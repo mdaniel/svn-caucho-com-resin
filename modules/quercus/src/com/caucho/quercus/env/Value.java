@@ -221,7 +221,7 @@ abstract public class Value implements java.io.Serializable
     return false;
   }
 
-  /*
+  /**
    * Returns true for a resource.
    */
   public boolean isResource()

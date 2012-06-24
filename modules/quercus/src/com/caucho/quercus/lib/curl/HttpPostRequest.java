@@ -42,7 +42,7 @@ public class HttpPostRequest
   extends CurlHttpRequest
 {
   private PostBody _body;
-  
+
   public HttpPostRequest(CurlResource curlResource)
   {
     super(curlResource);
@@ -56,23 +56,27 @@ public class HttpPostRequest
   {
     if (! super.init(env))
       return false;
-    
+
     CurlResource curl = getCurlResource();
     _body = PostBody.create(env, curl.getPostBody());
-    
+
     if (_body == null)
       return false;
-    
+
     CurlHttpConnection conn = getHttpConnection();
-    
-    conn.setRequestProperty("Content-Type",
-                            _body.getContentType());
-    
-    conn.setRequestProperty("Content-Length",
-                            String.valueOf(_body.getContentLength()));
-    
+
+    if (conn.getRequestProperty("Content-Type") == null) {
+      conn.setRequestProperty("Content-Type",
+                              _body.getContentType());
+    }
+
+    if (conn.getRequestProperty("Content-Length") == null) {
+      conn.setRequestProperty("Content-Length",
+                              String.valueOf(_body.getContentLength()));
+    }
+
     conn.setDoOutput(true);
-    
+
     return true;
   }
 
@@ -86,61 +90,61 @@ public class HttpPostRequest
 
     CurlHttpConnection conn = getHttpConnection();
     OutputStream out = conn.getOutputStream();
-    
+
     //out = new TestOutputStream(out);
-    
+
     _body.writeTo(env, out);
   }
-  
+
   /*
   static class TestOutputStream extends OutputStream
   {
     OutputStream _out;
     FileOutputStream _ps;
-    
+
     TestOutputStream(OutputStream out)
       throws IOException
     {
       _out = out;
-      
+
       _ps = new FileOutputStream("c:/out.txt");
     }
-    
+
     public void close()
       throws IOException
     {
       _out.close();
       _ps.close();
     }
-    
+
     public void flush()
       throws IOException
     {
       _out.flush();
       _ps.close();
     }
-    
+
     public void write(int b)
       throws IOException
     {
       _out.write(b);
       _ps.write(b);
     }
-    
+
     public void write(byte b[])
       throws IOException
     {
       _out.write(b);
       _ps.write(b);
     }
-    
+
     public void write(byte b[], int offset, int len)
       throws IOException
     {
       _out.write(b, offset, len);
       _ps.write(b, offset, len);
-    } 
+    }
   }
   */
-  
+
 }

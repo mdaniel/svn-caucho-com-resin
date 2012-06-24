@@ -110,7 +110,7 @@ public class QuercusImage extends ResourceValue
 
   public String toString()
   {
-    return "resource(Image)";
+    return "Image";
   }
 
   public void setInterlace(boolean isInterlace)

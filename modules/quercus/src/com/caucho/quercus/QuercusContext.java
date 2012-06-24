@@ -368,6 +368,16 @@ public class QuercusContext
     return _includeCacheTimeout;
   }
 
+  public String getName()
+  {
+    if (isPro()) {
+      return "Quercus Pro";
+    }
+    else {
+      return "Quercus";
+    }
+  }
+
   public String getVersion()
   {
     return "Open Source " + QuercusVersion.getVersionNumber();
@@ -383,7 +393,8 @@ public class QuercusContext
    */
   public String getSapiName()
   {
-    return "apache";
+    // default to cgi for mediawiki-1.19.1
+    return "cgi";
   }
 
   public boolean isRegisterArgv() {

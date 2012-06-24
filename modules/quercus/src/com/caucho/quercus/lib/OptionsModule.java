@@ -40,10 +40,12 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -514,7 +516,14 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static String php_sapi_name(Env env)
   {
-    return env.getQuercus().getSapiName();
+    String name = env.getIniString("quercus.sapi_name");
+
+    if (name != null && name.length() > 0) {
+      return name;
+    }
+    else {
+      return env.getQuercus().getSapiName();
+    }
   }
 
   /**
@@ -561,32 +570,18 @@ public class OptionsModule extends AbstractQuercusModule {
     }
   }
 
-  public static void phpinfo(Env env, @Optional("-1") int what)
+  public static void phpinfo(Env env, @Optional("INFO_ALL") int what)
   {
-    if (hasRequest(env)){
-        env.println("<!DOCTYPE html>\n<html><head><title>Quercus - PHP in Java</title>");
-        env.println("<style type=\"text/css\">");
+    if (hasRequest(env)) {
+      String quercusName = env.getQuercus().getName();
+      String css = getPhpinfoCss();
 
-        env.println("body {background-color: #ffffff; color: #000000; text-align: center;}\n" +
-                "body, th, h1, h2 {font-family: sans-serif;}\n" +
-                "pre {margin: 0px; font-family: monospace;}\n" +
-                "a:link {color: #4C2004; text-decoration: none; background-color: #ffffff;}\n" +
-                "a:hover {color: #FFCC33; text-decoration: underline;}\n" +
-                "table {border-collapse: collapse; width: 600px;}\n" +
-                ".center {text-align: center;}\n" +
-                "table.center { margin-left: auto; margin-right: auto; text-align: left;}\n" +
-                "th .center { text-align: center !important; }\n" +
-                "td, th { line-height: 110%; border-bottom: 1px solid #ccc; vertical-align: baseline; padding-bottom: 0.1em; padding-top: 0.6em; }\n" +
-                "h1, h2 { color: #990033; font-family: Helvetica,Arial,sans-serif; width: 600px; margin-left: auto; margin-right: auto;} \n" +
-                "h1 {font-size: 150%; border-bottom: 1px solid #FAB41D; }\n" +
-                "h2 {font-size: 125%;}\n" +
-                "img {float: right; border: 0px;}\n" +
-                "hr {" +
-                "    background: none repeat scroll 0 0 #FAB41D; border: 0 none; height: 1px; margin: 0.2em 0;" +
-                "width: 600px; }");
-        env.println("</style>");
-        env.println("</head><body>");
-
+      env.println("<!DOCTYPE html>\n<html><head><title>" + quercusName + "</title>");
+      env.println("<style type=\"text/css\">");
+      env.println(css);
+      env.println();
+      env.println("</style>");
+      env.println("</head><body>");
     }
 
     if ((what & INFO_GENERAL) != 0)
@@ -598,14 +593,50 @@ public class OptionsModule extends AbstractQuercusModule {
       env.println("</body></html>");
   }
 
+  private static String getPhpinfoCss()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    InputStream is = loader.getResourceAsStream("phpinfo/style.css");
+
+    try {
+      if (is != null) {
+        StringBuilder sb = new StringBuilder();
+
+        int ch;
+        while ((ch = is.read()) >= 0) {
+          sb.append((char) ch);
+        }
+
+        return sb.toString();
+      }
+    }
+    catch (IOException e) {
+      IoUtil.close(is);
+    }
+
+    return "body {background-color: #ffffff; color: #000000; text-align: center;}\n" +
+           "body, th, h1, h2 {font-family: sans-serif;}\n" +
+           "pre {margin: 0px; font-family: monospace;}\n" +
+           "a:link {color: #4C2004; text-decoration: none; background-color: #ffffff;}\n" +
+           "a:hover {color: #FFCC33; text-decoration: underline;}\n" +
+           "table {border-collapse: collapse; width: 600px;}\n" +
+           ".center {text-align: center;}\n" +
+           "table.center { margin-left: auto; margin-right: auto; text-align: left;}\n" +
+           "th .center { text-align: center !important; }\n" +
+           "td, th { line-height: 110%; border-bottom: 1px solid #ccc; vertical-align: baseline; padding-bottom: 0.1em; padding-top: 0.6em; }\n" +
+           "h1, h2 { color: #990033; font-family: Helvetica,Arial,sans-serif; width: 600px; margin-left: auto; margin-right: auto;} \n" +
+           "h1 {font-size: 150%; border-bottom: 1px solid #FAB41D; }\n" +
+           "h2 {font-size: 125%;}\n" +
+           "img {float: right; border: 0px;}\n" +
+           "hr {" +
+           "    background: none repeat scroll 0 0 #FAB41D; border: 0 none; height: 1px; margin: 0.2em 0;" +
+           "width: 600px; }";
+  }
+
   private static void phpinfoGeneral(Env env)
   {
-    String quercusName;
-
-    if (env.getQuercus().isPro())
-      quercusName = "Quercus Pro";
-    else
-      quercusName = "Quercus";
+    String quercusName = env.getQuercus().getName();
 
     if (hasRequest(env))
       env.println("<h1>" + quercusName + "</h1>");
@@ -940,7 +971,8 @@ public class OptionsModule extends AbstractQuercusModule {
       return HtmlModule.htmlspecialchars(env,
                                          value.toStringValue(),
                                          HtmlModule.ENT_COMPAT,
-                                         null);
+                                         null,
+                                         true);
     }
   }
 

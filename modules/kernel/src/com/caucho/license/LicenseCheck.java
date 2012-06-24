@@ -23,7 +23,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam 
+ * @author Sam
  */
 
 package com.caucho.license;
@@ -31,21 +31,20 @@ package com.caucho.license;
 import com.caucho.config.ConfigException;
 
 import java.io.IOException;
-import java.util.Collection;
 
 public interface LicenseCheck
 {
   public void requirePersonal(int personalCount)
     throws ConfigException, IOException;
-  
+
   public void requireProfessional(int professionalCount)
     throws ConfigException, IOException;
-  
+
   public String doLogging();
 
   public String getDescription()
     throws ConfigException, IOException;
-  
+
   public String getLicenseDirectory()
     throws ConfigException, IOException;
 }

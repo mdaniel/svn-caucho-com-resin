@@ -1108,6 +1108,8 @@ public class PDOStatement
 
   public String toString()
   {
-    return "PDOStatement[" + getQuery() + "]";
+    String query = getQuery();
+
+    return "PDOStatement[" + query.substring(0, 16) + "]";
   }
 }

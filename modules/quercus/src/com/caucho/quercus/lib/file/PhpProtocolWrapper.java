@@ -36,8 +36,6 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-
 public class PhpProtocolWrapper extends ProtocolWrapper {
   private static final L10N L = new L10N(PhpProtocolWrapper.class);
 
@@ -45,26 +43,38 @@ public class PhpProtocolWrapper extends ProtocolWrapper {
   {
   }
 
-  public BinaryStream fopen(Env env, StringValue pathV, StringValue mode, 
+  public BinaryStream fopen(Env env, StringValue pathV, StringValue mode,
                             LongValue options)
   {
     String path = pathV.toString();
-    
-    if (path.equals("php://output"))
-      return new PhpBinaryOutput(env);
-    else if (path.equals("php://input"))
-      return new PhpBinaryInput(env);
-    else if (path.equals("php://stdout"))
-      return new PhpStdout();
-    else if (path.equals("php://stderr"))
-      return new PhpStderr();
-    else if (path.equals("php://stdin"))
-      return new PhpStdin(env);
-    
-    env.warning(L.l("{0} is an unsupported or unknown path for this protocol",
-                    path));
 
-    return null;
+    if (path.equals("php://output")) {
+      return new PhpBinaryOutput(env);
+    }
+    else if (path.equals("php://input")) {
+      return new PhpBinaryInput(env);
+    }
+    else if (path.equals("php://stdout")) {
+      return new PhpStdout();
+    }
+    else if (path.equals("php://stderr")) {
+      return new PhpStderr();
+    }
+    else if (path.equals("php://stdin")) {
+      return new PhpStdin(env);
+    }
+    else if (path.equals("php://memory")) {
+      return new ByteArrayBinaryStream(env);
+    }
+    else if (path.equals("php://temp")) {
+      return FileModule.tmpfile(env);
+    }
+    else {
+      env.warning(L.l("{0} is an unsupported or unknown path for this protocol",
+                      path));
+
+      return null;
+    }
   }
 
   public Value opendir(Env env, StringValue path, LongValue flags)
@@ -88,7 +98,7 @@ public class PhpProtocolWrapper extends ProtocolWrapper {
     return false;
   }
 
-  public boolean mkdir(Env env, 
+  public boolean mkdir(Env env,
                        StringValue path, LongValue mode, LongValue options)
   {
     env.warning(L.l("mkdir not supported by protocol"));

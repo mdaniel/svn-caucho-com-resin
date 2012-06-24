@@ -42,6 +42,7 @@ import java.util.zip.CRC32;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.StringBuilderValue.BuilderOutputStream;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.quercus.marshal.Marshal;
@@ -2488,6 +2489,14 @@ abstract public class StringValue
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  /**
+   * Returns an OutputStream.
+   */
+  public OutputStream getOutputStream()
+  {
+    throw new UnsupportedOperationException();
   }
 
   /**

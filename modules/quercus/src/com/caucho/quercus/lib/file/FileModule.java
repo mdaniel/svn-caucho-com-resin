@@ -2650,7 +2650,7 @@ public class FileModule extends AbstractQuercusModule {
       return env.getEmptyString();
 
     if (path == null) {
-      if (! (optionsV instanceof DefaultValue)) {
+      if (! (optionsV.isDefault())) {
         return env.getEmptyString();
       }
 
@@ -2672,7 +2672,7 @@ public class FileModule extends AbstractQuercusModule {
       dirname = ".";
     }
 
-    p = path.indexOf('.');
+    p = path.lastIndexOf('.');
 
     String filename = path;
     String ext = "";

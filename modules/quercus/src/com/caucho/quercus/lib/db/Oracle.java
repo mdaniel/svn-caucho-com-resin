@@ -63,6 +63,13 @@ public class Oracle extends JdbcConnectionResource {
                     driver, url, false);
   }
 
+  @Override
+  protected String getDriverName()
+  {
+    // XXX: check
+    return "oci";
+  }
+
   /**
    * Connects to the underlying database.
    */

@@ -323,30 +323,71 @@ public class PDO implements EnvCleanup {
   {
     switch (attribute) {
       case ATTR_AUTOCOMMIT:
-        return BooleanValue.create(getAutocommit());
+      {
+        if (getAutocommit()) {
+          return LongValue.ONE;
+        }
+        else {
+          return LongValue.ZERO;
+        }
+      }
       case ATTR_CASE:
+      {
         return LongValue.create(getCase());
+      }
       case ATTR_CLIENT_VERSION:
-        throw new UnimplementedException();
-      case ATTR_CONNECTION_STATUS:
-        throw new UnimplementedException();
-      case ATTR_DRIVER_NAME:
-        throw new UnimplementedException();
-      case ATTR_ERRMODE:
-        return LongValue.create(_error.getErrmode());
-      case ATTR_ORACLE_NULLS:
-        return LongValue.create(getOracleNulls());
-      case ATTR_PERSISTENT:
-        return BooleanValue.create(getPersistent());
-      case ATTR_PREFETCH:
-        return LongValue.create(getPrefetch());
-      case ATTR_SERVER_INFO:
-        return getServerInfo(env);
-      case ATTR_SERVER_VERSION:
-        return getServerVersion(env);
-      case ATTR_TIMEOUT:
-        return LongValue.create(getTimeout());
+      {
+        String clientVersion = getConnection().getClientInfo(env);
 
+        return env.createString(clientVersion);
+      }
+      case ATTR_CONNECTION_STATUS:
+      {
+        try {
+          String hostInfo = getConnection().getHostInfo();
+
+          return env.createString(hostInfo);
+        }
+        catch (SQLException e) {
+          env.warning(e);
+
+          return BooleanValue.FALSE;
+        }
+      }
+      case ATTR_DRIVER_NAME:
+      {
+        String driverName = getConnection().getDriverName();
+
+        return env.createString(driverName);
+      }
+      case ATTR_ERRMODE:
+      {
+        return LongValue.create(_error.getErrmode());
+      }
+      case ATTR_ORACLE_NULLS:
+      {
+        return LongValue.create(getOracleNulls());
+      }
+      case ATTR_PERSISTENT:
+      {
+        return BooleanValue.create(getPersistent());
+      }
+      case ATTR_PREFETCH:
+      {
+        return getPrefetch(env);
+      }
+      case ATTR_SERVER_INFO:
+      {
+        return getConnection().getServerStat(env);
+      }
+      case ATTR_SERVER_VERSION:
+      {
+        return getServerVersion(env);
+      }
+      case ATTR_TIMEOUT:
+      {
+        return getTimeout(env);
+      }
       default:
         _error.unsupportedAttribute(env, attribute);
         // XXX: check what php does
@@ -382,12 +423,12 @@ public class PDO implements EnvCleanup {
 
   public int getCase()
   {
-    throw new UnimplementedException();
+    return _columnCase;
   }
 
   public int getOracleNulls()
   {
-    throw new UnimplementedException();
+    return 0;
   }
 
   private boolean getPersistent()
@@ -395,14 +436,11 @@ public class PDO implements EnvCleanup {
     return true;
   }
 
-  private int getPrefetch()
+  private Value getPrefetch(Env env)
   {
-    throw new UnimplementedException();
-  }
+    env.warning(L.l("driver does not support prefetch"));
 
-  private Value getServerInfo(Env env)
-  {
-    throw new UnimplementedException("PDO::ATTR_SERVER_INFO");
+    return BooleanValue.FALSE;
   }
 
   // XXX: might be int return
@@ -424,9 +462,11 @@ public class PDO implements EnvCleanup {
     }
   }
 
-  private int getTimeout()
+  private Value getTimeout(Env env)
   {
-    throw new UnimplementedException();
+    env.warning(L.l("Driver does not support timeouts"));
+
+    return BooleanValue.FALSE;
   }
 
   public String lastInsertId(Env env, @Optional Value nameV)

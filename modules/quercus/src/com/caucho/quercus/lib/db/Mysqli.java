@@ -52,6 +52,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -439,16 +440,14 @@ public class Mysqli extends JdbcConnectionResource
   /**
    * Quercus function to get the field 'client_info'.
    */
-  public StringValue getclient_info(Env env)
+  public String getclient_info(Env env)
   {
-    return getClientInfo(env);
+    String version = getClientInfo(env);
+
+    return version;
   }
 
-  /**
-   * Returns the client information.
-   */
-
-  static StringValue getClientInfo(Env env)
+  protected static String getClientInfoStatic(Env env)
   {
     QuercusContext quercus = env.getQuercus();
 
@@ -480,7 +479,13 @@ public class Mysqli extends JdbcConnectionResource
       version = "0.00.00";
     }
 
-    return env.createString(version);
+    return version;
+  }
+
+  @Override
+  protected String getClientInfo(Env env)
+  {
+    return getClientInfoStatic(env);
   }
 
   /**
@@ -1028,6 +1033,18 @@ public class Mysqli extends JdbcConnectionResource
       return "HY" + errno;
   }
 
+  @Override
+  protected String getDriverName()
+  {
+    return "mysql";
+  }
+
+  @Override
+  protected Value getServerStat(Env env)
+  {
+    return stat(env);
+  }
+
   /**
    * returns a string with the status of the connection
    * or FALSE if error
@@ -1044,24 +1061,62 @@ public class Mysqli extends JdbcConnectionResource
 
       Statement stmt = null;
 
-      StringBuilder str = new StringBuilder();
-
       try {
         stmt = conn.createStatement();
         stmt.execute("SHOW STATUS");
 
+        HashMap<String,String> statusMap = new HashMap<String,String>();
+
         ResultSet rs = stmt.getResultSet();
 
         while (rs.next()) {
-          if (str.length() > 0)
-            str.append(' ');
-          str.append(rs.getString(1));
-          str.append(": ");
-          str.append(rs.getString(2));
+          statusMap.put(rs.getString(1), rs.getString(2));
         }
 
-        return env.createString(str.toString());
-      } finally {
+        StringValue sb = env.createStringBuilder();
+        sb.append("Uptime: ");
+        sb.append(statusMap.get("Uptime"));
+
+        sb.append("  ");
+        sb.append("Threads: ");
+        sb.append(statusMap.get("Threads_connected"));
+
+        sb.append("  ");
+        sb.append("Questions: ");
+        sb.append(statusMap.get("Queries"));
+
+        sb.append("  ");
+        sb.append("Slow queries: ");
+        sb.append(statusMap.get("Slow_queries"));
+
+        sb.append("  ");
+        sb.append("Opens: ");
+        sb.append(statusMap.get("Opened_tables")); // XXX: right open?
+
+        sb.append("  ");
+        sb.append("Flush tables: ");
+        sb.append(statusMap.get("Flush_commands"));
+
+        sb.append("  ");
+        sb.append("Open tables: ");
+        sb.append(statusMap.get("Open_tables"));
+
+        sb.append("  ");
+        sb.append("Queries per second avg: ");
+
+        String totalQueriesStr = statusMap.get("Queries");
+        String uptimeStr = statusMap.get("Uptime");
+
+        long totalQueries = Long.valueOf(totalQueriesStr);
+        long uptime = Long.valueOf(uptimeStr);
+
+        double average = ((double) totalQueries) / uptime;
+
+        sb.append(String.format("%.2f", average));
+
+        return sb;
+      }
+      finally {
         if (stmt != null)
           stmt.close();
       }

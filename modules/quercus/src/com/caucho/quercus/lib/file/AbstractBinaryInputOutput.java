@@ -73,7 +73,7 @@ abstract public class AbstractBinaryInputOutput
   //
   // read methods
   //
-  
+
   /**
    * Returns the input stream.
    */
@@ -96,7 +96,7 @@ abstract public class AbstractBinaryInputOutput
    */
   abstract public void unread()
     throws IOException;
-  
+
   @Override
   public int getAvailable()
     throws IOException
@@ -197,7 +197,7 @@ abstract public class AbstractBinaryInputOutput
       return _env.getEmptyString();
     }
   }
-  
+
   /**
    * Reads the optional linefeed character from a \r\n
    */
@@ -364,7 +364,7 @@ abstract public class AbstractBinaryInputOutput
       TempBuffer.free(tb);
     }
   }
-  
+
   /**
    * Prints a string to a file.
    */
@@ -373,7 +373,7 @@ abstract public class AbstractBinaryInputOutput
   {
     write((byte) v);
   }
-  
+
   /**
    * Prints a string to a file.
    */
@@ -446,9 +446,9 @@ abstract public class AbstractBinaryInputOutput
   public String toString()
   {
     if (_is != null)
-      return "AbstractBinaryInputOutput[]";
+      return getClass().getSimpleName() + "[]";
     else
-      return "AbstractBinaryInputOutput[closed]";
+      return getClass().getSimpleName() + "[closed]";
   }
 }
 

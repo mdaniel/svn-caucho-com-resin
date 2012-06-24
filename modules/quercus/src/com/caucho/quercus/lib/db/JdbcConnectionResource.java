@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
@@ -48,7 +49,7 @@ import java.util.logging.Logger;
  * Represents a JDBC Connection value.
  */
 public abstract class JdbcConnectionResource
-    implements EnvCleanup
+  implements EnvCleanup
 {
   private static final L10N L = new L10N(JdbcConnectionResource.class);
   private static final Logger log
@@ -93,6 +94,18 @@ public abstract class JdbcConnectionResource
   protected JdbcConnectionResource(Env env)
   {
     env.addCleanup(this);
+  }
+
+  protected String getDriverName()
+  {
+    return "mysql";
+  }
+
+  protected Value getServerStat(Env env)
+  {
+    env.warning(L.l("driver does not support server stat"));
+
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -354,6 +367,11 @@ public abstract class JdbcConnectionResource
   public boolean setClientEncoding(String encoding)
   {
     return true;
+  }
+
+  protected String getClientInfo(Env env)
+  {
+    throw new UnimplementedException();
   }
 
   /**

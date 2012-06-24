@@ -186,6 +186,11 @@ public class CurlHttpConnection
     getHttpConnection().setRequestMethod(method);
   }
 
+  public String getRequestProperty(String key)
+  {
+    return _conn.getRequestProperty(key);
+  }
+
   public void setRequestProperty(String key, String value)
   {
     _conn.setRequestProperty(key, value);

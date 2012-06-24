@@ -1696,9 +1696,7 @@ public class StringBuilderValue
     out.print("\"");
   }
 
-  /**
-   * Returns an OutputStream.
-   */
+  @Override
   public OutputStream getOutputStream()
   {
     return new BuilderOutputStream();

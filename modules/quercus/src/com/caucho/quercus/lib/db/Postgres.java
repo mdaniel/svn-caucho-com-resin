@@ -80,6 +80,12 @@ public class Postgres extends JdbcConnectionResource
                     driver, url, false);
   }
 
+  @Override
+  protected String getDriverName()
+  {
+    return "pgsql";
+  }
+
   /**
    * Connects to the underlying database.
    */
