@@ -904,12 +904,10 @@ public class TcpPort
    * server/0940
    * network/02b0
    */
-  /*
   @Configurable
   public void addContentProgram(ConfigProgram program)
   {
   }
-  */
   
   /**
    * Returns the thread launcher for the link.
