@@ -67,7 +67,8 @@
   </welcome-file-list>
 
   <mime-mapping extension=".html" mime-type="text/html"/>
-  
+  <mime-mapping extension=".xhtml" mime-type="application/xhtml+xml"/>
+
   <mime-mapping extension=".ai" mime-type="application/postscript"/>
   <mime-mapping extension=".aif" mime-type="audio/x-aiff"/>
   <mime-mapping extension=".aiff" mime-type="audio/x-aiff"/>
