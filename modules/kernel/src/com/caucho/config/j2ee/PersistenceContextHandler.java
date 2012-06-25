@@ -212,7 +212,7 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     
     bean = bind(location, EntityManager.class, unitName);
     
-    if (bean == null)
+    if (bean == null && "".equals(unitName))
       bean = bind(location, EntityManager.class, name);
 
     if (bean != null) {
