@@ -72,6 +72,6 @@ public class JpaPersistenceContextLiteral
   @Override
   public String toString()
   {
-    return "@BeanName('" + _value + "')";
+    return "@" + JpaPersistenceContext.class.getSimpleName() + "('" + _value + "')";
   }
 }

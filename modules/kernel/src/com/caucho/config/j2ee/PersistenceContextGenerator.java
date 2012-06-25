@@ -90,7 +90,7 @@ public class PersistenceContextGenerator extends WebBeanGenerator
    * Returns the expected type
    */
   @Override
-  public Class getType()
+  public Class<?> getType()
   {
     return EntityManager.class;
   }
@@ -98,6 +98,7 @@ public class PersistenceContextGenerator extends WebBeanGenerator
   /**
    * Creates the value.
    */
+  @Override
   public Object create()
   {
     if (_manager != null)

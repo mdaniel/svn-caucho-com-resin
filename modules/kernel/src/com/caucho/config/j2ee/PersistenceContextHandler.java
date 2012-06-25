@@ -162,15 +162,48 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
   private ValueGenerator generateExtendedContext(String location,
                                                  PersistenceContext pContext)
   {
-    PersistenceContextGenerator gen;
+    Bean<?> bean = bindExtendedEntityManager(location, pContext);
 
-    gen = new PersistenceContextGenerator(location, pContext);
+    BeanValueGenerator gen
+      = new BeanValueGenerator(location, bean);
     
     return gen;
   }
   
   private Bean<?> bindEntityManager(String location, 
                                     PersistenceContext pContext)
+  {
+    String name = pContext.name();
+    String unitName = pContext.unitName();
+
+    Bean<?> bean;
+    
+    bean = bind(location, EntityManager.class, unitName);
+    
+    if (bean == null)
+      bean = bind(location, EntityManager.class, name);
+
+    if (bean != null) {
+      // valid bean
+    }
+    else if (! "".equals(unitName)) {
+      throw new ConfigException(location + L.l("unitName='{0}' is an unknown @PersistenceContext.",
+                                               unitName));
+    }
+    else if (! "".equals(name)) {
+      throw new ConfigException(location + L.l("name='{0}' is an unknown @PersistenceContext.",
+                                               name));
+
+    }
+    else {
+      throw new ConfigException(location + L.l("@PersistenceContext cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
+    }
+    
+    return bean;
+  }
+  
+  private Bean<?> bindExtendedEntityManager(String location, 
+                                            PersistenceContext pContext)
   {
     String name = pContext.name();
     String unitName = pContext.unitName();

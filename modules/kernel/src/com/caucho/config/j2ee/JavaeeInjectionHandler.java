@@ -67,7 +67,10 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     return _manager;
   }
   
-  protected Bean<?> bind(String location, Class<?> type, String name)
+  protected Bean<?> bind(String location, 
+                         Class<?> type, 
+                         String name,
+                         Annotation ...bindings)
   {
     try {
       InjectManager injectManager = getManager();

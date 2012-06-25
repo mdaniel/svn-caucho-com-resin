@@ -36,18 +36,18 @@ import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.persistence.*;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
 
 
 abstract public class WebBeanGenerator extends ValueGenerator {
-  private static final Logger log
-    = Logger.getLogger(WebBeanGenerator.class.getName());
   private static final L10N L = new L10N(WebBeanGenerator.class);
 
   private InjectManager _beanManager = InjectManager.create();
@@ -59,7 +59,13 @@ abstract public class WebBeanGenerator extends ValueGenerator {
   {
     Set<Bean<?>> beans = _beanManager.getBeans(type, bindings);
 
-    Bean bean = _beanManager.resolve(beans);
+    Bean<?> bean = _beanManager.resolve(beans);
+    
+    if (bean == null) {
+      throw new UnsatisfiedResolutionException(L.l("{0} cannot be instantiated by CDI\n  {1}",
+                                                   type,
+                                                   Arrays.toString(bindings)));
+    }
 
     CreationalContext<?> env = _beanManager.createCreationalContext(bean);
 

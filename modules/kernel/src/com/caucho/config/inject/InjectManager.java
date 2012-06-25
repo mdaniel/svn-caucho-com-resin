@@ -2286,6 +2286,11 @@ public final class InjectManager
       thread.setContextClassLoader(getClassLoader());
       
       ReferenceFactory factory = getReferenceFactory(bean);
+      
+      if (factory == null) {
+        throw new IllegalStateException(L.l("{0} is an uninstantiable bean",
+                                            bean));
+      }
 
       if (createContext instanceof CreationalContextImpl<?>)
         return factory.create((CreationalContextImpl) createContext, null, null);
