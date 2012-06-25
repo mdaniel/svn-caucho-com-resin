@@ -44,6 +44,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Producer;
 
+import com.caucho.config.bytecode.ScopeProxy;
 import com.caucho.config.program.Arg;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
@@ -156,7 +157,9 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   @Override
   public T create(CreationalContext<T> createEnv)
   {
-    return _producer.produce(createEnv);
+    T value = _producer.produce(createEnv);
+
+    return value;
   }
 
   @Override
@@ -255,9 +258,18 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
         }
       }
       
+      if (factory instanceof ScopeProxy) {
+        // ioc/0712
+        
+        ScopeProxy proxy = (ScopeProxy) factory;
+        
+        factory = (X) proxy.__caucho_getDelegate();
+      }
+      
       CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
 
       T instance = produce(factory, env.findInjectionPoint());
+      
       
       if (_producerBean.getScope() == Dependent.class)
         _producerBean.destroy(factory, producerCxt);

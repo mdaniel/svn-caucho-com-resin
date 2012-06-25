@@ -2550,8 +2550,8 @@ public final class InjectManager
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
 
-    ReferenceFactory factory = getReferenceFactory(type, qualifiers, ij);
-    
+    ReferenceFactory<?> factory = getReferenceFactory(type, qualifiers, ij);
+
     RuntimeException exn = validatePassivation(ij);
     
     if (exn != null) {
