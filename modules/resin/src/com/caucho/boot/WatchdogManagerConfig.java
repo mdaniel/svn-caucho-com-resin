@@ -70,7 +70,8 @@ class WatchdogManagerConfig {
     BootClusterConfig cluster = null;
     
     WatchdogConfig config
-      = new WatchdogConfig(cluster,
+      = new WatchdogConfig("watchdog", 
+                           cluster,
                            _resin.getArgs(), 
                            _resin.getRootDirectory(),
                            _resin.getNextIndex());

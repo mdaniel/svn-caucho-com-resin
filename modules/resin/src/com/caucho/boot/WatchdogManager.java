@@ -705,12 +705,13 @@ class WatchdogManager implements AlarmListener {
                                       clusterId));
       }
 
-      serverConfig = cluster.createServer();
+      WatchdogConfigHandle configHandle = cluster.createServer();
       serverId = args.getDynamicServerId();
-      serverConfig.setId(serverId);
-      serverConfig.setAddress(address);
-      serverConfig.setPort(port);
-      cluster.addServer(serverConfig);
+      configHandle.setId(serverId);
+      configHandle.setAddress(address);
+      configHandle.setPort(port);
+      
+      cluster.addServer(configHandle);
     }
 
     WatchdogChild watchdog = _watchdogMap.get(serverId);

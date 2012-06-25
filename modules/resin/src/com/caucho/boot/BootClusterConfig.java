@@ -103,12 +103,12 @@ public class BootClusterConfig {
     _resin.setManagement(management);
   }
 
-  public WatchdogConfig createServer()
+  public WatchdogConfigHandle createServer()
   {
-    WatchdogConfig config
-      = new WatchdogConfig(this, _resin.getArgs(), 
-                           _resin.getRootDirectory(),
-                           _serverList.size());
+    WatchdogConfigHandle config
+      = new WatchdogConfigHandle(this, _resin.getArgs(), 
+                                 _resin.getRootDirectory(),
+                                 _serverList.size());
     
     for (int i = 0; i < _serverDefaultList.size(); i++) {
       _serverDefaultList.get(i).configure(config);
@@ -117,12 +117,21 @@ public class BootClusterConfig {
     return config;
   }
 
-  public void addServer(WatchdogConfig config)
+  public WatchdogConfig addServer(WatchdogConfigHandle configHandle)
     throws ConfigException
+  {
+    WatchdogConfig config = configHandle.configure();
+    
+    addServerImpl(config);
+    
+    return config;
+  }
+    
+  public void addServerImpl(WatchdogConfig config)
   {
     if (_resin.isWatchdogManagerConfig())
       return;
-      
+    
     if (_resin.findClient(config.getId()) != null) {
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
                                     config.getId()));
@@ -141,7 +150,7 @@ public class BootClusterConfig {
     int index = 0;
 
     for (String address : multiServer.getAddressList()) {
-      WatchdogConfig server = createServer();
+      WatchdogConfigHandle server = createServer();
       
       server.setId(multiServer.getIdPrefix() + index++);
       

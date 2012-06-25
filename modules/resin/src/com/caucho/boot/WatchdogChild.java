@@ -81,7 +81,7 @@ class WatchdogChild
     _id = id;
     
     _system = system;
-    _config = new WatchdogConfig(cluster, args, rootDirectory, index);
+    _config = new WatchdogConfig(id, cluster, args, rootDirectory, index);
 
     _admin = new WatchdogAdmin();
   }

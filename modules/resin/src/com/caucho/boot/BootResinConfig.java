@@ -545,17 +545,20 @@ public class BootResinConfig // implements EnvironmentBean
                                     clusterId));
     }
 
-    WatchdogConfig config = cluster.createServer();
-    config.setId(args.getDynamicServerId());
+    WatchdogConfigHandle configHandle = cluster.createServer();
+    configHandle.setId(args.getDynamicServerId());
+    // configHandle.setDynamic(true);
+    configHandle.setAddress(address);
+    configHandle.setPort(port);
+    
+    WatchdogConfig config = cluster.addServer(configHandle);
+    
     config.setDynamic(true);
-    config.setAddress(address);
-    config.setPort(port);
-
-    cluster.addServer(config);
 
     addServer(config);
 
-    WatchdogClient client = new WatchdogClient(_system, BootResinConfig.this, config);
+    WatchdogClient client
+      = new WatchdogClient(_system, BootResinConfig.this, config);
     addClient(client);
 
     return client;

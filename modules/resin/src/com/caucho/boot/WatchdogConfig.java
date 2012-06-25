@@ -50,8 +50,8 @@ class WatchdogConfig
 {
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
-  private String _id = "default";
-  private int _index;
+  private final String _id;
+  private final int _index;
   
   private final BootClusterConfig _cluster;
 
@@ -99,12 +99,15 @@ class WatchdogConfig
   
   private boolean _isDynamic;
 
-  WatchdogConfig(BootClusterConfig cluster,
+  WatchdogConfig(String id,
+                 BootClusterConfig cluster,
                  WatchdogArgs args,
                  Path rootDirectory,
                  int index)
   {
+    _id = id;
     _cluster = cluster;
+    _index = index;
     
     _args = args;
     _rootDirectory = rootDirectory;
@@ -114,14 +117,6 @@ class WatchdogConfig
     _pwd = rootDirectory;
 
     _is64bit = args.is64Bit();
-  }
-
-  public void setId(String id)
-  {
-    if (id == null || "".equals(id))
-      id = "default";
-    
-    _id = id;
   }
 
   public String getId()
