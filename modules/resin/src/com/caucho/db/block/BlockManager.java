@@ -304,7 +304,7 @@ public final class BlockManager
     return block;
   }
 
-  boolean copyDirtyBlock(Block block)
+  final boolean copyDirtyBlock(Block block)
   {
     BlockStore store = block.getStore();
     

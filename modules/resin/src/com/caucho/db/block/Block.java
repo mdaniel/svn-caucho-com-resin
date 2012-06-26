@@ -246,7 +246,10 @@ public final class Block implements SyncCacheListener {
 
     synchronized (this) {
       if (_state.get().isValid()) {
-      } 
+      }
+      else if (_state.get().isDestroyed()) {
+        throw new IllegalStateException(toString());
+      }
       else if (_store.getBlockManager().copyDirtyBlock(this)) {
         clearDirty();
         toValid();
@@ -276,10 +279,12 @@ public final class Block implements SyncCacheListener {
   /**
    * Marks the data as valid.
    */
+  /*
   void toValid()
   {
     toState(BlockState.VALID);
   }
+  */
 
   /**
    * Marks the block's data as dirty
@@ -562,15 +567,28 @@ public final class Block implements SyncCacheListener {
 
   private boolean toWriteQueued()
   {
+    final AtomicReference<BlockState> state = _state;
+
+    BlockState oldState;
+    BlockState newState;
+    
+    do {
+      oldState = state.get();
+      newState = oldState.toWrite();
+    } while (! state.compareAndSet(oldState, newState));
+    
+    return newState.isWrite() && ! oldState.isWrite();
+  }
+
+  void toValid()
+  {
     BlockState oldState;
     BlockState newState;
     
     do {
       oldState = _state.get();
-      newState = oldState.toWrite();
+      newState = oldState.toValid();
     } while (! _state.compareAndSet(oldState, newState));
-    
-    return newState.isWrite() && ! oldState.isWrite();
   }
 
   private static byte []allocateBuffer()

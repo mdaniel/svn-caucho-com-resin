@@ -46,9 +46,6 @@ public class BlockWriter extends AbstractTaskWorker {
   
   private final BlockStore _store;
   
-  // private int _writeQueueMax = 256;
-  // private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
-  
   private final BlockWriteQueue _blockWriteQueue
     = new BlockWriteQueue(this);
   
@@ -74,7 +71,7 @@ public class BlockWriter extends AbstractTaskWorker {
    * Adds a block that's needs to be flushed.
    */
 
-  void addDirtyBlockNoWake(Block block)
+  void XX_addDirtyBlockNoWake(Block block)
   {
     boolean isWake = false;
 
@@ -89,27 +86,28 @@ public class BlockWriter extends AbstractTaskWorker {
       wake();
   }
 
-  void XX_addDirtyBlockNoWake(Block block)
+  void addDirtyBlockNoWake(Block block)
   {
     if (_queueSize <= 2 * _blockWriteRing.getSize()) {
       wake();
     }
 
-    synchronized (_blockWriteRing) {
-      if (findBlock(block.getBlockId()) != block) {
-        _blockWriteRing.offer(block);
-      }
+    if (findBlock(block.getBlockId()) != block) {
+      _blockWriteRing.put(block);
+    }
+    
+    if (_queueSize <= 2 * _blockWriteRing.getSize()) {
+      wake();
     }
   }
 
-  boolean copyDirtyBlock(long blockId, Block block)
+  boolean XX_copyDirtyBlock(long blockId, Block block)
   {
     Block writeBlock = null;
 
     synchronized (_blockWriteQueue) {
       writeBlock = _blockWriteQueue.findBlock(blockId);
     }
-
     
     if (writeBlock != null)
       return writeBlock.copyToBlock(block);
@@ -117,13 +115,11 @@ public class BlockWriter extends AbstractTaskWorker {
       return false;
   }
 
-  boolean XX_copyDirtyBlock(long blockId, Block block)
+  boolean copyDirtyBlock(long blockId, Block block)
   {
-    Block writeBlock = null;
-
-    synchronized (_blockWriteRing) {
-      writeBlock = findBlock(blockId);
-    }
+    Block writeBlock;
+    
+    writeBlock = findBlock(blockId);
     
     if (writeBlock != null)
       return writeBlock.copyToBlock(block);
@@ -135,29 +131,37 @@ public class BlockWriter extends AbstractTaskWorker {
   {
     int head = _blockWriteRing.getHead();
     int tail = _blockWriteRing.getTail();
-    int prevTail = _blockWriteRing.prevIndex(tail);
+    
+    // head = (tail + _blockWriteRing.getCapacity() - 1) & (_blockWriteRing.getCapacity() - 1);
+    
+     Block matchBlock = null;
 
-    for (; head != prevTail; head = _blockWriteRing.prevIndex(head)) {
-      Block writeBlock = _blockWriteRing.getValue(head);
+    for (int ptr = tail;
+         ptr != head;
+         ptr = _blockWriteRing.nextIndex(ptr)) {
+      Block testBlock = _blockWriteRing.getValue(ptr);
 
-      if (writeBlock != null && writeBlock.getBlockId() == blockId) {
-        return writeBlock;
+      if (testBlock != null 
+          && testBlock.getBlockId() == blockId
+          && testBlock.isValid()) {
+        matchBlock = testBlock;
       }
     }
     
-    return null;
+     return matchBlock;
+    //return null;
   }
 
   @Override
   public boolean isClosed()
   {
-    return super.isClosed() && _blockWriteQueue.isEmpty();
+    // return super.isClosed() && _blockWriteQueue.isEmpty();
     
-    // return super.isClosed() && _blockWriteRing.isEmpty();
+    return super.isClosed() && _blockWriteRing.isEmpty();
   }
   
 
-  boolean waitForComplete(long timeout)
+  boolean XX_waitForComplete(long timeout)
   {
     wake();
     
@@ -166,13 +170,13 @@ public class BlockWriter extends AbstractTaskWorker {
     return true;
   }
 
-  boolean XX_waitForComplete(long timeout)
+  boolean waitForComplete(long timeout)
   {
     wake();
 
     long expire = CurrentTime.getCurrentTimeActual() + timeout;
 
-    while (! _blockWriteQueue.isEmpty()
+    while (! _blockWriteRing.isEmpty()
            && CurrentTime.getCurrentTimeActual() < expire) {
       try {
         Thread.sleep(10);
@@ -181,7 +185,7 @@ public class BlockWriter extends AbstractTaskWorker {
       }
     }
 
-    return ! _blockWriteQueue.isEmpty();
+    return ! _blockWriteRing.isEmpty();
   }
 
   @Override
@@ -226,28 +230,24 @@ public class BlockWriter extends AbstractTaskWorker {
 
   private Block peekFirstBlock()
   {
+    /*
     synchronized (_blockWriteQueue) {
       return _blockWriteQueue.peekFirstBlock();
     }
-
-    /*
-    synchronized (_blockWriteRing) {
-      return _blockWriteRing.peek();
-    }
     */
+
+    return _blockWriteRing.peek();
   }
 
   private void removeFirstBlock()
   {
+    /*
     synchronized (_blockWriteQueue) {
       _blockWriteQueue.removeFirstBlock();
     }
-
-    /*
-    synchronized (_blockWriteRing) {
-      _blockWriteRing.poll();
-    }
     */
+
+    _blockWriteRing.poll();
   }
   
   @Override
