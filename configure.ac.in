@@ -46,6 +46,24 @@ AC_SUBST(resin_version)
 AC_SUBST(usr_share)
 AC_SUBST(build_dir)
 AC_SUBST(initd_dir)
+
+#
+# --with-resin-root
+#
+
+AC_ARG_WITH(resin-root,
+[AS_HELP_STRING([--with-resin-root=DIR],
+                [resin data directory])],
+[resin_root=${withval}])
+
+if test -z "$resin_root"; then
+  if test "$prefix" == "NONE"; then
+    resin_root="/var/resin"
+  else
+    resin_root="$prefix"
+  fi
+fi
+
 #
 # --with-resin-root
 #
@@ -658,6 +676,29 @@ AC_SUBST(apache_libexec)
 AC_SUBST(apache_conf)
 AC_SUBST(apache_dir)
 AC_SUBST(apache_cflags)
+
+#
+# --with-setuid
+#
+setuid_user=resin
+setuid_group=resin
+
+AC_ARG_WITH(setuid,
+[AS_HELP_STRING([--with-setuid=user],
+                [configure default setuid user])],
+[setuid_user=${withval}])
+
+#
+# --with-setgid
+#
+
+AC_ARG_WITH(setgid
+[AS_HELP_STRING([--with-setgid=user],
+                [configure default setgid user])],
+[setuid_group=${withval}])
+
+AC_SUBST(setuid_user)
+AC_SUBST(setuid_group)
 
 #
 # fill in compilation stuff
