@@ -1183,7 +1183,7 @@ public class TcpPort
 
     if (_serverSocket.isJni()) {
       SocketPollService pollService = SocketPollService.getCurrent();
-        
+
       if (pollService != null && isKeepaliveAsyncEnabled()) {
         _selectManager = pollService.getSelectManager();
       }
