@@ -161,7 +161,7 @@ public class BlockWriteQueue {
   {
     int length = (_head - _tail + _queueSize) % _queueSize;
     
-    return _queueSize <= 2 * length;
+    return _queueSize <= 4 * length;
   }
 
   private void wake()

@@ -384,10 +384,10 @@ public final class Block implements SyncCacheListener {
   @Override
   public boolean startLruRemove()
   {
-    save();
+    // save();
 
     if (_useCount.compareAndSet(1, 0)) {
-      save();
+      // save();
       return true;
     }
     else {
@@ -411,9 +411,14 @@ public final class Block implements SyncCacheListener {
   @Override
   public final void syncRemoveEvent()
   {
-    if ((_useCount.get() > 1 || _dirtyRange.get() != INIT_DIRTY)
-        && toWriteQueued()) {
-      _store.getWriter().addDirtyBlockNoWake(this);
+    if (_useCount.get() > 1 || _dirtyRange.get() != INIT_DIRTY) {
+      saveNoWake();
+      /*
+      if (toWriteQueued()) {
+        _store.getWriter().addDirtyBlockNoWake(this);
+        // _store.getWriter().addDirtyBlock(this);
+      }
+      */
     }
     
     releaseUse();
@@ -433,6 +438,16 @@ public final class Block implements SyncCacheListener {
     }
     
     return true;
+  }
+
+  /**
+   * Forces a write of the data.
+   */
+  private void saveNoWake()
+  {
+    if (toWriteQueued()) {
+      _store.getWriter().addDirtyBlockNoWake(this);
+    }
   }
 
   /**
@@ -457,7 +472,7 @@ public final class Block implements SyncCacheListener {
       }
 
       if (_dirtyRange.get() == INIT_DIRTY) {
-        toState(BlockState.VALID);
+        toValid();
       }
     } while (_dirtyRange.get() != INIT_DIRTY);
 
@@ -501,6 +516,9 @@ public final class Block implements SyncCacheListener {
     if (isValid) {
       System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
       block.toValid();
+    }
+    else {
+     // System.out.println("BAD_COPy: " + this);
     }
     
     return isValid;

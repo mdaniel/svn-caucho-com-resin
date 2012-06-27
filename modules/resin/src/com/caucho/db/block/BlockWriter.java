@@ -88,17 +88,25 @@ public class BlockWriter extends AbstractTaskWorker {
 
   void addDirtyBlockNoWake(Block block)
   {
-    if (_queueSize <= 2 * _blockWriteRing.getSize()) {
+    /*if (_queueSize <= 2 * _blockWriteRing.getSize()) {
+      wake();
+    }
+    */
+    
+    if (! _blockWriteRing.isEmpty()) {
       wake();
     }
 
-    if (findBlock(block.getBlockId()) != block) {
-      _blockWriteRing.put(block);
-    }
+    // if (findBlock(block.getBlockId()) != block) {
+    _blockWriteRing.put(block);
+    // }
     
+    /*
     if (_queueSize <= 2 * _blockWriteRing.getSize()) {
       wake();
     }
+    */
+    wake();
   }
 
   boolean XX_copyDirtyBlock(long blockId, Block block)
@@ -119,33 +127,32 @@ public class BlockWriter extends AbstractTaskWorker {
   {
     Block writeBlock;
     
-    writeBlock = findBlock(blockId);
-    
-    if (writeBlock != null)
-      return writeBlock.copyToBlock(block);
-    else
-      return false;
+    do {
+      writeBlock = findBlock(blockId);
+    } while (writeBlock != null && ! writeBlock.copyToBlock(block));
+
+    return writeBlock != null;
   }
 
   private Block findBlock(long blockId)
   {
     int head = _blockWriteRing.getHead();
-    int tail = _blockWriteRing.getTail();
-    
-    // head = (tail + _blockWriteRing.getCapacity() - 1) & (_blockWriteRing.getCapacity() - 1);
+    int size = _blockWriteRing.getSize();
     
      Block matchBlock = null;
 
-    for (int ptr = tail;
-         ptr != head;
-         ptr = _blockWriteRing.nextIndex(ptr)) {
+    int ptr = head;
+    for (int i = size + 4; i >= 0; i--) {
       Block testBlock = _blockWriteRing.getValue(ptr);
 
       if (testBlock != null 
           && testBlock.getBlockId() == blockId
           && testBlock.isValid()) {
-        matchBlock = testBlock;
+        // matchBlock = testBlock;
+        return testBlock;
       }
+      
+      ptr = _blockWriteRing.prevIndex(ptr);
     }
     
      return matchBlock;
@@ -207,7 +214,7 @@ public class BlockWriter extends AbstractTaskWorker {
             removeFirstBlock();
           }
         }
-        else if (retry-- <= 0) {
+        else if (isQueueEmpty() && retry-- <= 0) {
           return -1;
         }
       }
@@ -218,14 +225,10 @@ public class BlockWriter extends AbstractTaskWorker {
     return -1;
   }
   
-  @Override
-  protected void onThreadStart()
+  private boolean isQueueEmpty()
   {
-  }
-  
-  @Override
-  protected void onThreadComplete()
-  {
+    // return _blockWriteQueue.isEmpty();
+    return _blockWriteRing.isEmpty();
   }
 
   private Block peekFirstBlock()
@@ -250,6 +253,16 @@ public class BlockWriter extends AbstractTaskWorker {
     _blockWriteRing.poll();
   }
   
+  @Override
+  protected void onThreadStart()
+  {
+  }
+  
+  @Override
+  protected void onThreadComplete()
+  {
+  }
+
   @Override
   public String toString()
   {

@@ -78,7 +78,7 @@ public class RingValueQueue<T> {
     int head = _head.get();
     int tail = _tail.get();
     
-    return (head + _size - tail) & _mask;
+    return (head - tail + _size) & _mask;
   }
   
   public final int getCapacity()
@@ -204,9 +204,13 @@ public class RingValueQueue<T> {
   
   public final T peek()
   {
-    int tail = _tail.get();
+    int tail = _tailAlloc.get();
+    int head = _head.get();
     
-    return getValue(tail);
+    if (head != tail)
+      return getValue(tail);
+    else
+      return null;
   }
  
   public final T poll()
@@ -290,18 +294,19 @@ public class RingValueQueue<T> {
         retryCount = retryMax;
       }
     }
+    
+    wakeAvailable();
   }
   
   private void waitForAvailable(int headAlloc, int tail)
   {
     if (_headAlloc.get() == headAlloc && _tail.get() == tail) {
       synchronized (_isOfferWait) {
+        _isOfferWait.set(true);
         if (_headAlloc.get() == headAlloc
             && _tail.get() == tail) {
-          _isOfferWait.set(true);
-
           try {
-            _isOfferWait.wait(100);
+            _isOfferWait.wait(10);
           } catch (Exception e) {
             log.log(Level.FINER, e.toString(), e);
           }
@@ -332,9 +337,14 @@ public class RingValueQueue<T> {
   
   private void wakeAvailable()
   {
-    if (_isOfferWait.compareAndSet(true, false)) {
-      synchronized (_isOfferWait) {
-        _isOfferWait.notifyAll();
+    int size = getSize();
+    
+    if (_isOfferWait.get()
+        && (2 * size <= _size || _size - size > 64)) {
+      if (_isOfferWait.compareAndSet(true, false)) {
+        synchronized (_isOfferWait) {
+          _isOfferWait.notifyAll();
+        }
       }
     }
   }
