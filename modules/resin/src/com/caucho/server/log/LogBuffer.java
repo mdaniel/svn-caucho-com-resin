@@ -29,6 +29,11 @@
 
 package com.caucho.server.log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
+
+import com.caucho.env.thread.ThreadPool;
+
 /**
  * Holds the HTTP buffers for keepalive reuse.  Because a request needs a
  * large number of buffers, but a keepalive doesn't need those buffers,
@@ -39,7 +44,14 @@ public final class LogBuffer
 {
   private final boolean _isPrivate;
   private final byte []_logBuffer = new byte[1024];
-  private int _length;
+  private volatile int _length;
+  
+  private volatile Thread _thread;
+
+  public LogBuffer()
+  {
+    this(false);
+  }
 
   public LogBuffer(boolean isPrivate)
   {
@@ -64,6 +76,44 @@ public final class LogBuffer
   public final int getLength()
   {
     return _length;
+  }
+  
+  public final boolean allocate(AccessLogWriter logWriter)
+  {
+    /*
+    if (true)
+      return _length == 0;
+      */
+    
+    if (_length == 0) {
+      return true;
+    }
+    
+    if (logWriter.isBufferAvailable()) {
+      return false;
+    }
+    
+    _thread = Thread.currentThread();
+    try {
+      if (_length != 0) {
+        LockSupport.parkNanos(250 * 1000L);
+      }
+    } finally {
+      _thread = null;
+    }
+    
+    return _length == 0;
+  }
+  
+  public final void clear()
+  {
+    _length = 0;
+
+    Thread thread = _thread;
+    
+    if (thread != null) {
+      ThreadPool.getCurrent().scheduleUnpark(thread);
+    }
   }
 
   @Override

@@ -383,19 +383,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
     LogBuffer logBuffer = response.getLogBuffer();
     
-    if (logBuffer.getLength() > 0) {
+    if (! logBuffer.allocate(_logWriter)) {
       // if currently queued, create a new one
       logBuffer = _logWriter.allocateBuffer();
     }
-    
-    // logging is treated as idle for thread launching purposes
-    // TcpSocketLink tcpLink = absRequest.getTcpSocketLink();
-    
-    /*
-    if (tcpLink != null) {
-      tcpLink.beginThreadIdle();
-    }
-    */
 
     try {
       byte []buffer = logBuffer.getBuffer();
@@ -407,14 +398,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       _logWriter.writeBuffer(logBuffer);
       logBuffer = null;
     } finally {
-      /*
-      if (tcpLink != null) {
-        tcpLink.endThreadIdle();
-      }
-      */
-      
-      if (logBuffer != null)
+      if (logBuffer != null) {
         _logWriter.freeBuffer(logBuffer);
+      }
     }
   }
 

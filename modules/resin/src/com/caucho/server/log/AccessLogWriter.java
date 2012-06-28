@@ -59,15 +59,11 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   private boolean _isAutoFlush;
   private final Object _bufferLock = new Object();
-  private final Object _offerLock = new Object();
 
-  private final Semaphore _logSemaphore = new Semaphore(16 * 1024);
   private final FreeRing<LogBuffer> _freeList
     = new FreeRing<LogBuffer>(512);
 
   private final LogWriterTask _logWriterTask = new LogWriterTask();
-  
-  private SemaphoreMeter _semaphoreProbe;
   
   private TempFileService _tempService;
 
@@ -88,6 +84,10 @@ public class AccessLogWriter extends AbstractRolloverLog
     if (_tempService == null)
       throw new IllegalStateException(L.l("'{0}' is required for AccessLog",
                                           TempFileService.class.getSimpleName()));
+    
+    for (int i = 0; i < 64; i++) {
+      _freeList.free(new LogBuffer());
+    }
   }
 
   @Override
@@ -97,6 +97,11 @@ public class AccessLogWriter extends AbstractRolloverLog
     super.init();
 
     _isAutoFlush = _log.isAutoFlush();
+  }
+  
+  boolean isBufferAvailable()
+  {
+    return _freeList.getSize() >= 16;
   }
 
   void writeThrough(byte []buffer, int offset, int length)
@@ -112,6 +117,7 @@ public class AccessLogWriter extends AbstractRolloverLog
   void writeBuffer(LogBuffer buffer)
   {
     _logWriterTask.offer(buffer);
+    _logWriterTask.wake();
   }
 
   // must be synchronized by _bufferLock.
@@ -128,6 +134,11 @@ public class AccessLogWriter extends AbstractRolloverLog
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+  
+  protected void wake()
+  {
+    _logWriterTask.wake();
   }
 
   protected void waitForFlush(long timeout)
@@ -162,22 +173,10 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   LogBuffer allocateBuffer()
   {
-    /*
-    try {
-      Thread.interrupted();
-      _logSemaphore.acquire();
-
-      if (_semaphoreProbe != null)
-        _semaphoreProbe.acquire();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    */
-
     LogBuffer buffer = _freeList.allocate();
 
     if (buffer == null) {
-      buffer = new LogBuffer(false);
+      buffer = new LogBuffer();
     }
 
     return buffer;
@@ -185,15 +184,6 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   void freeBuffer(LogBuffer logBuffer)
   {
-    /*
-    _logSemaphore.release();
-    
-    if (_semaphoreProbe != null)
-      _semaphoreProbe.release();
-*/
-    // logBuffer.setNext(null);
-    logBuffer.setLength(0);
-    
     if (! logBuffer.isPrivate()) {
       _freeList.free(logBuffer);
     }
