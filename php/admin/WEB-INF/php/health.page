@@ -410,7 +410,7 @@ function display_health_availability()
     } else if ($downtime->isEstimated()) {
       $note = gettext('* Estimated: due to hard shutdown');
     } else {
-      note = '';
+      $note = '';
     }
     
     echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->startTime / 1000);
