@@ -58,9 +58,11 @@ public class SelectResult {
   private static final int SIZE = TempBuffer.SIZE;
 
   private static QDate _date = new QDate();
+  
+  private final byte []_tempBuffer = new byte[16];
 
-  private CharBuffer _cb = new CharBuffer();
-  private byte []_blob = new byte[128];
+  private final CharBuffer _cb = new CharBuffer();
+  private final byte []_blob = new byte[128];
 
   private Expr []_exprs;
   private BlockStore []_stores = new BlockStore[32];
@@ -1110,15 +1112,19 @@ public class SelectResult {
    */
   public void writeLong(long value)
   {
-    write(ColumnType.LONG.ordinal());
-    write((int) (value >> 56));
-    write((int) (value >> 48));
-    write((int) (value >> 40));
-    write((int) (value >> 32));
-    write((int) (value >> 24));
-    write((int) (value >> 16));
-    write((int) (value >> 8));
-    write((int) value);
+    byte []buffer = _tempBuffer;
+    
+    buffer[0] = (byte) ColumnType.LONG.ordinal();
+    buffer[1] = (byte) (value >> 56);
+    buffer[2] = (byte) (value >> 48);
+    buffer[3] = (byte) (value >> 40);
+    buffer[4] = (byte) (value >> 32);
+    buffer[5] = (byte) (value >> 24);
+    buffer[6] = (byte) (value >> 16);
+    buffer[7] = (byte) (value >> 8);
+    buffer[8] = (byte) value;
+    
+    write(buffer, 0, 9);
   }
 
   /**
