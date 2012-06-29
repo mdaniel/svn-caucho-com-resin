@@ -459,6 +459,7 @@
   <health:AnomalyAnalyzer>
     <meter>JVM|Thread|JVM Runnable Count</meter>
     <health-event>caucho.thread.anomaly.jvm-runnable</health-event>
+    <min-deviation>4</min-deviation>
   </health:AnomalyAnalyzer>
 
   <health:AnomalyAnalyzer>
@@ -474,6 +475,7 @@
   <health:AnomalyAnalyzer>
     <meter>Resin|Thread|Thread Active Count</meter>
     <health-event>caucho.thread.anomaly.resin-active</health-event>
+    <min-deviation>4</min-deviation>
   </health:AnomalyAnalyzer>
   
   <health:AnomalyAnalyzer>
