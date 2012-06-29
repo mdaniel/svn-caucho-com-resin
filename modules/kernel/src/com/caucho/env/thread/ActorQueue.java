@@ -55,12 +55,12 @@ public final class ActorQueue<T extends RingItem>
   private final ActorWorker<? super T> _firstWorker;
   
   //private final AtomicBoolean _isHeadAlloc = new AtomicBoolean();
-  private final AtomicInteger _headAllocRef = new AtomicInteger();
-  private final AtomicInteger _headRef = new AtomicInteger();
+  private final AtomicLong _headAllocRef = new AtomicLong();
+  private final AtomicLong _headRef = new AtomicLong();
   // private volatile int _head;
   
   // private final ActorQueueIndex _tailRef;
-  private final AtomicInteger _tailRef;
+  private final AtomicLong _tailRef;
   
   private final AtomicBoolean _isOfferWaitRef = new AtomicBoolean();
  
@@ -99,11 +99,11 @@ public final class ActorQueue<T extends RingItem>
     ActorConsumer<T> prevConsumer = null;
     ActorWorker<T> firstWorker = null;
     
-    AtomicInteger []tails = new AtomicInteger[processorsSize + 1];
+    AtomicLong []tails = new AtomicLong[processorsSize + 1];
     tails[0] = _headRef;
     
     for (int i = 0; i < processorsSize; i++) {
-      tails[i + 1] = new AtomicInteger();
+      tails[i + 1] = new AtomicLong();
     }
     
     for (int i = 0; i < processorsSize; i++) {
@@ -113,14 +113,15 @@ public final class ActorQueue<T extends RingItem>
         isWaitRef = _isOfferWaitRef;
       }
       
-      AtomicInteger allocRef = tails[i];
+      AtomicLong allocRef = tails[i];
       
       if (i == 0) {
         allocRef = _headAllocRef;
       }
       
       ActorConsumer<T> consumer
-        = new ActorConsumer<T>(_itemRing,
+        = new ActorConsumer<T>(this,
+                               _itemRing,
                                processors[i],
                                allocRef,
                                tails[i],
@@ -157,7 +158,7 @@ public final class ActorQueue<T extends RingItem>
   
   public final int getSize()
   {
-    return (_headRef.get() + _size - _tailRef.get()) & _mask;
+    return (int) ((_headRef.get() - _tailRef.get()) & _mask);
   }
   
   public final int getAvailable()
@@ -174,10 +175,10 @@ public final class ActorQueue<T extends RingItem>
   
   public final T startOffer(boolean isWait)
   {
-    final AtomicInteger headAllocRef = _headAllocRef;
+    final AtomicLong headAllocRef = _headAllocRef;
     // final AtomicBoolean isHeadAlloc = _isHeadAlloc;
     // final AtomicInteger headRef = _headRef;
-    final AtomicInteger tailRef = _tailRef;
+    final AtomicLong tailRef = _tailRef;
     final T []ring = _itemRing;
     final int mask = _mask;
     
@@ -186,27 +187,42 @@ public final class ActorQueue<T extends RingItem>
     // int nextHead;
     
     while (true) {
-      int headAlloc = headAllocRef.get();
-          
-      int nextHeadAlloc = (headAlloc + 1) & mask;
+      long headAlloc = headAllocRef.get();
+      long nextHeadAlloc = headAlloc + 1;
       
-      int tail = tailRef.get();
+      int headIndex = (int) (headAlloc & mask);
       
-      if (nextHeadAlloc == tail) {
-        if (finishOffer()) {
+      T item = ring[headIndex];
+      
+      long tail = tailRef.get();
+      
+      if (nextHeadAlloc != tail + _size) {
+        /*
+        if (item.getIndex() != headAlloc)
+          throw new IllegalStateException();
+          */
+        
+        if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
+          return item;
         }
-        else if (isWait) {
+      }
+      else {
+        if (headAlloc != _headRef.get()) {
+          finishOffer();
+          _firstWorker.wake();
+        }
+        
+        /*
+        if (headAlloc != _headRef.get() && finishOffer()) {
+          _firstWorker.wake();
+        }
+        else
+        */
+        if (isWait) {
           waitForQueue(headAlloc, tail);
         }
         else {
           return null;
-        }
-      }
-      else {
-        T item = ring[headAlloc];
-        
-        if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
-          return item;
         }
       }
     }
@@ -214,69 +230,62 @@ public final class ActorQueue<T extends RingItem>
   
   public final void finishOffer(final T item)
   {
-    item.setRingValue();
+    /*
+    if (item.isRingValue())
+      throw new IllegalStateException();
+      */
     
-    final int index = item.getIndex();
-    
-    final int nextHead = (index + 1) & _mask;
+    final long index = item.nextRingValue(_size);
+    final long nextHead = index + 1;
     
     if (! _headRef.compareAndSet(index, nextHead)) {
-      finishOffer(index);
+      finishOffer();
     }
-    
+    /*
     if ((index & 0x3f) == 0) {
       _firstWorker.wake();
-    }
+    }*/
     
-    wakeOfferQueue();
+    _firstWorker.wake();
+    // wakeOfferQueue();
   }
-  
+    
   private final boolean finishOffer()
   {
-    final int head = _headRef.get();
-    final int headAlloc = _headAllocRef.get();
-    // final int mask = _mask;
-    
-    if (head != headAlloc && get(head).isRingValue()) {
-      finishOffer(head);
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-    
-  private final void finishOffer(long index)
-  {
-    final AtomicInteger headAllocRef = _headAllocRef;
-    final AtomicInteger headRef = _headRef;
-    // final T []ring = _itemRing;
+    final AtomicLong headAllocRef = _headAllocRef;
+    final AtomicLong headRef = _headRef;
+    final T []ring = _itemRing;
     final int mask = _mask;
+    
+    long index = headRef.get();
     
     // in high-contention, can just finish since another thread will
     // ack us
-    int retryMax = (int) (((index & 0xf) + 1) << 2);
+    int retryMax = (int) (((index & 0xf) + 1) << 4);
     int retryCount = retryMax;
-    int count = 2;
+    int countMax = 4;
+    int count = countMax;
     
     while (retryCount-- >= 0) {
-      int headAlloc = headAllocRef.get();
-      int head = headRef.get();
+      final long headAlloc = headAllocRef.get();
+      final long head = headRef.get();
       
       if (head == headAlloc) {
-        return;
+        return head != index;
       }
       
-      if (get(head).isRingValue()) {
-        int nextHead = (head + 1) & mask;
+      if (ring[(int) (head & mask)].getRingValue() == head) {
+        long nextHead = head + 1;
         
         if (headRef.compareAndSet(head, nextHead) && count-- <= 0) {
-          return;
+          return true;
         }
         
         retryCount = retryMax;
       }
     }
+    
+    return true;
   }
   
   private void waitForQueue(long headAlloc, long tail)
@@ -285,10 +294,10 @@ public final class ActorQueue<T extends RingItem>
     
     if (_headAllocRef.get() == headAlloc && _tailRef.get() == tail) {
       synchronized (_isOfferWaitRef) {
+        _isOfferWaitRef.set(true);
+
         if (_headAllocRef.get() == headAlloc 
             && _tailRef.get() == tail) {
-          _isOfferWaitRef.set(true);
-
           try {
             _isOfferWaitRef.wait(100);
           } catch (Exception e) {
@@ -314,6 +323,8 @@ public final class ActorQueue<T extends RingItem>
 
   private static final class ActorConsumer<T extends RingItem>
   {
+    private final ActorQueue<T> _queue;
+    
     private final T []_itemRing;
     private final int _mask;
     
@@ -321,31 +332,39 @@ public final class ActorQueue<T extends RingItem>
     
     private final ItemProcessor<? super T> _processor;
     
-    private final AtomicInteger _headAllocRef;
-    private final AtomicInteger _headRef;
-    private final AtomicInteger _tailRef;
+    private final AtomicLong _headAllocRef;
+    private final AtomicLong _headRef;
+    private final AtomicLong _tailRef;
     
     private ActorWorker<T> _nextWorker;
     private final AtomicBoolean _isWaitRef;
     
-    ActorConsumer(T []ring,
+    ActorConsumer(ActorQueue<T> queue,
+                  T []ring,
                   ItemProcessor<? super T> processor,
-                  AtomicInteger headAllocRef,
-                  AtomicInteger headRef,
-                  AtomicInteger tailRef,
+                  AtomicLong headAllocRef,
+                  AtomicLong headRef,
+                  AtomicLong tailRef,
                   AtomicBoolean isWaitRef)
     {
+      _queue = queue;
       _itemRing = ring;
-      _mask = _itemRing.length - 1;
       
-      int tailChunk = Math.min(32, Math.max(1, _itemRing.length >> 3));
+      int size = _itemRing.length;
+      _mask = size - 1;
       
+      int tailChunk = Math.min(32, Math.max(1, size >> 3));
+      // tailChunk = 1;
       _tailChunk = tailChunk;
       
       _processor = processor;
-      _headAllocRef = headRef;
+      _headAllocRef = headAllocRef;
       _headRef = headRef;
       _tailRef = tailRef;
+      
+      _headAllocRef.set(size);
+      _headRef.set(size);
+      _tailRef.set(size);
       
       _isWaitRef = isWaitRef;
     }
@@ -357,6 +376,10 @@ public final class ActorQueue<T extends RingItem>
     
     private final void consumeAll()
     {
+      final AtomicLong headAllocRef = _headAllocRef;
+      final AtomicLong tailRef = _tailRef;
+      final ActorWorker<T> nextWorker = _nextWorker;
+      
       do {
         try {
           doConsume();
@@ -364,12 +387,14 @@ public final class ActorQueue<T extends RingItem>
           log.log(Level.FINER, e.toString(), e);
         }
 
-        if (_nextWorker != null) {
-          _nextWorker.wake();
+        if (nextWorker != null) {
+          nextWorker.wake();
         }
         
+        _queue.finishOffer();
+        
         wakeQueue();
-      } while (_headAllocRef.get() != _tailRef.get());
+      } while (headAllocRef.get() != tailRef.get());
       
       // forceWakeQueue();
     }
@@ -377,19 +402,20 @@ public final class ActorQueue<T extends RingItem>
     private final void doConsume()
       throws Exception
     {
-      final AtomicInteger headRef = _headRef;
-      final AtomicInteger tailRef = _tailRef;
+      final AtomicLong headRef = _headRef;
+      final AtomicLong tailRef = _tailRef;
       
-      int head = headRef.get();
-      int tail = tailRef.get();
+      final T []itemRing = _itemRing;
+      
+      final int mask = _mask;
+      final int tailChunk = _tailChunk;
+      
+      long head = headRef.get();
+      long tail = tailRef.get();
 
-      // final T []itemRing = _itemRing;
-      
-      int mask = _mask;
-      
       // int tailChunk = _tailChunk;
 
-      int nextTailChunk = nextTailChunk(head, tail);
+      long nextTailEnd = nextTailEnd(head, tail, tailChunk);
       
       final ItemProcessor<? super T> processor = _processor;
       // final ActorWorker<T> nextWorker = _nextWorker;
@@ -398,26 +424,24 @@ public final class ActorQueue<T extends RingItem>
 
       try {
         while (true) {
-          while (tail != nextTailChunk) {
-            T item = get(tail);
-          
-            tail = (tail + 1) & mask;
+          while (tail != nextTailEnd) {
+            T item = itemRing[(int) (tail & mask)];
+            
+            tail++;
             
             processor.process(item);
-            
-            item.clearRingValue();
           }
 
           tailRef.set(tail);
             
-          wakeQueue();
+          // wakeQueue();
           
           head = headRef.get();
           if (head == tail) {
             return;
           }
             
-          nextTailChunk = nextTailChunk(head, tail);
+          nextTailEnd = nextTailEnd(head, tail, tailChunk);
         }
       } finally {
         tailRef.set(tail);
@@ -431,9 +455,11 @@ public final class ActorQueue<T extends RingItem>
       return _itemRing[index];
     }
     
-    private int nextTailChunk(int head, int tail)
+    private static long nextTailEnd(long head, long tail, int tailChunk)
     {
-      return Math.min(head, tail + _tailChunk);
+      long nextTail = tail + tailChunk;
+      
+      return Math.min(head, nextTail);
     }
     
     private void wakeOfferWait(AtomicBoolean isWaitRef)
@@ -452,8 +478,9 @@ public final class ActorQueue<T extends RingItem>
       if (isWaitRef == null)
         return;
       
-      if (isWaitRef.compareAndSet(true, false)) {
+      if (isWaitRef.get()) {
         synchronized (isWaitRef) {
+          isWaitRef.set(false);
           isWaitRef.notifyAll();
         }
       }

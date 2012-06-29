@@ -40,11 +40,12 @@ public class RingItem
 
   private final int _index;
   // private volatile int _isRingValue;
-  private volatile boolean _isRingValue;
+  private volatile long _ringValue;
   
   protected RingItem(int index)
   {
     _index = index;
+    _ringValue = index;
   }
   
   public int getIndex()
@@ -52,15 +53,29 @@ public class RingItem
     return _index;
   }
   
+  public final long getRingValue()
+  {
+    return _ringValue;
+  }
+  
+  public final long nextRingValue(int size)
+  {
+    long value = _ringValue + size;
+    
+    _ringValue = value;
+    
+    return value;
+  }
+  
   public final boolean isRingValue()
   {
     // return _isRingValue != 0;
-    return _isRingValue;
+    return _ringValue != 0;
   }
   
   public final void setRingValue()
   {
-    _isRingValue = true;
+    _ringValue = 1;
 
     /*
     int oldValue = _isRingValueUpdater.getAndSet(this, 1);
@@ -73,7 +88,7 @@ public class RingItem
   
   public final void clearRingValue()
   {
-    _isRingValue = false;
+    _ringValue = 0;
 
     /*
     int oldValue = _isRingValueUpdater.getAndSet(this, 0);
