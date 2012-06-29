@@ -154,6 +154,9 @@ class WatchdogConfigHandle
       Config.setProperty("rvar0", _id);
       Config.setProperty("rvar1", _cluster.getId());
       
+      config.setAddress(_serverAddress);
+      config.setPort(_serverPort);
+      
       _program.configure(config);
     } finally {
       Config.setProperty("rvar0", oldRvar0);

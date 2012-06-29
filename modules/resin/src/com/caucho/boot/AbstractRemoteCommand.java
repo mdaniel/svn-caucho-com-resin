@@ -153,7 +153,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
       triad = findTriad(client, address, port);
     else
       triad = findLiveTriad(client);
-
+    
     if (triad == null)
       return null;
     

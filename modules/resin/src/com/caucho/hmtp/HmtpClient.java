@@ -218,7 +218,7 @@ public class HmtpClient implements RemoteActorSender
         if (testSignature.equals(serverSignature)) {
         }
         else if ("".equals(uid) && ! "".equals(password)) {
-          throw new NotAuthorizedException(L.l("{0} resin-system-auth-key does not match the server's value",
+          throw new NotAuthorizedException(L.l("{0} cluster-system-key does not match the server's value",
                                                this));
         }
 
