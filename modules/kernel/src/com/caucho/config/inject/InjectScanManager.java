@@ -41,9 +41,7 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
-import com.caucho.config.type.AnnotationType;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.enhancer.ScanClass;

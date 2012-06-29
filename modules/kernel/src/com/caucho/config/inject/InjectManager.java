@@ -148,7 +148,6 @@ import com.caucho.loader.EnvironmentApply;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -3130,6 +3129,7 @@ public final class InjectManager
 
       _isBeforeBeanDiscoverFired = true;
 
+      _xmlExtension.processRoots();
       /*
       // ioc/0061
       if (rootContextList.size() == 0)

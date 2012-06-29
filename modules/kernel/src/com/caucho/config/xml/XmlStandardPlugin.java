@@ -115,6 +115,11 @@ public class XmlStandardPlugin implements Extension {
 
   public void beforeDiscovery(@Observes BeforeBeanDiscovery event)
   {
+    processRoots();
+  }
+  
+  public void processRoots()
+  {
     try {
       ArrayList<Path> paths = new ArrayList<Path>(_pendingRoots);
       _pendingRoots.clear();
