@@ -457,14 +457,13 @@ class WatchdogArgs
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
       
-      
       String resinArg = arg;
       
       if (! resinArg.startsWith("--") && resinArg.startsWith("-")) {
         resinArg = "-" + resinArg;
       }
-
-      if ("-conf".equals(arg) || "--conf".equals(arg)) {
+      
+      if ("--conf".equals(resinArg)) {
         resinConf = argv[i + 1];
         i++;
       }
@@ -519,7 +518,7 @@ class WatchdogArgs
         
         if ("".equals(_serverId))
           _serverId = "default";
-
+        
         i++;
       }
       else if ("--cluster".equals(resinArg)) {

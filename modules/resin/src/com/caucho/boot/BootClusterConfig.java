@@ -129,8 +129,11 @@ public class BootClusterConfig {
     
   public void addServerImpl(WatchdogConfig config)
   {
+    // server/6e09
+    /*
     if (_resin.isWatchdogManagerConfig())
       return;
+      */
     
     if (_resin.findClient(config.getId()) != null) {
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
@@ -150,9 +153,9 @@ public class BootClusterConfig {
     int index = 0;
 
     for (String address : multiServer.getAddressList()) {
-      WatchdogConfigHandle server = createServer();
+      WatchdogConfigHandle serverHandle = createServer();
       
-      server.setId(multiServer.getIdPrefix() + index++);
+      serverHandle.setId(multiServer.getIdPrefix() + index++);
       
       boolean isExternal = false;
       
@@ -171,8 +174,8 @@ public class BootClusterConfig {
       
       boolean isAllowNonReservedIp = multiServer.isAllowNonReservedIp();
       
-      server.setAddress(address);
-      server.setPort(port);
+      serverHandle.setAddress(address);
+      serverHandle.setPort(port);
       // server.setExternalAddress(isExternal);
       
       /*
@@ -181,9 +184,16 @@ public class BootClusterConfig {
       }
       */
       
-      multiServer.getServerProgram().configure(server);
+      multiServer.getServerProgram().configure(serverHandle);
       
-      addServer(server);
+      WatchdogConfig server = addServer(serverHandle);
+
+      // server.setExternalAddress(isExternal);
+      /*
+      if (isAllowNonReservedIp) {
+        server.setAllowNonReservedIp(true);
+      }
+      */
     }
   }
   

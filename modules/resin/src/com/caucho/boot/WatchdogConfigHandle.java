@@ -29,21 +29,10 @@
 
 package com.caucho.boot;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.Bytes;
-import com.caucho.config.types.Period;
-import com.caucho.log.AbstractRolloverLog;
-import com.caucho.log.RotateStream;
-import com.caucho.network.listen.TcpPort;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 /**
  * Configuration handle for a watchdog before full configuration.
@@ -58,7 +47,7 @@ class WatchdogConfigHandle
   private final WatchdogArgs _args;
   private final Path _rootDirectory;
   
-  private String _serverAddress;
+  private String _serverAddress = "127.0.0.1";
   private int _serverPort;
   
   private ContainerProgram _program = new ContainerProgram();

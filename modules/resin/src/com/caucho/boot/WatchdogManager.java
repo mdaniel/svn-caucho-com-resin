@@ -111,9 +111,11 @@ class WatchdogManager implements AlarmListener {
     
     String serverId = _args.getServerId();
 
+    /*
     if (_args.isDynamicServer()) {
       serverId = _args.getDynamicServerId();
     }
+    */
     
     ResinArgs resinArgs = new ResinArgs();
     resinArgs.setRootDirectory(_args.getRootDirectory());
@@ -691,7 +693,7 @@ class WatchdogManager implements AlarmListener {
     else
       serverConfig = resin.findServer(serverId);
     
-
+System.out.println("CFG: " + serverConfig + " " + resin.isDynamicServer(args));
     if (serverConfig == null && resin.isDynamicServer(args)) {
       String clusterId = resin.getClusterId(args);
       
@@ -711,7 +713,7 @@ class WatchdogManager implements AlarmListener {
       configHandle.setAddress(address);
       configHandle.setPort(port);
       
-      cluster.addServer(configHandle);
+      WatchdogConfig server = cluster.addServer(configHandle);
     }
 
     WatchdogChild watchdog = _watchdogMap.get(serverId);

@@ -606,15 +606,16 @@ class WatchdogClient
       list.add(getId());
     }
 */
-    //server/6f05
-    if (("".equals(args.getServerId()) || args.getServerId() == null)
-        && ! args.isDynamicServer()) {
+    //server/6f05 vs server/6e09
+    /*
+    if (args.getServerId() == null && ! args.isDynamicServer()) {
       list.add("-server");
       if (getId() == null || "".equals(getId()))
         list.add("default");
       else
         list.add(getId());
     }
+    */
 
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].equals("-conf")

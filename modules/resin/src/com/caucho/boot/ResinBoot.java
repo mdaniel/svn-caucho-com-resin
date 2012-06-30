@@ -189,6 +189,7 @@ public class ResinBoot
     if (serverId == null) {
       serverId = _resinConfig.getHomeServer();
     }
+
     
     return serverId;
   }
