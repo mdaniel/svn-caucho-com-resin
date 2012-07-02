@@ -649,7 +649,7 @@ class WatchdogManager implements AlarmListener {
     return _server != null && _server.isActive();
   }
 
-  private WatchdogChild readConfig(String serverId, WatchdogArgs args)
+  private WatchdogChild readConfig(String debugServerId, WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();
@@ -675,17 +675,22 @@ class WatchdogManager implements AlarmListener {
                      args.getResinConf());
     */
 
+    /*
     if (serverId == null)
       serverId = args.getServerId();
+      */
+    String serverId = args.getServerId();
     
     WatchdogConfig serverConfig = null;
     
-    WatchdogClient client;
+    WatchdogClient client = resin.findClient(serverId, args);
     
+    /*
     if (serverId != null)
       client = resin.findClient(serverId);
     else
-      client = resin.findClient(serverId, args); 
+      client = 
+      */ 
 
     //resin.findClient(serverId);
     if (client != null)
@@ -693,7 +698,6 @@ class WatchdogManager implements AlarmListener {
     else
       serverConfig = resin.findServer(serverId);
     
-System.out.println("CFG: " + serverConfig + " " + resin.isDynamicServer(args));
     if (serverConfig == null && resin.isDynamicServer(args)) {
       String clusterId = resin.getClusterId(args);
       
@@ -713,7 +717,7 @@ System.out.println("CFG: " + serverConfig + " " + resin.isDynamicServer(args));
       configHandle.setAddress(address);
       configHandle.setPort(port);
       
-      WatchdogConfig server = cluster.addServer(configHandle);
+      serverConfig = cluster.addServer(configHandle);
     }
 
     WatchdogChild watchdog = _watchdogMap.get(serverId);

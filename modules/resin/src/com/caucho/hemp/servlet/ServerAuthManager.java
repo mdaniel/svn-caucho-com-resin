@@ -145,7 +145,7 @@ public class ServerAuthManager {
       else {
         log.info("Authentication failed because cluster-system-key is not configured");
         
-        throw new NotAuthorizedException(L.l("cluster-system-key is not configured"));
+        throw new NotAuthorizedException(L.l("No user and password credentials were presented and cluster-system-key is not configured"));
       }
       
       if (! serverSignature.equals(signature)) {

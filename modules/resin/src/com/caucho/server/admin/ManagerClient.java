@@ -134,7 +134,7 @@ public class ManagerClient
       if (_bamClient != null)
         return;
     } catch (RemoteConnectionFailedException e) {
-      exn = new RemoteConnectionFailedException(L.l("Connection to '{0}:{1}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+      exn = new RemoteConnectionFailedException(L.l("Connection to '{0}:{1}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {2}",
                                                     host, serverPort,
                                                     e.getMessage()),
                                                     e);
@@ -142,7 +142,7 @@ public class ManagerClient
       if (httpPort == 0)
         throw exn;
     } catch (RemoteListenerUnavailableException e) {
-      exn = new RemoteListenerUnavailableException(L.l("HMTP request to '{0}:{1}' failed for remote admin, because remote administration was not enabled. Check that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+      exn = new RemoteListenerUnavailableException(L.l("HMTP request to '{0}:{1}' failed for remote admin, because remote administration was not enabled. Check that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {2}",
                                                        host, serverPort,
                                                        e.getMessage()),
                                                        e);
