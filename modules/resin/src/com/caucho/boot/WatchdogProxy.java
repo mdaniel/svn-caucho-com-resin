@@ -37,7 +37,7 @@ public interface WatchdogProxy {
   
   public ResultStatus start(String serverId, String[] argv);
 
-  public ResultStatus stop(String serverId);
+  public ResultStatus stop(String serverId, String []argv);
 
   public ResultStatus kill(String serverId);
 

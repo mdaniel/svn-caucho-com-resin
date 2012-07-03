@@ -86,7 +86,7 @@ class WatchdogChildProcess
   private final WatchdogChild _watchdog;
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  private WatchdogActor _watchdogActor;
+  private WatchdogChildActor _watchdogActor;
   private WatchdogChildTask _task;
 
   private Socket _childSocket;
@@ -472,7 +472,7 @@ class WatchdogChildProcess
     InputStream watchdogIs = s.getInputStream();
     OutputStream watchdogOs = s.getOutputStream();
 
-    _watchdogActor = new WatchdogActor(this);
+    _watchdogActor = new WatchdogChildActor(this);
 
     HmtpLinkWorker link = new HmtpLinkWorker(_watchdogActor, watchdogIs, watchdogOs);
 

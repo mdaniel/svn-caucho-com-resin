@@ -335,14 +335,14 @@ class WatchdogClient
     return false;
   }
 
-  public void stopWatchdog(String serverId)
+  public void stopWatchdog(String serverId, String []argv)
   {
     ActorSender conn = getConnection();
 
     try {
       WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
       
-      ResultStatus status = watchdogProxy.stop(serverId);
+      ResultStatus status = watchdogProxy.stop(serverId, argv);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog '{1}' stop failed because of '{2}'",
@@ -630,10 +630,13 @@ class WatchdogClient
         list.add(argv[i]);
     }
 
+    // server/6e07
+    /*
     if (! args.isDynamicServer() && _config.getHomeCluster() != null) {
       list.add("--cluster");
       list.add(_config.getHomeCluster());
     }
+    */
 
     list.add("--log-directory");
     list.add(getLogDirectory().getFullPath());

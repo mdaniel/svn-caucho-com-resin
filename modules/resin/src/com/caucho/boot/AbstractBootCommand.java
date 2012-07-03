@@ -349,6 +349,12 @@ public abstract class AbstractBootCommand implements BootCommand {
   }
   
   @Override
+  public boolean isStartAll()
+  {
+    return false;
+  }
+  
+  @Override
   public boolean isConsole()
   {
     return false;

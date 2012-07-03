@@ -52,6 +52,7 @@ public interface BootCommand {
 
   public void usage();
   public boolean isStart();
+  public boolean isStartAll();
   public boolean isShutdown();
   public boolean isConsole();
 

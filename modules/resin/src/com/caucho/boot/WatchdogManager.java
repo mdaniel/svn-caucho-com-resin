@@ -199,11 +199,12 @@ class WatchdogManager implements AlarmListener {
     }
     
     _watchdogPort = _args.getWatchdogPort();
+
+    WatchdogChild server = readConfig(serverId, _args);
     
-    readConfig(serverId, _args);
+    server = getWatchdog(server, serverId, _args);
     
-    WatchdogChild server = null;
-    
+    /*
     if (serverId == null)
       server = findLocalServer();
       
@@ -212,6 +213,7 @@ class WatchdogManager implements AlarmListener {
 
     if (server == null && "".equals(serverId))
       server = _watchdogMap.get("default");
+      */
     
     if (server == null) {
       if (serverId == null) {
@@ -306,7 +308,7 @@ class WatchdogManager implements AlarmListener {
 
       HempBroker broker = HempBroker.getCurrent();
       
-      WatchdogService service = new WatchdogService(this);
+      WatchdogActor service = new WatchdogActor(this);
       
       broker.getBamManager().createService("watchdog@admin.resin.caucho", service);
 
@@ -485,6 +487,61 @@ class WatchdogManager implements AlarmListener {
                    String serverId,
                    WatchdogArgs args)
   {
+    watchdog = getWatchdog(watchdog, serverId, args);
+
+    if (watchdog == null) {
+      throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",
+                                      serverId, _args.getResinConf()));
+    }
+
+    watchdog.start();
+
+  }
+  
+  /**
+   * Called from the hessian API to gracefully stop a Resin instance
+   *
+   * @param serverId the Resin instance to stop
+   */
+  void stopServer(String serverId, String []argv)
+  {
+    WatchdogArgs args = new WatchdogArgs(argv, false);
+    
+    // serverId = getServerId(serverId, args);
+    
+    synchronized (_watchdogMap) {
+      WatchdogChild watchdog = getWatchdog(null, serverId, args);
+
+      if (watchdog == null)
+        throw new ConfigException(L().l("No matching <server> found for stop -server '{0}' in {1}",
+                                        serverId, _args.getResinConf()));
+
+      watchdog.stop();
+    }
+  }
+  
+  /**
+   * Called from the hessian API to gracefully stop a Resin instance
+   *
+   * @param serverId the Resin instance to stop
+   */
+  private void stopServer(WatchdogChild watchdog)
+  {
+    // serverId = getServerId(serverId, args);
+    
+    watchdog.stop();
+  }
+
+  WatchdogChild getWatchdog(WatchdogChild watchdog,
+                            String serverId,
+                            WatchdogArgs args)
+  {
+    if (serverId == null)
+      watchdog = findLocalServer();
+    
+    if (serverId == null)
+      serverId = "default";
+  
     // server/6e09
     String defaultServerId = getServerId(serverId, args);
     
@@ -500,34 +557,10 @@ class WatchdogManager implements AlarmListener {
         watchdog = _watchdogMap.get(defaultServerId);
       }
     }
-
-    if (watchdog == null)
-      throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",
-                                      defaultServerId, _args.getResinConf()));
-
-    watchdog.start();
-
-  }
-  /**
-   * Called from the hessian API to gracefully stop a Resin instance
-   *
-   * @param serverId the Resin instance to stop
-   */
-  void stopServer(String serverId)
-  {
-    serverId = getServerId(serverId, _args);
     
-    synchronized (_watchdogMap) {
-      WatchdogChild watchdog = getWatchdog(serverId);
-      
-      if (watchdog == null)
-        throw new ConfigException(L().l("No matching <server> found for stop -server '{0}' in {1}",
-                                        serverId, _args.getResinConf()));
-
-      watchdog.stop();
-    }
+    return watchdog;
   }
-  
+
   private String getServerId(String serverId, WatchdogArgs args)
   {
     /*
@@ -620,7 +653,7 @@ class WatchdogManager implements AlarmListener {
     keys.addAll(_watchdogMap.keySet());
     
     for (String serverId : keys) {
-      stopServer(serverId);
+      stopServer(_watchdogMap.get(serverId));
       killServer(serverId);
     }
   }
@@ -801,6 +834,24 @@ class WatchdogManager implements AlarmListener {
     }
     
     return null;
+  }
+  
+  private WatchdogChild findUniqueLocalServer()
+  {
+    ArrayList<InetAddress> localAddresses = BootResinConfig.getLocalAddresses();
+    
+    WatchdogChild server = null;
+    
+    for (WatchdogChild child : _watchdogMap.values()) {
+      if (BootResinConfig.isLocalClient(localAddresses, child.getConfig())) {
+        if (server != null)
+          return null;
+        
+        server = child;
+      }
+    }
+    
+    return server;
   }
 
   @Override

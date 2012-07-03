@@ -29,65 +29,228 @@
 
 package com.caucho.boot;
 
-import java.io.Serializable;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.Message;
-import com.caucho.bam.actor.SimpleActor;
-import com.caucho.server.resin.WarningMessage;
+import com.caucho.bam.Query;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
- * Service for handling the distributed cache
+ * BAM service managing the watchdog
  */
-public class WatchdogActor extends SimpleActor
+class WatchdogActor
 {
+  private static final L10N L = new L10N(WatchdogActor.class);
   private static final Logger log
     = Logger.getLogger(WatchdogActor.class.getName());
-  
-  private WatchdogChildProcess _child;
-  
-  WatchdogActor(WatchdogChildProcess watchdog)
+
+  private final WatchdogManager _manager;
+  // private final String _address;
+
+  WatchdogActor(WatchdogManager manager)
   {
-    setAddress("watchdog");
+    _manager = manager;
+    // _address = address;
     
-    _child = watchdog;
-  }
-  
-  public Serializable query(Serializable payload)
-  {
-    return getSender().query("resin@admin.resin.caucho", payload);
-  }
-  
-  public void message(Serializable payload)
-  {
-    getSender().message("resin@admin.resin.caucho", payload);
+    // setBroker(broker);
   }
 
-  public void sendShutdown()
-  {
-    getBroker().query(1,
-                      "resin@admin.resin.caucho",
-                      "watchdog@admin.resin.caucho",
-                      new WatchdogStopQuery(""));
-  }
-  
-  @Message
-  public void onWarning(String to, String from, WarningMessage warning)
-  {
-    String msg = warning.getMessage();
-    
-    log.warning("Watchdog received warning "
-                + "from Resin[" + _child.getId() + ",pid=" + _child.getPid() + "]:"
-                + "\n  " + warning.getMessage());
-    
-    if (msg.startsWith("Shutdown:"))
-      _child.setShutdownMessage(msg);
-  }
-  
+  /**
+   * Returns the server id of the watchdog.
+   */
   /*
-  public void destroy()
+  @Override
+  public String getAddress()
   {
-    _resin.destroy();
+    return _address;
   }
   */
+  
+  /**
+   * Returns the home directory of the watchdog for validation.
+   */
+  public String getResinHome()
+  {
+    return _manager.getResinHome().getFullPath();
+  }
+
+  /**
+   * Start queries
+   */
+  public ResultStatus start(String serverId, String []argv)
+  {
+    try {
+      serverId = _manager.startServer(serverId, argv);
+
+      String msg = L.l("{0}: started server '{1}'", this, serverId);
+    
+      return new ResultStatus(true, msg);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      String msg;
+
+      if (e instanceof ConfigException)
+        msg = e.getMessage();
+      else
+        msg = L.l("{0}: start server failed because of exception\n  {1}'",
+                  this, e.toString());
+    
+      return new ResultStatus(false, msg);
+    }
+  }
+
+  /**
+   * Status queries
+   */
+  public ResultStatus status()
+  {
+    try {
+      String result = _manager.status();
+    
+      return new ResultStatus(true, result);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      String msg = L.l("{0}: status failed because of exception\n{1}'",
+                       this, e.toString());
+    
+      return new ResultStatus(false, msg);
+    }
+  }
+
+  /**
+   * Handles stop queries
+   */
+  public ResultStatus stop(String serverId, String []argv)
+  {
+    ResultStatus result;
+    
+    try {
+      _manager.stopServer(serverId, argv);
+
+      String msg = L.l("{0}: stopped server='{1}'", this, serverId);
+    
+      result = new ResultStatus(true, msg);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      String msg = L.l("{0}: stop server='{1}' failed because of exception\n{2}'",
+                       this, serverId, e.toString());
+    
+      result = new ResultStatus(false, msg);
+    }
+    
+    if (_manager.isEmpty()) {
+      new Thread(new Shutdown()).start();
+    }
+    
+    return result;
+  }
+
+  /**
+   * Handles stop queries
+   */
+  public ResultStatus restart(String serverId, String []argv)
+  {
+    ResultStatus result;
+    
+    try {
+      _manager.restartServer(serverId, argv);
+
+      String msg = L.l("{0}: restarted server='{1}'", this, serverId);
+    
+      result = new ResultStatus(true, msg);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      String msg = L.l("{0}: restart server='{1}' failed because of exception\n{2}'",
+                       this, serverId, e.toString());
+    
+      result = new ResultStatus(false, msg);
+    }
+    
+    if (_manager.isEmpty()) {
+      new Thread(new Shutdown()).start();
+    }
+    
+    return result;
+  }
+
+  /**
+   * Handles kill queries
+   */
+  @Query
+  public ResultStatus kill(String serverId)
+  {
+    ResultStatus result;
+
+    try {
+      _manager.killServer(serverId);
+
+      String msg = L.l("{0}: killed server='{1}'", this, serverId);
+    
+      result = new ResultStatus(true, msg);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      String msg = L.l("{0}: kill server='{1}' failed because of exception\n{2}'",
+                       this, serverId, e.toString());
+    
+      result = new ResultStatus(false, msg);
+    }
+    
+    if (_manager.isEmpty()) {
+      new Thread(new Shutdown()).start();
+    }
+    
+    return result;
+  }
+
+  /**
+   * Handles shutdown queries
+   */
+  @Query
+  public ResultStatus shutdown()
+  {
+    try {
+      String from = " unknown"; // XXX:
+      
+      log.info(this + " shutdown from " + from);
+
+      String msg = L.l("{0}: shutdown", this);
+    
+      _manager.shutdown();
+      
+      new Thread(new Shutdown()).start();
+      
+      return new ResultStatus(true, msg);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      String msg = L.l("{0}: shutdown failed because of exception\n{2}'",
+                       this, e.toString());
+    
+      return new ResultStatus(false, msg);
+    }
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
+
+  static class Shutdown implements Runnable {
+    @Override
+    public void run()
+    {
+      try {
+        Thread.sleep(1000);
+      } catch (Exception e) {
+      }
+
+      System.exit(0);
+    }
+  }
 }

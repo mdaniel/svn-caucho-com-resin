@@ -57,6 +57,12 @@ public class StartAllCommand extends AbstractStartCommand
   {
     return true;
   }
+  
+  @Override
+  public boolean isStartAll()
+  {
+    return true;
+  }
 
   @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)

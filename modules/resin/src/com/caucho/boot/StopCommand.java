@@ -56,7 +56,7 @@ public class StopCommand extends AbstractStopCommand
     throws BootArgumentException
   {
     try {
-      client.stopWatchdog(args.getServerId());
+      client.stopWatchdog(args.getServerId(), args.getArgv());
 
       System.out.println(L().l(
         "Resin/{0} stopped{1} for watchdog at {2}:{3}",

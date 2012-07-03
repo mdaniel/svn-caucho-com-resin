@@ -298,9 +298,9 @@ public class BootResinConfig // implements EnvironmentBean
     ArrayList<WatchdogClient> clientList = findLocalClients(serverId);
     
     if (clientList.size() == 0) {
-      
     }
     else if (clientList.size() == 1
+        || _args.getCommand().isStartAll()
              || ! _args.getCommand().isStart()) {
       client = clientList.get(0);
 
@@ -311,6 +311,13 @@ public class BootResinConfig // implements EnvironmentBean
       // server/6e10
       if (client != null && client.getConfig().isRequireExplicitId())
         client = null;
+      
+      // server/6e07
+      if (client != null)
+        return client;
+    }
+    else if (_args.getCommand().isStartAll()) {
+      return null;
     }
 
     // server/6e10
