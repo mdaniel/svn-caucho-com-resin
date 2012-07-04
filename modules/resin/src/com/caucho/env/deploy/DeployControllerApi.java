@@ -140,6 +140,11 @@ public interface DeployControllerApi<I extends DeployInstance>
   public void close();
   
   /**
+   * Remove the controller
+   */
+  public void remove();
+  
+  /**
    * External lifecycle listeners, so applications can detect deployment
    * and redeployment.
    */

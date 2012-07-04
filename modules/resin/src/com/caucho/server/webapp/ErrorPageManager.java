@@ -279,8 +279,9 @@ public class ErrorPageManager {
           lineMessage = rootExn.getMessage();
       }
 
-      if (rootExn instanceof BadRequestException)
+      if (rootExn instanceof BadRequestException) {
         isBadRequest = true;
+      }
       
       if (rootExn instanceof OutOfMemoryError) {
         String msg = "TcpSocketLink OutOfMemory";
@@ -342,7 +343,8 @@ public class ErrorPageManager {
     }
 
     if (isBadRequest) {
-      // server/05a0
+      // server/05a0, server/0532
+
       if (rootExn instanceof CompileException)
         title = rootExn.getMessage();
       else
@@ -391,8 +393,9 @@ public class ErrorPageManager {
       title = "503 Unavailable";
     }
     */
-    else
+    else {
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
 
     if (location == null)
       location = _defaultLocation;

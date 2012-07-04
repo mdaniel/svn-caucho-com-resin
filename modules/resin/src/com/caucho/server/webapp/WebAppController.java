@@ -608,8 +608,11 @@ public class WebAppController
     if (! super.destroy())
       return false;
 
+    // server/1h03
+    /*
     if (_container != null)
       _container.removeWebApp(this);
+      */
 
     return true;
   }

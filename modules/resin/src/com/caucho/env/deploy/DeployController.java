@@ -866,6 +866,13 @@ abstract public class DeployController<I extends DeployInstance>
   {
     destroy();
   }
+  
+  public final void remove()
+  {
+    close();
+    
+    onRemove();
+  }
 
   /**
    * Destroys the entry.
@@ -888,11 +895,15 @@ abstract public class DeployController<I extends DeployInstance>
     _deployTagItem.removeActionHandler(this);
     
     onDestroy();
-    
+      
     return true;
   }
   
   protected void onDestroy()
+  {
+  }
+  
+  protected void onRemove()
   {
   }
   

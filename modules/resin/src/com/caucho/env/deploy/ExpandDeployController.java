@@ -775,9 +775,16 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (_deployItem != null) {
       _deployItem.removeNotificationListener(_deployListener);
     }
+  }
+  
+  @Override
+  protected void onRemove()
+  {
+    super.onRemove();
     
-    // server/6b0e
     String tag = getId();
+    
+    // server/6b0e, server/1h03
     String treeHash = _repositorySpi.getTagContentHash(tag);
     String rootHash = _rootHash;
     

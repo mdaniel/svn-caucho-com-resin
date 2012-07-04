@@ -287,7 +287,8 @@ public class DeployContainer<C extends DeployControllerApi<?>>
     C oldController = _controllerList.remove(name, getControllerNameMatch());
 
     if (oldController != null) {
-      oldController.close();
+      // oldController.close();
+      oldController.remove();
     }
   }
 
