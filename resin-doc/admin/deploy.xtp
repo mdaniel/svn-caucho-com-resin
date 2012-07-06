@@ -243,7 +243,7 @@ until you copy it to a live machine.</p>
 <example title="Example: deploying a preview stage">
 unix> bin/resin.sh deploy -stage preview foo.war
 
-unix> bin/resin.sh -stage preview -server dyn1 -join-cluster app-tier start
+unix> bin/resin.sh -stage preview -server dyn1 -cluster app-tier start
 </example>
 
 <p>Internally, Resin stores the preview stage as a repository tag

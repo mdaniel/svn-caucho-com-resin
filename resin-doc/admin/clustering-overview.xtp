@@ -149,11 +149,11 @@ a new server, Resin:
 at least one server configured, because the server needs the IP address of
 the core servers.</p>
 
-<p>The main operation is a "-join-cluster app-tier" which tells the
+<p>The main operation is a "--cluster app-tier" which tells the
 new server which cluster to join.</p>
 
 <example title="Example: minimal command-line for dynamic server">
-unix> bin/resin.sh -join-cluster app-tier start \
+unix> bin/resin.sh --cluster app-tier start \
           -user my-admin -password my-password
 </example>
 

@@ -84,7 +84,7 @@ basic resin.xml example that uses three servers.</p>
 enable automatic deployment to the new servers.</li>
 <li>Install a machine (or VM image) with Resin, your licenses, and the
 resin.xml.</li>
-<li>Start the new Resin server with a --join-cluster command-line
+<li>Start the new Resin server with a --cluster command-line
 option.</li>
 <li>The new server will load the applications from the triad and join
 in any clustered services like load-balancing and caching.</li>
@@ -129,11 +129,11 @@ be installed:</p>
 make a virtual machine image with these already saved, use the VM
 image for the new machine and start it.</p>
 
-<p>To start a new server, you'll add a '--join-cluster' option with
+<p>To start a new server, you'll add a '--cluster' option with
 the name of the cluster you want to join.</p>
 
 <example title="Example: command-line starting a dynamic server">
-unix> bin/resin.sh --join-cluster my-cluster start
+unix> bin/resin.sh --cluster my-cluster start
 </example>
 
 <p>If you don't have a &lt;resin-system-auth-key> in the resin.xml,

@@ -106,20 +106,20 @@ the triad even if one is down for maintenance or a restart.</p>
 &lt;/resin>
 </example>
 
-<s2 title="dynamic servers and --join-cluster">
+<s2 title="dynamic servers and --cluster">
 
 <p web-only='true'>For more details see the <a
 href="clustering-overview.xtp">clustering overview</a>.</p>
 
 <p>Elastic servers are added to a cluster using the command-line
-<b>--join-cluster</b> option. The new server is assigned a server id
+<b>--cluster</b> option. The new server is assigned a server id
 from the command line, an IP address from the local network. The new
 server contacts the triad defined in the resin.xml and requests to be
 added. The triad updates the cluster topology and informs all servers
 about the new server.</p>
 
 <example title="Example: command-line for dynamic server">
-unix> bin/resin.sh -join-cluster app-tier start \
+unix> bin/resin.sh --cluster app-tier start \
           -user my-admin -password my-password
 </example>
 
