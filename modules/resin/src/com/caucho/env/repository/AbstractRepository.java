@@ -321,7 +321,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
 
       ValidateHashResult validResult = validateHash(tagName, contentHash);
       if (! validResult.isValid()) {
-        throw new RepositoryException(L.l("'{0}' with sha1='{0}' has invalid or missing repository content",
+        throw new RepositoryException(L.l("'{0}' with sha1='{1}' has invalid or missing repository content",
                                           validResult.getName(), contentHash));
       }
       

@@ -35,6 +35,8 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
+import javax.inject.Singleton;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

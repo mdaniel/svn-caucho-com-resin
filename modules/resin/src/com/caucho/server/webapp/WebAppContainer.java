@@ -919,10 +919,10 @@ public class WebAppContainer
   public void buildErrorInvocation(Invocation invocation)
     throws ServletException
   {
-    WebApp app = buildSubInvocation(invocation);
+    WebApp webApp = buildSubInvocation(invocation);
 
-    if (app != null)
-      app.buildErrorInvocation(invocation);
+    if (webApp != null)
+      webApp.buildErrorInvocation(invocation);
   }
 
   /**

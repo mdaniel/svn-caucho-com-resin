@@ -3938,9 +3938,10 @@ public class WebApp extends ServletContextImpl
     // the CacheListener in ServletInvocation needs the top to
     // be a CacheListener.  Otherwise, the cache won't get lru.
     
-    if (getRequestListeners() != null && getRequestListeners().length > 0)
+    if (getRequestListeners() != null && getRequestListeners().length > 0) {
       chain = new WebAppListenerFilterChain(chain, this, getRequestListeners());
-
+    }
+    
     // TCK: cache needs to be outside because the cache flush conflicts
     // with the request listener destroy callback
     // top-level filter elements

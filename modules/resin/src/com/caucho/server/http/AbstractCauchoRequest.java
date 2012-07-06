@@ -749,7 +749,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   /**
    * Returns the next request in a chain.
    */
-  protected HttpServletRequest getRequest()
+  public HttpServletRequest getRequest()
   {
     return null;
   }

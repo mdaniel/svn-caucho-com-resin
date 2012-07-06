@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 
@@ -161,8 +162,9 @@ public class XmlAuthenticator extends AbstractAuthenticator
     if (userName == null)
       return null;
     
-    if (isModified())
+    if (isModified()) {
       reload();
+    }
 
     PasswordUser user = _userMap.get(userName);
 

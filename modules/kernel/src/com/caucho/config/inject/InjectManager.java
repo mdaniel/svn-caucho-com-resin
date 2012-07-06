@@ -2349,8 +2349,9 @@ public final class InjectManager
   {
     Class<? extends Annotation> scopeType = bean.getScope();
     
-    if (InjectionPoint.class.equals(bean.getBeanClass()))
+    if (InjectionPoint.class.equals(bean.getBeanClass())) {
       return (ReferenceFactory) new InjectionPointReferenceFactory();
+    }
 
     if (Dependent.class == scopeType) {
       if (bean instanceof ManagedBeanImpl<?>)

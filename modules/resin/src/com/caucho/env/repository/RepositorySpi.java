@@ -139,7 +139,7 @@ public interface RepositorySpi
   /**
    * Validates a hash, checking that it and its dependencies exist.
    */
-  public ValidateHashResult validateHash(String contentHash, String fileName)
+  public ValidateHashResult validateHash(String fileName, String contentHash)
     throws IOException;
   
   //
@@ -287,6 +287,11 @@ public interface RepositorySpi
         return new ValidateHashResult(_name, _hash, true);
       else
         return this;
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + getName() + "," + isValid() + "," + getHash() + "]";
     }
   }
 }

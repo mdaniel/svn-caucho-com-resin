@@ -30,6 +30,7 @@
 package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
@@ -47,6 +48,7 @@ import com.caucho.loader.EnvironmentClassLoader;
  */
 @Module
 public class SingletonScope extends AbstractScopeContext {
+  private WeakReference<ClassLoader> _loader;
   private ContextContainer _context = new ContextContainer();
 
   /**
@@ -54,6 +56,10 @@ public class SingletonScope extends AbstractScopeContext {
    */
   public SingletonScope()
   {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    _loader = new WeakReference<ClassLoader>(loader);
+    
     Environment.addCloseListener(_context);
   }
 
@@ -91,7 +97,22 @@ public class SingletonScope extends AbstractScopeContext {
   protected <T> T create(Contextual<T> bean, 
                          CreationalContext<T> env)
   {
-    T instance = super.create(bean, env);
+    T instance;
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    ClassLoader loader = _loader.get();
+    
+    try {
+      if (loader != null) {
+        // server/12bs
+        thread.setContextClassLoader(loader);
+      }
+      
+      instance = super.create(bean, env);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
 
     if ((instance instanceof HandleAware) 
         && (bean instanceof PassivationCapable)) {

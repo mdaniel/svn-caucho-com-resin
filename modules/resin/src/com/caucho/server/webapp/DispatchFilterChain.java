@@ -31,8 +31,6 @@ package com.caucho.server.webapp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -41,8 +39,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.server.http.AbstractCauchoRequest;
 import com.caucho.server.http.CauchoRequestWrapper;
 
 /**
@@ -50,9 +48,6 @@ import com.caucho.server.http.CauchoRequestWrapper;
  * be the servlet itself.
  */
 public class DispatchFilterChain implements FilterChain {
-  private static final Logger log
-    = Logger.getLogger(DispatchFilterChain.class.getName());
-  
   // Next filter chain
   private FilterChain _next;
 
@@ -108,8 +103,18 @@ public class DispatchFilterChain implements FilterChain {
     
       webApp = cReq.getRequest().getServletContext();
     }
-    else
+    else if (request instanceof AbstractCauchoRequest) {
+      // server/10gf
+      AbstractCauchoRequest cReq = (AbstractCauchoRequest) request;
+    
+      if (cReq.getRequest() != null)
+        webApp = cReq.getRequest().getServletContext();
+      else
+        webApp = cReq.getServletContext();
+    }
+    else {
       webApp = request.getServletContext();
+    }
     
     try {
       thread.setContextClassLoader(_classLoader);

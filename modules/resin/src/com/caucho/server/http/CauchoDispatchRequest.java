@@ -92,6 +92,7 @@ public class CauchoDispatchRequest extends AbstractCauchoRequest {
   }
   */
 
+  @Override
   public HttpServletRequest getRequest()
   {
     return _request;
