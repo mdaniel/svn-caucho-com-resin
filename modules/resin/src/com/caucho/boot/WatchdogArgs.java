@@ -108,6 +108,11 @@ class WatchdogArgs
 
   WatchdogArgs(String[] argv, boolean isTop)
   {
+    this(argv, System.getProperty("resin.watchdog"), isTop);
+  }
+
+  WatchdogArgs(String[] argv, String serverId, boolean isTop)
+  {
     String logLevel = System.getProperty("resin.log.level");
 
     if (isTop)
@@ -126,6 +131,8 @@ class WatchdogArgs
       _resinConf = _resinHome.lookup("conf/resin.xml");
     
     _userProperties = Vfs.lookup(System.getProperty("user.home") + "/.resin");
+    
+    _serverId = serverId;
 
     _argv = fillArgv(argv);
 

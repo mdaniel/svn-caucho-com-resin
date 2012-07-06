@@ -462,13 +462,14 @@ class WatchdogManager implements AlarmListener {
     String serverId = cliServerId;
     
     synchronized (_watchdogMap) {
-      WatchdogArgs args = new WatchdogArgs(argv, false);
+      WatchdogArgs args = new WatchdogArgs(argv, cliServerId, false);
 
       Vfs.setPwd(_args.getRootDirectory());
       
-      if (serverId == null)
+      if (serverId == null) {
         serverId = args.getServerId();
-      
+      }
+
       WatchdogChild server;
 
       try {
@@ -682,7 +683,7 @@ class WatchdogManager implements AlarmListener {
     return _server != null && _server.isActive();
   }
 
-  private WatchdogChild readConfig(String debugServerId, WatchdogArgs args)
+  private WatchdogChild readConfig(String cliServerId, WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();

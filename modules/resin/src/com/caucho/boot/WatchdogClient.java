@@ -481,7 +481,7 @@ class WatchdogClient
     return _conn;
   }
 
-  public Process launchManager(String []argv)
+  private Process launchManager(String []argv)
     throws IOException
   {
     System.out.println(L.l("Resin/{0} launching watchdog at {1}:{2}",
@@ -538,7 +538,6 @@ class WatchdogClient
     // #3759 - user args are first so they're displayed by ps
 
     list.addAll(_config.getWatchdogJvmArgs());
-
     list.add("-Dresin.watchdog=" + _id);
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
