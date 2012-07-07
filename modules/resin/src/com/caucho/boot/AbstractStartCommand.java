@@ -97,7 +97,7 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   }
 
   @Override
-  protected WatchdogClient findShutdownClient(ResinBoot boot, WatchdogArgs args)
+  protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
   {
     // server/6e09
     return null;

@@ -218,7 +218,7 @@ public class ResinBoot
 
   WatchdogClient findShutdownClient(WatchdogArgs args)
   {
-    return _resinConfig.findShutdownClient(args.getClusterId());
+    return _resinConfig.findWatchdogClient(args.getClusterId());
   }
  
   ArrayList<WatchdogClient> findLocalClients()

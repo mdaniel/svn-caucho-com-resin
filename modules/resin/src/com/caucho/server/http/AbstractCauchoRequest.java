@@ -253,7 +253,13 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   public Part getPart(String name)
     throws IOException, ServletException
   {
-    for (Part part : getParts()) {
+    Collection<Part> parts = getParts();
+    
+    if (parts == null) {
+      return null;
+    }
+
+    for (Part part : parts) {
       if (name.equals(part.getName()))
         return part;
     }

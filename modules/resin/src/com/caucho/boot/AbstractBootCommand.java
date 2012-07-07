@@ -108,21 +108,30 @@ public abstract class AbstractBootCommand implements BootCommand {
   @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)
   {
+    WatchdogClient client = findClient(boot, args);
+    
+    return doCommand(args, client);
+  }
+  
+  protected WatchdogClient findClient(ResinBoot boot, WatchdogArgs args)
+  {
     WatchdogClient client = boot.findClient(args.getServerId(), args);
     
-    if (client == null) {
-      client = findLocalClient(boot, args);
+    if (client != null) {
+      return client;
     }
     
+    client = findLocalClient(boot, args);
+    
     if (client == null) {
-      client = findShutdownClient(boot, args);
+      client = findWatchdogClient(boot, args);
     }
     
     if (client == null) {
       throw new ConfigException(L.l("No <server> can be found listening to a local IP address"));
     }
     
-    return doCommand(args, client);
+    return client;
   }
   
   protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
@@ -168,7 +177,7 @@ public abstract class AbstractBootCommand implements BootCommand {
     return foundClient;
   }
   
-  protected WatchdogClient findShutdownClient(ResinBoot boot, WatchdogArgs args)
+  protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
   {
     return boot.findShutdownClient(args);
   }

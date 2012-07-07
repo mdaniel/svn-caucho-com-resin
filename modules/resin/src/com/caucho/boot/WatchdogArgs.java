@@ -70,6 +70,8 @@ class WatchdogArgs
   private static final HashMap<String,BootCommand> _commandMap
     = new HashMap<String,BootCommand>();
 
+  private final String _clientServerId;
+  
   private Path _javaHome;
   private Path _resinHome;
   private Path _rootDirectory;
@@ -113,6 +115,8 @@ class WatchdogArgs
 
   WatchdogArgs(String[] argv, String serverId, boolean isTop)
   {
+    _clientServerId = serverId;
+    
     String logLevel = System.getProperty("resin.log.level");
 
     if (isTop)
@@ -132,8 +136,6 @@ class WatchdogArgs
     
     _userProperties = Vfs.lookup(System.getProperty("user.home") + "/.resin");
     
-    _serverId = serverId;
-
     _argv = fillArgv(argv);
 
     parseCommandLine(_argv);
@@ -187,6 +189,11 @@ class WatchdogArgs
   String getMode()
   {
     return _mode;
+  }
+  
+  String getClientServerId()
+  {
+    return _clientServerId;
   }
 
   String getServerId()

@@ -31,6 +31,9 @@ package com.caucho.boot;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -250,14 +253,14 @@ public class BootResinConfig // implements EnvironmentBean
     return _watchdogMap.get(id);
   }
   
-  
-  WatchdogClient findClient(String serverId, WatchdogArgs args)
+  /**
+   * Finds a matching client for the arguments.
+   */
+  WatchdogClient findClient(String cliServerId, WatchdogArgs args)
   {
     WatchdogClient client = null;
     
-    if (serverId == null) {
-      serverId = getHomeServer();
-    }
+    String serverId = getServerId(args);
 
     if (serverId != null) {
       client = findClient(serverId);
@@ -265,101 +268,92 @@ public class BootResinConfig // implements EnvironmentBean
       if (client != null)
         return client;
       
-      // cloud/1292, server/6e11
-      if (args.isDynamicServer()) {
-        client = findShutdownClient(_args.getClusterId());
-        
-        if (client != null)
-          return client;
-        
-        throw new ConfigException(L.l("Resin/{0}: {1} -cluster '{2}' does not match any defined <server>\nin {3}.",
-                                      VersionFactory.getVersion(),
-                                      _args.getCommand(),
-                                      _args.getClusterId(), 
-                                      _args.getResinConf()));
-      }
-      
-      if (! args.getCommand().isStart() && ! args.getCommand().isConsole()) {
-        throw new ConfigException(L.l("Resin/{0}: {1} -server '{2}' does not match any defined <server>\nin {3}.",
-                                      VersionFactory.getVersion(),
-                                      _args.getCommand(),
-                                      _args.getServerId(), 
-                                      _args.getResinConf()));
-      }
-    }
-    
-    // backward-compat default behavior
-    if (serverId == null)
-      client = findClient("default");
-    
-    if (client != null)
-      return client;
-    
-    ArrayList<WatchdogClient> clientList = findLocalClients(serverId);
-    
-    if (clientList.size() == 0) {
-    }
-    else if (clientList.size() == 1
-        || _args.getCommand().isStartAll()
-             || ! _args.getCommand().isStart()) {
-      client = clientList.get(0);
-
-      // server/6e0f
-      if (serverId != null && ! serverId.equals(client.getId()))
-        client = null;
-
-      // server/6e10
-      if (client != null && client.getConfig().isRequireExplicitId())
-        client = null;
-      
-      // server/6e07
-      if (client != null)
-        return client;
-    }
-    else if (_args.getCommand().isStartAll()) {
-      return null;
+      throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}\nserver ids: {3}.",
+                                    VersionFactory.getVersion(), 
+                                    getDisplayServerName(cliServerId),
+                                    _args.getResinConf(),
+                                    toStringList(_watchdogMap.values())));
     }
 
-    // server/6e10
+    // cloud/1292, server/6e11
     if (isDynamicServer(args)) {
       return null;
     }
-
-    /*
-    if (client == null && _args.getCommand().isShutdown()) {
-      client = findShutdownClient(_args.getClusterId());
-    }
-    */
-
-    if (client == null
-        && (! _args.getCommand().isStart()
-            && ! _args.getCommand().isConsole()
-            || _args.isDynamicServer())) {
-      client = findShutdownClient(_args.getClusterId());
-    }
-
-    if (client == null) {
-      throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}\nserver ids: {3}.",
-                                    VersionFactory.getVersion(), 
-                                    getDisplayServerName(_args.getServerId()), 
-                                    _args.getResinConf(),
-                                    toStringList(clientList)));
+    
+    // backward-compat default behavior
+    if (serverId == null) {
+      client = findClient("default");
     }
     
     return client;
   }
   
-  private String toStringList(ArrayList<WatchdogClient> clientList)
+  /**
+   * Finds a matching client for the arguments.
+   */
+  WatchdogClient findLocalClient(String cliServerId, WatchdogArgs args)
+  {
+    ArrayList<WatchdogClient> clientList = findLocalClients(cliServerId);
+    
+    if (clientList.size() == 0) {
+      return null;
+    }
+
+    WatchdogClient client = clientList.get(0);
+
+    // server/6e10
+    if (client != null && ! client.getConfig().isRequireExplicitId()) {
+        return client;
+    }
+      
+    return null;
+  }
+  
+  /**
+   * Finds a matching client for the arguments.
+   */
+  WatchdogClient findUniqueLocalClient(String cliServerId, WatchdogArgs args)
+  {
+    ArrayList<WatchdogClient> clientList = findLocalClients(cliServerId);
+    
+    if (clientList.size() == 0) {
+      return null;
+    }
+    
+    if (clientList.size() > 1) {
+      throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}\nserver ids: {3}.",
+                                    VersionFactory.getVersion(), 
+                                    getDisplayServerName(cliServerId),
+                                    _args.getResinConf(),
+                                    toStringList(clientList)));
+    }
+
+    WatchdogClient client = clientList.get(0);
+
+    if (client != null && ! client.getConfig().isRequireExplicitId()) {
+      return client;
+    }
+      
+    return null;
+  }
+
+  private String toStringList(Collection<WatchdogClient> clientList)
   {
     StringBuilder sb = new StringBuilder();
     
-    for (int i = 0; i < clientList.size(); i++) {
+    ArrayList<String> list = new ArrayList<String>();
+    
+    for (WatchdogClient client : clientList) {
+      list.add(client.getId());
+    }
+    
+    Collections.sort(list);
+    
+    for (int i = 0; i < list.size(); i++) {
       if (i != 0)
         sb.append(", ");
       
-      WatchdogClient client = clientList.get(i);
-      
-      sb.append(client.getId());
+      sb.append(list.get(i));
     }
     
     return sb.toString();
@@ -373,15 +367,31 @@ public class BootResinConfig // implements EnvironmentBean
       return name;
   }
   
+  String getServerId(WatchdogArgs args)
+  {
+    String serverId = args.getServerId();
+
+    if (serverId != null) {
+      return serverId;
+    }
+    
+    return getHomeServer();
+  }
+  
+  boolean isDynamicServerAllowed(WatchdogArgs args)
+  {
+    return isDynamicServer(args) || getHomeCluster() != null;
+  }
+  
   boolean isDynamicServer(WatchdogArgs args)
   {
     if (args.getServerId() != null) {
       return false;
     }
-    else if (args.isDynamicServer()) {
-      return true;
+    else if (getHomeServer() != null) {
+      return false;
     }
-    else if (getHomeCluster() != null) {
+    else if (args.isDynamicServer()) {
       return true;
     }
     else if (args.getClusterId() != null) {
@@ -424,7 +434,7 @@ public class BootResinConfig // implements EnvironmentBean
   /**
    * Finds a server.
    */
-  public WatchdogClient findShutdownClient(String clusterId)
+  public WatchdogClient findWatchdogClient(String clusterId)
   {
     WatchdogClient bestClient = null;
     
