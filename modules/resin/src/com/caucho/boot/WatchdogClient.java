@@ -109,6 +109,16 @@ class WatchdogClient
   {
     return _config.getIndex();
   }
+  
+  public String getAddress()
+  {
+    return _config.getAddress();
+  }
+  
+  public int getPort()
+  {
+    return _config.getPort();
+  }
 
   public String getWatchdogAddress()
   {
@@ -248,7 +258,7 @@ class WatchdogClient
     }
   }
 
-  public Process startWatchdog(String []argv)
+  public Process startWatchdog(String []argv, boolean isAllowLaunch)
     throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
@@ -270,38 +280,47 @@ class WatchdogClient
     }
 
     ActorSender conn = null;
+    
+    long expireTime = isAllowLaunch ? CurrentTime.getCurrentTimeActual() + 10000 : 0;
 
-    try {
-      conn = getConnection();
+    do {
+      try {
+        conn = getConnection();
       
-      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+        WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
       
-      String serverId = getId();
+        String serverId = getId();
 
-      ResultStatus status = watchdogProxy.start(serverId, argv);
+        ResultStatus status = watchdogProxy.start(serverId, argv);
 
-      if (status.isSuccess()) {
-        return null;
+        if (status.isSuccess()) {
+          return null;
+        }
+
+        throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
+                                      this, status.getMessage()));
+      } catch (RemoteConnectionFailedException e) {
+        log.log(Level.FINE, e.toString(), e);
+      } catch (RemoteListenerUnavailableException e) {
+        log.log(Level.FINE, e.toString(), e);
+      } catch (RuntimeException e) {
+        log.log(Level.FINE, e.toString(), e);
+        throw e;
+      } finally {
+        if (conn != null)
+          conn.close();
       }
-
-      throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
-                                    this, status.getMessage()));
-    } catch (RemoteConnectionFailedException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } catch (RemoteListenerUnavailableException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } catch (RuntimeException e) {
-      log.log(Level.FINE, e.toString(), e);
-      throw e;
-    } finally {
-      if (conn != null)
-        conn.close();
+    } while (CurrentTime.getCurrentTime() <= expireTime);
+    
+    if (! isAllowLaunch) {
+      throw new ConfigException(L.l("Can't contact watchdog at {0}:{1}.",
+                                    getWatchdogAddress(), getWatchdogPort()));
     }
 
     Process process = launchManager(argv);
     
     long timeout = 15 * 1000L;
-    long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
+    expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
     while (CurrentTime.getCurrentTimeActual() <= expireTime) {
       if (pingWatchdog()) {

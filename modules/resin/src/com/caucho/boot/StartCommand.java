@@ -62,7 +62,7 @@ public class StartCommand extends AbstractStartCommand
     throws BootArgumentException
   {
     try {
-      client.startWatchdog(args.getArgv());
+      client.startWatchdog(args.getArgv(), true);
 
       System.out.println(L().l("Resin/{0} started{1} with watchdog at {2}:{3}",
                                VersionFactory.getVersion(),

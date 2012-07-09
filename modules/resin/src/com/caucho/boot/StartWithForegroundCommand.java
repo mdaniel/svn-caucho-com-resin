@@ -62,7 +62,7 @@ public class StartWithForegroundCommand extends AbstractStartCommand
     throws BootArgumentException
   {
     try {
-      Process process = client.startWatchdog(args.getArgv());
+      Process process = client.startWatchdog(args.getArgv(), true);
 
       final String message;
       if (process != null)

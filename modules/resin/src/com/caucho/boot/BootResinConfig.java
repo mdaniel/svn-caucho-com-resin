@@ -252,6 +252,25 @@ public class BootResinConfig // implements EnvironmentBean
   {
     return _watchdogMap.get(id);
   }
+
+  /**
+   * Finds a server.
+   */
+  public WatchdogClient findClientByAddress(String address, int port)
+  {
+    if (port <= 0) {
+      return null;
+    }
+    
+    for (WatchdogClient client : _watchdogMap.values()) {
+      if (address.equals(client.getAddress())
+          && port == client.getPort()) {
+        return client;
+      }
+    }
+    
+    return null;
+  }
   
   /**
    * Finds a matching client for the arguments.
@@ -429,6 +448,23 @@ public class BootResinConfig // implements EnvironmentBean
     fillLocalClients(clientList);
     
     return clientList;
+  }
+  
+  public ArrayList<String> findLocalClientIds(String serverId)
+  {
+    ArrayList<WatchdogClient> clientList = new ArrayList<WatchdogClient>();
+    
+    fillLocalClients(clientList);
+    
+    ArrayList<String> ids = new ArrayList<String>();
+    
+    for (WatchdogClient client : clientList) {
+      ids.add(client.getId());
+    }
+    
+    Collections.sort(ids);
+    
+    return ids;
   }
 
   /**

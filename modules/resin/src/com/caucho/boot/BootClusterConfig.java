@@ -139,10 +139,20 @@ public class BootClusterConfig {
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
                                     config.getId()));
     }
+    
+    WatchdogClient client;
+    
+    if ((client = _resin.findClientByAddress(config.getAddress(), config.getPort())) != null) {
+      throw new ConfigException(L.l("<server id='{0}'> has a duplicate address {1}:{2} to server '{3}'.\nServers must have unique addresses.",
+                                    config.getId(),
+                                    config.getAddress(),
+                                    config.getPort(),
+                                    client.getId()));
+    }
       
     _resin.addServer(config);
     
-    WatchdogClient client = new WatchdogClient(_system, _resin, config);
+    client = new WatchdogClient(_system, _resin, config);
     _resin.addClient(client);
     
     _serverList.add(client);

@@ -368,6 +368,11 @@ class WatchdogManager implements AlarmListener {
   {
     return _server.isActive() && _httpPort.isActive();
   }
+  
+  WatchdogArgs getArgs()
+  {
+    return _args;
+  }
 
   Path getRootDirectory()
   {
@@ -726,7 +731,7 @@ class WatchdogManager implements AlarmListener {
     
     if (client == null) {
       throw new ConfigException(L().l("server '{0}' cannot be started because no configuration has been found.",
-                                      serverId != null ? serverId : "default"));
+                                      cliServerId != null ? cliServerId : ""));
     }
     
     serverId = client.getId();
@@ -759,17 +764,23 @@ class WatchdogManager implements AlarmListener {
     String serverId = resin.getServerId(args);
     
     WatchdogClient client = resin.findClient(cliServerId, args);
+    System.out.println("CLI: " + client + " " + cliServerId);
     
     if (client != null) {
       return client;
     }
-    
+
     if (serverId != null) {
       return null;
     }
-    
+
     if (! resin.isDynamicServer(args)) {
-      return resin.findUniqueLocalClient(cliServerId, args);
+      client = resin.findUniqueLocalClient(cliServerId, args);
+      
+      if (client != null) {
+        // server/6e12
+        return client;
+      }
     }
     
     if (resin.isDynamicServerAllowed(args)) {
@@ -900,8 +911,8 @@ class WatchdogManager implements AlarmListener {
 
       JniCauchoSystem.create().initJniBackground();
 
-      String serverId = null;
       WatchdogManager manager = new WatchdogManager(argv);
+      String serverId = manager.getArgs().getClientServerId();
       manager.startServer(serverId, argv);
 
       isValid = manager.isActive() && manager.isValid();

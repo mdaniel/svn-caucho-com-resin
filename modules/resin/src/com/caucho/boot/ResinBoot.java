@@ -226,6 +226,11 @@ public class ResinBoot
     return _resinConfig.findLocalClients(getServerId());
   }
 
+  ArrayList<String> findLocalClientIds()
+  {
+    return _resinConfig.findLocalClientIds(getServerId());
+  }
+
   BootCommand getCommand()
   {
     return _args.getCommand();

@@ -75,11 +75,12 @@ public class RepositoryRoot
   
   public void update()
   {
-    if (!_repository.isActive()) {
+    if (! _repository.isActive()) {
     }
     else if (! exists()) {
       deleteLocalCopy();
-    } else if (isModified()) {
+    }
+    else if (isModified()) {
       try {
         extractFromRepository();
       } catch (IOException e) {
@@ -88,7 +89,8 @@ public class RepositoryRoot
     }
   }
 
-  private boolean exists() {
+  private boolean exists()
+  {
     String tag = getId();
 
     String treeHash = _repository.getTagContentHash(tag);

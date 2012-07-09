@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.caucho.Version;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -170,7 +171,11 @@ public abstract class AbstractBootCommand implements BootCommand {
         foundClient = client;
       }
       else {
-        return null;
+        throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nwith a unique local IP in {2}.\n  server ids: {3}",
+                                      Version.VERSION,
+                                      "",
+                                      args.getResinConf().getNativePath(),
+                                      boot.findLocalClientIds()));
       }
     }
     

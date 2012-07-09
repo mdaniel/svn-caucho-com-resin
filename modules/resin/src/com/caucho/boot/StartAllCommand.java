@@ -75,15 +75,14 @@ public class StartAllCommand extends AbstractStartCommand
                                VersionFactory.getVersion()));
     }
 
-    boolean isFirst = true;
+    int watchdogPort = -1;
     for (WatchdogClient client : clientList) {
       try {
-        if (! isFirst)
-          Thread.sleep(2000);
+        int clientWatchdogPort = client.getWatchdogPort();
         
-        client.startWatchdog(args.getArgv());
+        client.startWatchdog(args.getArgv(), clientWatchdogPort != watchdogPort);
         
-        isFirst = false;
+        watchdogPort = clientWatchdogPort;
 
         System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
                                  VersionFactory.getVersion(),

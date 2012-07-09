@@ -40,6 +40,7 @@ import com.caucho.env.git.GitObjectStream;
 import com.caucho.env.git.GitSystem;
 import com.caucho.env.git.GitTree;
 import com.caucho.env.git.GitType;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -53,6 +54,8 @@ public class FileRepository extends AbstractRepository
   
   private AtomicReference<String> _rootHash = new AtomicReference<String>();
   
+  private Lifecycle _lifecycle = new Lifecycle();
+  
   public FileRepository()
   {
     this(GitSystem.getCurrent());
@@ -62,10 +65,11 @@ public class FileRepository extends AbstractRepository
   {
     _git = git;
     
-    if (_git == null)
+    if (_git == null) {
       throw new IllegalStateException(L.l("{0} is required for {1}",
                                           GitSystem.class.getSimpleName(),
                                           getClass().getSimpleName()));
+    }
   }
 
   /**
@@ -337,7 +341,16 @@ public class FileRepository extends AbstractRepository
   @Override
   public boolean isActive()
   {
-    return true;
+    return _lifecycle.isActive();
+  }
+
+  @Override
+  public void start()
+  {
+    if (! _lifecycle.toActive())
+      return;
+    
+    super.start();
   }
 
   /**
