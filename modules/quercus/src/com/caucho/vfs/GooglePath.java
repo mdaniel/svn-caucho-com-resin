@@ -115,6 +115,23 @@ abstract public class GooglePath extends FilesystemPath {
     }
   }
 
+  @Override
+  public String getFullPath()
+  {
+    // need to normalize paths like "/foo/" to "/foo" or memcache won't work
+    // XXX: test case
+
+    String fullPath = super.getFullPath();
+
+    int len = fullPath.length();
+
+    if (len > 1 && fullPath.charAt(len - 1) == '/') {
+      fullPath = fullPath.substring(0, len - 1);
+    }
+
+    return fullPath;
+  }
+
   /**
    * Lookup the actual path relative to the filesystem root.
    *
@@ -405,8 +422,6 @@ abstract public class GooglePath extends FilesystemPath {
     ReadStream is = null;
     WriteStream os = null;
 
-    boolean isSuccessful = false;
-
     TempBuffer tempBuffer = TempBuffer.allocate();
 
     try {
@@ -425,21 +440,24 @@ abstract public class GooglePath extends FilesystemPath {
         os.write(buffer, 0, readLen);
       }
 
-      isSuccessful = true;
+      IoUtil.close(is);
+
+      // don't silently close remote write streams except on error
+      os.close();
+      remove();
+
       return true;
     }
-    finally {
-      TempBuffer.free(tempBuffer);
-
+    catch (IOException e) {
       IoUtil.close(is);
       IoUtil.close(os);
 
-      if (isSuccessful) {
-        remove();
-      }
-      else {
-        path.remove();
-      }
+      path.remove();
+
+      throw e;
+    }
+    finally {
+      TempBuffer.free(tempBuffer);
     }
   }
 

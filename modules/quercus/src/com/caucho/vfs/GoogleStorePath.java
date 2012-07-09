@@ -57,7 +57,7 @@ public class GoogleStorePath extends GooglePath
     this(FileServiceFactory.getFileService(),
          new GoogleInodeService("quercus"),
          null);
-    }
+  }
 
   public GoogleStorePath(String bucket)
   {

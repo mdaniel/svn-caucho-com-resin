@@ -66,8 +66,8 @@ abstract public class FilesystemPath extends Path {
     if (pathname == null)
       throw new NullPointerException();
 
-    _pathname = pathname;
     _userPath = userPath;
+    _pathname = pathname;
 
     if (root != null) {
       _root = root;

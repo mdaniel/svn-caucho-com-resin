@@ -87,7 +87,7 @@ abstract public class ClassDef {
   {
     return _parentName;
   }
-
+  
   /*
    * Returns the name of the extension that this class is part of.
    */
@@ -117,7 +117,7 @@ abstract public class ClassDef {
   {
     return this;
   }
-
+  
   public AbstractFunction getCall()
   {
     return null;
@@ -126,11 +126,11 @@ abstract public class ClassDef {
   public void init()
   {
   }
-
+  
   public void init(QuercusClass cl)
   {
   }
-
+  
   /**
    * Returns the interfaces.
    */
@@ -145,7 +145,7 @@ abstract public class ClassDef {
   public void addInterfaces(HashSet<String> interfaceSet)
   {
     interfaceSet.add(getName().toLowerCase(Locale.ENGLISH));
-
+    
     for (String name : getInterfaces()) {
       interfaceSet.add(name.toLowerCase(Locale.ENGLISH));
     }
@@ -166,7 +166,7 @@ abstract public class ClassDef {
   {
     return false;
   }
-
+  
   /*
    * Returns true for a final class.
    */
@@ -174,7 +174,7 @@ abstract public class ClassDef {
   {
     return false;
   }
-
+  
   /*
    * Returns true if the class has private/protected methods.
    */
@@ -182,7 +182,7 @@ abstract public class ClassDef {
   {
     return false;
   }
-
+  
   /**
    * Initialize the quercus class.
    */
@@ -203,10 +203,10 @@ abstract public class ClassDef {
       throw env.createErrorException(
         L.l("interface '{0}' cannot be instantiated.", getName()));
     }
-
+    
     return new ObjectExtValue(qcl);
   }
-
+  
   /*
    * Creates a new object.
    */
@@ -220,7 +220,7 @@ abstract public class ClassDef {
       throw env.createErrorException(
         L.l("interface '{0}' cannot be instantiated.", getName()));
     }
-
+    
     return new ObjectExtValue(cls);
   }
 
@@ -268,7 +268,7 @@ abstract public class ClassDef {
   {
     return null;
   }
-
+  
   /**
    * Returns the documentation for this class.
    */
@@ -276,7 +276,7 @@ abstract public class ClassDef {
   {
     return null;
   }
-
+  
   /**
    * Returns the comment for the specified field.
    */
@@ -284,7 +284,7 @@ abstract public class ClassDef {
   {
     return null;
   }
-
+  
   /**
    * Returns the comment for the specified static field.
    */
@@ -305,12 +305,12 @@ abstract public class ClassDef {
   {
     return null;
   }
-
+  
   public Set<Map.Entry<String, StaticFieldEntry>> staticFieldSet()
   {
     return null;
   }
-
+  
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
   {
     return null;
@@ -328,7 +328,7 @@ abstract public class ClassDef {
       _visibility = visibility;
       _comment = null;
     }
-
+    
     public FieldEntry(Expr value, FieldVisibility visibility, String comment)
     {
       _value = value;
@@ -345,13 +345,13 @@ abstract public class ClassDef {
     {
       return _visibility;
     }
-
+    
     public String getComment()
     {
       return _comment;
     }
   }
-
+  
   public static class StaticFieldEntry {
     private final Expr _value;
     private final String _comment;
@@ -361,7 +361,7 @@ abstract public class ClassDef {
       _value = value;
       _comment = null;
     }
-
+    
     public StaticFieldEntry(Expr value, String comment)
     {
       _value = value;
@@ -372,7 +372,7 @@ abstract public class ClassDef {
     {
       return _value;
     }
-
+    
     public String getComment()
     {
       return _comment;

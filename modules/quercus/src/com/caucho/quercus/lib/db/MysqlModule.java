@@ -298,9 +298,8 @@ public class MysqlModule extends AbstractQuercusModule {
     if (databaseName.length() == 0)
       return false;
 
-    Value value = mysql_query(env,
-      env.createString("DROP DATABASE " + databaseName),
-      conn);
+    StringValue query = env.createString("DROP DATABASE " + databaseName);
+    Value value = mysql_query(env, query, conn);
 
     return (value != null && value.toBoolean());
   }

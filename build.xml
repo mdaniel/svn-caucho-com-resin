@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, resin-eclipselink, gae">
+          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus-dev, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, resin-eclipselink, gae">
   </target>
 
   <!--
@@ -596,7 +596,7 @@
     </antcall>
   </target>
 
-  <target name="quercus" depends="quercus-dev"/>
+  <target name="quercus" depends="init, resin-kernel, hessian, quercus-dev"/>
 
   <target name="ecmascript" depends="init">
     <antcall target="module" inheritRefs="true">

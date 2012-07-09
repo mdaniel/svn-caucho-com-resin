@@ -93,9 +93,7 @@ public class GoogleInodeService
       is = path.openRead();
 
       Hessian2Input hIn = new Hessian2Input(is);
-
       dirMap = (HashMap<String,GoogleInode>) hIn.readObject();
-
       hIn.close();
 
       boolean result = _memcacheService.put(fullPath, dirMap, null,
@@ -121,30 +119,31 @@ public class GoogleInodeService
   public boolean writeDirMap(GooglePath path,
                              HashMap<String,GoogleInode> dirMap)
   {
-    // XXX: distributed locking?
-
     String fullPath = path.getFullPath();
-    _memcacheService.put(fullPath, dirMap);
+
+    // XXX: distributed locking?
 
     WriteStream out = null;
     try {
       out = path.openWrite();
 
       Hessian2Output hOut = new Hessian2Output(out);
-
       hOut.writeObject(dirMap);
-
       hOut.close();
+
+      _memcacheService.put(fullPath, dirMap);
+
+      // don't silently close remote write streams except on error
+      out.close();
 
       return true;
     }
     catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
 
-      return false;
-    }
-    finally {
       IoUtil.close(out);
+
+      return false;
     }
   }
 }

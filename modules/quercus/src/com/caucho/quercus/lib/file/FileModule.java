@@ -2950,7 +2950,8 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param fileName the directory
    */
-  public static Value scandir(Env env, StringValue fileName,
+  public static Value scandir(Env env,
+                              StringValue fileName,
                               @Optional("1") int order,
                               @Optional Value context)
   {

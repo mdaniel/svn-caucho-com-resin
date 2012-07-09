@@ -51,5 +51,7 @@ public interface MemcacheService extends BaseMemcacheService
   public boolean put(Object key, Object value,
                      Expiration expires, MemcacheService.SetPolicy policy);
 
+  public boolean delete(Object key);
+
   public void setNamespace(String namespace);
 }
