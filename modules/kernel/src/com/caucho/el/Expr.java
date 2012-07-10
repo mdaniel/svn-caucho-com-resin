@@ -1048,11 +1048,7 @@ public abstract class Expr extends ValueExpression {
   }
 
   /**
-   * Converts some unknown value to a big integer
-   *
-   * @param value the value to be converted.
-   *
-   * @return the BigInteger-converted value.
+   * jsp/3019
    */
   public static Class<?> toClass(Object value, ELContext env)
     throws ELException
@@ -1061,6 +1057,7 @@ public abstract class Expr extends ValueExpression {
       return null;
     else if (value instanceof Class)
       return (Class<?>) value;
+    /*
     else if (value instanceof String) {
       try {
         Thread thread = Thread.currentThread();
@@ -1074,10 +1071,7 @@ public abstract class Expr extends ValueExpression {
         return null;
       }
     }
-    else {
-      return value.getClass();
-    }
-    /*
+    */
     else {
       ELException e = new ELException(L.l("can't convert {0} to Class.",
                                           value.getClass().getName()));
@@ -1086,7 +1080,6 @@ public abstract class Expr extends ValueExpression {
 
       return null;
     }
-    */
   }
 
   public static Object toEnum(Object obj, Class<? extends Enum> enumType)
@@ -1337,7 +1330,9 @@ public abstract class Expr extends ValueExpression {
   public static Object error(Throwable e, ELContext env)
     throws ELException
   {
-    if (env == null) {
+    if (e instanceof ELException)
+      throw (ELException) e;
+    else if (env == null) {
       // jsp/1b56
       throw new ELException(e);
     }
@@ -1432,10 +1427,11 @@ public abstract class Expr extends ValueExpression {
     
     _coerceMap.put(BigDecimal.class, CoerceType.BIG_DECIMAL);
     _coerceMap.put(BigInteger.class, CoerceType.BIG_INTEGER);
-    _coerceMap.put(Class.class, CoerceType.CLASS);
-    
+
     _coerceMap.put(void.class, CoerceType.VOID);
     _coerceMap.put(Object.class, CoerceType.OBJECT);
+
+    _coerceMap.put(Class.class, CoerceType.CLASS);
   }
 
   static {
