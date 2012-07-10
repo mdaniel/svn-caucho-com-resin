@@ -710,6 +710,14 @@ abstract public class Expr {
   }
 
   /**
+   * Evaluates the expression as an isset() statement.
+   */
+  public Value evalIssetValue(Env env)
+  {
+    return eval(env);
+  }
+
+  /**
    * Evaluates the expression as an array index unset
    */
   public void evalUnsetArray(Env env, Value index)

@@ -160,6 +160,14 @@ public class VarExpr
   }
 
   /**
+   * Evaluates the expression as an isset() statement.
+   */
+  public Value evalIssetValue(Env env)
+  {
+    return env.getValue(_name, false, false);
+  }
+
+  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.

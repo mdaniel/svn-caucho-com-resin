@@ -227,8 +227,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public boolean evalIsset(Env env)
   {
-    Value array = _expr.eval(env);
-    Value index = _index.eval(env);
+    Value array = _expr.evalIssetValue(env);
+    Value index = _index.evalIssetValue(env);
 
     return array.isset(index);
   }
