@@ -997,7 +997,7 @@ public class Resin
       _bootServerConfig = bootResin.findServer(serverId);
     }
     
-    if (serverId == null) {
+    if (serverId == null && _args.getHomeCluster() != null) {
       _bootServerConfig = bootResin.findServer("default");
     }
 
@@ -1018,7 +1018,8 @@ public class Resin
       throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
                                       _serverId));
     }
-    else if ((_bootServerConfig = bootResin.findLocalServer()) != null) {
+    else if (getHomeCluster() == null 
+             && (_bootServerConfig = bootResin.findLocalServer()) != null) {
     }
     
     if (_bootServerConfig == null && getHomeCluster() != null) {

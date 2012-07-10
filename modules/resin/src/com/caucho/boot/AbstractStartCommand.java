@@ -107,10 +107,10 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   {
     if (args.getServerId() != null)
       return " -server '" + args.getServerId() + "'";
-    else if (! args.isDynamicServer())
-      return " -server '" + clientId + "'";
+    else if (args.isDynamicServer())
+      return " dynamic server";
     else
-      return "";
+      return " -server '" + clientId + "'";
   }
 
   @Override
