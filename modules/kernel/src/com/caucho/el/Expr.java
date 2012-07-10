@@ -1057,7 +1057,6 @@ public abstract class Expr extends ValueExpression {
       return null;
     else if (value instanceof Class)
       return (Class<?>) value;
-    /*
     else if (value instanceof String) {
       try {
         Thread thread = Thread.currentThread();
@@ -1071,7 +1070,6 @@ public abstract class Expr extends ValueExpression {
         return null;
       }
     }
-    */
     else {
       ELException e = new ELException(L.l("can't convert {0} to Class.",
                                           value.getClass().getName()));
