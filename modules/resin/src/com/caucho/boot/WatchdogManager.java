@@ -764,7 +764,6 @@ class WatchdogManager implements AlarmListener {
     String serverId = resin.getServerId(args);
     
     WatchdogClient client = resin.findClient(cliServerId, args);
-    System.out.println("CLI: " + client + " " + cliServerId);
     
     if (client != null) {
       return client;
