@@ -67,6 +67,8 @@ public class BootClusterConfig implements SchemaBean
   private ArrayList<BootPodConfig> _pods
     = new ArrayList<BootPodConfig>();
 
+  private CloudCluster _cloudCluster;
+
   /*
   private ArrayList<BootServerConfig> _servers
     = new ArrayList<BootServerConfig>();
@@ -247,13 +249,27 @@ public class BootClusterConfig implements SchemaBean
   
   void initTopology(CloudCluster cluster)
   {
+    _cloudCluster = cluster;
+    
     cluster.putData(new ClusterServerProgram(_serverDefaultProgram));
 
     for (BootPodConfig bootPod : _pods) {
-      CloudPod pod = cluster.createPod();
-      
-      bootPod.initTopology(pod);
+      initTopology(bootPod);
     }
+  }
+  
+  void initTopology(BootPodConfig bootPod)
+  {
+    CloudCluster cluster = _cloudCluster;
+    
+    if (cluster == null) {
+      _resinConfig.initTopology(this);
+      cluster = _cloudCluster;
+    }
+    
+    CloudPod pod = cluster.createPod();
+    
+    bootPod.initTopology(pod);
   }
 
   public BootServerConfig addDynamicServer(CloudServer cloudServer)

@@ -60,6 +60,8 @@ public class BootPodConfig
 
   private ArrayList<BootServerConfig> _servers
     = new ArrayList<BootServerConfig>();
+  
+  private CloudPod _cloudPod;
 
   /**
    * Creates a new resin server.
@@ -148,33 +150,48 @@ public class BootPodConfig
   
   void initTopology(CloudPod cloudPod)
   {
+    _cloudPod = cloudPod;
+    
     cloudPod.putData(new ClusterServerProgram(_serverDefaultProgram));
 
     for (BootServerConfig bootServer : _servers) {
-      CloudServer cloudServer;
-      
-      String id = bootServer.getId();
-      String address = bootServer.getAddress();
-      int port = bootServer.getPort();
-      boolean isSecure = bootServer.isSecure();
-      boolean isAllowExternal = bootServer.isAllowExternalAddress();
-      
-      cloudServer = cloudPod.findServer(id);
-      
-      if (cloudServer != null) {
-      }
-      else if (bootServer.isExternalAddress()) {
-        cloudServer = cloudPod.createExternalStaticServer(id,
-                                                          address,
-                                                          port,
-                                                          isSecure);
-      } else {
-        cloudServer = cloudPod.createStaticServer(id, address, port, 
-                                                  isSecure, isAllowExternal);
-      }
-      
-      bootServer.initTopology(cloudServer);
+      initTopology(bootServer);
     }
+  }
+  
+  void initTopology(BootServerConfig bootServer)
+  {
+    CloudPod cloudPod = _cloudPod;
+    
+    if (cloudPod == null) {
+      getCluster().initTopology(this);
+      cloudPod = _cloudPod;
+    }
+    
+    CloudServer cloudServer;
+    
+    String id = bootServer.getId();
+    String address = bootServer.getAddress();
+    int port = bootServer.getPort();
+    boolean isSecure = bootServer.isSecure();
+    boolean isAllowExternal = bootServer.isAllowExternalAddress();
+    
+    cloudServer = cloudPod.findServer(id);
+    
+    if (cloudServer != null) {
+    }
+    else if (bootServer.isExternalAddress()) {
+      cloudServer = cloudPod.createExternalStaticServer(id,
+                                                        address,
+                                                        port,
+                                                        isSecure);
+    } else {
+      cloudServer = cloudPod.createStaticServer(id, address, port, 
+                                                isSecure, isAllowExternal);
+    }
+    
+    bootServer.initTopology(cloudServer);
+
   }
   
   /*

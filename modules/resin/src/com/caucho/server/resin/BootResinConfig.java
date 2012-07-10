@@ -260,15 +260,23 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   private void initTopology(CloudSystem cloudSystem)
   {
     for (BootClusterConfig bootCluster : _clusters) {
-      CloudCluster cloudCluster;
-      
-      cloudCluster = cloudSystem.findCluster(bootCluster.getId());
-      
-      if (cloudCluster == null)
-        cloudCluster = cloudSystem.createCluster(bootCluster.getId());
-      
-      bootCluster.initTopology(cloudCluster);
+      initTopology(bootCluster);
     }
+  }
+
+  /**
+   * @param bootClusterConfig
+   */
+  public void initTopology(BootClusterConfig bootCluster)
+  {
+    CloudSystem cloudSystem = TopologyService.getCurrentSystem();
+    
+    CloudCluster cloudCluster = cloudSystem.findCluster(bootCluster.getId());
+    
+    if (cloudCluster == null)
+      cloudCluster = cloudSystem.createCluster(bootCluster.getId());
+    
+    bootCluster.initTopology(cloudCluster);
   }
 
   public BootServerConfig findLocalServer()

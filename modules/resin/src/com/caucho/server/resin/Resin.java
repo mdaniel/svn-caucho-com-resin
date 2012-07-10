@@ -1032,8 +1032,10 @@ public class Resin
     
     _selfServer = cloudSystem.findServer(_bootServerConfig.getId());
     
-    if (_selfServer ==  null)
-      throw new ConfigException(L().l("unexpected empty server"));
+    if (_selfServer ==  null) {
+      throw new ConfigException(L().l("unexpected empty server '{0}'",
+                                      _bootServerConfig));
+    }
     
     Config.setProperty("rvar0", _selfServer.getId());
     Config.setProperty("rvar1", _selfServer.getCluster().getId());
@@ -1079,15 +1081,13 @@ public class Resin
     bootServer.setAddress("127.0.0.1");
     bootCluster.addServer(bootServer);
     
-    bootResin.initTopology();
+    bootServer.initTopology();
     
     return bootServer;
   }
   
   private BootServerConfig joinTest()
   {
-    BootResinConfig bootResin = _bootResinConfig;
-    
     BootClusterConfig bootCluster = findDefaultCluster();
     
     if (bootCluster.getPodList().size() == 0) {
@@ -1106,7 +1106,7 @@ public class Resin
     bootServer.setAddress("127.0.0.1");
     bootCluster.addServer(bootServer);
     
-    bootResin.initTopology();
+    bootServer.initTopology();
     
     return bootServer;
   }
@@ -1162,8 +1162,8 @@ public class Resin
     bootServer.setAddress("127.0.0.1");
     bootCluster.addServer(bootServer);
     
-    bootResin.initTopology();
-    
+    bootServer.initTopology();
+
     return bootServer;
   }
 
