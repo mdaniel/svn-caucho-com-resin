@@ -32,9 +32,13 @@ package com.caucho.server.resin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.BindException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -86,6 +90,7 @@ import com.caucho.server.resin.BootConfig.BootType;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.util.CompileException;
 import com.caucho.util.CurrentTime;
+import com.caucho.util.HostUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.MemoryPath;
@@ -188,8 +193,9 @@ public class Resin
 
     String serverId = args.getServerId();
 
-    if (serverId == null && args.getHomeCluster() != null)
-      serverId = "dyn-"+ args.getServerAddress() + ':' + args.getServerPort();
+    if (serverId == null && args.getHomeCluster() != null) {
+      serverId = "dyn-"+ getDynamicServerAddress() + ':' + getDynamicServerPort();
+    }
 
     _resinSystem = new ResinSystem(serverId);
 
@@ -440,9 +446,29 @@ public class Resin
     return _dynamicAddress;
   }
   
+  public String getDynamicServerAddress()
+  {
+    String address = getServerAddress();
+    
+    if (address != null)
+      return address;
+    else
+      return getLocalHostAddress();
+  }
+  
   public int getServerPort()
   {
     return _dynamicPort;
+  }
+  
+  public int getDynamicServerPort()
+  {
+    int port = getServerPort();
+    
+    if (port > 0)
+      return port;
+    else
+      return 6830;
   }
 
   public Path getLogDirectory()
@@ -798,6 +824,38 @@ public class Resin
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     }
+  }
+  
+  String getLocalHostAddress()
+  {
+    try {
+      InetAddress addr = InetAddress.getLocalHost();
+    
+      if (addr.isLinkLocalAddress() || addr.isLoopbackAddress()) {
+        addr = findLocalHost();
+      }
+      return addr.getHostAddress();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private InetAddress findLocalHost() throws SocketException
+  {
+    for (NetworkInterface iface : HostUtil.getNetworkInterfaces()) {
+      if (iface.isLoopback() || ! iface.isUp())
+        continue;
+      
+      Enumeration<InetAddress> eInet = iface.getInetAddresses();
+      while (eInet.hasMoreElements()) {
+        InetAddress iAddr = eInet.nextElement();
+
+        if (! iAddr.isLinkLocalAddress() && ! iAddr.isLoopbackAddress())
+          return iAddr;
+      }
+    }
+    
+    throw new ConfigException(L().l("Cannot find active interface for the server. Check the network configuration."));
   }
 
   /**
