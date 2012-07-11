@@ -538,6 +538,8 @@ class WatchdogChildProcess
               jvmArgs.add(String.valueOf(ss.getSystemFD()));
               jvmArgs.add(String.valueOf(port.getAddress()));
               jvmArgs.add(String.valueOf(port.getPort()));
+              
+              System.out.println("PORT: " + ss.getSystemFD() + " " + port.getAddress() + " " +port.getPort());
             }
             else {
               ss.close();

@@ -129,6 +129,11 @@ public class OpenPort
     throws java.io.IOException
   {
     QServerSocket ss;
+    
+    if (_port <= 0) {
+      // server/6e0k
+      return null;
+    }
 
     // use same method for ports for testability reasons
     /*
