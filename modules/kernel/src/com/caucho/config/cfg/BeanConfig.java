@@ -552,7 +552,7 @@ public class BeanConfig {
 
     _bean = builder.bean();
     _extAnnotated = builder.getExtendedAnnotated();
-    
+
     introspectPostInit();
 
     deploy();
@@ -586,8 +586,9 @@ public class BeanConfig {
   protected void deploy()
   {
     if (_bean != null) {
-      // ejb/1030
-      getBeanManager().addBean(_bean,  _extAnnotated);
+      // ejb/1030, env/1070
+      // getBeanManager().addBean(_bean,  _extAnnotated);
+      getBeanManager().addBeanDiscover(_bean,  _extAnnotated);
     }
   }
 
@@ -635,6 +636,7 @@ public class BeanConfig {
     }
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _cl + "]";

@@ -115,7 +115,7 @@ class NamespaceConfig {
   }
   */
 
-  public ConfigType getBean(String name)
+  public ConfigType<?> getBean(String name)
   {
     NamespaceBeanConfig beanConfig = _beanMap.get(name);
 

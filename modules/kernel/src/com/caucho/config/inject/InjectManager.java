@@ -1277,7 +1277,7 @@ public final class InjectManager
    * Processes the discovered bean
    */
   @Module
-  <T> void addBeanDiscover(Bean<T> bean, Annotated ann)
+  public <T> void addBeanDiscover(Bean<T> bean, Annotated ann)
   {
     if (ann != null) {
     }

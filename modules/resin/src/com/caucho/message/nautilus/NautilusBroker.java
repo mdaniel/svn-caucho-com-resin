@@ -153,7 +153,6 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   {
     _nautilusActor = new NautilusMultiQueueActor();
   
-    System.out.println("INIT:");
     JournalRecoverListener recover = new RecoverListener();
     _journalFile = new JournalFile(_path, recover);
   
