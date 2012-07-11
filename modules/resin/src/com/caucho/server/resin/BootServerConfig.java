@@ -191,6 +191,13 @@ public class BootServerConfig implements SchemaBean
     
     cloudServer.putData(new ClusterServerProgram(_serverProgram));
   }
+  
+  public String getFullAddress()
+  {
+    return (isExternalAddress() ? "ext:" : "") + 
+           getAddress() + 
+           (getPort() > 0 ? (":" + getPort()) : "");
+  }
 
   @Override
   public String toString()

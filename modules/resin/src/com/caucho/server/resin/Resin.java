@@ -1064,8 +1064,29 @@ public class Resin
     CloudServer cloudServer = getDelegate().joinCluster(cloudSystem);
 
     if (cloudServer == null) {
-      throw new ConfigException(L().l("{0} unable to join cluster {1}",
-                                      getDelegate(), clusterId));
+      String cause = null;
+      
+      if (bootCluster.getPodList().isEmpty() || 
+          bootCluster.getPodList().get(0).getServerList().isEmpty()) {
+        cause = L().l("No triad servers are configured.");
+      } else {
+        ArrayList<BootServerConfig> servers = 
+          bootCluster.getPodList().get(0).getServerList();
+        
+        boolean isFirst = true;
+        StringBuilder sb = new StringBuilder();
+        for(BootServerConfig server : servers) {
+          if (! isFirst)
+            sb.append(", ");
+          sb.append(server.getFullAddress());
+        }
+        
+        cause = L().l("No triad servers were reachable.\n" +
+                      "  Triad servers are {0}", sb);
+      }
+      
+      throw new ConfigException(L().l("{0} unable to join cluster {1}: {2}",
+                                      getDelegate(), clusterId, cause));
     }
     
     return bootCluster.addDynamicServer(cloudServer);
