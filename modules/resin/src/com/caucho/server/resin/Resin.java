@@ -190,22 +190,6 @@ public class Resin
     _startTime = CurrentTime.getCurrentTime();
     
     _args = args;
-
-    String serverId = args.getServerId();
-
-    if (serverId == null && args.getHomeCluster() != null) {
-      serverId = "dyn-"+ getDynamicServerAddress() + ':' + getDynamicServerPort();
-    }
-
-    _resinSystem = new ResinSystem(serverId);
-
-    // _licenseErrorMessage = licenseErrorMessage;
-    
-    _resinLocal.set(this, _resinSystem.getClassLoader());
-
-    Environment.init();
- 
-    _serverId = serverId;//args.getServerId();
     
     _resinHome = args.getResinHome();
     
@@ -226,6 +210,22 @@ public class Resin
     _stage = args.getStage();
  
     _pingSocket = _args.getPingSocket();
+
+    String serverId = args.getServerId();
+
+    if (serverId == null && args.getHomeCluster() != null) {
+      serverId = "dyn-"+ getDynamicServerAddress() + ':' + getDynamicServerPort();
+    }
+
+    _resinSystem = new ResinSystem(serverId);
+
+    // _licenseErrorMessage = licenseErrorMessage;
+    
+    _resinLocal.set(this, _resinSystem.getClassLoader());
+
+    Environment.init();
+ 
+    _serverId = serverId;//args.getServerId();
     
     preConfigureInit();
     
@@ -267,7 +267,8 @@ public class Resin
     return _serverId;
   }
 
-  public String getServerIdFilePart() {
+  public String getServerIdFilePart() 
+  {
     if (_serverId == null || _serverId.isEmpty())
       return "default";
     else return _serverId.replace(':', '_');
@@ -449,7 +450,7 @@ public class Resin
   public String getDynamicServerAddress()
   {
     String address = getServerAddress();
-    
+
     if (address != null)
       return address;
     else
@@ -997,7 +998,8 @@ public class Resin
       _bootServerConfig = bootResin.findServer(serverId);
     }
     
-    if (serverId == null && _args.getHomeCluster() != null) {
+    if (serverId == null && _args.getHomeCluster() == null) {
+      // server/2s00
       _bootServerConfig = bootResin.findServer("default");
     }
 
@@ -1075,7 +1077,7 @@ public class Resin
         
         boolean isFirst = true;
         StringBuilder sb = new StringBuilder();
-        for(BootServerConfig server : servers) {
+        for (BootServerConfig server : servers) {
           if (! isFirst)
             sb.append(", ");
           sb.append(server.getFullAddress());

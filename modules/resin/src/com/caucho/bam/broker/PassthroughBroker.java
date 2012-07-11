@@ -59,6 +59,7 @@ public class PassthroughBroker extends AbstractBroker
     _mailbox = mailbox;
   }
   
+  @Override
   public void close()
   {
     Mailbox mailbox = _mailbox;

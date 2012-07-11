@@ -107,7 +107,12 @@ public class LinkClient {
   
   public void close()
   {
+    Broker outboundBroker = _outboundBroker;
+    _outboundBroker = null;
     
+    if (outboundBroker != null) {
+      outboundBroker.close();
+    }
   }
   
   protected Mailbox createInboundMailbox(MessageStream inboundStream,
