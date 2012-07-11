@@ -763,7 +763,7 @@
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${resindir}/lib">
-        <include name="slf4j-api-1.6.1.jar"/>
+        <include name="slf4j-api-1.6.6.jar"/>
         <include name="hibernate-validator-4.0.2.GA.jar"/>
       </fileset>
     </copy>
