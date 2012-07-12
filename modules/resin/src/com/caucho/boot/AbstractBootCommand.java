@@ -57,6 +57,7 @@ public abstract class AbstractBootCommand implements BootCommand {
     addValueOption("log-directory", "dir", "alternate log directory");
     addValueOption("license-directory", "dir", "alternate license directory");
     
+    addFlagOption("elastic", "use an elastic server in the cluster");
     addFlagOption("verbose", "produce verbose output");
   }
 
@@ -184,7 +185,7 @@ public abstract class AbstractBootCommand implements BootCommand {
   
   protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
   {
-    return boot.findShutdownClient(args);
+    return boot.findWatchdogClient(args);
   }
   
   protected int doCommand(WatchdogArgs args, WatchdogClient client)

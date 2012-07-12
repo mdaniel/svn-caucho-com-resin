@@ -286,6 +286,11 @@ public class BootResinConfig // implements EnvironmentBean
 
       if (client != null)
         return client;
+
+      // cloud/1292, server/6e11
+      if (isElasticServer(args)) {
+        return null;
+      }
       
       throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}\nserver ids: {3}.",
                                     VersionFactory.getVersion(), 
@@ -295,7 +300,7 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     // cloud/1292, server/6e11
-    if (isDynamicServer(args)) {
+    if (isElasticServer(args)) {
       return null;
     }
     
@@ -399,19 +404,19 @@ public class BootResinConfig // implements EnvironmentBean
   
   boolean isDynamicServerAllowed(WatchdogArgs args)
   {
-    return isDynamicServer(args) || getHomeCluster() != null;
+    return isElasticServer(args) || getHomeCluster() != null;
   }
   
-  boolean isDynamicServer(WatchdogArgs args)
+  boolean isElasticServer(WatchdogArgs args)
   {
-    if (args.getServerId() != null) {
+    if (args.isElasticServer()) {
+      return true;
+    }
+    else if (args.getServerId() != null) {
       return false;
     }
     else if (getHomeServer() != null) {
       return false;
-    }
-    else if (args.isDynamicServer()) {
-      return true;
     }
     else if (args.getClusterId() != null) {
       return true;
@@ -473,7 +478,7 @@ public class BootResinConfig // implements EnvironmentBean
   public WatchdogClient findWatchdogClient(String clusterId)
   {
     WatchdogClient bestClient = null;
-    
+
     for (WatchdogClient client : _watchdogMap.values()) {
       if (client == null)
         continue;
@@ -572,9 +577,9 @@ public class BootResinConfig // implements EnvironmentBean
   /**
    * Finds a server.
    */
-  WatchdogClient addDynamicClient(WatchdogArgs args)
+  WatchdogClient addElasticClient(WatchdogArgs args)
   {
-    if (! args.isDynamicServer() && ! isHomeCluster())
+    if (! args.isElasticServer() && ! isHomeCluster())
       throw new IllegalStateException();
 
     String clusterId = args.getClusterId();
@@ -593,20 +598,20 @@ public class BootResinConfig // implements EnvironmentBean
                                     clusterId));
     }
 
-    if (! cluster.isDynamicServerEnable()) {
+    if (! cluster.isClusterServerEnable()) {
       throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. --home-cluster requires a <resin:ElasticCloudService> tag.",
                                     clusterId));
     }
 
     WatchdogConfigHandle configHandle = cluster.createServer();
-    configHandle.setId(args.getDynamicServerId());
+    configHandle.setId(args.getElasticServerId());
     // configHandle.setDynamic(true);
     configHandle.setAddress(address);
     configHandle.setPort(port);
     
     WatchdogConfig config = cluster.addServer(configHandle);
     
-    config.setDynamic(true);
+    config.setElastic(true);
 
     addServer(config);
 

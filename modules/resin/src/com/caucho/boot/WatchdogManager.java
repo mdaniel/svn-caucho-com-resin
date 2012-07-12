@@ -596,7 +596,7 @@ class WatchdogManager implements AlarmListener {
     if (serverId == null && ! isDynamicServer(args))
       serverId = args.getServerId();
     else if (serverId == null && isDynamicServer(args))
-      serverId = args.getDynamicServerId();
+      serverId = args.getElasticServerId();
 
     if (serverId == null)
       serverId = "default";
@@ -606,7 +606,7 @@ class WatchdogManager implements AlarmListener {
   
   private boolean isDynamicServer(WatchdogArgs args)
   {
-    if (args.isDynamicServer())
+    if (args.isElasticServer())
       return true;
     else
       return false;
@@ -769,11 +769,12 @@ class WatchdogManager implements AlarmListener {
       return client;
     }
 
-    if (serverId != null) {
-      return null;
-    }
 
-    if (! resin.isDynamicServer(args)) {
+    if (! resin.isElasticServer(args)) {
+      if (serverId != null) {
+        return null;
+      }
+      
       client = resin.findUniqueLocalClient(cliServerId, args);
       
       if (client != null) {
@@ -796,7 +797,7 @@ class WatchdogManager implements AlarmListener {
       }
 
       WatchdogConfigHandle configHandle = cluster.createServer();
-      serverId = args.getDynamicServerId();
+      serverId = args.getElasticServerId();
       configHandle.setId(serverId);
       configHandle.setAddress(address);
       configHandle.setPort(port);

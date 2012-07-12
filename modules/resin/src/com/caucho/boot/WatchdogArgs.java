@@ -88,6 +88,7 @@ class WatchdogArgs
 
   private String _serverId = null;
   private String _clusterId;
+  
   private int _watchdogPort;
   private boolean _isVerbose;
   private boolean _isHelp;
@@ -96,9 +97,10 @@ class WatchdogArgs
   private ArrayList<String> _tailArgs = new ArrayList<String>();
   private String []_defaultArgs;
 
-  private boolean _isDynamicServer;
-  private String _dynamicAddress;
-  private int _dynamicPort;
+  private boolean _isElastic;
+  private String _elasticAddress;
+  private int _elasticPort;
+  
   private ResinBootELContext _resinBootELContext = null;
 
   private boolean _is64bit;
@@ -201,12 +203,15 @@ class WatchdogArgs
     return _serverId;
   }
 
-  void setDynamicServerId(String serverId)
+  void setElasticServerId(String serverId)
   {
-    if (serverId != null) {
-      _isDynamicServer = true;
-      _serverId = serverId;
-    }
+    _serverId = serverId;
+    setElastic(true);
+  }
+  
+  void setElastic(boolean isElastic)
+  {
+    _isElastic = isElastic;
   }
 
   String getClusterId()
@@ -219,15 +224,18 @@ class WatchdogArgs
     return _argv;
   }
 
-  boolean isDynamicServer()
+  boolean isElasticServer()
   {
-    return _isDynamicServer || getServerId() == null && getClusterId() != null;
+    return _isElastic;
   }
 
   String getDynamicAddress()
   {
-    if (_dynamicAddress != null)
-      return _dynamicAddress;
+    if (! _isElastic) {
+      return null;
+    }
+    else if (_elasticAddress != null)
+      return _elasticAddress;
     else {
       try {
         return HostUtil.getLocalHostAddress();
@@ -240,8 +248,10 @@ class WatchdogArgs
 
   String getDynamicDisplayAddress()
   {
-    if (_dynamicAddress != null)
-      return _dynamicAddress;
+    if (! _isElastic)
+      return null;
+    else if (_elasticAddress != null)
+      return _elasticAddress;
     else if (CurrentTime.isTest())
       return "192.168.1.x";
     else {
@@ -256,18 +266,28 @@ class WatchdogArgs
 
   int getDynamicPort()
   {
-    if (_dynamicPort > 0)
-      return _dynamicPort;
-    else
+    if (! _isElastic) {
+      return 0;
+    }
+    else if (_elasticPort > 0) {
+      return _elasticPort;
+    }
+    else {
       return 6830;
+    }
   }
 
-  String getDynamicServerId()
+  String getElasticServerId()
   {
-    if (_serverId != null)
+    if (! _isElastic) {
+      return null;
+    }
+    else if (_serverId != null) {
       return _serverId;
-    else
+    }
+    else {
       return "dyn-" + getDynamicDisplayAddress() + ":" + getDynamicPort();
+    }
   }
 
   boolean isVerbose()
@@ -489,9 +509,13 @@ class WatchdogArgs
         _mode = argv[i + 1];
         i++;
       }
-      else if ("--join-cluster".equals(resinArg)
-               || "--cluster".equals(arg)) {
-        _isDynamicServer = true;
+      else if ("--join-cluster".equals(resinArg)) {
+        setElastic(true);
+        _clusterId = argv[i + 1];
+
+        i++;
+      }
+      else if ("--cluster".equals(arg)) {
         _clusterId = argv[i + 1];
 
         i++;
@@ -503,6 +527,18 @@ class WatchdogArgs
       else if ("--finer".equals(resinArg)) {
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.FINER);
+      }
+      else if ("--cluster".equals(resinArg)) {
+        _clusterId = argv[i + 1];
+        i++;
+      }
+      else if ("--data-directory".equals(resinArg)) {
+        _dataDirectory = Vfs.lookup(argv[i + 1]);
+        argv[i + 1] = _dataDirectory.getFullPath();
+        i++;
+      }
+      else if ("--elastic".equals(resinArg)) {
+        setElastic(true);
       }
       else if ("--log-directory".equals(resinArg)) {
         _logDirectory = _rootDirectory.lookup(argv[i + 1]);
@@ -522,21 +558,12 @@ class WatchdogArgs
         argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
-      else if ("--data-directory".equals(resinArg)) {
-        _dataDirectory = Vfs.lookup(argv[i + 1]);
-        argv[i + 1] = _dataDirectory.getFullPath();
-        i++;
-      }
       else if ("--server".equals(resinArg)) {
         _serverId = argv[i + 1];
         
         if ("".equals(_serverId))
           _serverId = "default";
         
-        i++;
-      }
-      else if ("--cluster".equals(resinArg)) {
-        _clusterId = argv[i + 1];
         i++;
       }
       else if ("--server-root".equals(resinArg)) {

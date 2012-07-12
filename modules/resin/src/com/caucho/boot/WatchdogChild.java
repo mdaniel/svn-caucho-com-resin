@@ -274,9 +274,9 @@ class WatchdogChild
       return null;
   }
   
-  boolean isDynamicServer()
+  boolean isElasticServer()
   {
-    return _config.isDynamic();
+    return _config.isElastic();
   }
 
   boolean hasXmx()

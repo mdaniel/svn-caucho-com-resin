@@ -97,7 +97,7 @@ class WatchdogConfig
   private boolean _hasWatchdogXss;
   private boolean _hasWatchdogXmx;
   
-  private boolean _isDynamic;
+  private boolean _isElastic;
 
   WatchdogConfig(String id,
                  BootClusterConfig cluster,
@@ -145,14 +145,14 @@ class WatchdogConfig
     return _args.getArgv();
   }
 
-  public void setDynamic(boolean isDynamic)
+  public void setElastic(boolean isElastic)
   {
-    _isDynamic = isDynamic;
+    _isElastic = isElastic;
   }
   
-  public boolean isDynamic()
+  public boolean isElastic()
   {
-    return _isDynamic;
+    return _isElastic;
   }
 
   public void setVerbose(boolean isVerbose)

@@ -787,8 +787,7 @@ class WatchdogChildProcess
       resinArgs.add(_watchdog.getResinConf().getNativePath());
     }
     
-    if (_watchdog.getId() != null
-        && ! _watchdog.isDynamicServer()) {
+    if (_watchdog.getId() != null) {
       resinArgs.add("-server");
       if ("".equals(_watchdog.getId()) || _watchdog.getId() == null)
         resinArgs.add("default");
@@ -797,9 +796,8 @@ class WatchdogChildProcess
     }
 
     // server/2k54
-    if (_watchdog.getArgs().getClusterId() != null) {
-      resinArgs.add("-cluster");
-      resinArgs.add(_watchdog.getArgs().getClusterId());
+    if (_watchdog.isElasticServer()) {
+      resinArgs.add("-elastic");
     }
     
     resinArgs.add("-socketwait");

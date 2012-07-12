@@ -69,6 +69,7 @@ public class ResinArgs
   
   private Socket _pingSocket;
   
+  private boolean _isElastic;
   private String _homeCluster;
   private String _serverAddress;
   private int _serverPort;
@@ -293,6 +294,11 @@ public class ResinArgs
     _stage = stage;
   }
   
+  public boolean isElasticServer()
+  {
+    return _isElastic;
+  }
+  
   public void setHomeCluster(String homeCluster)
   {
     _homeCluster = homeCluster;
@@ -430,6 +436,10 @@ public class ResinArgs
         _dataDirectory = Vfs.lookup(argv[i + 1]);
 
         i += 2;
+      }
+      else if (argv[i].equals("-elastic")) {
+        _isElastic = true;
+        i += 1;
       }
       else if (argv[i].equals("-service")) {
         JniCauchoSystem.create().initJniBackground();

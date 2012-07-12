@@ -85,7 +85,7 @@ public class BootClusterConfig {
     _isDynamicServerEnable = isEnabled;
   }
   
-  public boolean isDynamicServerEnable()
+  public boolean isClusterServerEnable()
   {
     return _isDynamicServerEnable;
   }

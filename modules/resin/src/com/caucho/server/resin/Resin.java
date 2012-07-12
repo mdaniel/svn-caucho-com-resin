@@ -213,7 +213,7 @@ public class Resin
 
     String serverId = args.getServerId();
 
-    if (serverId == null && args.getHomeCluster() != null) {
+    if (serverId == null && args.isElasticServer()) {
       serverId = "dyn-"+ getDynamicServerAddress() + ':' + getDynamicServerPort();
     }
 
@@ -998,7 +998,7 @@ public class Resin
       _bootServerConfig = bootResin.findServer(serverId);
     }
     
-    if (serverId == null && _args.getHomeCluster() == null) {
+    if (serverId == null && ! _args.isElasticServer()) {
       // server/2s00
       _bootServerConfig = bootResin.findServer("default");
     }
@@ -1070,7 +1070,7 @@ public class Resin
       
       if (bootCluster.getPodList().isEmpty() || 
           bootCluster.getPodList().get(0).getServerList().isEmpty()) {
-        cause = L().l("No triad servers are configured.");
+        cause = L().l("No triad servers are configured in {0}.", bootCluster);
       } else {
         ArrayList<BootServerConfig> servers = 
           bootCluster.getPodList().get(0).getServerList();

@@ -102,22 +102,4 @@ public class StopCommand extends AbstractStopCommand
 
     return _L;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.out.println("usage: bin/resin.sh [-options] stop");
-    System.out.println();
-    System.out.println("where options include:");
-    System.out.println("   -conf <file>          : select a configuration file");
-    System.out.println("   -data-directory <dir> : select a resin-data directory");
-    System.out.println("   -log-directory <dir>  : select a logging directory");
-    System.out.println("   -resin-home <dir>     : select a resin home directory");
-    System.out.println("   -root-directory <dir> : select a root directory");
-    System.out.println("   -server <id>          : select a <server> to run");
-    System.out.println("   -watchdog-port <port> : override the watchdog-port");
-    System.out.println("   -verbose              : print verbose starting information");
-  }
-  */
 }

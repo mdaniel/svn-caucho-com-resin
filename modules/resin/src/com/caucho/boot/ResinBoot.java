@@ -196,18 +196,23 @@ public class ResinBoot
   
   private void initClient()
   {
-    if (! (_args.isDynamicServer() || _resinConfig.isHomeCluster()))
+    if (! (_args.isElasticServer() || _resinConfig.isHomeCluster()))
       return;
     
-    if (getServerId() != null) {
+    if (_args.isElasticServer()) {
+    }
+    else if (getServerId() != null) {
+      return;
+    }
+    else if (! findLocalClients().isEmpty()) {
       return;
     }
 
-    if (findLocalClients().isEmpty()) {
-      WatchdogClient client = _resinConfig.addDynamicClient(_args);
+    WatchdogClient client = _resinConfig.addElasticClient(_args);
+    System.out.println("ELASTIC: " + client);
 
-      if (client != null)
-        _args.setDynamicServerId(client.getId());
+    if (client != null) {
+      _args.setElasticServerId(client.getId());
     }
   }
 
@@ -216,7 +221,7 @@ public class ResinBoot
     return _resinConfig.findClient(serverId, args);
   }
 
-  WatchdogClient findShutdownClient(WatchdogArgs args)
+  WatchdogClient findWatchdogClient(WatchdogArgs args)
   {
     return _resinConfig.findWatchdogClient(args.getClusterId());
   }
