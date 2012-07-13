@@ -10,7 +10,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.29 - snapshot">
+<s2 title="4.0.29 - Jul 13, 2012">
 <ul>
 <li>config: watchdog needs to enable rvar variables (#5126, rep by Kirk Kirkconnell)</li>
 <li>cloud: validate that no two servers have the same IP:address (#5122)</li>
