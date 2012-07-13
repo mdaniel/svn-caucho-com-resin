@@ -241,9 +241,9 @@ cluster. The preview version will only be visible on the preview server
 until you copy it to a live machine.</p>
 
 <example title="Example: deploying a preview stage">
-unix> bin/resin.sh deploy -stage preview foo.war
+unix> resinctl deploy -stage preview foo.war
 
-unix> bin/resin.sh -stage preview -server dyn1 -cluster app-tier start
+unix> resinctl start -stage preview -elastic -server dyn1 -cluster app-tier
 </example>
 
 <p>Internally, Resin stores the preview stage as a repository tag
