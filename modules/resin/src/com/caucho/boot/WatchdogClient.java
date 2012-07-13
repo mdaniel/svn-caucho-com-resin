@@ -310,6 +310,11 @@ class WatchdogClient
         if (conn != null)
           conn.close();
       }
+      
+      try {
+        Thread.sleep(250);
+      } catch (Exception e) {
+      }
     } while (CurrentTime.getCurrentTime() <= expireTime);
     
     if (! isAllowLaunch) {
