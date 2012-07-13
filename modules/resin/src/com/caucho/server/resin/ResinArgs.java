@@ -294,6 +294,11 @@ public class ResinArgs
     _stage = stage;
   }
   
+  public void setElastic(boolean isElastic)
+  {
+    _isElastic = isElastic;
+  }
+  
   public boolean isElasticServer()
   {
     return _isElastic;

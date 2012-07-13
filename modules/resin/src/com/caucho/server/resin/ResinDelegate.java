@@ -273,7 +273,8 @@ public class ResinDelegate
     return (AbstractRepository) localRepository;
   }
 
-  protected CloudServer joinCluster(CloudSystem system)
+  protected CloudServer joinCluster(CloudSystem system,
+                                    BootClusterConfig cluster)
   {
     throw new ConfigException(L.l("-join-cluster requires Resin Professional"));
   }

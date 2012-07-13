@@ -248,9 +248,7 @@ class WatchdogArgs
 
   String getDynamicDisplayAddress()
   {
-    if (! _isElastic)
-      return null;
-    else if (_elasticAddress != null)
+    if (_elasticAddress != null)
       return _elasticAddress;
     else if (CurrentTime.isTest())
       return "192.168.1.x";
@@ -266,10 +264,7 @@ class WatchdogArgs
 
   int getDynamicPort()
   {
-    if (! _isElastic) {
-      return 0;
-    }
-    else if (_elasticPort > 0) {
+    if (_elasticPort > 0) {
       return _elasticPort;
     }
     else {
@@ -279,10 +274,7 @@ class WatchdogArgs
 
   String getElasticServerId()
   {
-    if (! _isElastic) {
-      return null;
-    }
-    else if (_serverId != null) {
+    if (_serverId != null) {
       return _serverId;
     }
     else {

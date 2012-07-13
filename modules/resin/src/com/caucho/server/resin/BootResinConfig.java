@@ -191,7 +191,10 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   public BootClusterConfig findCluster(String id)
   {
     if (id == null) {
-      return null;
+      if (_clusters.size() == 1)
+        return _clusters.get(0);
+      else
+        return null;
     }
     
     for (BootClusterConfig cluster : _clusters) {

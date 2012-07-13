@@ -214,7 +214,7 @@ public class Resin
     String serverId = args.getServerId();
 
     if (serverId == null && args.isElasticServer()) {
-      serverId = "dyn-"+ getDynamicServerAddress() + ':' + getDynamicServerPort();
+      serverId = "dyn-"+ getDynamicDisplayAddress() + ':' + getDynamicServerPort();
     }
 
     _resinSystem = new ResinSystem(serverId);
@@ -424,6 +424,11 @@ public class Resin
       return null;
   }
   
+  public boolean isElasticServer()
+  {
+    return _args.isElasticServer();
+  }
+  
   public String getClusterSystemKey()
   {
     return _clusterSystemKey;
@@ -453,6 +458,18 @@ public class Resin
 
     if (address != null)
       return address;
+    else
+      return getLocalHostAddress();
+  }
+  
+  public String getDynamicDisplayAddress()
+  {
+    String address = getServerAddress();
+
+    if (address != null)
+      return address;
+    else if (CurrentTime.isTest())
+      return "192.168.1.x";
     else
       return getLocalHostAddress();
   }
@@ -1016,15 +1033,15 @@ public class Resin
     else if (isWatchdog()) {
       _bootServerConfig = joinWatchdog();
     }
-    else if (_serverId != null && getHomeCluster() == null) {
+    else if (_serverId != null && ! isElasticServer()) {
       throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
                                       _serverId));
     }
-    else if (getHomeCluster() == null 
+    else if (! isElasticServer()
              && (_bootServerConfig = bootResin.findLocalServer()) != null) {
     }
     
-    if (_bootServerConfig == null && getHomeCluster() != null) {
+    if (_bootServerConfig == null && isElasticServer()) {
       _bootServerConfig = joinCluster(cloudSystem);
     }
 
@@ -1063,7 +1080,7 @@ public class Resin
                                       clusterId));
     }
     
-    CloudServer cloudServer = getDelegate().joinCluster(cloudSystem);
+    CloudServer cloudServer = getDelegate().joinCluster(cloudSystem, bootCluster);
 
     if (cloudServer == null) {
       String cause = null;

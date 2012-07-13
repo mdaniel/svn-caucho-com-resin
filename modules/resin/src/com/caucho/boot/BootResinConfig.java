@@ -262,6 +262,10 @@ public class BootResinConfig // implements EnvironmentBean
       return null;
     }
     
+    if (address == null) {
+      return null;
+    }
+    
     for (WatchdogClient client : _watchdogMap.values()) {
       if (address.equals(client.getAddress())
           && port == client.getPort()) {
@@ -668,8 +672,13 @@ public class BootResinConfig // implements EnvironmentBean
 
   BootClusterConfig findCluster(String id)
   {
-    if (id == null)
-      return null;
+    if (id == null) {
+      // cloud/129c
+      if (_clusterList.size() == 1)
+        return _clusterList.get(0);
+      else
+        return null;
+    }
 
     for (int i = 0; i < _clusterList.size(); i++) {
       BootClusterConfig cluster = _clusterList.get(i);

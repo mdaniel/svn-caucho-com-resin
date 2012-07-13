@@ -209,7 +209,6 @@ public class ResinBoot
     }
 
     WatchdogClient client = _resinConfig.addElasticClient(_args);
-    System.out.println("ELASTIC: " + client);
 
     if (client != null) {
       _args.setElasticServerId(client.getId());
