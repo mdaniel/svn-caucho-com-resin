@@ -281,9 +281,9 @@ class WatchdogClient
 
     ActorSender conn = null;
     
-    long timeout = isLaunch ? 10000 : -1;
+    long timeout = isLaunch ? -1 : 10000;
     long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
-
+    
     do {
       try {
         conn = getConnection();
