@@ -75,12 +75,13 @@ public class StartAllCommand extends AbstractStartCommand
                                VersionFactory.getVersion()));
     }
 
-    int watchdogPort = -1;
+    int watchdogPort = -2;
     for (WatchdogClient client : clientList) {
       try {
         int clientWatchdogPort = client.getWatchdogPort();
         
-        client.startWatchdog(args.getArgv(), clientWatchdogPort != watchdogPort);
+        boolean isLaunch = (watchdogPort != clientWatchdogPort);
+        client.startWatchdog(args.getArgv(), isLaunch);
         
         watchdogPort = clientWatchdogPort;
 

@@ -258,7 +258,7 @@ class WatchdogClient
     }
   }
 
-  public Process startWatchdog(String []argv, boolean isAllowLaunch)
+  public Process startWatchdog(String []argv, boolean isLaunch)
     throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
@@ -281,7 +281,8 @@ class WatchdogClient
 
     ActorSender conn = null;
     
-    long expireTime = isAllowLaunch ? CurrentTime.getCurrentTimeActual() + 10000 : 0;
+    long timeout = isLaunch ? 10000 : -1;
+    long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
 
     do {
       try {
@@ -315,16 +316,16 @@ class WatchdogClient
         Thread.sleep(250);
       } catch (Exception e) {
       }
-    } while (CurrentTime.getCurrentTime() <= expireTime);
+    } while (CurrentTime.getCurrentTimeActual() <= expireTime);
     
-    if (! isAllowLaunch) {
+    if (! isLaunch) {
       throw new ConfigException(L.l("Can't contact watchdog at {0}:{1}.",
                                     getWatchdogAddress(), getWatchdogPort()));
     }
 
     Process process = launchManager(argv);
     
-    long timeout = 15 * 1000L;
+    timeout = 15 * 1000L;
     expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
     while (CurrentTime.getCurrentTimeActual() <= expireTime) {
