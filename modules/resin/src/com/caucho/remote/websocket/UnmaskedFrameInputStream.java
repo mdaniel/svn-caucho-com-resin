@@ -147,6 +147,11 @@ public class UnmaskedFrameInputStream extends FrameInputStream
     
     int frame1 = is.read();
     int frame2 = is.read();
+    
+    /*
+    System.out.println("WS: 0x" + Integer.toHexString(frame1)
+                       + " 0x" + Integer.toHexString(frame2));
+                       */
 
     if (frame2 < 0)
       return false;

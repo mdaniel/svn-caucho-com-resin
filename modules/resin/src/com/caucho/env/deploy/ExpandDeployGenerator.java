@@ -627,6 +627,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   private void deploy()
   {
     try {
+      if (_directoryManager == null) {
+        return;
+      }
+      
       _expandManager = new ExpandManager(getId(),
                                          _directoryManager,
                                          _archiveManager,

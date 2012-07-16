@@ -440,7 +440,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
           
           _wsIs.init();
 
-          _listener.onReadBinary(WebSocketClient.this, _wsIs);
+          try {
+            _listener.onReadBinary(WebSocketClient.this, _wsIs);
+          } finally {
+            _wsIs.close();
+          }
           break;
           
         default:
