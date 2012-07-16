@@ -31,5 +31,7 @@ join.</p>
 unix> resinctl start --elastic --cluster app
 </example>
 
+</s1>
+
 </body>
 </document>
