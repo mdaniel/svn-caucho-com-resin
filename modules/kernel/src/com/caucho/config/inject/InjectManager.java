@@ -1167,7 +1167,6 @@ public final class InjectManager
     // ioc/0062 (vs discover)
     try {
       AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(type);
-      
       // special call from servlet, etc.
       return createInjectionTarget(annType);
     } catch (Exception e) {

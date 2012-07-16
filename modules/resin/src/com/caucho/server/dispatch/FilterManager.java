@@ -180,7 +180,8 @@ public class FilterManager {
 
         InjectManager beanManager = InjectManager.create();
 
-        _bean = beanManager.createInjectionTarget(filterClass);
+        // ioc/0p2e
+        _bean = beanManager.discoverInjectionTarget(filterClass);
 
         filter = config.getFilter();
 

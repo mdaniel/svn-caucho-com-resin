@@ -127,7 +127,8 @@ public class ListenerConfig<T> extends DescriptionGroupConfig {
       return _object;
 
     InjectManager cdiManager = InjectManager.create();
-    _target = cdiManager.createInjectionTarget(_listenerClass);
+    // ioc/0p2b
+    _target = cdiManager.discoverInjectionTarget(_listenerClass);
 
     CreationalContext<T> env = cdiManager.createCreationalContext(null);
 

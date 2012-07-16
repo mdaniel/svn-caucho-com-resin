@@ -455,7 +455,8 @@ public class ServletConfigImpl
       _servletClass = Class.forName(servletClassName, false, loader);
 
       if (_comp == null) {
-        _comp = cdiManager.createInjectionTarget(_servletClass);
+        // ioc/0p2b
+        _comp = cdiManager.discoverInjectionTarget(_servletClass);
       }
     } catch (ClassNotFoundException e) {
       log.log(Level.ALL, e.toString(), e);
@@ -1323,6 +1324,7 @@ public class ServletConfigImpl
       InjectManager inject = InjectManager.create();
 
       if (_comp == null) {
+        // ioc/0p2b
         _comp = inject.createInjectionTarget(servletClass);
       }
 
