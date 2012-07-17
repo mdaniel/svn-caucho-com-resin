@@ -227,7 +227,7 @@ public class JniProcess extends Process
                               String user,
                               String group);
   
-  private native void nativeChown(byte []name, int length,
+  private native int nativeChown(byte []name, int length,
                                   String user, String group);
   
   private native int waitpid(int pid, boolean isBlock);

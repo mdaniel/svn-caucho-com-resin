@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2010 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2012 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -1405,7 +1405,7 @@ select_host(cluster_t *cluster, time_t now)
     return -1;
 
   if (cluster->round_robin_index < 0) {
-    srand(65521 * time(0) + getpid() + (int) cluster);
+    srand(65521 * time(0) + getpid());
     round_robin = rand();
     if (round_robin < 0)
       round_robin = -round_robin;

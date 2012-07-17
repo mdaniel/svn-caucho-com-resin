@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
+import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Dependency;
 
@@ -58,6 +58,9 @@ public class DependencyContainer implements Dependency
   // When the dependency check last occurred
   private volatile long _checkExpiresTime = 0;
 
+  private final DependencyCheckWorker _checkWorker
+    = new DependencyCheckWorker();
+  
   private final AtomicBoolean _isChecking = new AtomicBoolean();
 
   public DependencyContainer()
@@ -202,29 +205,34 @@ public class DependencyContainer implements Dependency
     
     if (_isChecking.getAndSet(true))
       return _isModified;
+    
+    _checkExpiresTime = now + _checkInterval;
 
     try {
-      _checkExpiresTime = now + _checkInterval;
+      _checkWorker.wake();
 
-      for (int i = _dependencyList.size() - 1; i >= 0; i--) {
-        Dependency dependency = _dependencyList.get(i);
-
-        if (dependency.isModified()) {
-          setModified(true);
-        
-          return _isModified;
-        }
-      }
-      
       return _isModified;
     } finally {
-      _isChecking.set(false);
+    }
+  }
+  
+  private void checkImpl()
+  {
+    for (int i = _dependencyList.size() - 1; i >= 0; i--) {
+      Dependency dependency = _dependencyList.get(i);
+
+      if (dependency.isModified()) {
+        setModified(true);
+      
+        return;
+      }
     }
   }
 
   /**
    * Logs the reason for modification.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     if (_isModifiedLog)
@@ -259,9 +267,26 @@ public class DependencyContainer implements Dependency
 
     return _log;
   }
-  
+
+  @Override
   public String toString()
   {
     return "DependencyContainer" + _dependencyList;
+  }
+  
+  // #5128
+  private class DependencyCheckWorker extends AbstractTaskWorker {
+    @Override
+    public long runTask()
+    {
+      try {
+        checkImpl();
+      } finally {
+        _isChecking.set(false);
+      }
+      
+      return 0;
+    }
+    
   }
 }

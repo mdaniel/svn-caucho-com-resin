@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * @author Scott Ferguson
  */
@@ -283,7 +283,11 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
     gid = group_ent->gr_gid;
   }
   
-  pipe(pipe_fds);
+  if (pipe(pipe_fds) < 0) {
+    resin_printf_exception(env, "java/lang/IllegalStateException",
+                           "pipe failed");
+    return 0;
+  }
 
   pid = fork();
 
@@ -315,7 +319,10 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
 
 #ifndef WIN32  
   if (chroot_path[0]) {
-    chroot(chroot_path);
+    if (chroot(chroot_path) < 0) {
+      fprintf(stderr, "%s:%d JniProcess.exec chroot failed %s\n",
+              __FILE__, __LINE__, chroot_path);
+    }
   }
 #endif
 
@@ -331,7 +338,10 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
     }
   }
   
-  chdir(pwd);
+  if (chdir(pwd) < 0) {
+    fprintf(stderr, "%s:%d JniProcess.exec chdir failed %s\n",
+            __FILE__, __LINE__, pwd);
+  }
 #endif
 
   dup2(pipe_fds[1], 1);

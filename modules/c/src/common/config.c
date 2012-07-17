@@ -41,7 +41,10 @@
 #include <fcntl.h>
 #else
 /* defined for Solaris ctime_r */
+
+#ifndef _POSIX_PTHREAD_SEMANTICS
 #define _POSIX_PTHREAD_SEMANTICS
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -246,7 +246,9 @@ Java_com_caucho_server_boot_ResinBoot_execDaemon(JNIEnv *env,
     pwd = (char *) malloc(strlen + 1);
     pwd = get_utf8(env, j_pwd, pwd, strlen + 1);
 
-    chdir(pwd);
+    if (chdir(pwd) < 0) {
+      fprintf(stderr, "execDaemin: chdir failed %s\n", pwd);
+    }
   }
 
   if (fork())
@@ -435,7 +437,7 @@ Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
 
 #else /* WIN32 */
 
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
 					      jobject obj,
 					      jbyteArray name,
@@ -454,8 +456,9 @@ Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
   int flags;
   struct stat st;
 
-  if (! name || length <= 0 || sizeof(buffer) <= length)
-    return;
+  if (! name || length <= 0 || sizeof(buffer) <= length) {
+    return 0;
+  }
 
   resin_get_byte_array_region(env, name, 0, length, buffer);
 
@@ -463,14 +466,15 @@ Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
 
   /* Check if the file exists first. */
   if (stat(buffer, &st)) {
-    return;
+    return 0;
   }
 
   if (user) {
     temp_string = (*env)->GetStringUTFChars(env, user, 0);
 
-    if (! temp_string)
-      return;
+    if (! temp_string) {
+      return 0;
+    }
 
     strncpy(userbuf, temp_string, sizeof(userbuf));
     userbuf[sizeof(userbuf) - 1] = 0;
@@ -484,15 +488,19 @@ Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
 			     "setuid '%s' is an unknown <user-name>.",
                              userbuf);
       
-      return;
+      return 0;
     }
 
     uid = passwd->pw_uid;
     gid = passwd->pw_gid;
   }
 
-  if (uid > 0 || gid > 0)
-    chown(buffer, uid, gid);
+  if (uid > 0 || gid > 0) {
+    return chown(buffer, uid, gid) >= 0;
+  }
+  else {
+    return 1;
+  }
 }
 
 #endif
