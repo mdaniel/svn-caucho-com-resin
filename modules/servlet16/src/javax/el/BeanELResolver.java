@@ -441,7 +441,7 @@ public class BeanELResolver extends ELResolver {
     }
   }
 
-  static final class BeanProperty {
+  protected static final class BeanProperty {
     private Class<?> _base;
     private PropertyDescriptor _descriptor;
     private Method _readMethod;
@@ -519,7 +519,7 @@ public class BeanELResolver extends ELResolver {
       return _descriptor;
     }
 
-    public Class<?> getPropertyType()
+    public Class getPropertyType()
     {
       return _descriptor.getPropertyType();
     }
