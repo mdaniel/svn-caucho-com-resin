@@ -315,9 +315,20 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       }
 
       Class<X> instanceClass = null;
+      
+      boolean isNoAspect = false;
+      
+      BaseTypeAnnotated baseAnnType = null;
+      if (_annotatedType instanceof BaseTypeAnnotated) {
+        baseAnnType = (BaseTypeAnnotated) _annotatedType;
+        
+        if (baseAnnType.getAnalysisAnnotation(NoAspect.class) != null) {
+          isNoAspect = true;
+        }
+      }
+        
 
-      if (_isGenerateInterception
-          && ! _annotatedType.isAnnotationPresent(NoAspect.class)) {
+      if (_isGenerateInterception && ! isNoAspect) {
         if (! _annotatedType.isAnnotationPresent(javax.interceptor.Interceptor.class)
             && ! _annotatedType.isAnnotationPresent(javax.decorator.Decorator.class)) {
           CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(getBeanManager(), _annotatedType);
@@ -327,10 +338,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
           
           if (instanceClass == cl) {
             if (_annotatedType instanceof BaseTypeAnnotated) {
-              BaseTypeAnnotated baseAnnType
-                = (BaseTypeAnnotated) _annotatedType;
+              baseAnnType = (BaseTypeAnnotated) _annotatedType;
               
-              baseAnnType.addOverrideAnnotation(NoAspectLiteral.ANN);
+              baseAnnType.addAnalysisAnnotation(NoAspectLiteral.ANN);
             }
           }
         }

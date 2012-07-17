@@ -1155,8 +1155,18 @@ public final class InjectManager
     // ioc/0p14 - createInjectionTarget doesn't trigger the event, the
     // initial scan does
     // return getExtensionManager().processInjectionTarget(target, type);
-    
+
     return target;
+  }
+
+  /**
+   * Creates an injection target
+   */
+  public <T> InjectionTarget<T> discoverInjectionTarget(AnnotatedType<T> type)
+  {
+    InjectionTarget<T> target = createInjectionTarget(type);
+
+    return getExtensionManager().processInjectionTarget(target, type);
   }
 
   /**
@@ -1186,10 +1196,10 @@ public final class InjectManager
         = getExtensionManager().processAnnotatedType(annType);
       
       if (enhAnnType != null)
-        return createInjectionTarget(enhAnnType);
+        return discoverInjectionTarget(enhAnnType);
       else {
         // special call from servlet, etc.
-        return createInjectionTarget(annType);
+        return discoverInjectionTarget(annType);
       }
     } catch (Exception e) {
       throw ConfigException.createConfig(e);

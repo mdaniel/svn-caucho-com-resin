@@ -51,4 +51,11 @@ public interface BaseTypeAnnotated {
    * Overrides, e.g. for analysis
    */
   public void addOverrideAnnotation(Annotation ann);
+  
+  /**
+   * Analysis annotations
+   */
+  public void addAnalysisAnnotation(Annotation ann);
+  
+  public <T extends Annotation> T getAnalysisAnnotation(Class<T> annType);
 }

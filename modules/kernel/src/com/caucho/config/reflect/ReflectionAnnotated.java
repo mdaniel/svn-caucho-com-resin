@@ -53,6 +53,7 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
   private Set<Type> _typeSet;
 
   private LinkedHashSet<Annotation> _annSet;
+  private AnnotationSet _analysisAnnSet;
 
   private Annotation []_annArray;
 
@@ -193,6 +194,28 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
   public void addOverrideAnnotation(Annotation ann)
   {
     addAnnotation(ann);
+  }
+  
+  @Override
+  public void addAnalysisAnnotation(Annotation ann)
+  {
+    if (_analysisAnnSet == null)
+      _analysisAnnSet = new AnnotationSet();
+    
+    _analysisAnnSet.add(ann);
+  }
+  
+  @Override
+  public <T extends Annotation> T getAnalysisAnnotation(Class<T> annType)
+  {
+    if (_analysisAnnSet != null) {
+      T ann = (T) _analysisAnnSet.getAnnotation(annType);
+      
+      if (ann != null)
+        return ann;
+    }
+    
+    return getAnnotation(annType);
   }
 
   @Override
