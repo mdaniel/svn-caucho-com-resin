@@ -49,8 +49,7 @@ import com.caucho.util.CurrentTime;
 abstract public class AbstractTaskWorker2
   implements Runnable, TaskWorker, Closeable
 {
-  private static final Logger log
-    = Logger.getLogger(AbstractTaskWorker2.class.getName());
+  private static Logger _log;
   
   private static final int TASK_PARK = 0;
   private static final int TASK_SLEEP = 1;
@@ -244,7 +243,7 @@ abstract public class AbstractTaskWorker2
     } catch (Throwable e) {
       System.out.println("EXN: " + e);
       WarningService.sendCurrentWarning(this, e);
-      log.log(Level.WARNING, e.toString(), e);
+      log().log(Level.WARNING, e.toString(), e);
     } finally {
       _thread = null;
 
@@ -263,6 +262,15 @@ abstract public class AbstractTaskWorker2
   protected long getCurrentTimeActual()
   {
     return CurrentTime.getCurrentTimeActual();
+  }
+  
+  private Logger log()
+  {
+    if (_log == null) {
+      _log = Logger.getLogger(AbstractTaskWorker2.class.getName()); 
+    }
+    
+    return _log;
   }
 
   @Override
