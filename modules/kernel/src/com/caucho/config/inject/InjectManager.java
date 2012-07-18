@@ -2696,8 +2696,9 @@ public final class InjectManager
     for (Bean<?> bean : beanSet) {
       int priority = getDeploymentPriority(bean);
 
-      if (priority == bestPriority)
+      if (priority == bestPriority) {
         matchBeans.add(toDisplayString(bean));
+      }
     }
 
     return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  Beans:{0}\nfor {1}. You may need to use the @Alternative or <alternatives> to select one.",

@@ -1741,47 +1741,24 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     return null;
   }
 
-  public String getSessionsAsJsonString() {
-
-    List<SessionImpl> sessionList;
+  public String []sessionIdList()
+  {
+    ArrayList<String> sessionIds = new ArrayList<String>();
+    
     synchronized (_sessions) {
-
-      sessionList = new ArrayList<SessionImpl>(_sessions.size());
-
       Iterator<LruCache.Entry<String, SessionImpl>> sessionsIterator
         = _sessions.iterator();
 
       while (sessionsIterator.hasNext()) {
-        sessionList.add(sessionsIterator.next().getValue());
+        sessionIds.add(sessionsIterator.next().getKey());
       }
     }
 
-    SessionImpl []sessions = new SessionImpl[sessionList.size()];
+    String []ids= new String[sessionIds.size()];
 
-    sessionList.toArray(sessions);
-
-    TempOutputStream buffer = new TempOutputStream();
-
-    PrintWriter out = new PrintWriter(new OutputStreamWriter(buffer, UTF_8));
-
-    JsonOutput jsonOutput = new JsonOutput(out);
-
-    try {
-      jsonOutput.writeObject(sessions, true);
-
-      jsonOutput.flush();
-
-      jsonOutput.close();
-
-      out.flush();
-
-      return new String(buffer.toByteArray(), UTF_8);
-    } catch (IOException e) {
-      if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("can't serialize sessions due to {0}", e), e);
-    }
-
-    return null;
+    sessionIds.toArray(ids);
+    
+    return ids;
   }
 
 
@@ -1790,8 +1767,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     Iterator<SessionImpl> sessions = _sessions.values();
     long l = 0;
 
-    while (sessions.hasNext())
+    while (sessions.hasNext()) {
       l += sessions.next().getLastSaveLength();
+    }
 
     return l;
   }

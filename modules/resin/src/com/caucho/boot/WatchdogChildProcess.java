@@ -682,11 +682,15 @@ class WatchdogChildProcess
     }
     
     Path resinHome = _watchdog.getResinHome();
+    Path resinRoot = _watchdog.getResinRoot();
     
     if (! isEndorsed) {
       String endorsed = System.getProperty("java.endorsed.dirs");
+      
       String resinEndorsed = resinHome.getNativePath() + File.separator + "endorsed";
       
+      resinEndorsed += (File.pathSeparator
+                        + resinRoot .getNativePath() + File.separator + "endorsed");
       
       if (endorsed != null)
         endorsed = endorsed + File.pathSeparator + resinEndorsed;

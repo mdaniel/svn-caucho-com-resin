@@ -676,6 +676,10 @@ public class MiscModule extends AbstractQuercusModule {
       }
 
       args[2] = command;
+      
+      if (log.isLoggable(Level.FINER)) {
+        log.finer("Quercus: passthru " + args[0] + " " + args[1] + " " + args[2]);
+      }
 
       ProcessBuilder processBuilder = new ProcessBuilder(args);
       processBuilder.redirectErrorStream(true);
