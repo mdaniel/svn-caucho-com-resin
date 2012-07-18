@@ -36,12 +36,16 @@ import javax.el.ELException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a named method call on an object.
  */
 @SuppressWarnings("serial")
 public class MethodExpr extends Expr {
+  private ConcurrentHashMap<Class<?>,MethodCall> _methodMap
+    = new ConcurrentHashMap<Class<?>,MethodCall>();
+  
   private Expr _expr;
   private String _methodName;
   
@@ -79,22 +83,16 @@ public class MethodExpr extends Expr {
     Object []objs = new Object[_args.length];
 
     try {
-      Method method = findMethod(aObj.getClass());
+      MethodCall methodCall = findMethod(aObj.getClass());
 
-      if (method != null) {
-        Class<?> []params = method.getParameterTypes();
+      if (methodCall != null) {
+        Marshall []marshall = methodCall.getMarshall();
 
-        for (int j = 0; j < params.length; j++) {
-          objs[j] = evalArg(params[j], _args[j], env);
-        }
-
-        // XXX: probably should look for the interface instead.
-        try {
-          method.setAccessible(true);
-        } catch (Throwable e) {
+        for (int j = 0; j < marshall.length; j++) {
+          objs[j] = marshall[j].marshall(_args[j], env);
         }
         
-        return method.invoke(aObj, objs);
+        return methodCall.getMethod().invoke(aObj, objs);
       }
       
       return null;
@@ -121,7 +119,24 @@ public class MethodExpr extends Expr {
     return getValue(env);
   }
   
-  private Method findMethod(Class<?> type)
+  private MethodCall findMethod(Class<?> type)
+  {
+    if (type == null)
+      return null;
+    
+    MethodCall method = _methodMap.get(type);
+    
+    if (method == null) {
+      method = findMethodImpl(type);
+      
+      _methodMap.put(type, method);
+    }
+    
+    return method;
+  }
+  
+    
+  private MethodCall findMethodImpl(Class<?> type)
   {
     if (type == null)
       return null;
@@ -132,22 +147,26 @@ public class MethodExpr extends Expr {
       for (int i = 0; i < methods.length; i++) {
         Method method = methods[i];
         
-        if (! Modifier.isPublic(method.getModifiers()))
+        if (! Modifier.isPublic(method.getModifiers())) {
           continue;
+        }
         
         Class<?> []params = method.getParameterTypes();
         
-        if (method.getName().equals(_methodName) &&
-            params.length == _args.length)
-          return method;
+        if (method.getName().equals(_methodName)
+            && params.length == _args.length) {
+          return new MethodCall(method);
+        }
       }
     }
     
     Class<?> []interfaces = type.getInterfaces();
     for (int i = 0; i < interfaces.length; i++) {
-      Method method = findMethod(interfaces[i]);
-      if (method != null)
+      MethodCall method = findMethod(interfaces[i]);
+      
+      if (method != null) {
         return method;
+      }
     }
     
     return findMethod(type.getSuperclass());
@@ -215,5 +234,38 @@ public class MethodExpr extends Expr {
   public String toString()
   {
     return "MethodExpr[" + _expr + "," + _methodName + "]";
+  }
+  
+  private static class MethodCall {
+    private final Method _method;
+    private final Marshall []_marshall;
+    
+    MethodCall(Method method)
+    {
+      _method = method;
+      
+      try {
+        method.setAccessible(true);
+      } catch (Throwable e) {
+      }
+      
+      Class<?> []paramTypes = method.getParameterTypes();
+      
+      _marshall = new Marshall[paramTypes.length];
+      
+      for (int i = 0; i < paramTypes.length; i++) {
+        _marshall[i] = Marshall.create(paramTypes[i]);
+      }
+    }
+    
+    public Method getMethod()
+    {
+      return _method;
+    }
+    
+    public Marshall []getMarshall()
+    {
+      return _marshall;
+    }
   }
 }

@@ -12,6 +12,8 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>jsp-el: add enum marshal for methods (#5131, rep by mate)</li>
+<li>embed: setRootDirectory applied in incorrect order (#5132, rep by M. Barker)</li>
 <li>jni: JNI compile warnings fixed (#5129)</li>
 <li>server: check dependencies in separate thread to avoid delays (#5128, rep by Russ Pridemore)</li>
 </ul>

@@ -89,7 +89,8 @@ public class ResinEmbed
   private static final String EMBED_CONF
     = "classpath:com/caucho/resin/resin-embed.xml";
 
-  private final Resin _resin;
+  private final ResinArgs _args;
+  private Resin _resin;
   private String _configFile = EMBED_CONF;
 
   private CloudCluster _cluster;
@@ -109,6 +110,8 @@ public class ResinEmbed
     = new ArrayList<PortEmbed>();
 
   private Lifecycle _lifecycle = new Lifecycle();
+  
+  private boolean _isScanRoot;
   private boolean _isConfig;
   private boolean _isDevelopmentMode;
   private boolean _isIgnoreClientDisconnect;
@@ -118,12 +121,10 @@ public class ResinEmbed
    */
   public ResinEmbed()
   {
-    ResinArgs args = new ResinArgs();
+    _args = new ResinArgs();
     // args.setServerId("embed");
-    args.setServerId("default");
-    args.setRootDirectory(Vfs.lookup());
-    
-    _resin = new ResinEmbedded(args);
+    _args.setServerId("default");
+    _args.setRootDirectory(Vfs.lookup());
   }
 
   /**
@@ -145,7 +146,7 @@ public class ResinEmbed
    */
   public void setRootDirectory(String rootUrl)
   {
-    _resin.setRootDirectory(Vfs.lookup(rootUrl));
+    _args.setRootDirectory(Vfs.lookup(rootUrl));
   }
 
   /**
@@ -182,8 +183,9 @@ public class ResinEmbed
    */
   public void setPorts(PortEmbed []ports)
   {
-    for (PortEmbed port : ports)
+    for (PortEmbed port : ports) {
       addPort(port);
+    }
   }
 
   /**
@@ -289,7 +291,7 @@ public class ResinEmbed
 
   public void addScanRoot()
   {
-    _resin.getClassLoader().addScanRoot();
+    _isScanRoot = true;
   }
 
   //
@@ -310,9 +312,14 @@ public class ResinEmbed
     try {
       Environment.initializeEnvironment();
 
+      _resin = new ResinEmbedded(_args);
       // _resin.preConfigureInit();
       
       thread.setContextClassLoader(_resin.getClassLoader());
+      
+      if (_isScanRoot) {
+        _resin.getClassLoader().addScanRoot();
+      }
 
       initConfig(_configFile);
 

@@ -32,111 +32,146 @@ package com.caucho.el;
 import javax.el.ELContext;
 import javax.el.ELException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Marshalls an expression.
  */
 abstract public class Marshall {
-  private static final HashMap<Class,Marshall> ARG_MAP
-    = new HashMap<Class,Marshall>();
+  private static final Logger log = Logger.getLogger(Marshall.class.getName());
+  
+  private static final HashMap<Class<?>,Marshall> ARG_MAP
+    = new HashMap<Class<?>,Marshall>();
 
-  public static Marshall create(Class arg)
+  public static Marshall create(Class<?> type)
   {
-    Marshall marshall = ARG_MAP.get(arg);
+    Marshall marshall = ARG_MAP.get(type);
 
-    if (marshall != null)
+    if (marshall != null) {
       return marshall;
-    else
-      return OBJECT;
+    }
+    
+    if (type.isEnum()) {
+      return new EnumMarshall(type);
+    }
+    
+    return OBJECT;
   }
   
   abstract public Object marshall(Expr expr, ELContext env)
     throws ELException;
 
   public static final Marshall BOOLEAN = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
+    public Object marshall(Expr expr, ELContext env)
         throws ELException
-      {
-        return new Boolean((boolean) expr.evalBoolean(env));
-      }
-    };
+    {
+      return new Boolean((boolean) expr.evalBoolean(env));
+    }
+  };
 
   public static final Marshall BYTE = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return new Byte((byte) expr.evalLong(env));
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Byte((byte) expr.evalLong(env));
+    }
+  };
 
   public static final Marshall SHORT = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return new Short((short) expr.evalLong(env));
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Short((short) expr.evalLong(env));
+    }
+  };
 
   public static final Marshall INTEGER = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return new Integer((int) expr.evalLong(env));
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Integer((int) expr.evalLong(env));
+    }
+  };
 
   public static final Marshall LONG = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return new Long(expr.evalLong(env));
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Long(expr.evalLong(env));
+    }
+  };
 
   public static final Marshall FLOAT = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return new Float((float) expr.evalDouble(env));
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Float((float) expr.evalDouble(env));
+    }
+  };
 
   public static final Marshall DOUBLE = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return new Double(expr.evalDouble(env));
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Double(expr.evalDouble(env));
+    }
+  };
 
   public static final Marshall STRING = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        return expr.evalString(env);
-      }
-    };
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return expr.evalString(env);
+    }
+  };
 
   public static final Marshall CHARACTER = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
-        throws ELException
-      {
-        String s = expr.evalString(env);
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      String s = expr.evalString(env);
 
-        if (s == null || s.length() == 0)
-          return null;
-        else
-          return new Character(s.charAt(0));
-      }
-    };
+      if (s == null || s.length() == 0)
+        return null;
+      else
+        return new Character(s.charAt(0));
+    }
+  };
 
   public static final Marshall OBJECT = new Marshall() {
-      public Object marshall(Expr expr, ELContext env)
+    public Object marshall(Expr expr, ELContext env)
         throws ELException
       {
         return expr.getValue(env);
       }
-    };
+  };
+  
+  static class EnumMarshall extends Marshall {
+    private Class _enumClass;
+    
+    EnumMarshall(Class<?> enumClass)
+    {
+      _enumClass = enumClass;
+    }
+    public Object marshall(Expr expr, ELContext env)
+        throws ELException
+    {
+      String name = expr.evalString(env);
+      
+      if (name == null)
+        return null;
+      else {
+        try {
+          return Enum.valueOf(_enumClass, name);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+          
+          return null;
+        }
+      }
+    }
+  }
 
   static {
     ARG_MAP.put(boolean.class, BOOLEAN);
