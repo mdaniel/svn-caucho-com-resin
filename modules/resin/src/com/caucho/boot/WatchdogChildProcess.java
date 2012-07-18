@@ -226,6 +226,7 @@ class WatchdogChildProcess
         logStatus(_status);
       }
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       log.log(Level.WARNING, e.toString(), e);
 
       try {

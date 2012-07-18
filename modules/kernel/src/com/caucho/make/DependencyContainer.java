@@ -31,6 +31,7 @@ package com.caucho.make;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.AbstractTaskWorker;
@@ -58,8 +59,8 @@ public class DependencyContainer implements Dependency
   // When the dependency check last occurred
   private volatile long _checkExpiresTime = 0;
 
-  private final DependencyCheckWorker _checkWorker
-    = new DependencyCheckWorker();
+  private final AtomicReference<DependencyCheckWorker> _checkWorkerRef
+    = new AtomicReference<DependencyCheckWorker>();
   
   private final AtomicBoolean _isChecking = new AtomicBoolean();
 
@@ -209,11 +210,25 @@ public class DependencyContainer implements Dependency
     _checkExpiresTime = now + _checkInterval;
 
     try {
-      _checkWorker.wake();
+      getWorker().wake();
 
       return _isModified;
     } finally {
     }
+  }
+  
+  private DependencyCheckWorker getWorker()
+  {
+    DependencyCheckWorker worker = _checkWorkerRef.get();
+    
+    if (worker != null)
+      return worker;
+    
+    worker = new DependencyCheckWorker();
+      
+    _checkWorkerRef.compareAndSet(null, worker);
+    
+    return _checkWorkerRef.get();
   }
   
   private void checkImpl()
