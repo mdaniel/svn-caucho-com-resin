@@ -221,7 +221,6 @@ public class SessionBeanImpl<X,T>
       
       AnnotatedMethod<? super X> apiMethod
         = AnnotatedTypeUtil.findMethod(extAnnType, beanMethod);
-      
       boolean isBeanMethod = false; 
 
       if (apiMethod == null) {
@@ -273,6 +272,7 @@ public class SessionBeanImpl<X,T>
   {
     return (getClass().getSimpleName()
             + "[" + getBeanClass().getSimpleName()
+            + "," + _context
             + ", " + getQualifiers() + "]");
   }
 }

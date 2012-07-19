@@ -127,7 +127,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X> {
           + _lockTimeoutUnit.toMillis(_lockTimeout)
           + "L, java.util.concurrent.TimeUnit.MILLISECONDS))");
       out.pushDepth();
-      out.println("throw new ConcurrentAccessTimeoutException(\"Timed out acquiring semaphore.\");");
+      out.println("throw new ConcurrentAccessTimeoutException(\"Timed out acquiring semaphore " + _lockTimeout + " ms.\");");
       out.popDepth();
       out.println("} catch (InterruptedException e) {");
       out.pushDepth();

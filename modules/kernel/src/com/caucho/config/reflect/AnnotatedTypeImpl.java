@@ -69,7 +69,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     _parentType = annType;
     
     _javaClass = annType.getJavaClass();
-  
+    
     /*
     if (getBaseTypeImpl().getParamMap() != null)
       _paramMap.putAll(getBaseTypeImpl().getParamMap());
@@ -130,6 +130,18 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
       return _methodSet;
     else
       return (Set<AnnotatedMethod<? super X>>) (Set) getParentType().getMethods();
+  }
+
+  /**
+   * Returns the abstract introspected methods
+   */
+  public Set<AnnotatedMethod<? super X>> getMethodsForUpdate()
+  {
+    if (_methodSet == null) {
+      initMethodSet();
+    }
+    
+    return _methodSet;
   }
   
   /**

@@ -176,8 +176,9 @@ public class EjbHandler extends JavaeeInjectionHandler {
     
     ValueGenerator gen = bindGenerator(location, ejb, bindType);
 
-    if (name != null && ! "".equals(name))
+    if (name != null && ! "".equals(name)) {
       bindJndi(name, gen, name);
+    }
     
     bindJndi(javaMethod, gen);
     

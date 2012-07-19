@@ -142,10 +142,10 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   ArrayList<String> _beanDependList = new ArrayList<String>();
 
-  protected ArrayList<EjbMethodPattern<X>> _methodList
+  private ArrayList<EjbMethodPattern<X>> _methodList
     = new ArrayList<EjbMethodPattern<X>>();
 
-  protected ArrayList<EjbMethodPattern<X>> _beanMethodList
+  private ArrayList<EjbMethodPattern<X>> _beanMethodList
     = new ArrayList<EjbMethodPattern<X>>();
 
   private ContainerProgram _initProgram;
@@ -1762,7 +1762,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
   
   private void configureMethods(AnnotatedTypeImpl<X> type)
   {
-    for (AnnotatedMethod<?> method : type.getMethods()) {
+    if (_beanMethodList.size() == 0) {
+      return;
+    }
+    
+    for (AnnotatedMethod<?> method : type.getMethodsForUpdate()) {
       for (EjbMethodPattern<?> cfgMethod : _beanMethodList) {
         if (cfgMethod.isMatch(method)) {
           cfgMethod.configure(method);

@@ -227,28 +227,32 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
 
   public void addAnnotations(Collection<Annotation> annSet)
   {
-    for (Annotation ann : annSet)
+    for (Annotation ann : annSet) {
       addAnnotation(ann);
+    }
   }
 
   public void addAnnotations(Annotation []annSet)
   {
-    for (Annotation ann : annSet)
+    for (Annotation ann : annSet) {
       addAnnotation(ann);
+    }
   }
   
   public void addAnnotation(Annotation newAnn)
   {
-    if (_annSet == null)
+    if (_annSet == null) {
       _annSet = new AnnotationSet();
+    }
     
     _annSet.replace(newAnn);
   }
   
   public void addAnnotationIfAbsent(Annotation newAnn)
   {
-    if (! isAnnotationPresent(newAnn.annotationType()))
+    if (! isAnnotationPresent(newAnn.annotationType())) {
       addAnnotation(newAnn);
+    }
   }
 
   public void removeAnnotation(Annotation ann)
@@ -346,6 +350,6 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _type + "]";
+    return getClass().getSimpleName() + "$" + System.identityHashCode(this) + "[" + _type + "]";
   }
 }

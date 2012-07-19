@@ -526,8 +526,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     for (AnnotatedMethod<? super X> method : baseType.getMethods()) {
       AnnotatedMethod<? super X> extMethod = mergeMethod(method, apiList);
       
-      if (extMethod != null)
+      if (extMethod != null) {
         extAnnType.addMethod(extMethod);
+      }
       else if (method.isAnnotationPresent(Produces.class)
                && ! baseType.isAnnotationPresent(Specializes.class)) {
         // TCK: conflict
@@ -561,8 +562,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
               ArrayList<AnnotatedType<? super X>> apiList)
   {
     // ioc/07g3
-    if (apiList.size() == 0)
+    if (apiList.size() == 0) {
       return method;
+    }
     
     for (AnnotatedType<? super X> api : apiList) {
       AnnotatedMethod<? super X> apiMethod

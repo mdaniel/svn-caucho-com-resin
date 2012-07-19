@@ -229,7 +229,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   
   private void introspectMethod(AnnotatedMethod<? super X> method)
   {
-    AnnotatedMethod<? super X> oldMethod 
+    AnnotatedMethod<? super X> oldMethod
       = findMethod(_annotatedMethods, method);
     
     if (oldMethod != null) {
@@ -243,7 +243,9 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     if (baseMethod == null)
       throw new IllegalStateException(L.l("{0} does not have a matching base method in {1}",
                                           method,
+      
                                           getBeanType()));
+    
     // XXX: merge annotations
     _annotatedMethods.add(baseMethod);
   }

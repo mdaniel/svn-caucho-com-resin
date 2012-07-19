@@ -47,7 +47,8 @@ public class LockUtil {
   {
     try {
       if (! readLock.tryLock(timeout, TimeUnit.MILLISECONDS))
-        throw new ConcurrentAccessTimeoutException(L.l("Timed out acquiring read lock."));
+        throw new ConcurrentAccessTimeoutException(L.l("Timed out acquiring read lock {0}ms.",
+                                                       timeout));
     } catch (InterruptedException e) {
       throw new ConcurrentAccessTimeoutException(L.l("Thread interruption acquiring read lock: {0}", e.getMessage()));
     }
@@ -73,7 +74,8 @@ public class LockUtil {
     
     try {
       if (! lock.writeLock().tryLock(timeout, TimeUnit.MILLISECONDS))
-        throw new ConcurrentAccessTimeoutException(L.l("Timed out acquiring write lock."));
+        throw new ConcurrentAccessTimeoutException(L.l("Timed out acquiring write lock {0}ms.",
+                                                       timeout));
     } catch (InterruptedException e) {
       throw new ConcurrentAccessTimeoutException(L.l("Thread interruption acquiring write lock: " + e.getMessage()));
     }

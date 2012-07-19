@@ -234,7 +234,7 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _api.getName() + "]";
+    return getClass().getSimpleName() + "[" + _manager.getEJBName() + "," + _api.getName() + "]";
   }
   
   static interface CancelCalled {
