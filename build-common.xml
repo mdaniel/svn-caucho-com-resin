@@ -59,6 +59,8 @@
 
   <property name="debian.stability" value="unstable"/>
 
+  <property name="jsf.jar" value="javax.faces-2.1.11.jar"/>
+
   <target name="update">
     <!-- <mkdir dir="${maven.lib}"/>-->
     <!-- XXX: temp build issues
@@ -721,7 +723,7 @@
         <include name="lib/jcache.jar"/>
         <include name="lib/jaxstream-15.jar"/>
         -->
-        <include name="lib/jsf-mojarra-2.1.8.jar"/>
+        <include name="lib/${jsf.jar}"/>
         <include name="lib/jsf.LICENSE"/>
         <!--
         <include name="lib/slf4j-api-1.6.1.jar"/>
@@ -886,7 +888,7 @@
       
       <include name="${dist.name}/lib/activation.jar"/>
       <include name="${dist.name}/lib/javamail-14.jar"/>
-      <include name="${dist.name}/lib/jsf-mojarra-2.1.8.jar"/>
+      <include name="${dist.name}/lib/${jsf.jar}"/>
 
       <exclude name="${dist.name}/webapps/*.war"/>
       <exclude name="${dist.name}/lib/**"/>
@@ -1496,7 +1498,7 @@
         <include name="lib/javaee-16.jar"/>
         <include name="lib/javamail-141.jar"/>
         <include name="lib/jaxrpc-15.jar"/>
-        <include name="lib/jsf-mojarra-2.1.8.jar"/>
+        <include name="lib/${jsf.jar}"/>
 
         <include name="lib/resin.jar"/>
         <include name="lib/resin-eclipselink.jar"/>
