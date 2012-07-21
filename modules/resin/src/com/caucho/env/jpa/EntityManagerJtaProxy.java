@@ -30,6 +30,7 @@
 package com.caucho.env.jpa;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -65,6 +66,8 @@ public class EntityManagerJtaProxy
   implements EntityManager, java.io.Serializable, HandleAware
 {
   private static final L10N L = new L10N(EntityManagerJtaProxy.class);
+  private static final Logger log
+    = Logger.getLogger(EntityManagerJtaProxy.class.getName());
   
   private final PersistenceUnitManager _persistenceUnit;
   
@@ -585,6 +588,9 @@ public class EntityManagerJtaProxy
   public void flush()
   {
     EntityManager em = getCurrent();
+    
+    System.err.println("FLUSH: " + em + " " + TransactionImpl.getCurrent());
+    log.warning("FLUSH2: " +  em + " " + TransactionImpl.getCurrent());
     
     if (em != null) {
       em.flush();

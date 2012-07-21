@@ -40,6 +40,7 @@ import javax.ejb.EJBException;
 import javax.ejb.embeddable.EJBContainer;
 import javax.naming.Context;
 
+import com.caucho.boot.ResinBootAgent;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
@@ -93,8 +94,9 @@ public class EJBContainerImpl extends EJBContainer {
 
   void addModule(Path path)
   {
-    if (_moduleRoots == null)
+    if (_moduleRoots == null) {
       _moduleRoots = new ArrayList<Path>();
+    }
 
     _moduleRoots.add(path);
   }
@@ -126,8 +128,9 @@ public class EJBContainerImpl extends EJBContainer {
 
       Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
       
-      if (_injectManager != null)
+      if (_injectManager != null && resinValidatorClass != null) {
         _injectManager.addManagedBean(_injectManager.createManagedBean(resinValidatorClass));
+      }
    
       // XXX initialcontextfactory broken when set by non-resin container
       AbstractModel model = InitialContextFactoryImpl.createRoot();
@@ -145,11 +148,14 @@ public class EJBContainerImpl extends EJBContainer {
     try {
       thread.setContextClassLoader(_classLoader);
       
+      System.err.println("ROOTS: " + _moduleRoots);
+      System.out.println("INSTR: " + ResinBootAgent.getInstrumentation());
+      
       configure();
-
       if (_moduleRoots != null) {
-        for (Path path : _moduleRoots)
+        for (Path path : _moduleRoots) {
           _classLoader.addURL(new URL(path.getURL()));
+        }
 
         EjbManager manager = EjbManager.getCurrent();
 

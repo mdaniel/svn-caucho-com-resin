@@ -3,5 +3,6 @@ Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: @VERSION@
 J2EE-DeploymentFactory-Implementation-Class: com.caucho.j2ee.deployclient.DeploymentFactoryImpl
 Main-Class: com.caucho.boot.ResinBoot
-
+Premain-Class: com.caucho.boot.ResinBootAgent
+Agent-Class: com.caucho.boot.ResinBootAgent
 

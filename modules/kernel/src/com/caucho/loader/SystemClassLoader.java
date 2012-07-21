@@ -96,6 +96,12 @@ public class SystemClassLoader
   {
     return this;
   }
+  
+  @Override
+  public boolean isRoot()
+  {
+    return true;
+  }
 
   @Override
   public void init()

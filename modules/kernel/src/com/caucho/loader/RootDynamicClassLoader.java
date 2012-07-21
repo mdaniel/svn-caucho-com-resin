@@ -81,6 +81,12 @@ public class RootDynamicClassLoader
   {
     return _systemRootClassLoader;
   }
+  
+  @Override
+  public boolean isRoot()
+  {
+    return true;
+  }
 
   /**
    * Load a class using this class loader

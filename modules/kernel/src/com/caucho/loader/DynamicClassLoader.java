@@ -251,6 +251,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     return _isJarCacheEnabled;
   }
+  
+  public boolean isRoot()
+  {
+    return false;
+  }
 
   /**
    * Returns true if jar entries should be cached.
@@ -977,8 +982,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void addTransformer(ClassFileTransformer transformer)
   {
-    if (_classFileTransformerList == null)
+    if (_classFileTransformerList == null) {
       _classFileTransformerList = new ArrayList<ClassFileTransformer>();
+    }
 
     _classFileTransformerList.add(transformer);
   }
@@ -1551,7 +1557,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
           cl = findSystemClass(name);
       }
     }
-
+    
     if (resolve && cl != null)
       resolveClass(cl);
 

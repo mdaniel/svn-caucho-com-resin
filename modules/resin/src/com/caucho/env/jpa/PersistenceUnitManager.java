@@ -32,6 +32,7 @@ package com.caucho.env.jpa;
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.lang.instrument.Instrumentation;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
@@ -55,12 +56,14 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import com.caucho.amber.manager.AmberPersistenceProvider;
+import com.caucho.boot.ResinBootAgent;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.naming.Jndi;
@@ -640,8 +643,28 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   public void addTransformer(ClassTransformer transformer)
   {
     EnvironmentClassLoader loader = _persistenceManager.getClassLoader();
+    
+    TransformerAdapter adapter = new TransformerAdapter(transformer); 
 
-    loader.addTransformer(new TransformerAdapter(transformer));
+    boolean isRootTransform = false;
+    Instrumentation inst = ResinBootAgent.getInstrumentation();
+    
+    if (inst != null) {
+      DynamicClassLoader parent = null;
+      
+      if (loader.getParent() instanceof DynamicClassLoader) {
+        parent = (DynamicClassLoader) loader.getParent();
+      }
+      
+      if (parent == null || parent.isRoot()) {
+        inst.addTransformer(adapter);
+        isRootTransform = true;
+      }
+    }
+    
+    if (! isRootTransform) {
+      loader.addTransformer(adapter);
+    }
   }
 
   /**
