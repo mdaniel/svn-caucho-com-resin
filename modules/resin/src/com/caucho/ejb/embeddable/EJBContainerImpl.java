@@ -148,9 +148,6 @@ public class EJBContainerImpl extends EJBContainer {
     try {
       thread.setContextClassLoader(_classLoader);
       
-      System.err.println("ROOTS: " + _moduleRoots);
-      System.out.println("INSTR: " + ResinBootAgent.getInstrumentation());
-      
       configure();
       if (_moduleRoots != null) {
         for (Path path : _moduleRoots) {
