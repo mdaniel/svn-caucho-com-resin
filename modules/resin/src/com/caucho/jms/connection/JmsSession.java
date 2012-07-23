@@ -964,7 +964,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     // of notification of message expiration. <P>Clients should not receive 
     // messages that have expired; however, the JMS API does not 
     // guarantee that this will not happen.
-    long now = CurrentTime.getCurrentTime();
+    long now = CurrentTime.getExactTime();
     long expireTime = 0;
     if (timeout == 0) {
       expireTime = now + MessageProducerImpl.DEFAULT_TIME_TO_LIVE;
