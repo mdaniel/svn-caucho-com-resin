@@ -1091,16 +1091,18 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
       return 0;
     }
 
-    sin = lookup_addr(env, addr_name, port, sin_data,
-                      &family, &protocol, &sin_length);
+    lookup_addr(env, addr_name, port, sin_data,
+                &family, &protocol, &sin_length);
   }
   else {
-    sin = (struct sockaddr_in *) sin_data;
-    sin->sin_family = AF_INET;
-    sin->sin_port = htons(port);
-    family = AF_INET;
+    struct sockaddr_in6 *sin6;
+    
+    sin6 = (struct sockaddr_in6 *) sin_data;
+    sin6->sin6_family = AF_INET6;
+    sin6->sin6_port = htons(port);
+    family = AF_INET6;
     protocol = IPPROTO_TCP;
-    sin_length = sizeof(struct sockaddr_in);
+    sin_length = sizeof(struct sockaddr_in6);
   }
   
   if (! sin)
@@ -1118,7 +1120,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
     return 0;
   }
 
-  if (bind(sock, (struct sockaddr *) sin, sin_length) < 0) {
+  if (bind(sock, (struct sockaddr *) sin_data, sin_length) < 0) {
     int i = 5;
     int result = 0;
     
@@ -1132,13 +1134,13 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
       fcntl(fd, F_SETFL, O_NONBLOCK|flags);
 #endif
 
-      result = connect(fd, (struct sockaddr *) &sin, sizeof(sin));
+      result = connect(fd, (struct sockaddr *) &sin_data, sizeof(sin));
       closesocket(fd);
     }
 
     result = -1;
     for (i = 50; result < 0 && i >= 0; i--) {
-      result = bind(sock, (struct sockaddr *) sin, sin_length);
+      result = bind(sock, (struct sockaddr *) sin_data, sin_length);
 
       if (result < 0) {
 	struct timeval tv;
@@ -1157,7 +1159,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   }
 
   sin_length = sizeof(sin_data);
-  getsockname(sock, (struct sockaddr *) sin, &sin_length);
+  getsockname(sock, (struct sockaddr *) sin_data, &sin_length);
 
   /* must be 0 if the poll is missing for accept */
 #if 0 && defined(O_NONBLOCK)

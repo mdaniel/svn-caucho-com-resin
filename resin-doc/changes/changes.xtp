@@ -12,6 +12,8 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>log: timestamp offset issues with min:sec (#5149, rep by Shinomiya Nobuaki)</li>
+<li>network: bind to IPv6 when address="*" (#5147, #5151, rep by Alex Sharaz)</li>
 <li>load-balance: issue with empty cookie values (#5144, rep by Scott Weatbrook)</li>
 <li>jmx: updated session jmx debug (#5143)</li>
 <li>jsp-el: add enum marshal for methods (#5131, rep by mate)</li>

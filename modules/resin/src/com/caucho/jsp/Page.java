@@ -67,7 +67,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   private ServletConfig _config;
   private WebApp _webApp;
 
-  private DependencyContainer _depends = new DependencyContainer();
+  private DependencyContainer _depends;
   private ArrayList<Depend> _cacheDepends;
 
   protected String _contentType;
@@ -83,7 +83,13 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   private boolean _isRecompiling = false;
   private int _useCount;
   private boolean _isDead = true;
-
+  
+  public Page()
+  {
+    _depends = new DependencyContainer();
+    _depends.setAsync(false);
+  }
+  
   public void init(Path path)
     throws ServletException
   {

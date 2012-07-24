@@ -63,6 +63,8 @@ public class DependencyContainer implements Dependency
     = new AtomicReference<DependencyCheckWorker>();
   
   private final AtomicBoolean _isChecking = new AtomicBoolean();
+  
+  private boolean _isAsync = false;
 
   public DependencyContainer()
   {
@@ -76,6 +78,16 @@ public class DependencyContainer implements Dependency
         break;
       }
     }
+  }
+  
+  public boolean isAsync()
+  {
+    return _isAsync;
+  }
+  
+  public void setAsync(boolean isAsync)
+  {
+    _isAsync = isAsync;
   }
   
   /**
@@ -199,6 +211,14 @@ public class DependencyContainer implements Dependency
   @Override
   public boolean isModified()
   {
+    return isModified(isAsync());
+  }
+
+  /**
+   * Returns true if the underlying dependencies have changed.
+   */
+  public boolean isModified(boolean isAsync)
+  {
     long now = CurrentTime.getCurrentTime();
 
     if (now < _checkExpiresTime)
@@ -209,12 +229,18 @@ public class DependencyContainer implements Dependency
     
     _checkExpiresTime = now + _checkInterval;
 
-    try {
+    if (isAsync) {
       getWorker().wake();
-
-      return _isModified;
-    } finally {
     }
+    else {
+      try {
+        checkImpl();
+      } finally {
+        _isChecking.set(false);
+      }
+    }
+
+    return _isModified;
   }
   
   private DependencyCheckWorker getWorker()
@@ -272,7 +298,7 @@ public class DependencyContainer implements Dependency
   {
     _checkExpiresTime = 0;
 
-    return isModified();
+    return isModified(false);
   }
 
   private Logger log()

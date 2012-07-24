@@ -108,6 +108,9 @@ abstract public class AbstractHttpResponse {
     = new CharBuffer("date");
   private static final CharBuffer SERVER
     = new CharBuffer("server");
+  
+  private static final long MINUTE = 60 * 1000L;
+  private static final long HOUR = 60 * MINUTE;
 
   private static final ConcurrentHashMap<String,ContentType> _contentTypeMap
     = new ConcurrentHashMap<String,ContentType>();
@@ -139,6 +142,8 @@ abstract public class AbstractHttpResponse {
   
   private final byte []_logDateBuffer = new byte[64];
   private final CharBuffer _logDateCharBuffer = new CharBuffer();
+  private int _logMinutesOffset;
+  private int _logSecondsOffset;
   private int _logDateBufferLength;
   private long _lastLogDate;
   
@@ -1147,7 +1152,7 @@ abstract public class AbstractHttpResponse {
 
   private void fillDate(long now)
   {
-    if (_lastDate / 60000 == now / 60000) {
+    if (_lastDate / HOUR == now / HOUR) {
       int min = (int) (now / 60000 % 60);
       int sec = (int) (now / 1000 % 60);
 
@@ -1190,12 +1195,10 @@ abstract public class AbstractHttpResponse {
   }
 
   public final byte []fillLogDateBuffer(long now, 
-                                        String timeFormat,
-                                        int minutesOffset,
-                                        int secondsOffset)
+                                        String timeFormat)
   {
     if (_lastLogDate / 1000 != now / 1000) {
-      fillLogDate(now, timeFormat, minutesOffset, secondsOffset);
+      fillLogDate(now, timeFormat);
     }
     
     return _logDateBuffer;
@@ -1207,11 +1210,9 @@ abstract public class AbstractHttpResponse {
   }
 
   private void fillLogDate(long now, 
-                           String timeFormat,
-                           int minutesOffset,
-                           int secondsOffset)
+                           String timeFormat)
   {
-    if (_lastLogDate / 60000 == now / 60000) {
+    if (_lastLogDate / HOUR == now / HOUR) {
       int min = (int) (now / 60000 % 60);
       int sec = (int) (now / 1000 % 60);
 
@@ -1221,11 +1222,11 @@ abstract public class AbstractHttpResponse {
       int s2 = '0' + (sec / 10);
       int s1 = '0' + (sec % 10);
 
-      _logDateBuffer[minutesOffset + 0] = (byte) m2;
-      _logDateBuffer[minutesOffset + 1] = (byte) m1;
+      _logDateBuffer[_logMinutesOffset + 0] = (byte) m2;
+      _logDateBuffer[_logMinutesOffset + 1] = (byte) m1;
 
-      _logDateBuffer[secondsOffset + 0] = (byte) s2;
-      _logDateBuffer[secondsOffset + 1] = (byte) s1;
+      _logDateBuffer[_logSecondsOffset + 0] = (byte) s2;
+      _logDateBuffer[_logSecondsOffset + 1] = (byte) s1;
 
       _lastLogDate = now;
 
@@ -1237,6 +1238,9 @@ abstract public class AbstractHttpResponse {
     _logDateCharBuffer.clear();
 
     _localCalendar.format(_logDateCharBuffer, timeFormat);
+    
+    _logSecondsOffset = _logDateCharBuffer.lastIndexOf(':') + 1;
+    _logMinutesOffset = _logSecondsOffset - 3;
 
     char []cb = _logDateCharBuffer.getBuffer();
     int len = _logDateCharBuffer.getLength();

@@ -47,7 +47,6 @@ import com.caucho.config.Configurable;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
-import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.server.http.CauchoRequest;
@@ -56,12 +55,10 @@ import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
-import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
-import com.caucho.util.QDate;
 import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Path;
 
@@ -79,8 +76,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   public static final int BUFFER_SIZE = 64 * 1024;
   
   private String _timeFormat;
-  private int _timeFormatSecondOffset = -1;
-  private int _timeFormatMinuteOffset = -1;
 
   private final AccessLogWriter _logWriter = new AccessLogWriter(this);
 
@@ -95,10 +90,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   private long _autoFlushTime = 60000;
 
   private final CharBuffer _cb = new CharBuffer();
-
-  private final CharBuffer _timeCharBuffer = new CharBuffer();
-  private final ByteBuffer _timeBuffer = new ByteBuffer();
-  private long _lastTime;
 
   private Alarm _alarm = new WeakAlarm(this);
   private boolean _isActive;
@@ -272,8 +263,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
     if (_timeFormat == null || _timeFormat.equals("")) {
       _timeFormat = "[%d/%b/%Y:%H:%M:%S %z]";
-      _timeFormatSecondOffset = 0;
-      _timeFormatMinuteOffset = 0;
     }
 
     _logWriter.init();
@@ -566,18 +555,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
       case 't':
       {
-        int dateOffset;
         long now = CurrentTime.getCurrentTime();
 
-        /*
-        if (date / 1000 != _lastTime / 1000) {
-          fillTime(date);
-        }
-        */
-
-        data = response.fillLogDateBuffer(now, _timeFormat,
-                                          _timeFormatMinuteOffset,
-                                          _timeFormatSecondOffset);
+        data = response.fillLogDateBuffer(now, _timeFormat);
         sublen = response.getLogDateBufferLength();
 
         System.arraycopy(data, 0, buffer, offset, sublen);
@@ -782,57 +762,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     flush();
 
     _logWriter.close();
-  }
-
-  /**
-   * Fills the time buffer with the formatted time.
-   *
-   * @param date current time in milliseconds
-   */
-  private void fillTime(long date)
-    throws IOException
-  {
-    synchronized (_timeBuffer) {
-      if (date / 1000 == _lastTime / 1000)
-        return;
-
-      if (_timeFormatSecondOffset >= 0
-          && date / 3600000 == _lastTime / 3600000) {
-        byte []bBuf = _timeBuffer.getBuffer();
-
-        int min = (int) (date / 60000 % 60);
-        int sec = (int) (date / 1000 % 60);
-
-        bBuf[_timeFormatMinuteOffset + 0] = (byte) ('0' + min / 10);
-        bBuf[_timeFormatMinuteOffset + 1] = (byte) ('0' + min % 10);
-
-        bBuf[_timeFormatSecondOffset + 0] = (byte) ('0' + sec / 10);
-        bBuf[_timeFormatSecondOffset + 1] = (byte) ('0' + sec % 10);
-
-        _lastTime = date;
-
-        return;
-      }
-
-      _timeCharBuffer.clear();
-      QDate.formatLocal(_timeCharBuffer, date, _timeFormat);
-
-      if (_timeFormatSecondOffset >= 0) {
-        _timeFormatSecondOffset = _timeCharBuffer.lastIndexOf(':') + 1;
-        _timeFormatMinuteOffset = _timeFormatSecondOffset - 3;
-      }
-
-      char []cBuf = _timeCharBuffer.getBuffer();
-      int length = _timeCharBuffer.getLength();
-
-      _timeBuffer.setLength(length);
-      byte []bBuf = _timeBuffer.getBuffer();
-
-      for (int i = length - 1; i >= 0; i--)
-        bBuf[i] = (byte) cBuf[i];
-    }
-
-    _lastTime = date;
   }
 
   /**

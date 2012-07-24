@@ -190,6 +190,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     _isEnableDependencyCheck = enableDependencyCheck;
 
     _dependencies.setCheckInterval(_globalDependencyCheckInterval);
+    _dependencies.setAsync(true);
 
     for (; parent != null; parent = parent.getParent()) {
       if (parent instanceof RootDynamicClassLoader) {
