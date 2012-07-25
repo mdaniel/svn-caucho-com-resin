@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-useradd -d /nonexistent -s /bin/false -M resin
+useradd -d /nonexistent -s /bin/false -M resin 2> /dev/null
 
 chown -R resin.resin /var/resin
 chown -R resin.resin /var/log/resin
