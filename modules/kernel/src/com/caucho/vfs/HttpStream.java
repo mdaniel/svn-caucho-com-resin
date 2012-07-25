@@ -37,6 +37,8 @@ import com.caucho.util.Log;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -151,7 +153,17 @@ class HttpStream extends StreamImpl {
     HttpStream stream = createStream(path);
     stream._isPost = false;
 
-    return new HttpStreamWrapper(stream);
+    HttpStreamWrapper wrapper = new HttpStreamWrapper(stream);
+    
+    String status = (String) wrapper.getAttribute("status");
+    
+    // ioc/23p0
+    if ("404".equals(status)) {
+      throw new FileNotFoundException(L.l("'{0}' returns a HTTP 404.",
+                                          path.getURL()));
+    }
+    
+    return wrapper;
   }
 
   public static void setAllowKeepalive(boolean isAllowKeepalive)

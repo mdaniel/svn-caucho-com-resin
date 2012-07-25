@@ -66,8 +66,10 @@ public class DeployCommand extends AbstractRepositoryCommand {
       throw new ConfigException(L.l("Cannot find .war argument in command line"));
     }
     
-    if (! war.endsWith(".war")) {
-      throw new ConfigException(L.l("Deploy expects to be used with a *.war file at {0}",
+    Path path = Vfs.lookup(war);
+    
+    if (! war.endsWith(".war") && ! path.isDirectory()) {
+      throw new ConfigException(L.l("Deploy expects to be used with a *.war file or a directory at {0}",
                                     war));
     }
 
@@ -84,8 +86,6 @@ public class DeployCommand extends AbstractRepositoryCommand {
     if (stage != null)
       commit.stage(stage);
     
-    Path path = Vfs.lookup(war);
-    
     String name = getName(args, path);
     
     commit.tagKey(host + "/" + name);
@@ -96,7 +96,7 @@ public class DeployCommand extends AbstractRepositoryCommand {
       commit.tagKey(tag);
       */
     
-    if (! path.isFile()) {
+    if (! path.isFile() && ! path.isDirectory()) {
       throw new ConfigException(L.l("'{0}' is not a readable file.",
                                     path.getFullPath()));
     }
@@ -117,7 +117,10 @@ public class DeployCommand extends AbstractRepositoryCommand {
     if (version != null)
       DeployClient.fillInVersion(commit, version);
 
-    deployClient.commitArchive(commit, path);
+    if (path.isDirectory())
+      deployClient.commitPath(commit, path);
+    else
+      deployClient.commitArchive(commit, path);
 
     System.out.println("Deployed " + commit.getId() + " from " + war + " to "
                        + deployClient.getUrl());

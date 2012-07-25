@@ -40,8 +40,10 @@ abstract public class PostBody
   static PostBody create(Env env, Value body)
   {
     PostBody post;
-    
-    if (body.isArray())
+
+    if (body == null)
+      return null;
+    else if (body.isArray())
       post = new MultipartBody();
     else
       post = new UrlEncodedBody();

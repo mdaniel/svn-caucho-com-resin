@@ -1,7 +1,6 @@
 #!/bin/sh -e
 
-groupadd resin
-useradd -D -d /nonexistent -s /bin/false -M resin
+useradd -d /nonexistent -s /bin/false -M resin
 
 chown -R resin.resin /var/resin
 chown -R resin.resin /var/log/resin

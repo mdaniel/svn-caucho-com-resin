@@ -1177,6 +1177,7 @@ class WatchdogArgs
 
     addCommand(new WebAppDeployCommand());
     addCommand(new WebAppRestartCommand());
+    addCommand(new WebAppRestartClusterCommand());
     addCommand(new WebAppStartCommand());
     addCommand(new WebAppStopCommand());
     addCommand(new WebAppUndeployCommand());
@@ -1187,6 +1188,7 @@ class WatchdogArgs
     _commandMap.put("deploy-start", new WebAppStartCommand());
     _commandMap.put("deploy-stop", new WebAppStopCommand());
     _commandMap.put("deploy-restart", new WebAppRestartCommand());
+    _commandMap.put("deploy-restart-cluster", new WebAppRestartClusterCommand());
 
     _commandMap.put("generate-password", new PasswordGenerateCommand());
 

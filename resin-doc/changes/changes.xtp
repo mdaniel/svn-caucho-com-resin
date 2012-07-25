@@ -12,8 +12,14 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>debian: update debian postinst script to change the user (#5140)</li>
+<li>quercus: NPE on curl_exec (#5145)</li>
+<li>cli: deploy can now be used with a director instead of a .war (#5139, rep by S. Bjornebekk)</li>
+<li>ejb: @Async uses LinkedBlockingQueue to avoid blocking on offer (#4994, rep by Yen-Fen Hsu)</li>
+<li>servlet: Part.getInputStream() now uses request.getCharacterEncoding() (#4954, rep by Mattias Jiderhamn)</li>
+<li>cli: add deploy-restart-cluster (#4812)</li>
 <li>log: timestamp offset issues with min:sec (#5149, rep by Shinomiya Nobuaki)</li>
-<li>network: bind to IPv6 when address="*" (#5147, #5151, rep by Alex Sharaz)</li>
+<li>network: bind to IPv6 when address="*" (#5147, #5151, #4825, rep by Alex Sharaz, S Nobuaki)</li>
 <li>load-balance: issue with empty cookie values (#5144, rep by Scott Weatbrook)</li>
 <li>jmx: updated session jmx debug (#5143)</li>
 <li>jsp-el: add enum marshal for methods (#5131, rep by mate)</li>
