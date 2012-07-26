@@ -30,6 +30,7 @@
 package com.caucho.config.type;
 
 import com.caucho.config.*;
+import com.caucho.config.util.ClassLoadUtil;
 import com.caucho.util.*;
 
 import java.util.*;
@@ -70,7 +71,7 @@ public final class ClassType extends ConfigType
     if (text == null || text.length() == 0)
       return null;
     else {
-      Class type = _primitiveTypes.get(text);
+      Class<?> type = _primitiveTypes.get(text);
 
       if (type != null)
         return type;
@@ -83,10 +84,11 @@ public final class ClassType extends ConfigType
         if (bracketIdx > 0) {
           String componentTypeName = text.substring(0, bracketIdx);
 
-          Class componentClass = _primitiveTypes.get(componentTypeName);
+          Class<?> componentClass = _primitiveTypes.get(componentTypeName);
 
-          if (componentClass == null)
-            componentClass = Class.forName(componentTypeName, false, loader);
+          if (componentClass == null) {
+            componentClass = ClassLoadUtil.load(componentTypeName, loader);
+          }
 
           while (bracketIdx > 0) {
             componentClass = Array.newInstance(componentClass, 0).getClass();
@@ -96,7 +98,7 @@ public final class ClassType extends ConfigType
           return componentClass;
         }
         else {
-          return Class.forName(text, false, loader);
+          return ClassLoadUtil.load(text, loader);
         }
       } catch (Exception e) {
         throw ConfigException.create(e);

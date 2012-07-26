@@ -442,7 +442,8 @@ abstract public class
       if (getPrologue() != null)
         initList.add(getPrologue());
 
-      thread.setContextClassLoader(instance.getClassLoader());
+      ClassLoader loader = instance.getClassLoader();
+      thread.setContextClassLoader(loader);
       Vfs.setPwd(getRootDirectory());
 
       addDependencies();
@@ -465,12 +466,19 @@ abstract public class
       } finally {
         cdiManager.setEnableAutoUpdate(true);
       }
+      
+      if (loader instanceof DynamicClassLoader) {
+        DynamicClassLoader dynLoader = (DynamicClassLoader) loader;
+
+        dynLoader.updateScan();
+      }
 
       for (DeployConfig config : initList) {
         ConfigProgram program = config.getBuilderProgram();
 
-        if (program != null)
+        if (program != null) {
           program.configure(instance);
+        }
       }
 
       instance.init();

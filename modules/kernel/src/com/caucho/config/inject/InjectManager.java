@@ -432,10 +432,10 @@ public final class InjectManager
       factory.type(InjectManager.class);
       factory.type(BeanManager.class);
       factory.annotation(ModulePrivateLiteral.create());
-      addBeanDiscover(factory.singleton(this));
+      addBean(factory.singleton(this));
       
       // ioc/0162
-      addBeanDiscover(new InjectionPointStandardBean());
+      addBean(new InjectionPointStandardBean());
 
       _xmlExtension = new XmlStandardPlugin(this);
       addExtension(_xmlExtension);
@@ -1189,6 +1189,8 @@ public final class InjectManager
    */
   public <T> InjectionTarget<T> discoverInjectionTarget(Class<T> type)
   {
+    fireBeforeBeanDiscovery();
+    
     try {
       AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(type);
       
@@ -1247,6 +1249,8 @@ public final class InjectManager
    */
   public <T> ManagedBeanImpl<T> discoverManagedBean(Class<T> cl)
   {
+    fireBeforeBeanDiscovery();
+    
     if (cl == null)
       throw new NullPointerException();
     
@@ -1288,6 +1292,8 @@ public final class InjectManager
   @Module
   public <T> void addBeanDiscover(Bean<T> bean, Annotated ann)
   {
+    fireBeforeBeanDiscovery();
+    
     if (ann != null) {
     }
     else if (bean instanceof AbstractBean<?>) {
@@ -3135,25 +3141,9 @@ public final class InjectManager
 
       _isBeforeBeanDiscoveryComplete = true;
 
-      if (! _isBeforeBeanDiscoverFired)
-        getExtensionManager().fireBeforeBeanDiscovery();
-
-      _isBeforeBeanDiscoverFired = true;
+      fireBeforeBeanDiscovery();
 
       _xmlExtension.processRoots();
-      /*
-      // ioc/0061
-      if (rootContextList.size() == 0)
-        return;
-
-      for (ScanRootContext context : rootContextList) {
-        for (String className : context.getClassNameList()) {
-          if (! _configuredClasses.contains(className)) {
-            discoverBean(className);
-          }
-        }
-      }
-      */
 
       processPendingAnnotatedTypes();
     } catch (ConfigException e) {
@@ -3164,6 +3154,38 @@ public final class InjectManager
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  private void fireBeforeBeanDiscovery()
+  {
+    if (_isBeforeBeanDiscoverFired) {
+      return;
+    }
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+      
+      _classLoader.updateScan();
+
+      _extensionManager.updateExtensions();
+
+      if (! _isBeforeBeanDiscoverFired) {
+        getExtensionManager().fireBeforeBeanDiscovery();
+
+        _isBeforeBeanDiscoverFired = true;
+      }
+    } catch (ConfigException e) {
+      if (_configException == null)
+        _configException = e;
+
+      throw e;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  
   }
   
   public void updateResources()

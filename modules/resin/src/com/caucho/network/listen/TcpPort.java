@@ -526,6 +526,13 @@ public class TcpPort
   @Configurable
   public void setPortThreadMax(int max)
   {
+    int threadMax = ThreadPool.getThreadPool().getThreadMax();
+    
+    if (threadMax < max) {
+      log.warning(L.l("<port-thread-max> value '{0}' should be less than <thread-max> value '{1}'",
+                      max, threadMax));
+    }
+    
     _launcher.setThreadMax(max);
   }
   

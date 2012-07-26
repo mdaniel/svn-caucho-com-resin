@@ -350,6 +350,6 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "$" + System.identityHashCode(this) + "[" + _type + "]";
+    return getClass().getSimpleName() + "[" + _type + "]";
   }
 }

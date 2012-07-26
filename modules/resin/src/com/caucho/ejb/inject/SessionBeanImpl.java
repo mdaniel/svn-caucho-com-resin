@@ -272,7 +272,7 @@ public class SessionBeanImpl<X,T>
   {
     return (getClass().getSimpleName()
             + "[" + getBeanClass().getSimpleName()
-            + "," + _context
+            // + "," + _context
             + ", " + getQualifiers() + "]");
   }
 }

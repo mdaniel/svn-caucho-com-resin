@@ -79,8 +79,9 @@ public final class EnumType extends ConfigType
   @Override
   public Object valueOf(String text)
   {
-    if (text == null)
+    if (text == null || "".equals(text)) {
       return null;
+    }
 
     Object value = _nameMap.get(text);
 

@@ -46,6 +46,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -161,6 +162,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private ZombieClassLoaderMarker _zombieMarker;
 
   private boolean _hasNewLoader = true;
+  private final AtomicBoolean _isScanning = new AtomicBoolean();
 
   /**
    * Create a new class loader.
@@ -875,18 +877,37 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     return listeners;
   }
 
+  public final void updateScan()
+  {
+    ClassLoader parent = getParent();
+    
+    if (parent instanceof DynamicClassLoader) {
+      DynamicClassLoader dynLoader = (DynamicClassLoader) parent;
+      
+      dynLoader.updateScan();
+    }
+    
+    sendAddLoaderEvent();
+  }
+  
   /**
    * Adds a listener to detect class loader changes.
    */
   protected final void sendAddLoaderEvent()
   {
-    if (_hasNewLoader) {
-      _hasNewLoader = false;
+    if (_hasNewLoader && _isScanning.compareAndSet(false, true)) {
+      try {
+        while (_hasNewLoader) {
+          _hasNewLoader = false;
 
-      scan();
+          scan();
 
-      configureEnhancerEvent();
-      configurePostEnhancerEvent();
+          configureEnhancerEvent();
+          configurePostEnhancerEvent();
+        }
+      } finally {
+        _isScanning.set(false);
+      }
     }
   }
 
@@ -1437,7 +1458,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     _hasNewLoader = true;
   }
   
-  public void scan()
+  protected void scan()
   {
   }
 
@@ -1520,8 +1541,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (_lifecycle.isBeforeInit())
       init();
 
+    // ioc/0h41 vs ioc/0043 - can't scan during class loading
     // Force scanning if any loaders have been added
-    sendAddLoaderEvent();
+    // sendAddLoaderEvent();
 
     if (normalJdkOrder) {
       try {

@@ -71,6 +71,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.RawString;
+import com.caucho.config.util.ClassLoadUtil;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlBeanType;
 import com.caucho.el.Expr;
@@ -511,10 +512,14 @@ public class TypeFactory implements AddLoaderListener
         
         String className = pkgName + '.' + name;
 
-        if (dynLoader != null)
+        if (dynLoader != null) {
+          dynLoader.updateScan();
+
           cl = dynLoader.loadClassImpl(className, false);
-        else
-          cl = Class.forName(className, false, loader);
+        }
+        else {
+          cl = ClassLoadUtil.load(className, loader);
+        }
 
         if (cl != null)
           return cl;
@@ -601,10 +606,11 @@ public class TypeFactory implements AddLoaderListener
         throw ConfigException.create(e);
       }
     }
+    else if (type.getEnumConstants() != null) {
+      return new EnumType(type);
+    }
     else if ((editor = findEditor(type)) != null)
       return new PropertyEditorType(type, editor);
-    else if (type.getEnumConstants() != null)
-      return new EnumType(type);
     else if (Set.class.isAssignableFrom(type))
       return new SetType(type);
     else if (Collection.class.isAssignableFrom(type)
@@ -746,7 +752,7 @@ public class TypeFactory implements AddLoaderListener
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = Class.forName(typeName, false, loader);
+      Class<?> cl = ClassLoadUtil.load(typeName, loader);
 
       if (! api.isAssignableFrom(cl))
         throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
@@ -782,7 +788,7 @@ public class TypeFactory implements AddLoaderListener
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = Class.forName(typeName, false, loader);
+      Class<?> cl = ClassLoadUtil.load(typeName, loader);
 
       if (! api.isAssignableFrom(cl))
         throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
@@ -862,7 +868,7 @@ public class TypeFactory implements AddLoaderListener
       String type = entry.getValue();
 
       try {
-        Class cl = Class.forName(type, false, loader);
+        Class<?> cl = ClassLoadUtil.load(type, loader);
 
         if (cl != null)
           schemes.add(scheme);

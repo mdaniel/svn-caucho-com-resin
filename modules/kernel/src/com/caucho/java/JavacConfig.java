@@ -28,6 +28,7 @@
 
 package com.caucho.java;
 
+import com.caucho.config.types.Period;
 import com.caucho.loader.EnvironmentLocal;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +42,10 @@ public class JavacConfig {
   private String _args;
   private String _encoding;
   private int _maxBatch = 64;
+
+  private long _startTimeout = 10 * 1000L;
+
+  private long _maxCompileTime;
 
   /**
    * Returns the environment configuration.
@@ -129,6 +134,26 @@ public class JavacConfig {
     setArgs(args);
   }
 
+  public long getStartTimeout()
+  {
+    return _startTimeout ;
+  }
+  
+  public void setStartTimeout(Period period)
+  {
+    _startTimeout = period.getPeriod();
+  }
+
+  public long getMaxCompileTime()
+  {
+    return _maxCompileTime;
+  }
+  
+  public void setMaxCompileTime(Period period)
+  {
+    _maxCompileTime = period.getPeriod();
+  }
+  
   /**
    * Stores self.
    */
@@ -138,4 +163,3 @@ public class JavacConfig {
     _localJavac.set(this);
   }
 }
-

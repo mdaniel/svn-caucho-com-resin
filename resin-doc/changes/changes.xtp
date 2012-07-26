@@ -12,6 +12,10 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>debian: update to debian post install scripts (#5140, rep by Alex Sharaz)</li>
+<li>jsf: upgrade mojarra distribution (#5137, rep by mate)</li>
+<li>jsp: add start-timeout to thread spawning to quickly fail when threads full (#5153, rep by TheScrumMaster)</li>
+<li>port/thread: add config warning when port-thread-max is greated than thread-max (#5138, rep by Mark Price)</li>
 <li>debian: update debian postinst script to change the user (#5140)</li>
 <li>quercus: NPE on curl_exec (#5145)</li>
 <li>cli: deploy can now be used with a director instead of a .war (#5139, rep by S. Bjornebekk)</li>

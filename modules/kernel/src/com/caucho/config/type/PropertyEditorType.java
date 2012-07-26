@@ -39,15 +39,13 @@ import java.beans.*;
  */
 public final class PropertyEditorType extends ConfigType
 {
-  private static final L10N L = new L10N(PropertyEditorType.class);
-
-  private Class _type;
+  private Class<?> _type;
   private PropertyEditor _editor;
   
   /**
    * The FloatType is a singleton
    */
-  public PropertyEditorType(Class type, PropertyEditor editor)
+  public PropertyEditorType(Class<?> type, PropertyEditor editor)
   {
     _type = type;
     _editor = editor;

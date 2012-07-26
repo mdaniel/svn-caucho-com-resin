@@ -558,7 +558,7 @@ public class WebAppController
     factory.type(ServletContext.class);
     // factory.stereotype(CauchoDeploymentLiteral.create());
 
-    beanManager.addBeanDiscover(factory.singleton(webApp));
+    beanManager.addBean(factory.singleton(webApp));
 
     Config.setProperty("webApp", getVar());
     Config.setProperty("app", getVar());

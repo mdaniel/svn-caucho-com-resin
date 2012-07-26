@@ -82,7 +82,8 @@ public class JavaCompilerUtil {
   protected ArrayList<String> _args;
 
   private int _maxBatch = 64;
-  protected long _maxCompileTime = 120 * 1000L;
+  private long _startTimeout = 10 * 1000L;
+  private long _maxCompileTime = 120 * 1000L;
 
   private JavaCompilerUtil()
   {
@@ -124,6 +125,8 @@ public class JavaCompilerUtil {
     javaCompiler.setArgs(config.getArgs());
     javaCompiler.setEncoding(config.getEncoding());
     javaCompiler.setMaxBatch(config.getMaxBatch());
+    javaCompiler.setStartTimeout(config.getStartTimeout());
+    javaCompiler.setMaxCompileTime(config.getMaxCompileTime());
 
     return javaCompiler;
   }
@@ -423,6 +426,22 @@ public class JavaCompilerUtil {
   }
 
   /**
+   * Returns the thread spawn time for an external compilation.
+   */
+  public long getStartTimeout()
+  {
+    return _startTimeout;
+  }
+
+  /**
+   * Sets the thread spawn time for an external compilation.
+   */
+  public void setStartTimeout(long startTimeout)
+  {
+    _startTimeout = startTimeout;
+  }
+
+  /**
    * Returns the maximum time allowed for an external compilation.
    */
   public long getMaxCompileTime()
@@ -681,7 +700,7 @@ public class JavaCompilerUtil {
     compiler.setLineMap(lineMap);
 
     // the compiler may not be well-behaved enough to use the ThreadPool
-    ThreadPool.getCurrent().schedule(compiler);
+    ThreadPool.getCurrent().start(compiler, _startTimeout);
 
     compiler.waitForComplete(_maxCompileTime);
 

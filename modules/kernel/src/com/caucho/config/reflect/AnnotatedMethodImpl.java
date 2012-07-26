@@ -216,7 +216,6 @@ public class AnnotatedMethodImpl<T>
     StringBuilder sb = new StringBuilder();
     
     sb.append(getClass().getSimpleName());
-    sb.append("$").append(System.identityHashCode(this));
     sb.append("[");
     sb.append(_method);
     sb.append("]");
