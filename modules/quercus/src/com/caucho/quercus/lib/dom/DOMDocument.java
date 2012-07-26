@@ -29,9 +29,6 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusLineRuntimeException;
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -51,8 +48,17 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 public class DOMDocument
   extends DOMNode<Document>
@@ -357,7 +363,6 @@ public class DOMDocument
 
   // XXX: also can be called statically, returns a DOMDocument in that case
   public boolean load(Env env, Path path, @Optional Value options)
-    throws IOException
   {
     if (options != null)
       env.stub(L.l("`{0}' is ignored", "options"));
@@ -369,13 +374,16 @@ public class DOMDocument
 
       getImpl().parseXMLDocument(_delegate, is, path.getPath());
     }
-    catch (SAXException ex) {
-      env.warning(ex);
-
+    catch (SAXException e) {
+      env.warning(e);
       return false;
     }
-    catch (IOException ex) {
-      env.warning(ex);
+    catch (IOException e) {
+      env.warning(e);
+      return false;
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
     finally {
@@ -492,6 +500,8 @@ public class DOMDocument
 
   public void normalizeDocument()
   {
+    // this is not implemented by com.caucho.xml, needed for Symfony-2.0.16
+    // use xerces instead
     _delegate.normalizeDocument();
   }
 
@@ -505,13 +515,15 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public DOMNode renameNode(
-      DOMNode node, String namespaceURI, String qualifiedName)
+  public DOMNode renameNode(DOMNode node,
+                            String namespaceURI,
+                            String qualifiedName)
     throws DOMException
   {
     try {
-      return wrap(_delegate.renameNode(
-          node.getDelegate(), namespaceURI, qualifiedName));
+      return wrap(_delegate.renameNode(node.getDelegate(),
+                                       namespaceURI,
+                                       qualifiedName));
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
@@ -563,28 +575,29 @@ public class DOMDocument
     printer.setMethod(isHTML ? "html" : "xml");
 
     printer.setEncoding(_encoding);
-    if(delegate._delegate instanceof Document)
-    {
-        /*
-        Print the XML Declaration ( the <?xml thing ) only for Documents,
-        as they don't make sense when just printing nodes.
-         */
-        printer.setPrintDeclaration(true);
+    if (delegate._delegate instanceof Document) {
+      /*
+      Print the XML Declaration ( the <?xml thing ) only for Documents,
+      as they don't make sense when just printing nodes.
+       */
+      printer.setPrintDeclaration(true);
 
-        Document document = (Document) delegate._delegate;
-        printer.setVersion(document.getXmlVersion());
-        if (document.getXmlStandalone()){
-            printer.setStandalone("yes");
-        }
-        printer.printXml(document);
+      Document document = (Document) delegate._delegate;
+      printer.setVersion(document.getXmlVersion());
+
+      if (document.getXmlStandalone()) {
+        printer.setStandalone("yes");
+      }
+
+      printer.printXml(document);
     }
-      else
-    {
-        printer.printXml((org.w3c.dom.Node) delegate._delegate);
+    else {
+      printer.printXml((org.w3c.dom.Node) delegate._delegate);
     }
 
-    if (hasChildNodes())
+    if (hasChildNodes()) {
       os.println();
+    }
   }
 
   @ReturnNullAsFalse
@@ -656,9 +669,37 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public boolean schemaValidateSource(String schemaSource)
+  public boolean schemaValidateSource(Env env, String schemaSource)
   {
-    throw new UnimplementedException();
+    String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+    SchemaFactory factory = SchemaFactory.newInstance(language);
+
+    try {
+      Source source = new StreamSource(new StringReader(schemaSource));
+
+      Schema schema = factory.newSchema(source);
+
+      Validator validator = schema.newValidator();
+
+      validator.validate(new DOMSource(getDelegate()));
+
+      return true;
+    }
+    catch (SAXException e) {
+      env.warning(e);
+
+      return false;
+    }
+    catch (IOException e) {
+      env.warning(e);
+
+      return false;
+    }
+    catch (Exception e) {
+      env.warning(e);
+
+      return false;
+    }
   }
 
   public void setDocumentURI(String documentURI)

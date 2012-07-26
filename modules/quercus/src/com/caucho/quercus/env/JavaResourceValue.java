@@ -44,7 +44,7 @@ public class JavaResourceValue extends JavaValue
   {
     super(env, object, def);
   }
-  
+
   /**
    * Returns true for an object.
    */
@@ -53,8 +53,8 @@ public class JavaResourceValue extends JavaValue
   {
     return false;
   }
-  
-  /*
+
+  /**
    * Returns true for a resource.
    */
   @Override
@@ -71,7 +71,7 @@ public class JavaResourceValue extends JavaValue
   {
     return "resource";
   }
-  
+
   /*
    * Returns the resource type.
    */

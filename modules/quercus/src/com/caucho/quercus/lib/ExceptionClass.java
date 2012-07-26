@@ -51,6 +51,8 @@ public class ExceptionClass
   private static final StringValue LINE = new ConstStringValue("line");
   private static final StringValue CODE = new ConstStringValue("code");
   private static final StringValue TRACE = new ConstStringValue("trace");
+  private static final StringValue PREVIOUS = new ConstStringValue("previous");
+
   private static final StringValue JAVA_EXCEPTION
     = new ConstStringValue("__javaException");
 
@@ -60,7 +62,8 @@ public class ExceptionClass
   public static Value __construct(Env env,
                                   @This ObjectValue value,
                                   @Optional StringValue message,
-                                  @Optional("0") int code)
+                                  @Optional("0") int code,
+                                  @Optional Value previous)
   {
     value.putField(env, "message", message);
 
@@ -84,6 +87,10 @@ public class ExceptionClass
     e.fillInStackTrace();
 
     value.putField(env, "_quercusException", env.wrapJava(e));
+
+    if (! previous.isDefault()) {
+      value.putField(env, "previous", previous);
+    }
 
     return value;
   }
@@ -142,6 +149,14 @@ public class ExceptionClass
   public static Value getTrace(Env env, @This Value obj)
   {
     return obj.getField(env, TRACE);
+  }
+
+  /**
+   * Returns the previous exception.
+   */
+  public static Value getPrevious(Env env, @This Value obj)
+  {
+    return obj.getField(env, PREVIOUS);
   }
 
   /**

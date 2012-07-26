@@ -42,13 +42,11 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ClassField;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.MethodMap;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -98,7 +96,7 @@ public class ReflectionClass
       cls = env.findClass(obj.toString());
 
     if (cls == null)
-      throw new ReflectionException(L.l("class '{0}' doesn't exist", obj));
+      throw new ReflectionException(env, L.l("class '{0}' doesn't exist", obj));
 
     return new ReflectionClass(cls);
   }
@@ -113,6 +111,39 @@ public class ReflectionClass
   public String getName()
   {
     return _name;
+  }
+
+  public String getNamespaceName()
+  {
+    String name = getName();
+
+    int p = name.lastIndexOf('\\');
+
+    if (p < 0) {
+      return "";
+    }
+
+    return name.substring(0, p);
+  }
+
+  public String getShortName()
+  {
+    String name = getName();
+
+    int p = name.lastIndexOf('\\');
+
+    if (p < 0) {
+      return name;
+    }
+
+    return name.substring(p + 1);
+  }
+
+  public boolean inNamespace()
+  {
+    String name = getName();
+
+    return name.contains("\\");
   }
 
   public boolean isInternal()
@@ -189,12 +220,6 @@ public class ReflectionClass
                                 name)));
 
     return new ReflectionMethod(_name, _cls.getFunction(name));
-
-    /*
-    MethodMap<AbstractFunction> map = _cls.getMethodMap();
-
-    return new ReflectionMethod(_name, map.get(name));
-    */
   }
 
   public ArrayValue getMethods(Env env)
@@ -481,6 +506,6 @@ public class ReflectionClass
 
   public String toString()
   {
-    return "ReflectionClass[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

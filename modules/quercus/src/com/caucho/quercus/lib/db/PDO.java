@@ -403,6 +403,7 @@ public class PDO implements EnvCleanup {
     array.put("pgsql");
     array.put("java");
     array.put("jdbc");
+    array.put("sqlite");
 
     return array;
   }
@@ -501,9 +502,7 @@ public class PDO implements EnvCleanup {
                        String query,
                        @Optional ArrayValue driverOptions)
   {
-    JdbcConnectionResource conn = getConnection();
-
-    if (! conn.isConnected()) {
+    if (! isConnected()) {
       return BooleanValue.FALSE;
     }
 
@@ -785,11 +784,6 @@ public class PDO implements EnvCleanup {
     return true;
   }
 
-  private boolean setPrefetch(int prefetch)
-  {
-    throw new UnimplementedException();
-  }
-
   /**
    * Sets a custom statement  class derived from PDOStatement.
    *
@@ -853,8 +847,14 @@ public class PDO implements EnvCleanup {
     else if (dsn.startsWith("java")) {
       return getJndiDataSource(env, dsn, user, pass);
     }
+    else if (dsn.startsWith("jdbc:")) {
+      return getJdbcDataSource(env, dsn, user, pass);
+    }
     else if (dsn.startsWith("resin:")) {
       return getResinDataSource(env, dsn);
+    }
+    else if (dsn.startsWith("sqlite:")) {
+      return getSqliteDataSource(env, dsn);
     }
     else {
       env.error(L.l("'{0}' is an unknown PDO data source.",
@@ -1024,6 +1024,70 @@ public class PDO implements EnvCleanup {
     }
 
     return new DataSourceConnection(env, ds, user, pass);
+  }
+
+  /**
+   * Opens a connection based on the dsn.
+   */
+  private JdbcConnectionResource getJdbcDataSource(Env env,
+                                                   String dsn,
+                                                   String user,
+                                                   String pass)
+  {
+    JdbcDriverContext context = env.getQuercus().getJdbcDriverContext();
+
+    int i = dsn.indexOf("jdbc:");
+    int j = dsn.indexOf("://", i + 5);
+
+    if (j < 0) {
+      j = dsn.indexOf(":", i + 5);
+    }
+
+    if (j < 0) {
+      return null;
+    }
+
+    String protocol = dsn.substring(i + 5, j);
+    String driver = context.getDriver(protocol);
+
+    if (driver == null) {
+      return null;
+    }
+
+    try {
+      DataSource ds = env.getDataSource(driver, dsn.toString());
+
+      return new DataSourceConnection(env, ds, user, pass);
+    }
+    catch (Exception e) {
+      env.warning(e);
+
+      return null;
+    }
+  }
+
+  /**
+   * Opens a resin connection based on the dsn.
+   */
+  private JdbcConnectionResource getSqliteDataSource(Env env, String dsn)
+  {
+    DataSource ds = null;
+
+    try {
+      Context ic = new InitialContext();
+
+      ds = (DataSource) ic.lookup(dsn);
+    } catch (NamingException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (ds == null) {
+      env.error(L.l("'{0}' is an unknown PDO JNDI data source.", dsn));
+
+      return null;
+    }
+
+    return new SQLite3(env, ds);
   }
 
   private HashMap<String,String> parseAttr(String dsn, int i)

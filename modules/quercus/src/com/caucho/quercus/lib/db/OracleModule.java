@@ -720,30 +720,33 @@ public class OracleModule extends AbstractQuercusModule {
   public static String oci_error(Env env,
                                  @Optional Value resource)
   {
-    if (resource.isDefault()) {
-      return null;
-    }
-
     JdbcConnectionResource conn = null;
 
-    if (resource == null) {
+    if (resource.isDefault()) {
       ConnectionInfo connectionInfo
         = (ConnectionInfo) env.getSpecialValue("caucho.oracle");
 
       if (connectionInfo != null) {
         conn = connectionInfo.getConnection();
       }
-    } else {
+    }
+    else {
       Object object = resource.toJavaObject();
 
       if (object instanceof Oracle) {
         conn = ((Oracle) object).validateConnection(env);
-      } else {
+      }
+      else if (object instanceof OracleStatement) {
         conn = ((OracleStatement) object).getConnection();
       }
     }
 
-    return conn.getErrorMessage();
+    if (conn != null) {
+      return conn.getErrorMessage();
+    }
+    else {
+      return null;
+    }
   }
 
   /**

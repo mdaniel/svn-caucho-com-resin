@@ -287,7 +287,7 @@ public class JavaValue extends ObjectValue
     return true;
   }
 
-  /*
+  /**
    * Returns true for a resource.
    */
   @Override

@@ -27,11 +27,33 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib.reflection;
+package com.caucho.quercus.lib.xml;
 
-import com.caucho.quercus.annotation.ClassImplementation;
-
-@ClassImplementation
-public interface Reflector
+public class LibXmlError
 {
+  public int level;
+  public int code;
+  public int column;
+
+  public String message;
+  public String file;
+  public int line;
+
+  protected LibXmlError(int level, int code, int column,
+                        String message, String file, int line)
+  {
+    this.level = level;
+    this.code = code;
+    this.column = column;
+    this.message = message;
+    this.file = file;
+    this.line = line;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + line
+                                      + "," + message + "]";
+  }
 }

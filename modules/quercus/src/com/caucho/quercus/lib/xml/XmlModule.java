@@ -33,14 +33,16 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * PHP XML
@@ -92,18 +94,22 @@ public class XmlModule extends AbstractQuercusModule {
   public static final int XML_ERROR_FINISHED = 36;
   public static final int XML_ERROR_SUSPEND_PE = 37;
 
+  public static final int LIBXML_ERR_WARNING = 1;
+  public static final int LIBXML_ERR_ERROR = 2;
+  public static final int LIBXML_ERR_FATAL = 3;
+
   public String []getLoadedExtensions()
   {
-    return new String[] { "xml" };
+    return new String[] { "xml", "libxml" };
   }
-  
+
   /**
    * Converts from iso-8859-1 to utf8
    */
   public static Value utf8_encode(Env env, StringValue str)
   {
     StringValue sb = str.createStringBuilder();
-    
+
     int len = str.length();
     for (int i = 0; i < len; i++) {
       int ch = str.charAt(i);
@@ -207,7 +213,7 @@ public class XmlModule extends AbstractQuercusModule {
     switch (code) {
     case XML_ERROR_NONE:
       return StringValue.create("No error");
-      
+
     case XML_ERROR_SYNTAX:
       return StringValue.create("syntax error");
 
@@ -250,7 +256,7 @@ public class XmlModule extends AbstractQuercusModule {
   {
     if (outputEncoding == null)
       outputEncoding = "UTF-8";
-    
+
     return new Xml(env, outputEncoding, null);
   }
 
@@ -269,7 +275,7 @@ public class XmlModule extends AbstractQuercusModule {
   {
     if (outputEncoding == null)
       outputEncoding = "UTF-8";
-    
+
     return new Xml(env, outputEncoding, separator);
   }
 
@@ -498,6 +504,95 @@ public class XmlModule extends AbstractQuercusModule {
       return false;
 
     return parser.xml_set_unparsed_entity_decl_handler(env, handler);
+  }
+
+  public static boolean libxml_use_internal_errors(Env env,
+                                                   @Optional Value isKeepErrors)
+  {
+    ArrayList<LibXmlError> existingErrorList = getErrorList(env);
+
+    if (! isKeepErrors.isDefault()) {
+      ArrayList<LibXmlError> newList = null;
+
+      if (isKeepErrors.toBoolean()) {
+        newList = existingErrorList;
+
+        if (newList == null) {
+          newList = new ArrayList<LibXmlError>();
+        }
+
+        env.setSpecialValue("xml.libxml_errors", newList);
+      }
+      else {
+        env.removeSpecialValue("xml.libxml_errors");
+      }
+    }
+
+    return existingErrorList != null;
+  }
+
+  public static void libxml_clear_errors(Env env)
+  {
+    ArrayList<LibXmlError> errorList = getErrorList(env);
+
+    if (errorList != null) {
+      errorList.clear();
+    }
+  }
+
+  public static ArrayList<LibXmlError> libxml_get_errors(Env env)
+  {
+    ArrayList<LibXmlError> errorList = getErrorList(env);
+
+    if (errorList == null) {
+      errorList = new ArrayList<LibXmlError>(0);
+    }
+
+    return errorList;
+  }
+
+  @ReturnNullAsFalse
+  public static LibXmlError libxml_get_last_error(Env env)
+  {
+    ArrayList<LibXmlError> errorList = getErrorList(env);
+
+    if (errorList != null && errorList.size() > 0) {
+      return errorList.get(errorList.size() - 1);
+    }
+
+    return null;
+  }
+
+  private static ArrayList<LibXmlError> getErrorList(Env env)
+  {
+    ArrayList<LibXmlError> errorList
+      = (ArrayList<LibXmlError>) env.getSpecialValue("xml.libxml_errors");
+
+    return errorList;
+  }
+
+  protected static void recordError(Env env,
+                                    int level, int errorCode, int column,
+                                    String message, String file, int line)
+  {
+    ArrayList<LibXmlError> errorList = getErrorList(env);
+
+    if (errorList == null) {
+      return;
+    }
+
+    LibXmlError error = new LibXmlError(level, errorCode, column, message, file, line);
+
+    errorList.add(error);
+  }
+
+  protected static void recordError(Env env, LibXmlError error)
+  {
+    ArrayList<LibXmlError> errorList = getErrorList(env);
+
+    if (errorList != null) {
+      errorList.add(error);
+    }
   }
 
   // @todo xml_error_string

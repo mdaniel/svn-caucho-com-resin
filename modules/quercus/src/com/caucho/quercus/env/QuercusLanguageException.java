@@ -45,9 +45,9 @@ public class QuercusLanguageException extends QuercusException
   private ArrayValue _trace;
   private Value _value;
 
-  protected QuercusLanguageException()
+  protected QuercusLanguageException(Env env)
   {
-    _value = Env.getCurrent().wrapJava(this);
+    _value = env.wrapJava(this);
   }
 
   public QuercusLanguageException(Value value)
@@ -56,7 +56,7 @@ public class QuercusLanguageException extends QuercusException
 
     _value = value;
   }
-  
+
   public Value toException(Env env)
   {
     // php/0g0j
@@ -90,12 +90,12 @@ public class QuercusLanguageException extends QuercusException
     Value field = _value.getField(env, MESSAGE);
 
     String msg;
-    
+
     if (field != null)
       msg = field.toString();
     else
       msg = getMessage();
-    
+
     return msg + env.getStackTraceAsString(getTrace(env), getLocation(env));
   }
 
@@ -112,23 +112,23 @@ public class QuercusLanguageException extends QuercusException
     else
       return new Location(file.toString(), line.toInt(), null, null);
   }
-  
+
   public int getLine(Env env)
   {
     return getLocation(env).getLineNumber();
   }
-  
+
   public String getFile(Env env)
   {
     return getLocation(env).getFileName();
   }
-  
+
   public ArrayValue getTrace(Env env)
   {
     if (_trace == null) {
       _trace = ErrorModule.debug_backtrace_exception(env, this, 0);
     }
-    
+
     return _trace;
   }
 }

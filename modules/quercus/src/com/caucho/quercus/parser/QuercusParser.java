@@ -1909,7 +1909,9 @@ public class QuercusParser {
           && token != '$'
           && token != -1) {
         _peekToken = token;
-        expectedClass = parseIdentifier();
+
+        // php/0m51
+        expectedClass = parseNamespaceIdentifier();
         token = parseToken();
       }
 
@@ -3772,6 +3774,13 @@ public class QuercusParser {
     else if (name.equals("__NAMESPACE__")) {
       return createString(_namespace);
     }
+    else if (name.equals("static")) {
+      if (_classDef == null) {
+        throw new IllegalStateException();
+      }
+
+      return createString(_classDef.getName());
+    }
 
     name = resolveIdentifier(name);
 
@@ -4494,8 +4503,8 @@ public class QuercusParser {
                       _lexeme));
     }
     else if (_peek == '\\') {
-        throw error(L.l("namespace identifier is not allowed at '{0}\\'",
-                        _lexeme));
+      throw error(L.l("namespace identifier is not allowed at '{0}\\'",
+                      _lexeme));
     }
 
     return _lexeme;

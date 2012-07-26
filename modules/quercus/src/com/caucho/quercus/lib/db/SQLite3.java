@@ -27,11 +27,24 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib.reflection;
+package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.env.Env;
 
-@ClassImplementation
-public interface Reflector
+import javax.sql.DataSource;
+
+/**
+ * Can only be used from PDO.
+ */
+public class SQLite3 extends DataSourceConnection
 {
+  protected SQLite3(Env env, DataSource ds)
+  {
+    this(env, ds, null, null);
+  }
+
+  protected SQLite3(Env env, DataSource ds, String user, String pass)
+  {
+    super(env, ds, user, pass);
+  }
 }

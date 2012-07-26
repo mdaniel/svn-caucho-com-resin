@@ -89,8 +89,8 @@ public class ClassesModule extends AbstractQuercusModule {
    * returns true if the class exists.
    */
   public static boolean class_exists(Env env,
-                              String className,
-                              @Optional("true") boolean useAutoload)
+                                     String className,
+                                     @Optional("true") boolean useAutoload)
   {
     if (className == null)
       return false;

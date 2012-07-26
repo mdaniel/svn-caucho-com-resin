@@ -28,7 +28,6 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -42,12 +41,14 @@ public class PDOException
 
   private Location _location;
 
-  public PDOException(String code, String message)
+  public PDOException(Env env, String code, String message)
   {
+    super(env);
+
     _code = code;
     _message = "SQLSTATE[" + code + "]: " + message;
 
-    _location = Env.getInstance().getLocation();
+    _location = env.getLocation();
   }
 
   public String getCode()

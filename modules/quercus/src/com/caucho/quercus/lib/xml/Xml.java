@@ -32,17 +32,28 @@ package com.caucho.quercus.lib.xml;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.annotation.ResourceType;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.CallbackObjectMethod;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +64,7 @@ import java.util.logging.Logger;
 /**
  * XML object oriented API facade
  */
+@ResourceType("xml")
 public class Xml {
   private static final Logger log = Logger.getLogger(Xml.class.getName());
   private static final L10N L = new L10N(Xml.class);
@@ -107,6 +119,8 @@ public class Xml {
 
   private StringValue _xmlString;
   private XmlHandler _xmlHandler;
+
+  private ArrayList<LibXmlError> _errorList;
 
   public Xml(Env env,
              String outputEncoding,
@@ -227,7 +241,8 @@ public class Xml {
   {
     if (_obj == null) {
       _defaultHandler = handler.toCallable(env);
-    } else {
+    }
+    else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
@@ -384,8 +399,9 @@ public class Xml {
         _xmlOptionTargetEncoding = is.getEncoding();
       }
       else if (_xmlOptionTargetEncoding != null
-               && _xmlOptionTargetEncoding.length() > 0)
+               && _xmlOptionTargetEncoding.length() > 0) {
         is = new InputSource(_xmlString.toReader(_xmlOptionTargetEncoding));
+      }
       else {
         is = new InputSource(_xmlString.toInputStream());
 
@@ -400,28 +416,31 @@ public class Xml {
 
         SAXParser saxParser = _factory.newSAXParser();
         saxParser.parse(is, _xmlHandler);
-      } catch (SAXException e) {
+      }
+      catch (SAXParseException e) {
+        XmlModule.recordError(env, XmlModule.LIBXML_ERR_FATAL, 0,
+                              e.getColumnNumber(), e.toString(), "",
+                              e.getLineNumber());
+
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
         _errorString = e.toString();
 
         log.log(Level.FINE, e.getMessage(), e);
         return 0;
-      } catch (IOException e) {
-        _errorCode = XmlModule.XML_ERROR_SYNTAX;
-        _errorString = e.toString();
+      }
+      catch (Exception e) {
+        XmlModule.recordError(env, XmlModule.LIBXML_ERR_FATAL, 0,
+                              0, e.toString(), "", 0);
 
-        log.log(Level.FINE, e.getMessage(), e);
-        return 0;
-      } catch (Exception e) {
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
         _errorString = e.toString();
 
         log.log(Level.FINE, e.toString(), e);
         return 0;
-      } finally {
+      }
+      finally {
         _xmlHandler = null;
       }
-
     }
 
     return 1;
@@ -807,8 +826,36 @@ public class Xml {
       args[0] = _parser;
 
       String eName = lName; // element name
-      if ("".equals(eName))
+      if (eName.length() == 0)
         eName = qName;
+
+      if (_startElementHandler == null && _defaultHandler != null) {
+        StringValue sb = _env.createStringBuilder();
+
+        sb.append("<");
+        sb.append(eName);
+
+        for (int i = 0; i < attrs.getLength(); i++) {
+          String aName = attrs.getLocalName(i); // Attr name
+
+          if (aName.length() == 0) {
+            aName = attrs.getQName(i);
+          }
+
+          sb.append(' ');
+          sb.append(aName);
+          sb.append('=');
+          sb.append('"');
+          sb.append(attrs.getValue(i));
+          sb.append('"');
+        }
+
+        sb.append(">");
+
+        _defaultHandler.call(_env, _parser, sb);
+
+        return;
+      }
 
       if (_xmlOptionCaseFolding)
         eName = eName.toUpperCase(Locale.ENGLISH);
@@ -826,14 +873,14 @@ public class Xml {
         if (_xmlOptionCaseFolding)
           aName = aName.toUpperCase(Locale.ENGLISH);
 
-        args[2].put(
-            _env.createString(aName),
-            _env.createString(attrs.getValue(i)));
+        args[2].put(_env.createString(aName),
+                    _env.createString(attrs.getValue(i)));
       }
 
       try {
-        if (_startElementHandler != null)
+        if (_startElementHandler != null) {
           _startElementHandler.call(_env, args);
+        }
         else {
           if (log.isLoggable(Level.FINER))
             log.finer(this + " startElement " + qName);
@@ -860,14 +907,25 @@ public class Xml {
       try {
         String eName = sName; // element name
 
-        if ("".equals(eName))
+        if (eName.length() == 0)
           eName = qName;
 
-        if (_xmlOptionCaseFolding)
+        if (_endElementHandler != null) {
+          if (_xmlOptionCaseFolding) {
             eName = eName.toUpperCase(Locale.ENGLISH);
+          }
 
-        if (_endElementHandler != null)
           _endElementHandler.call(_env, _parser, _env.createString(eName));
+        }
+        else if (_defaultHandler != null) {
+          StringValue sb = _env.createStringBuilder();
+
+          sb.append("</");
+          sb.append(eName);
+          sb.append(">");
+
+          _defaultHandler.call(_env, _parser, sb);
+        }
         else {
           if (log.isLoggable(Level.FINER))
             log.finer(this + " endElement " + sName);

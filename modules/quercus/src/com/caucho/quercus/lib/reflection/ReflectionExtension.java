@@ -178,6 +178,6 @@ public class ReflectionExtension
 
   public String toString()
   {
-    return "ReflectionExtension[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

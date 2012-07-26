@@ -45,7 +45,7 @@ import java.lang.reflect.*;
 public class QuercusScriptEngineFactory implements ScriptEngineFactory
 {
   private Bindings _globalBindings = new SimpleBindings();
-  
+
   /**
    * Returns the full name of the ScriptEngine.
    */
@@ -60,9 +60,7 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
   public String getEngineVersion()
   {
     try {
-      //return com.caucho.Version.VERSION;
-
-      Class cl = Class.forName("com.caucho.Version");
+      Class<?> cl = Class.forName("com.caucho.Version");
       Field version = cl.getField("VERSION");
 
       return (String) version.get(null);
@@ -165,7 +163,7 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
       sb.append(args[i]);
     }
     sb.append(");");
-    
+
     return sb.toString();
   }
 
@@ -190,12 +188,12 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
       sb.append(statements[i]);
       sb.append(";\n");
     }
-    
+
     sb.append("?>\n");
-    
+
     return sb.toString();
   }
-  
+
   /**
    * Returns a ScriptEngine instance.
    */
@@ -210,10 +208,10 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
   protected QuercusContext createQuercus()
   {
     QuercusContext quercus = new QuercusContext();
-    
+
     quercus.init();
     quercus.start();
-    
+
     return quercus;
   }
 

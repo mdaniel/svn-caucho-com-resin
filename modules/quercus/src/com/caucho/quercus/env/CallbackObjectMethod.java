@@ -175,4 +175,11 @@ public class CallbackObjectMethod extends Callback {
 
     return NullValue.NULL;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _obj.getClassName()
+                                      + "::" + _methodName + "]";
+  }
 }

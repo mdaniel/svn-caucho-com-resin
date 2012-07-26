@@ -40,6 +40,11 @@ public class DataSourceConnection extends JdbcConnectionResource
 {
   private final ConnectionEntry _conn;
 
+  public DataSourceConnection(Env env, DataSource ds)
+  {
+    this(env, ds, null, null);
+  }
+
   public DataSourceConnection(Env env, DataSource ds,
                               String user, String pass)
   {

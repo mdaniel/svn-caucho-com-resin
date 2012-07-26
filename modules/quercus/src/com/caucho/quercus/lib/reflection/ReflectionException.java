@@ -30,20 +30,22 @@
 package com.caucho.quercus.lib.reflection;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.Value;
 
 public class ReflectionException extends QuercusLanguageException
 {
   private String _message;
-  
-  public ReflectionException()
+
+  public ReflectionException(Env env)
   {
+    super(env);
   }
 
-  public ReflectionException(String msg)
+  public ReflectionException(Env env, String msg)
   {
+    super(env);
+
     _message = msg;
   }
 
@@ -58,7 +60,7 @@ public class ReflectionException extends QuercusLanguageException
   {
     return getMessage();
   }
-  
+
   /**
    * Converts the exception to a Value.
    */
@@ -66,7 +68,7 @@ public class ReflectionException extends QuercusLanguageException
   public Value toValue(Env env)
   {
     Value e = env.createException("ReflectionException", _message);
-    
+
     return e;
   }
 }

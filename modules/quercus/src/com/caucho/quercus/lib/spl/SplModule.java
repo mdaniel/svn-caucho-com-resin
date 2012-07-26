@@ -46,18 +46,18 @@ import com.caucho.util.CharBuffer;
 public class SplModule extends AbstractQuercusModule
 {
   private static String DEFAULT_EXTENSIONS = ".php,.inc";
-  
+
   public String []getLoadedExtensions()
   {
     return new String[] { "SPL" };
   }
-  
+
   public static Value class_implements(Env env,
                                         Value obj,
                                         @Optional boolean autoload)
   {
     QuercusClass cls;
-    
+
     if (obj.isObject())
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
     else
@@ -68,7 +68,7 @@ public class SplModule extends AbstractQuercusModule
     else
       return BooleanValue.FALSE;
   }
-  
+
   public static Value class_parents(Env env,
                                     Value obj,
                                     @Optional boolean autoload)
@@ -87,7 +87,7 @@ public class SplModule extends AbstractQuercusModule
 
       while ((parent = parent.getParent()) != null) {
         String name = parent.getName();
-        
+
         array.put(name, name);
       }
 
@@ -96,89 +96,92 @@ public class SplModule extends AbstractQuercusModule
     else
       return BooleanValue.FALSE;
   }
-  
+
   public static boolean spl_autoload_register(Env env,
-                                              @Optional Callable fun)
+                                              @Optional Callable fun,
+                                              @Optional("true") boolean isThrowErrors,
+                                              @Optional boolean isPrepend)
   {
-    if (fun == null)
+    if (fun == null) {
       fun = new CallbackFunction(env, "spl_autoload");
-    
-    env.addAutoloadFunction(fun);
-    
+    }
+
+    env.addAutoloadFunction(fun, isPrepend);
+
     return true;
   }
-  
+
   public static boolean spl_autoload_unregister(Env env,
                                                 Callable fun)
   {
     env.removeAutoloadFunction(fun);
-    
+
     return true;
   }
-  
+
   public static Value spl_autoload_functions(Env env)
   {
     ArrayList<Callable> funList = env.getAutoloadFunctions();
-    
+
     if (funList == null)
       return BooleanValue.FALSE;
-    
+
     ArrayValue array = new ArrayValueImpl();
 
     int size = funList.size();
     for (int i = 0; i < size; i++) {
       Callable cb = funList.get(i);
-      
+
       array.put(env.createString(cb.toString()));
     }
-    
+
     return array;
   }
-  
+
   public static String spl_autoload_extensions(Env env,
                                                @Optional String extensions)
   {
     String oldExtensions = getAutoloadExtensions(env);
-    
+
     if (extensions != null)
       env.setSpecialValue("caucho.spl_autoload", extensions);
-    
+
     return oldExtensions;
   }
-  
+
   private static String getAutoloadExtensions(Env env)
   {
     Object obj = env.getSpecialValue("caucho.spl_autoload");
-    
+
     if (obj == null)
       return DEFAULT_EXTENSIONS;
     else
       return (String) obj;
   }
-  
+
   public static void spl_autoload(Env env,
                                   String className,
                                   @Optional String extensions)
   {
     if (env.findClass(className, false, true) != null)
       return;
-    
+
     String []extensionList;
-    
+
     if (extensions == null || "".equals(extensions))
       extensionList = new String[] { ".php", ".inc" };
     else
       extensionList = extensions.split("[,\\s]+");
-    
+
     String filePrefix = className.toLowerCase(Locale.ENGLISH);
 
     for (String ext : extensionList) {
       StringValue filename = new StringBuilderValue(filePrefix).append(ext);
 
       env.include(filename);
-      
+
       QuercusClass cls = env.findClass(className, false, true);
-      
+
       if (cls != null)
         return;
     }

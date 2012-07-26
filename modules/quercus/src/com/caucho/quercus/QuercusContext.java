@@ -646,6 +646,20 @@ public class QuercusContext
   {
     if (_jdbcDriverContext == null) {
       _jdbcDriverContext = new JdbcDriverContext();
+
+      Value driverValue = getIniValue("quercus.jdbc_drivers");
+
+      if (driverValue.isArray()) {
+        ArrayValue array = (ArrayValue) driverValue.toArray();
+
+        for (Map.Entry<Value,Value> entry : array.entrySet()) {
+
+          Value key = entry.getKey();
+          Value value = entry.getValue();
+
+          _jdbcDriverContext.setProtocol(key.toString(), value.toString());
+        }
+      }
     }
 
     return _jdbcDriverContext;

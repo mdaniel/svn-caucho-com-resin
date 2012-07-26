@@ -33,18 +33,18 @@ package com.caucho.quercus.env;
  * Represents a call to a function.
  */
 abstract public class Callback extends Value implements Callable {
-  
+
   @Override
   public Callable toCallable(Env env)
   {
     return this;
   }
-  
+
   /**
    * Evaluates a callback where the first argument is from an array.
    * The callback may be modifying that array element.
    * For ArrayModule.
-   * 
+   *
    * @param env
    * @param array from which a1 came from
    * @param key index of a1 in the array
@@ -57,8 +57,8 @@ abstract public class Callback extends Value implements Callable {
                                Value a1)
   {
     // php/1740
-    
-    Value result;  
+
+    Value result;
 
     if (a1 instanceof Var) {
       a1 = new ArgRef((Var) a1);
@@ -71,19 +71,19 @@ abstract public class Callback extends Value implements Callable {
       result = call(env, aVar);
 
       Value aNew = aVar.toValue();
-      
+
       if (aNew != a1)
         array.put(key, aNew);
     }
 
     return result;
   }
-  
+
   /**
    * Evaluates a callback where the first argument is from an array.
    * The callback may be modifying that array element.
    * For ArrayModule.
-   * 
+   *
    * @param env
    * @param array from which a1 came from
    * @param key index of a1 in the array
@@ -97,8 +97,8 @@ abstract public class Callback extends Value implements Callable {
                                Value a2)
   {
     // php/1740
-    
-    Value result;  
+
+    Value result;
 
     if (a1 instanceof Var) {
       a1 = new ArgRef((Var) a1);
@@ -111,19 +111,19 @@ abstract public class Callback extends Value implements Callable {
       result = call(env, aVar, a2);
 
       Value aNew = aVar.toValue();
-      
+
       if (aNew != a1)
         array.put(key, aNew);
     }
 
     return result;
   }
-  
+
   /**
    * Evaluates a callback where the first argument is from an array.
    * The callback may be modifying that array element.
    * For ArrayModule.
-   * 
+   *
    * @param env
    * @param array from which a1 came from
    * @param key index of a1 in the array
@@ -138,8 +138,8 @@ abstract public class Callback extends Value implements Callable {
                                Value a3)
   {
     // php/1740
-    
-    Value result;  
+
+    Value result;
 
     if (a1 instanceof Var) {
       a1 = new ArgRef((Var) a1);
@@ -152,7 +152,7 @@ abstract public class Callback extends Value implements Callable {
       result = call(env, aVar, a2, a3);
 
       Value aNew = aVar.toValue();
-      
+
       if (aNew != a1)
         array.put(key, aNew);
     }
@@ -168,7 +168,7 @@ abstract public class Callback extends Value implements Callable {
   abstract public Value call(Env env, Value []args);
 
   /**
-   * 
+   *
    * @return true if this is an invalid callback reference
    */
   @Override
@@ -176,7 +176,7 @@ abstract public class Callback extends Value implements Callable {
 
   /**
    * Returns the name of the callback.
-   * 
+   *
    */
   abstract public String getCallbackName();
 
@@ -185,10 +185,10 @@ abstract public class Callback extends Value implements Callable {
    *
    */
   abstract public boolean isInternal(Env env);
-  
+
   public String toString()
   {
-    return "Callback" + getCallbackName() + "]";
+    return getClass().getSimpleName() + "[" + getCallbackName() + "]";
   }
 }
 
