@@ -1511,12 +1511,14 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     Thread thread = Thread.currentThread();
     
-    if (thread != _thread)
+    SocketLinkState state = _state;
+    
+    if (thread != _thread && ! state.isAsyncStarted()) {
       throw new IllegalStateException(L.l("{0} killKeepalive called from invalid thread.\n  expected: {1}\n  actual: {2}",
                                           this,
                                           _thread,
                                           thread));
-    SocketLinkState state = _state;
+    }
     
     _state = state.toKillKeepalive(this);
     
