@@ -113,7 +113,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private TimedCache<String,URL> _resourceCache;
 
   // Dependencies
-  private DependencyContainer _dependencies = new DependencyContainer();
+  private DependencyContainer _dependencies = new DependencyContainer(this);
   private boolean _isEnableDependencyCheck = false;
 
   // Makes
@@ -1362,8 +1362,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public static boolean isModified(ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
-      if (loader instanceof DynamicClassLoader)
+      if (loader instanceof DynamicClassLoader) {
         return ((DynamicClassLoader) loader).isModified();
+      }
     }
 
     return false;

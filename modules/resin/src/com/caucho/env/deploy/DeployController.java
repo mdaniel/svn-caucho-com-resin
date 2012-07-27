@@ -401,7 +401,11 @@ abstract public class DeployController<I extends DeployInstance>
     
     DeployInstance instance = getDeployInstanceImpl();
 
-    return instance == null || instance.isModified();
+    if (instance == null) {
+      return true;
+    }
+    
+    return instance.isModified();
   }
 
   /**
@@ -413,8 +417,12 @@ abstract public class DeployController<I extends DeployInstance>
       return true;
     
     DeployInstance instance = getDeployInstanceImpl();
-
-    return instance == null || instance.isModifiedNow();
+    
+    if (instance == null) {
+      return true;
+    }
+    
+    return instance.isModifiedNow();
   }
   
   /**

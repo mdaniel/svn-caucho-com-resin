@@ -29,6 +29,7 @@
 
 package com.caucho.make;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,6 +46,8 @@ import com.caucho.vfs.Dependency;
 public class DependencyContainer implements Dependency
 {
   private static Logger _log;
+  
+  private WeakReference<ClassLoader> _classLoaderRef;
   
   private ArrayList<Dependency> _dependencyList = new ArrayList<Dependency>();
 
@@ -68,7 +71,12 @@ public class DependencyContainer implements Dependency
 
   public DependencyContainer()
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    this(Thread.currentThread().getContextClassLoader());
+  }
+
+  public DependencyContainer(ClassLoader loader)
+  {
+    _classLoaderRef = new WeakReference<ClassLoader>(loader);
 
     _checkInterval = DynamicClassLoader.getGlobalDependencyCheckInterval();
     
@@ -259,14 +267,31 @@ public class DependencyContainer implements Dependency
   
   private void checkImpl()
   {
-    for (int i = _dependencyList.size() - 1; i >= 0; i--) {
-      Dependency dependency = _dependencyList.get(i);
-
-      if (dependency.isModified()) {
-        setModified(true);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      ClassLoader loader = null;
       
-        return;
+      if (_classLoaderRef != null)
+        loader = _classLoaderRef.get();
+      
+      if (loader != null) {
+        // server/1e87, #5156
+        thread.setContextClassLoader(loader);
       }
+
+      for (int i = _dependencyList.size() - 1; i >= 0; i--) {
+        Dependency dependency = _dependencyList.get(i);
+
+        if (dependency.isModified()) {
+          setModified(true);
+      
+          return;
+        }
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 

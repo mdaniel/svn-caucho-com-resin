@@ -50,8 +50,9 @@ class DeployControllerAlarm<C extends DeployController<?>>
     _controller = controller;
     _checkInterval = checkInterval;
     
-    if (checkInterval > 0)
+    if (checkInterval > 0) {
       _alarm.queue(checkInterval);
+    }
   }
 
   /**
@@ -63,8 +64,9 @@ class DeployControllerAlarm<C extends DeployController<?>>
     try {
       _controller.alarm();
     } finally {
-      if (! _controller.getState().isDestroyed())
+      if (! _controller.getState().isDestroyed()) {
         alarm.queue(_checkInterval);
+      }
     }
   }
   

@@ -12,6 +12,7 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>embed: isModified class-loader-context issue (#5156, rep by M Barker)</li>
 <li>debian: update to debian post install scripts (#5140, rep by Alex Sharaz)</li>
 <li>jsf: upgrade mojarra distribution (#5137, rep by mate)</li>
 <li>jsp: add start-timeout to thread spawning to quickly fail when threads full (#5153, rep by TheScrumMaster)</li>
