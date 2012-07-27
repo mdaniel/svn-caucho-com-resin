@@ -192,7 +192,7 @@ public class BlockWriter extends AbstractTaskWorker {
       }
     }
 
-    return ! _blockWriteRing.isEmpty();
+    return _blockWriteRing.isEmpty();
   }
 
   @Override

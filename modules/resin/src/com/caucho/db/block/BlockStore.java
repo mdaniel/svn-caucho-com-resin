@@ -1830,8 +1830,10 @@ public class BlockStore {
       return;
 
     log.finer(this + " closing");
-    if (_blockManager != null) {
-      _blockManager.freeStore(this);
+    BlockManager blockManager = _blockManager;
+    
+    if (blockManager != null) {
+      blockManager.freeStore(this);
     }
     
     _writer.close();
@@ -1843,8 +1845,8 @@ public class BlockStore {
 
     _readWrite.close();
 
-    if (_blockManager != null) {
-      _blockManager.freeStoreId(id);
+    if (blockManager != null) {
+      blockManager.freeStoreId(id);
     }
   }
 

@@ -1152,6 +1152,9 @@ public class Table extends BlockStore {
       if (fsync()) {
         writeShutdownTimestamp();
       }
+      else {
+        log.warning(this + " fsync on close failed.");
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }

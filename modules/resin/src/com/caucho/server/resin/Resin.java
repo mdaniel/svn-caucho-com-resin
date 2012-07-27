@@ -230,8 +230,9 @@ public class Resin
     
     preConfigureInit();
     
-    if (! isWatchdog())
+    if (! isWatchdog()) {
       configureFile(_resinConf);
+    }
   }
 
   /**

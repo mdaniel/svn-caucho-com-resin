@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.BlockManagerMXBean;
+import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.L10N;
 import com.caucho.util.LongKeyLruCache;
 
@@ -57,6 +58,9 @@ public final class BlockManager
   private static BlockManager _staticManager;
 
   private final byte []_storeMask = new byte[8192];
+  private final ConcurrentArrayList<BlockStore> _storeList
+    = new ConcurrentArrayList<BlockStore>(BlockStore.class);
+  
   private LongKeyLruCache<Block> _blockCache;
   
   private boolean _isEnableMmap = true;
@@ -204,6 +208,11 @@ public final class BlockManager
       throw new IllegalStateException(L.l("All store ids used."));
     }
   }
+  
+  void addStore(BlockStore store)
+  {
+    _storeList.add(store);
+  }
 
   /**
    * Frees blocks with the given store.
@@ -233,10 +242,38 @@ public final class BlockManager
   }
 
   /**
+   * Flushes all blocks.
+   */
+  public void flush()
+  {
+    ArrayList<Block> dirtyBlocks = new ArrayList<Block>();
+
+    synchronized (_blockCache) {
+      Iterator<Block> values = _blockCache.values();
+
+      while (values.hasNext()) {
+        Block block = values.next();
+        
+        if (block.isDirty()) {
+          dirtyBlocks.add(block);
+        }
+      }
+    }
+    
+    for (Block block : dirtyBlocks) {
+      BlockStore store = block.getStore();
+      // block.allocate();
+      store.getWriter().addDirtyBlock(block);
+    }
+  }
+
+  /**
    * Frees blocks with the given store.
    */
   public void freeStore(BlockStore store)
   {
+    _storeList.remove(store);
+    
     ArrayList<Block> removeBlocks = new ArrayList<Block>();
 
     synchronized (_blockCache) {
@@ -245,8 +282,9 @@ public final class BlockManager
       while (iter.hasNext()) {
         Block block = iter.next();
 
-        if (block != null && block.getStore() == store)
+        if (block != null && block.getStore() == store) {
           removeBlocks.add(block);
+        }
       }
     }
 
@@ -265,6 +303,17 @@ public final class BlockManager
         throw new IllegalArgumentException(String.valueOf(storeId));
 
       _storeMask[storeId / 8] &= ~(1 << storeId % 8);
+    }
+  }
+  
+  void destroy()
+  {
+    for (BlockStore store : _storeList.toArray()) {
+      try {
+        store.close();
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
     }
   }
 
