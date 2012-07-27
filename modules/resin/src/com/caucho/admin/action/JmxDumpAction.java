@@ -125,7 +125,9 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
     MBeanAttributeInfo []attributes = null;
     
     try {
-      attributes = server.getMBeanInfo(objectName).getAttributes();
+      synchronized (server) {
+        attributes = server.getMBeanInfo(objectName).getAttributes();
+      }
     } catch (Exception e) {
       sb.append("\"mbean_exception\": \"" + e + "\"\n");
       return;

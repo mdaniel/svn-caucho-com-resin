@@ -37,6 +37,6 @@
 	<classpathentry kind="lib" path="modules/ext/validation-api-1.0.0.GA.jar"/>
 	<classpathentry kind="lib" path="modules/ext/eclipselink-2.3.0.jar"/>
 	<classpathentry kind="lib" path="/usr/local/home/ferg/ws/resin/modules/ext/eclipselink.jar"/>
-	<classpathentry kind="lib" path="/usr/local/home/ferg/ws/resin/modules/ext/jsf-mojarra-2.1.8.jar"/>
+	<classpathentry kind="lib" path="/usr/local/home/ferg/ws/resin/modules/ext/javax.faces-2.1.11.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

@@ -1377,8 +1377,9 @@ Java_com_caucho_vfs_JniServerSocketImpl_getLocalPort(JNIEnv *env,
   if (socket) {
     return socket->port;
   }
-  else
+  else {
     return 0;
+  }
 }
 
 JNIEXPORT jint JNICALL
@@ -1494,9 +1495,11 @@ socket_fill_address(JNIEnv *env, jobject obj,
 {
   char temp_buf[1024];
   struct sockaddr_in *sin;
+  struct sockaddr_in6 *sin6;
 
-  if (! local_addr || ! remote_addr)
+  if (! local_addr || ! remote_addr) {
     return;
+  }
 
   if (ss->_isSecure) {
     jboolean is_secure = conn->ssl_sock != 0 && conn->ssl_cipher != 0;
@@ -1515,7 +1518,12 @@ socket_fill_address(JNIEnv *env, jobject obj,
     jint local_port;
 
     sin = (struct sockaddr_in *) conn->server_sin;
-    local_port = ntohs(sin->sin_port);
+    if (sin->sin_family == AF_INET6) {
+      sin6 = (struct sockaddr_in6 *) conn->server_sin;
+      local_port = ntohs(sin6->sin6_port);
+    } else {
+      local_port = ntohs(sin->sin_port);
+    }
 
     (*env)->SetIntField(env, obj, ss->_localPort, local_port);
   }
@@ -1528,10 +1536,15 @@ socket_fill_address(JNIEnv *env, jobject obj,
   }
 
   if (ss->_remotePort) {
-	jint remote_port;
+    jint remote_port;
 
     sin = (struct sockaddr_in *) conn->client_sin;
-    remote_port = ntohs(sin->sin_port);
+    if (sin->sin_family == AF_INET6) {
+      sin6 = (struct sockaddr_in6 *) conn->server_sin;
+      remote_port = ntohs(sin6->sin6_port);
+    } else {
+      remote_port = ntohs(sin->sin_port);
+    }
 
     (*env)->SetIntField(env, obj, ss->_remotePort, remote_port);
   }
