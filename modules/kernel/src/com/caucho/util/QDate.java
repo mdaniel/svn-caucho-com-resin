@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 public class QDate {
   private static final Logger log
     = Logger.getLogger(QDate.class.getName());
-  
+
   static final public int YEAR = 0;
   static final public int MONTH = YEAR + 1;
   static final public int DAY_OF_MONTH = MONTH + 1;
@@ -106,13 +106,13 @@ public class QDate {
   // static dates for the static formatting
   private static QDate _gmtDate = new QDate(false);
   private static QDate _localDate = new QDate(true);
-  
+
   private static final FreeList<QDate> _freeLocalDate
     = new FreeList<QDate>(8);
-  
+
   private static final FreeList<QDate> _freeGmtDate
     = new FreeList<QDate>(8);
-  
+
   private TimeZone _timeZone;
   private Calendar _calendar;
 
@@ -122,7 +122,7 @@ public class QDate {
   private DateFormat _dateFormat;
   private DateFormat _shortDateFormat;
   private DateFormat _shortTimeFormat;
-  
+
   private Date _date = new Date();
 
   // All times are local
@@ -197,7 +197,7 @@ public class QDate {
 
     setLocalTime(CurrentTime.getCurrentTime());
   }
-  
+
   /**
    * Creates the date from local or GMT.
    */
@@ -244,38 +244,38 @@ public class QDate {
   {
     return new QDate(true);
   }
-  
+
   public static QDate allocateLocalDate()
   {
     QDate date = _freeLocalDate.allocate();
-    
+
     if (date == null)
       date = new QDate(true);
-    
+
     return date;
   }
-  
+
   public static void freeLocalDate(QDate date)
   {
     _freeLocalDate.free(date);
   }
-  
+
   public static QDate allocateGmtDate()
   {
     QDate date = _freeGmtDate.allocate();
-    
+
     if (date == null)
       date = new QDate(false);
-    
+
     return date;
   }
-  
+
   public static void freeGmtDate(QDate date)
   {
     _freeGmtDate.free(date);
   }
-  
-  
+
+
 
   /**
    * Sets the time in milliseconds since the epoch and calculate
@@ -395,12 +395,12 @@ public class QDate {
   {
     if (month < 0 || DAYS_IN_MONTH.length <= month)
       return;
-     
+
     _month = month;
-    
+
     if (DAYS_IN_MONTH[month] <= _dayOfMonth)
       _dayOfMonth = DAYS_IN_MONTH[month] - 1;
-    
+
     calculateJoin();
     calculateSplit(_localTimeOfEpoch);
   }
@@ -574,7 +574,7 @@ public class QDate {
     if (_dayOfYear >= 360) {
       int days = 365 + (_isLeapYear ? 1 : 0);
       long nextNewYear = (_dayOfEpoch - _dayOfYear + days);
-      
+
       int dowNext4th = (int) ((nextNewYear + 3) % 7 + 10) % 7;
       int nextWw1Monday = 3 - dowNext4th;
 
@@ -785,7 +785,7 @@ public class QDate {
     os.print(_zoneName);
     os.write(')');
   }
-  
+
   /*
    * Mon, 17 Jan 1994 11:14:55 -0500
    */
@@ -849,7 +849,7 @@ public class QDate {
     sb.append('T');
     sb.append((time / 36000) % 10);
     sb.append((time / 3600) % 10);
-      
+
     sb.append(':');
     sb.append((time / 600) % 6);
     sb.append((time / 60) % 10);
@@ -1014,12 +1014,15 @@ public class QDate {
    * <tr><td>%B<td>day of month (verbose)
    * <tr><td>%c<td>Java locale date
    * <tr><td>%d<td>day of month (two-digit)
+   * <tr><td>%F<td>%Y-%m-%d
    * <tr><td>%H<td>24-hour (two-digit)
    * <tr><td>%I<td>12-hour (two-digit)
    * <tr><td>%j<td>day of year (three-digit)
+   * <tr><td>%l<td>12-hour (one-digit prefixed by space)
    * <tr><td>%m<td>month (two-digit)
    * <tr><td>%M<td>minutes
    * <tr><td>%p<td>am/pm
+   * <tr><td>%P<td>AM/PM
    * <tr><td>%S<td>seconds
    * <tr><td>%s<td>milliseconds
    * <tr><td>%x<td>Java locale short date
@@ -1090,6 +1093,24 @@ public class QDate {
 
         // ISO year
 
+      case 'F':
+        {
+          cb.append(_year / 1000 % 10);
+          cb.append(_year / 100 % 10);
+          cb.append(_year / 10 % 10);
+          cb.append(_year % 10);
+
+          cb.append('-');
+          cb.append((_month + 1) / 10);
+          cb.append((_month + 1) % 10);
+
+          cb.append('-');
+          cb.append((_dayOfMonth + 1) / 10);
+          cb.append((_dayOfMonth + 1) % 10);
+
+          break;
+        }
+
       case 'H':
         {
           int hour = (int) (_timeOfDay / 3600000) % 24;
@@ -1114,6 +1135,21 @@ public class QDate {
         cb.append((_dayOfYear + 1) % 10);
         break;
 
+      case 'l':
+        {
+          int hour = (int) (_timeOfDay / 3600000) % 12;
+          if (hour == 0)
+            hour = 12;
+
+          if (hour < 10) {
+            cb.append(' ');
+          }
+
+          cb.append(hour);
+
+          break;
+        }
+
       case 'm':
         cb.append((_month + 1) / 10);
         cb.append((_month + 1) % 10);
@@ -1133,6 +1169,16 @@ public class QDate {
             cb.append("pm");
           break;
         }
+
+      case 'P':
+      {
+        int hour = (int) (_timeOfDay / 3600000) % 24;
+        if (hour < 12)
+          cb.append("AM");
+        else
+          cb.append("PM");
+        break;
+      }
 
       case 'S':
         cb.append((_timeOfDay / 10000) % 6);
@@ -1172,11 +1218,11 @@ public class QDate {
       case 'x':
         cb.append(printShortLocaleDate());
         break;
-        
+
       case 'X':
         cb.append(printShortLocaleTime());
         break;
-    
+
       case 'y':
         cb.append(_year / 10 % 10);
         cb.append(_year % 10);
@@ -1252,7 +1298,7 @@ public class QDate {
 
     return _shortDateFormat.format(_date);
   }
-  
+
   /**
    * Returns a date in H:mm:ss PM format.
    */
@@ -1265,7 +1311,7 @@ public class QDate {
 
     return _shortTimeFormat.format(_date);
   }
-  
+
   /*
    * XXX: okay, this is vile.
    * Mon, 17 Jan 1994 11:14:55 -0500 (EST)
@@ -1292,10 +1338,10 @@ public class QDate {
   {
     try {
       int strlen = string.length();
-      
+
       if (strlen == 0)
         return 0;
-      
+
       int i = skipWhitespace(string, strlen, 0);
 
       int ch = string.charAt(i);
@@ -1318,7 +1364,7 @@ public class QDate {
         if (MONTH_NAMES[(int) month].equalsIgnoreCase(smonth))
           break;
       }
-      
+
       if (month == 12)
         throw new Exception("Unexpected month: " + month);
 
@@ -1377,7 +1423,7 @@ public class QDate {
       return _localTimeOfEpoch - _zoneOffset;
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       return Long.MAX_VALUE;
     }
   }
@@ -1448,7 +1494,7 @@ public class QDate {
         pos += 2;
       }
 
-      if (pos < strlen && 
+      if (pos < strlen &&
           (string.charAt(pos) == '.' || string.charAt(pos) == ',')) {
         pos++;
         // XXX: fractions can be any strlen, not just 3
@@ -1572,8 +1618,8 @@ public class QDate {
   private int skipWhitespace(String string, int strlen, int i)
   {
     char ch;
-    
-    for (; i < strlen 
+
+    for (; i < strlen
            && ((ch = string.charAt(i)) == ' ' || ch == '\t'
                || ch == '\n' || ch == '\r');
          i++) {

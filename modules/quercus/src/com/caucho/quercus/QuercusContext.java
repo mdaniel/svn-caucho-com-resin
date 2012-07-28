@@ -499,8 +499,7 @@ public class QuercusContext
   public boolean isUnicodeSemantics()
   {
     if (_isUnicodeSemantics == null) {
-      _isUnicodeSemantics
-        = Boolean.valueOf(getIniBoolean("unicode.semantics"));
+      _isUnicodeSemantics = Boolean.valueOf(getIniBoolean("unicode.semantics"));
     }
 
     return _isUnicodeSemantics.booleanValue();

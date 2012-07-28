@@ -977,6 +977,34 @@ public class DateModule extends AbstractQuercusModule {
       time = 1000 * phpTime;
     }
 
+    // php/190x
+    // XXX: push this to QDate?
+    if (format.contains("%p") || format.contains("%P")) {
+      StringBuilder sb = new StringBuilder();
+
+      int len = format.length();
+      for (int i = 0; i < len; i++) {
+        char ch = format.charAt(i);
+
+        sb.append(ch);
+
+        if (ch == '%' && i + 1 < len) {
+          char ch2 = format.charAt(++i);
+
+          if (ch2 == 'p') {
+            ch2 = 'P';
+          }
+          else if (ch2 == 'P') {
+            ch2 = 'p';
+          }
+
+          sb.append(ch2);
+        }
+      }
+
+      format = sb.toString();
+    }
+
     return QDate.formatLocal(time, format);
   }
 
