@@ -509,7 +509,8 @@ public class Env
 
     // Define the constant string PHP_VERSION
 
-    addConstant("PHP_VERSION", OptionsModule.phpversion(this, null), true);
+    String version = quercus.getPhpVersion();
+    addConstant("PHP_VERSION", createString(version), true);
 
     // STDIN, STDOUT, STDERR
     // php://stdin, php://stdout, php://stderr

@@ -329,22 +329,6 @@ public class QuercusServlet
     return ini;
   }
 
-  public boolean isUnicodeSemantics()
-  {
-    for (PhpIni ini : _phpIniList) {
-      String value = ini.getPropertyMap().get("unicode.semantics");
-
-      if (value != null
-          && ! value.equals("0")
-          && ! value.equals("false")
-          && ! value.equals("off")) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   /**
    * Sets a php.ini file.
    */
@@ -544,10 +528,6 @@ public class QuercusServlet
     log.info(L.l("QuercusServlet starting as {0}",
                  _impl.getClass().getSimpleName()));
 
-    if (isUnicodeSemantics()) {
-      _impl.getQuercus().setUnicodeSemantics(true);
-    }
-
     QuercusContext quercus = getQuercus();
 
     quercus.setCompile(_isCompile);
@@ -574,8 +554,6 @@ public class QuercusServlet
       String realPath = getServletContext().getRealPath("WEB-INF/php.ini");
       quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
     }
-
-    long e0 = System.currentTimeMillis();
 
     if (_scriptEncoding != null)
       quercus.setScriptEncoding(_scriptEncoding);

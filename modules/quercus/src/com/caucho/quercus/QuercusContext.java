@@ -141,11 +141,6 @@ public class QuercusContext
   private HashMap<String, AbstractFunction> _lowerFunMap
     = new HashMap<String, AbstractFunction>();
 
-  /*
-  private ClassDef _stdClassDef;
-  private QuercusClass _stdClass;
-  */
-
   private ConcurrentHashMap<String, JavaClassDef> _javaClassWrappers
     = new ConcurrentHashMap<String, JavaClassDef>();
 
@@ -203,7 +198,6 @@ public class QuercusContext
 
   private String _phpVersion = "5.3.2";
   private String _mySqlVersion;
-  private StringValue _phpVersionValue;
 
   private boolean _isStrict;
   private boolean _isLooseParse;
@@ -258,8 +252,8 @@ public class QuercusContext
     _sessionManager = createSessionManager();
 
     for (Map.Entry<String,String> entry : System.getenv().entrySet()) {
-       _serverEnvMap.put(createString(entry.getKey()),
-                         createString(entry.getValue()));
+      _serverEnvMap.put(createString(entry.getKey()),
+                        createString(entry.getValue()));
     }
   }
 
@@ -490,7 +484,7 @@ public class QuercusContext
 
   public void setUnicodeSemantics(boolean isUnicode)
   {
-    _isUnicodeSemantics = isUnicode;
+    setIni("unicode.semantics", BooleanValue.create(isUnicode));
   }
 
   /**
@@ -498,14 +492,11 @@ public class QuercusContext
    */
   public boolean isUnicodeSemantics()
   {
-    if (_isUnicodeSemantics == null) {
-      _isUnicodeSemantics = Boolean.valueOf(getIniBoolean("unicode.semantics"));
-    }
-
-    return _isUnicodeSemantics.booleanValue();
+    // php/
+    return getIniBoolean("unicode.semantics");
   }
 
-  /*
+  /**
    * Returns true if URLs may be arguments of include().
    */
   public boolean isAllowUrlInclude()
@@ -513,7 +504,7 @@ public class QuercusContext
     return getIniBoolean("allow_url_include");
   }
 
-  /*
+  /**
    * Returns true if URLs may be arguments of fopen().
    */
   public boolean isAllowUrlFopen()
@@ -537,7 +528,7 @@ public class QuercusContext
     _pageManager.setLazyCompile(isCompile);
   }
 
-  /*
+  /**
    * true if interpreted pages should be used if pages fail to compile.
    */
   public void setCompileFailover(boolean isCompileFailover)
@@ -545,7 +536,7 @@ public class QuercusContext
     _pageManager.setCompileFailover(isCompileFailover);
   }
 
-  /*
+  /**
    * Returns the expected encoding of php scripts.
    */
   public String getScriptEncoding()
@@ -558,7 +549,7 @@ public class QuercusContext
       return "iso-8859-1";
   }
 
-  /*
+  /**
    * Sets the expected encoding of php scripts.
    */
   public void setScriptEncoding(String encoding)
@@ -594,22 +585,9 @@ public class QuercusContext
   public void setPhpVersion(String version)
   {
     _phpVersion = version;
-    _phpVersionValue = null;
   }
 
-  public StringValue getPhpVersionValue()
-  {
-    if (_phpVersionValue == null) {
-      if (isUnicodeSemantics())
-        _phpVersionValue = createUnicodeString(_phpVersion);
-      else
-        _phpVersionValue = createString(_phpVersion);
-    }
-
-    return _phpVersionValue;
-  }
-
-  /*
+  /**
    * Sets the ServletContext.
    */
   public void setServletContext(ServletContext servletContext)
@@ -617,7 +595,7 @@ public class QuercusContext
     _servletContext = servletContext;
   }
 
-  /*
+  /**
    * Returns the ServletContext.
    */
   public ServletContext getServletContext()
@@ -981,7 +959,9 @@ public class QuercusContext
         ArrayValue array = (ArrayValue) result;
 
         for (Map.Entry<Value,Value> entry : array.entrySet()) {
-          setIni(entry.getKey().toString(), entry.getValue());
+          String key = entry.getKey().toString();
+
+          setIni(key, entry.getValue());
         }
       }
 
