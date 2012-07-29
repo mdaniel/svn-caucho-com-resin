@@ -1505,6 +1505,10 @@ abstract public class ArrayValue extends Value {
     else if (rValue == null) {
       return false;
     }
+    else if (rValue.isObject()) {
+      // php/03q1
+      return false;
+    }
     else if (! rValue.isArray()) {
       return rValue.eq(this);
     }

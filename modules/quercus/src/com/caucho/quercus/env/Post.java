@@ -478,77 +478,52 @@ public class Post
         return;
       }
 
-      String index = key;
+      int keyStart = 0;
+      int keyEnd = p;
 
-      Value keyValue;
-      Value existingValue;
+      while (p > 0 && p < q) {
+        String currentKey = key.substring(keyStart, keyEnd);
 
-      key = key.substring(0, p);
-      key = key.replaceAll("\\.", "_");
+        if (keyStart == 0) {
+          // php/081p
+          currentKey = currentKey.replaceAll("\\.", "_");
+        }
+
+        // php/080h
+        currentKey = currentKey.replaceAll(" ", "_");
+
+        StringValue currentKeyValue = env.createString(currentKey);
+        Value currentArray = array.get(currentKeyValue);
+
+        if (! currentArray.isArray()) {
+          currentArray = new ArrayValueImpl();
+        }
+
+        if (currentKeyValue.length() == 0) {
+          array.append(currentArray);
+        }
+        else {
+          array.put(currentKeyValue, currentArray);
+        }
+
+        array = currentArray.toArrayValue(env);
+
+        keyStart = p + 1;
+        keyEnd = q;
+
+        p = key.indexOf('[', q + 1);
+        q = key.indexOf(']', p + 1);
+      }
+
+      if (keyEnd > 0)
+        key = key.substring(keyStart, keyEnd);
+      else
+        key = key.substring(keyStart);
+
       // php/080h
       key = key.replaceAll(" ", "_");
 
-      keyValue = env.createString(key);
-      existingValue = array.get(keyValue);
-
-      if (existingValue == null || ! existingValue.isset()) {
-        existingValue = new ArrayValueImpl();
-        array.put(keyValue, existingValue);
-      }
-      else if (! existingValue.isArray()) {
-        // existing is overwritten
-        // php/115g
-
-        existingValue = new ArrayValueImpl();
-        array.put(keyValue, existingValue);
-      }
-
-      array = (ArrayValue) existingValue;
-
-      int q1 = q;
-
-      while (true) {
-        int p1 = index.indexOf('[', q1);
-
-        if (p1 < 0) {
-          break;
-        }
-
-        q1 = index.indexOf(']', p1);
-
-        if (q1 < 0) {
-          break;
-        }
-
-        key = index.substring(p1 + 1, q1);
-
-        if (key.length() == 0) {
-          existingValue = new ArrayValueImpl();
-          array.put(existingValue);
-        }
-        else {
-          keyValue = env.createString(key);
-          existingValue = array.get(keyValue);
-
-          if (existingValue == null || ! existingValue.isset()) {
-            existingValue = new ArrayValueImpl();
-            array.put(keyValue, existingValue);
-          }
-          else if (! existingValue.isArray()) {
-            existingValue = new ArrayValueImpl().put(existingValue);
-            array.put(keyValue, existingValue);
-          }
-        }
-
-        array = (ArrayValue) existingValue;
-      }
-
-      if (q > 0)
-        index = index.substring(p + 1, q);
-      else
-        index = index.substring(p + 1);
-
-      if (index.length() == 0) {
+      if (key.length() == 0) {
         if (formValueList != null) {
           for (int i = 0; i < formValueList.length; i++) {
             Value value;
@@ -564,13 +539,15 @@ public class Post
         else
           array.put(formValue);
       }
-      else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
+      else if ('0' <= key.charAt(0) && key.charAt(0) <= '9') {
         put(array,
-            LongValue.create(StringValue.toLong(index)),
+            LongValue.create(StringValue.toLong(key)),
             formValue,
             addSlashesToValues);
-      else
-        put(array, env.createString(index), formValue, addSlashesToValues);
+      }
+      else {
+        put(array, env.createString(key), formValue, addSlashesToValues);
+      }
     }
     else {
       if (key != null) {
