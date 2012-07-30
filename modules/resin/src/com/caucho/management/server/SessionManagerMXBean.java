@@ -221,9 +221,12 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
   @Description("A JSON formatted representation of session")
   public String sessionAsJsonString(String id);
 
-  @Description("A JSON formatted representation of sessions")
+  @Description("A list fo session ids")
   public String []sessionIdList();
 
+  @Description("A JSON formatted representation of session")
+  public String sessionsAsJsonString();
+  
   @Description("Estimated Memory Size")
   public long getEstimatedMemorySize();
   
