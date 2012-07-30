@@ -663,7 +663,7 @@ function pdf_availability()
     if ($downtime->isDataAbsent()) {
       $note = '* No data: using report start time';
     } else if ($downtime->isEstimated()) {
-      $note = '* Estimated: due to hard shutdown';
+      $note = '* Approximate: due to hard shutdown';
     } else {
       $note = '';
     }

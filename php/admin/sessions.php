@@ -30,7 +30,7 @@ if ($session_manager->SessionActiveCount == 0) {
   return;
 }
 
-$sessions_json = $session_manager->getSessionsAsJsonString();
+$sessions_json = $session_manager->sessionsAsJsonString();
 
 //[{"AccessTime":1335326457442,"CreationTime":1335326237342,"IdleIsSet":false,"IdleTimeout":1800000,"LastSaveLength":112,"LastUseTime":1335326459502,"New":false,"SessionId":"aaacRWFwH0LzGcuiiiGBt","UseCount":1.0,"Valid":true}]
 
