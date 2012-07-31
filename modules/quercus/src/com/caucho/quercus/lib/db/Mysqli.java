@@ -283,6 +283,12 @@ public class Mysqli extends JdbcConnectionResource
       urlBuilder.append("useSSL=true");
     }
 
+    {
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+      urlBuilder.append(sep);
+      urlBuilder.append("jdbcCompliantTruncation=false");
+    }
+
     // Explicitly indicate that we want iso-8859-1 encoding so
     // we would know what encoding to use to convert StringValues
     // to Strings

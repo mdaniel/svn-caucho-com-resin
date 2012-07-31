@@ -120,11 +120,17 @@ abstract public class Value implements java.io.Serializable
    */
   final public boolean isA(Value value)
   {
-    // php/03p7
-    if (value.isObject())
+    if (value.isObject()) {
+      // php/03p7
       return isA(value.getClassName());
-    else
+    }
+    else if (value instanceof QuercusClass) {
+      // php/1277
+      return isA(value.getClassName());
+    }
+    else {
       return isA(value.toJavaString());
+    }
   }
 
   /**
@@ -2497,6 +2503,13 @@ abstract public class Value implements java.io.Serializable
   public Value get(Value index)
   {
     return UnsetValue.UNSET;
+  }
+
+  /**
+   * Helper method that calls get(Value).
+   */
+  final public Value get(long index) {
+    return get(LongValue.create(index));
   }
 
   /**

@@ -930,11 +930,10 @@ public class MysqliModule extends AbstractQuercusModule {
    * Executes a query and returns the result.
    *
    */
-  public static Value mysqli_query(
-      Env env,
-      @NotNull Mysqli conn,
-      StringValue sql,
-      @Optional("MYSQLI_STORE_RESULT") int resultMode) {
+  public static Value mysqli_query(Env env,
+                                   @NotNull Mysqli conn,
+                                   StringValue sql,
+                                   @Optional("MYSQLI_STORE_RESULT") int resultMode) {
     // ERRATUM: <i>resultMode</i> is ignored, MYSQLI_USE_RESULT would represent
     //  an unbuffered query, but that is not supported.
 

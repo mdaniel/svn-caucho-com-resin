@@ -549,6 +549,7 @@ public class Env
                            true,
                            getHttpInputEncoding(),
                            isMagicQuotes,
+                           true,
                            _querySeparatorMap);
 
     /*
@@ -608,7 +609,8 @@ public class Env
                         array,
                         cookie.getName(),
                         new String[] { decodedValue },
-                        isMagicQuotes);
+                        isMagicQuotes,
+                        true);
     }
   }
 

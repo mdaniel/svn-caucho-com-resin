@@ -2158,7 +2158,7 @@ abstract public class StringValue
 
       for (int i = 1; i < matchLength; i++) {
         if (charAt(tail + i) != match.charAt(i))
-              continue loop;
+          continue loop;
       }
 
       return tail;

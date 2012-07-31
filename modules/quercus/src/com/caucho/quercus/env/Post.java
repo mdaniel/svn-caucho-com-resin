@@ -168,7 +168,7 @@ public class Post
 
         if (contentType != null
             && contentType.startsWith("application/x-www-form-urlencoded"))
-          StringUtility.parseStr(env, bb, postArray, true, encoding);
+          StringUtility.parseStr(env, bb, postArray, true, encoding, true);
       }
 
     }
@@ -222,7 +222,7 @@ public class Post
         value.appendReadAll(is, Integer.MAX_VALUE);
 
         if (name != null) {
-          addFormValue(env, postArray, name, value, null, addSlashesToValues);
+          addFormValue(env, postArray, name, value, null, addSlashesToValues, true);
         }
         else {
           env.warning(L.l("file upload is missing name and filename"));
@@ -325,7 +325,7 @@ public class Post
       error = FileModule.UPLOAD_ERR_OK;
 
     addFormValue(env, entry, "name", env.createString(fileName),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
     long size;
 
@@ -340,21 +340,21 @@ public class Post
 
     if (mimeType != null) {
       addFormValue(env, entry, "type", env.createString(mimeType),
-                   null, addSlashesToValues);
+                   null, addSlashesToValues, true);
 
       entry.put("type", mimeType);
     }
 
     addFormValue(env, entry, "tmp_name", env.createString(tmpName),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
     addFormValue(env, entry, "error", LongValue.create(error),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
     addFormValue(env, entry, "size", LongValue.create(size),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
-    addFormValue(env, files, null, entry, null, addSlashesToValues);
+    addFormValue(env, files, null, entry, null, addSlashesToValues, true);
   }
 
   private static void addFormFile(Env env,
@@ -373,6 +373,9 @@ public class Post
       index = name.substring(p);
       name = name.substring(0, p);
     }
+
+    // php/085j
+    name = name.replaceAll("\u0000", "");
 
     StringValue nameValue = env.createString(name);
     Value v = files.get(nameValue).toValue();
@@ -405,7 +408,7 @@ public class Post
       error = FileModule.UPLOAD_ERR_OK;
 
     addFormValue(env, entry, "name" + index, env.createString(fileName),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
     long size;
 
@@ -421,26 +424,27 @@ public class Post
 
     if (mimeType != null) {
       addFormValue(env, entry, "type" + index, env.createString(mimeType),
-                   null, addSlashesToValues);
+                   null, addSlashesToValues, true);
     }
 
     addFormValue(env, entry, "tmp_name" + index, env.createString(tmpName),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
     addFormValue(env, entry, "error" + index, LongValue.create(error),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
     addFormValue(env, entry, "size" + index, LongValue.create(size),
-                 null, addSlashesToValues);
+                 null, addSlashesToValues, true);
 
-    addFormValue(env, files, name, entry, null, addSlashesToValues);
+    addFormValue(env, files, name, entry, null, addSlashesToValues, true);
   }
 
   public static void addFormValue(Env env,
                                   ArrayValue array,
                                   String key,
                                   String []formValueList,
-                                  boolean addSlashesToValues)
+                                  boolean addSlashesToValues,
+                                  boolean isReplaceSpacesWithUnderscores)
   {
     // php/081b
     String formValue = formValueList[formValueList.length - 1];
@@ -454,7 +458,8 @@ public class Post
     addFormValue(env, array, key,
                  value,
                  formValueList,
-                 addSlashesToValues);
+                 addSlashesToValues,
+                 isReplaceSpacesWithUnderscores);
   }
 
   public static void addFormValue(Env env,
@@ -462,7 +467,8 @@ public class Post
                                   String key,
                                   Value formValue,
                                   String []formValueList,
-                                  boolean addSlashesToValues)
+                                  boolean addSlashesToValues,
+                                  boolean isReplaceSpacesWithUnderscores)
   {
     int p = -1;
     int q = -1;
@@ -489,8 +495,10 @@ public class Post
           currentKey = currentKey.replaceAll("\\.", "_");
         }
 
-        // php/080h
-        currentKey = currentKey.replaceAll(" ", "_");
+        if (isReplaceSpacesWithUnderscores) {
+          // php/080h
+          currentKey = currentKey.replaceAll(" ", "_");
+        }
 
         StringValue currentKeyValue = env.createString(currentKey);
         Value currentArray = array.get(currentKeyValue);
@@ -520,8 +528,10 @@ public class Post
       else
         key = key.substring(keyStart);
 
-      // php/080h
-      key = key.replaceAll(" ", "_");
+      if (isReplaceSpacesWithUnderscores) {
+        // php/080h
+        key = key.replaceAll(" ", "_");
+      }
 
       if (key.length() == 0) {
         if (formValueList != null) {
@@ -553,8 +563,11 @@ public class Post
       if (key != null) {
         key = key.replaceAll("\\.", "_");
 
-        // php/080h
-        key = key.replaceAll(" ", "_");
+        if (isReplaceSpacesWithUnderscores) {
+          // php/080h
+          key = key.replaceAll(" ", "_");
+        }
+
         put(array, env.createString(key), formValue, addSlashesToValues);
       }
       else {
@@ -749,7 +762,7 @@ public class Post
     for (String key : keys) {
       String []value = request.getParameterValues(key);
 
-      Post.addFormValue(env, post, key, value, addSlashesToValues);
+      Post.addFormValue(env, post, key, value, addSlashesToValues, true);
     }
   }
 }

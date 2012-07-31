@@ -77,7 +77,7 @@ public class Xml {
    */
   private boolean _xmlOptionCaseFolding = true;
 
-  private String _xmlOptionTargetEncoding;
+  private String _outputEncoding;
 
   /**
    *  XML_OPTION_SKIP_TAGSTART specifies how many chars
@@ -120,13 +120,11 @@ public class Xml {
   private StringValue _xmlString;
   private XmlHandler _xmlHandler;
 
-  private ArrayList<LibXmlError> _errorList;
-
   public Xml(Env env,
              String outputEncoding,
              String separator)
   {
-    _xmlOptionTargetEncoding = outputEncoding;
+    _outputEncoding = outputEncoding;
     _parser = env.wrapJava(this);
     _separator = separator;
   }
@@ -394,18 +392,12 @@ public class Xml {
       InputSource is;
 
       if (_xmlString.isUnicode()) {
+        // since it's unicode, doesn't matter what encoding we pass in
         is = new InputSource(_xmlString.toReader("utf-8"));
-
-        _xmlOptionTargetEncoding = is.getEncoding();
-      }
-      else if (_xmlOptionTargetEncoding != null
-               && _xmlOptionTargetEncoding.length() > 0) {
-        is = new InputSource(_xmlString.toReader(_xmlOptionTargetEncoding));
       }
       else {
+        // php/1h0t
         is = new InputSource(_xmlString.toInputStream());
-
-        _xmlOptionTargetEncoding = is.getEncoding();
       }
 
       try {
@@ -535,7 +527,7 @@ public class Xml {
         _xmlOptionSkipWhite = value.toBoolean();
         return true;
       case XmlModule.XML_OPTION_TARGET_ENCODING:
-        _xmlOptionTargetEncoding = value.toString();
+        _outputEncoding = value.toString();
         return true;
       default:
         return false;
@@ -557,7 +549,7 @@ public class Xml {
     case XmlModule.XML_OPTION_SKIP_WHITE:
       return (_xmlOptionSkipWhite ? LongValue.ONE : LongValue.ZERO);
     case XmlModule.XML_OPTION_TARGET_ENCODING:
-      return env.createString(_xmlOptionTargetEncoding);
+      return env.createString(_outputEncoding);
     default:
       return BooleanValue.FALSE;
     }
@@ -639,10 +631,16 @@ public class Xml {
       // turn attrs into an array of name, value pairs
       for (int i = 0; i < attrs.getLength(); i++) {
         String aName = attrs.getLocalName(i); // Attr name
-        if ("".equals(aName)) aName = attrs.getQName(i);
-        if (_xmlOptionCaseFolding) aName = aName.toUpperCase(Locale.ENGLISH);
-        result.put(
-            env.createString(aName), env.createString(attrs.getValue(i)));
+        if ("".equals(aName)) {
+          aName = attrs.getQName(i);
+        }
+
+        if (_xmlOptionCaseFolding) {
+          aName = aName.toUpperCase(Locale.ENGLISH);
+        }
+
+        result.put(env.createString(aName),
+                   env.createString(attrs.getValue(i)));
       }
 
       return result;
@@ -699,8 +697,9 @@ public class Xml {
 
       if (_isComplete) {
         elementArray = _valueArray.get(LongValue.create(_valueArrayIndex - 1));
-        elementArray.put(
-            _env.createString("type"), _env.createString("complete"));
+
+        elementArray.put(_env.createString("type"),
+                         _env.createString("complete"));
       } else {
         elementArray = new ArrayValueImpl();
         String eName = sName; // element name
@@ -738,30 +737,45 @@ public class Xml {
                            int length)
       throws SAXException
     {
-      String s = new String(ch, start, length);
-
       if (_isOutside) {
+        StringValue s = _env.createString(ch, start, length);
+
         Value elementArray = new ArrayValueImpl();
-        elementArray.put(
-            _env.createString("tag"),
-            _env.createString(_paramHashMap.get(_level - 1)));
-        elementArray.put(
-            _env.createString("value"), _env.createString(s));
-        elementArray.put(
-            _env.createString("type"), _env.createString("cdata"));
-        elementArray.put(
-            _env.createString("level"), LongValue.create(_level - 1));
+        elementArray.put(_env.createString("tag"),
+                         _env.createString(_paramHashMap.get(_level - 1)));
+
+        elementArray.put(_env.createString("value"), s);
+
+        elementArray.put(_env.createString("type"), _env.createString("cdata"));
+
+        elementArray.put(_env.createString("level"),
+                         LongValue.create(_level - 1));
+
         _valueArray.put(LongValue.create(_valueArrayIndex), elementArray);
 
-        Value indexArray = _indexArray.get(
-            _env.createString(_paramHashMap.get(_level - 1)));
+        StringValue key = _env.createString(_paramHashMap.get(_level - 1));
+        Value indexArray = _indexArray.get(key);
         indexArray.put(LongValue.create(_valueArrayIndex));
 
         _valueArrayIndex++;
       } else {
-        Value elementArray = _valueArray.get(
-            LongValue.create(_valueArrayIndex - 1));
-        elementArray.put(_env.createString("value"), _env.createString(s));
+        Value elementArray = _valueArray.get(_valueArrayIndex - 1);
+
+        StringValue key = _env.createString("value");
+
+        Value value = elementArray.get(key);
+        if (value.isString()) {
+          // php/1h0l
+          StringValue sb = _env.createStringBuilder();
+
+          sb.append(value);
+          sb.append(ch, start, length);
+
+          elementArray.put(key, sb);
+        }
+        else {
+          elementArray.put(key, _env.createString(ch, start, length));
+        }
       }
     }
   }
@@ -955,7 +969,7 @@ public class Xml {
         value = _env.createString(buf, start, length);
       }
       else {
-        String encoding = _xmlOptionTargetEncoding;
+        String encoding = _outputEncoding;
 
         if (encoding == null)
           encoding = "UTF-8";

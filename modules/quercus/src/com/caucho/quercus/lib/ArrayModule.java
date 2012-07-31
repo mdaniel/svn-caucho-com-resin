@@ -263,7 +263,7 @@ public class ArrayModule
   public Value array_copy_recursive(Value value)
   {
     value = value.toValue();
-    
+
     if (! value.isArray()) {
       return value;
     }
@@ -274,10 +274,10 @@ public class ArrayModule
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
       Value entryKey = entry.getKey();
-      
+
       copy.put(entryKey, array_copy_recursive(entryValue));
     }
-    
+
     return copy;
   }
 
@@ -1037,24 +1037,25 @@ public class ArrayModule
       return false;
     }
 
-    if (! (searchArray.isArray() || searchArray.isObject())) {
-      env.warning(
-          L.l("'" + searchArray.toString()
-              + "' is an unexpected argument, expected "
-              + "ArrayValue or ObjectValue"));
-      return false;
-    }
-
     if (! (key.isString() || key.isLongConvertible())) {
-      env.warning(
-          L.l(
-              "The first argument (a '{0}') should be "
-                  + "either a string or an integer",
+      env.warning(L.l("The first argument (a '{0}') should be "
+                      + "either a string or an integer",
                       key.getType()));
       return false;
     }
 
-    return searchArray.keyExists(key);
+    if (searchArray.isArray()) {
+      return searchArray.keyExists(key);
+    }
+    else if (searchArray.isObject()) {
+      return searchArray.isFieldExists(env, key.toStringValue(env));
+    }
+    else {
+      env.warning(L.l("'" + searchArray.toString()
+                      + "' is an unexpected argument, expected "
+                      + "ArrayValue or ObjectValue"));
+      return false;
+    }
   }
 
   /**

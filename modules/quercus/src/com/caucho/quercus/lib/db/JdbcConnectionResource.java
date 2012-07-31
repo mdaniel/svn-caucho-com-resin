@@ -696,11 +696,13 @@ public abstract class JdbcConnectionResource
         }
       }
     } catch (DataTruncation truncationError) {
+      saveErrors(truncationError);
+
       try {
         _affectedRows = stmt.getUpdateCount();
         //_warnings = stmt.getWarnings();
       } catch (SQLException e) {
-        saveErrors(e);
+        //saveErrors(e);
         log.log(Level.FINEST, e.toString(), e);
         return BooleanValue.FALSE;
       }

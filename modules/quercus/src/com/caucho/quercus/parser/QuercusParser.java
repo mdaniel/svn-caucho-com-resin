@@ -3774,13 +3774,6 @@ public class QuercusParser {
     else if (name.equals("__NAMESPACE__")) {
       return createString(_namespace);
     }
-    else if (name.equals("static")) {
-      if (_classDef == null) {
-        throw new IllegalStateException();
-      }
-
-      return createString(_classDef.getName());
-    }
 
     name = resolveIdentifier(name);
 
@@ -3913,7 +3906,7 @@ public class QuercusParser {
         expr = _factory.createNewStatic(getLocation(), args);
       }
       else {
-        expr =  _factory.createNew(getLocation(), name, args);
+        expr = _factory.createNew(getLocation(), name, args);
       }
     }
     else {
