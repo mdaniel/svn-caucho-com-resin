@@ -1,8 +1,6 @@
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin">
 
-
-
   <!--
      - default configuration applied to all clusters
     -->

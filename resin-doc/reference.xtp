@@ -5582,6 +5582,24 @@ and the Resin log file at INFO level.</p>
 
 </defun>
 
+<defun title="&lt;home-cluster>" name="idle-time">
+<parents>home-cluster</parents>
+
+<description>
+<p>The &lt;home-cluster> specifies the default --cluster value for
+dynamic servers. When Resin starts and elastic server, it looks for
+a &lt;home-cluster> if the --cluster option is missing. The home cluster
+will be cluster that the Resin server tries to join.</p>
+</description>
+
+<schema>
+element home-cluster {
+  string
+}
+</schema>
+
+</defun>
+
 <defun title="&lt;host>" name="host" version="Resin 4.0">
 <parents>cluster</parents>
 
@@ -9032,6 +9050,17 @@ to configure digest login.
 &lt;/web-app>
 </example>
 
+</defun>
+
+<defun title="&lt;resin:ElasticCloudService>"
+       name="resin:ElasticCloudService">
+<javadoc class="com.caucho.admin.ElasticCloudService"/>
+<description>
+<p>Enables dynamic servers. When dynamic servers are enable, a new
+Resin server can join a cluster by contacting the hub triad without needing
+an explicit server configuration in the resin.properties or resin.xml.
+</p>
+</description>
 </defun>
 
 <defun title="&lt;resin:FastCgiPort>" name="resin:FastCgiPort">

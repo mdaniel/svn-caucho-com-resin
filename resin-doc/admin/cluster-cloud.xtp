@@ -66,7 +66,60 @@ are worth additional reliability attention.</p>
 
 </s1>
 
-<s1 title="Baseline: three static server (triad) configuration">
+<s1 title="Baseline: three static server (triad) with resin.properties">
+
+<p>The standard /etc/resin.properties configuration lets you configure
+a triad and dynamic servers without a few properties.</p>
+
+<p>To configure three static servers for the triad hub, enable dynamic
+servers, and select the "app" cluster as the default dynamic server, use
+csomething like the following in your /etc/resin.properties.</p>
+
+<example title="Example: resin.properties for a 3-server hub">
+...
+# app-tier Triad servers: app-0 app-1 app-2
+app_servers      : 192.168.1.10:6800 192.168.1.11:6800 192.168.1.12:6800
+...
+# Allow elastic nodes to join the cluster (enable for cloud mode)
+elastic_cloud_enable : true
+
+# The cluster that elastic nodes should join - each will contact a Triad server
+# Use a separate resin.properties file for each cluster
+home_cluster : app
+</example>
+
+<ul>
+<li><b>app_servers:</b> each IP:port in the app-servers adds a new static
+server.</li>
+<li><b>elastic_cloud_enable:</b> enable dynamic servers.</li>
+<li><b>home_cluster:</b> select the home cluster for the dynamic server.</li>
+</ul>
+
+<p>To start the server, you can use the "start-all" command. The
+<em>start-all</em>
+with start all local servers (by comparing the IP to the IP addresses of
+the current machine.) If no local servers are found, <em>start-all</em>
+will start a dynamic server using the &lt;home-cluster>.</p>
+
+<example title="CLI: starting the servers">
+unix> resinctl start-all
+</example>
+
+<p>If you've installed Resin as a Unix service, it will be started
+automatically when the server starts. You can either use
+the /etc/init.d resin command or the "service" if it's available.
+The service start is equivalent to a resinctl "start-all".</p>
+
+<example title="CLI: service on debian">
+# service resin start
+</example>
+
+</s1>
+
+<s1 title="Custom: three static server (triad) in resin.xml">
+
+<p>If you are creating a custom resin.xml or modifying the default one,
+you can configure the servers explicitly in the resin.xml.</p>
 
 <p>The baseline cloud configuration is like a normal Resin configuration:
 define the three triad servers in your resin.xml, and copy the resin.xml
@@ -91,8 +144,19 @@ in any clustered services like load-balancing and caching.</li>
 <li>When load drops, stop the new Resin server as usual.</li>
 </ol>
 
+<p>You can configure the cluster using resin.properties without needing
+to modify the resin.xml. For the hub servers, add an IP:port for each
+static server. For the dynamic servers, enable <em>elastic_cloud_enable</em>
+and <em>home_cluster</em>.</p>
+
+<p>You can also configure the resin.xml directly to add the servers
+individually.</p>
+
+
 <example title="Example: basic resin.xml for a 3-server hub">
 &lt;resin xmlns="http://caucho.com/ns/resin">
+...
+  &lt;home-cluster>my-cluster&lt;/home-cluster>
 ...
 &lt;cluster id="my-cluster">
 
@@ -100,6 +164,8 @@ in any clustered services like load-balancing and caching.</li>
   &lt;server id="b" address="192.168.1.11" port="6800"/>
   &lt;server id="c" address="192.168.1.12" port="6800"/></b><br/>
 
+  &lt;resin:ElasticCloudService/>
+  
   ...
 &lt;/cluster>
 ...
@@ -114,6 +180,12 @@ as spoke servers in the hub-and-spoke model. The static servers are
 identical to any dynamic servers, but are predefined in the
 resin.xml</p>
 
+<p>The &lt;resin:ElasticCloudService/> enables dynamic servers. For security,
+Resin's is to disable dynamic servers.</p>
+
+<p>You can also add a &lt;home-cluster> which provides a default for the
+--cluster command-line option.</p>
+
 <s2 title="command-line: adding a dynamic server">
 
 <p>Before starting a server, your new machine needs the following to
@@ -122,7 +194,8 @@ be installed:</p>
 <ol>
 <li>The Java JDK</li>
 <li>Resin and your licenses</li>
-<li>Your resin.xml which defines the three triad servers</li>
+<li>Your resin.properties which defines the three triad servers
+or a custom resin.xml which defines the servers.</li>
 </ol>
 
 <p>Since these three items are the same for each new server, you can
@@ -133,7 +206,7 @@ image for the new machine and start it.</p>
 the name of the cluster you want to join.</p>
 
 <example title="Example: command-line starting a dynamic server">
-unix> bin/resin.sh --elastic --cluster my-cluster start
+unix> resinctl --elastic --cluster my-cluster start
 </example>
 
 <p>If you don't have a &lt;resin-system-auth-key> in the resin.xml,
@@ -225,7 +298,7 @@ hub. The cluster deployment ensures all servers are running the same
 each server; that's taken care of by a core Resin capability.</p>
 
 <example title="Example: command-line deployment">
-unix> bin/resin.sh deploy test.war
+unix> resinctl deploy test.war
 </example>
 
 <p>If you don't have a &lt;resin-system-auth-key> and do have
