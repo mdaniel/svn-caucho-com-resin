@@ -119,7 +119,7 @@ public class EjbJar extends DescriptionGroupConfig {
   public AssemblyDescriptor createAssemblyDescriptor()
     throws ConfigException
   {
-    return new AssemblyDescriptor(_config);
+    return new AssemblyDescriptor(this, _config);
   }
 
   public void addQueryFunction(QueryFunction fun)
@@ -130,12 +130,17 @@ public class EjbJar extends DescriptionGroupConfig {
   {
   }
   
+  MethodPermission createMethodPermission()
+  {
+    return new MethodPermission(_config);
+  }
+  
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _rootPath.getFullPath() + "]";
   }
 
-  public static class MethodPermission {
+  public class MethodPermission {
     EjbConfig _config;
     MethodSignature _method;
     ArrayList<String> _roles;
@@ -170,6 +175,9 @@ public class EjbJar extends DescriptionGroupConfig {
     public void init()
       throws ConfigException
     {
+      if (isSkip())
+        return;
+      
       EjbBean bean = _config.getBeanConfig(_method.getEJBName());
 
       if (bean == null)

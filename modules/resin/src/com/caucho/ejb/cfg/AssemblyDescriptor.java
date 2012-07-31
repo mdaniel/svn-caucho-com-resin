@@ -32,10 +32,12 @@ import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.j2ee.cfg.J2eeSecurityRole;
 
 public class AssemblyDescriptor {
+  private EjbJar _ejbJar;
   private EjbConfig _config;
 
-  AssemblyDescriptor(EjbConfig config)
+  AssemblyDescriptor(EjbJar ejbJar, EjbConfig config)
   {
+    _ejbJar = ejbJar;
     _config = config;
   }
 
@@ -46,7 +48,7 @@ public class AssemblyDescriptor {
 
   public EjbJar.MethodPermission createMethodPermission()
   {
-    return new EjbJar.MethodPermission(_config);
+    return _ejbJar.createMethodPermission();
   }
 
   public void addSecurityRole(J2eeSecurityRole securityRole)

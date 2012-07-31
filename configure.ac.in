@@ -631,10 +631,10 @@ AC_ARG_WITH(setuid,
 # --with-setgid
 #
 
-#AC_ARG_WITH(setgid
-#[AS_HELP_STRING([--with-setgid=user],
-#                [configure default setgid user])],
-#[setuid_group=${withval}])
+AC_ARG_WITH(setgid,
+[AS_HELP_STRING([--with-setgid=user],
+                [configure default setgid group])],
+[setuid_group=${withval}])
 
 AC_SUBST(setuid_user)
 AC_SUBST(setuid_group)

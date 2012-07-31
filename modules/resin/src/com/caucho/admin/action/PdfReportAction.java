@@ -145,6 +145,11 @@ public class PdfReportAction implements AdminAction
     return _logDirectory;
   }
   
+  public Path getLogPath()
+  {
+    return _logPath;
+  }
+  
   public void setLogDirectory(String logDirectory)
   {
     _logDirectory = logDirectory;

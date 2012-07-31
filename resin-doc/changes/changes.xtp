@@ -12,6 +12,11 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>install: add --with-setuid and --with-setgid (#5105)</li>
+<li>health: scheduled pdf reports as started asynchronously (#5164, rep by Keith Fetterman)</li>
+<li>mod_caucho: updated load balance to better distribute backups (#5116)</li>
+<li>ejb: skipped ejb.xml must not throw validation exceptions (#5165, rep by Anand Talari)</li>
+<li>install: solaris build issues (#5098, rep by tokyoturnip)</li>
 <li>db: transaction-isolation reset issues when double-set (#5150, rep by Ryan Johnson)</li>
 <li>http-cache: check for valid before checking is-modified (#4865)</li>
 <li>comet/async: keepalive close was not allowed with async written from separate thread (#5159, rep by Adrian Sutton)</li>
@@ -270,7 +275,7 @@
 <li>webapp: add alias-url-regexp to match multiple context-paths to a web-app (#4720, rep by Sachidanand Shukla)</li>
 <li>command-line: added uptime to "status" command"</li>
 <li>alarm: Alarm's base classloader needs to be Alarm not system classloader (#4707, rep by M Schmidt)</li>
-o<li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
+oo<li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
 <li>jndi: EnvironmentModel dynamic copy needs ConcurrentHashMap (#4721)</li>
 <li>servlet: getAvailable() issue with POST (#4726, rep by Olaf Krische)</li>
 <li>install: --disable-64bit changes to ./configure and CFLAGS (#4714, rep by S. Patil)</li>

@@ -29,8 +29,8 @@ all	:
 
 rpm-dist	:
 	cp conf/resin.properties conf/resin.properties.orig
-	awk '/setuid_user/ { print "setuid_user : resin"; next; } \
-	       /setuid_group/ { print "setuid_group : resin"; next; } \
+	awk '/setuid_user/ { print "setuid_user : @setuid_user@"; next; } \
+	       /setuid_group/ { print "setuid_group : @setuid_group@"; next; } \
 	             { print $0; }' \
 	conf/resin.properties.orig > conf/resin.properties
 
