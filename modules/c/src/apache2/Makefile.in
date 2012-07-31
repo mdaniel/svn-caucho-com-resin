@@ -2,15 +2,13 @@
 
 CC=@CC@
 CP=/bin/cp
-CFLAGS=@CFLAGS@ @apache_cflags@
-CFLAGS_SHLIB=@CFLAGS_SHLIB@
+CFLAGS=@CFLAGS@ @apache_cflags@ @apache_cflags_shlib@
 EGREP=@EGREP@
 LD=@LD@
-LIBTOOL=EGREP="@EGREP@" @LIBTOOL@ --tag=CXX
-LD_SHLIB=@LD_SHLIB@
-LIBS_SHLIB=@LIBS_SHLIB@
-LDFLAGS=@LDFLAGS@
-LDFLAGS_SHLIB=@LDFLAGS_SHLIB@
+LIBTOOL=EGREP="@EGREP@" @LIBTOOL@
+LD_SHLIB=@apache_ld_shlib@
+LIBS_SHLIB=@apache_libs_shlib@
+LDFLAGS_SHLIB=@apache_ldflags_shlib@
 APACHE_INC=@APACHE_INC@
 apache_conf=@apache_conf@
 apache_dir=@apache_dir@

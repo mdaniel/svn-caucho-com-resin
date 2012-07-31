@@ -710,7 +710,9 @@ public class ManagedConnectionImpl
     throws SQLException
   {
     try {
-      _oldIsolation = _driverConnection.getTransactionIsolation();
+      if (_oldIsolation < 0)
+        _oldIsolation = _driverConnection.getTransactionIsolation();
+      
       _isolation = isolation;
 
       _driverConnection.setTransactionIsolation(isolation);
@@ -768,6 +770,7 @@ public class ManagedConnectionImpl
         needsRollback = true;
         conn.setTransactionIsolation(_oldIsolation);
       }
+
       _isolation = _oldIsolation;
 
       // #4663

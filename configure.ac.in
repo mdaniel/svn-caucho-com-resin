@@ -314,71 +314,6 @@ else
 fi
 
 echo "using Apache source in ${apache_src}"
-
-mkdir ${apache_src}/modules/caucho 2> /dev/null
-cp modules/c/src/common/*.c ${apache_src}/modules/caucho
-cp modules/c/src/common/*.h ${apache_src}/modules/caucho
-cp modules/c/src/apache/*.c ${apache_src}/modules/caucho
-
-cat > ${apache_src}/modules/caucho/Makefile.tmpl <<'END'
-LIB=libcaucho.a
-OBJS=mod_caucho.o stream.o config.o registry.o memory.o
-
-OBJS_PIC=mod_caucho.lo stream.lo config.lo registry.lo memory.lo
-
-$(OBJS) $(OBJS_PIC): Makefile
-
-all: lib
-
-lib: $(LIB)
-
-libcaucho.a: $(OBJS)
-	rm -f $@
-	ar cr $@ $(OBJS)
-	$(RANLIB) $@
-
-libcaucho.o: $(OBJS)
-	$(LD) $(LDFLAGS) -r -o $@ $(OBJS)
-
-libcaucho.so: $(OBJS_PIC)
-	rm -f $@
-	$(LD_SHLIB) $(LDFLAGS_SHLIB) -o $@ $(OBJS_PIC) $(LIBS_SHLIB)
-
-.SUFFIXES: .o .lo
-
-.c.o:
-	$(CC) -c $(INCLUDES) $(CFLAGS) $<
-
-.c.lo:
-	$(CC) -c $(INCLUDES) $(CFLAGS) $(CFLAGS_SHLIB) $< && mv $*.o $*.lo
-
-# DO NOT REMOVE
-mod_caucho.o: cse.h
-mod_caucho.lo: cse.h
-stream.o: cse.h
-stream.lo: cse.h
-config.o: cse.h
-config.lo: cse.h
-registry.o: cse.h
-registry.lo: cse.h
-memory.o: cse.h
-memory.lo: cse.h
-
-END
-
-cat > ${apache_src}/modules/caucho/Makefile.libdir <<'END'
-# dummy
-END
-
-#grep caucho ${apache_src}/src/Configuration.tmpl >/dev/null 2>/dev/null
-#if test "$?" -ne 0; then
-#  cat >> ${apache_src}/src/Configuration.tmpl <<'END'
-## mod_caucho incorporates Resin into Apache.
-#
-## AddModule modules/caucho/libcaucho.a
-#END
-#fi
-
 ])
 #
 # --with-apache
@@ -676,6 +611,10 @@ AC_SUBST(apache_libexec)
 AC_SUBST(apache_conf)
 AC_SUBST(apache_dir)
 AC_SUBST(apache_cflags)
+AC_SUBST(apache_cflags_shlib)
+AC_SUBST(apache_ld_shlib)
+AC_SUBST(apache_ldflags_shlib)
+AC_SUBST(apache_libs_shlib)
 
 #
 # --with-setuid
@@ -711,14 +650,26 @@ is_gnu_ld=`${LD} -v 2>&1 | grep GNU`
 #
 # Use apxs if it's available
 #
-if test -z "${LD_SHLIB}"; then
-  if test -n "${apxs}"; then
-    CFLAGS_SHLIB=`${apxs} -q CFLAGS_SHLIB`
-    LD_SHLIB=`${apxs} -q LD_SHLIB`
-    LDFLAGS_SHLIB=`${apxs} -q LDFLAGS_SHLIB`
-    LIBS_SHLIB=`${apxs} -q LIBS_SHLIB`
+if test -z "${apache_ldflags_shlib}"; then
+   if test -x "${apr_bin}/apr-config"; then
+     apache_cflags_shlib=`${apr_bin}/apr-config --cflags`
+     apache_ldflags_shlib=`${apr_bin}/apr-config --link-ld`
+#     apache_ldflags_shlib=`${apr_bin}/apr-config --ldflags`
+     apache_libs_shlib=`${apr_bin}/apr-config --libs`
+ 
+   elif test -x "${apr_bin}/apr-1-config"; then
+     apache_cflags_shlib=`${apr_bin}/apr-1-config --cflags`
+     apache_ldflags_shlib=`${apr_bin}/apr-1-config --link-ld`
+#     apache_ldflags_shlib=`${apr_bin}/apr-1-config --ldflags`
+     apache_libs_shlib=`${apr_bin}/apr-1-config --libs`
+ 
+   elif test -n "${apxs}"; then
+     apache_cflags_shlib=`${apxs} -q CFLAGS_SHLIB`
+     apache_ld_shlib=`${apxs} -q LD_SHLIB`
+     apache_ldflags_shlib=`${apxs} -q LDFLAGS_SHLIB`
+     apache_libs_shlib=`${apxs} -q LIBS_SHLIB`
 
-    echo "Using shared library flags from ${apxs}"
+     echo "Using shared library flags from ${apxs}"
   fi
 fi
 
@@ -814,80 +765,116 @@ AC_ARG_ENABLE(lfs,
  esac],[])
 
 if test -n "${lfs}"; then
-  CFLAGS_JNI="$CFLAGS_JNI -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+  jni_cflags="$jni_cflags -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
 fi
 
 #
 # fill in based on known configurations
 #
-if test -z "${LD_SHLIB}"; then
-  LD_SHLIB=${LD}
-  CFLAGS_SHLIB="-fpic"
-  LDFLAGS_SHLIB="-shared"
+if test -z "${jni_ld_shlib}"; then
+  jni_ld_shlib=${LD}
+  jni_cflags_shlib="-fpic"
+  jni_ldflags_shlib="-shared"
+
+  plugin_cflags_shlib=$jni_cflags_shlib
+  plugin_ldflags_shlib=$jni_ldflags_shlib
 
   case "$target_os" in
     linux*)
-      LD_SHLIB=${CC}
+      jni_ld_shlib=${CC}
 
       CFLAGS="$CFLAGS -pthread -fPIC -fno-omit-frame-pointer -O2"
-      CFLAGS_JNI="$CFLAGS_JNI -fPIC"
-      LDFLAGS_SHLIB="-shared -fPIC"
+      jni_cflags="$jni_cflags -fPIC"
+      jni_ldflags_shlib="-shared -fPIC"
 
       if test -n "$b64_jni"; then
-        CFLAGS_JNI="$CFLAGS_JNI -m64 -fPIC"
-        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m64"
+        jni_cflags_jni="$jni_cflags_jni -m64 -fPIC"
+        jni_ldflags_shlib="$jni_ldflags_shlib -m64"
       else
-        CFLAGS_JNI="$CFLAGS_JNI -m32"
-        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m32"
+        jni_cflags="$jni_cflags -m32"
+        jni_ldflags_shlib="$jni_ldflags_shlib -m32"
+      fi
+      
+      plugin_cflags_shlib=$jni_cflags_shlib
+      plugin_ldflags_shlib=$jni_ldflags_shlib
+
+      if test -n "$b64"; then
+        plugin_cflags_jni="$jni_cflags_jni -m64 -fPIC"
+        plugin_ldflags_shlib="$jni_ldflags_shlib -m64"
+      else
+        plugin_cflags="$jni_cflags -m32"
+        plugin_ldflags_shlib="$jni_ldflags_shlib -m32"
       fi
       ;;
 
     *solaris*)
-      LDFLAGS_SHLIB=""
+      jni_ldflags_shlib=""
+      plugin_ldflags_shlib=""
+      
       if test -n "$is_gcc"; then
-        CFLAGS_SHLIB="-fPIC"
+        jni_cflags_shlib="-fPIC"
+        plugin_cflags_shlib="-fPIC"
 
         CFLAGS="$CFLAGS -fPIC -fno-omit-frame-pointer"
-        CFLAGS_JNI="$CFLAGS_JNI -fPIC -fno-omit-frame-pointer"
+        jni_cflags="$jni_cflags -fPIC -fno-omit-frame-pointer"
+        plugin_cflags_shlib="-fPIC"
 
         if test -n "$b64"; then
           CFLAGS="$CFLAGS -m64"
-          LDFLAGS_SHLIB="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
-        fi
-        if test -n "${b64_jni}"; then
-          CFLAGS_JNI="$CFLAGS_JNI -m64"
-          LDFLAGS_SHLIB="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
+          plugin_cflags_shlib="-m64"
+          plugin_ldflags_shlib="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
         fi
 
-        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -shared"
+        if test -n "${b64_jni}"; then
+          jni_cflags="$jni_cflags -m64"
+          jni_ldflags_shlib="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
+        fi
+
+        jni_ldflags_shlib="$jni_ldflags_shlib -shared"
+        plugin_ldflags_shlib="$plugin_ldflags_shlib -shared"
       else
         CFLAGS="-mt -KPIC -xO2"
-        CFLAGS_SHLIB="-mt -KPIC -xO2"
+        jni_cflags_shlib="-mt -KPIC -xO2"
+        plugin_cflags_shlib="-mt -KPIC -xO2"
 
         if test -n "$b64"; then
           CFLAGS="$CFLAGS -m64"
         fi
-        if test -n "$b64_jni"; then
-          CFLAGS_JNI="$CFLAGS_JNI -m64"
-          LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m64 -G -mt -z defs -z text"
-          LDFLAGS_SHLIB="$LDFLAGS_SHLIB -R/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9 -YP,/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9"
+
+        if test -n "$b64"; then
+          plugin_cflags="$plugin_cflags -m64"
+          plugin_ldflags_shlib="$jni_ldflags_shlib -m64 -G -mt -z defs -z text"
+          plugin_ldflags_shlib="$jni_ldflags_shlib -R/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9 -YP,/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9"
         fi
 
-        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -G -mt -z defs -z text"
+        if test -n "$b64_jni"; then
+          jni_cflags="$jni_cflags -m64"
+          jni_ldflags_shlib="$jni_ldflags_shlib -m64 -G -mt -z defs -z text"
+          jni_ldflags_shlib="$jni_ldflags_shlib -R/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9 -YP,/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9"
+        fi
+
+        jni_ldflags_shlib="$jni_ldflags_shlib -G -mt -z defs -z text"
+        plugin_ldflags_shlib="$plugin_ldflags_shlib -G -mt -z defs -z text"
       fi
       ;;
 
     darwin*)
-      CFLAGS_SHLIB="-DSHARED_MODULE"
-      LD_SHLIB=${CC}
-      LDFLAGS_SHLIB="-dynamiclib -undefined suppress -flat_namespace"
+      jni_cflags_shlib="-DSHARED_MODULE"
+      jni_ld_shlib=${CC}
+      jni_ldflags_shlib="-dynamiclib -undefined suppress -flat_namespace"
+
+      plugin_ld_shlib=${jni_ld_shlib}
+      plugin_ldflags_shlib=${jni_ldflags_shlib}
+      
       if test -n "$b64"; then
         CFLAGS="$CFLAGS -arch x86_64"
-        LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
+        jni_ldflags_shlib="-arch x86_64 $LDFLAGS_SHLIB"
+        plugin_ldflags_shlib="-arch x86_64 $LDFLAGS_SHLIB"
       fi
+      
       if test -n "$b64_jni"; then
-        CFLAGS_JNI="$CFLAGS_JNI -m64"
-        LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
+        jni_cflags_jni="$CFLAGS_JNI -m64"
+        jni_ldflags_shlib="-arch x86_64 $LDFLAGS_SHLIB"
       fi
       ;;
 
@@ -897,20 +884,20 @@ if test -z "${LD_SHLIB}"; then
 
     *aix*)
       if test -z "$is_gcc"; then
-        CFLAGS_SHLIB="-bexpall"
+        jni_cflags_shlib="-bexpall"
       else
-        CFLAGS_SHLIB="-fpic"
+        jni_cflags_shlib="-fpic"
       fi
-      LDFLAGS_SHLIB=""
+      jni_ldflags_shlib=""
       ;;
 
     *hpux*)
       if test -z "$is_gcc"; then
-        CFLAGS_SHLIB="+z"
+        jni_cflags_shlib="+z"
       else
-        CFLAGS_SHLIB="-fpic"
+        jni_cflags_shlib="-fpic"
       fi
-      LDFLAGS_SHLIB="-b"
+      jni_ldflags_shlib="-b"
       ;;
   esac
 
@@ -946,25 +933,25 @@ else
   AC_MSG_ERROR([Can't find valid Apache directory ${apache_inc}])
 fi
 
+if test -z "${apache_ld_shlib}"; then
+  apache_ld_shlib=$CC
+fi    
+
+#if test -z "${apache_ld_shlib}"; then
+#  apache_ld_shlib=$jni_ld_shlib
+#fi    
+
+if test -z "${apache_ldflags_shlib}"; then
+  apache_cflags_shlib=$plugin_cflags_shlib
+  apache_ld_shlib=$plugin_ld_shlib
+#  apache_ldflags_shlib=$plugin_ldflags_shlib
+  apache_libs_shlib=$plugin_libs_shlib
+fi    
+
+apache_ldflags_shlib="$apache_ldflags_shlib $plugin_ldflags_shlib"
+
 if test -n "$apache_cflags"; then
   echo "Using Apache CFLAGS: $apache_cflags"
-fi
-
-#
-# Using Perl if it's available.
-#
-PERL=`which perl`
-if test -z "${LD_SHLIB}"; then
-  if test -z "${LD_SHLIB}" -a "x`$PERL -V:dlsrc 2>/dev/null | grep dlopen`" != "x"; then
-    PCC="`$PERL -V:cc | cut -d\' -f2`"
-    if test "${PCC}" = "${CC}"; then
-      CFLAGS_SHLIB="`$PERL -V:cccdlflags | cut -d\' -f2`"
-      LDFLAGS_SHLIB="`$PERL -V:lddlflags | cut -d\' -f2`"
-      LD_SHLIB="`$PERL -V:ld | cut -d\' -f2`"
-      has_clflags=1
-      echo "Using shared library flags from Perl"
-    fi
-  fi
 fi
 
 #
@@ -1085,10 +1072,11 @@ AC_SUBST(CPU)
 AC_SUBST(OS)
 AC_SUBST(SO)
 AC_SUBST(CFLAGS)
-AC_SUBST(CFLAGS_SHLIB)
-AC_SUBST(LD_SHLIB)
-AC_SUBST(LDFLAGS_SHLIB)
-AC_SUBST(LIBS_SHLIB)
+AC_SUBST(jni_cflags)
+AC_SUBST(jni_cflags_shlib)
+AC_SUBST(jni_ld_shlib)
+AC_SUBST(jni_ldflags_shlib)
+AC_SUBST(jni_libs_shlib)
 AC_SUBST(PROXY_LIBS)
 AC_SUBST(SSL_LIBS)
 
@@ -1519,8 +1507,12 @@ else
     echo "  JNI         : 32-bit"
   fi
 
-  echo "    include   : ${JNI_INCLUDE}"
-  echo "    CFLAGS    : ${JNI_CFLAGS}"
+  echo "    include       : ${JNI_INCLUDE}"
+  echo "    CFLAGS        : ${JNI_CFLAGS}"
+  echo "    cflags_shlib  : ${jni_cflags_shlib}"
+  echo "    ld_shlib      : ${jni_ld_shlib}"
+  echo "    ldflags_shlib : ${jni_ldflags_shlib}"
+  echo "    libs_shlib    : ${jni_libs_shlib}"
 
   if test -n "$epoll"; then
     echo "    epoll() for keepalives"
@@ -1549,11 +1541,15 @@ else
 fi
 
 if test -n "${apache}"; then
-  echo "  APACHE      : ${apache_dir}"
-  echo "    conf      : ${apache_conf}"
-  echo "    libexec   : ${apache_libexec}"
-  echo "    include   : ${apache_include}"
-  echo "    CFLAGS    : ${apache_cflags}"
+  echo "  APACHE          : ${apache_dir}"
+  echo "    conf          : ${apache_conf}"
+  echo "    libexec       : ${apache_libexec}"
+  echo "    include       : ${apache_include}"
+  echo "    CFLAGS        : ${apache_cflags}"
+  echo "    cflags_shlib  : ${apache_cflags_shlib}"
+  echo "    ld_shlib      : ${apache_ld_shlib}"
+  echo "    ldflags_shlib : ${apache_ldflags_shlib}"
+  echo "    libs_shlib    : ${apache_libs_shlib}"
   echo ""
 fi
 
