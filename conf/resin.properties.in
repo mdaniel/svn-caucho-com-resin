@@ -19,6 +19,9 @@
 # Enable verbose browser error reporting
 dev_mode      : true
 
+# How often Resin should check for updated files.
+# dependency_check_interval : 5m
+
 # Enable /resin-doc Resin documentation
 resin_doc     : true
 
@@ -94,7 +97,7 @@ sendfile : true
 # self-signed development certificate if HTTPS is enabled
 
 # Enable the proxy-cache - for caching static content in memory
-proxy_cache_enable: false
+proxy_cache_enable : true
 
 # Sets the proxy cache memory size
 # proxy_cache_size : 256m

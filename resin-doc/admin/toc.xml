@@ -34,9 +34,11 @@
 
       <item link="cluster-cloud.xtp" title="Cloud"
             description="Dynamic Server (Cloud) configuration"/>
-      
+
+      <!--
       <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"
         description="ANT and Maven clustered deployment API reference"/>
+      -->
     </item>
 
     <item link="resin-admin-command-line.xtp" title="Command Line"
@@ -50,6 +52,12 @@
 
       <item link="config-overview.xtp" title="Overview"
             description="Overview of Resin configuration"/>
+
+      <item link="config-resin-xml.xtp" title="resin.xml"
+            description="resin.xml configuration"/>
+
+      <item link="config-resin-properties.xtp" title="resin.properties"
+            description="Standard Resin properties for configuration"/>
 
       <item link="config-candi.xtp" title="CanDI"
             description="XML configuration for Dependency Injection services"/>
@@ -120,6 +128,9 @@
 
       <item link="starting-resin-licenses.xtp" title="Resin Pro Licenses"
             description="Resin Pro Licenses"/>
+      
+      <item link="resin-directory.xtp" title="directory"
+            description="Resin directory layout"/>
       
     </item>
 
@@ -199,10 +210,6 @@
       
       <item link="advanced-jmx.xtp" title="jmx"
             description="JMX management"/>
-      
-      <item link="resin-directory.xtp" title="directory"
-            description="Resin directory layout"/>
-      
     </item>
     
   </item>
