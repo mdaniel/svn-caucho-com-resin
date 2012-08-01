@@ -186,7 +186,7 @@
            
     </item>
     
-    <item link="advanced.xtp" title="Advanced"
+    <item link="advanced.xtp" title="Details"
           description="Advanced and technical concepts">
     
       <item link="advanced-classloaders.xtp" title="classloaders"
@@ -199,6 +199,9 @@
       
       <item link="advanced-jmx.xtp" title="jmx"
             description="JMX management"/>
+      
+      <item link="resin-directory.xtp" title="directory"
+            description="Resin directory layout"/>
       
     </item>
     
