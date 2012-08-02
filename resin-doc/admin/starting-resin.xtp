@@ -27,6 +27,67 @@ Oracle also has links to some other ports of the JDK.</p>
 
 </s1>
 
+<s1 title="Installation and Directory Overview">
+
+<p>When Resin is installed on a unix system:</p>
+
+<ul>
+<li><b>resinctl</b> is the <a href="starting-resin-command-line.xtp">command-line interface</a>.</li>
+<li><a href="config-resin-properties.xtp">Configuration properties</a>
+are in <em>/etc/resin/resin.properties</em></li>
+<li><a href="deploy.xtp">Deployed applications</a> are
+in <em>/var/resin/webapps</em></li>
+<li>Logs are in <em>/var/log/resin</em></li>
+<li>Licenses belong in  <em>/etc/resin/licenses</em></li>
+<li>OpenSSL keys belong in <em>/etc/resin/keys</em></li>
+</ul>
+
+<example title="Unix Directory">
+/etc/resin/resin.properties  # configuration properties
+/etc/resin/resin.xml         # configuration file
+/etc/resin/licenses/         # license location
+/etc/resin/keys/             # openssl keys
+
+/var/resin/                  # resin.root
+/var/resin/webapps/          # default deployment directory
+
+/var/log/resin/              # resin logs
+
+/usr/local/resin/            # resin.home (binary deployment)
+</example>
+
+<example title="CLI: resinctl">
+unix> resinctl deploy --name ROOT myapp.war
+Deployed production/webapp/default/ROOT from myapp.war to hmux://127.0.0.1:6800
+</example>
+
+<p>When Resin is installed on a windows system:</p>
+
+<ul>
+<li><b>resin</b> is the <a href="starting-resin-command-line.xtp">command-line interface</a>.</li>
+<li><a href="config-resin-properties.xtp">Configuration properties</a>
+are in <em>conf/resin.properties</em></li>
+<li><a href="deploy.xtp">Deployed applications</a> are
+in <em>webapps</em></li>
+<li>Logs are in <em>log</em></li>
+<li>Licenses belong in  <em>conf/licenses</em></li>
+<li>OpenSSL keys belong in <em>conf/keys</em></li>
+</ul>
+
+<example title="Windows/unzip Directory">
+resin-4.0.x/                 # installation directory: resin.home, resin.root
+  conf/resin.properties      # configuration properties
+  conf/resin.xml             # configuration file
+  conf/licenses/             # license location
+  conf/keys/                 # openssl keys
+
+  webapps/                   # default deployment directory
+
+  logs/                      # resin logs
+</example>
+
+</s1>
+
 <s1 name="quickstart" title="Installing Resin">
 
 <p>Installation steps for the major operating systems are outlined below:</p>
@@ -59,7 +120,7 @@ using dpkg.
 <p>
 Alternatively, you can add Caucho's Debian repository to your system's
 repositories to use automated update tools like Synaptic and apt-get.
-To do this, add the following line to your <var>/etc/apt/sources.list</var>
+To do this, you can add the debian repository as follows:
 </p>
 <example>
 unix# add-apt-repository http://caucho.com/download/debian
@@ -203,7 +264,7 @@ unix# resinctl generate-password my-user my-password >> /etc/resin/resin.propert
 
 <ol>
 <li>Create an admin user following the prompt at /resin-admin.</li>
-<li>Copy the <em>resin.root/admin-users.xml.generated</em> to <em>resin.conf/admin-users.xml</em>.</li>
+<li>Copy the <em>${resin.root}/admin-users.xml.generated</em> to <em>${resin.confdir}/admin-users.xml</em>.</li>
 <li>Change the resin_admin_external to true in the resin.xml if you need access from a non-local IP address.</li>
 <li>Browse /resin-admin with an HTML 5 browser.</li>
 </ol>

@@ -68,6 +68,12 @@ public class AddLicenseAction implements AdminAction
     }
 
     File licenseDir = Resin.getCurrent().getLicenseStore().getLicenseDirectory();
+    
+    if (licenseDir == null) {
+      Path confDir = Resin.getCurrent().getConfDirectory();
+      
+      licenseDir = new File(confDir.lookup("licenses").getNativePath());
+    }
 
     File licenseFile = new File(licenseDir, fileName);
     if (licenseFile.exists() && ! overwrite) {
@@ -78,8 +84,9 @@ public class AddLicenseAction implements AdminAction
                  licenseFile);
     }
 
-    if (! licenseDir.exists())
+    if (! licenseDir.exists()) {
       licenseDir.mkdir();
+    }
 
     FileWriter out = null;
     try {

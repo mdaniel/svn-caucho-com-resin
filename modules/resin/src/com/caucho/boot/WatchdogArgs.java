@@ -121,8 +121,9 @@ class WatchdogArgs
     
     String logLevel = System.getProperty("resin.log.level");
 
-    if (isTop)
+    if (isTop) {
       setLogLevel(logLevel);
+    }
 
     setResinHome(calculateResinHome());
     
