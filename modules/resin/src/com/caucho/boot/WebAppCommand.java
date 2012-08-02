@@ -29,7 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.ConfigException;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -45,10 +44,7 @@ public abstract class WebAppCommand extends AbstractRepositoryCommand
     String tag = args.getArg("-tag");
 
     if (tag == null) {
-      String name = args.getDefaultArg();
-      
-      if (name == null || "/".equals(name))
-        name = "ROOT";
+      String name = getName(args, null);
 
       String stage = args.getArg("-stage");
       if (stage == null)

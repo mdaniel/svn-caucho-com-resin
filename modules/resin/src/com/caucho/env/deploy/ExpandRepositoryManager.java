@@ -72,8 +72,11 @@ class ExpandRepositoryManager
   {
     if (_oldRepositoryMap == _repository.getTagMap())
       return false;
-    else
-      return _digest != calculateDigest();
+    else {
+      long newDigest = calculateDigest();
+      
+      return _digest != newDigest;
+    }
   }
 
   /**
@@ -128,21 +131,23 @@ class ExpandRepositoryManager
     Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
 
     for (String key : tagMap.keySet()) {
-      if (key.startsWith(prefix))
+      if (key.startsWith(prefix)) {
         tags.add(key);
+      }
     }
 
     Collections.sort(tags);
-
+    
     for (String tag : tags) {
       digest = Crc64.generate(digest, tag);
 
       RepositoryTagEntry entry = tagMap.get(tag);
 
-      if (entry.getRoot() != null)
+      if (entry.getRoot() != null) {
         digest = Crc64.generate(digest, entry.getRoot());
+      }
     }
-
+    
     return digest;
   }
   

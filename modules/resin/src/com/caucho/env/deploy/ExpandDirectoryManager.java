@@ -73,6 +73,12 @@ class ExpandDirectoryManager
     _requireFiles.addAll(requireFiles);
   }
   
+  void reset()
+  {
+    _digest = -1;
+    _keySet = new TreeSet<String>();
+  }
+  
   public String getId()
   {
     return _id;
@@ -223,7 +229,7 @@ class ExpandDirectoryManager
     }
     
     Path expandHash = rootDirectory.lookup(ExpandDeployController.APPLICATION_HASH_PATH);
-
+    
     if (expandHash.canRead()) {
       log.finer(this + " " + rootDirectory + " contains an application hash");
       return false;

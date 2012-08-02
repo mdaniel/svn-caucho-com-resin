@@ -90,8 +90,9 @@ public class ConcurrentArrayList<E> extends AbstractCollection<E> {
     E []array = _array;
     
     for (int i = 0; i < array.length; i++) {
-      if (match.isMatch(array[i], key))
+      if (match.isMatch(array[i], key)) {
         return i;
+      }
     }
     
     return -1;

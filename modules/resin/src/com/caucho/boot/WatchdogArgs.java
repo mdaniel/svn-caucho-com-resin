@@ -423,23 +423,6 @@ class WatchdogArgs
       defaultArg = _defaultArgs[0];
 
     return defaultArg;
-
-/*
-    ArrayList<String> tailArgs = getTailArgs();
-
-    for (int i = 0; i < tailArgs.size(); i++) {
-      String arg = tailArgs.get(i);
-
-      if (arg.startsWith("-")) {
-        i++;
-        continue;
-      }
-
-      return arg;
-    }
-
-    return null;
-*/
   }
 
   public String []getDefaultArgs() {

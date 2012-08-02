@@ -246,17 +246,10 @@ public class DataStore {
         if (is == null)
           return false;
         
-        long startPosition = os.getPosition();
-        
         try {
           os.writeStream(is);
         } finally {
           is.close();
-        }
-
-        if (log.isLoggable(Level.FINER)) {
-          log.finer(this + " load " + id
-                    + " length:" + (os.getPosition() - startPosition));
         }
 
         return true;
@@ -459,12 +452,6 @@ public class DataStore {
         if (keys.next()) {
           long id = keys.getLong("id");
           
-          // System.out.println("INDEX: " + dataIndex);
-          if (log.isLoggable(Level.FINER)) {
-            log.finer(this + " insert " + Long.toHexString(id)
-                      + " length:" + length);
-          }
-
           return id;
         }
         
@@ -477,8 +464,7 @@ public class DataStore {
       // the data already exists in the cache, so this is okay
       log.finer(this + " " + e.toString());
       log.log(Level.FINEST, e.toString(), e);
-
-      System.out.println("EXISTS:");
+      
       return 1;
     } catch (SQLException e) {
       e.printStackTrace();

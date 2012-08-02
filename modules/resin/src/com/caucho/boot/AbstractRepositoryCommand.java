@@ -40,6 +40,7 @@ import com.caucho.vfs.Path;
 public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
   protected AbstractRepositoryCommand()
   {
+    addValueOption("name", "name", "name of the deployment context");
   }
 
   @Override
@@ -54,6 +55,7 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
 
       return doCommand(args, client, deployClient);
     } catch (Exception e) {
+      e.printStackTrace();
       Throwable cause = e;
 
       if (cause instanceof ConfigException || 
@@ -105,15 +107,19 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     
     String webapp = args.getArg("-web-app");
     
-    if (webapp != null)
+    if (webapp != null) {
       name = webapp;
+    }
     
     if (name == null && path != null) {
       String tail = path.getTail();
     
       int p = tail.lastIndexOf('.');
 
-      name = tail.substring(0, p);
+      if (p > 0)
+        name = tail.substring(0, p);
+      else
+        name = tail;
     }
     
     if (name == null || name.equals("/")) {

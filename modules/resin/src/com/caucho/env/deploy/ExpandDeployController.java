@@ -613,7 +613,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     Path path = _rootDirectory.lookup(APPLICATION_HASH_PATH);
-    
+
     WriteStream os = null;
     
     try {

@@ -504,10 +504,12 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   {
     int p = tag.lastIndexOf('/');
     
-    if (p >= 0)
+    if (p >= 0) {
       onTagChange(tag.substring(0, p));
-    else if (! tag.isEmpty())
+    }
+    else if (! tag.isEmpty()) {
       onTagChange("");
+    }
     
     CopyOnWriteArrayList<RepositoryTagListener> listeners;
     listeners = _tagListenerMap.get(tag);

@@ -63,11 +63,13 @@ class ExpandManager
     _archiveManager = archiveManager;
     _repositoryManager = repositoryManager;
     
+    directoryManager.reset();
+    
     TreeSet<String> keySet = new TreeSet<String>();
     
-    keySet.addAll(_directoryManager.getDeployedKeys());
-    keySet.addAll(_archiveManager.getDeployedKeys());
     keySet.addAll(_repositoryManager.getDeployedKeys());
+    keySet.addAll(_archiveManager.getDeployedKeys());
+    keySet.addAll(_directoryManager.getDeployedKeys());
     
     // XXX: needs to filter through repository manager to remove
     // undeployed items
