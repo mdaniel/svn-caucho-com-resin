@@ -36,24 +36,24 @@ public class ImportMap
 {
   HashMap<String, String> _qualifiedMap;
   ArrayList<String> _wildcardList;
- 
+
   ArrayList<String> _wildcardPhpList;
-  
+
   public ImportMap()
   {
   }
-  
+
   public void addWildcardImport(String name)
   {
     if (_wildcardList == null) {
       _wildcardList = new ArrayList<String>();
-      _wildcardPhpList = new ArrayList<String>(); 
+      _wildcardPhpList = new ArrayList<String>();
     }
-    
+
     _wildcardList.add(name);
-    _wildcardPhpList.add(name.replaceAll("\\.", "/"));
+    _wildcardPhpList.add(name.replace('.', '/'));
   }
-  
+
   public String putQualified(String name)
   {
     if (_qualifiedMap == null) {
@@ -67,12 +67,12 @@ public class ImportMap
       shortName = name.substring(i + 1);
     else
       shortName = name;
-    
+
     putQualified(shortName, name);
 
     return shortName;
   }
-  
+
   public void putQualified(String shortName, String name)
   {
     if (_qualifiedMap == null)
@@ -80,7 +80,7 @@ public class ImportMap
 
     _qualifiedMap.put(shortName, name);
   }
-  
+
   public String getQualified(String name)
   {
     if (_qualifiedMap == null)
@@ -88,57 +88,57 @@ public class ImportMap
     else
       return _qualifiedMap.get(name);
   }
-  
+
   public String getQualifiedPhp(String name)
   {
     if (_qualifiedMap == null)
       return null;
-    
+
     String fullName = _qualifiedMap.get(name);
-    
+
     if (fullName != null)
-      fullName = fullName.replaceAll("\\.", "/") + ".php";
+      fullName = fullName.replace('.', '/') + ".php";
 
     return fullName;
   }
-  
+
   public ArrayList<String> getWildcardList()
   {
     if (_wildcardList == null)
       _wildcardList = new ArrayList<String>();
-    
+
     return _wildcardList;
   }
-  
+
   public ArrayList<String> getWildcardPhpList()
   {
     if (_wildcardPhpList == null)
       _wildcardPhpList = new ArrayList<String>();
-    
+
     return _wildcardPhpList;
   }
-  
+
   public ImportMap copy()
   {
     ImportMap copy = new ImportMap();
-    
+
     if (_qualifiedMap != null)
       copy._qualifiedMap = new HashMap<String,String>(_qualifiedMap);
-    
+
     if (_wildcardList != null)
       copy._wildcardList = new ArrayList<String>(_wildcardList);
 
     if (_wildcardPhpList != null)
       copy._wildcardPhpList = new ArrayList<String>(_wildcardPhpList);
-    
+
     return copy;
   }
-  
+
   public void clear()
   {
     if (_qualifiedMap != null)
       _qualifiedMap.clear();
-    
+
     if (_wildcardList != null)
       _wildcardList.clear();
 

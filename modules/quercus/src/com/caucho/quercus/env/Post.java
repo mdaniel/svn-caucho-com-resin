@@ -312,7 +312,7 @@ public class Post
       = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
 
     // php/085j
-    fileName = fileName.replaceAll("\u0000", "");
+    fileName = fileName.replace("\u0000", "");
 
     if (fileName.length() == 0)
       // php/0864
@@ -375,7 +375,7 @@ public class Post
     }
 
     // php/085j
-    name = name.replaceAll("\u0000", "");
+    name = name.replace("\u0000", "");
 
     StringValue nameValue = env.createString(name);
     Value v = files.get(nameValue).toValue();
@@ -395,7 +395,7 @@ public class Post
       = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
 
     // php/085j
-    fileName = fileName.replaceAll("\u0000", "");
+    fileName = fileName.replace("\u0000", "");
 
     if (fileName.length() == 0)
       // php/0864
@@ -492,12 +492,12 @@ public class Post
 
         if (keyStart == 0) {
           // php/081p
-          currentKey = currentKey.replaceAll("\\.", "_");
+          currentKey = currentKey.replace('.', '_');
         }
 
         if (isReplaceSpacesWithUnderscores) {
           // php/080h
-          currentKey = currentKey.replaceAll(" ", "_");
+          currentKey = currentKey.replace(' ', '_');
         }
 
         StringValue currentKeyValue = env.createString(currentKey);
@@ -530,7 +530,7 @@ public class Post
 
       if (isReplaceSpacesWithUnderscores) {
         // php/080h
-        key = key.replaceAll(" ", "_");
+        key = key.replace(' ', '_');
       }
 
       if (key.length() == 0) {
@@ -561,11 +561,11 @@ public class Post
     }
     else {
       if (key != null) {
-        key = key.replaceAll("\\.", "_");
+        key = key.replace('.', '_');
 
         if (isReplaceSpacesWithUnderscores) {
           // php/080h
-          key = key.replaceAll(" ", "_");
+          key = key.replace(' ', '_');
         }
 
         put(array, env.createString(key), formValue, addSlashesToValues);

@@ -135,7 +135,7 @@ public class StringUtility
           }
           else if (openBracketIndex > 0) {
             String arrayName = key.substring(0, openBracketIndex);
-            arrayName = arrayName.replaceAll("\\.", "_");
+            arrayName = arrayName.replace('.', '_');
 
             Value v = env.getVar(arrayName).getRawValue();
             if (v instanceof ArrayValue) {

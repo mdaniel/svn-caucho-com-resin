@@ -781,8 +781,7 @@ public class Env
     if (! _isUnicodeSemantics)
       return null;
 
-    String encoding = QuercusContext.INI_UNICODE_OUTPUT_ENCODING
-      .getAsString(this);
+    String encoding = QuercusContext.INI_UNICODE_OUTPUT_ENCODING.getAsString(this);
 
     if (encoding == null)
       encoding = QuercusContext.INI_UNICODE_FALLBACK_ENCODING.getAsString(this);

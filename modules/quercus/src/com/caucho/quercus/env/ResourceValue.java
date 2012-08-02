@@ -82,7 +82,13 @@ public class ResourceValue extends Value
   @Override
   public String toString()
   {
-    return "ResourceValue[]";
+    if (ResourceValue.class.equals(getClass())) {
+      return ResourceValue.class.getSimpleName() + "[]";
+    }
+    else {
+      return ResourceValue.class.getSimpleName()
+             + "[" + getClass().getSimpleName() + "]";
+    }
   }
 
   @Override

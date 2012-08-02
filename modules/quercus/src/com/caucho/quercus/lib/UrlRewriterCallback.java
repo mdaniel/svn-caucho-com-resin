@@ -95,8 +95,8 @@ public class UrlRewriterCallback extends CallbackFunction {
     if (_rewriterQuery.length() > 0)
       _rewriterQuery.append("&");
 
-    String encodedVar = URLUtil.encodeURL(var.replaceAll(" ", "+"));
-    String encodedValue = URLUtil.encodeURL(value.replaceAll(" ", "+"));
+    String encodedVar = URLUtil.encodeURL(var.replace(' ', '+'));
+    String encodedValue = URLUtil.encodeURL(value.replace(' ', '+'));
 
     _rewriterQuery.append(encodedVar + "=" + encodedValue);
     _rewriterVars.add(new String[] {encodedVar, encodedValue});

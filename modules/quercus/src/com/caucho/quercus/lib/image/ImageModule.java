@@ -1548,17 +1548,27 @@ public class ImageModule extends AbstractQuercusModule {
     Graphics2D g = image.getGraphics();
 
     AffineTransform oldTransform = g.getTransform();
+    Object oldHint = g.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
 
-    g.translate(x, y);
-    //    g.rotate(-1 * Math.PI / 2);
-    g.rotate(-1 * Math.PI / 2);
+    // php/1p1a
+    // need to turn on anti-aliasing or "ABC" will get rendered
+    // as "CBA" vertically, bizarre JDK bug
+    g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                       RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+    Font awtFont = image.getFont(font);
+    g.setFont(awtFont);
     g.setColor(QuercusImage.intToColor(color));
-    Font awtfont = image.getFont(font);
-    int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
-    g.setFont(awtfont);
-    g.drawString(s, 0, 0 + height);
+
+    AffineTransform at = new AffineTransform();
+    at.setToRotation(- Math.PI / 2, x, y);
+    g.setTransform(at);
+
+    int height = image.getGraphics().getFontMetrics(awtFont).getAscent();
+    g.drawString(s, x, y + height);
 
     g.setTransform(oldTransform);
+    g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, oldHint);
 
     return true;
   }

@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryStream;
@@ -310,7 +311,7 @@ public class UrlModule
    * Extracts the meta tags from a file and returns them as an array.
    */
   public static Value get_meta_tags(Env env, StringValue filename,
-                                    @Optional("false") boolean use_include_path)
+                                    @Optional boolean useIncludePath)
   {
     InputStream in = null;
 
@@ -318,7 +319,7 @@ public class UrlModule
 
     try {
       BinaryStream stream
-        = FileModule.fopen(env, filename, "r", use_include_path, null);
+        = FileModule.fopen(env, filename, "r", useIncludePath, null);
 
       if (stream == null || ! (stream instanceof BinaryInput))
         return result;
@@ -344,8 +345,7 @@ public class UrlModule
             }
 
             if (name != null && content != null) {
-              result.put(env.createString(name),
-                         env.createString(content));
+              result.put(env.createString(name), env.createString(content));
               break;
             }
           }
@@ -367,9 +367,11 @@ public class UrlModule
   }
 
   public static Value http_build_query(Env env,
+                                       @This Value obj,
                                        Value formdata,
                                        @Optional StringValue numeric_prefix,
-                                       @Optional("'&'") StringValue separator) {
+                                       @Optional("'&'") StringValue separator)
+  {
     StringValue result = env.createUnicodeBuilder();
 
     httpBuildQueryImpl(env,
