@@ -4,24 +4,25 @@
 <description>
 
 <p>
-Resin's clustering is designed to support a straight-forward
-elastic-server private cloud: allowing servers to join and leave the
-cluster while maintaining uptime and reliability without needing
-configuration changes.
+Resin supports static and dynamic clusters with servers either defined
+in configuration files or added and removed as load changes. Its clustering
+supports both public and private cloud configurations. Clustering supports
+HTTP load balancing, distributed caching and sessions, distributed
+and deployment.
 </p>
 
 <p>To support the elastic-server cloud, Resin maintains the
 following when servers are added and removed:</p>
 
 <ul>
-<li>Data redundancy with a triad hub.</li>
-<li>Application deployment through a clustered transactional
+<li>Deployment of applications with a clustered transactional
 repository.</li>
-<li>Distributed caching and store for both servlet sessions and jCache
-caching.</li>
+<li>Data redundancy with a triad hub.</li>
 <li>Load balancing to the dynamic servers.</li>
 <li>Distributed management, sensing, and health checks.</li>
 <li>Elastic JMS message queues.</li>
+<li>Distributed caching and store for both servlet sessions and jCache
+caching.</li>
 </ul>
 
 </description>
@@ -50,6 +51,19 @@ management, triple redundancy, and distributed deployment.</p>
 <li>Distributed JMX management.</li>
 <li>Clustered caches and distributed sessions.</li>
 </ul>
+
+<p>To create a cluster, you add servers to the standard
+configuration files. Because its is built into the Resin's
+foundations, the servers benefit from clustering automatically.</p>
+
+<example title="Example: sample resin.properties for a small cluster">
+...
+app_servers : 192.168.1.10:6800 \
+              192.168.1.11:6801 \
+              192.168.1.12:6802 \
+              192.168.1.13:6803
+...              
+</example>
 
 <p>While most web applications start their life-cycle being deployed
 to a single server, it eventually becomes necessary to add servers
@@ -143,13 +157,50 @@ a new server, Resin:
 <li>Updates the health system to monitor and administer the new server.</li>
 </ul>
 
+<s2 title="Enabling an dynamic servers in the resin.properties">
+
+<p>To enable dynamic servers, you can modify the resin.properties with
+three values: the triad hub servers for the cluster, enabling the elastic
+flag, and the cluster to join.</p>
+
+<ul>
+<li>Configure at least one static server in <em>app_servers</em>.
+Configuring three static servers is better.</li>
+<li>Enable dynamic servers with <em>elastic_cloud_enable</em>.</li>
+<li>Select the cluster to join with <em>home_cluster</em>.</li>
+</ul>
+
+<example title="resin.properties to enable dynamic servers">
+...
+app_servers          : 192.168.1.10:6800
+
+elastic_cloud_enable : true
+
+home_cluster         : app
+...
+</example>
+
+<p>A similar pattern works for other clusters like the 'web' cluster.
+If you're enabling dynamic web servers, configure <em>web_servers</em>
+for the hub and <em>home_cluster</em> with 'web'.</p>
+
+<p>If you use a custom resin.xml configuration, you can add additional
+clusters following the same pattern. The standard resin.xml shows how
+the <em>app_servers</em> are defined. If you follow the same pattern, your
+custom 'mytier' cluster can use properties like <em>mytier_servers</em>
+and <em>home_cluster</em> 'mytier'.</p>
+
+</s2>
+
 <s2 title="Starting an dynamic server">
 
-<p>The new server requires a copy of the site's resin.xml, which must have
-at least one server configured, because the server needs the IP address of
-the core servers.</p>
+<p>The new server requires a copy of the site's resin.xml
+and resin.properties. In a cloud environment, you can clone the
+virtual machine with the properties preconfigured. At least one
+server must be configured in the hub, because the new server needs
+the IP address of the hub servers to join the cluster.</p>
 
-<p>The main operation is a "--elastic" which tells Resin to create a
+<p>The main operation is a "--elastic" which forces Resin to create a
 dynamic server, and "--cluster app-tier" which tells the
 new server which cluster to join.</p>
 
@@ -157,8 +208,14 @@ new server which cluster to join.</p>
 unix> resinctl start --elastic --cluster app-tier
 </example>
 
-<p>As usual, you can name the server with "-server my-name". By default, one
-is generated automatically.</p>
+<p>As usual, you can name the server with "-server my-name". By default,
+a name is generated automatically.</p>
+
+<p>You can omit the --elastic and --cluster if you define
+the <em>home_cluster</em> and if the server is not one of the static servers.
+(Resin searches for local IP address in the addresses of the static servers
+if you don't specify a --server. If it finds a match, Resin will start
+it as a static server.)</p>
 
 <p>After the server shuts down, the cluster will remember it for 15 minutes,
 giving the server time to restart before removing it from the cluster.</p>
@@ -169,25 +226,34 @@ giving the server time to restart before removing it from the cluster.</p>
 
 <s1 title="Deploying Applications to a Cluster">
 
-<p>The simplest mechanism for doing deployment in a clustered
-environment is to copy files to each server's deployment
-directory. The biggest issue with this approach is that it is very
-difficult to synchronize deployment across the cluster and it often
-results in some down-time. Resin clustered deployment is designed to
-solve this problem. Resin has ANT and Maven based APIs to deploy to a
-cluster in an automated fashion. These features work much like session
-clustering in that applications are automatically replicated across
-the cluster. Because Resin cluster deployment is based on Git, it also
-allows for application versioning and staging across the cluster.
+<p>Because each organization has different deployment strategies,
+Resin provides several deployment techniques to match
+your internal deployment strategy:</p>
+
+<ul>
+<li>Use command-line with "deploy" command.</li>
+<li>Upload and copy .war files individually.</li>
+<li>Use /resin-admin deploy form.</li>
+<li>Use <a href="resin-admin-rest.xtp">REST admin</a> interface.</li>
+</ul>
+
+<p>
+Resin clustered deployment synchronizes deployment across the cluster
+These features work much like session clustering in that applications
+are automatically replicated across the cluster. Because Resin cluster
+deployment is based on Git, it also allows for application versioning
+and staging across the cluster.
 </p>
 
-<p>Although the upload and copy of application archives is common for
-single servers, it becomes more difficult to manage as your site
-scales to multiple servers. Along with the mechanics of copying the
-same file many times, you also need to consider the synchronization of
-applications across all the servers, making sure that each server has
-a complete, consistent copy. The benefits of using Resin's clustered
-deployment include:</p>
+<p>
+The upload and copy method of deploying applications to the webapps
+file is always available. Although the upload and copy of application
+archives is common for single servers, it becomes more difficult to
+manage as your site scales to multiple servers. Along with the mechanics
+of copying the same file many times, you also need to consider the
+synchronization of applications across all the servers, making sure
+that each server has a complete, consistent copy. The benefits of
+using Resin's clustered deployment include:</p>
 
 <ul>
 <li>Verify complete upload by secure digest before deployment begins.</li>
@@ -195,53 +261,50 @@ deployment include:</p>
 <li>Versioned deployment, including transparent user upgrades.</li>
 </ul>
 
-<p>Because each organization has different deployment strategies,
-Resin provides several deployment techniques to match
-your internal deployment strategy:</p>
-
-<ul>
-<li>Upload and copy .war files individually.</li>
-<li>Use from command-line with "deploy" command.</li>
-<li>Use /resin-admin deploy form.</li>
-<li>Use ant script with Resin's deployment plugin.</li>
-<li>Use maven script with Resin's deployment plugin.</li>
-</ul>
-
 <p>As an example, the command-line deployment of a .war file to a
 running Resin instance looks like the following:</p>
 
 <example>
-unix> bin/resin.sh deploy test.war -user my-user -password my-pass
+unix> resinctl deploy test.war
 
 Deployed production/webapp/default/test from /home/caucho/ws/test.war
   to http://192.168.1.10:8080/hmtp
 </example>
 
-<p>In order to use Resin clustered deployment, you must first enable
-remote deployment on the server, which is disabled by default for security.
-You do this using the following Resin configuration: </p>
+<s2 title="Remote Deployment">
 
-<example title="Enabling Resin Clustered Deployment">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="urn:java:com.caucho.resin">
-  &lt;cluster id="app-tier">
+<p>In order to use Resin clustered deployment from a remote
+system, you must first enable remote deployment on the server, which is
+disable by default for security. You do this using the following
+Resin configuration:</p>
 
-    &lt;resin:AdminAuthenticator password-digest="none">
-      &lt;resin:user name="my-user" password="my-pass"/>
-    &lt;/resin:AdminAuthenticator>
-    
-    &lt;resin:RemoteAdminService/>
-    &lt;resin:DeployService/>
-  ...
-  &lt;/cluster>
-&lt;/resin>
+<example title="resin.properties: Enabling Resin Clustered Deployment">
+remote_cli_enable : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
 </example>
 
 <p>In the example above, both the remote admin service and the
 deployment service is enabled. Note, the admin authenticator must be
 enabled for any remote administration and deployment for obvious
 security reasons. To keep things simple, we used a clear-text password
-above, but you should likely use a password hash instead.  </p>
+above, but you should likely use a password hash instead.</p>
+
+<p>When deploying remotely, you will need to include the user and
+password.</p>
+
+
+<example>
+unix> resinctl deploy --user my-admin --password my-password test.war
+
+Deployed production/webapp/default/test from /home/caucho/ws/test.war
+  to http://192.168.1.10:8080/hmtp
+</example>
+
+</s2>
+
+<s2 title="Deployment details and architecture">
 
 <p>The output exposes a few important details about the underlying
 remote deployment implementation for Resin that you should
@@ -289,6 +352,8 @@ marked with a red 'x'.</p>
 <p>The details for each Ant and Maven based clustered deployment API
 is outlined <a href="clustering-deployment-ref.xtp">here</a>.  </p>
 
+</s2>
+
 </s1>
 
 <s1 title="HTTP Load Balancing and Failover">
@@ -314,6 +379,8 @@ defines the servers in a cluster, the only additional configuration
 is to use the &lt;resin:LoadBalance> tag to forward request to the backend.</p>
 
 <figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
+
+<s2 title="resin.xml load balancing configuration">
 
 <p>Dispatching requests with load balancing in Resin is accomplished through
 the <a href="http-rewrite-ref.xtp">&lt;resin:LoadBalance></a> tag
@@ -421,6 +488,8 @@ web-tier server, you'll want to remember to add a separate
 &lt;web-app> for resin-admin to make sure the &lt;rewrite-dispatch>
 doesn't inadvertantly send the management request to the app-tier.
 </p>
+
+</s2>
 
 <s2 title="Sticky/Persistent Sessions">
 
@@ -585,8 +654,9 @@ it should listen for new requests on the socket.  The
 sockets too soon.  The keepalive timeout can be large since the
 app-tier can use the <a
 href="http-server-ref.xtp">keepalive-select</a> manager to efficiently
-wait for many connections at once.</p> </s2>
+wait for many connections at once.</p> 
 
+</s2>
 <s2 title="resin:LoadBalance Dispatching">
 
 <p>&lt;resin:LoadBalance> is part of Resin's <a
@@ -892,6 +962,7 @@ if (cache.get("discount_rate") != null) {
   cache.put("discount_rate", discountRate);
 }
 </example>
+
 </s1>
 </body>
 </document>

@@ -86,9 +86,11 @@
       <item link="deploy-git-architecture.xtp" title=".git architecture"
             description="Architecture of the clustered .git deployment"/>
       -->
-    
+
+      <!--
       <item link="deploy-ant-maven.xtp" title="ant/maven"
             description="ant and maven deployment reference"/>
+      -->
     </item>
     
     

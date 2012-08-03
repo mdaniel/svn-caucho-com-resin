@@ -167,6 +167,16 @@ public class ResinProperties extends ResinControl implements FlowBean
         loader = systemLoader;
       
       while ((line = is.readLine()) != null) {
+        while (line.endsWith("\\")) {
+          line = line.substring(0, line.length() - 1);
+
+          String contLine = is.readLine();
+          
+          if (contLine != null) {
+            line += contLine;
+          }
+        }
+        
         line = line.trim();
         
         int p = line.indexOf('#');
@@ -189,9 +199,10 @@ public class ResinProperties extends ResinControl implements FlowBean
         if (p < 0 || q >= 0 && q < p)
           p = q;
         
-        if (p < 0)
+        if (p < 0) {
           throw new ConfigException(L.l("invalid line in {0}\n  {1}",
                                         path, line));
+        }
         
         if ("".equals(mode) || mode.equals(_mode)) {
           String key = line.substring(0, p).trim();
