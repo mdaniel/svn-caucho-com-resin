@@ -53,11 +53,11 @@
       <item link="config-overview.xtp" title="Overview"
             description="Overview of Resin configuration"/>
 
-      <item link="config-resin-xml.xtp" title="resin.xml"
-            description="resin.xml configuration"/>
-
       <item link="config-resin-properties.xtp" title="resin.properties"
             description="Standard Resin properties for configuration"/>
+
+      <item link="config-resin-xml.xtp" title="resin.xml"
+            description="Custom resin.xml configuration"/>
 
       <item link="config-candi.xtp" title="CanDI"
             description="XML configuration for Dependency Injection services"/>

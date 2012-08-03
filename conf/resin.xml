@@ -93,7 +93,9 @@
     </host-default>
 
     <!-- auto virtual host deployment in hosts/foo.example.com/webapps -->
-    <host-deploy path="hosts"/>
+    <host-deploy path="hosts">
+      <resin:import path="host.xml" optional="true"/>
+    </host-deploy>
 
     <!-- the default host, matching any host name -->
     <host id="" root-directory=".">

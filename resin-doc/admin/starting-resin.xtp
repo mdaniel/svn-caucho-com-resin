@@ -5,9 +5,8 @@
     <title>Resin Installation Quick Start</title>
 
     <description>
-<p>You can start using Resin by simply expanding the archive and
-starting Resin with a Java command line. You can also start Resin directly 
-from an IDE.</p>
+<p>If you're using Resin for the first time, this section will
+show you how to install Resin, start it, and deploy your application.</p>
     </description>
   </header>
 
@@ -27,7 +26,7 @@ Oracle also has links to some other ports of the JDK.</p>
 
 </s1>
 
-<s1 title="Installation and Directory Overview">
+<s1 title="Command and Directory Overview">
 
 <p>When Resin is installed on a unix system:</p>
 
@@ -36,7 +35,7 @@ Oracle also has links to some other ports of the JDK.</p>
 <li><a href="config-resin-properties.xtp">Configuration properties</a>
 are in <em>/etc/resin/resin.properties</em></li>
 <li><a href="deploy.xtp">Deployed applications</a> are
-in <em>/var/resin/webapps</em></li>
+put in <em>/var/resin/webapps</em></li>
 <li>Logs are in <em>/var/log/resin</em></li>
 <li>Licenses belong in  <em>/etc/resin/licenses</em></li>
 <li>OpenSSL keys belong in <em>/etc/resin/keys</em></li>
@@ -57,6 +56,8 @@ in <em>/var/resin/webapps</em></li>
 </example>
 
 <example title="CLI: resinctl">
+unix> sudo resinctl start
+
 unix> resinctl deploy --name ROOT myapp.war
 Deployed production/webapp/default/ROOT from myapp.war to hmux://127.0.0.1:6800
 </example>
@@ -229,11 +230,11 @@ configuration page.</p>
 
 <s1 title="Browser-Based Administration (/resin-admin)">
 
-<p>To enable the /resin-admin, you'll need to create an admin user and
-password. You can either create the user in resin-admin itself, or
-if you are using the standard resin.xml and resin.properties you can
-generate the key from the command line resinctl</p>
-
+<p>To enable the /resin-admin browser-based administration, you'll need
+to create an admin user and password. You can either create the user in
+resin-admin itself, or if you are using the standard resin.xml and
+resin.properties you can generate the key from the command
+line <em>resinctl</em></p>
 
 <s2 title="Installation with resin.properties and generate-password">
 
@@ -296,14 +297,21 @@ a running Resin server, using the .war file's name as the context-path.
 It looks like the following example.</p>
 
 <example title="Example: command-line deployment">
-resinctl deploy hello.war
+unix> resinctl deploy hello.war
 
-resinctl undeploy hello.war
+unix> resinctl undeploy hello.war
 </example>
 
 <p>The URL for the application would be: <em>http://localhost:8080/hello</em>.</p>
 
-<p>To deploy to the root context-path, use a file name ROOT.war.</p>
+<p>To deploy to the root context-path, use a file name ROOT.war
+or use the --name attribute.</p>
+
+<example title="Example: root command-line deployment">
+unix> resinctl deploy --name ROOT mywar.war
+
+unix> resinctl undeploy --name ROOT
+</example>
 
 </s2>
 
@@ -360,11 +368,9 @@ The URL for the application would be:
 
 <s1 title="Running Resin as a Daemon">
 
-<p>In most production environments, Resin will run as a background daemon.
-The previous steps ran Resin in the foreground, which is convenient
-for development since the logging output goes to the console.
+<p>Most production environments will run Resin as a background daemon.
 When running as a daemon, Resin detaches from the console and continues
-running until told to stop.</p>
+running until it is stopped.</p>
 
 <p>The following are the basic steps to running Resin as a daemon:</p>
 <ol>
@@ -380,8 +386,8 @@ start Resin when the system boots.</p>
 
 <s1 title="Command-Line PDF Reports">
 
-<p>PDF reports about the Resin running status are available from the
-command-line, from /resin-admin browser-based GUI, and as automatic health
+<p>PDF reports about the Resin server can be generated with the
+command-line, the /resin-admin browser-based GUI, or as automatic health
 system tasks.</p>
 
 <p>From the command-line you can generate a pdf-report with the following:</p>
@@ -424,6 +430,33 @@ for Resin Pro.</p>
 
 <p>More installation and configuration are available at
 <a href="install.xtp">installation options</a>.</p>
+
+</s1>
+
+<s1 title="Next Steps">
+
+<ul>
+<li><b><a href="config-resin-properties.xtp">resin.properties</a></b> configuration shows how to customize basic configuration.</li>
+<li><b><a href="config-resin-xml.xtp">resin.xml</a></b> configuration shows more advanced and specialized configuration.</li>
+<li><b><a href="resin-admin-command-line.xtp">command-line</a></b> describes
+using the <b>resinctl</b> command line interface.</li>
+<li><b><a href="deploy.xtp">deployment</a></b> deploying applications to
+a running server.</li>
+<li><b><a href="clustering.xtp">clustering</a></b> describes clustering,
+cloud, and dynamic servers.</li>
+<li><b><a href="resin-admin.xtp">resin-admin</a></b> describes the
+/resin-admin browser-based interface.</li>
+<li><b><a href="health.xtp">health</a></b> describes the
+Resin health and monitoring system.</li>
+<li><b><a href="resin-admin-rest.xtp">REST admin</a></b> describes the
+REST interface for remote third-party admin integration.</li>
+<li><b><a href="http.xtp">Resin HTTP Web Server</a></b>
+describes fast, scalable HTTP web server.</li>
+<li><b><a href="http-rewrite.xtp">HTTP URL Rewrite</a></b>
+describes Resin's URL rewriting (like mod_rewrite).</li>
+<li><b><a href="security.xtp">Security</a></b>
+describes authentication, authorization and SSL.</li>
+</ul>
 
 </s1>
 

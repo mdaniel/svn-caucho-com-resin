@@ -111,9 +111,18 @@ public class GitCommitJar {
       
       ZipOutputStream zos = new ZipOutputStream(os);
       
-      fillDirectory(zos, dir, "");
+      int count = fillDirectory(zos, dir, "");
       
-      zos.close();
+      if (count > 0) {
+        zos.close();
+      } else {
+        try {
+          zos.close();
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
+  
       os.close();
       
       GitCommitJar gitCommitJar = new GitCommitJar(tmpPath, true);
@@ -129,11 +138,13 @@ public class GitCommitJar {
     }
   }
   
-  private static void fillDirectory(ZipOutputStream zos, 
-                                    Path dir, 
-                                    String pathName)
+  private static int fillDirectory(ZipOutputStream zos, 
+                                   Path dir, 
+                                   String pathName)
     throws IOException
   {
+    int count = 0;
+    
     String []list = dir.list();
     Arrays.sort(list);
     
@@ -158,11 +169,17 @@ public class GitCommitJar {
         path.writeToStream(zos);
         
         zos.closeEntry();
+        
+        count++;
       }
       else if (path.isDirectory()) {
-        fillDirectory(zos, path, subPath);
+        int subcount = fillDirectory(zos, path, subPath);
+        
+        count += subcount;
       }
     }
+    
+    return count;
   }
   
   private void init(InputStream is)

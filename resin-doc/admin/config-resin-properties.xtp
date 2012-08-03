@@ -6,7 +6,9 @@
   <description>
 
     <p>
-      The resin.properties for common configuration.
+Most common Resin properties are configured by resin.properties.
+The resin.properties variables are used by the main resin.xml
+configuration file.
     </p>
 
   </description>

@@ -259,6 +259,11 @@ public class DeployClient implements Repository
     commit.validate();
     
     GitCommitJar gitCommit = null;
+    
+    if (! path.exists()) {
+      throw new ConfigException(L.l("'{0}' is not an existing path for deploy commit.",
+                                    path));
+    }
 
     try {
       gitCommit = GitCommitJar.createDirectory(path);
@@ -268,7 +273,6 @@ public class DeployClient implements Repository
       return deployJar(tag, gitCommit, commit.getAttributes());
     }
     catch (IOException e) {
-      e.printStackTrace();
       throw new RepositoryException(e);
     }
     finally {
