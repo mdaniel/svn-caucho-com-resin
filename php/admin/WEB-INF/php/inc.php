@@ -78,15 +78,15 @@ function mbean_init()
   
   $is_valid = 1;
 
-  $server_id = $_GET["s"];
+  $server_index = $_GET["s"];
 
   if (isset($_REQUEST["new_s"])) {
-    $server_id = $_REQUEST["new_s"];
+    $server_index = $_REQUEST["new_s"];
   }
   
   $g_mbean_server = new MBeanServer();
   
-  $server = server_find_by_id($g_mbean_server, $server_id);
+  $server = server_find_by_index($g_mbean_server, $server_index);
 
   if ($server) {
     $g_server_index = $server->ClusterIndex;
@@ -99,16 +99,13 @@ function mbean_init()
 
     if (! $g_server_id)
       $g_server_id = "default";
-
   }
   else {
     $server = server_find_by_index($g_mbean_server, $g_server_index);
-
     $g_server_id = $server->Name;
 
     try {
       $mbean_server = new MBeanServer($g_server_id);
-
       $server = $mbean_server->lookup("resin:type=Server");
 
       if ($server) {
@@ -304,6 +301,15 @@ function format_count($count)
     return sprintf("%.1fM", $count / (1000.0 * 1000.0));
   else
     return sprintf("%.1fG", $count / (1000.0 * 1000.0 * 1000.0));
+}
+
+function format_bytes($bytes) 
+{
+  if(!empty($bytes)) {
+    $s = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
+    $e = floor(log($bytes)/log(1024));
+    return sprintf('%.1f '.$s[$e], ($bytes/pow(1024, floor($e))));
+  }
 }
 
 function indent($string, $count = 2)
@@ -681,7 +687,7 @@ function display_header($script, $title, $server,
 
 //  $server_id = $server->Name;
 
-  $next_url = "?q=${g_page}&s=${g_server_id}${query}";
+  $next_url = "?q=${g_page}&s=${g_server_index}${query}";
   
   foreach ($_GET as $key => $value) {
     if (! preg_match("/^[sq]{1}$/", $key)) {
@@ -1031,7 +1037,7 @@ function display_servers($server)
     if ($cluster_server->ClusterIndex == $g_server_index)
       echo " selected='selected'";
 
-    echo " value=\"" . $id . "\">";
+    echo " value=\"" . $cluster_server->ClusterIndex . "\">";
     printf("%02d - %s\n", $cluster_server->ClusterIndex, $id);
     echo "  </option>";
   }
