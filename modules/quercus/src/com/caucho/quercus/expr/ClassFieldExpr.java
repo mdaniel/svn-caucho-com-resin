@@ -34,10 +34,8 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
@@ -50,17 +48,13 @@ public class ClassFieldExpr extends AbstractVarExpr {
 
   protected final String _className;
   protected final StringValue _varName;
-  
-  private final StringValue _var;
 
-  public ClassFieldExpr(String className, String varName)
+  public ClassFieldExpr(String className, StringValue varName)
   {
     _className = className;
-    _varName = MethodIntern.intern(varName);
-    
-    _var = new ConstStringValue(className + "::" + varName);
+    _varName = varName;
   }
-  
+
   //
   // function call creation
   //
@@ -76,10 +70,10 @@ public class ClassFieldExpr extends AbstractVarExpr {
   {
     Expr var = parser.createVar(_varName.toString());
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassMethodCall(location, _className, var, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -92,7 +86,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
   {
     return env.getClass(_className).getStaticFieldValue(env, _varName);
   }
-   
+
   /**
    * Evaluates the expression.
    *
@@ -105,7 +99,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
   {
     return env.getClass(_className).getStaticFieldVar(env, _varName);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -117,10 +111,10 @@ public class ClassFieldExpr extends AbstractVarExpr {
   public Value evalAssignRef(Env env, Value value)
   {
     env.getClass(_className).setStaticFieldRef(env, _varName, value);
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -135,7 +129,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
               L.l("{0}::${1}: Cannot unset static variables.",
                   _className, _varName));
   }
-  
+
   public String toString()
   {
     return _className + "::$" + _varName;

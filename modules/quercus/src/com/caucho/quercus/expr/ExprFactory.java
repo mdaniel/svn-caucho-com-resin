@@ -307,7 +307,7 @@ public class ExprFactory {
    * Creates an class static field 'a::$b' expression.
    */
   public Expr createClassField(String className,
-                               String name)
+                               StringValue name)
   {
     return new ClassFieldExpr(className, name);
   }
@@ -316,7 +316,7 @@ public class ExprFactory {
    * Creates an class static field '$a::$b' expression.
    */
   public Expr createClassField(Expr className,
-                               String name)
+                               StringValue name)
   {
     return new ClassVarFieldExpr(className, name);
   }
@@ -324,7 +324,7 @@ public class ExprFactory {
   /**
    * Creates a class static field 'static::$b' expression.
    */
-  public Expr createClassVirtualField(String name)
+  public Expr createClassVirtualField(StringValue name)
   {
     return new ClassVirtualFieldExpr(name);
   }

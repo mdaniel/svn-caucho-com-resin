@@ -100,18 +100,14 @@ public class QuercusClass extends NullValue {
 
   private boolean _isModified;
 
-  public QuercusClass(ClassDef classDef, QuercusClass parent)
-  {
-    this(ModuleContext
-      .getLocalContext(Thread.currentThread().getContextClassLoader()),
-         classDef,
-         parent);
-  }
+  private final ModuleContext _moduleContext;
 
   public QuercusClass(ModuleContext moduleContext,
                       ClassDef classDef,
                       QuercusClass parent)
   {
+    _moduleContext = moduleContext;
+
     _classDef = classDef.loadClassDef(); // force load of any lazy classes
     _className = classDef.getName();
     _parent = parent;
@@ -277,6 +273,8 @@ public class QuercusClass extends NullValue {
     _staticFieldExprMap = cacheClass._staticFieldExprMap;
     _staticFieldNameMap = cacheClass._staticFieldNameMap;
     _instanceofSet = cacheClass._instanceofSet;
+
+    _moduleContext = cacheClass._moduleContext;
   }
 
   public ClassDef getClassDef()
@@ -653,8 +651,33 @@ public class QuercusClass extends NullValue {
     }
 
     fieldList.add(new StaticField(name, value));
-    _staticFieldNameMap.put(new ConstStringValue(name),
-                            new ConstStringValue(className + "::" + name));
+
+    StringValue sb = createStringBuilder();
+    sb.append(className);
+    sb.append("::");
+    sb.append(name);
+
+    _staticFieldNameMap.put(createString(name), sb);
+  }
+
+  private StringValue createString(String s)
+  {
+    if (_moduleContext.isUnicodeSemantics()) {
+      return new UnicodeBuilderValue(s);
+    }
+    else {
+      return new ConstStringValue(s);
+    }
+  }
+
+  private StringValue createStringBuilder()
+  {
+    if (_moduleContext.isUnicodeSemantics()) {
+      return new UnicodeBuilderValue();
+    }
+    else {
+      return new StringBuilderValue();
+    }
   }
 
   /**

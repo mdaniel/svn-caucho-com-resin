@@ -31,11 +31,14 @@ package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.marshal.Marshal;
@@ -96,12 +99,15 @@ public class ModuleContext
   protected MarshalFactory _marshalFactory;
   protected ExprFactory _exprFactory;
 
+  private boolean _isUnicodeSemantics;
+
   /**
    * Constructor.
    */
-  private ModuleContext(ClassLoader loader)
+  private ModuleContext(ClassLoader loader, boolean isUnicodeSemantics)
   {
     _loader = loader;
+    _isUnicodeSemantics = isUnicodeSemantics;
 
     _marshalFactory = new MarshalFactory(this);
     _exprFactory = new ExprFactory();
@@ -115,9 +121,11 @@ public class ModuleContext
   /**
    * Constructor.
    */
-  public ModuleContext(ModuleContext parent, ClassLoader loader)
+  public ModuleContext(ModuleContext parent,
+                       ClassLoader loader,
+                       boolean isUnicodeSemantics)
   {
-    this(loader);
+    this(loader, isUnicodeSemantics);
 
     _parent = parent;
 
@@ -133,19 +141,29 @@ public class ModuleContext
     }
   }
 
-  public static ModuleContext getLocalContext(ClassLoader loader)
+  public boolean isUnicodeSemantics()
   {
-    throw new UnsupportedOperationException();
-    /*
-    ModuleContext context = _localModuleContext.getLevel(loader);
+    return _isUnicodeSemantics;
+  }
 
-    if (context == null) {
-      context = new ModuleContext(loader);
-      _localModuleContext.set(context, loader);
+  public StringValue createString(String s)
+  {
+    if (_isUnicodeSemantics) {
+      return new UnicodeBuilderValue(s);
     }
+    else {
+      return new ConstStringValue(s);
+    }
+  }
 
-    return context;
-    */
+  public StringValue createStringBuilder()
+  {
+    if (_isUnicodeSemantics) {
+      return new UnicodeBuilderValue();
+    }
+    else {
+      return new StringBuilderValue();
+    }
   }
 
   /**
@@ -163,7 +181,7 @@ public class ModuleContext
   {
     _serviceClassUrls.add(url);
   }
-  
+
   /**
    * Adds a URL for the context module
    */
@@ -534,7 +552,7 @@ public class ModuleContext
 
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
-        
+
         InputStream is = null;
         ReadStream rs = null;
         try {

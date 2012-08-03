@@ -111,9 +111,8 @@ public class QuercusContext
   private static IniDefinitions _ini = new IniDefinitions();
 
   private final PageManager _pageManager;
-  private final QuercusSessionManager _sessionManager;
-
   private final ClassLoader _loader;
+  private final QuercusSessionManager _sessionManager;
 
   private ModuleContext _moduleContext;
 
@@ -205,8 +204,6 @@ public class QuercusContext
 
   private boolean _isConnectionPool = true;
 
-  private Boolean _isUnicodeSemantics;
-
   private DataSource _database;
 
   private ConcurrentHashMap<String,DataSource> _databaseMap
@@ -238,23 +235,16 @@ public class QuercusContext
 
   private JdbcDriverContext _jdbcDriverContext;
 
+  private boolean _isUnicodeSemantics;
+
   /**
    * Constructor.
    */
   public QuercusContext()
   {
     _loader = Thread.currentThread().getContextClassLoader();
-
-    _moduleContext = getLocalContext();
-
     _pageManager = createPageManager();
-
     _sessionManager = createSessionManager();
-
-    for (Map.Entry<String,String> entry : System.getenv().entrySet()) {
-      _serverEnvMap.put(createString(entry.getKey()),
-                        createString(entry.getValue()));
-    }
   }
 
   /**
@@ -422,16 +412,17 @@ public class QuercusContext
   /**
    * Returns the context for this class loader.
    */
-  public final ModuleContext getLocalContext()
+  public final ModuleContext getLocalContext(boolean isUnicodeSemantics)
   {
-    return getLocalContext(_loader);
+    return getLocalContext(_loader, isUnicodeSemantics);
   }
 
-  public ModuleContext getLocalContext(ClassLoader loader)
+  public ModuleContext getLocalContext(ClassLoader loader,
+                                       boolean isUnicodeSemantics)
   {
     synchronized (this) {
       if (_moduleContext == null) {
-        _moduleContext = createModuleContext(null, loader);
+        _moduleContext = createModuleContext(null, loader, isUnicodeSemantics);
         _moduleContext.init();
       }
     }
@@ -440,9 +431,10 @@ public class QuercusContext
   }
 
   protected ModuleContext createModuleContext(ModuleContext parent,
-                                              ClassLoader loader)
+                                              ClassLoader loader,
+                                              boolean isUnicodeSemantics)
   {
-    return new ModuleContext(parent, loader);
+    return new ModuleContext(parent, loader, isUnicodeSemantics);
   }
 
   /**
@@ -482,18 +474,13 @@ public class QuercusContext
     return false;
   }
 
-  public void setUnicodeSemantics(boolean isUnicode)
-  {
-    setIni("unicode.semantics", BooleanValue.create(isUnicode));
-  }
-
   /**
    * Returns true if unicode.semantics is on.
    */
   public boolean isUnicodeSemantics()
   {
     // php/
-    return getIniBoolean("unicode.semantics");
+    return _isUnicodeSemantics;
   }
 
   /**
@@ -960,8 +947,9 @@ public class QuercusContext
 
         for (Map.Entry<Value,Value> entry : array.entrySet()) {
           String key = entry.getKey().toString();
+          Value value = entry.getValue();
 
-          setIni(key, entry.getValue());
+          setIni(key, value);
         }
       }
 
@@ -1808,6 +1796,15 @@ public class QuercusContext
    */
   public void init()
   {
+    _isUnicodeSemantics = getIniBoolean("unicode.semantics");
+
+    _moduleContext = getLocalContext(_isUnicodeSemantics);
+
+    for (Map.Entry<String,String> entry : System.getenv().entrySet()) {
+      _serverEnvMap.put(createString(entry.getKey()),
+                        createString(entry.getValue()));
+    }
+
     initModules();
     initClasses();
 
@@ -1933,42 +1930,18 @@ public class QuercusContext
     StringValue value = _stringMap.get(name);
 
     if (value == null) {
-      value = new ConstStringValue(name);
+      if (isUnicodeSemantics()) {
+        return new UnicodeBuilderValue(name);
+      }
+      else {
+        value = new ConstStringValue(name);
+      }
 
       _stringMap.put(name, value);
     }
 
     return value;
   }
-
-  /**
-   * Interns a string.
-   */
-/*
-  public StringValue intern(String name)
-  {
-    StringValue value = _internMap.get(name);
-
-    if (value != null)
-      return value;
-
-    synchronized (_internMap) {
-      value = _internMap.get(name);
-
-      if (value != null)
-        return value;
-
-      if (value == null) {
-        name = name.intern();
-
-        value = new StringBuilderValue(name);
-        _internMap.put(name, value);
-      }
-
-      return value;
-    }
-  }
-*/
 
   /**
    * Returns a named constant.

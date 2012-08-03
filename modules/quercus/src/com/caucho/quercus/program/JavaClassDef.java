@@ -97,16 +97,16 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private final MethodMap<AbstractJavaMethod> _functionMap
     = new MethodMap<AbstractJavaMethod>(null, this);
 
-  private final HashMap<StringValue, AbstractJavaMethod> _getMap
-    = new HashMap<StringValue, AbstractJavaMethod>();
+  private final HashMap<String, AbstractJavaMethod> _getMap
+    = new HashMap<String, AbstractJavaMethod>();
 
-  private final HashMap<StringValue, AbstractJavaMethod> _setMap
-    = new HashMap<StringValue, AbstractJavaMethod>();
+  private final HashMap<String, AbstractJavaMethod> _setMap
+    = new HashMap<String, AbstractJavaMethod>();
 
   // _fieldMap stores all public non-static fields
   // used by getField and setField
-  private final HashMap<StringValue, FieldMarshalPair> _fieldMap
-    = new HashMap<StringValue, FieldMarshalPair> ();
+  private final HashMap<String, FieldMarshalPair> _fieldMap
+    = new HashMap<String, FieldMarshalPair> ();
 
   private AbstractJavaMethod _cons;
   private AbstractJavaMethod __construct;
@@ -425,9 +425,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     // should getters be involved as well?
 
     for (
-      Map.Entry<StringValue, FieldMarshalPair> lEntry : _fieldMap.entrySet()
-      ) {
-      StringValue lFieldName = lEntry.getKey();
+      Map.Entry<String, FieldMarshalPair> lEntry : _fieldMap.entrySet()) {
+      String lFieldName = lEntry.getKey();
       FieldMarshalPair rFieldPair = rClassDef._fieldMap.get(lFieldName);
 
       if (rFieldPair == null)
@@ -459,8 +458,10 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(Env env, Value qThis, StringValue name)
+  public Value getField(Env env, Value qThis, StringValue nameV)
   {
+    String name = nameV.toString();
+
     AbstractJavaMethod get = _getMap.get(name);
 
     if (get != null) {
@@ -488,12 +489,12 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     AbstractFunction phpGet = qThis.getQuercusClass().getFieldGet();
 
     if (phpGet != null) {
-      return phpGet.callMethod(env, getQuercusClass(), qThis, name);
+      return phpGet.callMethod(env, getQuercusClass(), qThis, nameV);
     }
 
     if (__fieldGet != null) {
       try {
-        return __fieldGet.callMethod(env, getQuercusClass(), qThis, name);
+        return __fieldGet.callMethod(env, getQuercusClass(), qThis, nameV);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 
@@ -1108,7 +1109,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
       if (length > 3) {
         if (methodName.startsWith("get")) {
-          StringValue quercusName
+          String quercusName
             = javaToQuercusConvert(methodName.substring(3, length));
 
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
@@ -1122,7 +1123,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
           _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("is")) {
-          StringValue quercusName
+          String quercusName
             = javaToQuercusConvert(methodName.substring(2, length));
 
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
@@ -1136,7 +1137,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
           _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("set")) {
-          StringValue quercusName
+          String quercusName
             = javaToQuercusConvert(methodName.substring(3, length));
 
           AbstractJavaMethod existingSetter = _setMap.get(quercusName);
@@ -1196,7 +1197,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       MarshalFactory factory = moduleContext.getMarshalFactory();
       Marshal marshal = factory.create(field.getType(), false);
 
-      _fieldMap.put(new ConstStringValue(field.getName()),
+      _fieldMap.put(field.getName(),
                     new FieldMarshalPair(field, marshal));
     }
 
@@ -1210,17 +1211,19 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
    * @param s (eg: Foo, URL)
    * @return (foo, URL)
    */
-  private StringValue javaToQuercusConvert(String s)
+  private String javaToQuercusConvert(String s)
   {
     if (s.length() == 1) {
-      return new ConstStringValue(
-        new char[]{ Character.toLowerCase(s.charAt(0)) });
-    }
+      char ch = Character.toLowerCase(s.charAt(0));
 
-    if (Character.isUpperCase(s.charAt(1)))
-      return new ConstStringValue(s);
+      return String.valueOf(ch);
+    }
+    else if (Character.isUpperCase(s.charAt(1))) {
+      return s;
+    }
     else {
-      StringBuilderValue sb = new StringBuilderValue();
+      StringBuilder sb = new StringBuilder();
+
       sb.append(Character.toLowerCase(s.charAt(0)));
 
       int length = s.length();
@@ -1228,7 +1231,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         sb.append(s.charAt(i));
       }
 
-      return sb;
+      return sb.toString();
     }
   }
 

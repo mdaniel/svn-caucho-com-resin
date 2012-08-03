@@ -2306,7 +2306,7 @@ public class QuercusParser {
       Expr expr = parseExpr();
 
       ArrayList<Expr> args = new ArrayList<Expr>();
-      args.add(_factory.createString(name));
+      args.add(createString(name));
       args.add(expr);
 
       Expr fun = _factory.createCall(this, "define", args);
@@ -3650,7 +3650,7 @@ public class QuercusParser {
       token = parseToken();
 
       if (isIdentifier(token)) {
-        return classNameExpr.createClassField(this, _lexeme);
+        return classNameExpr.createClassField(this, createString(_lexeme));
       }
       else if (token == '{') {
         Expr expr = parseExpr();

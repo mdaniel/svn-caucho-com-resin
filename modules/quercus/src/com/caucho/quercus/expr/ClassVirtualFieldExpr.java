@@ -51,11 +51,11 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
 
   protected final StringValue _varName;
 
-  public ClassVirtualFieldExpr(String varName)
+  public ClassVirtualFieldExpr(StringValue varName)
   {
-    _varName = MethodIntern.intern(varName);
+    _varName = varName;
   }
-  
+
   //
   // function call creation
   //
@@ -70,12 +70,12 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     Expr var = parser.createVar(_varName.toString());
-    
+
     return factory.createClassVirtualMethodCall(location, var, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -88,16 +88,16 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   {
     Value qThis = env.getThis();
     QuercusClass qClass = qThis != null ? qThis.getQuercusClass() : null;
-    
+
     if (qClass == null) {
       env.error(L.l("No calling class found for '{0}'", this));
-      
+
       return NullValue.NULL;
     }
-    
+
     return qClass.getStaticFieldValue(env, _varName);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -110,16 +110,16 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   {
     Value qThis = env.getThis();
     QuercusClass qClass = qThis != null ? qThis.getQuercusClass() : null;
-    
+
     if (qClass == null) {
       env.error(L.l("No calling class found for '{0}'", this));
-      
+
       return NullValue.NULL.toVar();
     }
-    
+
     return qClass.getStaticFieldVar(env, _varName);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -132,16 +132,16 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   {
     Value qThis = env.getThis();
     QuercusClass qClass = qThis != null ? qThis.getQuercusClass() : null;
-    
+
     if (qClass == null) {
       env.error(L.l("No calling class found for '{0}'", this));
-      
+
       return NullValue.NULL.toVar();
     }
-    
+
     return qClass.setStaticFieldRef(env, _varName, value);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -155,7 +155,7 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
               L.l("{0}::${1}: Cannot unset static variables.",
                       env.getCallingClass().getName(), _varName));
   }
-  
+
   public String toString()
   {
     return "static::$" + _varName;

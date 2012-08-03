@@ -349,7 +349,7 @@ abstract public class Expr {
   /**
    * Creates a class field $class::$foo
    */
-  public Expr createClassField(QuercusParser parser, String name)
+  public Expr createClassField(QuercusParser parser, StringValue name)
   {
     ExprFactory factory = parser.getExprFactory();
 

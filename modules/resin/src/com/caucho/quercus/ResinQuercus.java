@@ -30,6 +30,7 @@
 package com.caucho.quercus;
 
 import com.caucho.VersionFactory;
+import com.caucho.java.WorkDir;
 import com.caucho.loader.*;
 import com.caucho.distcache.*;
 import com.caucho.quercus.env.Env;
@@ -38,21 +39,19 @@ import com.caucho.quercus.module.ResinModuleContext;
 import com.caucho.server.webapp.*;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.CacheImpl;
-import com.caucho.server.distcache.CacheManagerImpl;
-import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.session.*;
-import com.caucho.sql.*;
+import com.caucho.sql.DBPool;
+import com.caucho.sql.DatabaseManager;
+import com.caucho.sql.ManagedConnectionImpl;
+import com.caucho.sql.UserConnection;
+import com.caucho.sql.UserStatement;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.java.*;
 
 import javax.cache.Cache;
-import javax.cache.CacheManager;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Facade for the PHP language.
@@ -120,7 +119,8 @@ public class ResinQuercus extends QuercusContext
   }
 
   @Override
-  public ModuleContext getLocalContext(ClassLoader loader)
+  public ModuleContext getLocalContext(ClassLoader loader,
+                                       boolean isUnicodeSemantics)
   {
     synchronized (_localModuleContext) {
       ModuleContext context = _localModuleContext.getLevel(loader);
@@ -131,10 +131,10 @@ public class ResinQuercus extends QuercusContext
         ModuleContext parent = null;
 
         if (envLoader != null) {
-          parent = getLocalContext(envLoader.getParent());
+          parent = getLocalContext(envLoader.getParent(), isUnicodeSemantics);
         }
 
-        context = createModuleContext(parent, loader);
+        context = createModuleContext(parent, loader, isUnicodeSemantics);
 
         _localModuleContext.set(context, loader);
 
@@ -147,9 +147,10 @@ public class ResinQuercus extends QuercusContext
 
   @Override
   protected ModuleContext createModuleContext(ModuleContext parent,
-                                              ClassLoader loader)
+                                              ClassLoader loader,
+                                              boolean isUnicodeSemantics)
   {
-    return new ResinModuleContext(parent, loader);
+    return new ResinModuleContext(parent, loader, isUnicodeSemantics);
   }
 
   public String getCookieName()

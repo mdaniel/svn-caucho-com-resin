@@ -51,13 +51,13 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
   protected final Expr _className;
   protected final StringValue _varName;
 
-  public ClassVarFieldExpr(Expr className, String varName)
+  public ClassVarFieldExpr(Expr className, StringValue varName)
   {
     _className = className;
 
-    _varName = MethodIntern.intern(varName);
+    _varName = varName;
   }
-  
+
   //
   // function call creation
   //
@@ -73,7 +73,7 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
   {
     ExprFactory factory = parser.getExprFactory();
     Expr var = parser.createVar(_varName.toString());
-    
+
     return factory.createClassMethodCall(location, _className, var, args);
   }
 
@@ -90,7 +90,7 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
 
     QuercusClass qClass = env.getClass(className);
-    
+
     return qClass.getStaticFieldValue(env, _varName);
   }
 
@@ -107,7 +107,7 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
 
     QuercusClass qClass = env.getClass(className);
-    
+
     return qClass.getStaticFieldVar(env, _varName);
   }
 
@@ -124,7 +124,7 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
 
     QuercusClass qClass = env.getClass(className);
-    
+
     return qClass.setStaticFieldRef(env, _varName, value);
   }
 

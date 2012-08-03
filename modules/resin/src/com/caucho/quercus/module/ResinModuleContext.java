@@ -29,13 +29,8 @@
 
 package com.caucho.quercus.module;
 
-import java.lang.reflect.Method;
 import javax.management.openmbean.*;
 
-
-import com.caucho.quercus.function.*;
-import com.caucho.quercus.expr.*;
-import com.caucho.quercus.env.*;
 import com.caucho.quercus.program.*;
 
 /**
@@ -45,14 +40,15 @@ public class ResinModuleContext extends ModuleContext {
   /**
    * Constructor.
    */
-  public ResinModuleContext(ModuleContext parent, ClassLoader loader)
+  public ResinModuleContext(ModuleContext parent, ClassLoader loader,
+                            boolean isUnicodeSemantics)
   {
-    super(parent, loader);
+    super(parent, loader, isUnicodeSemantics);
   }
 
   @Override
   protected JavaClassDef createDefaultJavaClassDef(String className,
-                                                                           Class type)
+                                                   Class type)
   {
     if (CompositeData.class.isAssignableFrom(type))
       return new CompositeDataClassDef(this, className, type);
