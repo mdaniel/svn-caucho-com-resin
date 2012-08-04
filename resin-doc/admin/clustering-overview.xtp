@@ -380,6 +380,25 @@ is to use the &lt;resin:LoadBalance> tag to forward request to the backend.</p>
 
 <figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
 
+<s2 title="resin.properties load balancing configuration">
+
+<p>For load balancing with the standard resin.xml and resin.properties,
+the <em>web_servers</em> defines the static servers for the web
+(load-balancing) tier, and the <em>app_servers</em> defines the
+static servers for the application (backend) tier. The standard resin.xml
+configuration will proxy requests from the web tier to the app tier.</p>
+
+<example title="resin.properties: load balancing">
+web_servers : 192.168.1.20:6820
+web.http : 80
+
+app_servers : 192.168.1.10:6820 \
+              192.168.1.11:6820 \
+              192.168.1.22:6820
+app.http : 8080              
+</example>
+
+</s2>
 <s2 title="resin.xml load balancing configuration">
 
 <p>Dispatching requests with load balancing in Resin is accomplished through
@@ -458,17 +477,27 @@ like 192.168.1.10 and not public IP addresses. In particular, the load
 balancer on the web-tier uses the cluster-port of the app-tier to
 forward HTTP requests.</p>
 
+<p>When no explicit server is specified, Resin will search for local
+IP addresses that match the configured servers and start all of them.
+This local IP searching lets Resin's service start script work without
+modification. When dynamic servers are enabled, and no local server matches,
+Resin will start a new dynamic server to join the <em>home_cluster</em>
+cluster.</p>
+
+<example title="Starting Local Servers">
+unix> resinctl start-all
+</example>
+
 <p>All three servers will use the same resin.xml, which makes
 managing multiple server configurations pretty easy. The servers are
 named by the server <var>id</var> attribute, which must be unique,
 just as the &lt;IP,port>. When you start a Resin instance, you'll use
 the server-id as part of the command line: </p>
 
-
-<example title="Starting Servers">
-192.168.0.10> bin/resin.sh -server app-a start
-192.168.0.11> bin/resin.sh -server app-b start
-192.168.0.1> bin/resin.sh -server web-a start
+<example title="Starting Explicit Servers">
+192.168.0.10> resinctl -server app-a start
+192.168.0.11> resinctl -server app-b start
+192.168.0.1> resinctl -server web-a start
 </example>
 
 <p>Since Resin lets you start multiple servers on the same machine, a
@@ -688,7 +717,7 @@ the bar-tier cluster, and keeps anything else on the web-tier.</p>
           xmlns:resin="urn:java:com.caucho.resin">
 
   &lt;cluster-default>
-     &lt;resin:import path="${__DIR__}/app-default.xml"/>
+     &lt;resin:import path="classpath:META-INF/caucho/app-default.xml"/>
   &lt;/cluster-default>
       
   &lt;cluster id="web-tier">
@@ -783,7 +812,20 @@ nothing has changed. To make this process fast and reliable, Resin
 uses the triad servers as a triplicate backup for the user's session.</p>
 
 <p>
-The following is a simple example of how to enable clustering on Resin:
+The following is a simple example of how to enable session clustering
+for all web-apps using the standard resin.properties:
+</p>
+
+<example title="Example: resin.properties enabling clustered sessions">
+...
+session_store : true
+...
+</example>
+
+<p>
+If you want to configure persistent sessions for a specific web-app,
+you can set the <em>use-persistent-store</em> attribute of the
+&lt;session-config>.
 </p>
 
 <example title="Example: resin-web.xml enabling clustered sessions">
@@ -917,50 +959,43 @@ For details on the tags used for clustering, please refer to
 
 <s1 title="Distributed Caching">
 
-<p>Distributed caching is a very useful technique for reducing
-database load and increasing application performance. Resin provides a
-very simple JSR-107 JCache based distributed caching API. Distributed
-caching in Resin basically leverages the underlying infrastructure
+<p>Distributed caching is a useful technique to reduce
+database load and increase application performance. Resin provides a
+JSR-107 JCache based distributed caching API. Distributed
+caching in Resin uses the underlying infrastructure
 used to support load balancing, clustering and session/state
-replication. Note, since Resin clustering is not transactional, Resin
-distributed caching is also not transactional and does not use
-locking.  </p>
+replication.</p>
 
 <p>
 The first step to using Resin distributed caching is to configure a cache. 
 You configure a named distributed cache at the web application level like this:
 </p>
-<!-- XXX: Is this accurate? Why can't you configure a cache at the cluster level? -->
-<example title="Configuring Resin Distributed Cache">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:cluster="urn:java:com.caucho.distcache">
-  &lt;cluster id="">
-    &lt;host id="">
-      &lt;web-app id="">
-        &lt;cluster:ClusterCache>
-          &lt;cluster:name>test&lt;/cluster:name>
-        &lt;/cluster:ClusterCache> 
-      &lt;/web-app>
-    &lt;/host>
-  &lt;/cluster>
-&lt;/resin>
+
+<example title="resin-web.xml: Configuring Resin Distributed Cache">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:distcache="urn:java:com.caucho.distcache">
+          
+  &lt;distcache:ClusterCache>
+    &lt;name>test&lt;/name>
+  &lt;/distcache:ClusterCache> 
+
+&lt;/web-app>
 </example>
 
 <p>
-You may then inject the cache through CDI and use it in your application via the 
-JCache API:
+You may then inject the cache through CDI and use it in your application
+via the JCache API:
 </p>
 
-<!-- XXX: Why is the name not being used in injection? -->
 <example title="Using Resin Distributed Cache">
 import javax.cache.*;
 ...
 @Inject
-private Cache cache;
+private Cache _cache;
 ...
-if (cache.get("discount_rate") != null) {
-  cache.put("discount_rate", discountRate);
-}
+
+cache.putIfAbsent("discount_rate", discountRate);
+
 </example>
 
 </s1>

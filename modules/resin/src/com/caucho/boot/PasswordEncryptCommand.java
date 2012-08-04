@@ -118,7 +118,8 @@ public class PasswordEncryptCommand extends AbstractBootCommand
 
       return passwordApi.encrypt(password, salt);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.create("password-encrypt requires Resin Pro\n",
+                                   e);
       //return null;
     }
   }

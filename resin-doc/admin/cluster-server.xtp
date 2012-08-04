@@ -140,10 +140,11 @@ triad will remove the server.</p>
 
 <s1 title="server-default">
 
-<p>Because a cluster's servers are usually identical, most sites configure
-servers using a shared &lt;server-default>. The HTTP ports, timeouts,
-keepalives, JVM and thread configurations can be shared easily. Servers
-which do need different configuration (like a staging server) can override
+<p>Most sites use a shared &lt;server-default> to configure servers
+because parameters for a cluster's servers are usually identical.
+The HTTP ports, timeouts, keepalives, JVM and thread configurations can
+be shared easily. Servers that do need different configuration (like
+a staging server) can override
 the configuration in the &lt;server> tag.</p>
 
 <p>For example, the following defines a common set of JVM and
@@ -151,13 +152,15 @@ HTTP configuration.</p>
 
 <example title="Example: basic http configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;cluster id="">
+&lt;cluster id="app">
 
   &lt;server-default>
-    &lt;jvm-arg>-Xmx2048m&lt;/jvm-arg>
+    &lt;jvm-arg-line>-Xmx2048m&lt;/jvm-arg-line>
     
     &lt;accept-thread-min>32&lt;/accept-thread-max>
     &lt;accept-thread-min>64&lt;/accept-thread-max>
+    
+    &lt;port-thread-max>256&lt;/port-thread-max>
     
     &lt;http port="80"/>
   &lt;/server-default>
@@ -200,6 +203,11 @@ also process the request, and a new thread will be created to take
 its place listening for new requests. Since this HTTP thread pool is
 a child of Resin's main thread pool, the Resin threads limits and management
 automatically apply.</p>
+
+<p><b>port-thread-max</b> is the maximum thread count for handling
+a port's requests. If more requests arrive than threads, the requests
+will be queued until a thread becomes available. You can use
+<em>port-thread-max</em> to limit the maximum load on a server.</p>
 
 <p><b>accept-thread-min</b> sets the minimum number of threads
 which are concurrently accepting a new connection. If the thread count
