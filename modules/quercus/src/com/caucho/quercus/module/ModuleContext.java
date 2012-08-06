@@ -104,10 +104,9 @@ public class ModuleContext
   /**
    * Constructor.
    */
-  private ModuleContext(ClassLoader loader, boolean isUnicodeSemantics)
+  private ModuleContext(ClassLoader loader)
   {
     _loader = loader;
-    _isUnicodeSemantics = isUnicodeSemantics;
 
     _marshalFactory = new MarshalFactory(this);
     _exprFactory = new ExprFactory();
@@ -121,11 +120,9 @@ public class ModuleContext
   /**
    * Constructor.
    */
-  public ModuleContext(ModuleContext parent,
-                       ClassLoader loader,
-                       boolean isUnicodeSemantics)
+  public ModuleContext(ModuleContext parent, ClassLoader loader)
   {
-    this(loader, isUnicodeSemantics);
+    this(loader);
 
     _parent = parent;
 
@@ -144,6 +141,12 @@ public class ModuleContext
   public boolean isUnicodeSemantics()
   {
     return _isUnicodeSemantics;
+  }
+
+  public void setUnicodeSemantics(boolean isUnicodeSemantics)
+  {
+    // XXX: need to refactor static vs runtime unicode handling
+    _isUnicodeSemantics = isUnicodeSemantics;
   }
 
   public StringValue createString(String s)
@@ -200,7 +203,7 @@ public class ModuleContext
       ModuleInfo info = _moduleInfoMap.get(name);
 
       if (info == null) {
-        info = new ModuleInfo(this, name, module);
+        info = new ModuleInfo(name, module);
         _moduleInfoMap.put(name, info);
       }
 
@@ -369,23 +372,6 @@ public class ModuleContext
       return new JavaClassDef(this, className, type, extension);
   }
 
-  /**
-   * Finds the java class wrapper.
-   */
-  /*
-  public ClassDef findJavaClassWrapper(String name)
-  {
-    synchronized (_javaClassWrappers) {
-      ClassDef def = _javaClassWrappers.get(name);
-
-      if (def != null)
-        return def;
-
-      return _lowerJavaClassWrappers.get(name.toLowerCase(Locale.ENGLISH));
-    }
-  }
-  */
-
   public MarshalFactory getMarshalFactory()
   {
     return _marshalFactory;
@@ -404,47 +390,12 @@ public class ModuleContext
   }
 
   /**
-   * Returns an array of the defined functions.
-   */
-  /*
-  public ArrayValue getDefinedFunctions()
-  {
-    ArrayValue internal = new ArrayValueImpl();
-
-    synchronized (_staticFunctions) {
-      for (String name : _staticFunctions.keySet()) {
-        internal.put(name);
-      }
-    }
-
-    return internal;
-  }
-  */
-
-  /**
    * Returns the stdClass definition.
    */
   public QuercusClass getStdClass()
   {
     return _stdClass;
   }
-
-  /**
-   * Returns the class with the given name.
-   */
-  /*
-  public ClassDef findClass(String name)
-  {
-    synchronized (_staticClasses) {
-      ClassDef def = _staticClasses.get(name);
-
-      if (def == null)
-        def = _lowerStaticClasses.get(name.toLowerCase(Locale.ENGLISH));
-
-      return def;
-    }
-  }
-  */
 
   /**
    * Returns the class maps.
@@ -495,7 +446,7 @@ public class ModuleContext
     return _extensionSet;
   }
 
-  /*
+  /**
    * Adds a class to the extension's list of classes.
    */
   public void addExtensionClass(String ext, String clsName)

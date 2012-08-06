@@ -36,7 +36,6 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
@@ -53,10 +52,10 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   public ClassFieldVarExpr(String className, Expr varName)
   {
     _className = className;
-    
+
     _varName = varName;
   }
-  
+
   //
   // function call creation
   //
@@ -73,10 +72,10 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
     ExprFactory factory = parser.getExprFactory();
 
     Expr var = factory.createVarVar(_varName);
-    
+
     return factory.createClassMethodCall(location, _className, var, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -88,10 +87,10 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   public Value eval(Env env)
   {
     StringValue varName = _varName.evalStringValue(env);
-        
+
     return env.getClass(_className).getStaticFieldValue(env, varName);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -103,10 +102,10 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   public Var evalVar(Env env)
   {
     StringValue varName = _varName.evalStringValue(env);
-        
+
     return env.getClass(_className).getStaticFieldVar(env, varName);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -118,12 +117,12 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   public Value evalAssignRef(Env env, Value value)
   {
     StringValue varName = _varName.evalStringValue(env);
-    
+
     env.getClass(_className).setStaticFieldRef(env, varName, value);
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -136,9 +135,9 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   {
     env.error(getLocation(),
               L.l("{0}::${1}: Cannot unset static variables.",
-                  _className, _varName));
+                  _className, _varName.evalStringValue(env)));
   }
-  
+
   public String toString()
   {
     return _className + "::$" + _varName;

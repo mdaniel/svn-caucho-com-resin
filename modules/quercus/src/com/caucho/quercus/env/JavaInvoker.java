@@ -114,12 +114,7 @@ abstract public class JavaInvoker
                      JavaClassDef classDef,
                      Method method)
   {
-    Name nameAnn = method.getAnnotation(Name.class);
-
-    if (nameAnn != null)
-      _name = nameAnn.value();
-    else
-      _name = method.getName();
+    _name = getFunctionName(method);
 
     _moduleContext = moduleContext;
     _classDef = classDef;
@@ -130,6 +125,16 @@ abstract public class JavaInvoker
     _retType = method.getReturnType();
 
     // init();
+  }
+
+  public static String getFunctionName(Method method)
+  {
+    Name nameAnn = method.getAnnotation(Name.class);
+
+    if (nameAnn != null)
+      return nameAnn.value();
+    else
+      return method.getName();
   }
 
   public void init()

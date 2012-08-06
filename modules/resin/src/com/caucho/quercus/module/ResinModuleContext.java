@@ -40,10 +40,9 @@ public class ResinModuleContext extends ModuleContext {
   /**
    * Constructor.
    */
-  public ResinModuleContext(ModuleContext parent, ClassLoader loader,
-                            boolean isUnicodeSemantics)
+  public ResinModuleContext(ModuleContext parent, ClassLoader loader)
   {
-    super(parent, loader, isUnicodeSemantics);
+    super(parent, loader);
   }
 
   @Override

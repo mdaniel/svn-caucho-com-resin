@@ -468,57 +468,6 @@ public class QuercusServlet
   private void initImpl(ServletConfig config)
     throws ServletException
   {
-    /*
-    DynamicClassLoader loader = new DynamicClassLoader(Thread.currentThread().getContextClassLoader());
-    loader.setServletHack(true);
-
-    Path root = Vfs.lookup("WEB-INF/lib/quercus.jar");
-
-    MemoryPath memoryPath = new MemoryPath();
-
-    Path toWrite = memoryPath.lookup("quercus.jar");
-
-    WriteStream os = null;
-
-    try {
-      os = toWrite.openWrite();
-
-      root.writeToStream(os);
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    finally {
-      IoUtil.close(os);
-    }
-
-    System.err.println("QuercusServlet->initImpl0: " + root + " . " + toWrite);
-
-    loader.addRoot(JarPath.create(toWrite));
-
-
-    for (Loader l : loader.getLoaders()) {
-      System.err.println("\t" + l);
-    }
-
-    Thread.currentThread().setContextClassLoader(loader);
-    */
-
-    /*
-    Path quercusPath = Vfs.lookup("WEB-INF/lib/quercus.jar");
-    Path kernelPath = Vfs.lookup("WEB-INF/lib/resin-kernel.jar");
-
-    try {
-      GoogleQuercusClassLoader loader = new GoogleQuercusClassLoader(Thread.currentThread().getContextClassLoader(),
-                                                                     quercusPath, kernelPath);
-
-      Thread.currentThread().setContextClassLoader(loader);
-    }
-    catch (IOException e) {
-      throw new ServletException(e);
-    }
-    */
-
     long start = CurrentTime.getCurrentTime();
 
     Class<?> configClass = config.getClass();
@@ -565,7 +514,7 @@ public class QuercusServlet
       quercus.setPhpVersion(_phpVersion);
 
     for (QuercusModule module : _moduleList) {
-      quercus.addModule(module);
+      quercus.addInitModule(module);
     }
 
     for (PhpClassConfig cls : _classList) {
@@ -604,17 +553,7 @@ public class QuercusServlet
                       HttpServletResponse response)
     throws ServletException, IOException
   {
-    //System.err.println("QuercusServlet->service0: ---------------------------------------------------------------");
-    //System.err.println("QuercusServlet->service1: " + request.getRequestURI() + " . " + request.getQueryString());
-
-    //long start = System.currentTimeMillis();
-
     _impl.service(request, response);
-
-    //long end = System.currentTimeMillis();
-
-    //System.err.println("QuercusServlet->service2: " + request.getRequestURI() + " . " + request.getQueryString());
-    //System.err.println("QuercusServlet->service3: " + (end - start) + "ms ===============================================================");
   }
 
   /**

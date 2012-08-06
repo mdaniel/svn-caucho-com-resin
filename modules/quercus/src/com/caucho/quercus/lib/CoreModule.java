@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringBuilderValue;
@@ -57,6 +58,8 @@ public class CoreModule extends AbstractQuercusModule
     return new String[] { "Core" };
   }
 
+  @Hide
+  @Override
   public Map<StringValue,Value> getConstMap()
   {
     return CONST_MAP;

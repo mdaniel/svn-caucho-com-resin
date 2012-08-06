@@ -31,8 +31,15 @@ package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.Hide;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.JavaInvoker;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Field;
@@ -52,8 +59,6 @@ public class ModuleInfo {
   private static final Logger log
     = Logger.getLogger(ModuleInfo.class.getName());
 
-  private final ModuleContext _context;
-
   private final String _name;
   private final QuercusModule _module;
 
@@ -66,8 +71,8 @@ public class ModuleInfo {
   private HashMap<StringValue, Value> _unicodeConstMap
     = new HashMap<StringValue, Value>();
 
-  private HashMap<String, AbstractFunction> _staticFunctions
-    = new HashMap<String, AbstractFunction>();
+  private HashMap<String, Method[]> _staticFunctions
+    = new HashMap<String, Method[]>();
 
   private IniDefinitions _iniDefinitions = new IniDefinitions();
 
@@ -77,16 +82,20 @@ public class ModuleInfo {
   /**
    * Constructor.
    */
-  public ModuleInfo(ModuleContext context, String name, QuercusModule module)
+  public ModuleInfo(String name, QuercusModule module)
     throws ConfigException
   {
-    _context = context;
-
     _name = name;
     _module = module;
 
+    init();
+  }
+
+  private void init()
+    throws ConfigException
+  {
     try {
-      introspectPhpModuleClass(module.getClass());
+      introspectPhpModuleClass(_module.getClass());
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -136,7 +145,7 @@ public class ModuleInfo {
   /**
    * Returns the functions.
    */
-  public HashMap<String,AbstractFunction> getFunctions()
+  public HashMap<String, Method[]> getFunctions()
   {
     return _staticFunctions;
   }
@@ -151,7 +160,7 @@ public class ModuleInfo {
    *
    * @param cl the class to introspect.
    */
-  private void introspectPhpModuleClass(Class cl)
+  private void introspectPhpModuleClass(Class<?> cl)
     throws IllegalAccessException, InstantiationException
   {
     for (String ext : _module.getLoadedExtensions()) {
@@ -196,8 +205,7 @@ public class ModuleInfo {
       if (method.getDeclaringClass().equals(Object.class))
         continue;
 
-      if (method.getDeclaringClass()
-        .isAssignableFrom(AbstractQuercusModule.class))
+      if (method.getDeclaringClass().isAssignableFrom(AbstractQuercusModule.class))
         continue;
 
       if (! Modifier.isPublic(method.getModifiers()))
@@ -213,8 +221,6 @@ public class ModuleInfo {
       if (void.class.isAssignableFrom(retType))
         continue;
        */
-
-      Class<?> []params = method.getParameterTypes();
 
       // php/1a10
       if ("getLoadedExtensions".equals(method.getName()))
@@ -233,18 +239,23 @@ public class ModuleInfo {
           throw new UnsupportedOperationException(L.l("{0}: use @Name instead",
                                                       method));
 
-        StaticFunction function
-          = _context.createStaticFunction(_module, method);
+        String functionName = JavaInvoker.getFunctionName(method);
+        Method[] methods = _staticFunctions.get(functionName);
 
-        String functionName = function.getName();
+        if (methods != null) {
+          Method[] oldMethods = methods;
+          methods = new Method[oldMethods.length + 1];
 
-        AbstractJavaMethod oldFunction
-          = (AbstractJavaMethod) _staticFunctions.get(functionName);
+          System.arraycopy(oldMethods, 0, methods, 0, oldMethods.length);
 
-        if (oldFunction != null)
-          _staticFunctions.put(functionName, oldFunction.overload(function));
-        else
-          _staticFunctions.put(functionName, function);
+          methods[oldMethods.length] = method;
+        }
+        else {
+          methods = new Method[] { method };
+        }
+
+        _staticFunctions.put(functionName, methods);
+
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

@@ -497,8 +497,12 @@ abstract public class ObjectValue extends Value {
 
       return cmpObject((ObjectValue) rValue) == 0;
     }
+    else if (rValue.isArray()) {
+      return false;
+    }
     else {
-      return rValue.eq(this);
+      // php/03q0
+      return rValue.eq(this.toStringValue());
     }
   }
 

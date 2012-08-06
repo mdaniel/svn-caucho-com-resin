@@ -30,6 +30,7 @@
 package com.caucho.quercus;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +53,7 @@ import javax.sql.DataSource;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompilerUtil;
 import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.env.AbstractJavaMethod;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -125,6 +127,9 @@ public class QuercusContext
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
 
+  private ArrayList<ModuleInfo> _moduleInitList
+    = new ArrayList<ModuleInfo>();
+
   private HashSet<ModuleStartupListener> _moduleStartupListeners
     = new HashSet<ModuleStartupListener>();
 
@@ -148,6 +153,9 @@ public class QuercusContext
 
   private HashMap<String, JavaClassDef> _lowerJavaClassWrappers
     = new HashMap<String, JavaClassDef>();
+
+  private HashMap<String, Class<?>> _javaInitClassMap
+    = new HashMap<String, Class<?>>();
 
   private final IniDefinitions _iniDefinitions = new IniDefinitions();
 
@@ -235,7 +243,7 @@ public class QuercusContext
 
   private JdbcDriverContext _jdbcDriverContext;
 
-  private boolean _isUnicodeSemantics;
+  private Boolean _isUnicodeSemantics;
 
   /**
    * Constructor.
@@ -245,6 +253,8 @@ public class QuercusContext
     _loader = Thread.currentThread().getContextClassLoader();
     _pageManager = createPageManager();
     _sessionManager = createSessionManager();
+
+    _moduleContext = getLocalContext();
   }
 
   /**
@@ -412,17 +422,16 @@ public class QuercusContext
   /**
    * Returns the context for this class loader.
    */
-  public final ModuleContext getLocalContext(boolean isUnicodeSemantics)
+  public final ModuleContext getLocalContext()
   {
-    return getLocalContext(_loader, isUnicodeSemantics);
+    return getLocalContext(_loader);
   }
 
-  public ModuleContext getLocalContext(ClassLoader loader,
-                                       boolean isUnicodeSemantics)
+  public ModuleContext getLocalContext(ClassLoader loader)
   {
     synchronized (this) {
       if (_moduleContext == null) {
-        _moduleContext = createModuleContext(null, loader, isUnicodeSemantics);
+        _moduleContext = createModuleContext(null, loader);
         _moduleContext.init();
       }
     }
@@ -431,10 +440,9 @@ public class QuercusContext
   }
 
   protected ModuleContext createModuleContext(ModuleContext parent,
-                                              ClassLoader loader,
-                                              boolean isUnicodeSemantics)
+                                              ClassLoader loader)
   {
-    return new ModuleContext(parent, loader, isUnicodeSemantics);
+    return new ModuleContext(parent, loader);
   }
 
   /**
@@ -474,13 +482,22 @@ public class QuercusContext
     return false;
   }
 
+  public void setUnicodeSemantics(boolean isUnicode)
+  {
+    _isUnicodeSemantics = Boolean.valueOf(isUnicode);
+  }
+
   /**
    * Returns true if unicode.semantics is on.
    */
   public boolean isUnicodeSemantics()
   {
-    // php/
-    return _isUnicodeSemantics;
+    if (_isUnicodeSemantics == null) {
+      return false;
+    }
+    else {
+      return _isUnicodeSemantics.booleanValue();
+    }
   }
 
   /**
@@ -788,20 +805,23 @@ public class QuercusContext
     return _isConnectionPool;
   }
 
-  /**
-   * Adds a module
-   */
-  /*
-  public void addModule(QuercusModule module)
-    throws ConfigException
+  private void initJavaClasses()
   {
-    try {
-      introspectPhpModuleClass(module.getClass());
-    } catch (Exception e) {
-      throw ConfigException.create(e);
+    for (Map.Entry<String, Class<?>> entry : _javaInitClassMap.entrySet()) {
+      String name = entry.getKey();
+      Class<?> cls = entry.getValue();
+
+      try {
+        if (cls.isAnnotationPresent(ClassImplementation.class))
+          _moduleContext.introspectJavaImplClass(name, cls, null);
+        else
+          _moduleContext.introspectJavaClass(name, cls, null, null);
+      }
+      catch (Exception e) {
+        throw new QuercusRuntimeException(e);
+      }
     }
   }
-  */
 
   /**
    * Adds a java class
@@ -809,14 +829,7 @@ public class QuercusContext
   public void addJavaClass(String name, Class<?> type)
     throws ConfigException
   {
-    try {
-      if (type.isAnnotationPresent(ClassImplementation.class))
-        _moduleContext.introspectJavaImplClass(name, type, null);
-      else
-        _moduleContext.introspectJavaClass(name, type, null, null);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    _javaInitClassMap.put(name, type);
   }
 
   /**
@@ -934,27 +947,7 @@ public class QuercusContext
    */
   public void setIniFile(Path path)
   {
-    // XXX: Not sure why this dependency would be useful
-    // Environment.addDependency(new Depend(path));
-
-    if (path.canRead()) {
-      Env env = new Env(this);
-
-      Value result = FileModule.parse_ini_file(env, path, false);
-
-      if (result instanceof ArrayValue) {
-        ArrayValue array = (ArrayValue) result;
-
-        for (Map.Entry<Value,Value> entry : array.entrySet()) {
-          String key = entry.getKey().toString();
-          Value value = entry.getValue();
-
-          setIni(key, value);
-        }
-      }
-
-      _iniFile = path;
-    }
+    _iniFile = path;
   }
 
   /**
@@ -1796,9 +1789,28 @@ public class QuercusContext
    */
   public void init()
   {
-    _isUnicodeSemantics = getIniBoolean("unicode.semantics");
+    if (_iniFile != null && _iniFile.canRead()) {
+      Env env = new Env(this);
 
-    _moduleContext = getLocalContext(_isUnicodeSemantics);
+      Value result = FileModule.parse_ini_file(env, _iniFile, false);
+
+      if (result instanceof ArrayValue) {
+        ArrayValue array = (ArrayValue) result;
+
+        for (Map.Entry<Value,Value> entry : array.entrySet()) {
+          String key = entry.getKey().toString();
+          Value value = entry.getValue();
+
+          setIni(key, value);
+        }
+      }
+    }
+
+    if (_isUnicodeSemantics == null) {
+      _isUnicodeSemantics = getIniBoolean("unicode.semantics");
+    }
+
+    _moduleContext.setUnicodeSemantics(_isUnicodeSemantics);
 
     for (Map.Entry<String,String> entry : System.getenv().entrySet()) {
       _serverEnvMap.put(createString(entry.getKey()),
@@ -1818,13 +1830,12 @@ public class QuercusContext
     initLocal();
   }
 
-  public void addModule(QuercusModule module)
+  public void addInitModule(QuercusModule module)
   {
-    ModuleInfo info = new ModuleInfo(_moduleContext,
-                                     module.getClass().getName(),
+    ModuleInfo info = new ModuleInfo(module.getClass().getName(),
                                      module);
 
-    addModuleInfo(info);
+    _moduleInitList.add(info);
   }
 
   /**
@@ -1832,12 +1843,16 @@ public class QuercusContext
    */
   private void initModules()
   {
+    for (ModuleInfo info : _moduleInitList) {
+      initModuleInfo(info);
+    }
+
     for (ModuleInfo info : _moduleContext.getModules()) {
-      addModuleInfo(info);
+      initModuleInfo(info);
     }
   }
 
-  protected void addModuleInfo(ModuleInfo info)
+  private void initModuleInfo(ModuleInfo info)
   {
     _modules.put(info.getName(), info);
 
@@ -1866,10 +1881,20 @@ public class QuercusContext
 
     _iniDefinitions.addAll(info.getIniDefinitions());
 
-    for (Map.Entry<String, AbstractFunction> entry
+    for (Map.Entry<String, Method[]> entry
            : info.getFunctions().entrySet()) {
       String funName = entry.getKey();
-      AbstractFunction fun = entry.getValue();
+      Method[] methods = entry.getValue();
+
+      AbstractJavaMethod fun
+        = _moduleContext.createStaticFunction(info.getModule(), methods[0]);
+
+      for (int i = 1; i < methods.length; i++) {
+        AbstractJavaMethod overload
+          = _moduleContext.createStaticFunction(info.getModule(), methods[i]);
+
+        fun = fun.overload(overload);
+      }
 
       _funMap.put(funName, fun);
       _lowerFunMap.put(funName.toLowerCase(Locale.ENGLISH), fun);
@@ -1883,8 +1908,11 @@ public class QuercusContext
    */
   private void initClasses()
   {
-    for (Map.Entry<String,JavaClassDef> entry
-           : _moduleContext.getWrapperMap().entrySet()) {
+    initJavaClasses();
+
+    ModuleContext context = _moduleContext;
+
+    for (Map.Entry<String,JavaClassDef> entry : context.getWrapperMap().entrySet()) {
       String name = entry.getKey();
       JavaClassDef def = entry.getValue();
 
@@ -1892,9 +1920,7 @@ public class QuercusContext
       _lowerJavaClassWrappers.put(name.toLowerCase(Locale.ENGLISH), def);
     }
 
-    for (Map.Entry<String,ClassDef> entry
-           : _moduleContext.getClassMap().entrySet()) {
-
+    for (Map.Entry<String,ClassDef> entry : context.getClassMap().entrySet()) {
       String name = entry.getKey();
       ClassDef def = entry.getValue();
 

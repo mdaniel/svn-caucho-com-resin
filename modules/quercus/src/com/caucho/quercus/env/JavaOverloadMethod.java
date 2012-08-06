@@ -38,13 +38,13 @@ import com.caucho.util.L10N;
  */
 public class JavaOverloadMethod extends AbstractJavaMethod {
   private static final L10N L = new L10N(JavaOverloadMethod.class);
-  
+
   private AbstractJavaMethod [][]_methodTable
     = new AbstractJavaMethod[0][];
 
   private AbstractJavaMethod [][]_restMethodTable
     = new AbstractJavaMethod[0][];
-  
+
   public JavaOverloadMethod(AbstractJavaMethod fun)
   {
     overload(fun);
@@ -55,19 +55,19 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   {
     throw new UnsupportedOperationException();
   }
-  
+
   @Override
   public int getMinArgLength()
   {
     throw new UnsupportedOperationException();
   }
-  
+
   @Override
   public boolean getHasRestArgs()
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * Returns an overloaded java method.
    */
@@ -75,7 +75,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   {
     if (fun.getHasRestArgs()) {
       int len = fun.getMinArgLength();
-      
+
       if (_restMethodTable.length <= len) {
         AbstractJavaMethod [][]restMethodTable
           = new AbstractJavaMethod[len + 1][];
@@ -103,7 +103,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
     }
     else {
       int maxLen = fun.getMaxArgLength();
-      
+
       if (_methodTable.length <= maxLen) {
         AbstractJavaMethod [][]methodTable
           = new AbstractJavaMethod[maxLen + 1][];
@@ -112,7 +112,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
         _methodTable = methodTable;
       }
-      
+
       for (int len = fun.getMinArgLength(); len <= maxLen; len++) {
         AbstractJavaMethod []methods = _methodTable[len];
 
@@ -130,10 +130,10 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
         }
       }
     }
-    
+
     return this;
   }
-  
+
   /**
    * Returns the actual function
    */
@@ -217,7 +217,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
       }
     }
   }
-  
+
   /**
    * Returns the Java function that matches the args passed in.
    */
@@ -251,10 +251,10 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
          i--) {
       if (restMethodTable[i] == null)
         continue;
-      
+
       for (int j = 0; j < restMethodTable[i].length; j++) {
         AbstractJavaMethod javaMethod = restMethodTable[i][j];
-        
+
         int cost = javaMethod.getMarshalingCost(args);
 
         if (cost == 0)
@@ -269,7 +269,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
     return minCostJavaMethod;
   }
-  
+
   /**
    * Returns the Java function that matches the args passed in.
    */
@@ -302,10 +302,10 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
      i--) {
       if (restMethodTable[i] == null)
         continue;
-      
+
       for (int j = 0; j < restMethodTable[i].length; j++) {
         AbstractJavaMethod javaMethod = restMethodTable[i][j];
-        
+
         int cost = javaMethod.getMarshalingCost(args);
 
         if (cost == 0)
@@ -320,24 +320,24 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
     return minCostJavaMethod;
   }
-  
+
   /**
    * Returns the cost of marshaling for this method given the args.
    */
   public int getMarshalingCost(Value []args)
   {
     AbstractJavaMethod []methods = null;
-    
+
     if (args.length < _methodTable.length) {
       methods = _methodTable[args.length];
     }
-    
+
     AbstractJavaMethod bestFitMethod
       = getBestFitJavaMethod(methods, _restMethodTable, args);
-    
+
     return bestFitMethod.getMarshalingCost(args);
   }
-  
+
   /**
    * Returns the cost of marshaling for this method given the args.
    */
@@ -347,10 +347,10 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
     /*
     int size = _methods.size();
     int minCost = Integer.MAX_VALUE;
-    
+
     for (int i = 0; i < size; i++) {
       int cost = _methods.get(i).getMarshalingCost(args);
-      
+
       if (cost < minCost)
         minCost = cost;
     }

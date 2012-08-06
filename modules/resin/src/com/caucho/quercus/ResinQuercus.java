@@ -119,8 +119,7 @@ public class ResinQuercus extends QuercusContext
   }
 
   @Override
-  public ModuleContext getLocalContext(ClassLoader loader,
-                                       boolean isUnicodeSemantics)
+  public ModuleContext getLocalContext(ClassLoader loader)
   {
     synchronized (_localModuleContext) {
       ModuleContext context = _localModuleContext.getLevel(loader);
@@ -131,10 +130,10 @@ public class ResinQuercus extends QuercusContext
         ModuleContext parent = null;
 
         if (envLoader != null) {
-          parent = getLocalContext(envLoader.getParent(), isUnicodeSemantics);
+          parent = getLocalContext(envLoader.getParent());
         }
 
-        context = createModuleContext(parent, loader, isUnicodeSemantics);
+        context = createModuleContext(parent, loader);
 
         _localModuleContext.set(context, loader);
 
@@ -147,10 +146,9 @@ public class ResinQuercus extends QuercusContext
 
   @Override
   protected ModuleContext createModuleContext(ModuleContext parent,
-                                              ClassLoader loader,
-                                              boolean isUnicodeSemantics)
+                                              ClassLoader loader)
   {
-    return new ResinModuleContext(parent, loader, isUnicodeSemantics);
+    return new ResinModuleContext(parent, loader);
   }
 
   public String getCookieName()
