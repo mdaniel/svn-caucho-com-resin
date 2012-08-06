@@ -1555,7 +1555,7 @@ data is not serializable.  &lt;ignore-serialization-errors> simply
 skips session values which do not implement <code>java.io.Serializable</code>
 when serializing the session.</p>
 
-<default>false</default>
+<default>true</default>
 
 </defun>
 
@@ -1627,7 +1627,7 @@ when serializing the session.</p>
 <tr>
   <td>ignore-serialization-errors</td>
   <td>When persisting a session, ignore any values which don't implement java.io.Serializable</td>
-  <td>false</td>
+  <td>true</td>
 </tr>
 <tr>
   <td>invalidate-after-listener</td>

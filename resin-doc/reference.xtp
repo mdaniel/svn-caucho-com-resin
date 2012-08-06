@@ -12036,7 +12036,7 @@ information about distributed sessions and persistence.</p>
 <tr>
   <td>ignore-serialization-errors</td>
   <td>When persisting a session, ignore any values which don't implement java.io.Serializable</td>
-  <td>false</td>
+  <td>true</td>
 </tr>
 <tr>
   <td>invalidate-after-listener</td>
