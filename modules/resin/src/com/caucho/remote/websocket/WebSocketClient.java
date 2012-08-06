@@ -173,8 +173,8 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     else
       _s.connect(new InetSocketAddress(_host, _port));
 
-    _is = Vfs.openRead(_s.getInputStream());
-    _os = Vfs.openWrite(_s.getOutputStream());
+    _is = VfsStream.openRead(_s.getInputStream());
+    _os = VfsStream.openWrite(_s.getOutputStream());
 
     _os.print("GET " + _path + " HTTP/1.1\r\n");
     

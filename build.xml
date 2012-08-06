@@ -27,40 +27,6 @@
     </antcall>
   </target>
   -->
-  <!--
-  <target name="netbeans" depends="init">
-    <antcall target="artifact" inheritRefs="true">
-      <param name="artifact.name" value="netbeans"/>
-      <param name="artifact.jar" value="resin-netbeans.jar"/>
-    </antcall>
-
-    <property name="nbm.build" location="${artifacts}/netbeans/dist"/>
-    
-    <mkdir dir="${nbm.build}/Info" />
-    <mkdir dir="${nbm.build}/netbeans/modules" />
-    
-    <copy file="${artifacts}/netbeans/dist/resin-netbeans.jar"
-          tofile="${nbm.build}/netbeans/modules/resin-netbeans.jar"/>
-    
-    <copy file="${artifacts}/netbeans/Info/info.xml"
-          tofile="${nbm.build}/Info/info.xml"/>
-    
-    <copy todir="${nbm.build}/netbeans">
-      <fileset dir="${artifacts}/netbeans/netbeans">
-        <include name="**/*.xml"/>
-      </fileset>
-    </copy>
-	  
-    <jar jarfile="${artifacts}/netbeans/dist/resin-netbeans.nbm">
-      <fileset dir="${nbm.build}">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-        <exclude name="*.nbm"/>
-        <exclude name="*.jar"/>
-      </fileset>
-    </jar>
-  </target>
-  -->
   <target name="resin-eclipselink" depends="eclipselink">
     <copy file="modules/eclipselink/dist/resin-eclipselink.jar"
           todir="${resin.lib}"/>
@@ -550,6 +516,25 @@
       </fileset>
       
       <fileset dir="${resin.modules}/webbeans/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="websocket" depends="resin">
+    <!--
+       - resin-websocket-client.jar
+      -->
+    <jar destfile="${resin.lib}/resin-websocket-client.jar">
+      <fileset dir="${resin.modules}/kernel/classes">
+        <include name="com/caucho/util/*"/>
+        <include name="com/caucho/vfs/*"/>
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/resin/classes">
+        <include name="com/caucho/remote/websocket/**"/>
+        <include name="com/caucho/websocket/**"/>
         <exclude name="**/.*"/>
       </fileset>
     </jar>

@@ -51,7 +51,7 @@ import com.caucho.loader.EnvironmentLocal;
  */
 public class SchemeMap {
   // Constant null scheme map for protected filesystems.
-  public static final SchemeMap NULL_SCHEME_MAP = new SchemeMap();
+  private static SchemeMap _nullSchemeMap;
 
   private final EnvironmentLocal<HashMap<String,SchemeRoot>> _schemeMap
     = new EnvironmentLocal<HashMap<String,SchemeRoot>>();
@@ -79,7 +79,13 @@ public class SchemeMap {
    */
   static SchemeMap getNullSchemeMap()
   {
-    return NULL_SCHEME_MAP;
+    synchronized (SchemeMap.class) {
+      if (_nullSchemeMap == null) {
+        _nullSchemeMap = new SchemeMap();
+      }
+      
+      return _nullSchemeMap;
+    }
   }
 
   /**

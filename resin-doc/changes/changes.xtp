@@ -12,6 +12,8 @@
 
 <s2 title="4.0.30 - snapshot">
 <ul>
+<li>websocket: build standalone resin-websocket-client.jar (#5142, rep by Judd Gaddie)</li>
+<li>init.d: update status return code (#5166, rep by nmmn)</li>
 <li>install: add --with-setuid and --with-setgid (#5105)</li>
 <li>health: scheduled pdf reports as started asynchronously (#5164, rep by Keith Fetterman)</li>
 <li>mod_caucho: updated load balance to better distribute backups (#5116)</li>

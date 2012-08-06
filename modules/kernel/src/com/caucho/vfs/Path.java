@@ -84,8 +84,6 @@ public abstract class Path implements Comparable<Path> {
   private static final AtomicReference<PathKey> _key
     = new AtomicReference<PathKey>();
 
-  private static final SchemeMap DEFAULT_SCHEME_MAP = new SchemeMap();
-
   private static SchemeMap _defaultSchemeMap;
 
   static long _startTime;
@@ -101,10 +99,19 @@ public abstract class Path implements Comparable<Path> {
   {
     if (root != null)
       _schemeMap = root._schemeMap;
-    else if (_defaultSchemeMap != null)
-      _schemeMap = _defaultSchemeMap;
     else
-      _schemeMap = DEFAULT_SCHEME_MAP;
+      _schemeMap = getDefaultSchemeMap();
+  }
+  
+  private SchemeMap getDefaultSchemeMap()
+  {
+    synchronized (Path.class) {
+      if (_defaultSchemeMap == null) {
+        _defaultSchemeMap = createDefaultSchemeMap();
+      }
+      
+      return _defaultSchemeMap;
+    }
   }
 
   /**
@@ -1701,21 +1708,26 @@ public abstract class Path implements Comparable<Path> {
     }
   }
 
-  static {
-    DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
+  private static SchemeMap createDefaultSchemeMap()
+  {
+    SchemeMap map = new SchemeMap();
+    
+    map.put("file", new FilePath(null));
 
     //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null));
-    DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
+    map.put("http", new HttpPath("127.0.0.1", 0));
+    map.put("https", new HttpsPath("127.0.0.1", 0));
+    map.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
+    map.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
 
     StreamImpl stdout = StdoutStream.create();
     StreamImpl stderr = StderrStream.create();
-    DEFAULT_SCHEME_MAP.put("stdout", stdout.getPath());
-    DEFAULT_SCHEME_MAP.put("stderr", stderr.getPath());
+    map.put("stdout", stdout.getPath());
+    map.put("stderr", stderr.getPath());
     VfsStream nullStream = new VfsStream(null, null);
-    DEFAULT_SCHEME_MAP.put("null", new ConstPath(null, nullStream));
-    DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
+    map.put("null", new ConstPath(null, nullStream));
+    map.put("jndi", new JndiPath());
+    
+    return map;
   }
 }
