@@ -868,13 +868,13 @@ if test -z "${jni_ld_shlib}"; then
       
       if test -n "$b64"; then
         CFLAGS="$CFLAGS -arch x86_64"
-        jni_ldflags_shlib="-arch x86_64 $LDFLAGS_SHLIB"
-        plugin_ldflags_shlib="-arch x86_64 $LDFLAGS_SHLIB"
+        jni_ldflags_shlib="$-arch x86_64 $jni_ldflags_shlib"
+        plugin_ldflags_shlib="-arch x86_64 $jni_ldflags_shlib"
       fi
       
       if test -n "$b64_jni"; then
         jni_cflags_jni="$CFLAGS_JNI -m64"
-        jni_ldflags_shlib="-arch x86_64 $LDFLAGS_SHLIB"
+        jni_ldflags_shlib="-arch x86_64 $jni_ldflags_shlib"
       fi
       ;;
 
