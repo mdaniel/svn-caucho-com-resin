@@ -38,8 +38,7 @@ import com.caucho.loader.DynamicClassLoader;
  * The CurrentTime class returns the current system time.
  */
 public class CurrentTime {
-  private static final Logger log
-    = Logger.getLogger(CurrentTime.class.getName());
+  private static Logger _log;
 
   private static final CurrentTimeThread _currentTimeThread;
   
@@ -233,6 +232,14 @@ public class CurrentTime {
       }
     }
   }
+  
+  private static Logger log()
+  {
+    if (_log == null) 
+      _log = Logger.getLogger(CurrentTime.class.getName());
+    
+    return _log;
+  }
 
   static {
     ClassLoader systemLoader = null;
@@ -257,7 +264,7 @@ public class CurrentTime {
       }
     } catch (Throwable e) {
       // should display for security manager issues
-      log.fine("Alarm not started: " + e);
+      log().fine("Alarm not started: " + e);
     }
 
     // _systemLoader = systemLoader;

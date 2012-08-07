@@ -45,6 +45,11 @@ public class StartAllCommand extends AbstractStartCommand
 {
   private static Logger _log;
   private static L10N _L;
+  
+  protected StartAllCommand()
+  {
+    addFlagOption("elastic-ip", "dynamic IP addresses assigned after start");
+  }
 
   @Override
   public String getDescription()
@@ -70,26 +75,101 @@ public class StartAllCommand extends AbstractStartCommand
   {
     ArrayList<WatchdogClient> clientList = boot.findLocalClients();
     
-    if (clientList.size() == 0) {
+    if (clientList.size() == 0 && ! boot.isElasticIp(args)) {
       System.out.println(L().l("Resin/{0} cannot find any local servers to start in the configuration.",
                                VersionFactory.getVersion()));
+      
+      return 0;
+    }
+    
+    return super.doCommand(boot, args);
+  }
+
+  @Override
+  protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
+  {
+    /*
+    if (boot.isElasticIp(args))
+      return findLocalClientImpl(boot, args);
+    else
+      return super.findLocalClient(boot, args);
+      */
+    return findLocalClientImpl(boot, args);
+  }
+
+  @Override
+  protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
+  {
+    if (boot.isElasticIp(args))
+      return findWatchdogClientImpl(boot, args);
+    else
+      return super.findWatchdogClient(boot, args);
+  }
+
+  @Override
+  public int doCommand(WatchdogArgs args, WatchdogClient client)
+    throws BootArgumentException
+  {
+    try {
+      client.startAllWatchdog(args.getArgv(), true);
+
+      System.out.println(L().l("Resin/{0} start-all with watchdog at {1}:{2}",
+                             VersionFactory.getVersion(),
+                             client.getWatchdogAddress(),
+                             client.getWatchdogPort()));
+    } catch (Exception e) {
+      String eMsg;
+
+      if (e instanceof ConfigException)
+        eMsg = e.getMessage();
+      else
+        eMsg = e.toString();
+
+      System.out.println(L().l(
+        "Resin/{0} can't start-all for watchdog at {1}:{2}.\n  {3}",
+        VersionFactory.getVersion(),
+        client.getWatchdogAddress(),
+        client.getWatchdogPort(),
+        eMsg));
+
+      log().log(Level.FINE, e.toString(), e);
+
+      System.exit(1);
     }
 
-    int watchdogPort = -2;
+    return 0;
+  }
+
+  @Override
+  public void doWatchdogStart(WatchdogManager manager)
+  {
+    BootResinConfig boot = manager.getManagerConfig();
+    WatchdogArgs args = manager.getArgs();
+    
+    String serverId = args.getClientServerId();
+    
+    if (serverId != null && boot.isElasticServer(args)) {
+      manager.startServer(serverId, args.getArgv());
+      return;
+    }
+    
+    ArrayList<WatchdogClient> clientList;
+    
+    do {
+      clientList = boot.findLocalClients(null);
+      
+      if (clientList.size() == 0 && boot.isElasticIp(args)) {
+        try {
+          log().info("No local IP address found, waiting...");
+          Thread.sleep(10000);
+        } catch (Exception e) {
+        }
+      }
+    } while (clientList.size() == 0 && boot.isElasticIp(args));
+
     for (WatchdogClient client : clientList) {
       try {
-        int clientWatchdogPort = client.getWatchdogPort();
-        
-        boolean isLaunch = (watchdogPort != clientWatchdogPort);
-        client.startWatchdog(args.getArgv(), isLaunch);
-        
-        watchdogPort = clientWatchdogPort;
-
-        System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
-                                 VersionFactory.getVersion(),
-                                 client.getId(),
-                                 client.getWatchdogAddress(),
-                                 client.getWatchdogPort()));
+        manager.startServer(client.getId(), args.getArgv());
       } catch (Exception e) {
         String eMsg;
 
@@ -106,12 +186,8 @@ public class StartAllCommand extends AbstractStartCommand
                                  eMsg));
 
         log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
       }
     }
-
-    return 0;
   }
 
   @Override

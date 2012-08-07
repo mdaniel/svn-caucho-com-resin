@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -442,6 +443,11 @@ public class BootResinConfig // implements EnvironmentBean
       return isElasticServer();
     }
   }
+  
+  boolean isElasticIp(WatchdogArgs args)
+  {
+    return args.isElasticIp();
+  }
 
   public ArrayList<WatchdogClient> findLocalClients(String serverId)
   {
@@ -512,6 +518,8 @@ public class BootResinConfig // implements EnvironmentBean
         clientList.add(client);
       }
     }
+    
+    Collections.sort(clientList, new ClientComparator());
   }
   
   public static boolean isLocalClient(ArrayList<InetAddress> localAddresses,
@@ -711,6 +719,14 @@ public class BootResinConfig // implements EnvironmentBean
     public String getId()
     {
       return _cluster.getId();
+    }
+  }
+  
+  static class ClientComparator implements Comparator<WatchdogClient> {
+    @Override
+    public int compare(WatchdogClient a, WatchdogClient b)
+    {
+      return a.getId().compareTo(b.getId());
     }
   }
 }

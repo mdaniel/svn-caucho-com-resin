@@ -97,7 +97,8 @@ class WatchdogArgs
   private ArrayList<String> _tailArgs = new ArrayList<String>();
   private String []_defaultArgs;
 
-  private boolean _isElastic;
+  private boolean _isElasticServer;
+  private boolean _isElasticIp;
   private String _elasticAddress;
   private int _elasticPort;
   
@@ -207,12 +208,12 @@ class WatchdogArgs
   void setElasticServerId(String serverId)
   {
     _serverId = serverId;
-    setElastic(true);
+    setElasticServer(true);
   }
   
-  void setElastic(boolean isElastic)
+  void setElasticServer(boolean isElastic)
   {
-    _isElastic = isElastic;
+    _isElasticServer = isElastic;
   }
 
   String getClusterId()
@@ -227,12 +228,17 @@ class WatchdogArgs
 
   boolean isElasticServer()
   {
-    return _isElastic;
+    return _isElasticServer;
+  }
+
+  boolean isElasticIp()
+  {
+    return getArgBoolean("-elastic-ip", false);
   }
 
   String getDynamicAddress()
   {
-    if (! _isElastic) {
+    if (! _isElasticServer) {
       return null;
     }
     else if (_elasticAddress != null)
@@ -486,7 +492,7 @@ class WatchdogArgs
         i++;
       }
       else if ("--join-cluster".equals(resinArg)) {
-        setElastic(true);
+        setElasticServer(true);
         _clusterId = argv[i + 1];
 
         i++;
@@ -514,7 +520,7 @@ class WatchdogArgs
         i++;
       }
       else if ("--elastic".equals(resinArg)) {
-        setElastic(true);
+        setElasticServer(true);
       }
       else if ("--log-directory".equals(resinArg)) {
         _logDirectory = _rootDirectory.lookup(argv[i + 1]);
@@ -1144,7 +1150,7 @@ class WatchdogArgs
     addCommand(new RestartCommand());
 
     addCommand(new ShutdownCommand());
-    addCommand(new StartCloudCommand());
+    // addCommand(new StartCloudCommand());
     addCommand(new StartCommand());
     addCommand(new StartAllCommand());
     addCommand(new StartWithForegroundCommand());

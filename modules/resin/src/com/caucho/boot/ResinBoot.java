@@ -219,6 +219,11 @@ public class ResinBoot
   {
     return _resinConfig.isElasticServer(args);
   }
+  
+  public boolean isElasticIp(WatchdogArgs args)
+  {
+    return _resinConfig.isElasticIp(args);
+  }
 
   WatchdogClient findClient(String serverId, WatchdogArgs args)
   {

@@ -64,6 +64,7 @@ import com.caucho.management.server.DynamicClassLoaderMXBean;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.Crc64;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.TimedCache;
 import com.caucho.vfs.Dependency;
@@ -192,7 +193,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     _isEnableDependencyCheck = enableDependencyCheck;
 
     _dependencies.setCheckInterval(_globalDependencyCheckInterval);
-    _dependencies.setAsync(true);
+    if (! CurrentTime.isTest()) {
+      _dependencies.setAsync(true);
+    }
 
     for (; parent != null; parent = parent.getParent()) {
       if (parent instanceof RootDynamicClassLoader) {

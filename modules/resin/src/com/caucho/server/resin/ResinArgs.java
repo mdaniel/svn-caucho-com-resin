@@ -363,9 +363,7 @@ public class ResinArgs
       if (arg.startsWith("-") && ! arg.startsWith("--"))
         arg = "-" + arg;
 
-      if (i + 1 < len
-          && (arg.equals("-stdout")
-              || arg.equals("--stdout"))) {
+      if (i + 1 < len && arg.equals("--stdout")) {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
@@ -377,9 +375,7 @@ public class ResinArgs
 
         i += 2;
       }
-      else if (i + 1 < len
-               && (argv[i].equals("-stderr")
-                   || argv[i].equals("--stderr"))) {
+      else if (i + 1 < len && arg.equals("--stderr")) {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
@@ -391,28 +387,22 @@ public class ResinArgs
 
         i += 2;
       }
-      else if (i + 1 < len
-               && (argv[i].equals("-conf")
-                   || argv[i].equals("--conf"))) {
+      else if (i + 1 < len && arg.equals("--conf")) {
         _resinConf = argv[i + 1];
         i += 2;
       }
-      else if (argv[i].equals("-log-directory")
-               || argv[i].equals("--log-directory")) {
+      else if (arg.equals("--log-directory")) {
         i += 2;
       }
-      else if (argv[i].equals("-config-server")
-               || argv[i].equals("--config-server")) {
+      else if (arg.equals("--config-server")) {
         i += 2;
       }
-      else if (argv[i].equals("--dump-heap-on-exit")) {
+      else if (arg.equals("--dump-heap-on-exit")) {
         _isDumpHeapOnExit = true;
 
         i += 1;
       }
-      else if (i + 1 < len
-          && (argv[i].equals("-server")
-              || argv[i].equals("--server"))) {
+      else if (i + 1 < len && arg.equals("--server")) {
         _serverId = argv[i + 1];
    
         if (_serverId.equals(""))
@@ -420,74 +410,63 @@ public class ResinArgs
    
         i += 2;
       }
-      else if (argv[i].equals("-resin-home")
-               || argv[i].equals("--resin-home")) {
+      else if (arg.equals("--resin-home")) {
         _resinHome = Vfs.lookup(argv[i + 1]);
 
         i += 2;
       }
-      else if (argv[i].equals("-root-directory")
-          || argv[i].equals("--root-directory")
-          || argv[i].equals("-resin-root")
-          || argv[i].equals("--resin-root")
-          || argv[i].equals("-server-root")
-          || argv[i].equals("--server-root")) {
+      else if (arg.equals("--root-directory")
+               || arg.equals("--resin-root")
+               || arg.equals("--server-root")) {
         _rootDirectory = _resinHome.lookup(argv[i + 1]);
 
         i += 2;
       }
-      else if (argv[i].equals("-data-directory")
-            || argv[i].equals("--data-directory")) {
+      else if (arg.equals("--data-directory")) {
         _dataDirectory = Vfs.lookup(argv[i + 1]);
 
         i += 2;
       }
-      else if (argv[i].equals("-elastic")) {
+      else if (arg.equals("--elastic")) {
         _isElastic = true;
         i += 1;
       }
-      else if (argv[i].equals("-service")) {
+      else if (arg.equals("--elastic-ip")) {
+        i += 1;
+      }
+      else if (arg.equals("--service")) {
         JniCauchoSystem.create().initJniBackground();
         // windows service
         i += 1;
       }
       else if (i + 1 < len
-               && (argv[i].equals("-cluster")
-                   || argv[i].equals("--cluster")
-                   || argv[i].equals("-join-cluster")
-                   || argv[i].equals("--join-cluster"))) {
+               && (arg.equals("--cluster")
+                   || arg.equals("--join-cluster"))) {
         _homeCluster = argv[i + 1];
    
         i += 2;
       }
-      else if (i + 1 < len
-          && (argv[i].equals("-server-address")
-              || argv[i].equals("--server-address"))) {
+      else if (i + 1 < len && arg.equals("--server-address")) {
         _serverAddress = argv[i + 1];
    
         i += 2;
       }
       else if (i + 1 < len
-          && (argv[i].equals("-server-port")
-              || argv[i].equals("--server-port"))) {
+               && (arg.equals("--server-port"))) {
         _serverPort = Integer.parseInt(argv[i + 1]);
    
         i += 2;
       }
-      else if (argv[i].equals("-version")
-               || argv[i].equals("--version")) {
+      else if (arg.equals("--version")) {
         System.out.println(VersionFactory.getFullVersion());
         System.exit(66);
       }
-      else if (argv[i].equals("-watchdog-port")
-               || argv[i].equals("--watchdog-port")) {
+      else if (arg.equals("--watchdog-port")) {
         // watchdog
         i += 2;
       }
-      else if (argv[i].equals("-socketwait")
-               || argv[i].equals("--socketwait")
-               || argv[i].equals("-pingwait")
-               || argv[i].equals("--pingwait")) {
+      else if (arg.equals("--socketwait")
+               || arg.equals("--pingwait")) {
         int socketport = Integer.parseInt(argv[i + 1]);
 
         Socket socket = null;

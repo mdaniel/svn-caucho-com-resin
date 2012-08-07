@@ -94,16 +94,6 @@ public class StartCommand extends AbstractStartCommand
   }
 
   @Override
-  public void doWatchdogStart(WatchdogManager manager)
-  {
-    WatchdogArgs args = manager.getArgs();
-    
-    String serverId = args.getClientServerId();
-    
-    manager.startServer(serverId, args.getArgv());
-  }
- 
-  @Override
   public boolean isRetry()
   {
     return true;
