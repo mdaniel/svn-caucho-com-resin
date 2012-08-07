@@ -57,4 +57,6 @@ public interface BootCommand {
   public boolean isConsole();
 
   public boolean isRemote(WatchdogArgs args);
+
+  public void doWatchdogStart(WatchdogManager manager);
 }

@@ -428,7 +428,7 @@ public class Resin
   
   public boolean isElasticServer()
   {
-    return _args.isElasticServer();
+    return _bootResinConfig.isElasticServer(_args);
   }
   
   public String getClusterSystemKey()
@@ -1017,7 +1017,7 @@ public class Resin
       _bootServerConfig = bootResin.findServer(serverId);
     }
     
-    if (serverId == null && ! _args.isElasticServer()) {
+    if (serverId == null && ! bootResin.isElasticServer(_args)) {
       // server/2s00
       _bootServerConfig = bootResin.findServer("default");
     }

@@ -132,8 +132,9 @@ public class BlockManagerSubSystem extends AbstractResinSubSystem
     {
       try {
         BlockManager manager = BlockManager.getBlockManager();
-        
-        manager.flush();
+
+        if (manager != null)
+          manager.flush();
       } finally {
         if (_lifecycle.isActive()) {
           alarm.queue(BLOCK_FLUSH_PERIOD);

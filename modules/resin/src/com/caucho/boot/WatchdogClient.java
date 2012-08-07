@@ -258,8 +258,20 @@ class WatchdogClient
     }
   }
 
-  public Process startWatchdog(String []argv, boolean isLaunch)
+  public Process startAllWatchdog(String []argv, boolean isLaunch)
     throws ConfigException, IOException
+  {
+    return startWatchdog(argv, isLaunch, true);
+  }
+
+  public Process startWatchdog(String []argv, boolean isLaunch)
+      throws ConfigException, IOException
+  {
+    return startWatchdog(argv, isLaunch, false);
+  }
+
+  private Process startWatchdog(String []argv, boolean isLaunch, boolean isAll)
+      throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
       String message = getTroubleshootMessage();
@@ -279,44 +291,13 @@ class WatchdogClient
       throw new ConfigException(L.l("<group-name> requires compiled JNI.\n{0}", message));
     }
 
-    ActorSender conn = null;
-    
     long timeout = isLaunch ? -1 : 10000;
-    long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
-    do {
-      try {
-        conn = getConnection();
-      
-        WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
-      
-        String serverId = getId();
-
-        ResultStatus status = watchdogProxy.start(serverId, argv);
-
-        if (status.isSuccess()) {
-          return null;
-        }
-
-        throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
-                                      this, status.getMessage()));
-      } catch (RemoteConnectionFailedException e) {
-        log.log(Level.FINE, e.toString(), e);
-      } catch (RemoteListenerUnavailableException e) {
-        log.log(Level.FINE, e.toString(), e);
-      } catch (RuntimeException e) {
-        log.log(Level.FINE, e.toString(), e);
-        throw e;
-      } finally {
-        if (conn != null)
-          conn.close();
-      }
-      
-      try {
-        Thread.sleep(250);
-      } catch (Exception e) {
-      }
-    } while (CurrentTime.getCurrentTimeActual() <= expireTime);
+    if (startCommand(argv, timeout)) {
+      return null;
+    }
+    
+    long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
     if (! isLaunch) {
       throw new ConfigException(L.l("Can't contact watchdog at {0}:{1}.",
@@ -340,6 +321,48 @@ class WatchdogClient
     }
     
     return null;
+  }
+  
+  private boolean startCommand(String []argv, long timeout)
+  {
+    long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
+    do {
+      ActorSender conn = null;
+      
+      try {
+        conn = getConnection();
+      
+        WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+      
+        String serverId = getId();
+
+        ResultStatus status = watchdogProxy.start(serverId, argv);
+
+        if (status.isSuccess()) {
+          return true;
+        }
+
+        throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
+                                      this, status.getMessage()));
+      } catch (RemoteConnectionFailedException e) {
+        log.log(Level.FINE, e.toString(), e);
+      } catch (RemoteListenerUnavailableException e) {
+        log.log(Level.FINE, e.toString(), e);
+      } catch (RuntimeException e) {
+        log.log(Level.FINE, e.toString(), e);
+        throw e;
+      } finally {
+        if (conn != null)
+          conn.close();
+      }
+      
+      try {
+        Thread.sleep(250);
+      } catch (Exception e) {
+      }
+    } while (CurrentTime.getCurrentTimeActual() <= expireTime);
+  
+    return false;
   }
   
   private boolean pingWatchdog()

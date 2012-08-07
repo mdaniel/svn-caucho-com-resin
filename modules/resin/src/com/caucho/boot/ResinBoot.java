@@ -196,10 +196,10 @@ public class ResinBoot
   
   private void initClient()
   {
-    if (! (_args.isElasticServer() || _resinConfig.isHomeCluster()))
+    if (! (_resinConfig.isElasticServer(_args) || _resinConfig.isHomeCluster()))
       return;
     
-    if (_args.isElasticServer()) {
+    if (_resinConfig.isElasticServer(_args)) {
     }
     else if (getServerId() != null) {
       return;
@@ -213,6 +213,11 @@ public class ResinBoot
     if (client != null) {
       _args.setElasticServerId(client.getId());
     }
+  }
+  
+  boolean isElasticServer(WatchdogArgs args)
+  {
+    return _resinConfig.isElasticServer(args);
   }
 
   WatchdogClient findClient(String serverId, WatchdogArgs args)

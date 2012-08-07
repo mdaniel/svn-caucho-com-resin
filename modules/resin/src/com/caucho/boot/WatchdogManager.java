@@ -93,6 +93,7 @@ class WatchdogManager implements AlarmListener {
   private int _watchdogPort;
 
   private String _adminCookie;
+  private BootResinConfig _resinConfig;
   private BootManagementConfig _management;
   private final ResinSystem _system;
 
@@ -135,8 +136,6 @@ class WatchdogManager implements AlarmListener {
 
     Vfs.setPwd(_args.getRootDirectory());
     
-    boolean isLogDirectoryExists = getLogDirectory().exists();
-
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
     
     try {
@@ -205,22 +204,11 @@ class WatchdogManager implements AlarmListener {
     
     _watchdogPort = _args.getWatchdogPort();
     
-    BootResinConfig resinConfig = readConfig(serverId, _args);
+    _resinConfig = readConfig(serverId, _args);
 
-    WatchdogChild server = findConfig(resinConfig, serverId, _args);
+    WatchdogChild server = findConfig(_resinConfig, serverId, _args);
     
     server = getWatchdog(server, serverId, _args);
-    
-    /*
-    if (serverId == null)
-      server = findLocalServer();
-      
-    if (server == null)
-      server = _watchdogMap.get(serverId);
-
-    if (server == null && "".equals(serverId))
-      server = _watchdogMap.get("default");
-      */
     
     if (server == null) {
       if (serverId == null) {
@@ -231,7 +219,8 @@ class WatchdogManager implements AlarmListener {
                                               serverId));
       }
     }
-    
+    boolean isLogDirectoryExists = getLogDirectory().exists();
+
     JniBoot boot = new JniBoot();
     Path logDirectory = getLogDirectory();
 
@@ -244,11 +233,18 @@ class WatchdogManager implements AlarmListener {
     }
 
     server.getConfig().logInit(logStream);
-
+    
+    startWatchdogSystem(resin, server);
+  }
+  
+  private void startWatchdogSystem(Resin resin,
+                                   WatchdogChild server)
+    throws Exception
+  {
     // resin.preConfigureInit();
     // resin.setConfigFile(_args.getResinConf().getNativePath());
 
-    thread = Thread.currentThread();
+    Thread thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
 
     /*
@@ -289,7 +285,7 @@ class WatchdogManager implements AlarmListener {
     try {
       thread.setContextClassLoader(_system.getClassLoader());
 
-      cdiManager = InjectManager.create();
+      InjectManager cdiManager = InjectManager.create();
       AdminAuthenticator auth = null;
 
       if (_management != null)
@@ -409,6 +405,11 @@ class WatchdogManager implements AlarmListener {
   WatchdogChild findServer(String id)
   {
     return _watchdogMap.get(id);
+  }
+  
+  BootResinConfig getManagerConfig()
+  {
+    return _resinConfig;
   }
 
   /**
@@ -912,8 +913,14 @@ class WatchdogManager implements AlarmListener {
       JniCauchoSystem.create().initJniBackground();
 
       WatchdogManager manager = new WatchdogManager(argv);
+      
+      WatchdogArgs args = manager.getArgs();
+      
+      args.getCommand().doWatchdogStart(manager);
+      /*
       String serverId = manager.getArgs().getClientServerId();
       manager.startServer(serverId, argv);
+      */
 
       isValid = manager.isActive() && manager.isValid();
 

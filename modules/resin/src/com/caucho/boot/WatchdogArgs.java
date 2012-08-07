@@ -1144,6 +1144,7 @@ class WatchdogArgs
     addCommand(new RestartCommand());
 
     addCommand(new ShutdownCommand());
+    addCommand(new StartCloudCommand());
     addCommand(new StartCommand());
     addCommand(new StartAllCommand());
     addCommand(new StartWithForegroundCommand());

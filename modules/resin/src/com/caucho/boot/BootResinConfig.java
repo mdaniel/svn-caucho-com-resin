@@ -84,6 +84,7 @@ public class BootResinConfig // implements EnvironmentBean
   private String _clusterSystemKey;
   private String _homeCluster;
   private String _homeServer;
+  private boolean _isElasticServer;
   
   BootResinConfig(ResinSystem system,
                   WatchdogArgs args)
@@ -186,6 +187,17 @@ public class BootResinConfig // implements EnvironmentBean
   public boolean isHomeCluster()
   {
     return _homeCluster != null && ! "".equals(_homeCluster);
+  }
+  
+  @Configurable
+  public void setElasticServer(boolean isElasticServer)
+  {
+    _isElasticServer = isElasticServer;
+  }
+  
+  public boolean isElasticServer()
+  {
+    return _isElasticServer;
   }
 
   /*
@@ -411,25 +423,6 @@ public class BootResinConfig // implements EnvironmentBean
     return isElasticServer(args) || getHomeCluster() != null;
   }
   
-  boolean isElasticServer(WatchdogArgs args)
-  {
-    if (args.isElasticServer()) {
-      return true;
-    }
-    else if (args.getServerId() != null) {
-      return false;
-    }
-    else if (getHomeServer() != null) {
-      return false;
-    }
-    else if (args.getClusterId() != null) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-  
   String getClusterId(WatchdogArgs args)
   {
     if (args.getClusterId() != null) {
@@ -437,6 +430,16 @@ public class BootResinConfig // implements EnvironmentBean
     }
     else {
       return getHomeCluster();
+    }
+  }
+  
+  boolean isElasticServer(WatchdogArgs args)
+  {
+    if (args.isElasticServer()) {
+      return true;
+    }
+    else {
+      return isElasticServer();
     }
   }
 
@@ -583,7 +586,7 @@ public class BootResinConfig // implements EnvironmentBean
    */
   WatchdogClient addElasticClient(WatchdogArgs args)
   {
-    if (! args.isElasticServer() && ! isHomeCluster())
+    if (! isElasticServer(args) && ! isHomeCluster())
       throw new IllegalStateException();
 
     String clusterId = args.getClusterId();

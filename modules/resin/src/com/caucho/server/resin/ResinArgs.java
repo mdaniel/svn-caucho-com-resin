@@ -535,6 +535,7 @@ public class ResinArgs
       }
       else if ("start".equals(argv[i])
                || "start-all".equals(argv[i])
+               || "start-cloud".equals(argv[i])
                || "restart".equals(argv[i])) {
         JniCauchoSystem.create().initJniBackground();
         i++;

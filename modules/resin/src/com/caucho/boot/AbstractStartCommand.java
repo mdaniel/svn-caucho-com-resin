@@ -50,52 +50,23 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
     addIntValueOption("debug-port", "port", "listen to a JVM debug port");
     addIntValueOption("jmx-port", "port", "listen to an unauthenticated JMX port");
-
-    /*
-    _options.add("-verbose");
-    _options.add("--verbose");
-    _options.add("-preview");
-    _options.add("--preview");
-
-    _valueKeys.add("-conf");
-    _valueKeys.add("--conf");
-    _valueKeys.add("-data-directory");
-    _valueKeys.add("--data-directory");
-    _valueKeys.add("-join");
-    _valueKeys.add("--join");
-    _valueKeys.add("-join-cluster");
-    _valueKeys.add("--join--cluster");
-    _valueKeys.add("-log-directory");
-    _valueKeys.add("--log-directory");
-    _valueKeys.add("-resin-home");
-    _valueKeys.add("--resin-home");
-    _valueKeys.add("-root-directory");
-    _valueKeys.add("--root-directory");
-    _valueKeys.add("-server");
-    _valueKeys.add("--server");
-    _valueKeys.add("-stage");
-    _valueKeys.add("--stage");
-    _valueKeys.add("-watchdog-port");
-    _valueKeys.add("--watchdog-port");
-    _valueKeys.add("-debug-port");
-    _valueKeys.add("--debug-port");
-    _valueKeys.add("-jmx-port");
-    _valueKeys.add("--jmx-port");
-
-    _intValueKeys.add("-watchdog-port");
-    _intValueKeys.add("--watchdog-port");
-    _intValueKeys.add("-debug-port");
-    _intValueKeys.add("--debug-port");
-    _intValueKeys.add("-jmx-port");
-    _intValueKeys.add("--jmx-port");
-    */
   }
 
   @Override
+  public void doWatchdogStart(WatchdogManager manager)
+  {
+    WatchdogArgs args = manager.getArgs();
+    
+    String serverId = args.getClientServerId();
+    
+    manager.startServer(serverId, args.getArgv());
+  }
+ 
+  @Override
   protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
   {
-    if (args.isElasticServer())
-      return super.findLocalClient(boot, args);
+    if (boot.isElasticServer(args))
+      return findLocalClientImpl(boot, args);
     else
       return findUniqueLocalClient(boot, args);
   }
@@ -104,8 +75,8 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
   {
     // server/6e09
-    if (args.isElasticServer()) {
-      return super.findWatchdogClient(boot, args);
+    if (boot.isElasticServer(args)) {
+      return findWatchdogClientImpl(boot, args);
     }
     else {
       return null;

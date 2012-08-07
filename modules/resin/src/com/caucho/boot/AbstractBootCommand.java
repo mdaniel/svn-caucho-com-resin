@@ -114,6 +114,12 @@ public abstract class AbstractBootCommand implements BootCommand {
     
     return doCommand(args, client);
   }
+
+  @Override
+  public void doWatchdogStart(WatchdogManager manager)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   protected WatchdogClient findClient(ResinBoot boot, WatchdogArgs args)
   {
@@ -137,6 +143,11 @@ public abstract class AbstractBootCommand implements BootCommand {
   }
   
   protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
+  {
+    return findLocalClientImpl(boot, args);
+  }
+    
+  protected WatchdogClient findLocalClientImpl(ResinBoot boot, WatchdogArgs args)
   {
     ArrayList<WatchdogClient> clients = boot.findLocalClients();
     
@@ -185,6 +196,12 @@ public abstract class AbstractBootCommand implements BootCommand {
   
   protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
   {
+    return findWatchdogClientImpl(boot, args);
+  }
+  
+  protected WatchdogClient findWatchdogClientImpl(ResinBoot boot, 
+                                                  WatchdogArgs args)
+  {
     return boot.findWatchdogClient(args);
   }
   
@@ -232,56 +249,6 @@ public abstract class AbstractBootCommand implements BootCommand {
     
     return sb.toString();
   }
-
-
-/*  public void validateArgs(String[] args) throws BootArgumentException
-  {
-    for (int i = 0; i < args.length; i++) {
-      final String arg = args[i];
-
-      if (getName().equals(arg)) {
-        continue;
-      }
-
-      if (arg.startsWith("-J")
-          || arg.startsWith("-D")
-          || arg.startsWith("-X")) {
-        continue;
-      }
-
-      if (arg.equals("-d64") || arg.equals("-d32")) {
-        continue;
-      }
-
-      if (isFlag(arg)) {
-        continue;
-      }
-      else if (isValueOption(arg)) {
-      }
-      else if (isIntValueOption(arg)) {
-      }
-      else {
-        throw new BootArgumentException(L.l("unknown argument '{0}'", arg));
-      }
-
-      if (i + 1 == args.length)
-        throw new BootArgumentException(L.l("option '{0}' requires a value",
-                                              arg));
-      String value = args[++i];
-
-      if (isFlag(value) || isValueOption(value) || isIntValueOption(value))
-        throw new BootArgumentException(L.l("option '{0}' requires a value",
-                                            arg));
-
-      if (isIntValueOption(arg)) {
-        try {
-          Long.parseLong(value);
-        } catch (NumberFormatException e) {
-          throw new BootArgumentException(L.l("'{0}' argument must be a number: `{1}'", arg, value));
-        }
-      }
-    }
-  }*/
 
   @Override
   public boolean isValueOption(String key)

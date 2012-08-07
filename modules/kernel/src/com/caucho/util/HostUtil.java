@@ -32,7 +32,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -47,7 +46,8 @@ import com.caucho.config.ConfigException;
 public final class HostUtil {
   private static final Logger log = Logger.getLogger(HostUtil.class.getName());
   
-  private static final TimedCache _cache = new TimedCache(128, 2000);
+  private static final TimedCache<String,ArrayList<NetworkInterface>> _cache
+    = new TimedCache<String,ArrayList<NetworkInterface>>(128, 2000);
   
   private HostUtil() {}
   
@@ -66,40 +66,17 @@ public final class HostUtil {
         return addr.getHostAddress();
       }
     }
-    /*
-    for (InetAddress addr : getLocalAddresses()) {
-      if (isLinkLocalNetwork(addr))
-        return addr.getHostAddress();
-    }
-    */
     
     return "127.0.0.1";
   }
   
   public static String getLocalHostAddress()
   {
-    /*
-    try {
-      return InetAddress.getLocalHost().getCanonicalHostName();
-    } catch (UnknownHostException e) {
-      log.log(Level.FINER, e.toString(), e);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-    */
-
-    // System.out.println("GLA: " + getLocalAddresses());
     for (InetAddress addr : getLocalAddresses()) {
       if (isPrivateNetwork(addr)) {
         return addr.getHostAddress();
       }
     }
-    /*
-    for (InetAddress addr : getLocalAddresses()) {
-      if (isLinkLocalNetwork(addr))
-        return addr.getHostAddress();
-    }
-    */
     
     return "127.0.0.1";
   }
@@ -114,7 +91,7 @@ public final class HostUtil {
     if (bytes[0] == 10)
       return true;
     
-    if ((bytes[0] & 0xff) == 172 && bytes[1] >= 16 &&  bytes[1] <= 31)
+    if ((bytes[0] & 0xff) == 172 && 16 <= bytes[1] &&  bytes[1] <= 31)
       return true;
         
     if ((bytes[0] & 0xff) == 192 && (bytes[1] & 0xff) == 168)
@@ -157,26 +134,6 @@ public final class HostUtil {
     Collections.sort(localAddresses, new LocalIpCompare());
     
     return localAddresses;
-  }
-  
-  private boolean isLocalAddress(ArrayList<InetAddress> localAddresses,
-                                 String address)
-  {
-    if (address == null || "".equals(address))
-      return false;
-    
-    try {
-      InetAddress addr = InetAddress.getByName(address);
-      
-      if (localAddresses.contains(addr))
-        return true;
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-      
-      return false;
-    }
-    
-    return false;
   }
 
   /**

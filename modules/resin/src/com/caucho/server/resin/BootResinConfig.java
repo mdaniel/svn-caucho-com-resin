@@ -63,6 +63,7 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   
   private String _homeServer;
   private String _homeCluster;
+  private boolean _isElasticServer;
   
   private ContainerProgram _resinProgram
     = new ContainerProgram();
@@ -134,6 +135,21 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   public String getHomeCluster()
   {
     return _homeCluster;
+  }
+  
+  public void setElasticServer(boolean isElasticServer)
+  {
+    _isElasticServer = isElasticServer;
+  }
+
+  public boolean isElasticServer(ResinArgs args)
+  {
+    if (_isElasticServer) {
+      return true;
+    }
+    else {
+      return args.isElasticServer();
+    }
   }
   
   /**
