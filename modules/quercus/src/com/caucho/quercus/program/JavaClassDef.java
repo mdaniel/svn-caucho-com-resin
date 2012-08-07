@@ -507,11 +507,12 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
   public Value putField(Env env,
                         Value qThis,
-                        StringValue name,
+                        StringValue nameV,
                         Value value)
   {
+    String name = nameV.toString();
+    
     AbstractJavaMethod setter = _setMap.get(name);
-
     if (setter != null) {
       try {
         return setter.callMethod(env, getQuercusClass(), qThis, value);
@@ -545,7 +546,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         qThis.setFieldInit(true);
 
         try {
-          return phpSet.callMethod(env, getQuercusClass(), qThis, name, value);
+          return phpSet.callMethod(env, getQuercusClass(), qThis, nameV, value);
 
         } finally {
           qThis.setFieldInit(false);
@@ -559,7 +560,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         return __fieldSet.callMethod(env,
                                      getQuercusClass(),
                                      qThis,
-                                     name,
+                                     nameV,
                                      value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);

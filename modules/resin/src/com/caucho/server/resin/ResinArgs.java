@@ -135,8 +135,9 @@ public class ResinArgs
   
   public void setServerId(String serverId)
   {
-    if ("".equals(serverId))
+    if ("".equals(serverId)) {
       serverId = "default";
+    }
     
     _serverId = serverId;
   }
