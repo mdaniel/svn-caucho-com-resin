@@ -43,6 +43,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3192,7 +3193,7 @@ public final class InjectManager
   {
   }
   
-  public void addPendingAnnotatedType(AnnotatedType<?> annType)
+  private void addPendingAnnotatedType(AnnotatedType<?> annType)
   {
     _pendingAnnotatedTypes.add(annType);
   }
@@ -3203,10 +3204,12 @@ public final class InjectManager
     
     ArrayList<AnnotatedType<?>> types = new ArrayList<AnnotatedType<?>>(_pendingAnnotatedTypes);
     _pendingAnnotatedTypes.clear();
+    
+    Collections.sort(types, new AnnotatedTypeComparator());
 
     for (AnnotatedType<?> beanType : types) {
       AnnotatedType<?> type = getExtensionManager().processAnnotatedType(beanType);
-      
+
       if (type != null) {
         discoverBeanImpl(type);
       }
@@ -4841,6 +4844,16 @@ public final class InjectManager
                          InjectionPoint ip)
     {
       throw _exn;
+    }
+  }
+  
+  private static class AnnotatedTypeComparator 
+    implements Comparator<AnnotatedType<?>>
+  {
+    @Override
+    public int compare(AnnotatedType<?> a, AnnotatedType<?> b)
+    {
+      return a.toString().compareTo(b.toString());
     }
   }
 

@@ -287,16 +287,6 @@ public class ExtensionManager
     
     _pendingEventList.add(new PendingEvent(processBean, baseType));
     
-    /*
-    getEventManager().fireExtensionEvent(processBean, baseType);
-
-    if (processBean instanceof ProcessBeanImpl<?>
-        && ((ProcessBeanImpl<?>) processBean).isVeto())
-      return null;
-    else
-      return processBean.getBean();
-      */
-    
     return processBean.getBean();
   }
 
@@ -314,15 +304,6 @@ public class ExtensionManager
     baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
 
     _pendingEventList.add(new PendingEvent(event, baseType));
-    
-    /*
-    getEventManager().fireExtensionEvent(event, baseType);
-
-    if (event.isVeto())
-      return null;
-    else
-      return event.getBean();
-      */
     
     return event.getBean();
   }

@@ -196,15 +196,7 @@ public class ResinBoot
   
   private void initClient()
   {
-    if (! (_resinConfig.isElasticServer(_args) || _resinConfig.isHomeCluster()))
-      return;
-    
-    if (_resinConfig.isElasticServer(_args)) {
-    }
-    else if (getServerId() != null) {
-      return;
-    }
-    else if (! findLocalClients().isEmpty()) {
+    if (! _resinConfig.isElasticServer(_args)) {
       return;
     }
 
