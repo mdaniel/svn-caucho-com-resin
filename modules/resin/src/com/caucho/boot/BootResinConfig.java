@@ -614,7 +614,7 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     if (! cluster.isClusterServerEnable()) {
-      throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. --home-cluster requires a <resin:ElasticCloudService> tag.",
+      throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. --elastic requires a <resin:ElasticCloudService> tag.",
                                     clusterId));
     }
 
