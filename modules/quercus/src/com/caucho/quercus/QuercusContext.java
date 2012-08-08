@@ -947,7 +947,9 @@ public class QuercusContext
    */
   public void setIniFile(Path path)
   {
-    _iniFile = path;
+    if (path != null && path.canRead()) {
+      _iniFile = path;
+    }
   }
 
   /**
@@ -1789,7 +1791,7 @@ public class QuercusContext
    */
   public void init()
   {
-    if (_iniFile != null && _iniFile.canRead()) {
+    if (_iniFile != null) {
       Env env = new Env(this);
 
       Value result = FileModule.parse_ini_file(env, _iniFile, false);

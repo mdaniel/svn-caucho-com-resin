@@ -102,14 +102,14 @@ public abstract class Path implements Comparable<Path> {
     else
       _schemeMap = getDefaultSchemeMap();
   }
-  
+
   private SchemeMap getDefaultSchemeMap()
   {
     synchronized (Path.class) {
       if (_defaultSchemeMap == null) {
         _defaultSchemeMap = createDefaultSchemeMap();
       }
-      
+
       return _defaultSchemeMap;
     }
   }
@@ -1711,7 +1711,7 @@ public abstract class Path implements Comparable<Path> {
   private static SchemeMap createDefaultSchemeMap()
   {
     SchemeMap map = new SchemeMap();
-    
+
     map.put("file", new FilePath(null));
 
     //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null));
@@ -1727,7 +1727,12 @@ public abstract class Path implements Comparable<Path> {
     VfsStream nullStream = new VfsStream(null, null);
     map.put("null", new ConstPath(null, nullStream));
     map.put("jndi", new JndiPath());
-    
+
     return map;
+  }
+
+  static {
+    // for 3rd party app servers, need to initialize the Vfs class first
+    Vfs.getDefaultScheme();
   }
 }

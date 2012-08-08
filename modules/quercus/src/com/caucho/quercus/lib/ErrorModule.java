@@ -134,8 +134,7 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
                && name.equals("call")) {
         String path = unmangleFile(className);
-        String fileName = env
-            .getQuercus().getPwd().lookup("./" + path).getNativePath();
+        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
 
         String fun = findFunction(stack, i);
 
@@ -146,8 +145,7 @@ public class ErrorModule extends AbstractQuercusModule {
         result.put(call);
 
         call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(
-            env.getSourceLine(className, elt.getLineNumber())));
+        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
 
         call.put(FUNCTION, env.createString(fun));
 
@@ -182,14 +180,12 @@ public class ErrorModule extends AbstractQuercusModule {
 
         String path = unmangleFile(className);
 
-        String fileName = env
-            .getQuercus().getPwd().lookup("./" + path).getNativePath();
+        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
 
         ArrayValue call = new ArrayValueImpl();
 
         call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(
-            env.getSourceLine(className, elt.getLineNumber())));
+        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
 
         if (methodName.equals("includeOnce")) {
           call.put(FUNCTION, env.createString("include_once"));

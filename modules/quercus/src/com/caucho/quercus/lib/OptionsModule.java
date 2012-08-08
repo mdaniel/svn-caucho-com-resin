@@ -511,6 +511,23 @@ public class OptionsModule extends AbstractQuercusModule {
   // XXX: php_logo_guid
   // XXX: phpcredits
 
+  public static Value php_ini_loaded_file(Env env)
+  {
+    Path path = env.getQuercus().getIniFile();
+
+    if (path != null) {
+      return env.createString(path.toString());
+    }
+    else {
+      return BooleanValue.FALSE;
+    }
+  }
+
+  public static Value php_ini_scanned_files(Env env)
+  {
+    return BooleanValue.FALSE;
+  }
+
   /**
    * Returns the sapi type.
    */
