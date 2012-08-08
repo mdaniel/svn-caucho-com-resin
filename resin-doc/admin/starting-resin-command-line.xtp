@@ -33,10 +33,15 @@
     </tr>
     <tr>
       <td>--help</td>
-      <td>Help for all ./configure command line options</td></tr>
+      <td>Help for all ./configure command line options</td>
+    </tr>
+    <tr>
+      <td>--prefix</td>
+      <td>Installs Resin to a single directory.</td>
+    </tr>
     <tr>
       <td>--enable-64bit</td>
-      <td>Compiles the JNI using 64-bits, requires <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.xml</td>
+      <td>Compiles the JNI using 64-bits.</td>
     </tr>
     <tr>
       <td>--enable-ssl</td>

@@ -5,8 +5,7 @@
     <title>Resin Eclipse Support</title>
 
     <description>
-<p>Like other major Java application platforms, Resin includes excellent
-support for Eclipse. The Resin Eclipse plugin is based on the proven Eclipse
+<p>Resin includes excellent support for Eclipse. The Resin Eclipse plugin is based on the proven Eclipse
 <i>Web Tools Platform (WTP)</i> included by default in the <i>Eclipse IDE for Java EE 
 Developers</i>. Using the Resin plugin you can start servers, stop servers,
 deploy/undeploy applications, debug on the server and so on. You can even
