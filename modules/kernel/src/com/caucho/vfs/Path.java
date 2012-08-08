@@ -1730,9 +1730,4 @@ public abstract class Path implements Comparable<Path> {
 
     return map;
   }
-
-  static {
-    // for 3rd party app servers, need to initialize the Vfs class first
-    Vfs.getDefaultScheme();
-  }
 }
