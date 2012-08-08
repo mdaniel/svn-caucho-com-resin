@@ -79,7 +79,8 @@ public class ProducesBuilder {
   /**
    * Introspects the methods for any @Produces
    */
-  public <X> void introspectProduces(Bean<X> bean, AnnotatedType<X> beanType)
+  public <X> void introspectProduces(Bean<X> bean,
+                                     AnnotatedType<X> beanType)
   {
     HashSet<AnnotatedMethod<?>> disposesSet
       = new HashSet<AnnotatedMethod<?>>();

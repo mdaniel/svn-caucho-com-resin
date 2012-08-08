@@ -49,6 +49,7 @@ import com.caucho.ejb.manager.EjbManager;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.inject.ThreadContext;
 import com.caucho.java.WorkDir;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -126,6 +127,8 @@ public class ResinBeanContainer {
 
   // Path to the current module (typically the current directory)
   private Path _modulePath;
+  
+  private Lifecycle _lifecycle = new Lifecycle();
 
   /**
    * Creates a new Resin context.
@@ -157,17 +160,6 @@ public class ResinBeanContainer {
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
       Environment.addCloseListener(this);
-
-      Class<?> resinCdiProducer = getResinCdiProducerClass();
-      
-      if (resinCdiProducer != null)
-        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinCdiProducer));
-
-      Class<?> resinValidatorClass
-        = ResinCdiProducer.createResinValidatorProducer();
-
-      if (_cdiManager != null && resinValidatorClass != null)
-        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinValidatorClass));
 
       _classLoader.addScanRoot();
     } finally {
@@ -336,11 +328,17 @@ public class ResinBeanContainer {
    */
   public void start()
   {
+    if (! _lifecycle.toActive()) {
+      return;
+    }
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_classLoader);
+      
+      addCdiProducer();
 
       // env/0e81
       _cdiManager.update();
@@ -541,6 +539,29 @@ public class ResinBeanContainer {
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+  
+  private void addCdiProducer()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      Class<?> resinCdiProducer = getResinCdiProducerClass();
+
+      if (resinCdiProducer != null)
+        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinCdiProducer));
+
+      Class<?> resinValidatorClass
+      = ResinCdiProducer.createResinValidatorProducer();
+
+      if (_cdiManager != null && resinValidatorClass != null)
+        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinValidatorClass));
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
   
   private Class<?> getResinCdiProducerClass()

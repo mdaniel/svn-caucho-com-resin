@@ -174,11 +174,11 @@ public class BootConfig
         throw ConfigException.create(e);
       }
 
-      cdiManager.addManagedBean(cdiManager.createManagedBean(ResinCdiProducer.class));
+      cdiManager.addManagedBeanDiscover(cdiManager.createManagedBean(ResinCdiProducer.class));
       Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
       
       if (resinValidatorClass != null)
-        cdiManager.addManagedBean(cdiManager.createManagedBean(resinValidatorClass));
+        cdiManager.addManagedBeanDiscover(cdiManager.createManagedBean(resinValidatorClass));
 
       cdiManager.update();
     }

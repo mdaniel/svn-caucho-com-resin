@@ -369,7 +369,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   public void introspectProduces()
   {
     ProducesBuilder builder = new ManagedProducesBuilder(getBeanManager());
-    
+
     builder.introspectProduces(this, getAnnotatedType());
   }
   

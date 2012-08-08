@@ -124,12 +124,12 @@ public class EJBContainerImpl extends EJBContainer {
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
-      _injectManager.addManagedBean(_injectManager.createManagedBean(ResinCdiProducer.class));
+      _injectManager.addManagedBeanDiscover(_injectManager.createManagedBean(ResinCdiProducer.class));
 
       Class<?> resinValidatorClass = ResinCdiProducer.createResinValidatorProducer();
       
       if (_injectManager != null && resinValidatorClass != null) {
-        _injectManager.addManagedBean(_injectManager.createManagedBean(resinValidatorClass));
+        _injectManager.addManagedBeanDiscover(_injectManager.createManagedBean(resinValidatorClass));
       }
    
       // XXX initialcontextfactory broken when set by non-resin container

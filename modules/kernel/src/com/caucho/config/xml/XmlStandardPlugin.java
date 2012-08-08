@@ -86,6 +86,8 @@ public class XmlStandardPlugin implements Extension {
   private ArrayList<Path> _pendingRoots = new ArrayList<Path>();
   
   private ArrayList<Path> _pendingXml = new ArrayList<Path>();
+  
+  private HashSet<Path> _xmlSet = new HashSet<Path>();
 
   private ArrayList<BeansConfig> _pendingBeans = new ArrayList<BeansConfig>();
 
@@ -109,8 +111,10 @@ public class XmlStandardPlugin implements Extension {
   
   public void addXmlPath(Path xmlPath)
   {
-    if (! _pendingXml.contains(xmlPath))
+    if (! _xmlSet.contains(xmlPath)) {
+      _xmlSet.add(xmlPath);
       _pendingXml.add(xmlPath);
+    }
   }
 
   public void beforeDiscovery(@Observes BeforeBeanDiscovery event)
@@ -134,7 +138,6 @@ public class XmlStandardPlugin implements Extension {
       for (Path xml : xmlPaths) {
         configurePath(xml);
       }
-      
 
       for (int i = 0; i < _pendingBeans.size(); i++) {
         BeansConfig config = _pendingBeans.get(i);
@@ -180,9 +183,8 @@ public class XmlStandardPlugin implements Extension {
   private void addPath(Path beansPath)
   {
     if (beansPath.canRead()
-        && beansPath.getLength() > 0
-        && ! _pendingXml.contains(beansPath)) {
-      _pendingXml.add(beansPath);
+        && beansPath.getLength() > 0) {
+      addXmlPath(beansPath);
     }
   }
 

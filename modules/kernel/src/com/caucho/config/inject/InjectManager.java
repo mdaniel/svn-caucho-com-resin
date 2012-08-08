@@ -3191,6 +3191,11 @@ public final class InjectManager
   public void updateResources()
   {
   }
+  
+  public void addPendingAnnotatedType(AnnotatedType<?> annType)
+  {
+    _pendingAnnotatedTypes.add(annType);
+  }
 
   public void processPendingAnnotatedTypes()
   {
@@ -3198,9 +3203,13 @@ public final class InjectManager
     
     ArrayList<AnnotatedType<?>> types = new ArrayList<AnnotatedType<?>>(_pendingAnnotatedTypes);
     _pendingAnnotatedTypes.clear();
-    
-    for (AnnotatedType<?> type : types) {
-      discoverBeanImpl(type);
+
+    for (AnnotatedType<?> beanType : types) {
+      AnnotatedType<?> type = getExtensionManager().processAnnotatedType(beanType);
+      
+      if (type != null) {
+        discoverBeanImpl(type);
+      }
     }
     
     _extensionManager.processPendingEvents();
@@ -3292,11 +3301,7 @@ public final class InjectManager
       }
     }
     
-    AnnotatedType<X> type = getExtensionManager().processAnnotatedType(beanType);
-    if (type == null)
-      return;
-
-    _pendingAnnotatedTypes.add(type);
+    addPendingAnnotatedType(beanType);
   }
   
   private void addSpecialize(Class<?> specializedType, Class<?> parentType)
@@ -3565,9 +3570,16 @@ public final class InjectManager
     addBeanDiscover(bean, producesField);
   }
 
-  public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
+  public <X> void addManagedBeanDiscover(ManagedBeanImpl<X> managedBean)
   {
     addBeanDiscover(managedBean);
+    
+    managedBean.introspectProduces();
+  }
+
+  public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
+  {
+    addBean(managedBean);
     
     managedBean.introspectProduces();
   }

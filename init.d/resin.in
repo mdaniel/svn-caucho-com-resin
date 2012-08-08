@@ -71,13 +71,15 @@ START_CMD="start-all"
 #
 # -log-directory /var/log/resin -- the main log directory
 #
-#RESIN_LOG="-log-directory @resin_log@"
+#RESIN_LOG="--log-directory @resin_log@"
 #
 # -join-cluster app-tier        -- elastic servers
 #
-#JOIN_CLUSTER="-join-cluster app-tier"
+#JOIN_CLUSTER="--join-cluster app-tier"
 
-ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $RESIN_LICENSE $JOIN_CLUSTER $SERVER"
+ARGS="--elastic-ip
+ARGS="$ARGS $RESIN_CONF $RESIN_LOG $RESIN_ROOT $RESIN_LICENSE"
+ARGS="$ARGS $JOIN_CLUSTER $SERVER"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions
