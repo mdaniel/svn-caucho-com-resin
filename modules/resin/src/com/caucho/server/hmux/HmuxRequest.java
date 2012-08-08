@@ -1431,6 +1431,7 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     offset = fillDataBuffer(offset);
+
     _rawWrite.setBufferOffset(offset);
   }
 
@@ -1514,7 +1515,7 @@ public class HmuxRequest extends AbstractHttpRequest
       if (log.isLoggable(Level.FINE))
         log.fine(dbgId() + (char) HmuxRequest.HMUX_DATA + "-w(" + length + ")");
     }
-
+    
     _bufferStartOffset = 0;
 
     return offset;
@@ -1844,6 +1845,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _os.flush();
       else
         _os.close();
+      
       //nextRead.close();
     }
   }

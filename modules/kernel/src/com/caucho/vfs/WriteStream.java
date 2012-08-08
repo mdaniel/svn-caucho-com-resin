@@ -234,6 +234,7 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Sets the write offset.
    */
+  @Override
   public void setBufferOffset(int offset)
   {
     _writeLength = offset;

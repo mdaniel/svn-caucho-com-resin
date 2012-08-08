@@ -318,8 +318,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
       return getNextBuffer();
     }
-    else
+    else {
       return super.getBuffer();
+    }
   }
 
   /**
@@ -329,8 +330,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public final int getBufferOffset()
     throws IOException
   {
-    if (! isCommitted())
+    if (! isCommitted()) {
       return super.getBufferOffset();
+    }
 
     flushBuffer();
 
@@ -345,6 +347,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     if (isClosed()) {
+      // server/2630
+      setNextBufferOffset(getNextStartOffset());
       return;
     }
 
@@ -356,8 +360,10 @@ abstract public class ResponseStream extends ToByteResponseStream {
     flushBuffer();
 
     int startOffset = getNextStartOffset();
-    if (offset == startOffset)
+    if (offset == startOffset) {
+      setNextBufferOffset(offset);
       return;
+    }
 
     int oldOffset = getNextBufferOffset();
     int sublen = (offset - oldOffset);

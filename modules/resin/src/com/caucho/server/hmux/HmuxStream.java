@@ -505,7 +505,7 @@ class HmuxStream extends StreamImpl {
     }
 
     // Not splitting query? Also fullpath?
-      writeString(HmuxRequest.HMUX_URI, _path.getPath());
+    writeString(HmuxRequest.HMUX_URI, _path.getPath());
 
     if (_path.getQuery() != null)
       writeString(HmuxRequest.CSE_QUERY_STRING, _path.getQuery());
