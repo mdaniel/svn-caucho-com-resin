@@ -37,7 +37,9 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.make.DependencyContainer;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 
@@ -52,6 +54,8 @@ public class TreeLoader extends JarListLoader implements Dependency
   
   // Directory which may have jars dynamically added
   private Path _dir;
+  
+  private DependencyContainer _dependencyList = new DependencyContainer();
 
   /**
    * Creates a new directory loader.
@@ -154,6 +158,18 @@ public class TreeLoader extends JarListLoader implements Dependency
     else
       return false;
   }
+  
+  @Override
+  public boolean isModified()
+  {
+    // server/6p44
+    if (super.isModified()) {
+      return true;
+    }
+    else {
+      return _dependencyList.isModified();
+    }
+  }
 
   /**
    * Find all the jars in this directory and add them to jarList.
@@ -187,11 +203,13 @@ public class TreeLoader extends JarListLoader implements Dependency
   private void fillJars(ArrayList<Path> paths, Path dir)
   {
     try {
-      String []list = dir.list();
+      addDependency(dir);
 
+      String []list = dir.list();
+      
       for (int j = 0; list != null && j < list.length; j++) {
         Path path = dir.lookup(list[j]);
-
+        
         if (list[j].endsWith(".jar") || list[j].endsWith(".zip")) {
           paths.add(path);
         }
@@ -202,6 +220,11 @@ public class TreeLoader extends JarListLoader implements Dependency
       
     } catch (IOException e) {
     }
+  }
+  
+  private void addDependency(Path path)
+  {
+    _dependencyList.add(new Depend(path));
   }
 
   public Path getCodePath()

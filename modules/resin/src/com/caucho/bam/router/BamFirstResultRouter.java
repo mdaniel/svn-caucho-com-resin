@@ -117,6 +117,11 @@ public class BamFirstResultRouter extends AbstractBamRouter
     
     void start()
     {
+      if (_actors.length == 0) {
+        _broker.queryResult(_id, _from, _sender.getAddress(), null);
+        return;
+      }
+      
       if (! nextQuery()) {
         //_broker.queryResult(_id, _from, _sender.getAddress(), null);
         

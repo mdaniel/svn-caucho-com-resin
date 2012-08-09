@@ -55,7 +55,6 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
 
       return doCommand(args, client, deployClient);
     } catch (Exception e) {
-      e.printStackTrace();
       Throwable cause = e;
 
       if (cause instanceof ConfigException || 

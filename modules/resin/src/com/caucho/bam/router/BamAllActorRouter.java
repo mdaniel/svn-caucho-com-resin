@@ -175,7 +175,7 @@ public class BamAllActorRouter extends AbstractBamRouter
     
     private void completeNotActive(int index, BamActorRef actor)
     {
-      if (log.isLoggable(Level.FINER)) {
+      if (log.isLoggable(Level.FINEST)) {
         log.finer(this + " cannot contact " + actor + " because not active");
       }
       

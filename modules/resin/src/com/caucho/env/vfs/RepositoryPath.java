@@ -191,7 +191,10 @@ public class RepositoryPath extends Path
     throws IOException
   {
     update();
+    
     String []list = _physicalPath.list();
+    
+    _physicalPath.clearStatusCache();
     
     return list;
   }

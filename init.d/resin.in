@@ -77,9 +77,10 @@ START_CMD="start-all"
 #
 #JOIN_CLUSTER="--join-cluster app-tier"
 
-ARGS="$ARGS --elastic-ip"
 ARGS="$ARGS $RESIN_CONF $RESIN_LOG $RESIN_ROOT $RESIN_LICENSE"
 ARGS="$ARGS $JOIN_CLUSTER $SERVER"
+
+START_ARGS="$START_ARGS --elastic-ip"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions
@@ -121,7 +122,7 @@ case "$1" in
   start)
 	log_daemon_msg "Starting resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$RESIN_EXE $ARGS $START_CMD""" 1>> $CONSOLE 2>> $CONSOLE
+  	  su $USER -c """$RESIN_EXE $ARGS $START_ARGS $START_CMD""" 1>> $CONSOLE 2>> $CONSOLE
 	else
 	    errors=`$RESIN_EXE $ARGS $START_CMD 2>&1`
 	    if [ $? != 0 ]; then

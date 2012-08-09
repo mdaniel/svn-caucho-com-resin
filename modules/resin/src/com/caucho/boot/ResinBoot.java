@@ -351,7 +351,11 @@ public class ResinBoot
 
       System.exit(ExitCode.BAD_CONFIG.ordinal());
     } catch (Exception e) {
-      e.printStackTrace();
+      System.err.println(e.getMessage());
+      
+      if (log.isLoggable(Level.FINE)) {
+        e.printStackTrace();
+      }
 
       System.exit(ExitCode.UNKNOWN.ordinal());
     }
