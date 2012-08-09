@@ -73,9 +73,9 @@
 
   <!-- For resin.properties dynamic cluster joining -->
   <home-cluster>${home_cluster}</home-cluster>
-  <!-- <home-server>${home_server}</home-server> -->
-
-
+  <home-server>${home_server}</home-server>
+  <elastic-server>${elastic_server}</elastic-server>
+  <elastic-ip>${elastic_ip}</elastic-ip>
 
   <!--
      - Configures the main application cluster.  Load-balancing configurations

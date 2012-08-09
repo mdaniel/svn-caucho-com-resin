@@ -38,7 +38,7 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   {
     addFlagOption("verbose", "log command-line and environment information");
     addFlagOption("preview", "run as a preview (staging) server");
-    addFlagOption("elastic", "join a cluster as an elastic server (pro)");
+    addFlagOption("elastic-server", "join a cluster as an elastic server (pro)");
     
     addValueOption("data-directory", "dir", "override the working directory");
     addValueOption("cluster", "id", "cluster to join as an elastic server (pro)");

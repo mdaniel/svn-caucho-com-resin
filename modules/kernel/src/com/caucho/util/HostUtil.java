@@ -117,18 +117,20 @@ public final class HostUtil {
   {
     ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
     
-    try {
-      for (NetworkInterface iface : getNetworkInterfaces()) {
-        Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
+    synchronized (HostUtil.class) {
+      try {
+        for (NetworkInterface iface : getNetworkInterfaces()) {
+          Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
       
-        while (addrEnum.hasMoreElements()) {
-          InetAddress addr = addrEnum.nextElement();
+          while (addrEnum.hasMoreElements()) {
+            InetAddress addr = addrEnum.nextElement();
         
-          localAddresses.add(addr);
+            localAddresses.add(addr);
+          }
         }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
     }
     
     Collections.sort(localAddresses, new LocalIpCompare());

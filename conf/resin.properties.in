@@ -47,6 +47,16 @@ app_servers      : 127.0.0.1:6800
 # Use a separate resin.properties file for each cluster
 home_cluster : app
 
+# Used for an elastic server to join the cluster in home_cluster
+# elastic_server : true
+
+# Used for cloud servers where the dynamic IP address or DNS name for the
+# server is assigned after the server starts. Resin will retry the start.
+# elastic_ip : true
+
+# specifies the --server in the config file
+# home_server : app-0
+
 # Set HTTP and HTTPS bind address
 # http_address  : *
 

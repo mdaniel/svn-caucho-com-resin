@@ -519,7 +519,7 @@ class WatchdogArgs
         argv[i + 1] = _dataDirectory.getFullPath();
         i++;
       }
-      else if ("--elastic".equals(resinArg)) {
+      else if ("--elastic-server".equals(resinArg)) {
         setElasticServer(true);
       }
       else if ("--log-directory".equals(resinArg)) {

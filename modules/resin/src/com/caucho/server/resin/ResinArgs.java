@@ -428,7 +428,7 @@ public class ResinArgs
 
         i += 2;
       }
-      else if (arg.equals("--elastic")) {
+      else if (arg.equals("--elastic-server")) {
         _isElastic = true;
         i += 1;
       }
