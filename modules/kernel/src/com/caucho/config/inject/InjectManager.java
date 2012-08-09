@@ -1352,6 +1352,10 @@ public final class InjectManager
   {
     if (bean == null)
       return;
+    
+    if (_specializedMap.containsKey(bean.getBeanClass())) {
+      return;
+    }
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " add bean " + bean);
@@ -3295,7 +3299,7 @@ public final class InjectManager
 
     // ioc/07fb
     cl = beanType.getJavaClass();
-    
+
     if (cl.isAnnotationPresent(Specializes.class)) {
       Class<?> parent = cl.getSuperclass();
 
@@ -3501,25 +3505,9 @@ public final class InjectManager
       addBeanDiscover(managedBean);
 
       // ioc/0b0f
-      if (! _specializedMap.containsKey(managedBean.getBeanClass()))
+      if (! _specializedMap.containsKey(managedBean.getBeanClass())) {
         managedBean.introspectObservers();
-      
-      /*
-      for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
-        // observer = processObserver(observer);
-
-        if (observer != null) {
-          Set<Annotation> annSet = observer.getObservedQualifiers();
-
-          Annotation []bindings = new Annotation[annSet.size()];
-          annSet.toArray(bindings);
-
-          BaseType baseType = createSourceBaseType(observer.getObservedType());
-
-          _eventManager.addObserver(observer, baseType, bindings);
-        }
       }
-      */
     }
 
     // ioc/07d2
