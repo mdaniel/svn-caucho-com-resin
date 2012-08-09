@@ -152,7 +152,7 @@
                 then configure and compile your Resin Application Server:
 
                 <example>
-                    ./configure --prefix=/usr/local/resin
+                    ./configure --prefix=/usr/local/share/resin
                     make
                 </example>
 
@@ -160,8 +160,8 @@
                 don't have to run make install as root (and prevent an infinite
                 loop bug)
                 <example>
-                    pfexec mkdir /usr/local/resin
-                    pfexec chown YOURUSER /usr/local/resin
+                    pfexec mkdir /usr/local/share/resin
+                    pfexec chown YOURUSER /usr/local/share/resin
                     pfexec touch /etc/init.d/resin
                     pfexec chown YOURUSER /etc/init.d/resin
                 </example>
@@ -175,7 +175,7 @@
                 now reassign the directories and files to root again
 
                 <example>
-                    pfexec chown root /usr/local/resin -R
+                    pfexec chown root /usr/local/share/resin -R
                     pfexec chown root /etc/init.d/resin
                 </example>
             </s2>

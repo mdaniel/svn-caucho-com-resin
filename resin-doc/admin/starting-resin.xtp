@@ -52,7 +52,7 @@ put in <em>/var/resin/webapps</em></li>
 
 /var/log/resin/              # resin logs
 
-/usr/local/resin/            # resin.home (binaries and libraries)
+/usr/local/share/resin/      # resin.home (binaries and libraries)
 </example>
 
 <p>When Resin is installed on a <b>Windows</b> system:</p>

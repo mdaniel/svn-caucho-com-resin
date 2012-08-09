@@ -97,7 +97,7 @@ make Resin and website upgrades easier and more maintainable.</p>
 
 <ol>
 <li>Create a user to run Resin (e.g. <var>resin</var> or another non-root user)</li>
-<li>Link <var>/usr/local/resin</var> to the current Resin directory. This is <var>$RESIN_HOME</var>.</li>
+<li>Link <var>/usr/local/share/resin</var> to the current Resin directory. This is <var>$RESIN_HOME</var>.</li>
 <li>Create a deployment root, e.g. <var>/var/resin</var>, owned by the resin user. This is <var>$RESIN_ROOT</var>.</li>
 <li>Put the modified <var>resin.xml</var> in <var>/etc/resin/resin.conf</var></li>
 <li>Put the site documents in <var>/var/resin/webapps/ROOT</var>.</li>
@@ -143,7 +143,7 @@ might typically do a number of things:</p>
 #!/bin/sh
 
 JAVA_HOME=/usr/java
-RESIN_HOME=/usr/local/resin
+RESIN_HOME=/usr/local/share/resin
 RESIN_ROOT=/var/resin
 
 java=$JAVA_HOME/bin/java
@@ -264,7 +264,7 @@ C:\&gt; net stop resin
 <p>Resin runs as multiple processes that begin with the following JVM command:</p>
 
 <example>
-unix> bin/resin.sh /usr/local/resin/lib/resin.jar \
+unix> bin/resin.sh /usr/local/share/resin/lib/resin.jar \
            -conf /etc/resin/resin.xml \
            start
 </example>

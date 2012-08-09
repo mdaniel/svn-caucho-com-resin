@@ -185,7 +185,7 @@ JAVA_HOME=/usr/java
 export JAVA_HOME
 
 # Resin location (optional).  Usually Resin can figure this out.
-RESIN_HOME=/usr/local/resin
+RESIN_HOME=/usr/local/share/resin
 export RESIN_HOME
 
 # If you're using additional class libraries, you'll need to put them

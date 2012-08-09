@@ -91,14 +91,14 @@ The following command installs Resin and its files into the recommended
 locations on the file system:
 </p>
 <example>
-./configure --prefix=/usr/local/resin \
+./configure --prefix=/usr/local/share/resin \
             --with-resin-root=/var/resin \
             --with-resin-log=/var/log/resin \
             --with-resin-conf=/etc/resin
 </example>
 
 <p>
-This will configure Resin to install in <var>/usr/local/resin</var>,
+This will configure Resin to install in <var>/usr/local/share/resin</var>,
 with support for OpenSSL if it was detected, but without support
 for Apache.  If you want to use Apache or another 3rd party HTTP
 server in front of Resin (unrecommended), please take a look
@@ -115,7 +115,7 @@ will display a summary like the following:
 <example>
 Resin Configuration summary:
 
-  RESIN_HOME: /usr/local/resin
+  RESIN_HOME: /usr/local/share/resin
       root: /var/resin
       conf: /etc/resin/conf
       log : /var/log/resin

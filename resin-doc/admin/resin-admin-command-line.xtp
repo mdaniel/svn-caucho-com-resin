@@ -727,7 +727,7 @@ resinctl pdf-report [options]
 <example title="Example: generate the default watchdog PDF report">
 unix> bin/resin.sh pdf-report -user admin -password secret -watchdog
 
-generated /usr/local/resin/log/default-Watchdog-20110801T0251.pdf
+generated /usr/local/share/resin/log/default-Watchdog-20110801T0251.pdf
 </example>
 
   <deftable title="pdf-report options">
