@@ -597,8 +597,8 @@ r_resin-Content =
 
   & r_cluster-system-key?
 
-  & (attribute elastic-ip { r_boolean-Type }
-     | element elastic-ip { r_boolean-Type })?
+  & (attribute elastic-dns { r_boolean-Type }
+     | element elastic-dns { r_boolean-Type })?
 
   & (attribute elastic-server { r_boolean-Type }
      | element elastic-server { r_boolean-Type })?

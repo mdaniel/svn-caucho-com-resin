@@ -231,9 +231,9 @@ class WatchdogArgs
     return _isElasticServer;
   }
 
-  boolean isElasticIp()
+  boolean isElasticDns()
   {
-    return getArgBoolean("-elastic-ip", false);
+    return getArgBoolean("-elastic-dns", false);
   }
 
   String getDynamicAddress()
@@ -535,7 +535,9 @@ class WatchdogArgs
         argv[i + 1] = _resinHome.getFullPath();
         i++;
       }
-      else if ("--root-directory".equals(resinArg)) {
+      else if ("--root-directory".equals(resinArg)
+               || "--server-root".equals(resinArg)
+               || "--resin-root".equals(resinArg)) {
         setRootDirectory(Vfs.lookup(argv[i + 1]));
         argv[i + 1] = _rootDirectory.getFullPath();
         i++;
@@ -546,11 +548,6 @@ class WatchdogArgs
         if ("".equals(_serverId))
           _serverId = "default";
         
-        i++;
-      }
-      else if ("--server-root".equals(resinArg)) {
-        _rootDirectory = Vfs.lookup(argv[i + 1]);
-        argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
       else if ("--stage".equals(resinArg)) {

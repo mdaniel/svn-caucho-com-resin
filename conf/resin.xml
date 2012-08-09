@@ -75,7 +75,7 @@
   <home-cluster>${home_cluster}</home-cluster>
   <home-server>${home_server}</home-server>
   <elastic-server>${elastic_server}</elastic-server>
-  <elastic-ip>${elastic_ip}</elastic-ip>
+  <elastic-dns>${elastic_dns}</elastic-dns>
 
   <!--
      - Configures the main application cluster.  Load-balancing configurations

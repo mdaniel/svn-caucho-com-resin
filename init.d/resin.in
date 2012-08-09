@@ -80,7 +80,7 @@ START_CMD="start-all"
 ARGS="$ARGS $RESIN_CONF $RESIN_LOG $RESIN_ROOT $RESIN_LICENSE"
 ARGS="$ARGS $JOIN_CLUSTER $SERVER"
 
-START_ARGS="$START_ARGS --elastic-ip"
+#START_ARGS="$START_ARGS --elastic-ip"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions

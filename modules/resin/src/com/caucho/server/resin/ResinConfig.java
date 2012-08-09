@@ -191,7 +191,7 @@ public class ResinConfig implements EnvironmentBean
   }
   
   @Configurable
-  public void setElasticIp(boolean isElasticServer)
+  public void setElasticDns(boolean isElasticServer)
   {
   }
   

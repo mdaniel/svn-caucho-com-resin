@@ -86,6 +86,7 @@ public class BootResinConfig // implements EnvironmentBean
   private String _homeCluster;
   private String _homeServer;
   private boolean _isElasticServer;
+  private boolean _isElasticDns;
   
   BootResinConfig(ResinSystem system,
                   WatchdogArgs args)
@@ -199,6 +200,17 @@ public class BootResinConfig // implements EnvironmentBean
   public boolean isElasticServer()
   {
     return _isElasticServer;
+  }
+  
+  @Configurable
+  public void setElasticDns(boolean isElasticDns)
+  {
+    _isElasticDns = isElasticDns;
+  }
+  
+  public boolean isElasticDns()
+  {
+    return _isElasticDns;
   }
 
   /*
@@ -444,9 +456,9 @@ public class BootResinConfig // implements EnvironmentBean
     }
   }
   
-  boolean isElasticIp(WatchdogArgs args)
+  boolean isElasticDns(WatchdogArgs args)
   {
-    return args.isElasticIp();
+    return args.isElasticDns() || isElasticDns();
   }
 
   public ArrayList<WatchdogClient> findLocalClients(String serverId)

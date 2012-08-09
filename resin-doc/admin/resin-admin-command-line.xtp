@@ -192,11 +192,16 @@ Copyright(c) 1998-2012 Caucho Technology.  All rights reserved.
   </tr>
   <tr>
     <td>--cluster</td>
-    <td>cluster to join when using --elastic</td>
+    <td>cluster to join when using --elastic-server</td>
     <td></td>
   </tr>
   <tr>
-    <td>--elastic</td>
+    <td>--elastic-dns</td>
+    <td>lazy local DNS address binding: retry until succeed</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-server</td>
     <td>start as a dynamic server joining a cluster</td>
     <td></td>
   </tr>
@@ -920,11 +925,16 @@ watchdog-manager.log and jvm-default.log.</p>
   </tr>
   <tr>
     <td>--cluster</td>
-    <td>cluster to join when using --elastic</td>
+    <td>cluster to join when using --elastic-server</td>
     <td></td>
   </tr>
   <tr>
-    <td>--elastic</td>
+    <td>--elastic-dns</td>
+    <td>lazy local DNS address binding: retry until succeed</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-server</td>
     <td>start as a dynamic server joining a cluster</td>
     <td></td>
   </tr>
@@ -974,11 +984,16 @@ which contains a watchdog-manager.log and jvm-default.log.</p>
   </tr>
   <tr>
     <td>--cluster</td>
-    <td>cluster to join when using --elastic</td>
+    <td>cluster to join when using --elastic-server</td>
     <td></td>
   </tr>
   <tr>
-    <td>--elastic</td>
+    <td>--elastic-dns</td>
+    <td>lazy local DNS address binding: retry until succeed</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-server</td>
     <td>start as a dynamic server joining a cluster</td>
     <td></td>
   </tr>

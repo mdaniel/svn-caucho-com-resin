@@ -150,7 +150,8 @@ and the cluster port.</li>
 </ul>
 
 <p>The &lt;server> tags configure the servers in a cluster. Dynamic
-servers launched with the --elastic and  --cluster command-line arguments
+servers launched with the --elastic-server and --cluster
+command-line arguments
 will use the same &lt;server-default> configuration as other servers.</p>
 
 <p>The first three servers in the cluster automatically form

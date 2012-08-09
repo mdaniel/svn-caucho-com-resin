@@ -432,7 +432,7 @@ public class ResinArgs
         _isElastic = true;
         i += 1;
       }
-      else if (arg.equals("--elastic-ip")) {
+      else if (arg.equals("--elastic-dns")) {
         i += 1;
       }
       else if (arg.equals("--service")) {

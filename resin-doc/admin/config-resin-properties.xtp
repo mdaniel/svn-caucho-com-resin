@@ -362,13 +362,13 @@ In deployment it can be a larger value.</p>
 dependency_check_interval : 2m
 </example>
 
-</defun>
+</defun> <!-- dependency_check_interval -->
 
 <defun title="elastic_cloud_enable">
 
 <p><em>elastic_cloud_enable</em> lets dynamic servers join a cluster.
-If the "start" command either has an "--elastic" flag or if there are
-servers listening to the local address, Resin will connect to the
+If the "start" command either has an "--elastic-server" flag or
+if the <em>elastic_server</em> property is set, Resin will connect to the
 cluster as a new dynamic server.</p>
 
 <p>The cluster is either specified by "--cluster foo" or
@@ -378,21 +378,106 @@ are specified by the <em>app_servers</em> property.</p>
 <example title="Example: elastic_cloud_enable">
 app_servers : 182.168.1.10:6800
 
+elastic_server       : true
 elastic_cloud_enable : true
-home_cluster : app
+home_cluster         : app
 </example>
 
 <p>To start a dynamic server, use <em>resinctl</em> with <em>start</em>
-and specify <em>--elastic</em> to force a dynamic server. The
-<em>--elastic</em> is optional if none of the configured
-<em>app_servers</em> are local servers. The <em>--cluster</em> is
-optional if a <em>home-cluster</em> has been defined.</p>
+and specify <em>--elastic-server</em> to force a dynamic server. 
+The <em>--cluster</em> is optional if a <em>home-cluster</em> has been 
+defined.</p>
 
 <example title="Example: elastic_cloud_enable">
-# resinctl start --elastic --cluster app
+# resinctl start --elastic-server --cluster app
 </example>
 
-</defun>
+</defun> <!-- elastic_cloud_enable -->
+
+<defun title="elastic_dns">
+
+<p><em>elastic_dns</em> is used in cloud environments that assign IP
+addresses or DNS names after the server starts, for example in an EC2
+environment. When <em>elastic_dns</em> is enabled, Resin
+will start the server, wait and retry until the local IP addresses or
+DNS resolve to a matching server.</p>
+
+<p>For example, a Resin cluster might have a fixed pre-allocated DNS
+name of "app0.mydomain" and <em>app_servers</em> might include that
+address. At server boot time, the cloud assigns the dynamic IP 192.168.2.114.
+Later the cloud or the user will attach the IP to the DNS
+name "app0.mydomain". Resin will then recognize it and start with the correct
+value.</p>
+
+<ol>
+<li>Reserve DNS address "app0.mydomain" with cloud provider.</li>
+<li>Configure resin.properties with that fixed address
+and <em>elastic_dns</em>.</li>
+<li>Start Resin instance in the cloud (with address 192.168.2.114)</li>
+<li>[Resin is in wait mode until the following step because it doesn't
+lookup "app0.mydomain" to 192.168.2.114 in the configuration files.]</li>
+<li>Assign the DNS name "app0.mydomain" to 192.168.1.10
+with the cloud provider.</li>
+<li>Resin will detect the new assignment and start as that server.</li>
+</ul>
+
+<example title="Example: elastic_dns">
+app_servers : app0.mydomain:6800
+
+elastic_dns           : true
+</example>
+
+<p>You can specify the <em>elastic_dns</em> in the resin.properties or
+equivalently specify it on the command line as <em>--elastic-dns</em>.</p>
+
+<example title="Example: CLI elastic-dns">
+# resinctl start-all --elastic-dns
+</example>
+
+</defun> <!-- elastic_dns -->
+
+<defun title="elastic_server">
+
+<p><em>elastic_server</em> starts the server as a dynamic server and
+joins a cluster. The dynamic server must have a hub server configured
+in the cluster to register itself. The cluster must also have the
+<em>elastic_cloud_enable</em> set to enable dynamic servers.</p>
+
+<p>When the "start" command either has an "--elastic-server" flag or
+if the <em>elastic_server</em> property is set, Resin will connect to the
+cluster as a new dynamic server.</p>
+
+<p>The cluster is either specified by "--cluster foo" or
+the <em>home_cluster</em> property. The cluster triad hub servers
+are specified by the <em>app_servers</em> property.</p>
+
+<ul>
+<li>Either <em>elastic_server</em> in the resin.properties or <em>--elastic-server</em> on the command line to start an elastic server.</li>
+<li>Either <em>home_server</em> in the resin.properties or <em>--cluster</em> on the command line to specify the cluster.</li>
+<li><em>elastic_cloud_enable</em> in the resin.properties to enable
+dynamic servers.</li>
+<li>At least one static server defined in <em>app_servers</em> in the
+resin.properties as the hub. Three servers is preferred.</li>
+
+<example title="Example: elastic_server">
+app_servers : 182.168.1.10:6800
+
+elastic_server       : true
+elastic_cloud_enable : true
+home_cluster         : app
+</example>
+
+<p>To start a dynamic server, use <em>resinctl</em> with <em>start</em>
+and specify <em>--elastic-server</em> or <em>elastic_server</em> in
+the resin.properties to force a dynamic server. 
+The <em>--cluster</em> is optional if a <em>home-cluster</em> has been 
+defined.</p>
+
+<example title="Example: elastic_server">
+# resinctl start --elastic-server --cluster app
+</example>
+
+</defun> <!-- elastic_server -->
 
 <defun title="email">
 

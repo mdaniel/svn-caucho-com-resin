@@ -57,7 +57,7 @@ public abstract class AbstractBootCommand implements BootCommand {
     addValueOption("log-directory", "dir", "alternate log directory");
     addValueOption("license-directory", "dir", "alternate license directory");
     
-    addFlagOption("elastic", "use an elastic server in the cluster");
+    addFlagOption("elastic-server", "use an elastic server in the cluster");
     addFlagOption("verbose", "produce verbose output");
   }
 

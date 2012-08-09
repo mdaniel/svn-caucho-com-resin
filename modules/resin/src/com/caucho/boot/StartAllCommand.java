@@ -48,7 +48,8 @@ public class StartAllCommand extends AbstractStartCommand
   
   protected StartAllCommand()
   {
-    addFlagOption("elastic-ip", "dynamic IP addresses assigned after start");
+    addFlagOption("elastic-dns",
+                  "retry DNS address lookup on start until success");
   }
 
   @Override
@@ -158,14 +159,14 @@ public class StartAllCommand extends AbstractStartCommand
     do {
       clientList = boot.findLocalClients(null);
       
-      if (clientList.size() == 0 && boot.isElasticIp(args)) {
+      if (clientList.size() == 0 && boot.isElasticDns(args)) {
         try {
           log().info("No local IP address found, waiting...");
           Thread.sleep(10000);
         } catch (Exception e) {
         }
       }
-    } while (clientList.size() == 0 && boot.isElasticIp(args));
+    } while (clientList.size() == 0 && boot.isElasticDns(args));
 
     for (WatchdogClient client : clientList) {
       try {
