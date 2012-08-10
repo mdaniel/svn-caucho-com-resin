@@ -128,8 +128,9 @@ public class MethodExpr extends Expr {
     
     if (method == null) {
       method = findMethodImpl(type);
-      
-      _methodMap.put(type, method);
+
+      if (method != null)
+        _methodMap.put(type, method);
     }
     
     return method;

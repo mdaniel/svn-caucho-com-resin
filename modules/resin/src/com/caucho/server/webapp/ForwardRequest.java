@@ -36,13 +36,17 @@ import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.CauchoDispatchRequest;
+import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -62,7 +66,7 @@ public class ForwardRequest extends CauchoDispatchRequest {
 
   private ForwardResponse _response;
 
-  private HashMapImpl<String,String[]> _filledForm;
+  private HashMapImpl<String,String[]> _fwdFilledForm;
   
   public ForwardRequest()
   {
@@ -268,7 +272,8 @@ public class ForwardRequest extends CauchoDispatchRequest {
     }
   }
 
-  public HttpServletRequest unwrapRequest() {
+  public HttpServletRequest unwrapRequest()
+  {
     HttpServletRequest request = this.getRequest();
 
     while (request instanceof ForwardRequest) {
@@ -285,23 +290,27 @@ public class ForwardRequest extends CauchoDispatchRequest {
   /**
    * Returns an enumeration of the form names.
    */
+  @Override
   public Enumeration<String> getParameterNames()
   {
-    if (_filledForm == null)
-      _filledForm = parseQuery();
+    if (_fwdFilledForm == null) {
+      _fwdFilledForm = parseQuery();
+    }
 
-    return Collections.enumeration(_filledForm.keySet());
+    return Collections.enumeration(_fwdFilledForm.keySet());
   }
 
   /**
    * Returns a map of the form.
    */
+  @Override
   public Map<String,String[]> getParameterMap()
   {
-    if (_filledForm == null)
-      _filledForm = parseQuery();
+    if (_fwdFilledForm == null) {
+      _fwdFilledForm = parseQuery();
+    }
 
-    return Collections.unmodifiableMap(_filledForm);
+    return Collections.unmodifiableMap(_fwdFilledForm);
   }
 
   /**
@@ -310,17 +319,20 @@ public class ForwardRequest extends CauchoDispatchRequest {
    * @param name key in the form
    * @return value matching the key
    */
+  @Override
   public String []getParameterValues(String name)
   {
-    if (_filledForm == null)
-      _filledForm = parseQuery();
+    if (_fwdFilledForm == null) {
+      _fwdFilledForm = parseQuery();
+    }
 
-    return _filledForm.get(name);
+    return _fwdFilledForm.get(name);
   }
 
   /**
    * Returns the form primary value for the given name.
    */
+  @Override
   public String getParameter(String name)
   {
     String []values = getParameterValues(name);
@@ -367,7 +379,34 @@ public class ForwardRequest extends CauchoDispatchRequest {
   @Override
   protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
   {
-    // server/1637
+    // server/1637, server/162r
+    AbstractHttpRequest request = getAbstractHttpRequest();
+
+    if (request == null)
+      return;
+
+    CharSegment contentType = request.getContentTypeBuffer();
+    
+    if (contentType == null || ! "POST".equalsIgnoreCase(getMethod())) {
+      return;
+    }
+
+    if (getWebApp().isMultipartFormEnabled()) {
+      // server/1637 - original request would have handle it
+      return;
+    }
+
+    ServletInvocation invocation = getInvocation();
+
+    MultipartConfigElement multipartConfig = invocation.getMultipartConfig();
+
+
+    if ((getWebApp().isMultipartFormEnabled() || multipartConfig != null)
+        && contentType.startsWith("multipart/form-data")) {
+      // server/162r
+      super.parsePostQueryImpl(form);
+    }
+
   }
 
   static {

@@ -163,8 +163,9 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
   public final Map<String,String[]> getParameterMapImpl()
   {
-    if (_filledForm == null)
+    if (_filledForm == null) {
       _filledForm = parseQueryImpl();
+    }
 
     return Collections.unmodifiableMap(_filledForm);
   }
@@ -332,7 +333,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
   {
     AbstractHttpRequest request = getAbstractHttpRequest();
-    
+
     if (request == null)
       return;
 

@@ -121,6 +121,9 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
         name = tail;
     }
     
+    if (name == null && args.getDefaultArg() != null)
+      name = args.getDefaultArg();
+    
     if (name == null || name.equals("/")) {
       name = "ROOT";
     }
