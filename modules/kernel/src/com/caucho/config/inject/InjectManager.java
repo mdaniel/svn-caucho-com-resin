@@ -3118,12 +3118,14 @@ public final class InjectManager
   public void update()
   {
     // ioc/0044
-    if (! _isEnableAutoUpdate)
+    if (! _isEnableAutoUpdate) {
       return;
-    
+    }
+
     if (! _isUpdateNeeded 
         && ! _scanManager.isPending()
-        && _pendingAnnotatedTypes.size() == 0) {
+        && _pendingAnnotatedTypes.size() == 0
+        && ! _xmlExtension.isPending()) {
       return;
     }
 

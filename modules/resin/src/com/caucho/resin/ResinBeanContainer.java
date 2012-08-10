@@ -328,17 +328,15 @@ public class ResinBeanContainer {
    */
   public void start()
   {
-    if (! _lifecycle.toActive()) {
-      return;
-    }
-    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_classLoader);
       
-      addCdiProducer();
+      if (_lifecycle.toActive()) {
+        addCdiProducer();
+      }
 
       // env/0e81
       _cdiManager.update();

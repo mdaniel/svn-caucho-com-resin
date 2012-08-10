@@ -122,6 +122,11 @@ public class XmlStandardPlugin implements Extension {
     processRoots();
   }
   
+  public boolean isPending()
+  {
+    return _pendingRoots.size() > 0 || _pendingXml.size() > 0;
+  }
+  
   public void processRoots()
   {
     try {
