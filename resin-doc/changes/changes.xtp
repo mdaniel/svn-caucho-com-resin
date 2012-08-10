@@ -13,7 +13,7 @@
 <s2 title="4.0.30 - snapshot">
 <ul>
 <li>cloud: added --elastic-ip for Amazon-style local dns or elastic ip</li>
-<li>cloud: elastic servers now require --elastic or &lt;elastic-server><li>
+<li>cloud: elastic servers now require --elastic or &lt;elastic-server></li>
 <li>websocket: build standalone resin-websocket-client.jar (#5142, rep by Judd Gaddie)</li>
 <li>init.d: update status return code (#5166, rep by nmmn)</li>
 <li>install: add --with-setuid and --with-setgid (#5105)</li>
