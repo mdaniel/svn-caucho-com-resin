@@ -269,6 +269,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     // _sharedBufferLock = _logWriter.getBufferLock();
 
     super.init();
+    
+    _logWriter.rollover();
   }
 
   /**

@@ -350,8 +350,10 @@ public class AbstractRolloverLog implements Closeable {
       _rolloverPrefix = path.getTail();
 
       long lastModified = path.getLastModified();
-      if (lastModified <= 0 || now < lastModified)
+      
+      if (lastModified <= 0 || now < lastModified) {
         lastModified = now;
+      }
 
       // _calendar.setGMTTime(lastModified);
 
@@ -384,7 +386,6 @@ public class AbstractRolloverLog implements Closeable {
 
     if (_nextPeriodEnd <= now || _nextRolloverCheckTime.get() <= now) {
       _nextRolloverCheckTime.set(now + _rolloverCheckPeriod);
-
       _rolloverWorker.wake();
 
       return true;

@@ -3174,8 +3174,10 @@ public final class InjectManager
 
     try {
       thread.setContextClassLoader(_classLoader);
-      
-      _classLoader.updateScan();
+
+      if (_classLoader != null) {
+        _classLoader.updateScan();
+      }
 
       _extensionManager.updateExtensions();
 
