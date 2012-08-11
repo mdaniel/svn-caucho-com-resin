@@ -38,6 +38,7 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class LicenseAddCommand extends AbstractManagementCommand
 {
@@ -74,22 +75,43 @@ public class LicenseAddCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String licensePath = args.getArg("-license");
+    ArrayList<String> licenses = new ArrayList<String>();
     
-    if (licensePath == null && args.getTailArgs().size() == 1) {
-      licensePath = args.getTailArgs().get(0);
+    licenses.addAll(args.getTailArgs());
+    
+    String licensePath = args.getArg("-license");
+    if (licensePath != null) {
+      licenses.add(licensePath);
     }
     
-    if (licensePath == null) {
+    if (licenses.size() == 0) {
       System.err.println(L.l("-license is required"));
       usage();
       return 1;
     }
     
+    int value = 1;
+    
+    for (int i = 0; i < licenses.size(); i++) {
+      boolean isLast = i + 1 == licenses.size();
+      String license = licenses.get(i);
+      
+      value = addLicense(args, client, managerClient, license, isLast);
+    }
+    
+    return value;
+  }
+  
+  private int addLicense(WatchdogArgs args,
+                         WatchdogClient client,
+                         ManagerClient managerClient,
+                         String licensePath,
+                         boolean isLast)
+  {
     String fileName = args.getArg("-to");
     
     boolean overwrite = args.hasOption("-overwrite");
-    boolean restart = args.hasOption("-restart");
+    boolean restart = args.hasOption("-restart") && isLast;
     
     Path path = Vfs.lookup(licensePath);
     
@@ -98,7 +120,8 @@ public class LicenseAddCommand extends AbstractManagementCommand
     }
     
     if (! fileName.endsWith(".license")) {
-      System.err.println(L.l("license file name must end with .license"));
+      System.err.println(L.l("license '{0}' must end with .license",
+                             fileName));
       return 1;
     }
       

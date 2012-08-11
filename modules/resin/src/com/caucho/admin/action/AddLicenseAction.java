@@ -58,48 +58,52 @@ public class AddLicenseAction implements AdminAction
                         boolean overwrite,
                         boolean restart)
   {
-    Class<?> cl = null;
-    
     try {
+      Class<?> cl = null;
+      
       cl = Class.forName("com.caucho.license.LicenseCheckImpl");
     }
     catch (ClassNotFoundException e) {
       throw new ConfigException(L.l("add-license requires the Resin Professional download"), e);
     }
-
-    File licenseDir = Resin.getCurrent().getLicenseStore().getLicenseDirectory();
     
-    if (licenseDir == null) {
-      Path confDir = Resin.getCurrent().getConfDirectory();
-      
-      licenseDir = new File(confDir.lookup("licenses").getNativePath());
-    }
+    WriteStream out = null;
 
-    File licenseFile = new File(licenseDir, fileName);
-    if (licenseFile.exists() && ! overwrite) {
-      log.log(Level.FINE,
-              L.l("add-license will not overwrite {0} (use -overwrite)",
-                  licenseFile));
-      return L.l("add-license will not overwrite {0} (use -overwrite)",
-                 licenseFile);
-    }
-
-    if (! licenseDir.exists()) {
-      licenseDir.mkdir();
-    }
-
-    FileWriter out = null;
     try {
-      out = new FileWriter(licenseFile);
-      out.write(licenseContent);
-      out.flush();
+      File licenseDir = Resin.getCurrent().getLicenseStore().getLicenseDirectory();
+    
+      Path licensePath;
+    
+      if (licenseDir != null) {
+        licensePath = Vfs.lookup(licenseDir.getCanonicalPath());
+      }
+      else {
+        Path confDir = Resin.getCurrent().getConfDirectory();
+      
+        licensePath = confDir.lookup("licenses");
+      }
+
+      Path licenseFile = licensePath.lookup(fileName);
+      
+      if (licenseFile.exists() && ! overwrite) {
+        log.log(Level.FINE,
+                L.l("add-license will not overwrite {0} (use -overwrite)",
+                    licenseFile));
+        return L.l("add-license will not overwrite {0} (use -overwrite)",
+                   licenseFile);
+      }
+
+      licensePath.mkdirs();
+      
+      log.info(this + " adding license " + licenseFile.getNativePath());
+
+      out = licenseFile.openWrite();
+      out.print(licenseContent);
     } catch (IOException e) {
       throw new ConfigException(L.l("add-license failed to write {0}: {1}", 
                                     fileName, e.toString()), e);
     } finally {
-      if (out != null) {
-        try { out.close(); } catch (Exception e2) { }
-      }
+      IoUtil.close(out);
     }
     
     if (restart) {

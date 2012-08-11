@@ -336,9 +336,9 @@ class WatchdogArgs
   public String getArg(String arg)
   {
     for (int i = 0; i + 1 < _argv.length; i++) {
-      if (_argv[i].equals(arg)
-          || _argv[i].equals("-" + arg))
+      if (_argv[i].equals(arg) || _argv[i].equals("-" + arg)) {
         return _argv[i + 1];
+      }
     }
 
     return null;
@@ -597,7 +597,14 @@ class WatchdogArgs
         _command = _commandMap.get(arg);
       }
       else if (_command != null) {
-        _tailArgs.add(arg);
+        if (_command.isFlag(arg)) {
+        }
+        else if (_command.isValueOption(arg)) {
+          i++;
+        }
+        else {
+          _tailArgs.add(arg);
+        }
       }
       else if (_isHelp) {
       }
