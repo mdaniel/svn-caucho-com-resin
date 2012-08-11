@@ -761,16 +761,16 @@
       </fileset>
     </copy>
 
+      <!--
     <copy todir="${dist.build}/webapp-jars"
           preservelastmodified="true"
           overwrite="true">
-      <!--
       <fileset dir="${resindir}/lib">
         <include name="slf4j-api-1.6.6.jar"/>
         <include name="hibernate-validator-4.0.2.GA.jar"/>
       </fileset>
-      -->
     </copy>
+      -->
 
 
     <copy todir="${dist.build}/doc/resin-doc">
