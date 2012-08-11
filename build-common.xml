@@ -718,7 +718,7 @@
         <include name="lib/eclipselink-2.3.0.jar"/>
         <include name="lib/resin-eclipselink.jar"/>
 
-        <include name="lib/hibernate-validate-4.3.0.Final.jar"/>
+        <include name="lib/hibernate-validator-4.3.0.Final.jar"/>
         <include name="lib/jboss-logging-3.1.0.CR2.jar"/>
 
         <include name="lib/javamail-141.jar"/>
@@ -1502,7 +1502,7 @@
         -->
         <include name="lib/eclipselink-2.3.0.jar"/>
 
-        <include name="lib/hibernate-validate-4.3.0.Final.jar"/>
+        <include name="lib/hibernate-validator-4.3.0.Final.jar"/>
         <include name="lib/jboss-logging-3.1.0.CR2.jar"/>
 
         <include name="lib/javaee-16.jar"/>
