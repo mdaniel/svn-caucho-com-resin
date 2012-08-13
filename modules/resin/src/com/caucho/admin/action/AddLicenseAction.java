@@ -70,17 +70,17 @@ public class AddLicenseAction implements AdminAction
     WriteStream out = null;
 
     try {
-      File licenseDir = Resin.getCurrent().getLicenseStore().getLicenseDirectory();
-    
-      Path licensePath;
-    
-      if (licenseDir != null) {
-        licensePath = Vfs.lookup(licenseDir.getCanonicalPath());
-      }
-      else {
-        Path confDir = Resin.getCurrent().getConfDirectory();
+      Resin resin = Resin.getCurrent();
+      Path resinRoot = resin.getRootDirectory();
       
-        licensePath = confDir.lookup("licenses");
+      // Path licensePath = resinRoot.lookup("licenses");
+      
+      Path licensePath = resin.getLicenseDirectory();
+      
+      if (licensePath == null 
+          || ! licensePath.isDirectory()
+          || ! licensePath.canWrite()) {
+        licensePath = resinRoot.lookup("licenses");
       }
 
       Path licenseFile = licensePath.lookup(fileName);
