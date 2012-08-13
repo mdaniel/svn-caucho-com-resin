@@ -589,9 +589,6 @@ public class EntityManagerJtaProxy
   {
     EntityManager em = getCurrent();
     
-    System.err.println("FLUSH: " + em + " " + TransactionImpl.getCurrent());
-    log.warning("FLUSH2: " +  em + " " + TransactionImpl.getCurrent());
-    
     if (em != null) {
       em.flush();
       return;

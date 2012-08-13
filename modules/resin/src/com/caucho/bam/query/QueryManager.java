@@ -439,7 +439,7 @@ public class QueryManager {
       long now = CurrentTime.getCurrentTimeActual();
       long expires = now + timeout;
 
-      while (! _isResult.get() && CurrentTime.getCurrentTimeActual() < expires) {
+      while (! _isResult.get() && CurrentTime.getCurrentTimeActual() <= expires) {
         try {
           Thread.interrupted();
           LockSupport.parkUntil(expires);
