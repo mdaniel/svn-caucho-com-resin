@@ -121,6 +121,7 @@ public class JniFileStream extends StreamImpl
     return _fd >= 0;
   }
 
+  @Override
   public long skip(long length)
     throws IOException
   {
@@ -137,6 +138,7 @@ public class JniFileStream extends StreamImpl
   /**
    * Reads data from the file.
    */
+  @Override
   public int read(byte []buf, int offset, int length)
     throws IOException
   {
@@ -154,6 +156,7 @@ public class JniFileStream extends StreamImpl
   }
 
   // XXX: needs update
+  @Override
   public int getAvailable() throws IOException
   {
     if (_fd < 0) {
@@ -171,6 +174,7 @@ public class JniFileStream extends StreamImpl
   /**
    * Returns true if this is a writeable stream.
    */
+  @Override
   public boolean canWrite()
   {
     return _canWrite && _fd >= 0;
@@ -179,6 +183,7 @@ public class JniFileStream extends StreamImpl
   /**
    * Writes data to the file.
    */
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -190,29 +195,34 @@ public class JniFileStream extends StreamImpl
     nativeWrite(_fd, buf, offset, length);
   }
 
+  @Override
   public void seekStart(long offset)
     throws IOException
   {
     nativeSeekStart(_fd, offset);
   }
 
+  @Override
   public void seekEnd(long offset)
     throws IOException
   {
     nativeSeekEnd(_fd, offset);
   }
 
+  @Override
   public void flush()
     throws IOException
   {
   }
 
+  @Override
   public void flushToDisk()
     throws IOException
   {
     nativeFlushToDisk(_fd);
   }
 
+  @Override
   public void close()
     throws IOException
   {
@@ -226,6 +236,7 @@ public class JniFileStream extends StreamImpl
     nativeClose(fd);
   }
 
+  @Override
   protected void finalize()
     throws IOException
   {

@@ -40,6 +40,7 @@ import com.caucho.loader.Loader;
 import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -701,7 +702,7 @@ public class JavaCompilerUtil {
 
     // the compiler may not be well-behaved enough to use the ThreadPool
     ThreadPool.getCurrent().start(compiler, _startTimeout);
-
+    
     compiler.waitForComplete(_maxCompileTime);
 
     if (! compiler.isDone()) {

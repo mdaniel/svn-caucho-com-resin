@@ -1385,6 +1385,7 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Close the stream, first flushing the write buffer.
    */
+  @Override
   public final void close() throws IOException
   {
     StreamImpl s = _source;
@@ -1419,6 +1420,14 @@ public class WriteStream extends OutputStreamWithBuffer
 
       if (s != null && ! _isDisableCloseSource)
         s.closeWrite();
+    }
+    
+    if (s != null) {
+      Path path = s.getPath();
+      
+      if (path != null) {
+        path.clearStatusCache();
+      }
     }
   }
 

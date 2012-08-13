@@ -47,7 +47,7 @@ public final class HostUtil {
   private static final Logger log = Logger.getLogger(HostUtil.class.getName());
   
   private static final TimedCache<String,ArrayList<NetworkInterface>> _cache
-    = new TimedCache<String,ArrayList<NetworkInterface>>(128, 2000);
+    = new TimedCache<String,ArrayList<NetworkInterface>>(128, 120000);
   
   private HostUtil() {}
   

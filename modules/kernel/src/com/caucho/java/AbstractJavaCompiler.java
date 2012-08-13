@@ -139,13 +139,11 @@ abstract public class AbstractJavaCompiler implements Runnable {
   protected void waitForComplete(long timeout)
   {
     long endTime = CurrentTime.getCurrentTimeActual() + timeout;
-    Thread thread;
 
     synchronized (_isDone) {
       while (! isDone()
-          && CurrentTime.getCurrentTimeActual() <= endTime
-          && ((thread = _compileThread) == null || thread.isAlive())) {
-        Thread.currentThread().interrupted();
+             && CurrentTime.getCurrentTimeActual() <= endTime) {
+        Thread.interrupted();
         
         try {
           _isDone.wait(endTime - CurrentTime.getCurrentTimeActual());
