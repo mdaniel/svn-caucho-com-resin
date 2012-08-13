@@ -44,8 +44,7 @@ public class JavacConfig {
   private int _maxBatch = 64;
 
   private long _startTimeout = 10 * 1000L;
-
-  private long _maxCompileTime;
+  private long _maxCompileTime = 120 * 1000L;
 
   /**
    * Returns the environment configuration.

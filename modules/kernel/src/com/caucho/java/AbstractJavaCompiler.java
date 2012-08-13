@@ -136,7 +136,7 @@ abstract public class AbstractJavaCompiler implements Runnable {
     }
   }
 
-  protected void waitForComplete(long timeout)
+  protected final void waitForComplete(long timeout)
   {
     long endTime = CurrentTime.getCurrentTimeActual() + timeout;
 

@@ -703,7 +703,7 @@ public class JavaCompilerUtil {
     // the compiler may not be well-behaved enough to use the ThreadPool
     ThreadPool.getCurrent().start(compiler, _startTimeout);
     
-    compiler.waitForComplete(_maxCompileTime);
+    compiler.waitForComplete(getMaxCompileTime());
 
     if (! compiler.isDone()) {
       log.warning("compilation timed out");
