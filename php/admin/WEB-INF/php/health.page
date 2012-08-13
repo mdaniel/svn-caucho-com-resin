@@ -340,7 +340,7 @@ function display_health_availability()
   $start = ($end - $g_period);
       
   $downtimes = $stat->getDownTimes($g_server_index, $start * 1000, $end * 1000);
-  if (count($downtimes) == 0) {
+  if (is_null($downtimes)) {
     echo gettext("No data available");
     return; 
   }

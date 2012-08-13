@@ -581,7 +581,7 @@ function pdf_availability()
   $g_canvas->setTextFont();
   
   $downtimes = $stat->getDownTimes($g_si, $g_start * 1000, $g_end * 1000);
-  if (count($downtimes) == 0) {
+  if (is_null($downtimes)) {
     $g_canvas->newLine();
     $g_canvas->writeTextLineIndent(20, "No Data");
     return;
