@@ -125,19 +125,14 @@ After adding this line, update your local repository cache by running:
 <example>
 unix# apt-get update
 </example>
+
 <p>
-Finally, install Resin Professional using the following:
+Install Resin Professional  with this command:
 </p>
 <example>
 unix# apt-get install resin-pro
 </example>
-<p>
-If you have a license file for Resin, save it in <var>/etc/resin/licenses</var>.
-You can also install the license from the command line with:
-<example>
-unix# resinctl license-add mylicense.license
-</example>
-</p>
+
 <p>
 Or install Resin Open Source with this command:
 </p>
@@ -183,9 +178,23 @@ environment variable <var>JAVA_HOME</var>.</li>
 </s2>
 </s1>
 
+<s1 title="Installing a license file for Resin Pro">
+<p>
+After installing Resin Professional, you need to install the license file.
+</p>
+
+<p>
+If you have a license file for Resin, save it in <var>/etc/resin/licenses</var>.
+You can also install the license from the command line with:
+<example>
+unix# resinctl license-add mylicense.license
+</example>
+</p>
+</s1>
+
 <s1 title="Resin as a Web Server">
 
-<p>Resin includes a high-performance HTTP server. The easiest and fastest
+<p>Resin includes a high-performance HTTP server that outperforms NginX and Apache httpd. The easiest and fastest
 Resin configuration uses Resin as the web server as well as 
 the application server. We highly recommend you start with this configuration 
 although you are free to use other web servers like Apache or IIS
