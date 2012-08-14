@@ -151,7 +151,7 @@ function display_session_manager($webapp)
   echo " </td>\n";
 
   echo "<td>";
-  echo $sessionManager->getEstimatedMemorySize();
+  echo format_bytes($sessionManager->getEstimatedMemorySize());
   echo " </td>\n";
 
   echo "<td>";
