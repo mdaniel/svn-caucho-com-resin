@@ -277,7 +277,7 @@ public class ResinDelegate
   protected CloudServer joinCluster(CloudSystem system,
                                     BootClusterConfig cluster)
   {
-    throw new ConfigException(L.l("--elastic requires Resin Professional"));
+    throw new ConfigException(L.l("--elastic-server requires Resin Professional"));
   }
 
   /**
