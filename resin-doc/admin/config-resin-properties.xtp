@@ -419,7 +419,7 @@ lookup "app0.mydomain" to 192.168.2.114 in the configuration files.]</li>
 <li>Assign the DNS name "app0.mydomain" to 192.168.1.10
 with the cloud provider.</li>
 <li>Resin will detect the new assignment and start as that server.</li>
-</ul>
+</ol>
 
 <example title="Example: elastic_dns">
 app_servers : app0.mydomain:6800
@@ -458,6 +458,7 @@ are specified by the <em>app_servers</em> property.</p>
 dynamic servers.</li>
 <li>At least one static server defined in <em>app_servers</em> in the
 resin.properties as the hub. Three servers is preferred.</li>
+</ul>
 
 <example title="Example: elastic_server">
 app_servers : 182.168.1.10:6800

@@ -86,22 +86,6 @@ resin-4.0.x/                 # installation directory: resin.home, resin.root
 
 <p>Installation steps for the major operating systems are outlined below:</p>
 
-<s2 title="Windows">
-
-<ol>
-<li>Install JDK 6 or later.</li>
-<li>Check that the environment variable <var>JAVA_HOME</var> is set to the JDK 
-location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
-<li>Unzip resin-4.0.x.zip</li>
-<li>Define the environment variable <var>RESIN_HOME</var> to the location of
-Resin, for example <code>c:\resin-4.0.x</code></li>
-<li>Execute <code>resin.exe</code>
-  <ul><li>or run <code>java -jar lib/resin.jar start</code></li></ul>
-</li>
-<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
-</ol>
-</s2>
-
 <s2 title="Debian Unix .deb and apt-get">
 <p>
 Debian users can download a .deb packaged version of Resin
@@ -152,7 +136,7 @@ http://caucho.com/download/rpm/RPM-GPG-KEY-caucho</a>.
 
 <example title="RPM/yum install">
 unix# rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
-unix# yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
+unix# yum install http://caucho.com/download/rpm/4.0.30/x86_64/resin-pro-4.0.30-1.x86_64.rpm
 </example>
 
 </s2>
@@ -176,6 +160,23 @@ environment variable <var>JAVA_HOME</var>.</li>
 </ol>
 
 </s2>
+
+<s2 title="Windows">
+
+<ol>
+<li>Install JDK 6 or later.</li>
+<li>Check that the environment variable <var>JAVA_HOME</var> is set to the JDK 
+location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
+<li>Unzip resin-4.0.x.zip</li>
+<li>Define the environment variable <var>RESIN_HOME</var> to the location of
+Resin, for example <code>c:\resin-4.0.x</code></li>
+<li>Execute <code>resin.exe</code>
+  <ul><li>or run <code>java -jar lib/resin.jar start</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
+</ol>
+</s2>
+
 </s1>
 
 <s1 title="Installing a license file for Resin Pro">
@@ -187,7 +188,7 @@ After installing Resin Professional, you need to install the license file.
 If you have a license file for Resin, save it in <var>/etc/resin/licenses</var>.
 You can also install the license from the command line with:
 <example>
-unix# resinctl license-add mylicense.license
+unix> resinctl license-add mylicense.license
 </example>
 </p>
 </s1>

@@ -113,11 +113,15 @@
     <item link="install.xtp" title="Installation"
           description="Detailed Options for Installation">
 
+      <!--
       <item link="starting-resin-install.xtp" title="Deployment"
             description="Install Resin on Unix, Windows, and Mac OS X"/>
+      -->
 
+      <!--
       <item link="starting-resin-command-line.xtp" title="Command Line"
             description="Command line arguments to the Resin server"/>
+      -->
       <!--
       <item link="starting-resin-server-stages.xtp" title="Server Stages"/>
       -->
@@ -128,8 +132,10 @@
       <item link="starting-resin-iis-7.xtp" title="IIS 7 Plugin"
             description="Using Microsoft IIS 7 with Resin"/>
 
+      <!--
       <item link="starting-resin-licenses.xtp" title="Resin Pro Licenses"
             description="Resin Pro Licenses"/>
+      -->
       
       <item link="resin-directory.xtp" title="directory"
             description="Resin directory layout"/>

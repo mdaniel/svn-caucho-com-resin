@@ -127,4 +127,10 @@ public class AddLicenseAction implements AdminAction
       return L.l("add-license wrote {0} successfully", fileName);
     }
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

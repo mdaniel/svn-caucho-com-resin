@@ -93,7 +93,7 @@ same directory. Instead of looking for the .war file in a directory,
 Resin will look in an internal repository using the web-app's identifier.</p>
 
 <example title="Example: command-line deployment">
-unix> bin/resin.sh deploy test.war
+unix> resinctl deploy test.war
 </example>
 
 <p>The default deployment is to the default host with the war's name as
@@ -110,7 +110,7 @@ undeploy a web-app from the command-line if you decide to switch from
 command-line deployment to directory deployment.</p>
 
 <example title="Example: command-line undeployment">
-unix> bin/resin.sh undeploy test.war
+unix> resinctl undeploy test.war
 unix> cp test.war webapps
 </example>
 
@@ -202,11 +202,11 @@ and then makes it live using a deploy-copy. The "-stage archive" selects
 the archive tag.</p>
 
 <example title="Example: archive deploy and update">
-unix> bin/resin.sh deploy -stage archive -version 1.2.13 foo.war
+unix> resinctl deploy -stage archive -version 1.2.13 foo.war
 Deployed archive/webapp/default/foo-1.2.13 from /tmp/caucho/qa/foo.war \
   to http://127.0.0.1:8087/hmtp
 
-unix> bin/resin.sh deploy-copy \
+unix> resinctl deploy-copy \
   -source-stage archive -source-version 1.2.13 -source foo \
   -target foo
 </example>
@@ -226,7 +226,7 @@ production/webapp/default/foo       -- production foo.war (a copy of 1.2.13)
 rolled-back by copying it from a previous version.</p>
 
 <example title="Example: rolling back to foo.1.2.12">
-unix> bin/resin.sh deploy-copy \
+unix> resinctl deploy-copy \
   -source-stage archive -source-version 1.2.12 -source foo \
   -target foo
 </example>
@@ -243,7 +243,7 @@ until you copy it to a live machine.</p>
 <example title="Example: deploying a preview stage">
 unix> resinctl deploy -stage preview foo.war
 
-unix> resinctl start -stage preview -elastic -server dyn1 -cluster app-tier
+unix> resinctl start -stage preview -elastic-server -server dyn1 -cluster app-tier
 </example>
 
 <p>Internally, Resin stores the preview stage as a repository tag
@@ -261,7 +261,7 @@ production/webapp/default/foo     -- production foo.war contents
 deploy it to production using the deploy-copy.</p>
 
 <example title="Example: deploying a preview as production">
-unix> bin/resin.sh deploy-copy \
+unix> resinctl deploy-copy \
   -source-stage preview -source foo \
   -target foo
 </example>
@@ -458,7 +458,7 @@ to all servers in the cluster. Since the AdminAuthenticator requires a user
 and password, you'll need to pass those arguments.</p>
 
 <example title="Example: deploy hello.war">
-unix> bin/resin.sh deploy hello.war \
+unix> resinctl deploy hello.war \
            -user foo -password test
 </example>
 
