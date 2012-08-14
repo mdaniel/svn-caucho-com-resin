@@ -1099,7 +1099,10 @@ public class Resin
         for (BootServerConfig server : servers) {
           if (! isFirst)
             sb.append(", ");
+
           sb.append(server.getFullAddress());
+
+          isFirst = false;
         }
         
         cause = L().l("No triad servers were reachable.\n" +
