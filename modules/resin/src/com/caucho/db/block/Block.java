@@ -471,7 +471,7 @@ public final class Block implements SyncCacheListener {
         writeImpl(dirtyMin, dirtyMax - dirtyMin, isPriority);
       }
 
-      if (_dirtyRange.get() == INIT_DIRTY) {
+      if (_dirtyRange.get() == INIT_DIRTY && ! isDestroyed()) {
         toValid();
       }
     } while (_dirtyRange.get() != INIT_DIRTY);
