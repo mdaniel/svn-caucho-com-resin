@@ -401,15 +401,27 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     boolean isExpire;
     
     long preCount = _mnodeStore.getCount();
+    long oid = 0;
     
     do {
       isExpire = false;
       
-      for (ExpiredMnode data : _mnodeStore.selectExpiredData()) {
+      long startOid = oid;
+      oid++;
+      
+      for (ExpiredMnode data : _mnodeStore.selectExpiredData(startOid)) {
         try {
+          if (data.getOid() < startOid) {
+            log.warning(this + " mismatched oid " + data.getOid());
+            return;
+          }
+          
           if (removeData(data.getKey(), data.getDataId())) {
             removeCount++;
             isExpire = true;
+            
+            if (oid < data.getOid())
+              oid = data.getOid();
           }
         } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);

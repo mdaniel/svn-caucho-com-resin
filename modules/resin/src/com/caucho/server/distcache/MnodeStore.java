@@ -206,9 +206,10 @@ public class MnodeStore {
          + " SET access_timeout=?,access_time=?"
          + " WHERE id=? AND item_version=?");
 
-    _selectExpireQuery = ("SELECT id,value_data_id FROM " + _tableName
-                          + " WHERE access_time + 5 * access_timeout / 4 < ?"
-                          + " OR modified_time + modified_timeout < ?"
+    _selectExpireQuery = ("SELECT resin_oid,id,value_data_id FROM " + _tableName
+                          + " WHERE ? < resin_oid"
+                          + " AND (access_time + 5 * access_timeout / 4 < ?"
+                          + "      OR modified_time + modified_timeout < ?)"
                           + " LIMIT 4096");
 
     _deleteQuery = ("DELETE FROM " + _tableName
@@ -799,7 +800,7 @@ public class MnodeStore {
   /**
    * Clears the expired data
    */
-  public ArrayList<ExpiredMnode> selectExpiredData()
+  public ArrayList<ExpiredMnode> selectExpiredData(long startOid)
   {
     ArrayList<ExpiredMnode> expireList = new ArrayList<ExpiredMnode>();
     
@@ -811,16 +812,18 @@ public class MnodeStore {
 
       long now = CurrentTime.getCurrentTime();
 
-      pstmt.setLong(1, now);
+      pstmt.setLong(1, startOid);
       pstmt.setLong(2, now);
+      pstmt.setLong(3, now);
       
       ResultSet rs = pstmt.executeQuery();
       
       while (rs.next()) {
-        byte []key = rs.getBytes(1);
-        long dataId = rs.getLong(2);
+        long oid = rs.getLong(1);
+        byte []key = rs.getBytes(2);
+        long dataId = rs.getLong(3);
         
-        expireList.add(new ExpiredMnode(key, dataId));
+        expireList.add(new ExpiredMnode(oid, key, dataId));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -995,13 +998,20 @@ public class MnodeStore {
   }
   
   public static final class ExpiredMnode {
+    private final long _oid;
     private final byte []_key;
     private final long _dataId;
     
-    ExpiredMnode(byte []key, long dataId)
+    ExpiredMnode(long oid, byte []key, long dataId)
     {
+      _oid = oid;
       _key = key;
       _dataId = dataId;
+    }
+    
+    public final long getOid()
+    {
+      return _oid;
     }
     
     public final byte []getKey()

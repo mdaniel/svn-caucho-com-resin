@@ -126,6 +126,9 @@ public class BlockStore {
     = (int) ((BLOCK_SIZE - 64) / MINI_FRAG_SIZE);
   public final static int MINI_FRAG_ALLOC_OFFSET
     = MINI_FRAG_PER_BLOCK * MINI_FRAG_SIZE;
+  
+  private final static int MINI_FRAG_FREE_STRIDE = 4;
+  private final static int MINI_FRAG_STRIDE_MASK = MINI_FRAG_FREE_STRIDE - 1;
 
   public final static long METADATA_START = BLOCK_SIZE;
 
@@ -160,7 +163,6 @@ public class BlockStore {
   private int _freeMiniAllocIndex; // index for finding a free mini
   private int _freeMiniAllocCount;
   
-  private final int _freeMiniOffsetStride = 8;
   private final AtomicLong _freeMiniOffset = new AtomicLong();
 
   private final Object _allocationWriteLock = new Object();
@@ -1589,8 +1591,8 @@ public class BlockStore {
   private long allocateMiniFragmentBlock()
     throws IOException
   {
-    int offsetStride =  _freeMiniOffsetStride;
-    int offsetMask = offsetStride - 1;
+    int offsetStride =  MINI_FRAG_FREE_STRIDE;
+    int offsetMask = MINI_FRAG_STRIDE_MASK;
     int allocStride = ALLOC_BYTES_PER_BLOCK * offsetStride;
     
     while (true) {
@@ -1604,7 +1606,8 @@ public class BlockStore {
         int fragMask = allocationTable[i + 1] & 0xff;
 
         if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
-          _freeMiniAllocIndex = i;
+          updateFreeMiniAllocIndex(i);
+
           _freeMiniAllocCount++;
 
           synchronized (_allocationLock) {
@@ -1634,7 +1637,7 @@ public class BlockStore {
         else
           count = 1;
           */
-        int count = 16;
+        int count = 32;
 
         for (int i = 0; i < count; i++) {
           Block block = allocateBlockMiniFragment();
@@ -1646,7 +1649,33 @@ public class BlockStore {
       _freeMiniAllocIndex = 0;
     }
   }
-
+  
+  private void updateFreeMiniAllocIndex(int i)
+  {
+    byte []allocationTable = _allocationTable;
+    
+    int offset = _freeMiniAllocIndex;
+    
+    if (offset == (i & ~MINI_FRAG_STRIDE_MASK)) {
+      return;
+    }
+    
+    // if current stride has a free mini-frag, use it
+    for (int j = 0; j < MINI_FRAG_FREE_STRIDE; j++) {
+      int code = allocationTable[offset];
+      int fragMask = allocationTable[offset + 1] & 0xff;
+      
+      if (code == ALLOC_MINI_FRAG && fragMask != 0xff) {
+        return;
+      }
+      
+      offset += ALLOC_BYTES_PER_BLOCK;
+    }
+    
+    _freeMiniAllocIndex = i & ~MINI_FRAG_STRIDE_MASK;
+    
+  }
+  
   /**
    * Deletes a miniFragment.
    */
@@ -1816,6 +1845,9 @@ public class BlockStore {
       if (_blockManager != null) {
         _blockManager.flush(this);
       }
+      
+      long timeout = 100;
+      getWriter().waitForComplete(timeout);
     }
   }
   
