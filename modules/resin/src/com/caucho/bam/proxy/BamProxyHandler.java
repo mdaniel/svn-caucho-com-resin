@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
 import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.BamActorRef;

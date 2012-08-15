@@ -31,6 +31,7 @@ package com.caucho.bam.actor;
 
 import java.io.Serializable;
 
+import com.caucho.bam.BamError;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
@@ -217,7 +218,12 @@ abstract public class AbstractActorSender implements ActorSender {
     QueryFuture future
       = getQueryManager().addQueryFuture(qId, to, getAddress(), payload, timeout);
     
-    getBroker().query(qId, to, getAddress(), payload);
+    try {
+      getBroker().query(qId, to, getAddress(), payload);
+    } catch (RuntimeException e) {
+      getQueryManager().onQueryError(qId, getAddress(), to, payload,
+                                     BamError.create(e));
+    }
                       
     return future;
   }
@@ -246,8 +252,13 @@ abstract public class AbstractActorSender implements ActorSender {
     long qId = getQueryManager().nextQueryId();
     
     getQueryManager().addQueryCallback(qId, callback, getTimeout());
-    
-    getBroker().query(qId, to, getAddress(), payload);
+
+    try {
+      getBroker().query(qId, to, getAddress(), payload);
+    } catch (RuntimeException e) {
+      getQueryManager().onQueryError(qId, getAddress(), to, payload,
+                                     BamError.create(e));
+    }
   }
 
   /**
@@ -274,7 +285,13 @@ abstract public class AbstractActorSender implements ActorSender {
     long qId = getQueryManager().nextQueryId();
     
     getQueryManager().addQueryCallback(qId, callback, getTimeout());
-    
-    to.query(qId, getAddress(), payload);
+
+    try {
+      to.query(qId, getAddress(), payload);
+    } catch (RuntimeException e) {
+      getQueryManager().onQueryError(qId, getAddress(), to.getAddress(),
+                                     payload,
+                                     BamError.create(e));
+    }
   }
 }
