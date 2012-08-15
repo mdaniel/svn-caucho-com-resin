@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.CurrentTime;
 import com.caucho.util.RingItem;
 import com.caucho.util.RingItemFactory;
 
@@ -172,8 +173,13 @@ public final class ActorQueue<T extends RingItem>
       _firstWorker.wake();
     }
   }
- 
+  
   public final T startOffer(boolean isWait)
+  {
+    return startOffer(isWait ? Integer.MAX_VALUE : -1);
+  }
+    
+  public final T startOffer(long timeout)
   {
     final AtomicLong headAllocRef = _headAllocRef;
     // final AtomicBoolean isHeadAlloc = _isHeadAlloc;
@@ -181,6 +187,8 @@ public final class ActorQueue<T extends RingItem>
     final AtomicLong tailRef = _tailRef;
     final T []ring = _itemRing;
     final int mask = _mask;
+    
+    long expires = -1;
     
     // int head;
     // T item;
@@ -218,12 +226,19 @@ public final class ActorQueue<T extends RingItem>
         }
         else
         */
-        if (isWait) {
-          waitForQueue(headAlloc, tail);
-        }
-        else {
+        if (timeout <= 0) {
           return null;
         }
+        
+        long now = CurrentTime.getCurrentTimeActual();
+        if (expires < 0) {
+          expires = now + timeout;
+        }
+        else if (expires < now) {
+          return null;
+        }
+        
+        waitForQueue(headAlloc, tail);
       }
     }
   }
