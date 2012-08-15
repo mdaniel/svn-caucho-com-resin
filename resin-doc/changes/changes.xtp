@@ -10,9 +10,9 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.30 - snapshot">
+<s2 title="4.0.30 - Aug 12, 2012">
 <ul>
-<li>cloud: added --elastic-ip for Amazon-style local dns or elastic ip</li>
+<li>cloud: added --elastic-dns for Amazon-style local dns or elastic ip</li>
 <li>cloud: elastic servers now require --elastic or &lt;elastic-server></li>
 <li>websocket: build standalone resin-websocket-client.jar (#5142, rep by Judd Gaddie)</li>
 <li>init.d: update status return code (#5166, rep by nmmn)</li>

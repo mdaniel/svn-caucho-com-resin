@@ -201,8 +201,13 @@ the application server. We highly recommend you start with this configuration
 although you are free to use other web servers like Apache or IIS
 with Resin.</p>
 
-<p>Keep in mind, Resin can be used for
-development or evaluation in addition to using it in production. If desired,
+<p>Resin Web Server has been tested to serve 100,000 requests per second,
+making it comparable in performance to top C-based web servers.
+See <a href="http://wiki4.caucho.com/NginX_1.2.0_versus_Resin_4.0.29_performance_tests">Wiki: Resin Web Server: Resin 4.0.x vs nginx 1.2 performance</a> for
+a comparison of Resin's performance vs nginx, a fast C-based HTTP server.</p>
+
+<p>Keep in mind, Resin can be used for development or evaluation in addition
+to using it in production. If desired,
 you can easily apply for a development license to enable Resin Pro features.
 You can also simply use Resin Open Source to start development.</p>
 

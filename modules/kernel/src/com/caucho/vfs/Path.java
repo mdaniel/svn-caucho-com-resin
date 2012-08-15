@@ -71,7 +71,7 @@ public abstract class Path implements Comparable<Path> {
   protected final static L10N L = new L10N(Path.class);
 
   private static final Integer LOCK = new Integer(0);
-
+  
   private static final LruCache<PathKey,Path> _pathLookupCache
     = new LruCache<PathKey,Path>(8192);
 
@@ -107,7 +107,9 @@ public abstract class Path implements Comparable<Path> {
   {
     synchronized (Path.class) {
       if (_defaultSchemeMap == null) {
-        _defaultSchemeMap = createDefaultSchemeMap();
+        _defaultSchemeMap = new SchemeMap();
+        
+        createDefaultSchemeMap(_defaultSchemeMap);
       }
 
       return _defaultSchemeMap;
@@ -1708,10 +1710,8 @@ public abstract class Path implements Comparable<Path> {
     }
   }
 
-  private static SchemeMap createDefaultSchemeMap()
+  private static void createDefaultSchemeMap(SchemeMap map)
   {
-    SchemeMap map = new SchemeMap();
-
     map.put("file", new FilePath(null));
 
     //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null));
@@ -1727,7 +1727,5 @@ public abstract class Path implements Comparable<Path> {
     VfsStream nullStream = new VfsStream(null, null);
     map.put("null", new ConstPath(null, nullStream));
     map.put("jndi", new JndiPath());
-
-    return map;
   }
 }

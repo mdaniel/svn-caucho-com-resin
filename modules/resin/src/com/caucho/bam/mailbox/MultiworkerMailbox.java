@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamException;
+import com.caucho.bam.QueueFullException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
@@ -249,7 +250,9 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       log.finest(this + " enqueue(" + size + ") " + packet);
     }
     
-    workerQueue.offer(packet);
+    if (! workerQueue.offer(packet, false)) {
+      throw new QueueFullException(this + " size=" + workerQueue.getSize() + " " + packet);
+    }
     workerQueue.wake();
   }
   

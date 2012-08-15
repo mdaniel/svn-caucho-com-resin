@@ -286,10 +286,10 @@
     <s1 title="config-deploy">
       <p>Command config-deploy deploys a configuration archive from an input
         stream to Resin cluster. Config-deploy action works with Resin's import
-      tag, which imports from a <code>cloud:/resin-inf/*.xml</code> with
+      tag, which imports from a <code>cloud:/resin-inf/&#043;.xml</code> with
       default configuration (resin.xml)</p>
       <pre><code>
-          &amp;resin:import fileset="cloud:/resin-inf/*.xml" recover="true"/>
+          &amp;resin:import fileset="cloud:/resin-inf/&#043;.xml" recover="true"/>
       </code></pre>
       <p>Action expects the configuration to be streamed in the POST request body.</p>
       <example>

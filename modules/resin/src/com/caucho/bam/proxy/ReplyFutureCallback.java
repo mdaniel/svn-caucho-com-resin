@@ -103,7 +103,7 @@ public class ReplyFutureCallback<T> implements ReplyCallback<T> {
       case ERROR:
         throw _error.createException();
       default:
-        throw new IllegalStateException(L.l("future timeout"));
+        throw new IllegalStateException(L.l("future timeout {0}ms", timeout));
       }
     }
     }
