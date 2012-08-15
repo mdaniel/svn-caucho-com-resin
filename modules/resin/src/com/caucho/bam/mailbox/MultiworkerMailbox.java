@@ -175,7 +175,15 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   @Override
   public void message(String to, String from, Serializable value)
   {
-    enqueue(new Message(to, from, value));
+    try {
+      enqueue(new Message(to, from, value));
+    } catch (RuntimeException e) {
+      log.warning(this + ": message "
+          + value + " {to:" + to + ", from:" + from + "}"
+          + "\n  " + e.toString());
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**
@@ -187,7 +195,15 @@ public class MultiworkerMailbox implements Mailbox, Closeable
                                Serializable value,
                                BamError error)
   {
-    enqueue(new MessageError(to, from, value, error));
+    try {
+      enqueue(new MessageError(to, from, value, error));
+    } catch (RuntimeException e) {
+      log.warning(this + ": messageError "
+          + value + " {to:" + to + ", from:" + from + "}"
+          + "\n  " + e.toString());
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**
@@ -209,7 +225,15 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       return;
     }
 
-    enqueue(new Query(id, to, from, query));
+    try {
+      enqueue(new Query(id, to, from, query));
+    } catch (RuntimeException e) {
+      log.warning(this + ": query "
+          + query + " {to:" + to + ", from:" + from + "}"
+          + "\n  " + e.toString());
+      
+      getBroker().queryError(id, from, to, query, BamError.create(e));
+    }
   }
 
   /**
@@ -221,7 +245,15 @@ public class MultiworkerMailbox implements Mailbox, Closeable
                           String from,
                           Serializable value)
   {
-    enqueue(new QueryResult(id, to, from, value));
+    try {
+      enqueue(new QueryResult(id, to, from, value));
+    } catch (RuntimeException e) {
+      log.warning(this + ": queryResult "
+                  + value + " {to:" + to + ", from:" + from + "}"
+                  + "\n  " + e.toString());
+    
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**
@@ -234,7 +266,15 @@ public class MultiworkerMailbox implements Mailbox, Closeable
                          Serializable query,
                          BamError error)
   {
-    enqueue(new QueryError(id, to, from, query, error));
+    try {
+      enqueue(new QueryError(id, to, from, query, error));
+    } catch (RuntimeException e) {
+      log.warning(this + ": queryError "
+          + error + " {to:" + to + ", from:" + from + "}"
+          + "\n  " + e.toString());
+  
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   protected final void enqueue(Packet packet)
