@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -158,6 +159,9 @@ public class BlockStore {
 
   private int _freeMiniAllocIndex; // index for finding a free mini
   private int _freeMiniAllocCount;
+  
+  private final int _freeMiniOffsetStride = 8;
+  private final AtomicLong _freeMiniOffset = new AtomicLong();
 
   private final Object _allocationWriteLock = new Object();
   private final AtomicInteger _allocationWriteCount = new AtomicInteger();
@@ -1585,12 +1589,18 @@ public class BlockStore {
   private long allocateMiniFragmentBlock()
     throws IOException
   {
+    int offsetStride =  _freeMiniOffsetStride;
+    int offsetMask = offsetStride - 1;
+    int allocStride = ALLOC_BYTES_PER_BLOCK * offsetStride;
+    
     while (true) {
       byte []allocationTable = _allocationTable;
+      
+      int offset = (int) (_freeMiniOffset.getAndIncrement() & offsetMask);
 
-      for (int i = _freeMiniAllocIndex;
+      for (int i = _freeMiniAllocIndex + offset * ALLOC_BYTES_PER_BLOCK;
            i < allocationTable.length;
-           i += ALLOC_BYTES_PER_BLOCK) {
+           i += allocStride) {
         int fragMask = allocationTable[i + 1] & 0xff;
 
         if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
@@ -1617,11 +1627,14 @@ public class BlockStore {
       if (_freeMiniAllocCount == 0) {
         // if no fragment, allocate a new one.
 
+        /*
         int count;
         if (_blockCount >= 256)
           count = 16;
         else
           count = 1;
+          */
+        int count = 16;
 
         for (int i = 0; i < count; i++) {
           Block block = allocateBlockMiniFragment();

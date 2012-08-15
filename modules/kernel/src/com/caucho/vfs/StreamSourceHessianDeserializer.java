@@ -38,7 +38,7 @@ import java.io.*;
  */
 public class StreamSourceHessianDeserializer extends AbstractStreamDeserializer
 {
-  public Class getType()
+  public Class<?> getType()
   {
     return StreamSource.class;
   }
