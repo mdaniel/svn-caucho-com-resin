@@ -50,6 +50,7 @@ import com.caucho.bam.stream.MessageStream;
 import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadDump;
 
 /**
  * mailbox for BAM messages waiting to be sent to the Actor.
@@ -290,12 +291,17 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       log.finest(this + " enqueue(" + size + ") " + packet);
     }
     
-    long timeout = 10;
     if (! workerQueue.offer(packet, false)) {
+      if (! _isFull) {
+        _isFull = true;
+        ThreadDump.create().dumpThreads();
+      }
       throw new QueueFullException(this + " size=" + workerQueue.getSize() + " " + packet);
     }
     workerQueue.wake();
   }
+  
+  private boolean _isFull;
   
   private MailboxQueue2 findWorker()
   {
