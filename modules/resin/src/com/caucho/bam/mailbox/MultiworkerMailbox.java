@@ -291,8 +291,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       log.finest(this + " enqueue(" + size + ") " + packet);
     }
     
-    long timeout = 10;
-    if (! workerQueue.offer(packet, timeout)) {
+    long timeout = 1;
+    if (! workerQueue.offer(packet, false)) {
       if (! _isFull) {
         _isFull = true;
         ThreadDump.create().dumpThreads();

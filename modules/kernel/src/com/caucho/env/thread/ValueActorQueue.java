@@ -73,15 +73,9 @@ public class ValueActorQueue<T>
   
   public final boolean offer(T value, boolean isWait)
   {
-    return offer(value, isWait ? Integer.MAX_VALUE : -1);
-    
-  }
-  
-  public final boolean offer(T value, long timeout)
-  {
     ActorQueue<ValueItem<T>> actorQueue = _actorQueue;
     
-    ValueItem<T> item = actorQueue.startOffer(timeout);
+    ValueItem<T> item = actorQueue.startOffer(isWait);
     
     if (item == null) {
       return false;
