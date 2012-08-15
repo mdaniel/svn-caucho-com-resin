@@ -172,7 +172,7 @@ public final class ActorQueue<T extends RingItem>
       _firstWorker.wake();
     }
   }
-  
+ 
   public final T startOffer(boolean isWait)
   {
     final AtomicLong headAllocRef = _headAllocRef;
@@ -288,9 +288,12 @@ public final class ActorQueue<T extends RingItem>
     return true;
   }
   
-  private void waitForQueue(long headAlloc, long tail)
+  private void waitForQueue(long headAlloc, 
+                            long tail)
   {
     _firstWorker.wake();
+    
+    long timeout = 100;
     
     if (_headAllocRef.get() == headAlloc && _tailRef.get() == tail) {
       synchronized (_isOfferWaitRef) {
@@ -299,7 +302,7 @@ public final class ActorQueue<T extends RingItem>
         if (_headAllocRef.get() == headAlloc 
             && _tailRef.get() == tail) {
           try {
-            _isOfferWaitRef.wait(100);
+            _isOfferWaitRef.wait(timeout);
           } catch (Exception e) {
           }
         }
