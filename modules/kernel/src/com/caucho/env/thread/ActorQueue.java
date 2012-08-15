@@ -238,7 +238,7 @@ public final class ActorQueue<T extends RingItem>
           return null;
         }
         
-        waitForQueue(headAlloc, tail);
+        waitForQueue(headAlloc, tail, timeout);
       }
     }
   }
@@ -304,11 +304,12 @@ public final class ActorQueue<T extends RingItem>
   }
   
   private void waitForQueue(long headAlloc, 
-                            long tail)
+                            long tail,
+                            long timeout)
   {
     _firstWorker.wake();
     
-    long timeout = 100;
+    timeout = Math.min(100, timeout);
     
     if (_headAllocRef.get() == headAlloc && _tailRef.get() == tail) {
       synchronized (_isOfferWaitRef) {
