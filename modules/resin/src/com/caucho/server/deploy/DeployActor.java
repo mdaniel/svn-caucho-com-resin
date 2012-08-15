@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.manager.BamManager;
+import com.caucho.bam.proxy.ActorFor;
 import com.caucho.bam.proxy.ReplyCallback;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.config.ConfigException;
@@ -61,6 +62,7 @@ import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
 
+@ActorFor(api = DeployActorProxy.class)
 public class DeployActor
 {
   private static final L10N L = new L10N(DeployActor.class);

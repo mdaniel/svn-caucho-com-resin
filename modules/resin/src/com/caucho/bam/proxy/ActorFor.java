@@ -27,15 +27,9 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.server.admin;
+package com.caucho.bam.proxy;
 
-import com.caucho.bam.proxy.BamClientProxy;
-
-public interface ManagerProxyApi extends BamClientProxy
+public @interface ActorFor
 {
-  public String enable();
-  
-  public String disable();
-  
-  public String disableSoft();
+  Class<? extends BamClientProxy> api();
 }

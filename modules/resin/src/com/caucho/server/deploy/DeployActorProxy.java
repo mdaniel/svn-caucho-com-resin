@@ -29,14 +29,14 @@
 
 package com.caucho.server.deploy;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.caucho.bam.proxy.BamClientProxy;
 import com.caucho.bam.proxy.ReplyCallback;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.vfs.StreamSource;
 
-public interface DeployActorProxy
+import java.util.Map;
+
+public interface DeployActorProxy extends BamClientProxy
 {
   public String[] getCommitList(String[] commitList);
 
@@ -52,7 +52,7 @@ public interface DeployActorProxy
   //
 
   public boolean putTag(String tag, String contentHash,
-                        HashMap<String, String> attributeCopy);
+                        Map<String, String> attributeCopy);
 
   public Boolean copyTag(String targetId, String sourceId,
                          Map<String, String> attributes);

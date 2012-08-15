@@ -29,11 +29,13 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.bam.proxy.ActorFor;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 
+@ActorFor(api = ManagerProxyApi.class)
 public class ManagerProxyActor
 {
   private static final L10N L = new L10N(ManagerProxyActor.class);
