@@ -49,7 +49,7 @@ public class BlockWriter extends AbstractTaskWorker {
   private final BlockWriteQueue _blockWriteQueue
     = new BlockWriteQueue(this);
   
-  private int _queueSize = 1024;
+  private int _queueSize = 2 * 1024;
 
   private final RingValueQueue<Block> _blockWriteRing
     = new RingValueQueue<Block>(_queueSize);

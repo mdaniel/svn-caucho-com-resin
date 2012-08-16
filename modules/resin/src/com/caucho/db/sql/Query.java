@@ -384,9 +384,10 @@ abstract public class Query {
           Expr expr = andProduct.remove(bestIndex);
           RowIterateExpr indexExpr = null;
 
-          if (i < fromItems.length)
+          if (i < fromItems.length) {
             indexExpr = expr.getIndexExpr(fromItems[i]);
-
+          }
+          
           if (indexExpr != null && indexExprs[i] == null) {
             indexExprs[i] = indexExpr;
           }

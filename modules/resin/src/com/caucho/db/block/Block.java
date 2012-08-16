@@ -339,10 +339,9 @@ public final class Block implements SyncCacheListener {
   public void commit()
     throws IOException
   {
-    if (! _isFlushDirtyOnCommit)
-      return;
-    else
+    if (_isFlushDirtyOnCommit) {
       save();
+    }
   }
 
   public int getUseCount()

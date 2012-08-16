@@ -318,11 +318,13 @@ public class Table extends BlockStore {
 
         table.init();
         
+        boolean isReadIndex = table.readIndexes();
+        
         if (! table.isShutdownTimestampValid()) {
           log.info(L.l("{0} validating indexes due to unclean shutdown.",
                        table));
 
-          if (! table.readIndexes() || ! table.validateIndexesSafe()) {
+          if (! isReadIndex || ! table.validateIndexesSafe()) {
             log.warning(L.l("rebuilding indexes for '{0}' because they did not properly validate on startup.",
                             table));
           
@@ -515,7 +517,7 @@ public class Table extends BlockStore {
     throws IOException, SQLException
   {
     int indexCount = 0;
-    
+
     Column []columns = _row.getColumns();
     for (int i = 0; i < columns.length; i++) {
       Column column = columns[i];
