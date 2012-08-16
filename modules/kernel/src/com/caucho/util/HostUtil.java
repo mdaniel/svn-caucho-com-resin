@@ -46,8 +46,7 @@ import com.caucho.config.ConfigException;
 public final class HostUtil {
   private static final Logger log = Logger.getLogger(HostUtil.class.getName());
   
-  private static final TimedCache<String,ArrayList<NetworkInterface>> _cache
-    = new TimedCache<String,ArrayList<NetworkInterface>>(128, 120000);
+  private static final TimedCache<String,ArrayList<NetworkInterface>> _cache;
   
   private HostUtil() {}
   
@@ -205,5 +204,11 @@ public final class HostUtil {
       return 0;
     }
     
+  }
+  
+  static {
+    long timeout = CurrentTime.isTest() ? Integer.MAX_VALUE : 120000;
+  
+    _cache = new TimedCache<String,ArrayList<NetworkInterface>>(128, timeout);
   }
 }
