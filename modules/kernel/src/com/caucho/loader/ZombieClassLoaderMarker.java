@@ -29,9 +29,31 @@
 
 package com.caucho.loader;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * Marker for an object that should be garbage-collected.
  */
 public class ZombieClassLoaderMarker {
+  private final static AtomicInteger _zombieCount = new AtomicInteger();
+  
+  public ZombieClassLoaderMarker()
+  {
+    _zombieCount.incrementAndGet();
+  }
+  
+  public static int getZombieCount()
+  {
+    return _zombieCount.get();
+  }
+  
+  /*
+  @Override
+  public final void finalize()
+    throws Throwable
+  {
+    _zombieCount.decrementAndGet();
+  }
+  */
 }

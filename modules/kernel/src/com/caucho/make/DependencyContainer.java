@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.AbstractTaskWorker;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Dependency;
@@ -180,6 +181,14 @@ public class DependencyContainer implements Dependency
   {
     return _checkInterval;
   }
+  
+  public ClassLoader getClassLoader()
+  {
+    if (_classLoaderRef != null)
+      return _classLoaderRef.get();
+    else
+      return null;
+  }
 
   /**
    * Sets the modified.
@@ -258,7 +267,7 @@ public class DependencyContainer implements Dependency
     if (worker != null)
       return worker;
     
-    worker = new DependencyCheckWorker();
+    worker = new DependencyCheckWorker(getClassLoader());
       
     _checkWorkerRef.compareAndSet(null, worker);
     
@@ -271,10 +280,7 @@ public class DependencyContainer implements Dependency
     ClassLoader oldLoader = thread.getContextClassLoader();
     
     try {
-      ClassLoader loader = null;
-      
-      if (_classLoaderRef != null)
-        loader = _classLoaderRef.get();
+      ClassLoader loader = getClassLoader();
       
       if (loader != null) {
         // server/1e87, #5156
@@ -333,7 +339,7 @@ public class DependencyContainer implements Dependency
 
     return _log;
   }
-
+  
   @Override
   public String toString()
   {
@@ -342,6 +348,11 @@ public class DependencyContainer implements Dependency
   
   // #5128
   private class DependencyCheckWorker extends AbstractTaskWorker {
+    private DependencyCheckWorker(ClassLoader loader)
+    {
+      super(loader, ThreadPool.getCurrent());
+    }
+    
     @Override
     public long runTask()
     {

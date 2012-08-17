@@ -38,6 +38,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,6 +112,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private EnvironmentAdmin _admin;
 
   private Throwable _configException;
+  
+  private static AtomicInteger _debugCounter = new AtomicInteger();
+  private int _debugId = _debugCounter.incrementAndGet();
 
   /**
    * Creates a new environment class loader.
@@ -1006,7 +1010,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     if (! _lifecycle.toStop())
       return;
-
+    
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     Thread thread = Thread.currentThread();

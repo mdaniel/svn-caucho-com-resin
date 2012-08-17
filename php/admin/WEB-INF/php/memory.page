@@ -200,6 +200,7 @@ if (sizeof($entries) > 0) {
   $application_entries = array();
   $jvm_entries = array();
   $resin_entries = array();
+  $class_loader_entries = array();
 
   foreach ($entries as $entry) {
     if (strpos($entry->getClassName(), "java") === 0
@@ -215,18 +216,29 @@ if (sizeof($entries) > 0) {
     else {
       array_push($application_entries, $entry);
     }
+    
+    if (strpos($entry->getClassName(), "ClassLoader") > 0) {
+      array_push($class_loader_entries, $entry);
+    }
   }
 
   echo "<div id='heap-tabs'>";
   echo "<ul>";
   if (count($application_entries) > 0)
     echo "<li><a href='#Application-heap-dump-tab'>Application</a></li>\n";
+
   if (count($jvm_entries) > 0)
     echo "<li><a href='#JVM-heap-dump-tab'>JVM</a></li>\n";
+
   if (count($resin_entries) > 0)
     echo "<li><a href='#Resin-heap-dump-tab'>Resin</a></li>\n";
+
+  if (count($class_loader_entries) > 0)
+    echo "<li><a href='#ClassLoader-heap-dump-tab'>ClassLoader</a></li>\n";
+
   if (count($entries) > 0)
     echo "<li><a href='#All-heap-dump-tab'>All</a></li>\n";
+
   echo "</ul>";
 
   if (count($application_entries) > 0)
@@ -237,6 +249,9 @@ if (sizeof($entries) > 0) {
 
   if (count($resin_entries) > 0)
     display_heap_dump_subtab("Resin", $resin_entries);
+
+  if (count($class_loader_entries) > 0)
+    display_heap_dump_subtab("ClassLoader", $class_loader_entries);
 
   if (count($entries) > 0)
     display_heap_dump_subtab("All", $entries);

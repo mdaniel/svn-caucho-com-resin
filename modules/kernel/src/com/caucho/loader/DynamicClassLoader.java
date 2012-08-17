@@ -2242,8 +2242,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void stop()
   {
-    if (_zombieMarker == null)
-      _zombieMarker = new ZombieClassLoaderMarker();
   }
 
   /**
@@ -2251,6 +2249,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void destroy()
   {
+    if (_zombieMarker == null) {
+      _zombieMarker = new ZombieClassLoaderMarker();
+    }
+    
     try {
       stop();
     } catch (Throwable e) {
