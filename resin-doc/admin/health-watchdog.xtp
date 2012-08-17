@@ -74,7 +74,7 @@ development.  The standard output of the Resin instance will appear in the
 console window.</p>
 
 <example title="Example: watchdog console">
-resin-4.0.x> bin/resin.sh -conf conf/test.conf -server a console
+resin-4.0.x> resinctl console -server a
 ...
 </example>
 
@@ -88,9 +88,15 @@ current machine, and start a new watchdog if necessary.  The server id
 must be unique for all servers defined in the resin.xml.</p>
 
 <example title="Example: watchdog start">
-resin-4.0.x> bin/resin.sh -conf conf/test.conf -server a start
+resin-4.0.x> resinctl start -server a
 
 Resin/4.0.x started -server 'a' for watchdog at 127.0.0.1:6700
+</example>
+
+<example title="Example: watchdog start-all">
+resin-4.0.x> resinctl start-all
+
+Resin/4.0.x started for watchdog at 127.0.0.1:6700
 </example>
 
 </s2>
@@ -104,7 +110,7 @@ which is used to start daemon services on Mac OSX system. The server id
 must be unique for all servers defined in the resin.xml.</p>
 
 <example title="Example: watchdog start-with-foreground">
-resin-4.0.x> bin/resin.sh -conf conf/test.conf -server a start-with-foreground
+resin-4.0.x> resinctl start-with-foreground -server a
 
 Resin/4.0.x started -server 'a' for watchdog at 127.0.0.1:6700 with foreground
 </example>
@@ -119,9 +125,9 @@ watchdog will automatically exit.  If no <code>-server</code> is specified,
 the watchdog defaults to <code>-server ""</code>.</p>
 
 <example title="Example: watchdog stop">
-resin-4.0.x> bin/resin.sh stop
+resin-4.0.x> resinctl stop
 
-Resin/4.0.x started -server '' for watchdog at 127.0.0.1:6600
+Resin/4.0.x stopped -server '' for watchdog at 127.0.0.1:6600
 </example>
 
 </s2>
@@ -132,7 +138,7 @@ Resin/4.0.x started -server '' for watchdog at 127.0.0.1:6600
 by the watchdog service.</p>
 
 <example title="Example: watchdog status">
-resin-4.0.x> bin/resin.sh status
+resin-4.0.x> resinctl status
 
 Resin/4.0.x status for watchdog at 127.0.0.1:6600
 
@@ -315,7 +321,7 @@ will start a watchdog at port 6700.  Starting Resin
 with <code>-server app-b</code> will start the watchdog at port 6701.</p>
 
 <example title="Example: starting app-b with watchdog-port=6701">
-resin-4.0.x> bin/resin.sh -server app-b start
+resin-4.0.x> resinctl start -server app-b
 </example>
 
 </s1>

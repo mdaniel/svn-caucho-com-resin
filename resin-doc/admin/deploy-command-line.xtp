@@ -61,8 +61,7 @@ host. Since the AdminAuthenticator requires a user and password, you'll
 need to pass those arguments as well.</p>
 
 <example title="Example: deploy hello.war">
-unix> bin/resin.sh deploy hello.war \
-           -user foo -password test
+unix> resinctl deploy hello.war
 </example>
 
 </s2>
@@ -74,8 +73,7 @@ host. Since the AdminAuthenticator requires a user and password, you'll
 need to pass those arguments as well.</p>
 
 <example title="Example: undeploy hello">
-unix> bin/resin.sh undeploy hello \
-           -user foo -password test
+unix> resinctl undeploy hello
 </example>
 
 </s2>
@@ -86,8 +84,7 @@ unix> bin/resin.sh undeploy hello \
 host.</p>
 
 <example title="Example: deploy www.example.com hello.war">
-unix> bin/resin.sh deploy -host www.example.com hello.war \
-           -user foo -password test
+unix> resinctl deploy -host www.example.com hello.war
 </example>
 
 </s2>
@@ -98,8 +95,7 @@ unix> bin/resin.sh deploy -host www.example.com hello.war \
 host.</p>
 
 <example title="Example: undeploy www.example.com hello">
-unix> bin/resin.sh undeploy -host www.example.com hello \
-           -user foo -password test
+unix> resinctl undeploy -host www.example.com hello
 </example>
 
 </s2>
@@ -135,15 +131,15 @@ deployed on the server and controlling application lifecycle.</p>
     <td>copies an application from one context to another</td>
   </tr>
   <tr>
-    <td>start-webapp</td>
+    <td>webapp-start</td>
     <td>starts web application context</td>
   </tr>
   <tr>
-    <td>stop-webapp</td>
+    <td>webapp-stop</td>
     <td>stops web application context</td>
   </tr>
   <tr>
-    <td>restart-webapp</td>
+    <td>webapp-restart</td>
     <td>restarts web application context</td>
   </tr>
 </deftable>
@@ -190,11 +186,11 @@ deployed on the server and controlling application lifecycle.</p>
 <p>Deploying an application is done with a <code>deploy</code> command</p>
 
 <def>
-bin/resin.sh [-conf &lt;file>] deploy [options] &lt;war-file>
+resinctl deploy [options] &lt;war-file>
 </def>
 
 <example title="deploying an application from a hello-world.war archive">
-unix> bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
+unix> resinctl deploy /projects/hello-world/hello-world.war
 
 Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
 <deftable title="deploy options">
@@ -231,11 +227,11 @@ Deployed production/webapp/default/hello-world as hello-world.war to http://127.
 <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
 
 <def>
-bin/resin.sh [-conf &lt;file>] deploy-list [options]
+resinctl deploy-list [options]
 </def>
 
 <example title="">
-unix> bin/resin.sh deploy-list -user admin -password secret
+unix> resinctl deploy-list
 
 production/webapp/default/hello-world
 </example>
@@ -245,11 +241,11 @@ production/webapp/default/hello-world
 <p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
 
 <def>
-bin/resin.sh [-conf &lt;file>] deploy-copy [options]
+resinctl deploy-copy [options]
 </def>
 
 <example title="">
-bin/resin.sh deploy-copy -user admin -password secret -source hello-world -target foo
+resinctl deploy-copy -source hello-world -target foo
 
 copied production/webapp/default/hello-world to production/webapp/default/foo
 </example>
@@ -306,10 +302,10 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
 <p>Undeploying an application is done with an <code>undeploy</code> command</p>
 
 <def>
-bin/resin.sh [-conf &lt;file>] undeploy [options] &lt;name></def>
+resinctl undeploy [options] &lt;name></def>
 
 <example title="">
-unix> bin/resin.sh undeploy -user admin -password secret undeploy foo
+unix> resinctl undeploy undeploy foo
 
 Undeployed foo from http://127.0.0.1:8080/hmtp
 </example>
@@ -341,16 +337,16 @@ Undeployed foo from http://127.0.0.1:8080/hmtp
 <p>Starting an application is done with a <code>start-webapp</code> command</p>
 
 <def>
-unix> bin/resin.sh [-conf &lt;file>] start-webapp [options] &lt;name>
+unix> resinctl webapp-start [options] &lt;name>
 </def>
 
 <example title="start web application deployed at context '/foo'">
-unix> bin/resin.sh start-webapp -user admin -password secret foo
+unix> resinctl webapp-start foo
 
 'production/webapp/default/foo' is started
 </example>
 
-  <deftable title="start-webapp options">
+  <deftable title="webapp-start options">
     <tr>
       <th>Argument</th>
       <th>Meaning</th>
@@ -377,11 +373,11 @@ unix> bin/resin.sh start-webapp -user admin -password secret foo
 <p>Stopping an application is done with an <code>stop-webapp</code> command</p>
 
 <def>
-bin/resin.sh [-conf &lt;file>] stop-webapp [options] &lt;name>
+resinctl webapp-stop [options] &lt;name>
 </def>
 
 <example title="stop web application deployed at context '/foo'">
-unix> bin/resin.sh stop-webapp -user admin -password secret foo
+unix> resinctl webapp-stop foo
  
 'production/webapp/default/foo' is stopped
 </example>
@@ -412,11 +408,11 @@ unix> bin/resin.sh stop-webapp -user admin -password secret foo
 <s3 title="restarting application">
 <p>Restarting an application is done with an <code>restart-webapp</code> command</p>
 
-<def>bin/resin.sh [-conf &lt;file>] restart-webapp [options] &lt;name>
+<def>resinctl webapp-restart [options] &lt;name>
 </def>
 
 <example title="stop web application deployed at context '/foo'">
-unix> bin/resin.sh restart-webapp -user admin -password secret foo
+unix> resinctl webapp-restart foo
 
 'production/webapp/default/foo' is restarted
 </example>

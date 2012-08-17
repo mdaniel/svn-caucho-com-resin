@@ -20,7 +20,7 @@ command-line "pdf-report". The pdf-report will ask the server to generate
 a report immediately.</p>
 
 <example title="Example: generating a PDF report">
-unix> bin/httpd.sh pdf-report
+unix> resinctl pdf-report
 
 generated /var/resin/log/default-Summary-20110921T1218.pdf
 </example>

@@ -23,7 +23,7 @@ deploy as you would for a single server. The deployment process is the same
 because Resin treats a standalone server as single server in a cluster.</p>
 
 <example title="Example: command-line deployment">
-unix> bin/resin.sh deploy test.war
+unix> resinctl deploy test.war
 </example>
 
 <p>That command-line deploy will send the test.war to the cluster's
@@ -62,7 +62,7 @@ specify the virtual host to deploy to.</p>
 a prefix. Both can be changed with deploy options.</p>
 
 <example title="Example: virtual host deployment">
-unix> bin/resin.sh deploy -host www.foo.com test.war
+unix> resinctl deploy -host www.foo.com test.war
 </example>
 
 </s2>
@@ -73,10 +73,10 @@ unix> bin/resin.sh deploy -host www.foo.com test.war
 automatically and restart the web-app immediately. You can delay
 the restart by putting it on manual control. In <em>manual</em> mode,
 Resin will only look for a new version when you use a
-command-line <em>restart-webapp</em>.</p>
+command-line <em>webapp-restart</em>.</p>
 
 <example title="Example: command-line to restart the web-app">
-unix> bin/resin.sh restart-webapp test
+unix> resinctl webapp-restart test
 </example>
 
 <p>The manual control is configured by
@@ -111,7 +111,7 @@ version upgrade.</p>
 
 <p>By default, Resin restarts the web-app on a new deployment, destroying
 the current user sessions before starting them on the new deployment.
-You can change that behavior by setting <em>versioning</em> to true
+You can change that behavior by setting <em>multiversion-routing</em> to true
 and deploying with a <em>-version</em> command-line option.</p>
 
 <example title="Example: web-app-deploy with versioning">
@@ -121,7 +121,7 @@ and deploying with a <em>-version</em> command-line option.</p>
   &lt;host id="">
   
     &lt;web-app-deploy path="webapps"
-                 <b>versioning="true"</b>
+                 <b>multiversion-routing="true"</b>
                  expand-preserve-fileset="WEB-INF/work/**"/>
     
   &lt;/host>
@@ -134,7 +134,7 @@ application. Resin will send new sessions to the most recent version and
 leave old sessions on the previous version.</p>
 
 <example title="Example: command-line deploy with versioning">
-unix> bin/resin.sh deploy -version 2.1.3 test.war
+unix> resinctl deploy -version 2.1.3 test.war
 </example>
 
 <p>Internally, the application repository has both versions active.</p>

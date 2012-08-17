@@ -32,6 +32,7 @@ package com.caucho.vfs;
 import java.io.IOException;
 
 import com.caucho.util.JniTroubleshoot;
+import com.caucho.util.JniUtil;
 
 /**
  * Stream using with JNI.
@@ -347,11 +348,14 @@ public class JniFileStream extends StreamImpl
   static {
     JniTroubleshoot jniTroubleshoot = null;
 
+    JniUtil.acquire();
     try {
       System.loadLibrary("resin_os");
       jniTroubleshoot = new JniTroubleshoot(JniFileStream.class, "resin_os");
     } catch (Throwable e) {
       jniTroubleshoot = new JniTroubleshoot(JniFileStream.class, "resin_os", e);
+    } finally {
+      JniUtil.release();
     }
 
     _jniTroubleshoot = jniTroubleshoot;

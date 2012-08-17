@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import com.caucho.util.JniTroubleshoot;
+import com.caucho.util.JniUtil;
 import com.caucho.util.L10N;
 
 /**
@@ -422,6 +423,7 @@ public class JniServerSocketImpl extends QServerSocket {
     boolean isSendfileEnabled = false;
     boolean isCorkEnabled = false;
 
+    JniUtil.acquire();
     try {
       System.loadLibrary("resin_os");
       jniTroubleshoot
@@ -432,6 +434,8 @@ public class JniServerSocketImpl extends QServerSocket {
     } catch (Throwable e) {
       jniTroubleshoot
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os", e);
+    } finally {
+      JniUtil.release();
     }
 
     _jniTroubleshoot = jniTroubleshoot;

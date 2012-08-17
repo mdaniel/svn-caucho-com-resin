@@ -28,8 +28,25 @@
 
 package com.caucho.util;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * JNI calls for misc system utilities.
  */
-public class JniCaucho {
+public class JniUtil {
+  private static final Semaphore _lock = new Semaphore(1);
+  
+  public static final void acquire()
+  {
+    try {
+      _lock.acquire();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public static final void release()
+  {
+    _lock.release();
+  }
 }

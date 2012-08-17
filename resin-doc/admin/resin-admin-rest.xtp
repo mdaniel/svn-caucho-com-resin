@@ -110,8 +110,8 @@
       </p>
 
       <example title="Example: invoking Resin REST jmx-list action">
-        ~$curl --user admin:secret
-        'http://localhost:8080/resin-rest/jmx-list?pattern=resin:type=Resin&amp;print-values=true'
+~$curl --user admin:secret \
+       'http://localhost:8080/resin-rest/jmx-list?pattern=resin:type=Resin&amp;print-values=true'
 
         [
           {
@@ -293,7 +293,9 @@
       </code></pre>
       <p>Action expects the configuration to be streamed in the POST request body.</p>
       <example>
-        curl -H "Content-Type: " --user admin:secret --data-binary @/tmp/my-conf.jar 'http://localhost:8080/resin-rest/config-deploy'
+        curl -H "Content-Type: " --user admin:secret \
+             --data-binary @/tmp/my-conf.jar \
+             'http://localhost:8080/resin-rest/config-deploy'
       </example>
       <note>A value other than "application/x-www-form-urlencoded" must be
         specified as a value for Content-Type header.</note>
@@ -582,7 +584,9 @@
       </deftable>
 
       <example>
-        curl -H "Content-Type: " --user admin:secret --data-binary @/tmp/my-conf.jar 'http://localhost:8080/resin-rest/config-deploy'
+        curl -H "Content-Type: " --user admin:secret \
+              --data-binary @/tmp/my-conf.jar \
+              'http://localhost:8080/resin-rest/config-deploy'
       </example>
       <note>A value other than "application/x-www-form-urlencoded" must be
         specified as a value for Content-Type header.</note>
@@ -732,7 +736,8 @@
       <example title="querying Memory statistics">
         <pre>
           <code>
-            curl --user admin:secret  'http://localhost:8080/resin-rest/stats?meters=JVM|Memory|Heap%20Memory%20Used'
+curl --user admin:secret \
+     'http://localhost:8080/resin-rest/stats?meters=JVM|Memory|Heap%20Memory%20Used'
             [
               {
               "label":"00|JVM|Memory|Heap Memory Used",
@@ -900,7 +905,10 @@
       </deftable>
 
       <example title="deploying an application via REST">
-        curl -H "Content-Type: " --data-binary @/tmp/my-app.war --user admin:secret 'http://localhost:8080/resin-rest/web-app-deploy?context=foo'
+        curl -H "Content-Type: " \
+             --data-binary @/tmp/my-app.war \
+             --user admin:secret \
+             'http://localhost:8080/resin-rest/web-app-deploy?context=foo'
       </example>
     </s1>
     <!---->

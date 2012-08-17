@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import com.caucho.inject.Module;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.JniTroubleshoot;
+import com.caucho.util.JniUtil;
 import com.caucho.util.L10N;
 
 /**
@@ -801,6 +802,7 @@ public final class JniSocketImpl extends QSocket {
   static {
     JniTroubleshoot jniTroubleshoot = null;
 
+    JniUtil.acquire();
     try {
       System.loadLibrary("resin_os");
 
@@ -810,6 +812,8 @@ public final class JniSocketImpl extends QSocket {
     catch (Throwable e) {
       jniTroubleshoot 
         = new JniTroubleshoot(JniSocketImpl.class, "resin_os", e);
+    } finally {
+      JniUtil.release();
     }
 
     _jniTroubleshoot = jniTroubleshoot;
