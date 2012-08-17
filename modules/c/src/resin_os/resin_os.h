@@ -257,13 +257,14 @@ resin_set_byte_array_region(JNIEnv *env,
                             jint offset,
                             jint sublen,
                             char *c_buf);
-
+/*
 int
 resin_get_byte_array_region(JNIEnv *env,
                             jbyteArray buf,
                             jint offset,
                             jint sublen,
                             char *buffer);
+*/
 
 int poll_read(int fd, int ms);
 int poll_write(int fd, int ms);

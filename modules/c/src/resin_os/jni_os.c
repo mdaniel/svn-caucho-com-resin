@@ -85,7 +85,7 @@ resin_set_byte_array_region(JNIEnv *env,
   return 1;
 }
 
-int
+static int
 resin_get_byte_array_region(JNIEnv *env,
 			    jbyteArray j_buf,
 			    jint offset,
