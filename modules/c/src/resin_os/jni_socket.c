@@ -114,6 +114,29 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAllocate(JNIEnv *env,
 }
 
 static int
+resin_get_byte_array_region(JNIEnv *env,
+			    jbyteArray j_buf,
+			    jint offset,
+			    jint sublen,
+			    char *c_buf)
+{
+  /* JDK uses GetByteArrayRegion */
+  (*env)->GetByteArrayRegion(env, j_buf, offset, sublen, (void*) c_buf);
+
+  /*
+  jbyte *cBuf = (*env)->GetPrimitiveArrayCritical(env, j_buf, 0);
+  if (! cBuf)
+    return 0;
+
+  memcpy(c_buf, cBuf + offset, sublen);
+
+  (*env)->ReleasePrimitiveArrayCritical(env, j_buf, cBuf, 0);
+  */
+  
+  return 1;
+}
+
+static int
 resin_tcp_nodelay(connection_t *conn)
 {
   int fd = conn->fd;
