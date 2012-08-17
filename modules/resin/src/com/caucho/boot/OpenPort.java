@@ -38,6 +38,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.network.listen.TcpPort;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
@@ -136,6 +137,9 @@ public class OpenPort
     }
 
     // use same method for ports for testability reasons
+    if (_port >= 1024 && ! CurrentTime.isTest()) {
+      return null;
+    }
     /*
     if (_port >= 1024)
       return null;
