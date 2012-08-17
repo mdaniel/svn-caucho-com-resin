@@ -347,13 +347,14 @@ public class JniFileStream extends StreamImpl
 
   static {
     JniTroubleshoot jniTroubleshoot = null;
+    Class<?> cl = JniFileStream.class;
 
     JniUtil.acquire();
     try {
       System.loadLibrary("resin_os");
-      jniTroubleshoot = new JniTroubleshoot(JniFileStream.class, "resin_os");
+      jniTroubleshoot = new JniTroubleshoot(cl, "resin_os");
     } catch (Throwable e) {
-      jniTroubleshoot = new JniTroubleshoot(JniFileStream.class, "resin_os", e);
+      jniTroubleshoot = new JniTroubleshoot(cl, "resin_os", e);
     } finally {
       JniUtil.release();
     }
