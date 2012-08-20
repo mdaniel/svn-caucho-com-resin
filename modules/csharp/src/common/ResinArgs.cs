@@ -58,6 +58,7 @@ namespace Caucho
     public bool IsPreview { get; private set; }
     public StringCollection RawArgs { get; private set; }
     public bool DynamicServer { get; private set; }
+    public bool ElasticServer { get; private set; }
     public String Cluster { get; private set; }
 
     public ResinArgs(String cmd)
@@ -234,11 +235,18 @@ namespace Caucho
         else if ("-join-cluster".Equals(arguments[argsIdx])
                   || "--join-cluster".Equals(arguments[argsIdx])
                   || "-cluster".Equals(arguments[argsIdx]) 
-                  || "--cluster".Equals(arguments[argsIdx])) {
+                  || "--cluster".Equals(arguments[argsIdx]))
+        {
           DynamicServer = true;
+          ElasticServer = true;
           Cluster = arguments[argsIdx + 1];
 
           argsIdx += 2;
+        }
+        else if ("-elastic-server".Equals(arguments[argsIdx])
+                 || "--elastic-server".Equals(arguments[argsIdx])) {
+          ElasticServer = true;
+          argsIdx++;
         }
         else if ("-conf".Equals(arguments[argsIdx])
                  || "--conf".Equals(arguments[argsIdx]))

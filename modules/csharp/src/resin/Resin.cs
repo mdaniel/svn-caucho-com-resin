@@ -184,6 +184,9 @@ namespace Caucho
       else if (ResinArgs.Server != null)
         arguments.Append(" -server ").Append(ResinArgs.Server);
 
+      if (ResinArgs.ElasticServer)
+        arguments.Append(" --elastic-server ");
+
           /*
       else if (ResinArgs.DynamicServer != null)
         arguments.Append(" -dynamic-server ").Append(ResinArgs.DynamicServer);

@@ -725,6 +725,7 @@ namespace Caucho
           ResinConfServer dynamicServer = ResinConf.ParseDynamic(_serverCmbBox.Text);
           resinService.Cluster = dynamicServer.Cluster;
           resinService.Server = dynamicServer.ID;
+          resinService.ElasticServer = true;
           resinService.DynamicServer = true;
         }
       }

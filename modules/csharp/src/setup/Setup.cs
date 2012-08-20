@@ -232,6 +232,7 @@ namespace Caucho
           resin.Name = name;
           resin.Server = resinArgs.Server;
           resin.DynamicServer = resinArgs.DynamicServer;
+          resin.ElasticServer = resinArgs.ElasticServer;
           resin.Cluster = resinArgs.Cluster;
           resin.Root = resinArgs.ResinRoot;
           resin.Conf = resinArgs.Conf;
@@ -625,6 +626,7 @@ namespace Caucho
     public String JavaHome { get; set; }
     public String Server { get; set; }
     public bool DynamicServer { get; set; }
+    public bool ElasticServer { get; set; }
     public String Cluster { get; set; }
     public int DebugPort { get; set; }
     public int JmxPort { get; set; }
@@ -661,6 +663,9 @@ namespace Caucho
 
       if (DynamicServer)
         sb.Append(" -cluster ").Append(Cluster);
+
+      if (ElasticServer)
+        sb.Append(" --elastic-server ");
 
       if (DynamicServer) {
       } else if (Server != null && !"".Equals(Server)) {
