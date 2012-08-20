@@ -368,7 +368,7 @@ private NavigationItem writeHeaderTable(XMLStreamWriter out)
 
     out.writeStartElement("a");
     out.writeAttribute("style", "text-decoration: none");
-    out.writeAttribute("href","http://http://wiki4.caucho.com/NginX_1.2.0_versus_Resin_4.0.29_performance_tests");
+    out.writeAttribute("href","http://wiki4.caucho.com/NginX_1.2.0_versus_Resin_4.0.29_performance_tests");
     out.writeAttribute("title","Resin outscales C-based web server nginx in AutoBench benchmark");
     out.writeCharacters("Aug 2012: Resin outscales C-based web server nginx in AutoBench benchmark");
     out.writeEndElement(); // a
