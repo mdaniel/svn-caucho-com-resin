@@ -279,7 +279,7 @@
 <li>webapp: add alias-url-regexp to match multiple context-paths to a web-app (#4720, rep by Sachidanand Shukla)</li>
 <li>command-line: added uptime to "status" command"</li>
 <li>alarm: Alarm's base classloader needs to be Alarm not system classloader (#4707, rep by M Schmidt)</li>
-oo<li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
+<li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
 <li>jndi: EnvironmentModel dynamic copy needs ConcurrentHashMap (#4721)</li>
 <li>servlet: getAvailable() issue with POST (#4726, rep by Olaf Krische)</li>
 <li>install: --disable-64bit changes to ./configure and CFLAGS (#4714, rep by S. Patil)</li>
