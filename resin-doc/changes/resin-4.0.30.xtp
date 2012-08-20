@@ -35,9 +35,9 @@ unix> resinctl start --elastic-server --cluster app
 
 <s1 title="CLI: --elastic-dns for cloud environments">
 
-<p>For cloud environments where a dynamic IP address is assigned an
+<p>For cloud environments where a dynamic IP address is assigned and
 bound to a DNS value, Resin can start immediately with the --elastic-dns
-flag, and continue checking the addresses until on resolves to
+flag, and continue checking the addresses until one resolves to
 a local IP address.</p>
 
 </s1>
