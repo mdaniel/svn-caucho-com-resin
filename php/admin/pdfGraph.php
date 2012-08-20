@@ -549,7 +549,7 @@ function pdf_health_events($start, $end)
     $g_canvas->setFont("Courier", "8");
     
     foreach ($events as $event) {
-      $ts = strftime("%Y-%m-%d %H:%M:%S", $events->timestamp / 1000);
+      $ts = strftime("%Y-%m-%d %H:%M:%S", $event->timestamp / 1000);
       
       $g_canvas->writeTextColumn($w1, 'l', $ts);
       $g_canvas->writeTextColumn($w2, 'l', $event->typeDescription);
