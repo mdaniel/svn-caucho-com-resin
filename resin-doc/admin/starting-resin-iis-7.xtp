@@ -108,7 +108,7 @@
         pages, while all static content is served by IIS.
       </p>
 
-      <figure src="IIS_srun.gif" alt="browser <-> (IIS/iis_srun.dll <- html) <-> Resin httpd/servlets,beans <- html,jsp"/>
+      <figure src="iis_srun.gif" alt="browser <-> (IIS/iis_srun.dll <- html) <-> Resin httpd/servlets,beans <- html,jsp"/>
 
       <p>
         Next section explains how to install and configure Resin IIS Handler to
@@ -170,15 +170,19 @@
   &lt;system.webServer>
     &lt;handlers>
       <b>&lt;add name="ResinHandlerFactory"</b> &lt;!--Name used by resin handler. Can be changed.-->
-           <b>path="*"</b> &lt;!-- Requests path to invoke the handler on-->
-           <b>verb="*"</b> &lt;!-- HTTP Method. possible values: 'GET', 'POST', 'HEAD' or combination 'GET,POST' -->
-           <b>type="Caucho.IIS.ResinHandlerFactory"</b> &lt;!-- Resin Handler Factory that supplies one reusable handler instance-->
+           &lt;!-- Requests path to invoke the handler on-->
+           <b>path="*"</b>
+           &lt;!-- HTTP Method. possible values: 'GET', 'POST', 'HEAD' or combination 'GET,POST' -->
+           <b>verb="*"</b>
+            &lt;!-- Resin Handler Factory that supplies one reusable handler instance-->
+           <b>type="Caucho.IIS.ResinHandlerFactory"</b>
            <b>preCondition="integratedMode"/></b>
     &lt;/handlers>
   &lt;/system.webServer>
   &lt;appSettings>
     <b>&lt;add key="resin.servers" value="127.0.0.1:6800"/></b> &lt;!-- Address and port to Resin server(s)-->
-    &lt;add key="resin.log-level" value="Information"/> &lt;!-- logging level used by Resin IIS Handler. Use 'None' for silent operation-->
+    &lt;!-- logging level used by Resin IIS Handler. Use 'None' for silent operation-->
+    &lt;add key="resin.log-level" value="Information"/> 
   &lt;/appSettings>
 &lt;/configuration>
         </example>
@@ -299,15 +303,21 @@
   &lt;system.webServer>
     &lt;handlers>
       <b>&lt;add name="ResinHandlerFactory"</b> &lt;!--Name used by resin handler. Can be changed.-->
-           <b>path="*"</b> &lt;!-- Requests path to invoke the handler on-->
-           <b>verb="*"</b> &lt;!-- HTTP Method. possible values: 'GET', 'POST', 'HEAD' or combination 'GET,POST' -->
-           <b>type="Caucho.IIS.ResinHandlerFactory"</b> &lt;!-- Resin Handler Factory that supplies one reusable handler instance-->
+           &lt;!-- Requests path to invoke the handler on-->
+           <b>path="*"</b>
+           &lt;!-- HTTP Method. possible values: 'GET', 'POST', 'HEAD' or combination 'GET,POST' -->
+           <b>verb="*"</b>
+           &lt;!-- Resin Handler Factory that supplies one reusable handler instance-->
+           <b>type="Caucho.IIS.ResinHandlerFactory"</b>
            <b>preCondition="integratedMode"/></b>
     &lt;/handlers>
   &lt;/system.webServer>
   &lt;appSettings>
-    <b>&lt;add key="resin.servers" value="127.0.0.1:6800 127.0.0.2:6800 127.0.0.1:6801 127.0.0.2:6802"/></b> &lt;!-- Address and port to Resin server(s)-->
-    &lt;add key="resin.log-level" value="Information"/> &lt;!-- logging level used by Resin IIS Handler. Use 'None' for silent operation-->
+    &lt;!-- Address and port to Resin server(s)-->
+    <b>&lt;add key="resin.servers"
+               value="127.0.0.1:6800 127.0.0.2:6800 127.0.0.1:6801 127.0.0.2:6802"/></b>
+    &lt;!-- logging level used by Resin IIS Handler. Use 'None' for silent operation-->
+    &lt;add key="resin.log-level" value="Information"/>
   &lt;/appSettings>
 &lt;/configuration>
         </example>
@@ -321,33 +331,34 @@
 
       <p>Assuming that we are working with the Default Web Site:</p>
       <example title="Registering the Resin IIS Handler">
-        # Remove Resin IIS Hanlder if one is registered
-        %APPCMD% set config "Default Web Site" /section:handlers /-[name='ResinHandlerFactory']
+# Remove Resin IIS Handler if one is registered
+%APPCMD% set config "Default Web Site" /section:handlers /-[name='ResinHandlerFactory']
 
-        # Add Resin IIS Handler
-        %APPCMD% set config "Default Web Site" /section:handlers /+[name='ResinHandlerFactory',path='*',\
-        verb='*',type='Caucho.IIS.ResinHandlerFactory',preCondition='integratedMode']
+# Add Resin IIS Handler
+%APPCMD% set config "Default Web Site" /section:handlers /+[name='ResinHandlerFactory',path='*',\
+  verb='*',type='Caucho.IIS.ResinHandlerFactory',preCondition='integratedMode']
 
-        # Note: The above command needs to be issued in one line. The \ character
-        # at the last position of the first line is used to denote that command
-        # continues on next line
+# Note: The above command needs to be issued in one line. The \ character
+# at the last position of the first line is used to denote that command
+# continues on next line
 
-
-        # Note: %APPCMD% should be pointing to the location of appcmd.exe utility.
-        #       default location is c:\Windows\System32\inetsrv\appcmd.exe
+# Note: %APPCMD% should be pointing to the location of appcmd.exe utility.
+#       default location is c:\Windows\System32\inetsrv\appcmd.exe
       </example>
 
       <p>Specifying parameters using appcmd.exe:</p>
-      <example title="Resin IIS Hanlder parameters">
-        # Remove resin.servers parameter
-        %APPCMD% set config "Default Web Site" /section:appSettings /-[key='resin.servers']
-        # Set resin.servers parameter
-        %APPCMD% set config "Default Web Site" /section:appSettings /+[key='resin.servers',value='192.168.0.1:6800']
+      <example title="Resin IIS Handler parameters">
+# Remove resin.servers parameter
+%APPCMD% set config "Default Web Site" /section:appSettings /-[key='resin.servers']
+# Set resin.servers parameter
+%APPCMD% set config "Default Web Site" /section:appSettings \
+   /+[key='resin.servers',value='192.168.0.1:6800']
 
-        # Remove resin.log-level parameter
-        %APPCMD% set config "Default Web Site" /section:appSettings /-[key='resin.log-level']
-        # Set resin.log-level parameter to 'Information'
-        %APPCMD% set config "Default Web Site" /section:appSettings /+[key='resin.log-level',value='Information']
+# Remove resin.log-level parameter
+%APPCMD% set config "Default Web Site" /section:appSettings /-[key='resin.log-level']
+# Set resin.log-level parameter to 'Information'
+%APPCMD% set config "Default Web Site" /section:appSettings \
+  /+[key='resin.log-level',value='Information']
       </example>
     </s1>
 
@@ -392,11 +403,11 @@
 &lt;configuration>
 &lt;system.webServer>
   &lt;handlers>
-    <b>&lt;add name="ResinHandlerFactory"</b>
-         <b>path="*.jsp"</b>
-         <b>verb="*"</b>
-         <b>type="Caucho.IIS.ResinHandlerFactory"</b>
-         <b>preCondition="integratedMode"/></b>
+    <b>&lt;add name="ResinHandlerFactory"
+         path="*.jsp"
+         verb="*"
+         type="Caucho.IIS.ResinHandlerFactory"
+         preCondition="integratedMode"/></b>
   &lt;/handlers>
 &lt;/system.webServer>
 &lt;appSettings>
@@ -422,7 +433,8 @@
   &lt;system.diagnostics>
     &lt;trace autoflush="true" indentsize="0">
       &lt;listeners>
-         &lt;add name="resin-trace" initializeData="C:\temp\resin-iis-trace.log" type="System.Diagnostics.TextWriterTraceListener" />
+         &lt;add name="resin-trace" initializeData="C:\temp\resin-iis-trace.log"
+                 type="System.Diagnostics.TextWriterTraceListener" />
       &lt;/listeners>
     &lt;/trace>
   &lt;/system.diagnostics>
