@@ -1143,6 +1143,16 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
     return 0;
   }
 
+  val = 0;
+#ifdef IPV6_V6ONLY
+  if (family != AF_INET6) {
+  }
+  else if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY,
+                 (char *) &val, sizeof(int)) < 0) {
+    fprintf(stderr, "Cannot set ipv6_v6only");
+  }
+#endif
+
   if (bind(sock, (struct sockaddr *) sin_data, sin_length) < 0) {
     int i = 5;
     int result = 0;
