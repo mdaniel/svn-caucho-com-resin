@@ -185,6 +185,7 @@
         <include name="**/*.tld"/>
         <include name="**/*.xml"/>
         <include name="**/*.xsl"/>
+        <include name="**/*.dtd"/>
         <include name="**/jaxb.index"/>
         <include name="**/namespace"/>
         <include name="META-INF/**"/>
@@ -776,6 +777,13 @@
     </copy>
       -->
 
+    <copy todir="${dist.build}/ext-lib"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resindir}/lib">
+        <include name="resin-jasper.jar"/>
+      </fileset>
+    </copy>
 
     <copy todir="${dist.build}/doc/resin-doc">
       <fileset dir="${resin.doc}">
