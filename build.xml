@@ -434,7 +434,6 @@
   <target name="jasper" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jasper"/>
-      <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="resin-jasper.jar"/>
     </antcall>
   </target>

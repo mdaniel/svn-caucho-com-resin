@@ -780,7 +780,7 @@
     <copy todir="${dist.build}/ext-lib"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${resindir}/lib">
+      <fileset dir="${resindir}/modules/jasper/dist">
         <include name="resin-jasper.jar"/>
       </fileset>
     </copy>
