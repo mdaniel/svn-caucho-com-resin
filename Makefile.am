@@ -14,6 +14,8 @@ build_dir=@build_dir@
 setuid_user=@setuid_user@
 setuid_group=@setuid_group@
 setuid_set=@setuid_set@
+user_add=@user_add@
+group_add=@group_add@
 LIBEXEC=@LIBEXEC@
 skip_check_resin_sh=@SKIP_CHECK_RESIN_SH@
 root_subdirs_preserve=project-jars webapps webapp-jars endorsed resin-inf app-inf
@@ -216,6 +218,46 @@ install	:
 	@ (cd modules/c/src; $(MAKE) install)
 	@ if test $(resin_pro) != "." -a -r $(resin_pro)/modules/c/src/Makefile; then \
 	  (cd $(resin_pro)/modules/c/src; $(MAKE) install) \
+	fi
+	if test "$(setuid_set)" = "true"; then \
+	  if test -n "$(group_add)"; then \
+	    echo "Creating setuid group $(setuid_group)."; \
+	    egrep '$$$(setuid_group):' /etc/group 1>/dev/null 2>/dev/null; \
+	    if test $$? = "0"; then \
+	      echo "setuid group $(setuid_group) already exists."; \
+	    else \
+	      groupadd $(setuid_group); \
+	      if test $$? != "0"; then \
+	        echo "WARNING: failed to create the $(setuid_group) group. The group may already exist, or run 'make install' as root."; \
+	      fi; \
+	    fi; \
+	  fi; \
+	  if test -n "$(user_add)"; then \
+	    echo "Creating setuid user $(setuid_user)."; \
+	    egrep '$$$(setuid_user):' /etc/passwd 1>/dev/null 2>/dev/null; \
+	    if test $$? = "0"; then \
+	      echo "setuid user $(setuid_user) already exists."; \
+	    else \
+	      useradd -d /nonexistent -s /bin/false -g $(setuid_group) $(setuid_user); \
+	      if test $$? != "0"; then \
+	        echo "WARNING: failed to create the $(setuid_user) user. The user may already exist, or run 'make install' as root."; \
+	      fi; \
+	    fi; \
+	  fi; \
+	  if test -n "$(user_add)"; then \
+	    echo "Changing the owner of Resin root $(resin_root) to $(setuid_user):$(setuid_group)."; \
+	    chown -R $(setuid_user):$(setuid_group) $(resin_root); \
+	    if test $$? != "0"; then \
+	      echo "WARNING: failed change owner of Resin root to $(setuid_user). Ensure $(resin_root) is writable by $$USER, or run 'make install' as root."; \
+	    fi; \
+	  fi; \
+	  if test -n "$(group_add)"; then \
+	    echo "Changing the owner of Resin log $(resin_log) to $(setuid_user):$(setuid_group)."; \
+	    chown -R $(setuid_user):$(setuid_group) $(resin_log); \
+	    if test $$? != "0"; then \
+	      echo "WARNING: failed change owner of Resin log to $(setuid_user). Ensure $(resin_log) is writable by $$USER, or run 'make install' as root."; \
+	    fi; \
+	  fi; \
 	fi
 
 clean	:

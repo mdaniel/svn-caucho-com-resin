@@ -629,6 +629,12 @@ AC_SUBST(setuid_user)
 AC_SUBST(setuid_group)
 AC_SUBST(setuid_set)
 
+user_add=`which useradd`
+group_add=`which groupadd`
+
+AC_SUBST(user_add)
+AC_SUBST(group_add)
+
 #
 # fill in compilation stuff
 #
@@ -1006,7 +1012,7 @@ esac
 case "$target_os" in
   linux*)
   jni_os=linux
-        PROXY_LIBS="-lpthread -lrt -lc"
+  PROXY_LIBS="-lpthread -lrt -lc"
   ;;
 
   *solaris*)
@@ -1017,7 +1023,7 @@ case "$target_os" in
 
   *freebsd*)
   PROXY_LIBS='-lpthread'
-        jni_os=freebsd
+  jni_os=freebsd
 
   tmp=`ldd $JAVA_HOME/bin/java | sed 's/.*=>//' | grep -c libc_r`
   tmp=$tmp `ldd $JAVA_HOME/bin/java | sed 's/.*=>//' | grep -c libpthread`
