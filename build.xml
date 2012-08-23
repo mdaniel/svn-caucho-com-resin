@@ -689,6 +689,8 @@
   <target name="ext" depends="init, resin">
     <copy todir="${install}/lib" preservelastmodified="true">
       <fileset dir="${ext}">
+        <exclude name="jasper.jar"/>
+        <exclude name="tomcat-*.jar"/>
       </fileset>
     </copy>
   </target>
