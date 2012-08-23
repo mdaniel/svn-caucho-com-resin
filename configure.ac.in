@@ -64,23 +64,6 @@ if test -z "$resin_root"; then
   fi
 fi
 
-#
-# --with-resin-root
-#
-
-AC_ARG_WITH(resin-root,
-[AS_HELP_STRING([--with-resin-root=DIR],
-                [resin data directory])],
-[resin_root=${withval}])
-
-if test -z "$resin_root"; then
-  if test "$prefix" == "NONE"; then
-    resin_root="/var/resin"
-  else
-    resin_root="$prefix"
-  fi
-fi
-
 AC_SUBST(resin_root)
 
 #
@@ -625,19 +608,26 @@ setuid_group=resin
 AC_ARG_WITH(setuid,
 [AS_HELP_STRING([--with-setuid=user],
                 [configure default setuid user])],
-[setuid_user=${withval}])
+[
+setuid_user=${withval} 
+setuid_set=true
+])
 
 #
 # --with-setgid
 #
 
 AC_ARG_WITH(setgid,
-[AS_HELP_STRING([--with-setgid=user],
+[AS_HELP_STRING([--with-setgid=group],
                 [configure default setgid group])],
-[setuid_group=${withval}])
+[
+setuid_group=${withval}; 
+setuid_set=true
+])
 
 AC_SUBST(setuid_user)
 AC_SUBST(setuid_group)
+AC_SUBST(setuid_set)
 
 #
 # fill in compilation stuff

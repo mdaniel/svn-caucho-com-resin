@@ -13,6 +13,7 @@ resin_pro=@resin_pro@
 build_dir=@build_dir@
 setuid_user=@setuid_user@
 setuid_group=@setuid_group@
+setuid_set=@setuid_set@
 LIBEXEC=@LIBEXEC@
 skip_check_resin_sh=@SKIP_CHECK_RESIN_SH@
 root_subdirs_preserve=project-jars webapps webapp-jars endorsed resin-inf app-inf
@@ -28,13 +29,20 @@ all	:
 	fi
 
 rpm-dist	:
-	cp conf/resin.properties conf/resin.properties.orig
-	awk '/setuid_user/ { print "setuid_user : @setuid_user@"; next; } \
-	       /setuid_group/ { print "setuid_group : @setuid_group@"; next; } \
-	             { print $0; }' \
-	conf/resin.properties.orig > conf/resin.properties
+	@ cp conf/resin.properties conf/resin.properties.orig
+	@ awk '/setuid_user/ { print "setuid_user : $(setuid_user)"; next; } \
+	    /setuid_group/ { print "setuid_group : $(setuid_group)"; next; } \
+	    { print $0; }' \
+	    conf/resin.properties.orig > conf/resin.properties
 
 install	:
+	@ if test "$(setuid_set)" = "true"; then \
+	  cp conf/resin.properties conf/resin.properties.orig; \
+	  awk '/setuid_user/ { print "setuid_user : $(setuid_user)"; next; } \
+	      /setuid_group/ { print "setuid_group : $(setuid_group)"; next; } \
+	      { print $0; }' \
+	      conf/resin.properties.orig > conf/resin.properties; \
+	fi
 	@ if test "$(resin_root)" != "$(build_dir)"; then \
 	  echo "Installing Resin root $(resin_root)."; \
 	  if test ! -e "$(resin_root)"; then \
