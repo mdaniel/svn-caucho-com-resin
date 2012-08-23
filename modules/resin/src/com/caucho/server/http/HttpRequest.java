@@ -980,7 +980,7 @@ public class HttpRequest extends AbstractHttpRequest
     int readOffset = s.getOffset();
     int readLength = s.getLength();
     int ch;
-
+    
     // skip leading whitespace
     do {
       if (readLength <= readOffset) {

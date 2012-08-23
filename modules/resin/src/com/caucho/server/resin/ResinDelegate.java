@@ -239,7 +239,7 @@ public class ResinDelegate
 
   protected Management createResinManagement()
   {
-    return null;
+    return new ManagementDummyConfig();
   }
 
   public StatSystem createStatSystem()
@@ -402,5 +402,8 @@ public class ResinDelegate
         blockManager.clear();
       }
     }
+  }
+  
+  static class ManagementDummyConfig extends Management {
   }
 }

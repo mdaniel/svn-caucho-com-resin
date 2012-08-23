@@ -303,6 +303,28 @@ public class Environment {
   }
 
   /**
+   * Add close listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addWeakCloseListener(Object obj)
+  {
+    addClassLoaderListener(new WeakCloseListener(obj));
+  }
+
+  /**
+   * Add close listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addWeakCloseListener(Object obj, ClassLoader loader)
+  {
+    addClassLoaderListener(new WeakCloseListener(obj), loader);
+  }
+
+  /**
    * Starts the current environment.
    */
   public static void init()

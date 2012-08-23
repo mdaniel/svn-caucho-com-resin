@@ -150,7 +150,7 @@ public class StartAllCommand extends AbstractStartCommand
     String serverId = args.getClientServerId();
     
     if (serverId != null && boot.isElasticServer(args)) {
-      manager.startServer(serverId, args.getArgv());
+      manager.startServerAll(serverId, args.getArgv());
       return;
     }
     

@@ -31,7 +31,6 @@ package com.caucho.server.resin;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.instrument.Instrumentation;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -58,7 +57,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.core.ResinProperties;
 import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.db.block.BlockManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.git.GitSystem;
@@ -115,7 +113,8 @@ public class Resin
   
   private final ResinSystem _resinSystem;
   
-  private String _serverId = null;
+  private final String _serverId;
+  private final String _displayServerId;
 
   private Path _resinHome;
   private Path _resinConf;
@@ -212,10 +211,15 @@ public class Resin
  
     _pingSocket = _args.getPingSocket();
 
-    String serverId = args.getServerId();
+    String displayServerId = args.getServerId();
+    
+    if (displayServerId == null || displayServerId.equals(""))
+      displayServerId = "default";
+    
+    String serverId = displayServerId;
 
-    if (serverId == null && args.isElasticServer()) {
-      serverId = "dyn-"+ getDynamicDisplayAddress() + ':' + getDynamicServerPort();
+    if (args.isElasticServer()) {
+      serverId = serverId + "-"+ getDynamicDisplayAddress() + ':' + getDynamicServerPort();
     }
 
     _resinSystem = new ResinSystem(serverId);
@@ -227,6 +231,7 @@ public class Resin
     Environment.init();
  
     _serverId = serverId;//args.getServerId();
+    _displayServerId = displayServerId;
     
     preConfigureInit();
     
@@ -273,12 +278,14 @@ public class Resin
   {
     if (_serverId == null || _serverId.isEmpty())
       return "default";
-    else return _serverId.replace(':', '_');
+    else 
+      return _serverId.replace(':', '_');
   }
 
   /**
    * Sets the server id.
    */
+  /*
   void setServerId(String serverId)
   {
     if (serverId == null || "".equals(serverId))
@@ -288,6 +295,7 @@ public class Resin
 
     _resinSystem.setId(_serverId);
   }
+  */
 
   public String getUniqueServerName()
   {
@@ -310,10 +318,7 @@ public class Resin
    */
   public String getDisplayServerId()
   {
-    if (_serverId == null || "".equals(_serverId))
-      return "default";
-    else
-      return _serverId;
+    return _displayServerId;
   }
 
   public static String getCurrentServerId()
@@ -458,6 +463,10 @@ public class Resin
   {
     String address = getServerAddress();
 
+    if (address == null) {
+      address = _bootConfig.getBootResin().getElasticServerAddress(_args);
+    }
+    
     if (address != null)
       return address;
     else
@@ -488,7 +497,7 @@ public class Resin
     if (port > 0)
       return port;
     else
-      return 6830;
+      return _bootConfig.getBootResin().getElasticServerPort(_args);
   }
 
   public Path getLogDirectory()
@@ -1059,7 +1068,8 @@ public class Resin
                                       _bootServerConfig));
     }
     
-    Config.setProperty("rvar0", _selfServer.getId());
+    // Config.setProperty("rvar0", _selfServer.getId());
+    Config.setProperty("rvar0", getDisplayServerId());
     Config.setProperty("rvar1", _selfServer.getCluster().getId());
 
     getDelegate().validateServerCluster();

@@ -69,10 +69,10 @@ public class ResinArgs
   
   private Socket _pingSocket;
   
-  private boolean _isElastic;
+  private boolean _isElasticServer;
   private String _homeCluster;
-  private String _serverAddress;
-  private int _serverPort;
+  private String _elasticServerAddress;
+  private int _elasticServerPort;
   
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
@@ -297,12 +297,22 @@ public class ResinArgs
   
   public void setElastic(boolean isElastic)
   {
-    _isElastic = isElastic;
+    _isElasticServer = isElastic;
   }
   
   public boolean isElasticServer()
   {
-    return _isElastic;
+    return _isElasticServer;
+  }
+  
+  public int getElasticServerPort()
+  {
+    return _elasticServerPort;
+  }
+  
+  public String getElasticServerAddress()
+  {
+    return _elasticServerAddress;
   }
   
   public void setHomeCluster(String homeCluster)
@@ -317,22 +327,22 @@ public class ResinArgs
   
   public String getServerAddress()
   {
-    return _serverAddress;
+    return _elasticServerAddress;
   }
   
   public void setServerAddress(String address)
   {
-    _serverAddress = address;
+    _elasticServerAddress = address;
   }
   
   public int getServerPort()
   {
-    return _serverPort;
+    return _elasticServerPort;
   }
   
   public void setServerPort(int port)
   {
-    _serverPort = port;
+    _elasticServerPort = port;
   }
   
   public String getUser()
@@ -429,8 +439,22 @@ public class ResinArgs
         i += 2;
       }
       else if (arg.equals("--elastic-server")) {
-        _isElastic = true;
+        _isElasticServer = true;
         i += 1;
+      }
+      else if (i + 1 < len
+               && (arg.equals("--elastic-server-address")
+                   || arg.equals("--server-address"))) {
+        _elasticServerAddress = argv[i + 1];
+   
+        i += 2;
+      }
+      else if (i + 1 < len
+               && (arg.equals("--elastic-server-port")
+                   || arg.equals("--elastic-server-port"))) {
+        _elasticServerPort = Integer.parseInt(argv[i + 1]);
+   
+        i += 2;
       }
       else if (arg.equals("--elastic-dns")) {
         i += 1;
@@ -444,17 +468,6 @@ public class ResinArgs
                && (arg.equals("--cluster")
                    || arg.equals("--join-cluster"))) {
         _homeCluster = argv[i + 1];
-   
-        i += 2;
-      }
-      else if (i + 1 < len && arg.equals("--server-address")) {
-        _serverAddress = argv[i + 1];
-   
-        i += 2;
-      }
-      else if (i + 1 < len
-               && (arg.equals("--server-port"))) {
-        _serverPort = Integer.parseInt(argv[i + 1]);
    
         i += 2;
       }
@@ -582,7 +595,7 @@ public class ResinArgs
         i += 2;
       }
       else {
-        System.out.println(L.l("unknown argument '{0}'", argv[i]));
+        System.out.println(L.l("unknown argument '{0}'", arg));
         System.out.println();
         usage();
         System.exit(66);

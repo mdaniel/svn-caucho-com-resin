@@ -603,6 +603,12 @@ r_resin-Content =
   & (attribute elastic-server { r_boolean-Type }
      | element elastic-server { r_boolean-Type })?
 
+  & (attribute elastic-server-address { string }
+     | element elastic-server-address { string })?
+
+  & (attribute elastic-server-port { r_int-Type }
+     | element elastic-server-port { r_int-Type })?
+
   & (attribute environment-system-properties { r_boolean-Type }
      | element environment-system-properties { r_boolean-Type })?
 

@@ -800,7 +800,13 @@ class WatchdogChildProcess
 
     // server/2k54
     if (_watchdog.isElasticServer()) {
-      resinArgs.add("-elastic-server");
+      resinArgs.add("--elastic-server");
+      
+      resinArgs.add("--cluster");
+      resinArgs.add(_watchdog.getElasticServerCluster());
+      
+      resinArgs.add("--elastic-server-port");
+      resinArgs.add(Integer.toString(_watchdog.getElasticServerPort()));
     }
     
     resinArgs.add("-socketwait");

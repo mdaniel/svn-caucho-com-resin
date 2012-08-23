@@ -99,6 +99,10 @@ class WatchdogConfig
   
   private boolean _isElastic;
 
+  private int _elasticServerPort;
+
+  private String _elasticServerCluster;
+
   WatchdogConfig(String id,
                  BootClusterConfig cluster,
                  WatchdogArgs args,
@@ -153,6 +157,26 @@ class WatchdogConfig
   public boolean isElastic()
   {
     return _isElastic;
+  }
+  
+  public int getElasticServerPort()
+  {
+    return _elasticServerPort;
+  }
+  
+  public void setElasticServerPort(int port)
+  {
+    _elasticServerPort = port;
+  }
+  
+  public String getElasticServerCluster()
+  {
+    return _elasticServerCluster;
+  }
+  
+  public void setElasticServerCluster(String cluster)
+  {
+    _elasticServerCluster = cluster;
   }
 
   public void setVerbose(boolean isVerbose)

@@ -278,6 +278,16 @@ class WatchdogChild
   {
     return _config.isElastic();
   }
+  
+  int getElasticServerPort()
+  {
+    return _config.getElasticServerPort();
+  }
+  
+  String getElasticServerCluster()
+  {
+    return _config.getElasticServerCluster();
+  }
 
   boolean hasXmx()
   {

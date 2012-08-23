@@ -40,16 +40,19 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     addFlagOption("preview", "run as a preview (staging) server");
     addFlagOption("elastic-server", "join a cluster as an elastic server (pro)");
     
-    addValueOption("data-directory", "dir", "override the working directory");
     addValueOption("cluster", "id", "cluster to join as an elastic server (pro)");
+    addValueOption("data-directory", "dir", "override the working directory");
+    addValueOption("elastic-server-address", "ip", "cluster IP address for an elastic server");
     addValueOption("root-directory", "dir", "set the root directory");
     addValueOption("log-directory", "dir", "set the log directory");
     addValueOption("server", "id", "select a configured server");
     addValueOption("stage", "stage", "select a configuration stage (production, preview)");
 
-    addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
+    addIntValueOption("elastic-server-port", "port",
+                      "cluster port anthe new elastic server");
     addIntValueOption("debug-port", "port", "listen to a JVM debug port");
     addIntValueOption("jmx-port", "port", "listen to an unauthenticated JMX port");
+    addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
   }
 
   @Override

@@ -74,6 +74,10 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   private ArrayList<BootClusterConfig> _clusters
     = new ArrayList<BootClusterConfig>();
 
+  private int _elasticServerPort;
+
+  private String _elasticServerAddress;
+
   /**
    * Creates a new resin server.
    */
@@ -144,11 +148,41 @@ public class BootResinConfig implements SchemaBean, DependencyBean
 
   public boolean isElasticServer(ResinArgs args)
   {
-    if (_isElasticServer) {
-      return true;
+    if (args.isElasticServer()) {
+      return args.isElasticServer();
     }
     else {
-      return args.isElasticServer();
+      return _isElasticServer;
+    }
+  }
+  
+  public void setElasticServerPort(int port)
+  {
+    _elasticServerPort = port;
+  }
+
+  public int getElasticServerPort(ResinArgs args)
+  {
+    if (args.getElasticServerPort() > 0) {
+      return args.getElasticServerPort();
+    }
+    else {
+      return _elasticServerPort;
+    }
+  }
+  
+  public void setElasticServerAddress(String address)
+  {
+    _elasticServerAddress = address;
+  }
+
+  public String getElasticServerAddress(ResinArgs args)
+  {
+    if (args.getElasticServerAddress() != null) {
+      return args.getElasticServerAddress();
+    }
+    else {
+      return _elasticServerAddress;
     }
   }
   

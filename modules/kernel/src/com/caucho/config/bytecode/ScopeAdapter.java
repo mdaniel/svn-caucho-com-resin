@@ -393,6 +393,7 @@ public class ScopeAdapter {
       if (boolean.class.equals(type)
           || byte.class.equals(type)
           || short.class.equals(type)
+          || char.class.equals(type)
           || int.class.equals(type)) {
         code.pushIntVar(index);
         index += 1;
@@ -438,6 +439,7 @@ public class ScopeAdapter {
     if (boolean.class.equals(retType)
         || byte.class.equals(retType)
         || short.class.equals(retType)
+        || char.class.equals(retType)
         || int.class.equals(retType)) {
       code.addIntReturn();
     }

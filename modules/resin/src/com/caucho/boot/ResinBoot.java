@@ -334,7 +334,7 @@ public class ResinBoot
     } catch (BootArgumentException e) {
       System.err.println(e.getMessage());
       
-      if (log.isLoggable(Level.FINER)) {
+      if (e.getMessage() == null || log.isLoggable(Level.FINER)) {
         e.printStackTrace();
       }
 
@@ -345,7 +345,7 @@ public class ResinBoot
     } catch (ConfigException e) {
       System.err.println(e.getMessage());
       
-      if (log.isLoggable(Level.FINER)) {
+      if (e.getMessage() == null || log.isLoggable(Level.FINER)) {
         e.printStackTrace();
       }
 
@@ -353,7 +353,7 @@ public class ResinBoot
     } catch (Exception e) {
       System.err.println(e.getMessage());
       
-      if (log.isLoggable(Level.FINE)) {
+      if (e.getMessage() == null || log.isLoggable(Level.FINE)) {
         e.printStackTrace();
       }
 
