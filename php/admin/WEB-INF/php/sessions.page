@@ -161,6 +161,7 @@ function display_session_manager($webapp)
 
 function display_sessions($webapp, $host)
 {
+  global $g_server_index;
   $hostName = $host->HostName;
   $context = $webapp->ContextPath;
 
@@ -185,7 +186,7 @@ function display_sessions($webapp, $host)
 
     var sessionsDiv = $(this).parent().next();
 
-    var link ="sessions.php?host=${hostName}&webapp=${webapp->ContextPath}&manager-suffix=${manager_suffix}";
+    var link ="sessions.php?s=${g_server_index}&host=${hostName}&webapp=${webapp->ContextPath}&manager-suffix=${manager_suffix}";
 
     $(this).text('refresh sessions');
 
