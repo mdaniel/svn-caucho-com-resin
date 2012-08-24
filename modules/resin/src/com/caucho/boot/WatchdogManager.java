@@ -825,7 +825,6 @@ class WatchdogManager implements AlarmListener {
     WatchdogChild watchdog = new WatchdogChild(_system, client.getConfig());
     
     updateChild(watchdog);
-    System.out.println("CHILD: " + watchdog);
     
     return watchdog;
   }
@@ -852,7 +851,6 @@ class WatchdogManager implements AlarmListener {
     
     clusterId = cluster.getId();
     String serverId = "dyn-" + clusterId + "-" + index;
-System.out.println("SID: " + serverId);
 
     WatchdogConfigHandle configHandle = cluster.createServer();
     // String serverId = args.getElasticServerId();
