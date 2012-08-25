@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.simplexml;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -65,6 +66,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.JsonEncodeContext;
@@ -74,6 +76,7 @@ import com.caucho.quercus.env.ObjectExtJavaValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -737,9 +740,10 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
    *
    * @return xml string
    */
-  @ReturnNullAsFalse
-  public StringValue asXML(Env env)
+  public Value asXML(Env env, @Optional Value filename)
   {
+    StringValue value;
+
     if (_parent == null) {
       StringValue sb = env.createBinaryBuilder();
 
@@ -747,10 +751,38 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       toXMLImpl(sb);
       sb.append("\n");
 
-      return sb;
+      value = sb;
     }
-    else
-      return toXML(env);
+    else {
+      value = toXML(env);
+    }
+
+    if (filename.isDefault()) {
+      return value;
+    }
+    else {
+      Path path = env.lookupPwd(filename);
+
+      OutputStream os = null;
+
+      try {
+        os = path.openWrite();
+
+        value.writeTo(os);
+
+        return BooleanValue.TRUE;
+      }
+      catch (IOException e) {
+        env.warning(e);
+
+        return BooleanValue.FALSE;
+      }
+      finally {
+        if (os != null) {
+          IoUtil.close(os);
+        }
+      }
+    }
   }
 
   public StringValue toXML(Env env)
@@ -915,7 +947,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     try {
       XPath xpath = XPathFactory.newInstance().newXPath();
 
-      InputSource is = new InputSource(asXML(env).toInputStream());
+      InputSource is = new InputSource(asXML(env, DefaultValue.DEFAULT).toInputStream());
       NodeList nodes = (NodeList) xpath.evaluate(expression, is,
                                                  XPathConstants.NODESET);
 

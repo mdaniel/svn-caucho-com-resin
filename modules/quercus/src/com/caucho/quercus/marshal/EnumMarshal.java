@@ -49,14 +49,40 @@ public class EnumMarshal extends Marshal {
   {
     String name = expr.evalString(env);
 
-    return Enum.valueOf(_enumClass, name);
+    if (name == null) {
+      return null;
+    }
+
+    try {
+      return Enum.valueOf(_enumClass, name);
+    }
+    catch (IllegalArgumentException e) {
+      env.warning(e);
+
+      return null;
+    }
   }
 
   public Object marshal(Env env, Value value, Class argClass)
   {
+    if (value.isNull()) {
+      return null;
+    }
+
     String name = value.toString();
 
-    return Enum.valueOf(_enumClass, name);
+    if (name == null) {
+      return null;
+    }
+
+    try {
+      return Enum.valueOf(_enumClass, name);
+    }
+    catch (IllegalArgumentException e) {
+      env.warning(e);
+
+      return null;
+    }
   }
 
   public Value unmarshal(Env env, Object value)
