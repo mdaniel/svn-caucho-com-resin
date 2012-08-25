@@ -101,21 +101,6 @@ public class SimpleXMLAttribute extends SimpleXMLElement
       return null;
   }
 
-  /**
-   * Converts node tree to a valid xml string.
-   *
-   * @return xml string
-   */
-  @Override
-  public StringValue asXML(Env env)
-  {
-    StringValue sb = env.createStringBuilder();
-
-    toXMLImpl(sb);
-
-    return sb;
-  }
-
   @Override
   protected void toXMLImpl(StringValue sb)
   {

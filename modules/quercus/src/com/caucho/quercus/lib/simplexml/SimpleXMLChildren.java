@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.simplexml;
 
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
@@ -47,7 +48,7 @@ public class SimpleXMLChildren extends SimpleXMLElement
   {
     super(env, cls, parent, name);
   }
-  
+
   /**
    * Implementation for getting the indices of this class.
    * i.e. <code>$a->foo[0]</code>
@@ -57,7 +58,7 @@ public class SimpleXMLChildren extends SimpleXMLElement
   {
     if (indexV.isString()) {
       String name = indexV.toString();
-      
+
       return wrapJava(env, _cls, getAttribute(name));
     }
     else if (indexV.isLongConvertible()) {
@@ -71,18 +72,18 @@ public class SimpleXMLChildren extends SimpleXMLElement
     else
       return NullValue.NULL;
   }
-  
+
   /**
    * Converts node tree to a valid xml string.
-   * 
+   *
    * @return xml string
    */
-  @ReturnNullAsFalse
-  public StringValue asXML(Env env)
+  @Override
+  protected Value toXML(Env env)
   {
     if (_children != null)
       return _children.get(0).toXML(env);
     else
-      return null;
+      return BooleanValue.FALSE;
   }
 }

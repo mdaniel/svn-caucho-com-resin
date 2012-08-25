@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.dom;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
 import com.caucho.quercus.module.AbstractQuercusModule;
 
@@ -96,11 +97,11 @@ public class QuercusDOMModule
   {
     if (node == null)
       return null;
-    
+
     DOMDocument document = DOMDocument.__construct(env, "1.0", null);
-    
-    StringValue xml = node.asXML(env);
-    document.loadXML(env, xml, DefaultValue.DEFAULT);
+
+    Value xml = node.asXML(env, DefaultValue.DEFAULT);
+    document.loadXML(env, xml.toStringValue(env), DefaultValue.DEFAULT);
 
     return document.getDocumentElement();
   }

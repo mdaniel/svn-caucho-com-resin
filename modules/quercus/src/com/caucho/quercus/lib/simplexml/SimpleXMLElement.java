@@ -740,25 +740,18 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
    *
    * @return xml string
    */
-  public Value asXML(Env env, @Optional Value filename)
+  public final Value asXML(Env env, @Optional Value filename)
   {
-    StringValue value;
+    Value value = toXML(env);
 
-    if (_parent == null) {
-      StringValue sb = env.createBinaryBuilder();
-
-      sb.append("<?xml version=\"1.0\"?>\n");
-      toXMLImpl(sb);
-      sb.append("\n");
-
-      value = sb;
+    if (! value.isString()) {
+      return value;
     }
-    else {
-      value = toXML(env);
-    }
+
+    StringValue str = value.toStringValue(env);
 
     if (filename.isDefault()) {
-      return value;
+      return str;
     }
     else {
       Path path = env.lookupPwd(filename);
@@ -768,7 +761,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       try {
         os = path.openWrite();
 
-        value.writeTo(os);
+        str.writeTo(os);
 
         return BooleanValue.TRUE;
       }
@@ -785,11 +778,19 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     }
   }
 
-  public StringValue toXML(Env env)
+  protected Value toXML(Env env)
   {
     StringValue sb = env.createBinaryBuilder();
 
+    if (_parent == null) {
+      sb.append("<?xml version=\"1.0\"?>\n");
+    }
+
     toXMLImpl(sb);
+
+    if (_parent == null) {
+      sb.append("\n");
+    }
 
     return sb;
   }

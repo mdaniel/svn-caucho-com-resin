@@ -74,7 +74,7 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
   {
     super(env, cls, parent, name);
   }
-  
+
   protected SimpleXMLAttributeList(Env env,
                                    QuercusClass cls,
                                    SimpleXMLElement parent,
@@ -89,7 +89,7 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
 
   /**
    * Returns the name of the node.
-   * 
+   *
    * @return name of the node
    */
   @Name("getName")
@@ -118,7 +118,7 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
     if (_parent != null)
       _parent.addNamespaceAttribute(env, name, namespace);
   }
-  
+
   /**
    * Required for 'foreach'. When only values are specified in
    * the loop <code>foreach($a as $b)</code>, this method
@@ -137,14 +137,14 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
     else
       return null;
   }
-  
+
   /**
    * Converts node tree to a valid xml string.
-   * 
+   *
    * @return xml string
    */
-  @Override  
-  public StringValue asXML(Env env)
+  @Override
+  protected Value toXML(Env env)
   {
     StringValue sb = env.createStringBuilder();
 
@@ -152,15 +152,15 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
       for (SimpleXMLElement attr : _attributes) {
         if (attr._name.equals("xmlns"))
           continue;
-        
+
         attr.toXMLImpl(sb);
         break;
       }
-      
+
       return sb;
     }
     else
-      return null;
+      return BooleanValue.FALSE;
   }
 
   @Override
@@ -172,14 +172,14 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
       sb.append(_prefix);
       sb.append(":");
     }
-    
+
     sb.append(_name);
     sb.append("=\"");
     if (_text != null)
       sb.append(_text);
     sb.append("\"");
   }
-  
+
   /**
    * Implementation for getting the indices of this class.
    * i.e. <code>$a->foo[0]</code>
@@ -188,9 +188,9 @@ public class SimpleXMLAttributeList extends SimpleXMLElement
   {
     if (indexV.isString()) {
       String name = indexV.toString();
-      
+
       SimpleXMLElement attr = getAttribute(name);
-      
+
       if (attr != null)
         return wrapJava(env, _cls, attr);
       else

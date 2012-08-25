@@ -3207,6 +3207,12 @@ public class FileModule extends AbstractQuercusModule {
 
       Path path = env.lookupPwd(filename);
 
+      if (path == null || path.exists()) {
+        env.warning(L.l("file does not exist: '{0}'", filename));
+
+        return false;
+      }
+
       return path.remove();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
