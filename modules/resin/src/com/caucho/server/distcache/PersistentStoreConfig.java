@@ -158,22 +158,6 @@ public class PersistentStoreConfig
       DistCacheSystem system = DistCacheSystem.getCurrent();
 
       system.setJdbcDataSource(_dataSource);
-      /*
-      if (system.getJdbcCacheManager() == null) {
-        ResinSystem resinSystem = ResinSystem.getCurrent();
-        
-        JdbcCacheManager jdbcManager
-          = new JdbcCacheManager(resinSystem, _dataSource);
-        
-        system.setJdbcCacheManager(jdbcManager);
-      }
-      */
     }
-    /*
-    if (_name.startsWith("java:comp"))
-      Jndi.bindDeep(_name, _store);
-    else
-      Jndi.bindDeep("java:comp/env/" + _name, _store);
-    */
   }
 }

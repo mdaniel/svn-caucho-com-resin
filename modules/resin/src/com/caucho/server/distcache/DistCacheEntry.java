@@ -1085,7 +1085,7 @@ public class DistCacheEntry {
   /**
    * Sets a cache entry
    */
-  final MnodeEntry putLocalValue(MnodeEntry mnodeValue)
+  public final MnodeEntry putLocalValue(MnodeEntry mnodeValue)
   {
     MnodeEntry oldEntryValue = getMnodeEntry();
 

@@ -33,22 +33,26 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
+import com.caucho.config.ConfigException;
 import com.caucho.env.service.AbstractResinSubSystem;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.Environment;
+import com.caucho.util.L10N;
 
 /**
  * The local cache repository.
  */
 public class DistCacheSystem extends AbstractResinSubSystem 
 {
+  private static final L10N L = new L10N(DistCacheSystem.class);
+  
   public static final int START_PRIORITY = START_PRIORITY_CACHE_SERVICE;
 
   private ConcurrentHashMap<String,CacheManagerImpl> _managerMap
     = new ConcurrentHashMap<String,CacheManagerImpl>(); 
   
   private CacheStoreManager _distCacheManager;
-  
+
   private DataSource _jdbcDataSource;
   
   public DistCacheSystem(CacheStoreManager distCacheManager)
@@ -73,6 +77,11 @@ public class DistCacheSystem extends AbstractResinSubSystem
   public static DistCacheSystem getCurrent()
   {
     return ResinSystem.getCurrentService(DistCacheSystem.class);
+  }
+
+  public void setJdbcDataSource(DataSource dataSource)
+  {
+    throw new ConfigException(L.l("jdbc persistent-store requires Resin Professional"));
   }
 
   public static CacheImpl getMatchingCache(String name)
@@ -129,23 +138,6 @@ public class DistCacheSystem extends AbstractResinSubSystem
   {
     _managerMap.remove(guid);
   }
-  
-  public DataSource getJdbcDataSource()
-  {
-    return _jdbcDataSource;
-  }
-  
-  public void setJdbcDataSource(DataSource dataSource)
-  {
-    _jdbcDataSource = dataSource;
-  }
-
-  /*
-  public CacheBuilderImpl createBuilder(String name)
-  {
-    return getCacheManager()new CacheBuilderImpl(name, _cacheManager, _distCacheManager);
-  }
-  */
   
   @Override
   public int getStartPriority()
