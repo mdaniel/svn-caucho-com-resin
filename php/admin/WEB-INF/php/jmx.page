@@ -49,7 +49,7 @@ function display_mbeans($id, $mbean_group)
 
   foreach ($mbean_group as $group_name => $group_mbeans) {
     echo "<h1>" . $group_name . "</h1>\n";
-    display_jmx($mbean_server, $group_mbeans);
+    display_jmx($group_mbeans);
   }
 
   echo "</div>\n";

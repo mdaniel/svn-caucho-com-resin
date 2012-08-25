@@ -325,7 +325,7 @@ function display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid)
   echo "</table>\n";
 
   echo "<h3>Application MBeans</h3>";
-  display_jmx($g_mbean_server, $beans);
+  display_jmx($beans);
 }
 
 function display_versions($webapp, $webapp_id, $is_deploy_valid)

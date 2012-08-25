@@ -10,14 +10,14 @@ require_once "WEB-INF/php/graph_flot.php";
 import java.lang.System;
 import com.caucho.management.server.*;
 
+global $g_resin;
+global $g_is_professional;
+global $g_mbean_server;
+global $g_server;
 global $g_server_id;
 global $g_server_index;
-global $g_si;
 global $g_label;
-global $g_mbean_server;
-global $g_resin;
-global $g_server;
-global $g_is_professional;
+global $g_si;
 
 global $g_tail_objects;
 
@@ -35,9 +35,6 @@ if (function_exists('header')) {
 function admin_init($query="", $is_refresh=false, $fragment = false)
 {
   global $g_server_id;
-  global $g_server_index;
-  global $g_mbean_server;
-  global $g_resin;
   global $g_server;
   global $g_page;
 
@@ -128,20 +125,7 @@ function mbean_init()
     $g_server = $g_mbean_server->lookup("resin:type=Server");
     
     $g_is_professional = $g_resin->Professional;
-    
-    /*
-    echo "<!--\n";
-    echo "g_server_id = $g_server_id\n";
-    echo "g_server_index = $g_server_index\n";
-    echo "g_si = $g_si\n";
-    echo "g_label = $g_label\n";
-    echo "g_mbean_server = $g_mbean_server\n";
-    echo "g_resin = $g_resin\n";
-    echo "g_server = $g_server\n";
-    echo "g_is_professional = $g_is_professional\n";
-    echo "-->\n";    
-		*/
-    
+
     return $is_valid;
   }
   else
@@ -338,97 +322,6 @@ function uri($path)
     return $home_uri . "/" . $path;
 }
 
-function uri_nocache($path)
-{
-  global $home_uri;
-
-  if (is_null($home_uri))
-    $home_uri = rtrim(dirname($_SERVER['PHP_SELF']), '/\\'); 
-
-  /*
-  if (strstr($path, "?") === FALSE)
-    $rand = "?.rand=" . mt_rand();
-  else
-    $rand = "&.rand=" . mt_rand();
-  */
-
-  $rand = "";
-
-  if (strncmp($path, "/", 1) === 0)
-    return $path . $rand;
-  else
-    return $home_uri . "/" . $path . $rand;
-}
-
-function server_names($server, $cluster)
-{
-  $client_names = array();
-
-  foreach ($cluster->Servers as $client) {
-    $client_names[] = $client->Name;
-  }
-
-  sort($client_names);
-
-  return $client_names;
-}
-
-function static_server_names($server, $cluster)
-{
-  $client_names = array();
-
-  foreach ($cluster->Servers as $client) {
-    if (! $client->isDynamicServer())
-      $client_names[] = $client->Name;
-  }
-
-  sort($client_names);
-
-  return $client_names;
-}
-
-function dynamic_server_names($server, $cluster)
-{
-  $client_names = array();
-
-  foreach ($cluster->Servers as $client) {
-    if ($client->isDynamicServer())
-      $client_names[] = $client->Name;
-  }
-
-  sort($client_names);
-
-  return $client_names;
-}
-
-function server_by_name($name, $cluster)
-{
-  foreach ($cluster->Servers as $client) {
-    if ($client->Name == $name)
-      return $client;
-  }
-
-  return null;
-}
-
-function redirect($relative_url)
-{
-  $uri = uri($relative_url);
-
-  $scheme = $_SERVER['HTTPS'] ? "https" : "http";
-
-  header("Location: $scheme://" . $_SERVER['HTTP_HOST'] . $uri);
-}
-
-function redirect_nocache($relative_url)
-{
-  $uri = uri_nocache($relative_url);
-
-  $scheme = $_SERVER['HTTPS'] ? "https" : "http";
-
-  header("Location: $scheme://" . $_SERVER['HTTP_HOST'] . $uri);
-}
-
 if (is_null($target_uri))
   $target_uri = $_SERVER['PHP_SELF'];
 
@@ -443,7 +336,7 @@ $is_display_footer = false;
 /**
  * Displays JMX data to the output
  **/
-function display_jmx($mbean_server, $group_mbeans)
+function display_jmx($group_mbeans)
 {
   $type_partition = jmx_partition($group_mbeans, array("type"));
   ksort($type_partition);
@@ -481,14 +374,10 @@ function display_jmx($mbean_server, $group_mbeans)
       $start_id = ++$data_id;
 
       echo "<div id='jmx-${start_id}' ";
-      // echo " class='switch ui-widget-header ui-corner-all jmx-header'>";
-      //echo " class='switch jmx-header " . row_style($row++) . "'>";
-      //echo " class='switch jmx-header " . row_style($row++) . "'>";
       echo " class='switch jmx-header'>";
-      echo jmx_short_name($mbean->mbean_name, $group_array);
+      echo jmx_short_name($mbean->mbean_name, null);
       echo "</div>\n";
 
-//      echo "<div class='jmx-data-table ui-widget-content toggle-jmx-${start_id}'>";
       echo "<div class='jmx-data-table toggle-jmx-${start_id}'>";
       echo "<table class='jmx-data'>\n";
 
@@ -523,6 +412,7 @@ function display_jmx($mbean_server, $group_mbeans)
 function is_composite_data($v)
 {
   $class_name = get_java_class_name($v);
+
   return $class_name == "com.caucho.quercus.lib.resin.CompositeDataBean";
 }
 
@@ -575,10 +465,10 @@ function display_jmx_data($v)
 
 function htmlvardump($var)
 {
-	ob_start(); 
-	call_user_func_array('var_dump', $var); 
-	echo htmlspecialchars(ob_get_clean());
-	ob_end_clean();
+  ob_start();
+  call_user_func_array('var_dump', $var);
+  echo htmlspecialchars(ob_get_clean());
+  ob_end_clean();
 }
 
 function jmx_partition($mbean_list, $keys)
@@ -685,8 +575,6 @@ function display_header($script, $title, $server,
   
   $title = $title . " for server " . $g_server_id;
 
-//  $server_id = $server->Name;
-
   $next_url = "?q=${g_page}&s=${g_server_index}${query}";
   
   foreach ($_GET as $key => $value) {
@@ -704,8 +592,6 @@ function display_header($script, $title, $server,
 
   $display_header_script = $script;
   $display_header_title = $title;
-
-  $logout_uri = uri("logout.php");
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -766,7 +652,7 @@ else {
 }
 ?>
 <ul class='status'>
-	<li class="server status-item"><?php display_servers($server); ?></li>
+  <li class="server status-item"><?php display_servers($server); ?></li>
   <li class="status-item"><?php display_health(); ?></li>
   <li class="status-item status-log"><?php display_status_log($server); ?></li>
   <li class="status-item status-log"><?php display_graph_control(); ?></li>
@@ -781,7 +667,7 @@ else {
 <? } ?>
 
 <div class="top-header">
-	<img src='<?= uri("images/caucho-logo.png") ?>' width='300' alt="Caucho Technology"/>
+  <img src='<?= uri("images/caucho-logo.png") ?>' width='300' alt="Caucho Technology"/>
 </div>
 <table id="layout">
 <tr>
@@ -789,10 +675,6 @@ else {
     <ul class="leftnav">
     <?php
       display_pages();
-/*
-         if ($allow_remote)
-           display_left_navigation($server);
-*/
     ?>
     </ul>
   </td>
@@ -1117,8 +999,7 @@ flush();
 function display_left_navigation($current_server)
 {
   global $g_page;
-  global $g_server_id;
-  
+
   $mbean_server = new MBeanServer();
 
   if (! $mbean_server)
@@ -1137,10 +1018,6 @@ function display_left_navigation($current_server)
     echo "<div class='nav-cluster'>$cluster->Name</div>\n";
 
     $client_names = array();
-    /*
-    if ($cluster->Name == $server->Cluster->Name) {
-      $client_names[] = $server->Id;
-    }*/
 
     foreach ($cluster->Servers as $client) {
       $client_names[] = $client->Name;
@@ -1226,19 +1103,6 @@ function display_timeout($timeout)
   }
 }
 
-
-function server_find_by_index($g_mbean_server, $index)
-{
-  $server = $g_mbean_server->lookup("resin:type=Server");
-
-  foreach ($server->Cluster->Servers as $cluster_server) {
-    if ($cluster_server->ClusterIndex == $index) {
-      return $cluster_server;
-    }
-  }
-  
-  return null;
-}
 
 function server_find_by_index($g_mbean_server, $index)
 {

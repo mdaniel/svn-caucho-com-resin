@@ -47,13 +47,7 @@ if (require_professional()) {
 }
 
 echo "</div>";
-/*
-echo "<div id='meter-tab'>\n";
 
-print_graphs();
-
-echo "</div><!-- meter-tab -->\n";
-*/
 echo "<div id='table-tab'>\n";
 
 print_threads();
@@ -280,14 +274,14 @@ function print_overview_graphs()
 	$mem_params = new GraphParams("sum-memory", $width, $height);
 	$mem_params->title = gettext('Memory');
 	$mem_params->alt = gettext('A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
-  
+
   stat_graph($mem_params,
-             array("$g_si|JVM|Memory|Heap Memory Free",
-                   "$g_si|JVM|Memory|Heap Memory Used",
-                   "$g_si|JVM|Memory|Tenured Memory Free",
-                   "$g_si|JVM|Memory|Tenured Memory Used",
-             			 "$g_si|JVM|Memory|PermGen Memory Free"),
-             			 "$g_si|JVM|Memory|PermGen Memory Used");
+    array("$g_si|JVM|Memory|Heap Memory Free",
+      "$g_si|JVM|Memory|Heap Memory Used",
+      "$g_si|JVM|Memory|Tenured Memory Free",
+      "$g_si|JVM|Memory|Tenured Memory Used",
+      "$g_si|JVM|Memory|PermGen Memory Free",
+      "$g_si|JVM|Memory|PermGen Memory Used"));
 
   echo "</td><td>\n";
 
@@ -348,7 +342,7 @@ function recent_messages($max)
   global $g_server, $g_mbean_server;
 
   $mbean = $g_mbean_server->lookup("resin:type=LogService");
-  
+
   if (! require_professional()) {
     return;
   } else if (! $mbean) {
@@ -381,7 +375,7 @@ function recent_messages($max)
       $messages = array_reverse($messages);
 
       if ($max < sizeof($messages)) {
-        $messages = array_slice($array, 0, $max);
+        $messages = array_slice($messages, 0, $max);
       }
 
       echo "<tbody class='scroll'>\n";
@@ -706,11 +700,6 @@ function print_threads()
       echo "<pre id='h1_$pname' style='display:none'>";
 
       $thread = $jvm_thread->getThreadInfo($threadId, 50);
-      /*
-      foreach ($thread->stackTrace as $trace) {
-        echo "     at " . $trace->className . "." . $trace->methodName . "\n";
-      }
-      */
 
       echo $thread;
 
@@ -800,22 +789,6 @@ function print_database_pools()
     echo print_db_pools($db_pools);
   }
 }
-
-/*
-$store = $mbean_server->lookup("resin:type=PersistentStore");
-
-if ($store) {
-  echo "<h2>Persistent Store: $store->StoreType</h2>\n";
-  echo "<table class='data'>";
-
-  echo "<tr><th>Object Count</th><td>$store->ObjectCount</td>\n";
-  echo "<tr><th>Load Count</th><td>$store->LoadCountTotal</td>\n";
-  echo "<tr><th>Load Fail Count</th><td>$store->LoadFailCountTotal</td>\n";
-  echo "<tr><th>Save Count</th><td>$store->SaveCountTotal</td>\n";
-  echo "<tr><th>Save Fail Count</th><td>$store->SaveFailCountTotal</td>\n";
-  echo "</table>";
-}
-*/
 
 function conn_time_cmp($conn_a, $conn_b)
 {
