@@ -89,7 +89,7 @@ echo gettext('Restart at');
 echo date("Y-m-d H:i", $restart_time);
 echo "</h2>\n";
 
-$log_mbean = $mbean_server->lookup("resin:type=LogService");
+$log_mbean = $mbean_server->getLogService();
 
 echo "<div id='watchdog-tabs'>\n";
 echo "<ul>";

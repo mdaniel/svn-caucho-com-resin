@@ -9,7 +9,7 @@ $profile = @new Java("com.caucho.profile.ProProfile");
 
 $mbeanServer = new MBeanServer();
 
-$server = $mbeanServer->lookup("resin:type=Server");
+$server = $mbeanServer->getServer();
 
 $title = "Resin: Profile $server->Id";
 

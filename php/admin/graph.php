@@ -8,8 +8,8 @@
 //echo "<pre>";
 $mbean_server = new MBeanServer();
 
-$server = $mbean_server->lookup("resin:type=Server");
-$stat_service = $mbean_server->lookup("resin:type=StatService");
+$server = $mbean_server->getServer();
+$stat_service = $mbean_server->getStatService();
 
 if (! $stat_service) {
   echo "stat service not available";
@@ -62,7 +62,7 @@ foreach ($items as $item) {
     
   $test_server = $server_id;
 
-  $stat_service = $mbean_server->lookup("resin:type=StatService");
+  $stat_service = $mbean_server->getStatService();
 
   if (! $stat_service)
     continue;

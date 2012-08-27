@@ -16,7 +16,7 @@ if (! admin_init()) {
 print_title("thread", "Thread Dump");
 
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
-$server = $g_mbean_server->lookup("resin:type=Server");
+$server = $g_mbean_server->getServer();
 
 ?>
 <!--
@@ -24,7 +24,7 @@ $server = $g_mbean_server->lookup("resin:type=Server");
 -->
 <?php
 
-$stat_service = $g_mbean_server->lookup("resin:type=StatService");
+$stat_service = $g_mbean_server->getStatService();
 $si = sprintf("%02d", $server->SelfServer->ClusterIndex);
 
 $thread_pool = $g_server->ThreadPool;

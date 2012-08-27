@@ -341,7 +341,7 @@ function recent_messages($max)
 {
   global $g_server, $g_mbean_server;
 
-  $mbean = $g_mbean_server->lookup("resin:type=LogService");
+  $mbean = $g_mbean_server->getLogService();
 
   if (! require_professional()) {
     return;

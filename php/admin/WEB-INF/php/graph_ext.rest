@@ -12,7 +12,7 @@ if (! $mbean_server) {
   return;
 }
 
-$stat = $mbean_server->lookup("resin:type=StatService");
+$stat = $mbean_server->getStatService();
 
 foreach ($graphs as $graph) {
   stat_graph_script($stat, $graph->canvas, $graph->names, 

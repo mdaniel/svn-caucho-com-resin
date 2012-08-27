@@ -19,7 +19,7 @@ echo "</ul>";
 
 echo "<div id='graphs'>\n";
 
-$stat_service = $g_mbean_server->lookup("resin:type=StatService");
+$stat_service = $g_mbean_server->getStatService();
 
 if ($stat_service) {
 

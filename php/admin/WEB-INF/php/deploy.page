@@ -33,7 +33,7 @@ function check_deploy_enabled($is_secure)
     return 0;
 
   $mbean_server = new MBeanServer();
-  $server = $mbean_server->lookup("resin:type=Server");
+  $server = $mbean_server->getServer();
   $server_index = $server->SelfServer->ClusterIndex;
 
   if ($g_server_index != $server_index)

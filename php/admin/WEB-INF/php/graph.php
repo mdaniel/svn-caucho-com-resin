@@ -39,7 +39,7 @@ function stat_graph_regexp($canvas, $width, $height,
   if (! $g_mbean_server)
     return;
 
-  $stat = $g_mbean_server->lookup("resin:type=StatService");
+  $stat = $g_mbean_server->getStatService();
 
   if (! $stat)
     return;
@@ -61,7 +61,7 @@ function stat_graph($canvas, $width, $height,
   if (! $g_mbean_server)
     return;
 
-  $stat = $g_mbean_server->lookup("resin:type=StatService");
+  $stat = $g_mbean_server->getStatService();
 
   if (! $stat)
     return;

@@ -19,7 +19,7 @@ $os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
 $runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
 $thread = $g_mbean_server->lookup("resin:type=ThreadPool");
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
-$stat = $g_mbean_server->lookup("resin:type=StatService");
+$stat = $g_mbean_server->getStatService();
 
 if (! $stat) {
   echo "mod_status requires Resin Professional";

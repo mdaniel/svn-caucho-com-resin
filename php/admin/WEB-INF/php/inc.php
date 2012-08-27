@@ -6,9 +6,10 @@
  */
 
 require_once "WEB-INF/php/graph_flot.php";
+require_once "WEB-INF/php/MBeanServer.php";
 
 import java.lang.System;
-import com.caucho.management.server.*;
+//import com.caucho.management.server.*;
 
 global $g_resin;
 global $g_is_professional;
@@ -27,8 +28,8 @@ bindtextdomain("messages", "i18n");
 
 if (function_exists('header')) {
   // kill the cache, all pages are uncached and private
-  header("Expires: 01 Dec 1994 16:00:00 GMT"); 
-  header("Cache-Control: max-age=0,private"); 
+  header("Expires: 01 Dec 1994 16:00:00 GMT");
+  header("Cache-Control: max-age=0,private");
   header("Pragma: No-Cache");
 }  
 
@@ -46,8 +47,13 @@ function admin_init($query="", $is_refresh=false, $fragment = false)
 
     display_header($g_page, $title, $g_server, $query, $is_refresh);
 
-    echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
-    
+    $mbean_server = new MBeanServer($g_server_id);
+
+    if ($mbean_server->isConnected() == true)
+      echo "<h3 class='fail'>Please register &lt;resin:AdminService/></h3>";
+    else
+      echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
+
     return false;
   }
 
@@ -60,19 +66,19 @@ function admin_init($query="", $is_refresh=false, $fragment = false)
     return true;
   else
     return display_header($g_page, $title, $g_server, $query, $is_refresh, true);
-}  
+}
 
 function mbean_init()
 {
+  global $g_resin;
+  global $g_is_professional;
+  global $g_mbean_server;
+  global $g_server;
   global $g_server_id;
   global $g_server_index;
-  global $g_si;
   global $g_label;
-  global $g_mbean_server;
-  global $g_resin;
-  global $g_server;
-  global $g_is_professional;
-  
+  global $g_si;
+
   $is_valid = 1;
 
   $server_index = $_GET["s"];
@@ -80,9 +86,9 @@ function mbean_init()
   if (isset($_REQUEST["new_s"])) {
     $server_index = $_REQUEST["new_s"];
   }
-  
+
   $g_mbean_server = new MBeanServer();
-  
+
   $server = server_find_by_index($g_mbean_server, $server_index);
 
   if ($server) {
@@ -90,7 +96,7 @@ function mbean_init()
   }
 
   if (! isset($g_server_index)) {
-    $g_server = $g_mbean_server->lookup("resin:type=Server");
+    $g_server = $g_mbean_server->getServer();
     $g_server_index = $g_server->SelfServer->ClusterIndex;
     $g_server_id = $g_server->Id;
 
@@ -103,7 +109,8 @@ function mbean_init()
 
     try {
       $mbean_server = new MBeanServer($g_server_id);
-      $server = $mbean_server->lookup("resin:type=Server");
+
+      $server = $mbean_server->getServer();
 
       if ($server) {
         $g_mbean_server = $mbean_server;
@@ -116,14 +123,14 @@ function mbean_init()
       $is_valid = false;
     }
   }
-  
+
   $g_si = sprintf("%02d", $g_server_index);
   $g_label = "$g_si - $g_server_id";
 
   if ($g_mbean_server) {
-    $g_resin = $g_mbean_server->lookup("resin:type=Resin");
-    $g_server = $g_mbean_server->lookup("resin:type=Server");
-    
+    $g_resin = $g_mbean_server->getResin();
+    $g_server = $g_mbean_server->getServer();
+
     $g_is_professional = $g_resin->Professional;
 
     return $is_valid;
@@ -141,7 +148,7 @@ function load_pages($suffix)
 
   if ($user_path)
     $pages = array_merge($pages, load_dir_pages($user_path, $suffix));
-    
+
   return $pages;
 }
 
@@ -161,7 +168,7 @@ function load_dir_pages($dir_name, $suffix)
   }
 
   closedir($dir);
-  
+
   return $pages;
 }
 
@@ -198,7 +205,7 @@ function format_ago_td_pair($value, $date, $headers=null)
 	  echo "<td>$value</td>\n";
 	  echo "<td $ago_class>";
   }
-  
+
   echo format_ago($date);
   echo "</td>\n";
 }
@@ -238,7 +245,7 @@ function format_ago($date)
     return "";
 
   $event_time = $date->time / 1000;
-  
+
   return format_ago_unixtime($event_time);
 }
 
@@ -257,7 +264,7 @@ function format_ago_unixtime($event_time)
 }
 
 // this is necessary to strip milliseconds, which strtotime doesn't handle
-function java_iso8601_to_date($iso8601) 
+function java_iso8601_to_date($iso8601)
 {
   $array = split('[T\.\+]', $iso8601);
   return strtotime($array[0] . "T" . $array[1] . "+" . $array[3]);
@@ -287,7 +294,7 @@ function format_count($count)
     return sprintf("%.1fG", $count / (1000.0 * 1000.0 * 1000.0));
 }
 
-function format_bytes($bytes) 
+function format_bytes($bytes)
 {
   if(!empty($bytes)) {
     $s = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
@@ -314,7 +321,7 @@ function uri($path)
   global $home_uri;
 
   if (is_null($home_uri))
-    $home_uri = rtrim(dirname($_SERVER['PHP_SELF']), '/\\'); 
+    $home_uri = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
 
   if (strncmp($path, "/", 1) === 0)
     return $path;
@@ -348,7 +355,7 @@ function display_jmx($group_mbeans)
   $row = 0;
 
   echo "<div class='jmx'>";
-  
+
   foreach ($type_partition as $type_name => $type_mbeans) {
     echo "<div id='jmx-${group_id}-type-${type_name}'";
     // echo " class='ui-widget-header ui-corner-all switch jmx-header'>\n";
@@ -363,9 +370,9 @@ function display_jmx($group_mbeans)
     foreach ($type_mbeans as $mbean) {
       $attr_list = $mbean->mbean_info->attributes;
       sort($attr_list);
-      
+
       $attr_names = null;
-      
+
       foreach ($attr_list as $attr) {
         $attr_names[] = $attr->name;
       }
@@ -394,7 +401,7 @@ function display_jmx($group_mbeans)
           echo "Data unavailable due to error: ";
           var_dump($e);
         }
-        
+
         echo "</td>\n";
         echo "</tr>\n";
       }
@@ -403,7 +410,7 @@ function display_jmx($group_mbeans)
 
     echo "</div>";
   }
-  
+
   echo "</div>";
 
   $group_id++;
@@ -458,7 +465,7 @@ function display_jmx_data($v)
     $v = (string) $v;
 
     $v = wordwrap($v);
-	  
+
     echo htmlspecialchars($v);
   }
 }
@@ -488,7 +495,7 @@ function jmx_partition($mbean_list, $keys)
     foreach ($keys as $key) {
       if ($key == ":domain:")
         continue;
-      
+
       $value = $exp[$key];
 
       if ($value) {
@@ -502,10 +509,10 @@ function jmx_partition($mbean_list, $keys)
     if (in_array(":domain:", $keys)) {
       $name = "${domain}:" . $name;
     }
-      
+
     $env[$name][] = $mbean;
   }
-  
+
   ksort($env);
 
   return $env;
@@ -521,23 +528,23 @@ function jmx_short_name($name, $exclude_array)
 
   if (count($exp) > 0) {
     ksort($exp);
-    
+
     $name = "";
-    
+
     foreach ($exp as $key => $value) {
       if ($key == ':domain:')
         continue;
-	
+
       if (strlen($name) > 0)
         $name .= ",";
 
       $name .= $key . '=' . $value;
     }
-    
+
     if ($exp[':domain:']) {
       $name = $exp[':domain:'] . ":" . $name;
     }
-    
+
     return $name;
   }
   else
@@ -548,7 +555,7 @@ function jmx_short_name($name, $exclude_array)
  * Outputs an html header.
  * A header is only output if this is the first call to display_header().
  * The first call establishes the title of the page.
- * 
+ *
  * @param $script the script calling the function
  * @param $title a title to use if the header is output.
  *
@@ -572,19 +579,19 @@ function display_header($script, $title, $server,
   if (! empty($display_header_script)) {
     return;
   }
-  
+
   $title = $title . " for server " . $g_server_id;
 
   $next_url = "?q=${g_page}&s=${g_server_index}${query}";
-  
+
   foreach ($_GET as $key => $value) {
     if (! preg_match("/^[sq]{1}$/", $key)) {
       $next_url .= "&${key}=${value}";
     }
   }
-  
-  $g_next_url = str_replace('&', '&amp;', $next_url); 
-  
+
+  $g_next_url = str_replace('&', '&amp;', $next_url);
+
   if (isset($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
     header("Location: ${next_url}");
     return false;
@@ -600,7 +607,7 @@ function display_header($script, $title, $server,
   <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
   <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
   <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" media="screen" />
-  
+
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <?php
 if ($is_refresh) {
@@ -684,7 +691,7 @@ else {
     echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
     return false;
   }
-  
+
   return true;
 }
 
@@ -751,13 +758,13 @@ function display_status_log($server)
   $mbean_server = new MBeanServer($server->SelfServer->Name);
 
   if ($mbean_server) {
-    $mbean = $mbean_server->lookup("resin:type=LogService");
+    $mbean = $mbean_server->getLogService();
   }
 
   //
   // recent messages
   //
-  
+
   if ($mbean) {
     $now = time();
 
@@ -773,7 +780,7 @@ function display_status_log($server)
       $first_message = $messages[0]->message;
 
       if (strlen($first_message) > 60) {
-        $first_message 
+        $first_message
           = htmlspecialchars(substr($messages[0]->message, 0, 57)) . "...";
       }
       else {
@@ -813,10 +820,10 @@ function display_health()
 {
   global $g_server;
   $resin = $g_server->Cluster->Resin;
-  
+
   // $clusters = $resin->Clusters;
   $clusters = array($g_server->Cluster);
-  
+
   $down_servers = array();
   $error = "";
 
@@ -830,26 +837,26 @@ function display_health()
         array_push($triads, array($triad, new MBeanServer($triad->Name)));
       }
     }
-    
+
     foreach ($servers as $s) {
       if ($s->Name == "")
         $display_name = "{$c->Name}:default";
       else
         $display_name = "{$c->Name}:{$s->Name}";
-        
+
       $error = "";
 
       foreach ($triads as $triad_pair) {
         list($triad, $triad_mbean_server) = $triad_pair;
-        
+
         if ($s->SelfServer->Name == $triad->Name)
           continue;
 
         $s_mbean_server = new MBeanServer($s->Name);
-        $s_server = $s_mbean_server->lookup("resin:type=Server");
+        $s_server = $s_mbean_server->getServer();
         $s_triad_server = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
-        
-        $triad_server = $triad_mbean_server->lookup("resin:type=Server");
+
+        $triad_server = $triad_mbean_server->getServer();
         $triad_cluster = $triad_server->SelfServer->Cluster;
         $triad_cluster_server = $triad_cluster->Servers[$s->ClusterIndex];
 
@@ -863,11 +870,11 @@ function display_health()
       }
 
       if ($error) {
-				array_push($down_servers, array($display_name, $error));
+        array_push($down_servers, array($display_name, $error));
       }
     }
   }
-  
+
   $health = (count($down_servers) == 0);
 
   if ($health) {
@@ -880,7 +887,7 @@ function display_health()
     echo " (" . count($down_servers) . ") ";
     echo "<span class='menu-switch' id='down-servers'>";
     echo "<ul class='toggle-down-servers' style='display: none'>";
-  	foreach ($down_servers as $down_server) {
+    foreach ($down_servers as $down_server) {
       list($display_name, $error) = $down_server;
       $title = htmlspecialchars($error);
 
@@ -905,7 +912,7 @@ function display_servers($server)
   }
 
   echo "<form class='status-item' name='servers' method='post' action='${g_next_url}'>";
-  echo "<label for='new_s'>Server</label>: "; 
+  echo "<label for='new_s'>Server</label>: ";
   echo "<select id='new_s' name='new_s' onchange='document.forms.servers.submit();' class='status-item'>\n";
 
   $self_server = $server->SelfServer;
@@ -974,7 +981,7 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="pie-chart.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
-<script type="text/javascript" src="flot/jquery.flot.selection.js"></script> 
+<script type="text/javascript" src="flot/jquery.flot.selection.js"></script>
 <script type="text/javascript">
 <!--
 //  $(document).ready(function() {
@@ -1005,8 +1012,8 @@ function display_left_navigation($current_server)
   if (! $mbean_server)
     return;
 
-  $resin = $mbean_server->lookup("resin:type=Resin");
-  $server = $mbean_server->lookup("resin:type=Server");
+  $resin = $mbean_server->getResin();
+  $server = $mbean_server->getServer();
 
   if (! $current_server)
     $current_server = $server;
@@ -1032,7 +1039,7 @@ function display_left_navigation($current_server)
 
       if (! $client)
         $client = '""';
-        
+
       $client_server = $mbean_server->lookup("resin:type=ClusterServer,name=$client");
 
       if ($client == $current_server->Id) {
@@ -1106,20 +1113,20 @@ function display_timeout($timeout)
 
 function server_find_by_index($g_mbean_server, $index)
 {
-  $server = $g_mbean_server->lookup("resin:type=Server");
+  $server = $g_mbean_server->getServer();
 
   foreach ($server->Cluster->Servers as $cluster_server) {
     if ($cluster_server->ClusterIndex == $index) {
       return $cluster_server;
     }
   }
-  
+
   return null;
 }
 
 function server_find_by_id($mbean_server, $id)
 {
-  $server = $mbean_server->lookup("resin:type=Server");
+  $server = $mbean_server->getServer();
 
   if (! $id) {
     $id = "default";
@@ -1131,12 +1138,12 @@ function server_find_by_id($mbean_server, $id)
     if (! $server_id) {
       $server_id = "default";
     }
-    
+
     if ($server_id == $id) {
       return $cluster_server;
     }
   }
-  
+
   return null;
 }
     
@@ -1208,18 +1215,18 @@ function display_health_status($s)
 
   $label = $si . " - " . $server_id;
   echo "<h2>" . gettext('Server') . ": $label</h2>\n";
-  
+
   echo "<table class='data'>\n";
   echo "<tr><th scope='col' class='item'>" . gettext('Status') . "</th>";
   echo "<th scope='col' class='item'>" . gettext('Check') . "<span id='sw_health_status_${si}' class='switch'></span></th>";
   echo "<th scope='col' class='item'>" . gettext('Message') . "</th></tr>\n";
-  
+
   echo "<tr><td>";
 
   if ($mbean_server) {
     $health = $mbean_server->lookup("resin:type=HealthCheck,name=Resin");
   }
-  
+
   if (! $health) {
     print_health("CRITICAL");
     $message = gettext('cannot connect to server ') . $label;
@@ -1228,7 +1235,7 @@ function display_health_status($s)
     print_health($health->Status);
     $message = $health->Message;
   }
-	
+
   echo "</td><td>" . gettext('Overall') . "</td><td>$message</td></tr>\n";
 
   if ($mbean_server && $health) {
@@ -1249,7 +1256,7 @@ function display_health_status($s)
       echo "</tr>";
     }
   }
-  
+
   echo "</table><br/>";
 }
 
@@ -1265,7 +1272,7 @@ function get_stats_service($mbean_server = null)
     return;
   }
 
-  return $mbean_server->lookup("resin:type=StatService");
+  return $mbean_server->getStatService();
 }
 
 function display_add_tail($tail)
@@ -1278,7 +1285,7 @@ function display_add_tail($tail)
 function display_tail()
 {
   global $g_tail_objects;
-  
+
   foreach ($g_tail_objects as $tail) {
     $tail->execute();
   }
@@ -1287,27 +1294,27 @@ function display_tail()
 function require_professional($msg = "This feature requires Resin Professional and a valid license.")
 {
   global $g_is_professional;
-  
+
   if (! $g_is_professional) {
     echo "<div style=\"display:inline-block;margin:.5em;\">\n";
     echo "<div class=\"req-pro-title\"><span style=\"color: red\">&#x2717;&nbsp;&nbsp;</span>";
     echo "Resin Professional Feature</div>\n";
-    
+
     if (isset($msg)) {
       echo "<div class=\"req-pro-message\">${msg}</div>\n";
     }
-    
+
     echo "<div class=\"req-pro-link\">Please download  
     <a href='http://www.caucho.com/download'> 
     Resin Professional</a> and request a free 
     <a href='http://www.caucho.com/evaluation-license/'>evaluation license</a>.
     </div>\n";
-    
+
     echo "</div>\n";
-    
+
     return false;
   }
-  
+
   return true;
 }
 
@@ -1315,14 +1322,14 @@ function get_param($current, $name, $default=null)
 {
   if ($current)
     return $current;
-    
+
   if ($_REQUEST[$name])
     return $_REQUEST[$name];
-    
+
   return $default;
 }
 
-function debug($obj) 
+function debug($obj)
 {
   if (is_string($obj))
     System::out->println($obj);
@@ -1330,30 +1337,30 @@ function debug($obj)
     System::out->println(var_export($obj,1));
 }
 
-function format_seconds($seconds) 
+function format_seconds($seconds)
 {
   if (round($seconds) == 0)
     return "0 seconds";
-  
+
   $minute = 60;
   $hour = $minute * 60;
   $day = $hour * 24;
   $week = $day * 7;
-  
+
   $weeks = floor($seconds/$week);
   $seconds -= $weeks * $week;
-  
+
   $days = floor($seconds/$day);
   $seconds -= $days * $day;
-  
+
   $hours = floor($seconds/$hour);
   $seconds -= $hours * $hour;
-  
+
   $minutes = floor($seconds/$minute);
   $seconds -= $minutes * $minute;
-  
+
   $seconds = round($seconds);
-  
+
   $sb = "";
   if ($weeks == 1)
     $sb .= $weeks . " week ";
@@ -1375,7 +1382,7 @@ function format_seconds($seconds)
     $sb .= $seconds . " second";
   if ($seconds > 1)
     $sb .= $seconds . " seconds";
-    
+
   return $sb;
 }
 

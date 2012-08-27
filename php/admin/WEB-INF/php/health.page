@@ -137,7 +137,7 @@ function display_heartbeat()
         $style = "border-width : 1px";
 
         $s_mbean_server = new MBeanServer($s->Name);
-        $s_server = $s_mbean_server->lookup("resin:type=Server");
+        $s_server = $s_mbean_server->getServer();
 
         if (! $s_server) {
           $style .= "; border-color : #cc0000";
@@ -191,7 +191,7 @@ function display_heartbeat()
       // 
 
       $s_mbean_server = new MBeanServer($s->Name);
-      $s_server = $s_mbean_server->lookup("resin:type=Server");
+      $s_server = $s_mbean_server->getServer();
       $s_health = $s_mbean_server->lookup("resin:type=HealthCheck,name=Resin");
       
       $is_health = $s_server;
@@ -237,10 +237,10 @@ function do_triad($s, $triad, $triad_mbean_server)
   echo "<span style='font-size=1.2em'>";
   
   $s_mbean_server = new MBeanServer($s->Name);
-  $s_server = $s_mbean_server->lookup("resin:type=Server");
+  $s_server = $s_mbean_server->getServer();
   $s_triad_server = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
 
-  $triad_server = $triad_mbean_server->lookup("resin:type=Server");
+  $triad_server = $triad_mbean_server->getServer();
   $triad_cluster = $triad_server->SelfServer->Cluster;
   $triad_cluster_server = $triad_cluster->Servers[$s->ClusterIndex];
 
@@ -330,8 +330,8 @@ function display_health_availability()
   if (! require_professional()) {
     return;
   }
-  
-	$stat = get_stats_service();
+
+  $stat = get_stats_service();
   if (! $stat) {
     return;
   }
@@ -349,7 +349,7 @@ function display_health_availability()
   $params->title = $g_label . " " . gettext('Uptime');
   $params->alt
     = gettext("A line graph representing the availability of the server.");
-  $params->mbean_server = $mbean_server;
+  $params->mbean_server = $g_mbean_server;
   $params->labels = array("DOWN","","","UP");
 
   stat_graph($params, array("$g_si|Resin|Uptime|Up"));

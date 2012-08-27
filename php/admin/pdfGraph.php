@@ -40,7 +40,7 @@ if (! $stat) {
   return;
 }
 
-$log_mbean = $g_mbean_server->lookup("resin:type=LogService");
+$log_mbean = $g_mbean_server->getLogService();
 
 function  my_error_handler($error_type, $error_msg, $errfile, $errline) 
 {
