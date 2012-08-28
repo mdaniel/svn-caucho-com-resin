@@ -31,9 +31,14 @@ package com.caucho.boot;
 
 import java.util.ArrayList;
 
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
 
 public abstract class AbstractStartCommand extends AbstractBootCommand
 {
+  private static final L10N L = new L10N(AbstractStartCommand.class);
+  
   protected AbstractStartCommand()
   {
     addFlagOption("verbose", "log command-line and environment information");
@@ -64,7 +69,23 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     
     manager.startServer(serverId, args.getArgv());
   }
- 
+  
+  @Override
+  protected WatchdogClient findNamedClient(ResinBoot boot, 
+                                           WatchdogArgs args,
+                                           String serverId)
+  {
+    WatchdogClient client = super.findNamedClient(boot, args, serverId);
+    System.err.println("CL: " + client  + " " + serverId + " " + boot.isElasticServer(args));
+    if (boot.isElasticServer(args)) {
+      throw new ConfigException(L.l("-server '{0}' is a static server, but --elastic-server is requested.",
+                                    serverId));
+    }
+    else {
+      return client;
+    }
+  }
+
   @Override
   protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
   {

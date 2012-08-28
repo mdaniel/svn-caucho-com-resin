@@ -199,7 +199,7 @@ public class ResinBoot
     if (! _resinConfig.isElasticServer(_args)) {
       return;
     }
-
+    
     WatchdogClient client = _resinConfig.addElasticClient(_args);
 
     if (client != null) {

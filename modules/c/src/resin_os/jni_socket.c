@@ -1085,7 +1085,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   int family = 0;
   int protocol = 0;
   server_socket_t *ss;
-  char sin_data[256];
+  char sin_data[512];
   struct sockaddr_in *sin = (struct sockaddr_in *) sin_data;
   int sin_length = sizeof(sin_data);
 
@@ -1192,6 +1192,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   }
 
   sin_length = sizeof(sin_data);
+  memset(sin_data, 0, sin_length);
   getsockname(sock, (struct sockaddr *) sin_data, &sin_length);
 
   /* must be 0 if the poll is missing for accept */

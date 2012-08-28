@@ -660,8 +660,9 @@ public class BootResinConfig // implements EnvironmentBean
    */
   WatchdogClient addElasticClient(WatchdogArgs args)
   {
-    if (! isElasticServer(args) && ! isHomeCluster())
+    if (! isElasticServer(args) && ! isHomeCluster()) {
       throw new IllegalStateException();
+    }
     
     int count = 0;
     
@@ -726,6 +727,12 @@ public class BootResinConfig // implements EnvironmentBean
     // configHandle.setDynamic(true);
     configHandle.setAddress(address);
     configHandle.setPort(port);
+    
+    if (findClient(configHandle.getId()) != null) {
+      throw new ConfigException(L.l("--elastic-server '{0}' already exists as a static server."
+                                    + " Elastic server names must not conflict with static server names.",
+                                    configHandle.getId()));
+    }
     
     WatchdogConfig config = cluster.addServer(configHandle);
     

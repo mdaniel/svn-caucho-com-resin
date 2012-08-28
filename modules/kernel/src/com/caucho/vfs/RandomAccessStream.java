@@ -32,6 +32,7 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +47,7 @@ abstract public class RandomAccessStream
     = Logger.getLogger(RandomAccessStream.class.getName());
   
   private final AtomicLong _useCount = new AtomicLong(1);
+  private final AtomicBoolean _isClosed = new AtomicBoolean();
   
   /**
    * Returns the length.
@@ -188,7 +190,9 @@ abstract public class RandomAccessStream
    */
   public final void close()
   {
-    free();
+    if (! _isClosed.getAndSet(true)) {
+      free();
+    }
   }
   
   /**

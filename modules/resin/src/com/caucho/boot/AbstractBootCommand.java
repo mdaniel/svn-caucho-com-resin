@@ -123,8 +123,8 @@ public abstract class AbstractBootCommand implements BootCommand {
   
   protected WatchdogClient findClient(ResinBoot boot, WatchdogArgs args)
   {
-    WatchdogClient client = boot.findClient(args.getServerId(), args);
-    
+    WatchdogClient client = findNamedClient(boot, args, args.getServerId());
+    System.err.println("FC: " + client);
     if (client != null) {
       return client;
     }
@@ -140,6 +140,20 @@ public abstract class AbstractBootCommand implements BootCommand {
     }
     
     return client;
+  }
+  
+  protected WatchdogClient findNamedClient(ResinBoot boot, 
+                                           WatchdogArgs args,
+                                           String serverId)
+  {
+    return findNamedClientImpl(boot, args, args.getServerId());
+  }
+  
+  protected WatchdogClient findNamedClientImpl(ResinBoot boot,
+                                               WatchdogArgs args,
+                                               String serverId)
+  {
+    return boot.findClient(serverId, args);
   }
   
   protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
