@@ -124,7 +124,7 @@ public abstract class AbstractBootCommand implements BootCommand {
   protected WatchdogClient findClient(ResinBoot boot, WatchdogArgs args)
   {
     WatchdogClient client = findNamedClient(boot, args, args.getServerId());
-    System.err.println("FC: " + client);
+
     if (client != null) {
       return client;
     }

@@ -85,6 +85,7 @@ public class ProtocolPortConfig extends TcpPort
   
   public void add(Protocol protocol)
   {
+    System.out.println("ADD: " +protocol);
     setProtocol(protocol);
   }
 
@@ -119,7 +120,7 @@ public class ProtocolPortConfig extends TcpPort
       setProtocol(protocol);
     }
     else
-      throw new ConfigException(L.l("protocol requires either a class"));
+      throw new ConfigException(L.l("protocol requires either a class or a Protocol child."));
     
     super.init();
   }

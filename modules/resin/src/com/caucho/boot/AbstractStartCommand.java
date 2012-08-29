@@ -75,15 +75,20 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
                                            WatchdogArgs args,
                                            String serverId)
   {
-    WatchdogClient client = super.findNamedClient(boot, args, serverId);
-    System.err.println("CL: " + client  + " " + serverId + " " + boot.isElasticServer(args));
+    WatchdogClient client = findNamedClientImpl(boot, args, serverId);
+
+    /*
     if (boot.isElasticServer(args)) {
+      Thread.dumpStack();
       throw new ConfigException(L.l("-server '{0}' is a static server, but --elastic-server is requested.",
                                     serverId));
     }
     else {
       return client;
     }
+    */
+    
+    return client;
   }
 
   @Override

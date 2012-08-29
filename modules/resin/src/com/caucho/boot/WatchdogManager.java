@@ -199,7 +199,7 @@ class WatchdogManager implements AlarmListener {
     
     _watchdogPort = _args.getWatchdogPort();
     
-    _resinConfig = readConfig(serverId, _args);
+    _resinConfig = readConfig(_args);
 
     WatchdogChild server = findConfig(_resinConfig, serverId, _args);
     
@@ -469,7 +469,7 @@ class WatchdogManager implements AlarmListener {
     WatchdogChild server;
 
     try {
-      BootResinConfig resin = readConfig(serverId, args);
+      BootResinConfig resin = readConfig(args);
       
       if (resin.isElasticServer()) {
         int totalCount = 0;
@@ -525,7 +525,7 @@ class WatchdogManager implements AlarmListener {
       WatchdogChild server;
 
       try {
-        BootResinConfig resin = readConfig(serverId, args);
+        BootResinConfig resin = readConfig(args);
         
         server = findConfig(resin, serverId, args);
       } catch (Exception e) {
@@ -566,9 +566,10 @@ class WatchdogManager implements AlarmListener {
     synchronized (_watchdogMap) {
       WatchdogChild watchdog = getWatchdog(null, serverId, args);
 
-      if (watchdog == null)
+      if (watchdog == null) {
         throw new ConfigException(L().l("No matching <server> found for stop -server '{0}' in {1}",
                                         serverId, _args.getResinConf()));
+      }
 
       watchdog.stop();
     }
@@ -723,11 +724,15 @@ class WatchdogManager implements AlarmListener {
    */
   void restartServer(String serverId, String []argv)
   {
+    WatchdogArgs args = new WatchdogArgs(argv, false);
+    
+    // serverId = getServerId(serverId, args);
+    
     synchronized (_watchdogMap) {
-      WatchdogChild server = _watchdogMap.get(serverId);
+      WatchdogChild watchdog = getWatchdog(null, serverId, args);
 
-      if (server != null) {
-        server.stop();
+      if (watchdog != null) {
+        watchdog.stop();
       }
 
       startServer(serverId, argv);
@@ -739,7 +744,7 @@ class WatchdogManager implements AlarmListener {
     return _server != null && _server.isActive();
   }
 
-  private BootResinConfig readConfig(String cliServerId, WatchdogArgs args)
+  private BootResinConfig readConfig(WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();
@@ -791,7 +796,6 @@ class WatchdogManager implements AlarmListener {
       return client;
     }
 
-
     if (! resin.isElasticServer(args)) {
       if (serverId != null) {
         return null;
@@ -840,7 +844,7 @@ class WatchdogManager implements AlarmListener {
     }
     
     String address = args.getDynamicAddress();
-    int port = args.getDynamicPort() + totalCount;
+    int port = resin.getElasticServerPort(args, totalCount);
 
     BootClusterConfig cluster = resin.findCluster(clusterId);
 
@@ -850,7 +854,17 @@ class WatchdogManager implements AlarmListener {
     }
     
     clusterId = cluster.getId();
-    String serverId = "dyn-" + clusterId + "-" + index;
+    String serverId = args.getServerId();
+    
+    if (serverId == null) {
+      serverId = "dyn-" + clusterId + "-" + index;
+    }
+    else if (totalCount > 1) {
+      throw new ConfigException(L().l("--elastic-server with --server '{0}' and multiple elastic servers is not allowed.",
+                                      serverId));
+    }
+    
+    System.out.println("WATHCOD: " + serverId + " " + port);
 
     WatchdogConfigHandle configHandle = cluster.createServer();
     // String serverId = args.getElasticServerId();

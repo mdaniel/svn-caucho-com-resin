@@ -271,12 +271,7 @@ class WatchdogArgs
 
   int getDynamicPort()
   {
-    if (_elasticPort > 0) {
-      return _elasticPort;
-    }
-    else {
-      return 6830;
-    }
+    return _elasticPort;
   }
 
   String getElasticServerId()

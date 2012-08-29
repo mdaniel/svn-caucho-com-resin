@@ -86,6 +86,7 @@ public class BootResinConfig // implements EnvironmentBean
   private String _homeCluster;
   private String _homeServer;
   private boolean _isElasticServer;
+  private int _elasticServerPort;
   private boolean _isElasticDns;
   private ArrayList<ElasticServer> _elasticServerList;
   
@@ -265,6 +266,30 @@ public class BootResinConfig // implements EnvironmentBean
   public boolean isElasticDns()
   {
     return _isElasticDns;
+  }
+  
+  @Configurable
+  public void setElasticServerPort(int port)
+  {
+    _elasticServerPort = port;
+  }
+  
+  public int getElasticServerPort()
+  {
+    return _elasticServerPort;
+  }
+  
+  public int getElasticServerPort(WatchdogArgs arg, int count)
+  {
+    int port = arg.getDynamicPort();
+    
+    if (port <= 0)
+      port = _elasticServerPort;
+    
+    if (port <= 0)
+      port = 6830 + count;
+    
+    return port;
   }
 
   /*
@@ -708,7 +733,7 @@ public class BootResinConfig // implements EnvironmentBean
     }
     
     String address = args.getDynamicAddress();
-    int port = args.getDynamicPort() + index;
+    int port = getElasticServerPort(args, count);
     
     BootClusterConfig cluster = findCluster(clusterId);
 
@@ -721,9 +746,15 @@ public class BootResinConfig // implements EnvironmentBean
       throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. --elastic-server requires a <resin:ElasticCloudService> tag.",
                                     clusterId));
     }
-
+    
+    String serverId = args.getServerId();
+    
+    if (serverId == null) {
+      serverId = "dyn-" + clusterId + "-" + index;
+    }
+    
     WatchdogConfigHandle configHandle = cluster.createServer();
-    configHandle.setId(args.getElasticServerId());
+    configHandle.setId(serverId);
     // configHandle.setDynamic(true);
     configHandle.setAddress(address);
     configHandle.setPort(port);

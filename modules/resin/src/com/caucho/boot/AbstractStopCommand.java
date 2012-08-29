@@ -48,7 +48,14 @@ public abstract class AbstractStopCommand extends AbstractBootCommand
   {
     return true;
   }
-  
+
+  @Override
+  protected WatchdogClient findWatchdogClient(ResinBoot boot, WatchdogArgs args)
+  {
+    // server/1299
+    return findWatchdogClientImpl(boot, args);
+  }
+ 
   protected String getServerUsageArg(String serverId, String clientId)
   {
     if (serverId != null)
