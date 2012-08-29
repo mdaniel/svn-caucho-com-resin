@@ -47,9 +47,11 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
   private static final L10N L = new L10N(ObjectMethodExpr.class);
 
   protected final Expr _objExpr;
-  
+
   protected final StringValue _methodName;
-  
+
+  protected final String _name;
+
   protected final Expr []_args;
 
   public ObjectMethodExpr(Location location,
@@ -58,9 +60,10 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
                           ArrayList<Expr> args)
   {
     super(location);
-    
+
     _objExpr = objExpr;
-    
+
+    _name = name;
     _methodName = MethodIntern.intern(name);
 
     _args = new Expr[args.size()];
@@ -76,7 +79,7 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
   {
     return _methodName.toString();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -90,13 +93,15 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
     env.checkTimeout();
 
     Value obj = _objExpr.eval(env);
-    
-    StringValue methodName = _methodName;
+
+    //StringValue methodName = _methodName;
+
+    StringValue methodName = env.createString(_name);
     int hash = methodName.hashCodeCaseInsensitive();
-    
+
     return eval(env, obj, methodName, hash, _args);
   }
-  
+
   public String toString()
   {
     return _objExpr + "->" + _methodName + "()";
