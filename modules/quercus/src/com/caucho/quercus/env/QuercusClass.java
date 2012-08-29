@@ -90,8 +90,8 @@ public class QuercusClass extends NullValue {
   private final ArrayList<InstanceInitializer> _initializers;
 
   private final MethodMap<AbstractFunction> _methodMap;
-  private final HashMap<String,Expr> _constMap;
-  private final HashMap<String,Object> _constJavaMap;
+  private final HashMap<StringValue,Expr> _constMap;
+  private final HashMap<StringValue,Object> _constJavaMap;
   private final LinkedHashMap<StringValue,ClassField> _fieldMap;
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
   private final HashMap<StringValue,StringValue> _staticFieldNameMap;
@@ -119,8 +119,8 @@ public class QuercusClass extends NullValue {
 
     _fieldMap = new LinkedHashMap<StringValue,ClassField>();
     _methodMap = new MethodMap<AbstractFunction>(this, null);
-    _constMap = new HashMap<String,Expr>();
-    _constJavaMap = new HashMap<String,Object>();
+    _constMap = new HashMap<StringValue,Expr>();
+    _constJavaMap = new HashMap<StringValue,Object>();
 
     _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();
 
@@ -606,13 +606,15 @@ public class QuercusClass extends NullValue {
     if (fun == null)
       throw new NullPointerException(L.l("'{0}' is a null function", name));
 
+    StringValue nameV = _moduleContext.createString(name);
+
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
-    AbstractFunction existingFun = _methodMap.getRaw(name);
+    AbstractFunction existingFun = _methodMap.getRaw(nameV);
 
     if (existingFun == null || ! fun.isAbstract())
-      _methodMap.put(name, fun);
+      _methodMap.put(nameV, fun);
     else if (! existingFun.isAbstract() && fun.isAbstract()) {
       Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
                                   getName(), name));
@@ -628,19 +630,21 @@ public class QuercusClass extends NullValue {
       throw new NullPointerException(L.l("'{0}' is a null function", name));
     }
 
+    StringValue nameV = _moduleContext.createString(name);
+
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
-    AbstractFunction existingFun = _methodMap.getRaw(name);
+    AbstractFunction existingFun = _methodMap.getRaw(nameV);
 
     if (existingFun == null && ! fun.isAbstract())
-      _methodMap.put(name, fun);
+      _methodMap.put(nameV, fun);
   }
 
   /**
    * Adds a static class field.
    */
-  public void addStaticFieldExpr(String className, String name, Expr value)
+  public void addStaticFieldExpr(String className, StringValue name, Expr value)
   {
     ArrayList<StaticField> fieldList = _staticFieldExprMap.get(className);
 
@@ -657,7 +661,7 @@ public class QuercusClass extends NullValue {
     sb.append("::");
     sb.append(name);
 
-    _staticFieldNameMap.put(createString(name), sb);
+    _staticFieldNameMap.put(name, sb);
   }
 
   private StringValue createString(String s)
@@ -699,7 +703,7 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a constant definition
    */
-  public void addConstant(String name, Expr expr)
+  public void addConstant(StringValue name, Expr expr)
   {
     _constMap.put(name, expr);
   }
@@ -707,7 +711,7 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a constant definition
    */
-  public void addJavaConstant(String name, Object obj)
+  public void addJavaConstant(StringValue name, Object obj)
   {
     _constJavaMap.put(name, obj);
   }
@@ -1276,7 +1280,9 @@ public class QuercusClass extends NullValue {
    */
   public final AbstractFunction findFunction(String methodName)
   {
-    return _methodMap.getRaw(methodName);
+    StringValue nameV = _moduleContext.createString(methodName);
+
+    return _methodMap.getRaw(nameV);
   }
 
   /**
@@ -1859,7 +1865,7 @@ public class QuercusClass extends NullValue {
   /**
    * Finds the matching constant
    */
-  public final Value getConstant(Env env, String name)
+  public final Value getConstant(Env env, StringValue name)
   {
     Expr expr = _constMap.get(name);
 
@@ -1878,7 +1884,7 @@ public class QuercusClass extends NullValue {
   /**
    * Returns true if the constant exists.
    */
-  public final boolean hasConstant(String name)
+  public final boolean hasConstant(StringValue name)
   {
     if (_constMap.get(name) != null)
       return true;
@@ -1889,15 +1895,15 @@ public class QuercusClass extends NullValue {
   /**
    * Returns the constants defined in this class.
    */
-  public final HashMap<String, Value> getConstantMap(Env env)
+  public final HashMap<StringValue, Value> getConstantMap(Env env)
   {
-    HashMap<String, Value> map = new HashMap<String, Value>();
+    HashMap<StringValue, Value> map = new HashMap<StringValue, Value>();
 
-    for (Map.Entry<String, Expr> entry : _constMap.entrySet()) {
+    for (Map.Entry<StringValue, Expr> entry : _constMap.entrySet()) {
       map.put(entry.getKey(), entry.getValue().eval(env));
     }
 
-    for (Map.Entry<String, Object> entry : _constJavaMap.entrySet()) {
+    for (Map.Entry<StringValue, Object> entry : _constJavaMap.entrySet()) {
       map.put(entry.getKey(), env.wrapJava(entry.getValue()));
     }
 
@@ -1963,16 +1969,16 @@ public class QuercusClass extends NullValue {
 
   static class StaticField
   {
-    String _name;
+    StringValue _name;
     Expr _expr;
 
-    StaticField(String name, Expr expr)
+    StaticField(StringValue name, Expr expr)
     {
       _name = name;
       _expr = expr;
     }
 
-    String getName()
+    StringValue getName()
     {
       return _name;
     }

@@ -31,12 +31,10 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -49,32 +47,33 @@ public class ClassVirtualMethodExpr extends Expr {
   private static final L10N L = new L10N(ClassVirtualMethodExpr.class);
 
   protected final StringValue _methodName;
+
   private final int _hash;
   protected final Expr []_args;
 
   protected boolean _isMethod;
 
   public ClassVirtualMethodExpr(Location location,
-                                String methodName,
+                                StringValue methodName,
                                 ArrayList<Expr> args)
   {
     super(location);
-    
-    _methodName = MethodIntern.intern(methodName);
-    _hash = _methodName.hashCodeCaseInsensitive();
+
+    _methodName = methodName;
+    _hash = methodName.hashCodeCaseInsensitive();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
   public ClassVirtualMethodExpr(Location location,
-                                String name,
+                                StringValue name,
                                 Expr []args)
   {
     super(location);
 
-    _methodName = MethodIntern.intern(name);
-    _hash = _methodName.hashCodeCaseInsensitive();
+    _methodName =  name;
+    _hash = name.hashCodeCaseInsensitive();
 
     _args = args;
   }
@@ -89,15 +88,15 @@ public class ClassVirtualMethodExpr extends Expr {
   public Value eval(Env env)
   {
     Value qThis = env.getThis();
-    
+
     QuercusClass cls = qThis.getQuercusClass();
 
     if (cls == null) {
       env.error(getLocation(), L.l("no calling class found"));
-      
+
       return NullValue.NULL;
     }
-    
+
     Value []values = evalArgs(env, _args);
 
     env.pushCall(this, cls, values);
@@ -110,7 +109,7 @@ public class ClassVirtualMethodExpr extends Expr {
       env.popCall();
     }
   }
-  
+
   public String toString()
   {
     return "static::" + _methodName + "()";

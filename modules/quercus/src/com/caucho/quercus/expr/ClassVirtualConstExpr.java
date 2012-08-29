@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
@@ -46,20 +46,20 @@ public class ClassVirtualConstExpr extends Expr {
   private static final L10N L
     = new L10N(ClassVirtualMethodExpr.class);
 
-  protected final String _name;
+  protected final StringValue _name;
 
-  public ClassVirtualConstExpr(Location location, String name)
+  public ClassVirtualConstExpr(Location location, StringValue name)
   {
     super(location);
 
-    _name = name.intern();
+    _name = name;
   }
 
-  public ClassVirtualConstExpr(String name)
+  public ClassVirtualConstExpr(StringValue name)
   {
-    _name = name.intern();
+    _name = name;
   }
-  
+
   //
   // function call creation
   //
@@ -74,10 +74,10 @@ public class ClassVirtualConstExpr extends Expr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassVirtualMethodCall(location, _name, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -89,7 +89,7 @@ public class ClassVirtualConstExpr extends Expr {
   {
     return env.getCallingClass().getConstant(env, _name);
   }
-  
+
   public String toString()
   {
     return "static::" + _name;

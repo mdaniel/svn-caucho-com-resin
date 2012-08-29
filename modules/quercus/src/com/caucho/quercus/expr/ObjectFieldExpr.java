@@ -79,7 +79,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   {
     ExprFactory factory = parser.getExprFactory();
 
-    return factory.createMethodCall(location, _objExpr, _name.toString(), args);
+    return factory.createMethodCall(location, _objExpr, _name, args);
   }
 
   /**

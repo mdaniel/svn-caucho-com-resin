@@ -72,7 +72,7 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    Expr var = parser.createVar(_varName.toString());
+    Expr var = parser.createVar(_varName);
 
     return factory.createClassMethodCall(location, _className, var, args);
   }

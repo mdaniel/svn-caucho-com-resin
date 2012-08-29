@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
@@ -46,12 +47,12 @@ public class ClassVarConstExpr extends Expr {
   private static final L10N L = new L10N(ClassVarConstExpr.class);
 
   protected final Expr _className;
-  protected final String _name;
+  protected final StringValue _name;
 
-  public ClassVarConstExpr(Expr className, String name)
+  public ClassVarConstExpr(Expr className, StringValue name)
   {
     _className = className;
-    _name = name.intern();
+    _name = name;
   }
 
   //

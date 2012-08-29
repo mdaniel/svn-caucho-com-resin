@@ -33,7 +33,6 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -47,19 +46,21 @@ public class ClassMethodExpr extends AbstractMethodExpr {
 
   protected final String _className;
   protected final StringValue _methodName;
+
   protected final int _hash;
   protected final Expr []_args;
 
   protected boolean _isMethod;
 
   public ClassMethodExpr(Location location, String className,
-                         String methodName,
+                         StringValue methodName,
                          ArrayList<Expr> args)
   {
     super(location);
     _className = className.intern();
 
-    _methodName = MethodIntern.intern(methodName);
+    _methodName = methodName;
+
     _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = new Expr[args.size()];
@@ -67,13 +68,14 @@ public class ClassMethodExpr extends AbstractMethodExpr {
   }
 
   public ClassMethodExpr(Location location, String className,
-                         String methodName, Expr []args)
+                         StringValue methodName, Expr []args)
   {
     super(location);
 
     _className = className.intern();
 
-    _methodName = MethodIntern.intern(methodName);
+    _methodName = methodName;
+
     _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = args;

@@ -66,7 +66,6 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ErrorModule;
-import com.caucho.quercus.lib.OptionsModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.file.PhpProtocolWrapper;
@@ -169,14 +168,23 @@ public class Env
   private static final IntMap SPECIAL_VARS
     = new IntMap();
 
+  private static final IntMap SPECIAL_VARS_U
+    = new IntMap();
+
   private static final StringValue PHP_SELF_STRING
     = new ConstStringValue("PHP_SELF");
 
   private static final StringValue UTF8_STRING
     = new ConstStringValue("utf-8");
 
+  private static final StringValue UTF8_STRING_U
+    = new UnicodeBuilderValue("utf-8");
+
   private static final StringValue S_GET
     = new ConstStringValue("_GET");
+
+  private static final StringValue S_GET_U
+    = new UnicodeBuilderValue("_GET");
 
   private static final StringValue S_POST
     = new ConstStringValue("_POST");
@@ -198,6 +206,9 @@ public class Env
 
   private static final StringValue S_ARGV
     = new ConstStringValue("argv");
+
+  private static final StringValue S_ARGV_U
+    = new UnicodeBuilderValue("argv");
 
   public static final Value []EMPTY_VALUE = new Value[0];
 
@@ -2507,7 +2518,15 @@ public class Env
                                    boolean isCheckGlobal,
                                    boolean isGlobal)
   {
-    int specialVarId = SPECIAL_VARS.get(name);
+    int specialVarId;
+
+    if (isUnicodeSemantics()) {
+      specialVarId = SPECIAL_VARS_U.get(name);
+    }
+    else {
+      specialVarId = SPECIAL_VARS.get(name);
+
+    }
 
     if (isCheckGlobal) {
       if (specialVarId != IntMap.NULL) {
@@ -2626,7 +2645,7 @@ public class Env
         else if (! isGlobal)
           return null;
         else
-          return getGlobalEnvVar(S_GET);
+          return getGlobalEnvVar(isUnicodeSemantics() ? S_GET_U : S_GET);
       }
 
       case _GET: {
@@ -7592,6 +7611,28 @@ public class Env
     SPECIAL_VARS.put(MethodIntern.intern("PHP_SELF"), PHP_SELF);
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_RAW_POST_DATA"),
                      HTTP_RAW_POST_DATA);
+
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("GLOBALS"), _GLOBAL);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_SERVER"), _SERVER);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_GET"), _GET);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_POST"), _POST);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_FILES"), _FILES);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_REQUEST"), _REQUEST);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_COOKIE"), _COOKIE);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_SESSION"), _SESSION);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("_ENV"), _ENV);
+
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("argc"), ARGC);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("argv"), ARGV);
+
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_GET_VARS"), HTTP_GET_VARS);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_POST_VARS"), HTTP_POST_VARS);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_POST_FILES"), HTTP_POST_FILES);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_COOKIE_VARS"), HTTP_COOKIE_VARS);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("PHP_SELF"), PHP_SELF);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_RAW_POST_DATA"),
+                       HTTP_RAW_POST_DATA);
 
     DEFAULT_QUERY_SEPARATOR_MAP = new int[128];
     DEFAULT_QUERY_SEPARATOR_MAP['&'] = 1;

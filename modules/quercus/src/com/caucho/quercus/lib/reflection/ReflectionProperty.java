@@ -305,15 +305,17 @@ public class ReflectionProperty
       return null;
     }
 
+    @Override
     public String getComment(Env env)
     {
       QuercusClass cls = getDeclaringClass(env, _cls);
 
       ClassDef def = cls.getClassDef();
 
-      return def.getStaticFieldComment(_name.toString());
+      return def.getStaticFieldComment(_name);
     }
 
+    @Override
     public String toString()
     {
       if (_cls.getName() != null)

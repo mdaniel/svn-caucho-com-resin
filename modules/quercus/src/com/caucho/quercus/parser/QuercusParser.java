@@ -1076,7 +1076,7 @@ public class QuercusParser {
 
       String name = parseIdentifier();
 
-      VarExpr var = _factory.createVar(_function.createVar(name));
+      VarExpr var = _factory.createVar(_function.createVar(createStringValue(name)));
 
       Expr init = null;
 
@@ -1936,7 +1936,7 @@ public class QuercusParser {
         token = parseToken();
       }
 
-      Arg arg = new Arg(argName, defaultExpr, isReference, expectedClass);
+      Arg arg = new Arg(createStringValue(argName), defaultExpr, isReference, expectedClass);
 
       if (argMap.get(argName) != null && _quercus.isStrict()) {
         throw error(L.l("aliasing of function argument '{0}'", argName));
@@ -1944,7 +1944,7 @@ public class QuercusParser {
 
       argMap.put(argName, arg);
 
-      VarInfo var = _function.createVar(argName);
+      VarInfo var = _function.createVar(createStringValue(argName));
 
       if (token != ',') {
         _peekToken = token;
@@ -2337,7 +2337,7 @@ public class QuercusParser {
 
       Expr expr = parseExpr();
 
-      ((ClassScope) _scope).addConstant(name, expr);
+      ((ClassScope) _scope).addConstant(createStringValue(name), expr);
 
       token = parseToken();
     } while (token == ',');
@@ -3644,13 +3644,13 @@ public class QuercusParser {
     int token = parseToken();
 
     if (isIdentifier(token)) {
-      return classNameExpr.createClassConst(this, _lexeme);
+      return classNameExpr.createClassConst(this, createStringValue(_lexeme));
     }
     else if (token == '$') {
       token = parseToken();
 
       if (isIdentifier(token)) {
-        return classNameExpr.createClassField(this, createString(_lexeme));
+        return classNameExpr.createClassField(this, createStringValue(_lexeme));
       }
       else if (token == '{') {
         Expr expr = parseExpr();
@@ -3706,10 +3706,10 @@ public class QuercusParser {
       throw error(L.l("Namespace is not allowed for variable ${0}", _lexeme));
     }
 
-    return _factory.createVar(_function.createVar(_lexeme));
+    return _factory.createVar(_function.createVar(createStringValue(_lexeme)));
   }
 
-  public Expr createVar(String name)
+  public Expr createVar(StringValue name)
   {
     return _factory.createVar(_function.createVar(name));
   }
@@ -4982,7 +4982,7 @@ public class QuercusParser {
         if (varName.equals("this"))
           tail = _factory.createThis(_classDef);
         else
-          tail = _factory.createVar(_function.createVar(varName));
+          tail = _factory.createVar(_function.createVar(createStringValue(varName)));
 
         // php/013n
         if (((ch = read()) == '[' || ch == '-')) {
@@ -5055,7 +5055,9 @@ public class QuercusParser {
         _sb.append((char) ch);
       }
 
-      VarExpr var = _factory.createVar(_function.createVar(_sb.toString()));
+      StringValue nameV = createStringValue(_sb.toString());
+
+      VarExpr var = _factory.createVar(_function.createVar(nameV));
 
       tail = _factory.createArrayGet(getLocation(), tail, var);
     }
@@ -5069,7 +5071,7 @@ public class QuercusParser {
       }
 
       tail = _factory.createArrayGet(getLocation(),
-          tail, _factory.createLong(index));
+                                     tail, _factory.createLong(index));
     }
     else if (isIdentifierPart(ch)) {
       for (; isIdentifierPart(ch); ch = read()) {

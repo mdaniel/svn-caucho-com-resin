@@ -69,7 +69,7 @@ public class ConstExpr extends Expr {
    * Creates a class field Foo::bar
    */
   @Override
-  public Expr createClassConst(QuercusParser parser, String name)
+  public Expr createClassConst(QuercusParser parser, StringValue name)
   {
     ExprFactory factory = parser.getExprFactory();
 

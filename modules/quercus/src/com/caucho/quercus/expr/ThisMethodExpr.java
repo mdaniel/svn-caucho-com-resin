@@ -30,6 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -40,10 +41,10 @@ import java.util.ArrayList;
 public class ThisMethodExpr extends ObjectMethodExpr {
   private static final L10N L = new L10N(ThisMethodExpr.class);
 
-  public ThisMethodExpr(Location location, 
-                           ThisExpr qThis,
-                           String methodName, 
-                           ArrayList<Expr> args)
+  public ThisMethodExpr(Location location,
+                        ThisExpr qThis,
+                        StringValue methodName,
+                        ArrayList<Expr> args)
   {
     super(location, qThis, methodName, args);
   }

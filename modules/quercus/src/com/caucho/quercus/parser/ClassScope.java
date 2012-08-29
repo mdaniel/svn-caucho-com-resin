@@ -45,14 +45,14 @@ import java.util.ArrayList;
 public class ClassScope extends Scope
 {
   private final static L10N L = new L10N(ClassScope.class);
-  
+
   private final InterpretedClassDef _cl;
 
   public ClassScope(InterpretedClassDef cl)
   {
     _cl = cl;
   }
-  
+
   /**
    * Returns true if scope is within a class.
    */
@@ -60,7 +60,7 @@ public class ClassScope extends Scope
   {
     return true;
   }
-  
+
   /**
    * Returns true for an abstract scope, e.g. an abstract class or an
    * interface.
@@ -69,7 +69,7 @@ public class ClassScope extends Scope
   {
     return _cl.isAbstract() || _cl.isInterface();
   }
-  
+
   /**
    * Adds a function.
    */
@@ -80,7 +80,7 @@ public class ClassScope extends Scope
   {
     _cl.addFunction(name, function);
   }
-  
+
   /*
    *  Adds a function defined in a conditional block.
    */
@@ -89,7 +89,7 @@ public class ClassScope extends Scope
   {
     //addFunction(name, function);
   }
-  
+
   /**
    * Adds a value
    */
@@ -100,7 +100,7 @@ public class ClassScope extends Scope
   {
     _cl.addValue(name, value, visibility, comment);
   }
-  
+
   /**
    * Adds a static value
    */
@@ -108,11 +108,11 @@ public class ClassScope extends Scope
   {
     _cl.addStaticValue(name, value, comment);
   }
-  
+
   /**
    * Adds a constant value
    */
-  public void addConstant(String name, Expr value)
+  public void addConstant(StringValue name, Expr value)
   {
     _cl.addConstant(name, value);
   }
@@ -129,7 +129,7 @@ public class ClassScope extends Scope
   {
     throw new UnsupportedOperationException();
   }
-  
+
   /*
    *  Adds a conditional class.
    */

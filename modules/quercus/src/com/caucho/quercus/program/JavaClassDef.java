@@ -511,7 +511,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
                         Value value)
   {
     String name = nameV.toString();
-    
+
     AbstractJavaMethod setter = _setMap.get(name);
     if (setter != null) {
       try {
@@ -803,11 +803,13 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       cl.setCountDelegate(_countDelegate);
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
-      cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
+      cl.addConstant(_moduleContext.createString(entry.getKey()),
+                     new LiteralExpr(entry.getValue()));
     }
 
     for (Map.Entry<String,Object> entry : _constJavaMap.entrySet()) {
-      cl.addJavaConstant(entry.getKey(), entry.getValue());
+      cl.addJavaConstant(_moduleContext.createString(entry.getKey()),
+                         entry.getValue());
     }
 
     cl.addInitializer(this);
@@ -1327,10 +1329,10 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         __call = new JavaMethod(moduleContext, this, method);
       } else if ("__toString".equals(method.getName())) {
         __toString = new JavaMethod(moduleContext, this, method);
-        _functionMap.put(method.getName(), __toString);
+        _functionMap.put(_moduleContext.createString(method.getName()), __toString);
       } else if ("__destruct".equals(method.getName())) {
         __destruct = new JavaMethod(moduleContext, this, method);
-        _functionMap.put(method.getName(), __destruct);
+        _functionMap.put(_moduleContext.createString(method.getName()), __destruct);
       } else {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(
@@ -1338,14 +1340,17 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
         JavaMethod newFun = new JavaMethod(moduleContext, this, method);
         String funName = newFun.getName();
-        AbstractJavaMethod fun = _functionMap.getRaw(funName);
+
+        StringValue nameV = moduleContext.createString(funName);
+
+        AbstractJavaMethod fun = _functionMap.getRaw(nameV);
 
         if (fun != null)
           fun = fun.overload(newFun);
         else
           fun = newFun;
 
-        _functionMap.put(funName, fun);
+        _functionMap.put(nameV, fun);
       }
     }
 

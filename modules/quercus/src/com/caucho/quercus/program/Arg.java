@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 
@@ -43,13 +42,12 @@ public class Arg {
   private final boolean _isReference;
   private final String _expectedClass;
 
-
-  public Arg(String name,
+  public Arg(StringValue name,
              Expr defaultExpr,
              boolean isReference,
              String expectedClass)
   {
-    _name = MethodIntern.intern(name);
+    _name = name;
     _default = defaultExpr;
     _isReference = isReference;
     _expectedClass = expectedClass;
@@ -89,7 +87,7 @@ public class Arg {
   {
     return _expectedClass;
   }
-  
+
   public String toString()
   {
     return "Arg[" + _name + "]";

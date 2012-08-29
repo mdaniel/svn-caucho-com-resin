@@ -38,7 +38,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
 /**
@@ -48,7 +47,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ThisFieldExpr.class);
 
   protected final ThisExpr _qThis;
-  
+
   protected final StringValue _name;
 
   public ThisFieldExpr(ThisExpr qThis, StringValue name)
@@ -62,7 +61,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     return env.error(getLocation(),
                      "Cannot use '$this' when not in object context.");
   }
-  
+
   //
   // function call creation
   //
@@ -77,8 +76,8 @@ public class ThisFieldExpr extends AbstractVarExpr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
-    return factory.createThisMethod(location, _qThis, _name.toString(), args);
+
+    return factory.createThisMethod(location, _qThis, _name, args);
   }
 
   /**
@@ -94,10 +93,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       return cannotUseThisError(env);
-    
+
     return obj.getThisField(env, _name);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -111,7 +110,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       return cannotUseThisError(env);
-    
+
     return obj.getThisField(env, _name).copy();
   }
 
@@ -129,13 +128,13 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull()) {
       cannotUseThisError(env);
-      
+
       return new Var();
     }
-    
+
     return obj.getThisFieldVar(env, _name);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -150,10 +149,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       return cannotUseThisError(env);
-    
+
     return obj.getThisFieldArg(env, _name);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -168,12 +167,12 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       cannotUseThisError(env);
-    
+
     obj.putThisField(env, _name, value);
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -188,12 +187,12 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       cannotUseThisError(env);
-    
+
     obj.putThisField(env, _name, value);
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates as an array index assign ($a[index] = value).
    */
@@ -204,10 +203,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       cannotUseThisError(env);
-    
+
     // php/044i
     Value fieldVar = obj.getThisFieldArray(env, _name);
-    
+
     return fieldVar.putThisFieldArray(env, obj, _name, index, value);
   }
 
@@ -224,7 +223,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       return cannotUseThisError(env);
-    
+
     return obj.getThisFieldArray(env, _name);
   }
 
@@ -241,10 +240,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       return cannotUseThisError(env);
-    
+
     return obj.getThisFieldObject(env, _name);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -258,10 +257,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
     if (obj.isNull())
       cannotUseThisError(env);
-    
+
     obj.unsetThisField(_name);
   }
-  
+
   public String toString()
   {
     return "$this->" + _name;

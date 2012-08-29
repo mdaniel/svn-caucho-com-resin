@@ -254,7 +254,7 @@ public class ExprFactory {
    */
   public Expr createThisMethod(Location loc,
                                ThisExpr qThis,
-                               String methodName,
+                               StringValue methodName,
                                ArrayList<Expr> args)
   {
     return new ThisMethodExpr(loc, qThis, methodName, args);
@@ -278,7 +278,7 @@ public class ExprFactory {
   /**
    * Creates a class const expression.
    */
-  public ClassConstExpr createClassConst(String className, String name)
+  public ClassConstExpr createClassConst(String className, StringValue name)
   {
     return new ClassConstExpr(className, name);
   }
@@ -286,7 +286,7 @@ public class ExprFactory {
   /**
    * Creates an expression class const expression ($class::FOO).
    */
-  public Expr createClassConst(Expr className, String name)
+  public Expr createClassConst(Expr className, StringValue name)
   {
     return new ClassVarConstExpr(className, name);
   }
@@ -294,7 +294,7 @@ public class ExprFactory {
   /**
    * Creates a class const expression (static::FOO).
    */
-  public ClassVirtualConstExpr createClassVirtualConst(String name)
+  public ClassVirtualConstExpr createClassVirtualConst(StringValue name)
   {
     return new ClassVirtualConstExpr(name);
   }
@@ -1013,7 +1013,7 @@ public class ExprFactory {
    */
   public Expr createMethodCall(Location loc,
                                Expr objExpr,
-                               String methodName,
+                               StringValue methodName,
                                ArrayList<Expr> args)
   {
     return new ObjectMethodExpr(loc, objExpr, methodName, args);
@@ -1035,10 +1035,10 @@ public class ExprFactory {
    */
   public Expr createClassMethodCall(Location loc,
                                     String className,
-                                    String methodName,
+                                    StringValue methodName,
                                     ArrayList<Expr> args)
   {
-    if ("__construct".equals(methodName)) {
+    if ("__construct".equals(methodName.toString())) {
       return new ClassConstructExpr(loc, className, args);
     }
     else {
@@ -1051,7 +1051,7 @@ public class ExprFactory {
    */
   public Expr createClassMethodCall(Location loc,
                                     Expr className,
-                                    String methodName,
+                                    StringValue methodName,
                                     ArrayList<Expr> args)
   {
     return new ClassVarMethodExpr(loc, className, methodName, args);
@@ -1061,7 +1061,7 @@ public class ExprFactory {
    * Creates a new function call based on the class context.
    */
   public Expr createClassVirtualMethodCall(Location loc,
-                                           String methodName,
+                                           StringValue methodName,
                                            ArrayList<Expr> args)
   {
     return new ClassVirtualMethodExpr(loc, methodName, args);
@@ -1104,7 +1104,7 @@ public class ExprFactory {
    */
   public Expr createClassConstructor(Location loc,
                                      String className,
-                                     String methodName,
+                                     StringValue methodName,
                                      ArrayList<Expr> args)
   {
     return new ClassConstructorExpr(loc, className, methodName, args);

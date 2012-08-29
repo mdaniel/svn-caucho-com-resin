@@ -71,7 +71,7 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   {
     ExprFactory factory = parser.getExprFactory();
 
-    Expr var = parser.createVar(_varName.toString());
+    Expr var = parser.createVar(_varName);
 
     return factory.createClassVirtualMethodCall(location, var, args);
   }

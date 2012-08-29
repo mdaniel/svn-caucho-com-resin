@@ -61,11 +61,11 @@ public class InterpretedClassDef extends ClassDef
   protected final HashMap<StringValue,FieldEntry> _fieldMap
     = new LinkedHashMap<StringValue,FieldEntry>();
 
-  protected final HashMap<String,StaticFieldEntry> _staticFieldMap
-    = new LinkedHashMap<String,StaticFieldEntry>();
+  protected final HashMap<StringValue,StaticFieldEntry> _staticFieldMap
+    = new LinkedHashMap<StringValue,StaticFieldEntry>();
 
-  protected final HashMap<String,Expr> _constMap
-    = new HashMap<String,Expr>();
+  protected final HashMap<StringValue,Expr> _constMap
+    = new HashMap<StringValue,Expr>();
 
   protected AbstractFunction _constructor;
   protected AbstractFunction _destructor;
@@ -240,13 +240,13 @@ public class InterpretedClassDef extends ClassDef
     }
 
     String className = getName();
-    for (Map.Entry<String, StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
+    for (Map.Entry<StringValue, StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
       StaticFieldEntry field = entry.getValue();
 
       cl.addStaticFieldExpr(className, entry.getKey(), field.getValue());
     }
 
-    for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
+    for (Map.Entry<StringValue, Expr> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), entry.getValue());
     }
   }
@@ -297,7 +297,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addStaticValue(Value name, Expr value)
   {
-    _staticFieldMap.put(name.toString(), new StaticFieldEntry(value));
+    _staticFieldMap.put(name.toStringValue(), new StaticFieldEntry(value));
   }
 
   /**
@@ -305,15 +305,15 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addStaticValue(Value name, Expr value, String comment)
   {
-    _staticFieldMap.put(name.toString(), new StaticFieldEntry(value, comment));
+    _staticFieldMap.put(name.toStringValue(), new StaticFieldEntry(value, comment));
   }
 
   /**
    * Adds a const value.
    */
-  public void addConstant(String name, Expr value)
+  public void addConstant(StringValue name, Expr value)
   {
-    _constMap.put(name.intern(), value);
+    _constMap.put(name, value);
   }
 
   /**
@@ -372,12 +372,12 @@ public class InterpretedClassDef extends ClassDef
   {
     QuercusClass qClass = env.getClass(getName());
 
-    for (Map.Entry<String,StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
-      String name = entry.getKey();
+    for (Map.Entry<StringValue,StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
+      StringValue name = entry.getKey();
 
       StaticFieldEntry field = entry.getValue();
 
-      Var var = qClass.getStaticFieldVar(env, env.createString(name));
+      Var var = qClass.getStaticFieldVar(env, name);
 
       var.set(field.getValue().eval(env).copy());
     }
@@ -446,7 +446,7 @@ public class InterpretedClassDef extends ClassDef
    * Returns the comment for the specified field.
    */
   @Override
-  public String getStaticFieldComment(String name)
+  public String getStaticFieldComment(StringValue name)
   {
     StaticFieldEntry field = _staticFieldMap.get(name);
 
@@ -461,7 +461,8 @@ public class InterpretedClassDef extends ClassDef
     return _fieldMap.entrySet();
   }
 
-  public Set<Map.Entry<String, StaticFieldEntry>> staticFieldSet()
+  @Override
+  public Set<Map.Entry<StringValue, StaticFieldEntry>> staticFieldSet()
   {
     return _staticFieldMap.entrySet();
   }

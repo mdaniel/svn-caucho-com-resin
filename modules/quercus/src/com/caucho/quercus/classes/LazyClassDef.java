@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.classes;
 
-import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
@@ -45,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.lang.reflect.Constructor;
 
 /**
  * Lazily load a compiled class
@@ -67,7 +65,7 @@ public class LazyClassDef extends CompiledClassDef
 		      String className)
   {
     super(null, name, null, null);
-    
+
     _name = name;
     _pageClass = pageClass;
     _className = className;
@@ -94,12 +92,12 @@ public class LazyClassDef extends CompiledClassDef
   {
     if (_def != null)
       return _def;
-    
+
     try {
       ClassLoader loader = _pageClass.getClassLoader();
 
       String className = _pageClass.getName() + "$" + _className;
-      
+
       Class cl = Class.forName(className, false, loader);
 
       _def = (CompiledClassDef) cl.newInstance();
@@ -127,7 +125,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().getParentName();
   }
-  
+
   /*
    * Returns the name of the extension that this class is part of.
    */
@@ -142,7 +140,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     getClassDef().init();
   }
-  
+
   /**
    * Returns the interfaces.
    */
@@ -169,7 +167,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().isInterface();
   }
-  
+
   /*
    * Returns true for a final class.
    */
@@ -178,7 +176,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().isFinal();
   }
-  
+
   /**
    * Returns the documentation for this class.
    */
@@ -187,7 +185,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().getComment();
   }
-  
+
   /**
    * Returns the comment for the specified field.
    */
@@ -196,16 +194,16 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().getFieldComment(name);
   }
-  
+
   /**
    * Returns the comment for the specified static field.
    */
   @Override
-  public String getStaticFieldComment(String name)
+  public String getStaticFieldComment(StringValue name)
   {
     return getClassDef().getStaticFieldComment(name);
   }
-  
+
   /*
    * Returns true if the class has private/protected methods.
    */
@@ -214,7 +212,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().hasNonPublicMethods();
   }
-  
+
   /**
    * Initialize the quercus class.
    */
@@ -232,7 +230,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().newInstance(env, qcl);
   }
-  
+
   /*
    * Creates a new object.
    */
@@ -250,7 +248,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().callNew(env, args);
   }
-  
+
   /**
    * Initialize the quercus class.
    */
@@ -307,7 +305,7 @@ public class LazyClassDef extends CompiledClassDef
   {
     return getClassDef().fieldSet();
   }
-  
+
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
   {
     return getClassDef().functionSet();

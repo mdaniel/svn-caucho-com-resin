@@ -288,7 +288,7 @@ abstract public class ClassDef {
   /**
    * Returns the comment for the specified static field.
    */
-  public String getStaticFieldComment(String name)
+  public String getStaticFieldComment(StringValue name)
   {
     return null;
   }
@@ -306,7 +306,7 @@ abstract public class ClassDef {
     return null;
   }
 
-  public Set<Map.Entry<String, StaticFieldEntry>> staticFieldSet()
+  public Set<Map.Entry<StringValue, StaticFieldEntry>> staticFieldSet()
   {
     return null;
   }

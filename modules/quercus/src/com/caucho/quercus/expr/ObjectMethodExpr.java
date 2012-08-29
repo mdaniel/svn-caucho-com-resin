@@ -31,9 +31,6 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
-import com.caucho.quercus.env.MethodMap;
-import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
@@ -50,27 +47,24 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
 
   protected final StringValue _methodName;
 
-  protected final String _name;
-
   protected final Expr []_args;
 
   public ObjectMethodExpr(Location location,
                           Expr objExpr,
-                          String name,
+                          StringValue name,
                           ArrayList<Expr> args)
   {
     super(location);
 
     _objExpr = objExpr;
 
-    _name = name;
-    _methodName = MethodIntern.intern(name);
+    _methodName = name;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public ObjectMethodExpr(Expr objExpr, String name, ArrayList<Expr> args)
+  public ObjectMethodExpr(Expr objExpr, StringValue name, ArrayList<Expr> args)
   {
     this(Location.UNKNOWN, objExpr, name, args);
   }
@@ -94,9 +88,8 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
 
     Value obj = _objExpr.eval(env);
 
-    //StringValue methodName = _methodName;
+    StringValue methodName = _methodName;
 
-    StringValue methodName = env.createString(_name);
     int hash = methodName.hashCodeCaseInsensitive();
 
     return eval(env, obj, methodName, hash, _args);

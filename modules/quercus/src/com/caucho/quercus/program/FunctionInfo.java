@@ -31,7 +31,6 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.expr.VarInfo;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.StringValue;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class FunctionInfo
 
   private final ClassDef _classDef;
   private final String _name;
-  
+
   private final HashMap<StringValue,VarInfo> _varMap
     = new HashMap<StringValue,VarInfo>();
 
@@ -60,10 +59,10 @@ public class FunctionInfo
   private boolean _isGlobal;
   private boolean _isClosure;
   private boolean _isConstructor;
-  
+
   private boolean _isPageMain;
   private boolean _isPageStatic;
-  
+
   private boolean _isReturnsReference;
   private boolean _isVariableVar;
   private boolean _isOutUsed;
@@ -103,7 +102,7 @@ public class FunctionInfo
 
     return copy;
   }
-  
+
   protected FunctionInfo createCopy()
   {
     return new FunctionInfo(_quercus, _classDef, _name);
@@ -161,7 +160,7 @@ public class FunctionInfo
   {
     return _isClosure;
   }
-   
+
   /*
    * True for a final function.
    */
@@ -240,7 +239,7 @@ public class FunctionInfo
   {
     return _classDef != null && ! _fun.isStatic();
   }
-  
+
   /**
    * True for a constructor
    */
@@ -248,7 +247,7 @@ public class FunctionInfo
   {
     return _isConstructor;
   }
-  
+
   /**
    * True for a constructor.
    */
@@ -320,7 +319,7 @@ public class FunctionInfo
   {
     _isUsesSymbolTable = isUsesSymbolTable;
   }
-  
+
   /*
    * True if the global statement is used.
    */
@@ -328,7 +327,7 @@ public class FunctionInfo
   {
     return _isUsesGlobal;
   }
-  
+
   /*
    * True if the global statement is used.
    */
@@ -369,11 +368,6 @@ public class FunctionInfo
     _isReadOnly = false;
   }
 
-  public VarInfo createVar(String name)
-  {
-    return createVar(MethodIntern.intern(name));
-  }
-  
   /**
    * Returns the variable.
    */
@@ -389,7 +383,7 @@ public class FunctionInfo
 
     return var;
   }
-  
+
   protected VarInfo createVarInfo(StringValue name)
   {
     return new VarInfo(name, this);
@@ -424,13 +418,13 @@ public class FunctionInfo
   {
     return _tempVarList.size();
   }
-  
+
   public String createTempVar()
   {
     String name = "q_temp_" + getTempIndex();
-    
+
     _tempVarList.add(name);
-    
+
     return name;
   }
 

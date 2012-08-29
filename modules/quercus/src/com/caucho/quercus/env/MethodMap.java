@@ -57,12 +57,6 @@ public final class MethodMap<V>
     _classDef = classDef;
   }
 
-  public void put(String methodName, V value) {
-    StringValue name = MethodIntern.intern(methodName);
-
-    put(name, value);
-  }
-
   public void put(StringValue name, V value)
   {
     if (_entries.length <= _size * 4)
@@ -76,7 +70,7 @@ public final class MethodMap<V>
     for (entry = _entries[bucket]; entry != null; entry = entry.getNext()) {
       StringValue entryKey = entry.getKey();
 
-      if (name == entryKey || name.equalsIgnoreCaseUniversal(entryKey)) {
+      if (name == entryKey || name.equalsIgnoreCase(entryKey)) {
         entry.setValue(value);
 
         return;
@@ -102,7 +96,7 @@ public final class MethodMap<V>
          entry = entry.getNext()) {
       final StringValue entryKey = entry.getKey();
 
-      if (key == entryKey || key.equalsIgnoreCaseUniversal(entryKey))
+      if (key == entryKey || key.equalsIgnoreCase(entryKey))
         return true;
     }
 
@@ -118,7 +112,7 @@ public final class MethodMap<V>
          entry = entry.getNext()) {
       final StringValue entryKey = entry.getKey();
 
-      if (key == entryKey || key.equalsIgnoreCaseUniversal(entryKey))
+      if (key == entryKey || key.equalsIgnoreCase(entryKey))
         return entry._value;
     }
 
@@ -148,12 +142,6 @@ public final class MethodMap<V>
                                         key));
   }
 
-  public V getRaw(String key) {
-    StringValue keyV = MethodIntern.intern(key);
-
-    return getRaw(keyV);
-  }
-
   public V getRaw(StringValue key)
   {
     int hash = key.hashCodeCaseInsensitive();
@@ -165,7 +153,7 @@ public final class MethodMap<V>
          entry = entry.getNext()) {
       StringValue entryKey = entry.getKey();
 
-      if (key == entryKey || key.equalsIgnoreCaseUniversal(entryKey))
+      if (key == entryKey || key.equalsIgnoreCase(entryKey))
         return entry.getValue();
     }
 

@@ -31,12 +31,10 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -48,38 +46,38 @@ public class ClassConstructorExpr extends Expr {
   private static final L10N L = new L10N(ClassConstructorExpr.class);
 
   protected final String _className;
-  protected final StringValue _name;
+  protected final StringValue _nameV;
+
   protected final Expr []_args;
 
-  public ClassConstructorExpr(Location location, 
+  public ClassConstructorExpr(Location location,
                               String className,
-                              String name,
+                              StringValue nameV,
                               ArrayList<Expr> args)
   {
     super(location);
 
     _className = className.intern();
-    
-    _name = MethodIntern.intern(name);
+    _nameV = nameV;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public ClassConstructorExpr(Location location, 
+  public ClassConstructorExpr(Location location,
                               String className,
-                              String name,
+                              StringValue nameV,
                               Expr []args)
   {
     super(location);
 
     _className = className.intern();
-    
-    _name = MethodIntern.intern(name);
+
+    _nameV = nameV;
 
     _args = args;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -95,8 +93,10 @@ public class ClassConstructorExpr extends Expr {
       throw env.createErrorException(L.l("{0} is an unknown class",
                                          _className));
 
-    AbstractFunction fun = cl.getFunction(_name);
-    
+    StringValue nameV = _nameV;
+
+    AbstractFunction fun = cl.getFunction(nameV);
+
     Value []values = evalArgs(env, _args);
 
     Value qThis = env.getThis();
@@ -105,15 +105,15 @@ public class ClassConstructorExpr extends Expr {
     try {
       env.checkTimeout();
 
-      return cl.callMethod(env, qThis, _name, _name.hashCode(), values);
+      return cl.callMethod(env, qThis, nameV, nameV.hashCode(), values);
     } finally {
       env.popCall();
     }
   }
-  
+
   public String toString()
   {
-    return _className + "::" + _name + "()";
+    return _className + "::" + _nameV + "()";
   }
 }
 

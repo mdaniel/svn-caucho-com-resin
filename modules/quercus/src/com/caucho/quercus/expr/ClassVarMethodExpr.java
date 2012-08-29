@@ -30,13 +30,10 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
@@ -51,6 +48,7 @@ public class ClassVarMethodExpr extends Expr {
 
   protected final Expr _className;
   protected final StringValue _methodName;
+
   protected final Expr []_args;
 
   protected AbstractFunction _fun;
@@ -58,14 +56,14 @@ public class ClassVarMethodExpr extends Expr {
 
   public ClassVarMethodExpr(Location location,
                             Expr className,
-                            String methodName,
+                            StringValue methodName,
                             ArrayList<Expr> args)
   {
     super(location);
 
     _className = className;
 
-    _methodName = MethodIntern.intern(methodName);
+    _methodName = methodName;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -110,17 +108,19 @@ public class ClassVarMethodExpr extends Expr {
   public Value eval(Env env)
   {
     String className = _className.evalString(env);
-    
+
     QuercusClass cl = env.findClass(className);
 
     if (cl == null) {
       env.error(getLocation(), L.l("no matching class {0}", _className));
     }
-    
-    int hash = _methodName.hashCodeCaseInsensitive();
 
-    return cl.callMethod(env, env.getThis(), 
-                         _methodName, hash,
+    StringValue nameV = _methodName;
+
+    int hash = nameV.hashCodeCaseInsensitive();
+
+    return cl.callMethod(env, env.getThis(),
+                         nameV, hash,
                          evalArgs(env, _args));
   }
 

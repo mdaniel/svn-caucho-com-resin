@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.program.FunctionInfo;
 
@@ -40,7 +39,7 @@ public class VarInfo {
   private final FunctionInfo _function;
 
   private final StringValue _name;
-  
+
   public VarInfo(StringValue name, FunctionInfo function)
   {
     _name = name;
@@ -62,7 +61,7 @@ public class VarInfo {
   {
     return _function;
   }
- 
+
   @Override
   public String toString()
   {

@@ -86,7 +86,7 @@ public class VariableModule extends AbstractQuercusModule {
 
       name = name.substring(i + 2);
 
-      return env.getClass(cls).getConstant(env, name);
+      return env.getClass(cls).getConstant(env, env.createString(name));
     }
     else {
       Value constant = env.getConstant(name, false);
@@ -152,7 +152,7 @@ public class VariableModule extends AbstractQuercusModule {
 
       QuercusClass cls = env.getClass(clsName);
 
-      return cls.hasConstant(name);
+      return cls.hasConstant(env.createString(name));
     }
     else
       return env.isDefined(name);
