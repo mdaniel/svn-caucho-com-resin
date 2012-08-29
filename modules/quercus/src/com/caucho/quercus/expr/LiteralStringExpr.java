@@ -33,7 +33,6 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 
@@ -46,14 +45,14 @@ public class LiteralStringExpr extends Expr {
   public LiteralStringExpr(Location location, String value)
   {
     super(location);
-    
+
     _value = new ConstStringValue(value);
   }
 
   public LiteralStringExpr(Location location, StringValue value)
   {
     super(location);
-    
+
     _value = value;
   }
 
@@ -74,7 +73,7 @@ public class LiteralStringExpr extends Expr {
   {
     return true;
   }
-  
+
   /**
    * Returns true if the expression evaluates to a string.
    */
@@ -82,28 +81,28 @@ public class LiteralStringExpr extends Expr {
   {
     return true;
   }
-  
+
   //
   // expression creation
   //
-  
+
   /**
    * Creates a class field $class::foo
    */
   public Expr createClassConst(QuercusParser parser, String name)
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     String className = _value.toString();
-    
+
     if ("self".equals(className)) {
       className = parser.getSelfClassName();
-      
+
       return factory.createClassConst(className, name);
     }
     else if ("parent".equals(className)) {
       className = parser.getParentClassName();
-      
+
       return factory.createClassConst(className, name);
     }
     else if ("static".equals(className)) {

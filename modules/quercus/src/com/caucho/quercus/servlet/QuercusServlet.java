@@ -36,6 +36,7 @@ import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -496,8 +497,19 @@ public class QuercusServlet
     }
 
     if (_iniPath != null) {
-      String realPath = getServletContext().getRealPath(_iniPath);
-      quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
+      Path path;
+
+      if (_iniPath.startsWith("/") || _iniPath.contains(":")) {
+        // php/2026
+        path = getQuercus().getPwd().lookup(_iniPath);
+      }
+      else {
+        String realPath = getServletContext().getRealPath(_iniPath);
+
+        path = getQuercus().getPwd().lookup(realPath);
+      }
+
+      quercus.setIniFile(path);
     }
     else {
       String realPath = getServletContext().getRealPath("WEB-INF/php.ini");

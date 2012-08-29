@@ -42,7 +42,6 @@ import java.util.zip.CRC32;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.env.StringBuilderValue.BuilderOutputStream;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.quercus.marshal.Marshal;
@@ -2617,6 +2616,49 @@ abstract public class StringValue
 
     if (s.isUnicode() != isUnicode())
       return false;
+
+    int aLength = length();
+    int bLength = s.length();
+
+    if (aLength != bLength)
+      return false;
+
+    for (int i = aLength - 1; i >= 0; i--) {
+      int chA = charAt(i);
+      int chB = s.charAt(i);
+
+      if (chA == chB) {
+      }
+      else {
+        if ('A' <= chA && chA <= 'Z')
+          chA += 'a' - 'A';
+
+        if ('A' <= chB && chB <= 'Z')
+          chB += 'a' - 'A';
+
+        if (chA != chB)
+          return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Test for equality, ignoring the types of the strings.
+   * XXX: interim fix to get $a->{$name}() to work with unicode.semantics
+   */
+  public boolean equalsIgnoreCaseUniversal(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof StringValue))
+      return false;
+
+    StringValue s = (StringValue) o;
+
+    //if (s.isUnicode() != isUnicode())
+    //  return false;
 
     int aLength = length();
     int bLength = s.length();

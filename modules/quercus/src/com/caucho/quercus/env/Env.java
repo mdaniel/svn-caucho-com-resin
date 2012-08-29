@@ -3378,9 +3378,9 @@ public class Env
     StringBuilder sb = new StringBuilder();
 
     for (Value item : value.values()) {
-      String function = item.get(ErrorModule.FUNCTION).toJavaString();
-      String file = item.get(ErrorModule.FILE).toJavaString();
-      int line = item.get(ErrorModule.LINE).toInt();
+      String function = item.get(createString("function")).toJavaString();
+      String file = item.get(createString("file")).toJavaString();
+      int line = item.get(createString("line")).toInt();
 
       if (function == null || "".equals(function))
         continue;

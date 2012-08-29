@@ -73,13 +73,6 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
   public static final int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
 
-  public static final StringValue ARGS = new ConstStringValue("args");
-  public static final StringValue CLASS = new ConstStringValue("class");
-  public static final StringValue FILE = new ConstStringValue("file");
-  public static final StringValue FUNCTION = new ConstStringValue("function");
-  public static final StringValue LINE = new ConstStringValue("line");
-  public static final StringValue TYPE = new ConstStringValue("type");
-
   /**
    * Returns the default php.ini values.
    */
@@ -144,13 +137,14 @@ public class ErrorModule extends AbstractQuercusModule {
         ArrayValue call = new ArrayValueImpl();
         result.put(call);
 
-        call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
+        call.put(env.createString("file"), env.createString(fileName));
+        call.put(env.createString("line"),
+                 LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
 
-        call.put(FUNCTION, env.createString(fun));
+        call.put(env.createString("function"), env.createString(fun));
 
         if (isPrintArgs) {
-          call.put(ARGS, new ArrayValueImpl());
+          call.put(env.createString("args"), new ArrayValueImpl());
         }
       }
       else if (className.startsWith("_quercus._")
@@ -162,16 +156,16 @@ public class ErrorModule extends AbstractQuercusModule {
         ArrayValue call = new ArrayValueImpl();
         result.put(call);
 
-        call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(
+        call.put(env.createString("file"), env.createString(fileName));
+        call.put(env.createString("line"), LongValue.create(
             env.getSourceLine(className, elt.getLineNumber())));
 
-        call.put(FUNCTION, env.createString(unmangleFunction(className)));
-        call.put(CLASS, env.createString(unmangleClass(className)));
-        call.put(TYPE, env.createString("->"));
+        call.put(env.createString("function"), env.createString(unmangleFunction(className)));
+        call.put(env.createString("class"), env.createString(unmangleClass(className)));
+        call.put(env.createString("type"), env.createString("->"));
 
         if (isPrintArgs) {
-          call.put(ARGS, new ArrayValueImpl());
+          call.put(env.createString("args"), new ArrayValueImpl());
         }
       }
       else if (className.startsWith("_quercus._")
@@ -184,16 +178,16 @@ public class ErrorModule extends AbstractQuercusModule {
 
         ArrayValue call = new ArrayValueImpl();
 
-        call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
+        call.put(env.createString("file"), env.createString(fileName));
+        call.put(env.createString("line"), LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
 
         if (methodName.equals("includeOnce")) {
-          call.put(FUNCTION, env.createString("include_once"));
+          call.put(env.createString("function"), env.createString("include_once"));
 
           result.put(call);
         }
         else if (methodName.equals("include")) {
-          call.put(FUNCTION, env.createString("include"));
+          call.put(env.createString("function"), env.createString("include"));
 
           result.put(call);
         }
@@ -207,7 +201,7 @@ public class ErrorModule extends AbstractQuercusModule {
           if (fun == null || fun.equals("debug_backtrace")) {
           }
           else {
-            call.put(FUNCTION, env.createString(fun));
+            call.put(env.createString("function"), env.createString(fun));
 
             result.put(call);
           }
@@ -257,14 +251,14 @@ public class ErrorModule extends AbstractQuercusModule {
         ArrayValue call = new ArrayValueImpl();
         result.put(call);
 
-        call.put(FILE, env.createString(elt.getFileName()));
-        call.put(LINE, LongValue.create(elt.getLineNumber()));
+        call.put(env.createString("file"), env.createString(elt.getFileName()));
+        call.put(env.createString("line"), LongValue.create(elt.getLineNumber()));
 
-        call.put(FUNCTION, env.createString(elt.getMethodName()));
-        call.put(CLASS, env.createString(elt.getClassName()));
+        call.put(env.createString("function"), env.createString(elt.getMethodName()));
+        call.put(env.createString("class"), env.createString(elt.getClassName()));
 
         if (isPrintArgs) {
-          call.put(ARGS, new ArrayValueImpl());
+          call.put(env.createString("args"), new ArrayValueImpl());
         }
       }
     }
@@ -308,13 +302,13 @@ public class ErrorModule extends AbstractQuercusModule {
       result.put(call);
 
       if (callExpr.getFileName() != null) {
-        call.put(FILE,
+        call.put(env.createString("file"),
                  env.createString(callExpr.getFileName()));
-        call.put(LINE,
+        call.put(env.createString("line"),
                  LongValue.create(callExpr.getLine()));
       }
 
-      call.put(FUNCTION,
+      call.put(env.createString("function"),
                env.createString(callExpr.getName()));
 
       // Create "args" argument value array
@@ -325,8 +319,7 @@ public class ErrorModule extends AbstractQuercusModule {
 
       if (isPrintArgs) {
         ArrayValueImpl args = new ArrayValueImpl(env.peekArgs(i));
-
-        call.put(ARGS, args);
+        call.put(env.createString("args"), args);
       }
     }
     else if (expr instanceof ObjectMethodExpr) {
@@ -336,22 +329,22 @@ public class ErrorModule extends AbstractQuercusModule {
       result.put(call);
 
       if (callExpr.getFileName() != null) {
-        call.put(FILE,
+        call.put(env.createString("file"),
                  env.createString(callExpr.getFileName()));
-        call.put(LINE,
+        call.put(env.createString("line"),
                  LongValue.create(callExpr.getLine()));
       }
 
-      call.put(FUNCTION,
+      call.put(env.createString("function"),
                env.createString(callExpr.getName()));
 
-      call.put(CLASS,
+      call.put(env.createString("class"),
                env.createString(env.peekCallThis(i).getClassName()));
 
-      call.put(TYPE, env.createString("->"));
+      call.put(env.createString("type"), env.createString("->"));
 
       if (isPrintArgs) {
-        call.put(ARGS, new ArrayValueImpl());
+        call.put(env.createString("args"), new ArrayValueImpl());
       }
     }
     else if (expr instanceof FunIncludeExpr) {
@@ -359,11 +352,11 @@ public class ErrorModule extends AbstractQuercusModule {
       result.put(call);
 
       if (expr.getFileName() != null) {
-        call.put(FILE, env.createString(expr.getFileName()));
-        call.put(LINE, LongValue.create(expr.getLine()));
+        call.put(env.createString("file"), env.createString(expr.getFileName()));
+        call.put(env.createString("line"), LongValue.create(expr.getLine()));
       }
 
-      call.put(FUNCTION, env.createString("include"));
+      call.put(env.createString("function"), env.createString("include"));
     }
     else if (expr instanceof FunIncludeOnceExpr) {
       boolean isRequire = ((FunIncludeOnceExpr) expr).isRequire();
@@ -372,8 +365,8 @@ public class ErrorModule extends AbstractQuercusModule {
       result.put(call);
 
       if (expr.getFileName() != null) {
-        call.put(FILE, env.createString(expr.getFileName()));
-        call.put(LINE, LongValue.create(expr.getLine()));
+        call.put(env.createString("file"), env.createString(expr.getFileName()));
+        call.put(env.createString("line"), LongValue.create(expr.getLine()));
       }
 
       String name;
@@ -383,7 +376,7 @@ public class ErrorModule extends AbstractQuercusModule {
       else
         name = "include_once";
 
-      call.put(FUNCTION, env.createString(name));
+      call.put(env.createString("function"), env.createString(name));
     }
   }
 

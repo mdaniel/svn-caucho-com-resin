@@ -54,9 +54,6 @@ public class Post
 {
   private static final L10N L = new L10N(Post.class);
 
-  private static StringValue MAX_FILE_SIZE
-    = new ConstStringValue("MAX_FILE_SIZE");
-
   static void fillPost(Env env,
                        ArrayValue postArray,
                        ArrayValue files,
@@ -279,7 +276,7 @@ public class Post
 
         long maxFileSize = Long.MAX_VALUE;
 
-        Value maxFileSizeV = postArray.get(MAX_FILE_SIZE);
+        Value maxFileSizeV = postArray.get(env.createString("MAX_FILE_SIZE"));
         if (! maxFileSizeV.isNull())
           maxFileSize = maxFileSizeV.toLong();
 
@@ -721,7 +718,7 @@ public class Post
 
     long maxFileSize = Long.MAX_VALUE;
 
-    Value maxFileSizeV = post.get(MAX_FILE_SIZE);
+    Value maxFileSizeV = post.get(env.createString("MAX_FILE_SIZE"));
     if (maxFileSizeV.isNull())
       maxFileSize = maxFileSizeV.toLong();
 

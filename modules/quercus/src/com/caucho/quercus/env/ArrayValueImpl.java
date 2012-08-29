@@ -46,9 +46,6 @@ import com.caucho.util.RandomUtil;
 public class ArrayValueImpl extends ArrayValue
   implements Serializable
 {
-  private static final StringValue KEY = new ConstStringValue("key");
-  private static final StringValue VALUE = new ConstStringValue("value");
-
   private static final int DEFAULT_SIZE = 16;
 
   private static final int SORT_REGULAR = 0;

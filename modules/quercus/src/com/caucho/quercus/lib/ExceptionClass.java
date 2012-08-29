@@ -45,17 +45,6 @@ import java.util.Iterator;
 @ClassImplementation
 public class ExceptionClass
 {
-  private static final StringValue MESSAGE = new ConstStringValue("message");
-  private static final StringValue FUNCTION = new ConstStringValue("function");
-  private static final StringValue FILE = new ConstStringValue("file");
-  private static final StringValue LINE = new ConstStringValue("line");
-  private static final StringValue CODE = new ConstStringValue("code");
-  private static final StringValue TRACE = new ConstStringValue("trace");
-  private static final StringValue PREVIOUS = new ConstStringValue("previous");
-
-  private static final StringValue JAVA_EXCEPTION
-    = new ConstStringValue("__javaException");
-
   /**
    * Create a new exception API object.
    */
@@ -116,7 +105,7 @@ public class ExceptionClass
    */
   public static Value getMessage(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, MESSAGE);
+    return obj.getField(env, env.createString("message"));
   }
 
   /**
@@ -124,7 +113,7 @@ public class ExceptionClass
    */
   public static Value getCode(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, CODE);
+    return obj.getField(env, env.createString("code"));
   }
 
   /**
@@ -132,7 +121,7 @@ public class ExceptionClass
    */
   public static Value getFile(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, FILE);
+    return obj.getField(env, env.createString("file"));
   }
 
   /**
@@ -140,7 +129,7 @@ public class ExceptionClass
    */
   public static Value getLine(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, LINE);
+    return obj.getField(env, env.createString("line"));
   }
 
   /**
@@ -148,7 +137,7 @@ public class ExceptionClass
    */
   public static Value getTrace(Env env, @This Value obj)
   {
-    return obj.getField(env, TRACE);
+    return obj.getField(env, env.createString("trace"));
   }
 
   /**
@@ -156,7 +145,7 @@ public class ExceptionClass
    */
   public static Value getPrevious(Env env, @This Value obj)
   {
-    return obj.getField(env, PREVIOUS);
+    return obj.getField(env, env.createString("previous"));
   }
 
   /**
@@ -164,7 +153,7 @@ public class ExceptionClass
    */
   public static Value getJavaException(Env env, @This Value obj)
   {
-    return obj.getField(env, JAVA_EXCEPTION);
+    return obj.getField(env, env.createString("__javaException"));
   }
 
   /**
@@ -183,11 +172,11 @@ public class ExceptionClass
       Value value = iter.next();
 
       sb = sb.append('\n');
-      sb = sb.append(value.get(FILE));
+      sb = sb.append(value.get(env.createString("file")));
       sb = sb.append(':');
-      sb = sb.append(value.get(LINE));
+      sb = sb.append(value.get(env.createString("line")));
       sb = sb.append(": ");
-      sb = sb.append(value.get(FUNCTION));
+      sb = sb.append(value.get(env.createString("function")));
     }
 
     return sb;

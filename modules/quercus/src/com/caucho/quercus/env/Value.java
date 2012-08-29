@@ -62,8 +62,6 @@ abstract public class Value implements java.io.Serializable
 
   private static final Value []NULL_ARG_VALUES = new Value[0];
 
-  public static final StringValue SCALAR_V = new ConstStringValue("scalar");
-
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
 

@@ -35,7 +35,6 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Callable;
-import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
@@ -63,9 +62,6 @@ public class OutputModule extends AbstractQuercusModule
   private static final L10N L = new L10N(OutputModule.class);
   private static final Logger log = Logger.getLogger(
       OutputModule.class.getName());
-
-  private static final StringValue HTTP_ACCEPT_ENCODING
-    = new ConstStringValue("HTTP_ACCEPT_ENCODING");
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
@@ -513,7 +509,7 @@ public class OutputModule extends AbstractQuercusModule
     Value _SERVER = env.getGlobalVar("_SERVER");
 
     String [] acceptedList
-      = _SERVER.get(HTTP_ACCEPT_ENCODING).toString().split(",");
+      = _SERVER.get(env.createString("HTTP_ACCEPT_ENCODING")).toString().split(",");
 
     for (String accepted : acceptedList) {
       accepted = accepted.trim();
