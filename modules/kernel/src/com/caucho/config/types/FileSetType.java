@@ -117,12 +117,17 @@ public class FileSetType {
   {
     _excludeList.add(pattern);
   }
-  
+
   public void add(FileSetType fileSet)
   {
     if (fileSet == this)
       return;
-    
+
+    if (! isSameDir(fileSet))
+      throw new IllegalArgumentException(L.l("can't add {0} to {1}",
+                                             fileSet,
+                                             this));
+
     if (fileSet._includeList != null) {
       for (PathPatternType include : fileSet._includeList){
         addInclude(include);
@@ -138,6 +143,14 @@ public class FileSetType {
   
   public void addInverse(FileSetType fileSet)
   {
+    if (fileSet == this)
+      return;
+
+    if (! isSameDir(fileSet))
+      throw new IllegalArgumentException(L.l("can't add {0} to {1}",
+                                             fileSet,
+                                             this));
+
     if (fileSet._includeList != null) {
       for (PathPatternType include : fileSet._includeList){
         addExclude(include);
@@ -270,6 +283,19 @@ public class FileSetType {
       if (pattern.isMatch(suffix))
         return true;
     }
+
+    return false;
+  }
+
+  private boolean isSameDir(FileSetType fileSet) {
+    if (fileSet == null)
+      throw new NullPointerException();
+
+    if (_dir == fileSet._dir)
+      return true;
+
+    if (_dir != null && _dir.equals(fileSet._dir))
+      return true;
 
     return false;
   }

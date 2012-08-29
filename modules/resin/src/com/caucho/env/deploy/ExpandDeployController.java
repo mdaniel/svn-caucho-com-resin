@@ -40,7 +40,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.PathPatternType;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositorySystem;
@@ -203,10 +205,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     return map;
   }
 
-  /**
-   * Sets the archive auto-remove file set.
-   */
-  public void addExpandCleanupFileSet(FileSetType fileSet)
+  public void addParentExpandCleanupFileSet(FileSetType fileSet)
   {
     if (_expandCleanupFileSet == null)
       _expandCleanupFileSet = fileSet;
@@ -217,12 +216,25 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Sets the archive auto-remove file set.
    */
-  public void addExpandPreserveFileset(FileSetType fileSet)
+  @Configurable
+  public void addExpandCleanupFileSet(PathPatternType include)
+  {
+    if (_expandCleanupFileSet == null)
+      _expandCleanupFileSet = new FileSetType();
+
+    _expandCleanupFileSet.addInclude(include);
+  }
+
+  /**
+   * Sets the archive auto-remove file set.
+   */
+  @Configurable
+  public void addExpandPreserveFileset(PathPatternType exclude)
   {
     if (_expandCleanupFileSet == null)
       _expandCleanupFileSet = new FileSetType();
     
-    _expandCleanupFileSet.addInverse(fileSet);
+    _expandCleanupFileSet.addExclude(exclude);
   }
 
   public String getAutoDeployStage()

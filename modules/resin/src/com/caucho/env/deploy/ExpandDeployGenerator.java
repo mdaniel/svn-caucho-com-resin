@@ -38,7 +38,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositorySystem;
@@ -229,26 +231,20 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     return _cronInterval;
   }
 
-  /**
-   * Sets the expand remove file set.
-   */
-  public void addExpandCleanupFileset(FileSetType fileSet)
-  {
-    if (_expandCleanupFileSet == null)
-      _expandCleanupFileSet = fileSet;
-    else
-      _expandCleanupFileSet.add(fileSet);
-  }
-
-  /**
-   * Sets the expand remove file set.
-   */
-  public void addExpandPreserveFileset(FileSetType fileSet)
-  {
+  @Configurable
+  public void addExpandCleanupFileset(PathPatternType include) {
     if (_expandCleanupFileSet == null)
       _expandCleanupFileSet = new FileSetType();
 
-    _expandCleanupFileSet.addInverse(fileSet);
+    _expandCleanupFileSet.addInclude(include);
+  }
+
+  @Configurable
+  public void addExpandPreserveFileset(PathPatternType exclude) {
+    if (_expandCleanupFileSet == null)
+      _expandCleanupFileSet = new FileSetType();
+
+    _expandCleanupFileSet.addExclude(exclude);
   }
 
   /**
@@ -430,7 +426,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
    * Returns the location of an expanded archive, or null if no archive with
    * the passed name is deployed.
    *
-   * @param name a name, without an extension
+   * @param key a name, without an extension
    */
   public Path getExpandPath(String key)
   {
@@ -677,7 +673,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       E controller = createController(version);
 
       if (controller != null) {
-        controller.addExpandCleanupFileSet(_expandCleanupFileSet);
+        controller.addParentExpandCleanupFileSet(_expandCleanupFileSet);
         controllerList.add(controller);
 
         // _controllerNames.add(name); // server/1d19
