@@ -325,6 +325,11 @@ public final class ActorQueue<T extends RingItem>
       }
     }
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _firstWorker + "]";
+  }
 
   private static final class ActorConsumer<T extends RingItem>
   {

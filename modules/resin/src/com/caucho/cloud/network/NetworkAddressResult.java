@@ -29,21 +29,41 @@
 
 package com.caucho.cloud.network;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.listen.TcpPort;
+import java.io.Serializable;
 
 /**
- * Represents a protocol connection.
+ * Service for handling the cache messages
  */
-public class ClusterTcpPort extends TcpPort {
-  public ClusterTcpPort(ClusterServer server)
+@SuppressWarnings("serial")
+public class NetworkAddressResult implements Serializable
+{
+  private String _address;
+  private int _port;
+  
+  @SuppressWarnings("unused")
+  private NetworkAddressResult()
   {
-    try {
-      setAddress(server.getAddress());
-      
-      setPort(server.getPort());
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    
+  }
+
+  public NetworkAddressResult(String address, int port)
+  {
+    _address = address;
+    _port = port;
+  }
+  
+  public String getAddress()
+  {
+    return _address;
+  }
+  
+  public int getPort()
+  {
+    return _port;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getAddress() + ":" + getPort() + "]";
   }
 }

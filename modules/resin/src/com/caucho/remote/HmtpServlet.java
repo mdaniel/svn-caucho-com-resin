@@ -112,6 +112,10 @@ public class HmtpServlet extends GenericServlet {
     if ("true".equals(admin))
       _isAdmin = true;
 
+    // _authManager = new ServerAuthManager(_auth);
+    _authManager = new ServerAuthManager();
+    _authManager.setAuthenticationRequired(_isAuthenticationRequired);
+
     try {
       if (_isAdmin)
         _auth = _adminInstance.get();
@@ -122,16 +126,14 @@ public class HmtpServlet extends GenericServlet {
         log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",
                                  this), e);
       }
+      else if (_authManager.isClusterSystemKey()) {
+      }
       else if (_isAuthenticationRequired){
         // network/03f0
         log.info(L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.  In the resin.xml, add an <sec:AdminAuthenticator>",
                    this));
       }
     }
-
-    // _authManager = new ServerAuthManager(_auth);
-    _authManager = new ServerAuthManager();
-    _authManager.setAuthenticationRequired(_isAuthenticationRequired);
 
     if (_isAdmin)
       _broker = ServletService.getCurrent().getAdminBroker();

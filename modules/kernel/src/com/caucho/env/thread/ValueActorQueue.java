@@ -97,6 +97,11 @@ public class ValueActorQueue<T>
     // _disruptor.close();
   }
   
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _actorQueue + "]";
+  }
+  
   public interface ValueProcessor<T> {
     public String getThreadName();
     

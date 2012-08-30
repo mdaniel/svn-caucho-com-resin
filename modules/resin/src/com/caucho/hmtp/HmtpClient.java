@@ -88,20 +88,16 @@ public class HmtpClient implements RemoteActorSender
   private ClientAuthManager _authManager = new ClientAuthManager();
   
   public HmtpClient(String url, ActorHolder actor)
-    throws IOException
   {
     _actor = actor;
     _url = url;
-    
+
     init();
   }
   
   public HmtpClient(String url)
   {
-    _actor = new NullActor("HmtpClient@" + url);
-    _url = url;
-    
-    init();
+    this(url, new NullActor("HmtpClient@" + url));
   }
 
   public void setVirtualHost(String host)
@@ -312,7 +308,7 @@ public class HmtpClient implements RemoteActorSender
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close");
-
+    
     // super.close();
     
     HmtpLinkFactory linkFactory = _linkFactory;

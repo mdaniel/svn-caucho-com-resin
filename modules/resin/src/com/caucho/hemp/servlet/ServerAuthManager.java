@@ -96,6 +96,11 @@ public class ServerAuthManager {
     else
       return _security.getAuthenticator();
   }
+  
+  public boolean isClusterSystemKey()
+  {
+    return _security.isSystemAuthKey();
+  }
 
   //
   // authentication

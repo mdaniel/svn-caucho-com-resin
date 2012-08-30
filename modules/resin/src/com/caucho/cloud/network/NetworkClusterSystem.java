@@ -318,7 +318,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
    * Returns the local ip address for a server configured with
    * external-address.
    */
-  public String getLocalSocketAddress(ClusterServer clusterServer)
+  public NetworkAddressResult getLocalSocketAddress(ClusterServer clusterServer)
   {
     return null;
   }
@@ -385,6 +385,10 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       listener.bind();
       listener.start();
       log.info("");
+      
+      if (clusterServer.getPort() == 0) {
+        clusterServer.setPort(listener.getLocalPort());
+      }
     }
   }
 

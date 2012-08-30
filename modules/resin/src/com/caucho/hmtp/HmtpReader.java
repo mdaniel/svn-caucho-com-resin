@@ -130,7 +130,7 @@ public class HmtpReader {
           log.finest(this + " message " + value
                     + " {to:" + to + ", from:" + from + "}");
         }
-
+        
         actorStream.message(to, from, value);
 
         break;

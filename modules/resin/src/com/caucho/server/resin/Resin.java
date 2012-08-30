@@ -216,12 +216,20 @@ public class Resin
     if (displayServerId == null || displayServerId.equals(""))
       displayServerId = "default";
     
-    String serverId = displayServerId;
+    String serverId;
 
     if (args.isElasticServer()) {
+      serverId = args.getServerId();
+      
+      if (serverId == null || "".equals(serverId))
+        serverId = "dyn";
+      
       serverId = serverId + "-"+ getDynamicDisplayAddress() + ':' + getDynamicServerPort();
     }
-
+    else {
+      serverId = displayServerId;
+    }
+    
     _resinSystem = new ResinSystem(serverId);
 
     // _licenseErrorMessage = licenseErrorMessage;
@@ -496,8 +504,17 @@ public class Resin
     
     if (port > 0)
       return port;
+    else if (_bootConfig != null) {
+      port = _bootConfig.getBootResin().getElasticServerPort(_args);
+      
+      if (port > 0)
+        return port;
+    }
+
+    if (_args.getElasticServerPort() > 0)
+      return _args.getElasticServerPort();
     else
-      return _bootConfig.getBootResin().getElasticServerPort(_args);
+      return 6830;
   }
 
   public Path getLogDirectory()
@@ -742,6 +759,8 @@ public class Resin
       }
 
       readUserProperties();
+      
+      Config.setProperty("rvar0", getDisplayServerId());
       
       _bootConfig
         = new BootConfig(_resinSystem,
@@ -1231,7 +1250,10 @@ public class Resin
     NetworkClusterSystem.createAndAddService(clusterSystem);
     
     ClusterServer server = _selfServer.getData(ClusterServer.class);
-    
+
+    if (server.getPort() == 0 && getServerPort() > 0) {
+      server.setPort(getServerPort());
+    }
     // initRepository();
     
     LoadBalanceService.createAndAddService(getDelegate().createLoadBalanceFactory());
