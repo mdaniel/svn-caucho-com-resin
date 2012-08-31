@@ -1528,7 +1528,7 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
     cluster_srun_t *cluster_srun = cluster->srun_list + index;
     srun_t *srun = cluster_srun->srun;
 
-    if (index == host) {
+    if (index == host && size > 1) {
       continue;
     }
     else if (! srun) {

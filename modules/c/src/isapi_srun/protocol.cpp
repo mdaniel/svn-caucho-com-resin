@@ -30,7 +30,6 @@
 /*
  * SSL client certificate contributed by Ahn Le
  */
-
 /*
  * Anh: We have to define _WIN32_WINNT as 0x0400 to have access to
  * the Crypto API.  By definning as this way, the dll can only work
@@ -76,10 +75,12 @@ cse_error(config_t *config, char *fmt, ...)
         }
 #ifdef DEBUG
 	{
-		FILE *file;
+	    FILE *file;
 	    file = fopen("/temp/isapi.log", "a+b");
-		fprintf(file, "%s\n", buf);
-		fclose(file);
+	    fprintf(file, "%s\n", buf);
+
+	    if (file)
+              fclose(file);
 	}
 #endif
 }
@@ -113,9 +114,12 @@ cse_log(char *fmt, ...)
 	file = fopen("/temp/isapi.log", "a+");
 	va_start(arg, fmt);
 	if (file)
-		vfprintf(file, fmt, arg);
+	  vfprintf(file, fmt, arg);
+
 	va_end(arg);
-	fclose(file);
+
+	if (file)
+	  fclose(file);
 #endif
 }
 
