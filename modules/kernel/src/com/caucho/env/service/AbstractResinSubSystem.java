@@ -29,6 +29,7 @@
 
 package com.caucho.env.service;
 
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
 
@@ -38,17 +39,24 @@ import com.caucho.util.L10N;
 public class AbstractResinSubSystem implements ResinSubSystem
 {
   private static final L10N L = new L10N(AbstractResinSubSystem.class);
+  private final Lifecycle _lifecycle = new Lifecycle();
 
   @Override
   public int getStartPriority()
   {
     return START_PRIORITY_DEFAULT;
   }
+  
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
+  }
 
   @Override
   public void start()
     throws Exception
   {
+    _lifecycle.toActive();
   }
 
   @Override
@@ -61,6 +69,7 @@ public class AbstractResinSubSystem implements ResinSubSystem
   public void stop() 
     throws Exception
   {
+    _lifecycle.toStop();
   }
 
   @Override

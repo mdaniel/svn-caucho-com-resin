@@ -39,15 +39,17 @@ import javax.annotation.PostConstruct;
 public class ContainerTransaction {
   private static final L10N L = new L10N(ContainerTransaction.class);
 
-  private EjbConfig _config;
+  private final EjbJar _ejbJar;
+  private final EjbConfig _config;
   private MethodSignature _method;
   private String _trans;
 
   /**
    * Creates a new cmp-relation
    */
-  public ContainerTransaction(EjbConfig config)
+  public ContainerTransaction(EjbJar ejbJar, EjbConfig config)
   {
+    _ejbJar = ejbJar;
     _config = config;
   }
 
@@ -89,6 +91,10 @@ public class ContainerTransaction {
   public void init()
     throws ConfigException
   {
+    if (_ejbJar.isSkip()) {
+      return;
+    }
+    
     EjbBean<?> bean = _config.getBeanConfig(_method.getEJBName());
 
     if (bean == null)

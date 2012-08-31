@@ -54,7 +54,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
 
     if (resAdapt == null)
       resAdapt = new ToCharResponseAdapter();
-
+    
     resAdapt.init(response);
 
     return resAdapt;

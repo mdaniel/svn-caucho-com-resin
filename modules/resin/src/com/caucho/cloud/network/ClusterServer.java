@@ -1071,7 +1071,7 @@ public final class ClusterServer {
   {
     long now = CurrentTime.getCurrentTime();
     
-    _lastHeartbeatTime.set(now);
+    long oldHeartbeatTime = _lastHeartbeatTime.getAndSet(now);
 
     boolean isActive = _isHeartbeatActive.getAndSet(true);
     
@@ -1083,11 +1083,17 @@ public final class ClusterServer {
     _cloudServer.onHeartbeatStart();
 
     ClientSocketFactory clusterSocketPool = getClusterSocketPool();
-    if (clusterSocketPool != null)
+    if (clusterSocketPool != null) {
       clusterSocketPool.notifyHeartbeatStart();
+    }
 
-    if (log.isLoggable(Level.FINER))
+    if (oldHeartbeatTime > 0) {
+      // #5173
+      log.warning(this + " notify-heartbeat-start");
+    }
+    else if (log.isLoggable(Level.FINER)) {
       log.finer(this + " notify-heartbeat-start");
+    }
 
     _clusterSystem.notifyHeartbeatStart(this);
 
@@ -1118,7 +1124,10 @@ public final class ClusterServer {
     
     _stateTimestamp.set(CurrentTime.getCurrentTime());
 
-    log.warning(this + " notify-heartbeat-stop");
+    if (_clusterSystem.isActive())
+      log.warning(this + " notify-heartbeat-stop");
+    else
+      log.fine(this + " notify-heartbeat-stop");
     
     _cloudServer.onHeartbeatStop();
 

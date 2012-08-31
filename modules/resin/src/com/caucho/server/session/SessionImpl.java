@@ -104,7 +104,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   private boolean _isNew = true;
   // true if the application has modified the data
   @Transient
-  private boolean _isModified = false;
+  private boolean _isModified;
   // true if the session is still valid, i.e. not invalidated
   @Json(name = "Valid")
   private boolean _isValid = true;
@@ -535,8 +535,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
 
     // e.g. server 'C' when 'A' and 'B' have no record of session
-    if (_isValid)
+    if (_isValid) {
       unbind();
+    }
     
     // TCK now cares about exact time
     now = CurrentTime.getExactTime();
@@ -545,6 +546,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     _isNew = true;
     _accessTime = now;
     _creationTime = now;
+    
+    // server/01np
+    _isModified = true;
 
     /*
     if (_clusterObject != null && isCreate)

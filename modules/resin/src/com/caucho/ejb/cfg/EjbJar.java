@@ -130,6 +130,11 @@ public class EjbJar extends DescriptionGroupConfig {
   {
   }
   
+  ContainerTransaction createContainerTransaction()
+  {
+    return new ContainerTransaction(this, _config);
+  }
+  
   MethodPermission createMethodPermission()
   {
     return new MethodPermission(_config);

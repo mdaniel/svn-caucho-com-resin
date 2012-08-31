@@ -43,7 +43,7 @@ public class AssemblyDescriptor {
 
   public ContainerTransaction createContainerTransaction()
   {
-    return new ContainerTransaction(_config);
+    return _ejbJar.createContainerTransaction();
   }
 
   public EjbJar.MethodPermission createMethodPermission()

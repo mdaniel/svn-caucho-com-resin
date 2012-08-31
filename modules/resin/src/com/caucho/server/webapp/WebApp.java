@@ -771,7 +771,8 @@ public class WebApp extends ServletContextImpl
   {
     String ns = node.getNamespaceURI();
 
-    if (ns == null || ns.equals("")) {
+    // jsp/013f
+    if (node.getNodeName().equals("web-app") && (ns == null || ns.equals(""))) {
       _jspState = JSP_1;
     }
   }

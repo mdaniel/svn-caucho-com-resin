@@ -101,13 +101,15 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Sets the buffer size.
    */
+  @Override
   public void setBufferSize(int size)
   {
     size = (size + SIZE - 1);
     size -= size % SIZE;
 
-    if (_bufferCapacity < size)
+    if (_bufferCapacity < size) {
       _bufferCapacity = size;
+    }
   }
 
   /**
@@ -182,8 +184,9 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     */
     _charBuffer[_charLength++] = (char) ch;
 
-    if (SIZE <= _charLength)
+    if (SIZE <= _charLength) {
       expandCharBuffer();
+    }
   }
 
   /**

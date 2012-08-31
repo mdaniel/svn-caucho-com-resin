@@ -90,6 +90,7 @@ import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.RequestAdapter;
+import com.caucho.server.http.ResponseAdapter;
 import com.caucho.server.http.ToCharResponseAdapter;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.server.webapp.WebApp;
@@ -232,8 +233,9 @@ public class PageContextImpl extends PageContext
     _request = (HttpServletRequest) request;
     _servletResponse = response;
 
-    if (response instanceof CauchoResponse
-        && bufferSize <= TempCharBuffer.SIZE) {
+    if ((response instanceof ToCharResponseAdapter)
+        || (response instanceof CauchoResponse
+            && bufferSize <= TempCharBuffer.SIZE)) {
       _response = (CauchoResponse) response;
       _responseAdapter = null;
     }
@@ -251,6 +253,7 @@ public class PageContextImpl extends PageContext
     }
 
     _responseStream = _response.getResponseStream();
+
     _topOut = _jspAdapter;
     _responseStream.setAutoFlush(autoFlush);
     _jspAdapter.init(null, _response, _responseStream);
