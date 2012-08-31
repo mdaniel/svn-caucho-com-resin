@@ -265,11 +265,11 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   if (connect(sock, (struct sockaddr *) sin, sizeof(struct sockaddr_in))) {
     WSAEVENT event = WSACreateEvent();
     WSANETWORKEVENTS networkResult;
+    int timeout_ms = srun->connect_timeout * 1000;
     int result;
 
     WSAEventSelect(sock, event, FD_CONNECT);
-    result = WSAWaitForMultipleEvents(1, &event, 0,
-                                      srun->connect_timeout * 1000, 0);
+    result = WSAWaitForMultipleEvents(1, &event, 0, timeout_ms, 0);
     WSAEnumNetworkEvents(sock, event, &networkResult);
     WSAEventSelect(sock, 0, 0);
     WSACloseEvent(event);
@@ -492,14 +492,14 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
   }
 
 #ifdef HAS_SOCK_TIMEOUT
-  timeout.tv_sec = srun->read_timeout / 1000;
-  timeout.tv_usec = srun->read_timeout % 1000 * 1000;
+  timeout.tv_sec = srun->read_timeout;
+  timeout.tv_usec = 0;
   
   setsockopt(s->socket, SOL_SOCKET, SO_RCVTIMEO,
              (char *) &timeout, sizeof(timeout));
 
-  timeout.tv_sec = srun->read_timeout / 1000;
-  timeout.tv_usec = srun->read_timeout % 1000 * 1000;
+  timeout.tv_sec = srun->read_timeout;
+  timeout.tv_usec = 0;
   setsockopt(s->socket, SOL_SOCKET, SO_SNDTIMEO,
 	     (char *) &timeout, sizeof(timeout));
 #endif

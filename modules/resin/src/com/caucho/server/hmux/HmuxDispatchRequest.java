@@ -434,12 +434,18 @@ public class HmuxDispatchRequest {
   private long writeTime(WriteStream os, long crc, String header, long time)
     throws IOException
   {
-    writeString(os, HmuxRequest.HMUX_HEADER, header);
-    writeString(os, HmuxRequest.HMUX_STRING, "" + (time / 1000));
-    
     crc = Crc64.generate(crc, time);
+
+    writeTime(os, header, time);
     
     return crc;
+  }
+  
+  private void writeTime(WriteStream os, String header, long time)
+    throws IOException
+  {
+    writeString(os, HmuxRequest.HMUX_HEADER, header);
+    writeString(os, HmuxRequest.HMUX_STRING, "" + ((time + 999) / 1000));
   }
   
   /**
@@ -448,9 +454,7 @@ public class HmuxDispatchRequest {
   private void queryServer(WriteStream os)
     throws IOException
   {
-    writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
-    writeString(os, HmuxRequest.HMUX_STRING,
-                String.valueOf(_server.getDependencyCheckInterval() / 1000));
+    writeTime(os, "check-interval", _server.getDependencyCheckInterval());
     
     writeString(os, HmuxRequest.HMUX_HEADER, "cookie");
     writeString(os, HmuxRequest.HMUX_STRING,

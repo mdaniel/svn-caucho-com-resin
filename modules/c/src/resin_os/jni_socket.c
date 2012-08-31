@@ -491,7 +491,7 @@ jni_open_file(JNIEnv *env,
 
   buffer[length] = 0;
 
- flags = O_RDWR|O_CREAT;
+  flags = O_RDONLY;
   
 #ifdef O_BINARY
   flags |= O_BINARY;
