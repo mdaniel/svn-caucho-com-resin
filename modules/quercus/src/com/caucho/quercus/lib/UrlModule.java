@@ -164,7 +164,7 @@ public class UrlModule
     if (str.length() == 0)
       return str;
 
-    StringValue sb = env.createStringBuilder();
+    StringValue sb = env.createBinaryBuilder();
 
     OutputStream os = new StringBuilderOutputStream(sb);
 

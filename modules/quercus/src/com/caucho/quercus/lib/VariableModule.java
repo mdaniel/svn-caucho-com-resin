@@ -36,8 +36,20 @@ import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.UsesSymbolTable;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvVar;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.SerializeMap;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnserializeCacheEntry;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -46,12 +58,9 @@ import com.caucho.vfs.StringWriter;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.lang.ref.*;
-import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.lang.ref.SoftReference;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
