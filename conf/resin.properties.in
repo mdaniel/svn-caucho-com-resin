@@ -129,8 +129,8 @@ session_store : true
 # Must be identical between web, app, and cache clusters.
 # cluster_system_key : changeme
 
-# Enable command-line remote admin (required for remote deploy)
-# remote_cli_enable : true
+# Enable remote admin (for remote CLI and for EC2 ext: triad discovery)
+# remote_admin_enable : true
 
 # Enable /resin-admin web administration console
 web_admin_enable : true

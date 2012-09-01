@@ -282,7 +282,10 @@ public class DistCacheEntry {
     
     if (modifiedExpireTime < 0)
       modifiedExpireTime = config.getModifiedExpireTimeout();
-
+    
+    if (valueHash == getMnodeEntry().getValueHash()
+        && flags == getMnodeEntry().getFlags()) {
+    }
     
     int leaseOwner = getMnodeEntry().getLeaseOwner();
     long leaseExpireTimeout = config.getLeaseExpireTimeout();
@@ -672,6 +675,11 @@ public class DistCacheEntry {
       return newVersion;
   }
 
+  public void clearLease(int oldLeaseOwner)
+  {
+    getMnodeEntry().clearLease(oldLeaseOwner);
+  }
+
   public void clearLease()
   {
     getMnodeEntry().clearLease();
@@ -684,9 +692,17 @@ public class DistCacheEntry {
   
   public void updateLease(int leaseOwner)
   {
+    if (leaseOwner <= 2) {
+      return;
+    }
+    
     long now = CurrentTime.getCurrentTime();
 
-    getMnodeEntry().setLeaseOwner(leaseOwner, now);
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (isLeaseExpired() || entry.getLeaseOwner() == leaseOwner) {
+      entry.setLeaseOwner(leaseOwner, now);
+    }
   }
 
   public long getCost()
@@ -993,6 +1009,9 @@ public class DistCacheEntry {
           || (version == oldVersion
               && valueHash != 0
               && valueHash <= oldValueHash)) {
+        // server/01ns
+        // lease ownership handled externally. Only lease owner updates.
+        /*
         // lease ownership updates even if value doesn't
         if (oldEntryValue.isLeaseExpired(now)) {
           oldEntryValue.setLeaseOwner(mnodeUpdate.getLeaseOwner(), now);
@@ -1000,6 +1019,7 @@ public class DistCacheEntry {
           // XXX: access time?
           oldEntryValue.setLastAccessTime(now);
         }
+        */
 
         return oldEntryValue;
       }
@@ -1008,12 +1028,15 @@ public class DistCacheEntry {
       long accessTime = now;
       long updateTime = mnodeUpdate.getLastModifiedTime();
       
-      int leaseOwner;
+      int leaseOwner = oldLeaseOwner;
       
+      // server/01ns
+      /*
       if (oldEntryValue.isLeaseExpired(now))
         leaseOwner = mnodeUpdate.getLeaseOwner();
       else
         leaseOwner = oldLeaseOwner;
+        */
 
       mnodeValue = new MnodeEntry(mnodeUpdate,
                                   valueDataId,
@@ -1031,6 +1054,7 @@ public class DistCacheEntry {
                                                  mnodeUpdate);
     
     if (oldLeaseOwner != mnodeUpdate.getLeaseOwner()) {
+      clearLease(oldLeaseOwner);
       _cacheService.getCacheEngine().notifyLease(key, oldLeaseOwner);
     }
     

@@ -343,6 +343,18 @@ public final class MnodeEntry extends MnodeValue {
   }
 
   /**
+   * Sets the owner
+   */
+  public final void clearLease(int oldLeaseOwner)
+  {
+    if (_leaseOwner == oldLeaseOwner) {
+      _leaseOwner = -1;
+
+      _leaseExpireTime = 0;
+    }
+  }
+
+  /**
    * Returns the idle window to avoid too many updates
    */
   public long getAccessExpireTimeoutWindow()

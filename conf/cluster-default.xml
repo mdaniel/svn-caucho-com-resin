@@ -47,7 +47,7 @@
        - Admin services
       -->
 
-    <resin:if test="${remote_cli_enable}">
+    <resin:if test="${remote_admin_enable}">
       <resin:RemoteAdminService/>
     </resin:if>
     

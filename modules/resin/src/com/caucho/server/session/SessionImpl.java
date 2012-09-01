@@ -656,10 +656,11 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public boolean load(boolean isNew)
   {
+    long now = CurrentTime.getCurrentTime();
+    
     if (! _isValid)
       return false;
-    else if (_isIdleSet
-             && _accessTime + _idleTimeout < CurrentTime.getCurrentTime()) {
+    else if (_isIdleSet && _accessTime + _idleTimeout < now) {
       // server/01o2 (tck)
     
       return false;
@@ -672,12 +673,14 @@ public class SessionImpl implements HttpSession, CacheListener {
     try {
       ByteStreamCache cache = _manager.getCache();
 
-      if (cache == null)
+      if (cache == null) {
         return ! isNew;
+      }
 
       // server/015m
-      if (! isNew && _manager.isSaveOnShutdown())
+      if (! isNew && _manager.isSaveOnShutdown()) {
         return true;
+      }
 
       ExtCacheEntry entry = cache.getExtCacheEntry(_id);
       ExtCacheEntry cacheEntry = _cacheEntry;
@@ -686,6 +689,12 @@ public class SessionImpl implements HttpSession, CacheListener {
         // server/01a1, #4419
         
         _idleTimeout = entry.getAccessedExpireTimeout();
+        
+        long lastAccessTime = entry.getLastAccessedTime();
+        
+        if (lastAccessTime + _idleTimeout * 5 / 4 < now) {
+          return false;
+        }
         // _idleTimeout = entry.getIdleTimeout() * 4 / 5;
         //_isIdleSet = true;
       }
@@ -696,6 +705,8 @@ public class SessionImpl implements HttpSession, CacheListener {
           log.fine(this + " session load-same valueHash="
                    + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
+        
+        _isModified = false;
         
         return true;
       }
@@ -718,6 +729,7 @@ public class SessionImpl implements HttpSession, CacheListener {
         is.close();
 
         _cacheEntry = entry;
+        _isModified = false;
 
         return true;
       }
@@ -891,7 +903,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " session save valueHash="
-                 + (_cacheEntry != null ? _cacheEntry.getValueHash() : null));
+                 + (_cacheEntry != null ? Long.toHexString(_cacheEntry.getValueHash()) : null));
       }
 
       os.close();
