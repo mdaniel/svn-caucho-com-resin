@@ -2644,6 +2644,57 @@ abstract public class StringValue
     return true;
   }
 
+  public boolean equalsString(CharSequence s)
+  {
+    int lenA = length();
+    int lenB = s.length();
+
+    if (lenA != lenB) {
+      return false;
+    }
+
+    for (int i = 0; i < lenA; i++) {
+      char chA = charAt(i);
+      char chB = s.charAt(i);
+
+      if (chA != chB) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public boolean equalsStringIgnoreCase(CharSequence s)
+  {
+    int lenA = length();
+    int lenB = s.length();
+
+    if (lenA != lenB) {
+      return false;
+    }
+
+    for (int i = 0; i < lenA; i++) {
+      char chA = charAt(i);
+      char chB = s.charAt(i);
+
+      if (chA == chB) {
+      }
+      else {
+        if ('A' <= chA && chA <= 'Z')
+          chA += 'a' - 'A';
+
+        if ('A' <= chB && chB <= 'Z')
+          chB += 'a' - 'A';
+
+        if (chA != chB)
+          return false;
+      }
+    }
+
+    return true;
+  }
+
   //
   // Java generator code
   //

@@ -108,27 +108,6 @@ public final class UnserializeReader {
 
     case 's':
     case 'S':
-      {
-        expect(':');
-        int len = (int) readInt();
-        expect(':');
-        expect('"');
-
-        if (! isValidString(len)) {
-          env.notice(L.l("expected string length of {0}", len));
-          return BooleanValue.FALSE;
-        }
-
-        Value value = readStringValue(env, len);
-
-        expect('"');
-        expect(';');
-
-        if (_useReference)
-          value = createReference(value);
-
-        return value;
-      }
     case 'u':
     case 'U':
       {
@@ -142,7 +121,14 @@ public final class UnserializeReader {
           return BooleanValue.FALSE;
         }
 
-        Value value = readUnicodeValue(env, len);
+        Value value;
+
+        if (ch == 's' || ch == 'S') {
+          value = readStringValue(env, len);
+        }
+        else {
+          value = readUnicodeValue(env, len);
+        }
 
         expect('"');
         expect(';');
@@ -397,21 +383,6 @@ public final class UnserializeReader {
 
       case 's':
       case 'S':
-      {
-        _referenceList.add(Boolean.FALSE);
-
-        expect(':');
-        int len = (int) readInt();
-        expect(':');
-        expect('"');
-
-        _index += len;
-
-        expect('"');
-        expect(';');
-
-        return;
-      }
       case 'u':
       case 'U':
       {
@@ -604,8 +575,10 @@ public final class UnserializeReader {
     int ch = read();
 
     switch (ch) {
-    case 's':
-    case 'S':
+      case 's':
+      case 'S':
+      case 'u':
+      case 'U':
       {
         expect(':');
         int len = (int) readInt();
@@ -625,7 +598,12 @@ public final class UnserializeReader {
           else {
             StringKey key = new StringKey(_buffer, _index, len);
 
-            v = readStringValue(env, len);
+            if (ch == 's' || ch == 'S') {
+              v = readStringValue(env, len);
+            }
+            else {
+              v = readUnicodeValue(env, len);
+            }
 
             _keyCache.put(key, v);
           }
@@ -640,7 +618,7 @@ public final class UnserializeReader {
         return v;
       }
 
-    case 'i':
+      case 'i':
       {
         expect(':');
 

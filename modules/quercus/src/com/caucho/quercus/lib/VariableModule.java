@@ -684,9 +684,7 @@ public class VariableModule extends AbstractQuercusModule {
 
       v = is.unserialize(env);
     } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      env.notice(e.toString());
+      env.warning(e);
 
       v = BooleanValue.FALSE;
     }

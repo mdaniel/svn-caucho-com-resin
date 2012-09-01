@@ -214,8 +214,7 @@ public class ReflectionClass
     if (fun == null)
       throw new QuercusLanguageException(
         env.createException("ReflectionException",
-                            L.l(
-                                "method {0}::{1}() does not exist",
+                            L.l("method {0}::{1}() does not exist",
                                 _name,
                                 name)));
 
