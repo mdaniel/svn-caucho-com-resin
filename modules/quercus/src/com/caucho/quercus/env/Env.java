@@ -174,11 +174,8 @@ public class Env
   private static final StringValue PHP_SELF_STRING
     = new ConstStringValue("PHP_SELF");
 
-  private static final StringValue UTF8_STRING
-    = new ConstStringValue("utf-8");
-
-  private static final StringValue UTF8_STRING_U
-    = new UnicodeBuilderValue("utf-8");
+  private static final StringValue PHP_SELF_STRING_U
+    = new UnicodeBuilderValue("PHP_SELF");
 
   private static final StringValue S_GET
     = new ConstStringValue("_GET");
@@ -189,20 +186,32 @@ public class Env
   private static final StringValue S_POST
     = new ConstStringValue("_POST");
 
+  private static final StringValue S_POST_U
+    = new UnicodeBuilderValue("_POST");
+
   private static final StringValue S_SESSION
     = new ConstStringValue("_SESSION");
+
+  private static final StringValue S_SESSION_U
+    = new UnicodeBuilderValue("_SESSION");
 
   private static final StringValue S_SERVER
     = new ConstStringValue("_SERVER");
 
-  private static final StringValue S_ENV
-    = new ConstStringValue("_ENV");
+  private static final StringValue S_SERVER_U
+    = new UnicodeBuilderValue("_SERVER");
 
   private static final StringValue S_COOKIE
     = new ConstStringValue("_COOKIE");
 
+  private static final StringValue S_COOKIE_U
+    = new UnicodeBuilderValue("_COOKIE");
+
   private static final StringValue S_FILES
     = new ConstStringValue("_FILES");
+
+  private static final StringValue S_FILES_U
+    = new UnicodeBuilderValue("_FILES");
 
   private static final StringValue S_ARGV
     = new ConstStringValue("argv");
@@ -738,12 +747,14 @@ public class Env
 
     if (encoding.length() == 0) {
       encoding = getIni("unicode.fallback_encoding");
-
-      if (encoding.length() == 0)
-        encoding = UTF8_STRING;
     }
 
-    return encoding.toString();
+    if (encoding.length() > 0) {
+      return encoding.toString();
+    }
+    else {
+      return "utf-8";
+    }
   }
 
   /**
@@ -776,12 +787,14 @@ public class Env
 
     if (encoding.length() == 0) {
       encoding = getIni("unicode.fallback_encoding");
-
-      if (encoding.length() == 0)
-        encoding = UTF8_STRING;
     }
 
-    return encoding.toString();
+    if (encoding.length() > 0) {
+      return encoding.toString();
+    }
+    else {
+      return "utf-8";
+    }
   }
 
   /**
@@ -1754,12 +1767,21 @@ public class Env
   {
     _session = session;
 
+    StringValue sessionStr;
+
+    if (isUnicodeSemantics()) {
+      sessionStr = S_SESSION_U;
+    }
+    else {
+      sessionStr = S_SESSION;
+    }
+
     if (session != null) {
-      Value var = getGlobalVar(S_SESSION);
+      Value var = getGlobalVar(sessionStr);
 
       if (! (var instanceof SessionVar)) {
         var = new SessionVar();
-        setGlobalValue(S_SESSION, var);
+        setGlobalValue(sessionStr, var);
       }
 
       var.set(session);
@@ -1770,7 +1792,7 @@ public class Env
     }
     else {
       // php/1k0v
-      Value v = getGlobalVar(S_SESSION);
+      Value v = getGlobalVar(sessionStr);
 
       if (v != null)
         v.set(UnsetValue.UNSET);
@@ -2571,7 +2593,7 @@ public class Env
           return null;
         }
 
-        Var array = getGlobalEnvVar(S_ARGV).getVar();
+        Var array = getGlobalEnvVar(isUnicodeSemantics() ? S_ARGV_U : S_ARGV).getVar();
 
         int size = array.getSize();
 
@@ -2590,7 +2612,7 @@ public class Env
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar(S_POST);
+          return getGlobalEnvVar(isUnicodeSemantics() ? S_POST_U : S_POST);
       }
 
       case _POST: {
@@ -2617,7 +2639,7 @@ public class Env
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar(S_FILES);
+          return getGlobalEnvVar(isUnicodeSemantics() ? S_FILES_U : S_FILES);
       }
 
       case _FILES: {
@@ -2733,7 +2755,7 @@ public class Env
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar(S_SERVER);
+          return getGlobalEnvVar(isUnicodeSemantics() ? S_SERVER_U : S_SERVER);
       }
 
       case _SERVER: {
@@ -2780,7 +2802,7 @@ public class Env
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar(S_COOKIE);
+          return getGlobalEnvVar(isUnicodeSemantics() ? S_COOKIE_U : S_COOKIE);
 
       case _COOKIE: {
         Var var = new Var();
@@ -2815,7 +2837,7 @@ public class Env
 
         _globalMap.put(name, envVar);
 
-        var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
+        var.set(getGlobalVar("_SERVER").get(isUnicodeSemantics() ? PHP_SELF_STRING_U : PHP_SELF_STRING));
 
         return envVar;
       }
