@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.filter;
 
-import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
@@ -37,11 +37,15 @@ import com.caucho.quercus.env.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class IpValidateFilter extends ValidateFilter
 {
   @Override
-  protected Value filterImpl(Env env, Value value, int flags)
+  protected Value filterImpl(Env env, Value value,
+                             int flags, ArrayValue options)
   {
     if (! value.isString()) {
       return BooleanValue.FALSE;
@@ -205,6 +209,16 @@ public class IpValidateFilter extends ValidateFilter
                                     boolean isRejectReserved,
                                     boolean isRejectPrivate)
   {
-    throw new UnimplementedException();
+    // contributed by SSN
+    // XXX: reserved, private
+
+    try {
+      InetAddress ip = InetAddress.getByName(str.toString());
+
+      return ip instanceof Inet6Address;
+    }
+    catch (UnknownHostException e) {
+      return false;
+    }
   }
 }

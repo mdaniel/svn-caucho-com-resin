@@ -52,15 +52,23 @@ public class FilterModule extends AbstractQuercusModule
   public static final int INPUT_ENV = 4;
   public static final int INPUT_SERVER = 5;
 
-  public static final int FILTER_VALIDATE_INT = 256 + 1; //257
-  public static final int FILTER_VALIDATE_EMAIL = 256 + 16 + 2; // 274
-  public static final int FILTER_VALIDATE_IP = 256 + 16 + 2 + 1; // 275
-  public static final int FILTER_DEFAULT = 512 + 4; // 516
+  public static final int FILTER_VALIDATE_INT = 0x101;     // 257
+  public static final int FILTER_VALIDATE_BOOLEAN = 0x102; // 258
+  public static final int FILTER_VALIDATE_FLOAT = 0x103;   // 259
+  public static final int FILTER_VALIDATE_EMAIL = 0x112;   // 274
+  public static final int FILTER_VALIDATE_IP = 0x113;      // 275
+  public static final int FILTER_DEFAULT = 0x204;          // 516
 
-  public static final int FILTER_FLAG_IPV4 = 1 << 20;
-  public static final int FILTER_FLAG_IPV6 = FILTER_FLAG_IPV4 * 2;
-  public static final int FILTER_FLAG_NO_RES_RANGE = FILTER_FLAG_IPV4 * 4;
-  public static final int FILTER_FLAG_NO_PRIV_RANGE = FILTER_FLAG_IPV4 * 8;
+  public static final int FILTER_FLAG_ALLOW_OCTAL = 0x01; // 1
+
+  public static final int FILTER_FLAG_ALLOW_THOUSAND = 0x2000; // 8192
+
+  public static final int FILTER_NULL_ON_FAILURE = 0x8000000; // 134217728
+
+  public static final int FILTER_FLAG_IPV4 = 0x100000; // 1048576
+  public static final int FILTER_FLAG_IPV6 = 0x200000;
+  public static final int FILTER_FLAG_NO_RES_RANGE = 0x400000;
+  public static final int FILTER_FLAG_NO_PRIV_RANGE = 0x800000;
 
   public static HashMap<Integer,Filter> _filterMap
    =  new HashMap<Integer,Filter>();
@@ -82,7 +90,7 @@ public class FilterModule extends AbstractQuercusModule
     Filter filter = _filterMap.get(filterId);
 
     if (filter == null) {
-      throw new UnimplementedException(L.l("filter not implemented: {0}", filterId));
+      return BooleanValue.FALSE;
     }
 
     return filter.filter(env, value, flagV);
@@ -127,6 +135,8 @@ public class FilterModule extends AbstractQuercusModule
   static {
     _filterMap.put(FILTER_DEFAULT, new DefaultFilter());
     _filterMap.put(FILTER_VALIDATE_INT, new IntValidateFilter());
+    _filterMap.put(FILTER_VALIDATE_BOOLEAN, new BooleanValidateFilter());
+    _filterMap.put(FILTER_VALIDATE_FLOAT, new FloatValidateFilter());
     _filterMap.put(FILTER_VALIDATE_EMAIL, new EmailValidateFilter());
     _filterMap.put(FILTER_VALIDATE_IP, new IpValidateFilter());
   }

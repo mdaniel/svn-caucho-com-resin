@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.filter;
 
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
@@ -38,27 +39,22 @@ import com.caucho.quercus.env.Value;
 public class IntValidateFilter extends ValidateFilter
 {
   @Override
-  public Value filter(Env env, Value value, Value flagsV)
+  protected Value filterImpl(Env env, Value value, int flags, ArrayValue options)
   {
     long min = Long.MIN_VALUE;
     long max = Long.MAX_VALUE;
 
-    if (flagsV.isArray() && flagsV.getSize() > 0) {
-      Value options = flagsV.get(env.createString("options"));
+    if (options != null) {
+      Value minV = options.get(env.createString("min_range"));
+      Value maxV = options.get(env.createString("max_range"));
 
-      if (options.isArray()) {
-        Value minV = options.get(env.createString("min_range"));
-        Value maxV = options.get(env.createString("max_range"));
-
-        if (minV != UnsetValue.UNSET) {
-          min = minV.toLong();
-        }
-
-        if (maxV != UnsetValue.UNSET) {
-          max = maxV.toLong();
-        }
+      if (minV != UnsetValue.UNSET) {
+        min = minV.toLong();
       }
 
+      if (maxV != UnsetValue.UNSET) {
+        max = maxV.toLong();
+      }
     }
 
     if (! value.isLongConvertible() && value != BooleanValue.TRUE) {
