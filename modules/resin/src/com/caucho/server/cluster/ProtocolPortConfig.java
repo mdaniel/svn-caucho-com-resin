@@ -85,7 +85,6 @@ public class ProtocolPortConfig extends TcpPort
   
   public void add(Protocol protocol)
   {
-    System.out.println("ADD: " +protocol);
     setProtocol(protocol);
   }
 

@@ -165,7 +165,12 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   @Override
   public int getLeaseOwner()
   {
-    return _mnodeEntry.getLeaseOwner();
+    if (! _mnodeEntry.isLeaseExpired(CurrentTime.getCurrentTime())) {
+      return _mnodeEntry.getLeaseOwner();
+    }
+    else {
+      return -1;
+    }
   }
 
   @Override

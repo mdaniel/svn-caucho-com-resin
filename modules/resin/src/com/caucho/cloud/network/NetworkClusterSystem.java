@@ -41,6 +41,7 @@ import com.caucho.cloud.topology.AbstractCloudServerListener;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.AbstractResinSubSystem;
 import com.caucho.env.service.ResinSystem;
@@ -328,35 +329,48 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
    */
   private void configureServer(CloudServer cloudServer)
   {
-    CloudCluster cluster = cloudServer.getCluster();
-    CloudPod pod = cloudServer.getPod();
-    
-    ClusterServerProgram clusterServerProgram
-      = cluster.getData(ClusterServerProgram.class);
-    
-    ClusterServerProgram podServerProgram
-      = pod.getData(ClusterServerProgram.class);
-    
-    ClusterServerProgram serverProgram
-      = cloudServer.getData(ClusterServerProgram.class);
-    
     ClusterServer server = new ClusterServer(this, cloudServer);
     
-    if (clusterServerProgram != null)
-      clusterServerProgram.getProgram().configure(server);
-    
-    if (podServerProgram != null)
-      podServerProgram.getProgram().configure(server);
-    
-    if (serverProgram != null)
-      serverProgram.getProgram().configure(server);
-    
-    if (cloudServer.putDataIfAbsent(server) != null) {
-      throw new IllegalStateException(L.l("{0} cannot be configured twice.",
-                                          server));
-    }
-    
+    configServer(server, cloudServer);
+
     server.init();
+  }
+  
+  public static void configServer(Object server, CloudServer cloudServer)
+  {
+    String oldServerId = (String) Config.getCurrentVar("rvar0");
+    
+    try {
+      Config.setProperty("rvar0", cloudServer.getDisplayId());
+      
+      CloudCluster cluster = cloudServer.getCluster();
+      CloudPod pod = cloudServer.getPod();
+
+      ClusterServerProgram clusterServerProgram
+      = cluster.getData(ClusterServerProgram.class);
+
+      ClusterServerProgram podServerProgram
+      = pod.getData(ClusterServerProgram.class);
+
+      ClusterServerProgram serverProgram
+      = cloudServer.getData(ClusterServerProgram.class);
+
+      if (clusterServerProgram != null)
+        clusterServerProgram.getProgram().configure(server);
+
+      if (podServerProgram != null)
+        podServerProgram.getProgram().configure(server);
+
+      if (serverProgram != null)
+        serverProgram.getProgram().configure(server);
+
+      if (cloudServer.putDataIfAbsent(server) != null) {
+        throw new IllegalStateException(L.l("{0} cannot be configured twice.",
+                                            server));
+      }
+    } finally {
+      Config.setProperty("rvar0", oldServerId);
+    }
   }
  
   /**

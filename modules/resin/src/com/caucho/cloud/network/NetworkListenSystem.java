@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.cloud.topology.CloudServer;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.*;
 import com.caucho.network.listen.*;
@@ -71,8 +72,9 @@ public class NetworkListenSystem extends AbstractResinSubSystem
     if (clusterService != null)
       _clusterListener = clusterService.getClusterListener();
     
-    if (_clusterListener != null)
+    if (_clusterListener != null) {
       _listeners.add(_clusterListener);
+    }
 
     NetworkServerConfig config = new NetworkServerConfig(this);
    
@@ -229,22 +231,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
   
   private void configure(CloudServer server, Object config)
   {
-    ClusterServerProgram program;
-    
-    program = server.getCluster().getData(ClusterServerProgram.class);
-
-    if (program != null)
-      program.getProgram().configure(config);
-    
-    program = server.getPod().getData(ClusterServerProgram.class);
-
-    if (program != null)
-      program.getProgram().configure(config);
-    
-    program = server.getData(ClusterServerProgram.class);
-
-    if (program != null)
-      program.getProgram().configure(config);
+    NetworkClusterSystem.configServer(config, server);
   }
 
   /**

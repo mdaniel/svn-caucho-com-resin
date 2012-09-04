@@ -38,6 +38,7 @@ public class TriadServer extends CloudServer {
   private static final L10N L = new L10N(TriadServer.class);
 
   public TriadServer(String id,
+                     String displayId,
                      CloudPod pod, 
                      int index,
                      String address,
@@ -46,7 +47,7 @@ public class TriadServer extends CloudServer {
                      CloudServer.ServerType isStatic,
                      boolean isAllowExternal)
   {
-    super(id, pod, index, address, port, isSSL, isStatic, isAllowExternal);
+    super(id, displayId, pod, index, address, port, isSSL, isStatic, isAllowExternal);
     
     if (index < 0 || index > 2)
       throw new IllegalArgumentException(L.l("'{0}' is an invalid triad server index because it must be between 0 and 3",

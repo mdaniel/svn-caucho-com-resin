@@ -54,7 +54,6 @@ import com.caucho.network.listen.TcpPort;
 import com.caucho.server.cluster.ProtocolPort;
 import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
@@ -868,8 +867,9 @@ public final class ClusterServer {
       return socketPool.getFactory();
     }
     
-    if (! isExternal())
+    if (! isExternal()) {
       return null;
+    }
     
     NetworkAddressResult result = _clusterSystem.getLocalSocketAddress(this);
 
