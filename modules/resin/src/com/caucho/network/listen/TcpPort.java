@@ -35,10 +35,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -175,7 +172,7 @@ public class TcpPort
   // The virtual host name
   private String _virtualHost;
 
-  private final SocketLinkAdmin _admin = new SocketLinkAdmin(this);
+  private final TcpPortAdmin _admin = new TcpPortAdmin(this);
 
   // the server socket
   private QServerSocket _serverSocket;
@@ -1330,36 +1327,23 @@ public class TcpPort
   /**
    * returns the connection info for jmx
    */
-  TcpConnectionInfo []connectionInfo()
+  TcpConnectionInfo []getActiveConnections()
   {
-    TcpSocketLink []connections;
-
-    connections = new TcpSocketLink[_activeConnectionSet.size()];
+    List<TcpConnectionInfo> infoList = new ArrayList<TcpConnectionInfo>();
+    
+    TcpSocketLink[] connections = new TcpSocketLink[_activeConnectionSet.size()];
     _activeConnectionSet.keySet().toArray(connections);
 
-    long now = CurrentTime.getExactTime();
-    TcpConnectionInfo []infoList = new TcpConnectionInfo[connections.length];
-
     for (int i = 0 ; i < connections.length; i++) {
-      TcpSocketLink conn = connections[i];
-
-      long requestTime = -1;
-      long startTime = conn.getRequestStartTime();
-
-      if (conn.isRequestActive() && startTime > 0)
-        requestTime = now - startTime;
-
-      TcpConnectionInfo info
-        = new TcpConnectionInfo(conn.getId(),
-                                conn.getThreadId(),
-                                getAddress() + ":" + getPort(),
-                                conn.getState().toString(),
-                                requestTime);
-
-      infoList[i] = info;
+      TcpConnectionInfo connInfo = connections[i].getConnectionInfo();
+      if (connInfo != null)
+        infoList.add(connInfo);
     }
+    
+    TcpConnectionInfo []infoArray = new TcpConnectionInfo[infoList.size()];
+    infoList.toArray(infoArray);
 
-    return infoList;
+    return infoArray;
   }
 
   /**

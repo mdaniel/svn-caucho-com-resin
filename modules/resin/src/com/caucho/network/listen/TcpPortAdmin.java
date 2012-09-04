@@ -31,17 +31,15 @@
 package com.caucho.network.listen;
 
 import com.caucho.inject.Module;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.PortMXBean;
-import com.caucho.management.server.TcpConnectionInfo;
+import com.caucho.management.server.*;
 
 @Module
-public class SocketLinkAdmin extends AbstractManagedObject
+public class TcpPortAdmin extends AbstractManagedObject
   implements PortMXBean
 {
   private TcpPort _port;
 
-  public SocketLinkAdmin(TcpPort port)
+  public TcpPortAdmin(TcpPort port)
   {
     _port = port;
   }
@@ -305,7 +303,7 @@ public class SocketLinkAdmin extends AbstractManagedObject
   @Override
   public TcpConnectionInfo []connectionInfo()
   {
-    return _port.connectionInfo();
+    return _port.getActiveConnections();
   }
 
   void register()

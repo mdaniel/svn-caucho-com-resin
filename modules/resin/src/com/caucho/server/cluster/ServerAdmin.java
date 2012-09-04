@@ -38,15 +38,7 @@ import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.env.meter.MeterService;
 import com.caucho.env.meter.TotalMeter;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.management.server.AbstractEmitterObject;
-import com.caucho.management.server.CacheItem;
-import com.caucho.management.server.ClusterMXBean;
-import com.caucho.management.server.ClusterServerMXBean;
-import com.caucho.management.server.EnvironmentMXBean;
-import com.caucho.management.server.PortMXBean;
-import com.caucho.management.server.ServerMXBean;
-import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.management.server.ThreadPoolMXBean;
+import com.caucho.management.server.*;
 import com.caucho.network.listen.TcpPort;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.dispatch.Invocation;
@@ -536,12 +528,12 @@ public class ServerAdmin extends AbstractEmitterObject
    * Finds the ConnectionMXBean for a given thread id
    */
   @Override
-  public TcpConnectionMXBean findConnectionByThreadId(long threadId)
+  public TcpConnectionInfo findConnectionByThreadId(long threadId)
   {
     TcpSocketLink conn = getListenService().findConnectionByThreadId(threadId);
 
     if (conn != null)
-      return conn.getAdmin();
+      return conn.getConnectionInfo();
     else
       return null;
   }
@@ -549,7 +541,7 @@ public class ServerAdmin extends AbstractEmitterObject
   private Collection<TcpPort> getNetworkListeners()
   {
     NetworkListenSystem listenService
-    = _server.getResinSystem().getService(NetworkListenSystem.class);
+      = _server.getResinSystem().getService(NetworkListenSystem.class);
   
     return listenService.getListeners();
   }

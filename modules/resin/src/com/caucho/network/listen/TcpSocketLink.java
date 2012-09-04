@@ -44,8 +44,7 @@ import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
 import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.TcpConnectionMXBean;
+import com.caucho.management.server.*;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
@@ -92,8 +91,6 @@ public class TcpSocketLink extends AbstractSocketLink
   private final CometResumeTask _resumeTask;
   // duplex (websocket) task
   private DuplexReadTask _duplexReadTask;
-
-  private final Admin _admin = new Admin();
 
   private SocketLinkState _state = SocketLinkState.INIT;
   
@@ -210,10 +207,41 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the admin
    */
-  public TcpConnectionMXBean getAdmin()
+  public TcpConnectionInfo getConnectionInfo()
   {
-    return _admin;
+    if (isActive() && _requestStartTime > 0) {
+      return new TcpConnectionInfo(getId(), 
+                                   getThreadId(), 
+                                   _port.getAddress() + ":" + _port.getPort(), 
+                                   getDisplayState() + ": " + getState(),
+                                   getRequestStartTime(), 
+                                   getRemoteHost(), 
+                                   getRequestUrl());
+    }
+    
+    return null;
   }
+  
+  public String getRequestUrl()
+  {
+    ProtocolConnection request = getRequest();
+  
+    String url = request.getProtocolRequestURL();
+    if (url != null && ! "".equals(url))
+      return url;
+    
+    TcpPort port = getPort();
+    
+    String protocolName = port.getProtocolName();
+    if (protocolName == null)
+      protocolName = "request";
+    
+    if (port.getAddress() == null)
+      return protocolName + "://*:" + port.getPort();
+    else
+      return protocolName + "://" + port.getAddress() + ":" + port.getPort();
+  }
+  
 
   //
   // timeout properties
@@ -1767,76 +1795,6 @@ public class TcpSocketLink extends AbstractSocketLink
   public String toString()
   {
     return getClass().getSimpleName() + "[id=" + _id + "," + _port.toURL() + "," + _state + "]";
-  }
-
-  class Admin extends AbstractManagedObject implements TcpConnectionMXBean {
-    Admin()
-    {
-      super(_systemClassLoader);
-    }
-
-    public String getName()
-    {
-      return _name;
-    }
-
-    @Override
-    public long getThreadId()
-    {
-      return TcpSocketLink.this.getThreadId();
-    }
-
-    @Override
-    public long getRequestActiveTime()
-    {
-      if (_requestStartTime > 0)
-        return CurrentTime.getCurrentTime() - _requestStartTime;
-      else
-        return -1;
-    }
-
-    @Override
-    public String getUrl()
-    {
-      ProtocolConnection request = TcpSocketLink.this.getRequest();
-
-      String url = request.getProtocolRequestURL();
-      
-      if (url != null && ! "".equals(url))
-        return url;
-      
-      TcpPort port = TcpSocketLink.this.getPort();
-
-      if (port.getAddress() == null)
-        return "request://*:" + port.getPort();
-      else
-        return "request://" + port.getAddress() + ":" + port.getPort();
-    }
-
-    public String getState()
-    {
-      return TcpSocketLink.this.getState().toString();
-    }
-
-    public String getDisplayState()
-    {
-      return TcpSocketLink.this.getDisplayState();
-    }
-
-    public String getRemoteAddress()
-    {
-      return TcpSocketLink.this.getRemoteHost();
-    }
-
-    void register()
-    {
-      registerSelf();
-    }
-
-    void unregister()
-    {
-      unregisterSelf();
-    }
   }
 
   static {

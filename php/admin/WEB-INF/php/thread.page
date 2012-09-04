@@ -44,18 +44,19 @@ $thread_ids = $jvm_thread->AllThreadIds;
 $info_list = $jvm_thread->getThreadInfo($thread_ids, true, true);
 
 foreach ($info_list as $info) {
+
+  $id = $info->threadId;
+  
   $conn = $server->findConnectionByThreadId($id);
-
-  $id = $info->ThreadId;
-
+  
   $thread = array("id" => $id,
                   "info" => $info);
-
+  
   if ($conn) {
     $thread["url"] = $conn->getUrl();
   }
-    
-  $threads[] = $thread;
+  
+  array_push($threads, $thread);
 }
 
 usort($threads, "thread_stack_cmp");
@@ -255,11 +256,11 @@ function thread_display_group($group_name, $threads)
   echo "<th id='${group_name}_method'>method</th>";
   echo "<th id='${group_name}_state'>state</th>";
   echo "<th id='${group_name}_id'>id</th>";
-  //echo "<th id='${group_name}_url'>url</th>";
+  echo "<th id='${group_name}_url'>url</th>";
   echo "</tr>\n";
 
   echo "<tr>";
-  echo "<th id='${group_name}_stack' colspan='4'>stack</th>";
+  echo "<th id='${group_name}_stack' colspan='5'>stack</th>";
   echo "</tr>\n";
   echo "</thead>\n";
 
@@ -270,6 +271,7 @@ function thread_display_group($group_name, $threads)
 
   foreach ($threads as $thread) {
     $info = $thread["info"];
+    $url = $thread["url"];
 
     if (is_object($info)) {
       $newPlainStackTrace = stack_trace_to_str($info);
@@ -284,7 +286,8 @@ function thread_display_group($group_name, $threads)
                             $group_name,
                             $count++,
                             stack_trace_to_html($group_name, $info),
-                            $stackTraceClass);
+                            $stackTraceClass,
+                            $url);
 
       $plainStackTrace = $newPlainStackTrace;
     }
@@ -314,7 +317,7 @@ function thread_count_rec($value)
 }
 
 function thread_display_thread($info, $group_name, $count, $stackTrace,
-  $stackTraceClass)
+  $stackTraceClass, $url)
 {
   echo "<tr class='" . "" . " " . $stackTraceClass . "'>";
 
@@ -350,6 +353,9 @@ function thread_display_thread($info, $group_name, $count, $stackTrace,
 
   echo "<td headers='${group_name} ${group_name}_id'><a name='th_${id}'></a>";
   echo $id . "</td>";
+  
+  echo "<td headers='${group_name} ${group_name}_url'><a name='th_${id}'></a>";
+  echo $url . "</td>";
 
   echo "</tr>\n";
 
@@ -359,7 +365,7 @@ function thread_display_thread($info, $group_name, $count, $stackTrace,
 function thread_display_stack($id, $group, $stackTrace, $stackTraceClass)
 {
   echo "<tr class='stack_trace ${stackTraceClass} toggle-sw_${group} toggle-sw_${group}_${id}'>";
-  echo "<td colspan='4' headers='${group} ${group}_stack'>";
+  echo "<td colspan='5' headers='${group} ${group}_stack'>";
  // echo "<pre class='stack_trace toggle-sw_${group}'>";
   echo "<pre class='stack_trace'>";
 

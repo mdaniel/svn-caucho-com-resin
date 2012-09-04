@@ -50,7 +50,7 @@ echo "</div>";
 
 echo "<div id='table-tab'>\n";
 
-print_threads();
+print_connections();
 print_tcp_ports();
 print_load_balance();
 print_database_pools();
@@ -633,14 +633,12 @@ function print_tcp_ports()
   }
 }
 
-function print_threads()
+function print_connections()
 {
   global $g_mbean_server;
   global $g_server;
 
-  $conn = null;
-
-  $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
+  $jvm_thread_mbean = $g_mbean_server->lookup("java.lang:type=Threading");
 
   $connInfoList = array();
 
@@ -654,7 +652,7 @@ function print_threads()
   $row = 0;
   @ usort($connInfoList, "conn_time_cmp");
 
-  echo "<h3>" . gettext('Open Connections') . "</h3>";
+  echo "<h2>" . gettext('Open Connections') . "</h2>";
 
   echo "<table class='data' summary='" . gettext("Open Connections") . "'>";
   echo "<tr><th scope='col'>" . gettext('action') . "</th>";
@@ -664,49 +662,41 @@ function print_threads()
   echo "<th scope='col'>" . gettext('IP') . "</th></tr>\n";
 
   foreach ($connInfoList as $connInfo) {
-    if ($connInfo->requestTime >= 0 && $connInfo->threadId >= 0) {
-      echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
-      echo "<tr>\n";
-      echo "<td>\n";
+    echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
+    echo "<td>\n";
 
-      $pname = "port_" . $row;
+    $pname = "port_" . $row;
     
-      $threadId = $connInfo->threadId;
+    $threadId = $connInfo->threadId;
     
-      $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
-      $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
-      echo "<a id='s_$pname' href=\"javascript:$show\">" . gettext('[show]') . "</a> ";
-      echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>" . gettext('[hide]') . "</a> ";
-      echo "<td>";
+    $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
+    $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
+    echo "<a id='s_$pname' href=\"javascript:$show\">" . gettext('[show]') . "</a> ";
+    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>" . gettext('[hide]') . "</a> ";
     
-      echo sprintf("%.3fs", $connInfo->requestTime * 0.001);
-      // echo " thread=" . $threadId;
-      echo "<td>";
-      echo $connInfo->id;
+    echo "</td>\n<td>";
+    echo sprintf("%.3fs", $connInfo->requestActiveTime * 0.001);
     
-      echo "<td>";
-      $conn = $g_server->findConnectionByThreadId($threadId);
-      if ($conn)
-        echo $conn->getUrl();
-      else
-        echo $connInfo->state;
+    echo "</td>\n<td>";
+    echo $connInfo->id;
+    
+    echo "</td>\n<td>";
+    echo $connInfo->getUrl();
 
-      echo "<td>";
-      echo " " . ($conn ? $conn->getRemoteAddress() : "");
-      echo "\n";
-      echo "</tr>";
+    echo "</td>\n<td>";
+    echo $connInfo->getRemoteAddress();
+    echo "</td>\n";
+    echo "</tr>";
 
-      echo "<tr><td colspan='5'>";
-      echo "<pre id='h1_$pname' style='display:none'>";
+    echo "<tr><td colspan='6'>";
+    echo "<pre id='h1_$pname' style='display:none'>";
 
-      $thread = $jvm_thread->getThreadInfo($threadId, 50);
+    $thread = $jvm_thread_mbean->getThreadInfo($threadId, 50);
+    echo $thread;
 
-      echo $thread;
-
-      echo "</pre>";
-      echo "</td>";
-      echo "</tr>";
-    }
+    echo "</pre>";
+    echo "</td>";
+    echo "</tr>\n";
   }
 
   echo "</table>\n";
@@ -792,7 +782,7 @@ function print_database_pools()
 
 function conn_time_cmp($conn_a, $conn_b)
 {
-  return $conn_b->requestTime - $conn_a->requestTime;
+  return $conn_b->requestStartTime - $conn_a->requestStartTime;
 }
 
 display_footer($g_page, javascript_create_tab("summary-tabs"));

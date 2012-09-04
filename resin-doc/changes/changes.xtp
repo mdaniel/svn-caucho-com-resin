@@ -21,7 +21,7 @@
 <li>jsp: flushing issue with JSP/filter and buffer size (#5201, rep by evernat)</li>
 <li>ejb: improved ejb-ee skipping for jira</li>
 <li>cloud: added oracle jdbc-store (#4643, rep by Eric Kreiser)</li>
-<li>server: web-app-deploy expand issues with expand-preserve-fileset & expand-cleanup-fileset (#5193, #5194)</li>
+<li>server: web-app-deploy expand issues with expand-preserve-fileset &amp; expand-cleanup-fileset (#5193, #5194)</li>
 <li>cloud: --elastic-server warning messages improved (#5184)</li>
 <li>health-check: changed health-check timeout and warning message</li>
 <li>resin-admin: specific warning for missing &lt;resin:AdminServices/>(#5183)</li>
