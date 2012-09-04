@@ -68,8 +68,10 @@ install	:
 	      if test $$? != "0"; then \
 	        echo "ABORT: Resin root subdir creation failed. Ensure $(resin_root)/$$subdir can be created by $$USER, or run 'make install' as root."; \
 	        exit 42; \
+	      elif cp -r $$subdir/* $(resin_root)/$$subdir; then \
+	        echo "updated $(resin_root)/$$subdir"; \
 	      else \
-	        cp -r $$subdir/* $(resin_root)/$$subdir; \
+	        echo "skipped $$subdir"; \
 	      fi; \
 	    fi; \
 	  done; \
@@ -112,7 +114,11 @@ install	:
 	        exit 42; \
 	      fi; \
 	    fi; \
-	    cp -r $$subdir/* $(resin_home)/$$subdir; \
+	    if cp -r $$subdir/* $(resin_home)/$$subdir; then \
+	      echo "updated $(resin_home)/$$subdir"; \
+            else \
+              echo "skipped $$subdir"; \
+	    fi; \
 	  done; \
 	fi
 	@ if test -e "$(resin_log)"; then \
@@ -177,15 +183,17 @@ install	:
 	  fi; \
 	  for subdir in $(conf_subdirs); do \
 	    if test -e "$(resin_conf)/$$subdir"; then \
-	      echo "Preserving existing Resin conf subdir $(resin_conf)/$$subdir.";\
+	      echo "Preserving existing Resin conf subdir $(resin_conf)/$$subdir."; \
 	    else \
 	      echo "Installing Resin conf subdir $(resin_conf)/$$subdir."; \
 	      mkdir -p $(resin_conf)/$$subdir; \
 	      if test $$? != "0"; then \
 	        echo "ABORT: Resin conf subdir creation failed. Ensure $(resin_conf)/$$subdir can be created by $$USER, or run 'make install' as root."; \
 	        exit 42; \
+	      elif cp -r $$subdir/* $(resin_conf)/$$subdir; then \
+	        echo "updated $(resin_conf)/$$subdir"; \
 	      else \
-	        cp -r $$subdir/* $(resin_conf)/$$subdir; \
+	        echo "skipped $$subdir"; \
 	      fi; \
 	    fi; \
 	  done; \
