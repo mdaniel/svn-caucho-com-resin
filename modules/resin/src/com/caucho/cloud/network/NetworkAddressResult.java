@@ -37,6 +37,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class NetworkAddressResult implements Serializable
 {
+  private String _scheme;
   private String _address;
   private int _port;
   
@@ -46,10 +47,16 @@ public class NetworkAddressResult implements Serializable
     
   }
 
-  public NetworkAddressResult(String address, int port)
+  public NetworkAddressResult(String scheme, String address, int port)
   {
+    _scheme = scheme;
     _address = address;
     _port = port;
+  }
+  
+  public String getScheme()
+  {
+    return _scheme;
   }
   
   public String getAddress()

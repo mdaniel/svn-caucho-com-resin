@@ -59,8 +59,6 @@ public class BootServerConfig implements SchemaBean
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
-  
-  private CloudServer _cloudServer;
 
   /**
    * Creates a new resin server.
@@ -187,8 +185,6 @@ public class BootServerConfig implements SchemaBean
   
   void initTopology(CloudServer cloudServer)
   {
-    _cloudServer = cloudServer;
-    
     cloudServer.putData(new ClusterServerProgram(_serverProgram));
   }
   

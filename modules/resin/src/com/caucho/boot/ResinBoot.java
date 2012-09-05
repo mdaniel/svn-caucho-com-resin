@@ -216,6 +216,21 @@ public class ResinBoot
   {
     return _resinConfig.isElasticDns(args);
   }
+  
+  String getHomeCluster(WatchdogArgs args)
+  {
+    String clusterId = args.getClusterId();
+    
+    if (clusterId != null)
+      return clusterId;
+    else
+      return _resinConfig.getHomeCluster();
+  }
+
+  BootClusterConfig findCluster(String clusterId)
+  {
+    return _resinConfig.findCluster(clusterId);
+  }
 
   WatchdogClient findClient(String serverId, WatchdogArgs args)
   {

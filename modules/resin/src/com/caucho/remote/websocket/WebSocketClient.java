@@ -36,12 +36,16 @@ import com.caucho.websocket.WebSocketEncoder;
 import com.caucho.websocket.WebSocketListener;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.*;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * WebSocketClient
@@ -151,7 +155,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
 
     if (p < 0) {
       _host = server;
-      _port = 80;
+      
+      if ("https".equals(_scheme))
+        _port = 443;
+      else
+        _port = 80;
     }
     else {
       _host = server.substring(0, p);
@@ -172,6 +180,10 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
       _s.connect(new InetSocketAddress(_host, _port), connectTimeout);
     else
       _s.connect(new InetSocketAddress(_host, _port));
+    
+    if ("https".equals(_scheme)) {
+      _s = openSsl(_s);
+    }
 
     _is = VfsStream.openRead(_s.getInputStream());
     _os = VfsStream.openWrite(_s.getOutputStream());
@@ -222,6 +234,37 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     Thread thread = new Thread(_context);
     thread.setDaemon(true);
     thread.start();
+  }
+
+  private Socket openSsl(Socket s)
+      throws ConnectException
+  {
+    try {
+      SSLContext context = SSLContext.getInstance("TLS");
+
+      javax.net.ssl.TrustManager tm =
+        new javax.net.ssl.X509TrustManager() {
+          public java.security.cert.X509Certificate[]
+            getAcceptedIssuers() {
+            return null;
+          }
+          public void checkClientTrusted(
+                                         java.security.cert.X509Certificate[] cert, String foo) {
+          }
+          public void checkServerTrusted(
+                                         java.security.cert.X509Certificate[] cert, String foo) {
+          }
+        };
+
+      context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
+      SSLSocketFactory factory = context.getSocketFactory();
+
+      return factory.createSocket(s, _host, _port, true);
+    } catch (ConnectException e) {
+      throw new ConnectException("SSL " + _host + ":" + _port + ": " + e.getMessage());
+    } catch (Exception e) {
+      throw new ConnectException("SSL " + _host + ":" + _port + ": " + e.toString());
+    }
   }
 
   protected void parseHeaders(ReadStream in)

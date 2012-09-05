@@ -61,6 +61,40 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   }
 
   @Override
+  public int doCommand(ResinBoot boot, WatchdogArgs args)
+  {
+    if (boot.isElasticServer(args)) {
+      validateElasticServer(boot, args);
+    }
+    return super.doCommand(boot, args);
+  }
+  
+  private void validateElasticServer(ResinBoot boot, WatchdogArgs args)
+  {
+    String clusterId = boot.getHomeCluster(args);
+    
+    BootClusterConfig cluster = boot.findCluster(clusterId);
+
+    if (cluster != null) {
+    }
+    else if (clusterId == null) {
+      throw new ConfigException(L.l("--elastic-server requires a --cluster or <home-cluster> configuration."
+          + " --elastic-server needs to know which cluster to join."));
+    }
+    else {
+      throw new ConfigException(L.l("--cluster '{0}' is an unknown cluster."
+                                    + "  --elastic-server requires a configured --cluster.",
+                                    clusterId));
+    }
+    
+    ArrayList<WatchdogClient> serverList = cluster.getServerList();
+    
+    for (int i = 0; i < serverList.size() && i < 3; i++) {
+      WatchdogClient triad = serverList.get(i);
+    }
+  }
+
+  @Override
   public void doWatchdogStart(WatchdogManager manager)
   {
     WatchdogArgs args = manager.getArgs();
