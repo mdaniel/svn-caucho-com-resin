@@ -860,7 +860,7 @@ public class HmuxRequest extends AbstractHttpRequest
         is.readAll(cb, len);
         if (isLoggable)
           log.fine(dbgId() + (char) code + " " + cb);
-        getRequestFacade().setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER_NAME,
+        getRequestFacade().setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER,
                                         new com.caucho.security.BasicPrincipal(cb.toString()));
         break;
 
