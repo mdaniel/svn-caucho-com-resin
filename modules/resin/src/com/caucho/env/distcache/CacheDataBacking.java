@@ -37,6 +37,7 @@ import com.caucho.server.distcache.CacheData;
 import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.server.distcache.MnodeStore;
+import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
@@ -71,7 +72,7 @@ public interface CacheDataBacking {
   public boolean putLocalValue(MnodeEntry mnodeValue,
                                HashKey key,
                                MnodeEntry oldEntryValue,
-                               MnodeValue mnodeUpdate);
+                               MnodeUpdate mnodeUpdate);
   
   public boolean loadData(long valueDataId, WriteStream os)
     throws IOException;

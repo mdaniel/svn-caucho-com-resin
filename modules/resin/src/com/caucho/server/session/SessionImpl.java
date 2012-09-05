@@ -141,7 +141,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     creationTime = CurrentTime.getExactTime();
 
     _creationTime = creationTime;
-    _accessTime = creationTime;
+    setAccessTime(creationTime);
     _lastUseTime = _accessTime;
     _idleTimeout = manager.getSessionTimeout();
 
@@ -544,7 +544,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     _isValid = true;
     _isNew = true;
-    _accessTime = now;
+    setAccessTime(now);
     _creationTime = now;
     
     // server/01np
@@ -613,10 +613,10 @@ public class SessionImpl implements HttpSession, CacheListener {
     _accessTime = now;*/
   }
   
-  public void setAccessTime(long now)
+  public void setAccessTime(long accessTime)
   {
     // server/0123 (vs TCK?)
-    _accessTime = now;
+    _accessTime = accessTime;
   }
 
   public int getLastSaveLength()
@@ -635,7 +635,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     // server/0122
     // TCK cares about exact time
-    _accessTime = CurrentTime.getExactTime();
+    setAccessTime(CurrentTime.getExactTime());
     _isNew = false;
 
     // update cache access?
@@ -691,7 +691,7 @@ public class SessionImpl implements HttpSession, CacheListener {
         _idleTimeout = entry.getAccessedExpireTimeout();
         
         long lastAccessTime = entry.getLastAccessedTime();
-        
+
         if (lastAccessTime + _idleTimeout * 5 / 4 < now) {
           return false;
         }
@@ -830,7 +830,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     unbind();
     _isValid = true;
     _isNew = true;
-    _accessTime = now;
+    setAccessTime(now);
     _creationTime = now;
   }
 
@@ -896,10 +896,16 @@ public class SessionImpl implements HttpSession, CacheListener {
       _manager.addSessionSaveSample(length);
 
       _lastSaveLength = length;
+      
+      // #5170
+      long lastAccessTime = _accessTime;
+      long lastModifiedTime = lastAccessTime;
 
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
                                             _idleTimeout,
-                                            -1);
+                                            -1,
+                                            lastAccessTime,
+                                            lastModifiedTime);
 
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " session save valueHash="

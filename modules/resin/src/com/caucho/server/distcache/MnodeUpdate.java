@@ -37,9 +37,10 @@ import com.caucho.util.CurrentTime;
 @SuppressWarnings("serial")
 public class MnodeUpdate extends MnodeValue {
   public static final MnodeUpdate NULL
-    = new MnodeUpdate(0, 0, 0, null, 0, 0, 0, -1, -1, -1);
+    = new MnodeUpdate(0, 0, 0, null, 0, 0, 0, -1, -1, -1, -1);
   
   private final int _leaseOwner;
+  private final long _accessTime;
   private final long _modifiedTime;
   
   public MnodeUpdate(long valueHash,
@@ -51,6 +52,7 @@ public class MnodeUpdate extends MnodeValue {
                      long modifiedExpireTime,
                      long leaseExpireTime,
                      int leaseOwner,
+                     long accessTime,
                      long modifiedTime)
   {
     super(valueHash, valueLength, version,
@@ -59,6 +61,7 @@ public class MnodeUpdate extends MnodeValue {
           accessedExpireTime, modifiedExpireTime, leaseExpireTime);
     
     _leaseOwner = leaseOwner;
+    _accessTime = accessTime;
     _modifiedTime = modifiedTime;
   }
   
@@ -70,6 +73,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = -1;
     _modifiedTime = CurrentTime.getCurrentTime();
+    _accessTime = _modifiedTime;
   }
   
   public MnodeUpdate(MnodeUpdate update)
@@ -78,6 +82,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = update._leaseOwner;
     _modifiedTime = update._modifiedTime;
+    _accessTime = update._accessTime;
   }
   
   public MnodeUpdate(MnodeValue mnodeValue)
@@ -86,6 +91,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = -1;
     _modifiedTime = CurrentTime.getCurrentTime();
+    _accessTime = _modifiedTime;
   }
   
   public MnodeUpdate(MnodeValue mnodeValue,
@@ -96,6 +102,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = leaseOwner;
     _modifiedTime = modifiedTime;
+    _accessTime = modifiedTime;
   }
 
   public MnodeUpdate(long valueHash,
@@ -107,6 +114,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = -1;
     _modifiedTime = CurrentTime.getCurrentTime();
+    _accessTime = _modifiedTime;
   }
 
   public MnodeUpdate(long valueHash,
@@ -121,6 +129,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = leaseOwner;
     _modifiedTime = modifiedTime;
+    _accessTime = modifiedTime;
   }
 
   public MnodeUpdate(long valueHash,
@@ -132,6 +141,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = -1;
     _modifiedTime = CurrentTime.getCurrentTime();
+    _accessTime = _modifiedTime;
   }
 
   public MnodeUpdate(long valueHash,
@@ -144,6 +154,7 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = leaseOwner;
     _modifiedTime = CurrentTime.getCurrentTime();
+    _accessTime = _modifiedTime;
   }
   
   public static MnodeUpdate createNull(long version, MnodeValue oldValue)
@@ -172,6 +183,11 @@ public class MnodeUpdate extends MnodeValue {
   public final int getLeaseOwner()
   {
     return _leaseOwner;
+  }
+  
+  public final long getLastAccessTime()
+  {
+    return _accessTime;
   }
   
   public final long getLastModifiedTime()

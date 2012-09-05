@@ -595,7 +595,9 @@ public class MnodeStore {
    */
   public boolean insert(HashKey id,
                         MnodeValue mnodeUpdate,
-                        long valueDataId)
+                        long valueDataId,
+                        long lastAccessTime,
+                        long lastModifiedTime)
   {
     if ((valueDataId == 0) != (mnodeUpdate.getValueHash() == 0)) {
       throw new IllegalStateException(L.l("data {0} vs hash {1} mismatch for cache mnode {2}",
@@ -627,8 +629,8 @@ public class MnodeStore {
       stmt.setLong(10, mnodeUpdate.getModifiedExpireTimeout());
       
       long now = CurrentTime.getCurrentTime();
-      stmt.setLong(11, now);
-      stmt.setLong(12, now);
+      stmt.setLong(11, lastAccessTime);
+      stmt.setLong(12, lastModifiedTime);
 
       int count = stmt.executeUpdate();
 
@@ -660,7 +662,9 @@ public class MnodeStore {
    */
   public boolean updateSave(byte []key,
                             MnodeValue mnodeUpdate,
-                            long valueDataId)
+                            long valueDataId,
+                            long lastAccessTime,
+                            long lastModifiedTime)
   {
     CacheMapConnection conn = null;
 
@@ -681,9 +685,8 @@ public class MnodeStore {
       stmt.setLong(9, mnodeUpdate.getModifiedExpireTimeout());
       
       
-      long now = CurrentTime.getCurrentTime();
-      stmt.setLong(10, now);
-      stmt.setLong(11, now);
+      stmt.setLong(10, lastAccessTime);
+      stmt.setLong(11, lastModifiedTime);
       /*
       + " SET value_hash=?,value_data_id=?,value_length=?,cache_id=?,flags=?,"
       + "     item_version=?,server_version=?,"

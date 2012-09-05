@@ -440,6 +440,34 @@ public class CacheImpl<K,V>
   }
 
   /**
+   * Puts a new item in the cache with a custom idle
+   * timeout (used for sessions).
+   *
+   * @param key         the key of the item to put
+   * @param is          the value of the item to put
+   * @param idleTimeout the idle timeout for the item
+   */
+  @Override
+  public ExtCacheEntry put(Object key,
+                           InputStream is,
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout,
+                           long lastAccessTime,
+                           long lastModifiedTime)
+    throws IOException
+  {
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    entry.put(is, _config, 
+              accessedExpireTimeout,
+              modifiedExpireTimeout,
+              lastAccessTime,
+              lastModifiedTime);
+    
+    return getExtCacheEntry(entry);
+  }
+
+  /**
    * Puts a new item in the cache.
    *
    * @param key   the key of the item to put

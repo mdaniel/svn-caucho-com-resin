@@ -95,7 +95,7 @@ public final class MnodeEntry extends MnodeValue {
     
     // server/0165
     // _lastAccessTime = CurrentTime.getCurrentTime();
-    _lastAccessTime = lastAccessTime;
+    setLastAccessTime(lastAccessTime);
 
     _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
@@ -156,7 +156,9 @@ public final class MnodeEntry extends MnodeValue {
     _valueDataId = valueDataId;
     
     _lastRemoteAccessTime = lastAccessTime;
-    _lastAccessTime = CurrentTime.getCurrentTime();
+    //_lastAccessTime = CurrentTime.getCurrentTime();
+    // server/01o9
+    setLastAccessTime(lastAccessTime);
     
     _lastModifiedTime = oldMnodeValue._lastModifiedTime;
 

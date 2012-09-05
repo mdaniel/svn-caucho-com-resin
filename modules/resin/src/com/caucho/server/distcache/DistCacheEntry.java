@@ -158,7 +158,8 @@ public class DistCacheEntry {
   {
     long now = CurrentTime.getCurrentTime();
 
-    return loadMnodeValue(config, now); // , false);
+    // server/01o9
+    return loadMnodeValue(config, now, false); // , false);
   }
 
   /**
@@ -168,7 +169,8 @@ public class DistCacheEntry {
   {
     MnodeEntry mnodeValue = getMnodeEntry();
 
-    updateAccessTime();
+    // server/01o9
+    // updateAccessTime();
 
     return getLocalDataManager().createDataSource(mnodeValue.getValueDataId());
   }
@@ -222,7 +224,7 @@ public class DistCacheEntry {
     long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
-    MnodeEntry mnodeValue = loadMnodeValue(config, now); // , false);
+    MnodeEntry mnodeValue = loadMnodeValue(config, now, true); // , false);
 
     put(value, config, now, mnodeValue);
   }
@@ -236,10 +238,35 @@ public class DistCacheEntry {
                   long modifiedExpireTimeout)
     throws IOException
   {
-      putStream(is, config, 
-                accessedExpireTimeout,
-                modifiedExpireTimeout, 
-                0);
+    long now = CurrentTime.getCurrentTime();
+    long lastAccessTime = now;
+    long lastModifiedTime = now;
+    
+    putStream(is, config, 
+              accessedExpireTimeout,
+              modifiedExpireTimeout, 
+              0,
+              lastAccessTime,
+              lastModifiedTime);
+  }
+
+  /**
+   * Sets the value by an input stream
+   */
+  public void put(InputStream is,
+                  CacheConfig config,
+                  long accessedExpireTimeout,
+                  long modifiedExpireTimeout,
+                  long lastAccessTime,
+                  long lastModifiedTime)
+    throws IOException
+  {
+    putStream(is, config, 
+              accessedExpireTimeout,
+              modifiedExpireTimeout, 
+              0,
+              lastAccessTime,
+              lastModifiedTime);
   }
 
   /**
@@ -252,17 +279,25 @@ public class DistCacheEntry {
                   int flags)
     throws IOException
   {
+    long now = CurrentTime.getCurrentTime();
+    long lastAccessTime = now;
+    long lastModifiedTime = now;
+    
     putStream(is, config, 
               accessedExpireTimeout, 
               modifiedExpireTimeout,
-              flags);
+              flags,
+              lastAccessTime,
+              lastModifiedTime);
   }
 
   private final void putStream(InputStream is,
                                CacheConfig config,
                                long accessedExpireTime,
                                long modifiedExpireTime,
-                               int userFlags)
+                               int userFlags,
+                               long lastAccessTime,
+                               long lastModifiedTime)
     throws IOException
   {
     loadLocalMnodeValue();
@@ -289,7 +324,6 @@ public class DistCacheEntry {
     
     int leaseOwner = getMnodeEntry().getLeaseOwner();
     long leaseExpireTimeout = config.getLeaseExpireTimeout();
-    long now = CurrentTime.getCurrentTime();
     
     MnodeUpdate mnodeUpdate = new MnodeUpdate(valueHash,
                                               valueLength,
@@ -300,7 +334,8 @@ public class DistCacheEntry {
                                               modifiedExpireTime,
                                               leaseExpireTimeout,
                                               leaseOwner,
-                                              now);
+                                              lastAccessTime,
+                                              lastModifiedTime);
 
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
@@ -540,7 +575,7 @@ public class DistCacheEntry {
     long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
-    MnodeEntry mnodeValue = loadMnodeValue(config, now); // , false);
+    MnodeEntry mnodeValue = loadMnodeValue(config, now, true); // , false);
 
     return getAndPut(value, config, now, mnodeValue);
   }
@@ -717,7 +752,7 @@ public class DistCacheEntry {
   private Object get(CacheConfig config,
                      long now)
   {
-    MnodeEntry mnodeEntry = loadMnodeValue(config, now);
+    MnodeEntry mnodeEntry = loadMnodeValue(config, now, true);
 
     if (mnodeEntry == null) {
       return null;
@@ -755,18 +790,22 @@ public class DistCacheEntry {
     return value;
   }
 
-  final private MnodeEntry loadMnodeValue(CacheConfig config, long now)
+  final private MnodeEntry loadMnodeValue(CacheConfig config, 
+                                          long now,
+                                          boolean isUpdateAccessTime)
   {
     MnodeEntry mnodeEntry = loadLocalMnodeValue();
     
     int server = config.getEngine().getServerIndex();
 
     if (mnodeEntry == null || mnodeEntry.isLocalExpired(server, now, config)) {
-      reloadValue(config, now);
+      reloadValue(config, now, isUpdateAccessTime);
     }
 
     // server/016q
-    updateAccessTime();
+    if (isUpdateAccessTime) {
+      updateAccessTime();
+    }
 
     mnodeEntry = getMnodeEntry();
 
@@ -782,12 +821,13 @@ public class DistCacheEntry {
   }
 
   private void reloadValue(CacheConfig config,
-                           long now)
+                           long now,
+                           boolean isUpdateAccessTime)
   {
     // only one thread may update the expired data
     if (startReadUpdate()) {
       try {
-        loadExpiredValue(config, now);
+        loadExpiredValue(config, now, isUpdateAccessTime);
       } finally {
         finishReadUpdate();
       }
@@ -795,7 +835,8 @@ public class DistCacheEntry {
   }
   
   private void loadExpiredValue(CacheConfig config,
-                                long now)
+                                long now,
+                                boolean isUpdateAccessTime)
   {
     MnodeEntry mnodeEntry = getMnodeEntry();
     
@@ -808,7 +849,9 @@ public class DistCacheEntry {
     mnodeEntry = getMnodeEntry();
 
     if (! mnodeEntry.isExpired(now)) {
-      mnodeEntry.setLastAccessTime(now);
+      if (isUpdateAccessTime) {
+        mnodeEntry.setLastAccessTime(now);
+      }
     }
     else if (loadFromCacheLoader(config, now)) {
       mnodeEntry.setLastAccessTime(now);
@@ -1025,7 +1068,7 @@ public class DistCacheEntry {
       }
 
       // long accessTime = now;
-      long accessTime = now;
+      long accessTime = mnodeUpdate.getLastAccessTime();
       long updateTime = mnodeUpdate.getLastModifiedTime();
       
       int leaseOwner = oldLeaseOwner;
@@ -1159,7 +1202,7 @@ public class DistCacheEntry {
   }
 
   void updateAccessTime(MnodeEntry mnodeValue,
-                                long now)
+                        long now)
   {
     if (mnodeValue != null) {
       long idleTimeout = mnodeValue.getAccessedExpireTimeout();

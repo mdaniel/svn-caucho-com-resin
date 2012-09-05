@@ -47,6 +47,7 @@ import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.server.distcache.MnodeStore.ExpiredMnode;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
@@ -104,7 +105,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   @Override
   public MnodeEntry loadLocalEntryValue(HashKey key)
   {
-    return _mnodeStore.load(key);
+    MnodeEntry entry = _mnodeStore.load(key);
+    
+    return entry;
   }
 
   /**
@@ -120,7 +123,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeEntry.NULL) {
-      if (_mnodeStore.insert(key, mnodeUpdate, mnodeUpdate.getValueDataId())) {
+      if (_mnodeStore.insert(key, mnodeUpdate, 
+                             mnodeUpdate.getValueDataId(),
+                             mnodeUpdate.getLastAccessedTime(),
+                             mnodeUpdate.getLastModifiedTime())) {
         return mnodeUpdate;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
@@ -131,11 +137,15 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     } else {
       if (_mnodeStore.updateSave(key.getHash(), 
                                  mnodeUpdate,
-                                 mnodeUpdate.getValueDataId())) {
+                                 mnodeUpdate.getValueDataId(),
+                                 mnodeUpdate.getLastAccessedTime(),
+                                 mnodeUpdate.getLastModifiedTime())) {
         return mnodeUpdate;
       }
       else if (_mnodeStore.insert(key, mnodeUpdate, 
-                                  mnodeUpdate.getValueDataId())) {
+                                  mnodeUpdate.getValueDataId(),
+                                  mnodeUpdate.getLastAccessedTime(),
+                                  mnodeUpdate.getLastModifiedTime())) {
         return mnodeUpdate;
       }
       else {
@@ -151,14 +161,19 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   public boolean putLocalValue(MnodeEntry mnodeEntry,
                                HashKey key,
                                MnodeEntry oldEntryEntry,
-                               MnodeValue mnodeUpdate)
+                               MnodeUpdate mnodeUpdate)
   {
     boolean isSave = false;
     
     if (oldEntryEntry == null
         || oldEntryEntry.isImplicitNull()
         || oldEntryEntry == MnodeEntry.NULL) {
-      if (_mnodeStore.insert(key, mnodeUpdate, mnodeEntry.getValueDataId())) {
+      // long now = CurrentTime.getCurrentTime();
+      long lastAccessTime = mnodeUpdate.getLastAccessTime();
+      long lastModifiedTime = mnodeUpdate.getLastAccessTime();
+      
+      if (_mnodeStore.insert(key, mnodeUpdate, mnodeEntry.getValueDataId(),
+                             lastAccessTime, lastModifiedTime)) {
         isSave = true;
         
         addCreateCount();
@@ -169,12 +184,16 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     } else {
       if (_mnodeStore.updateSave(key.getHash(), 
                                  mnodeUpdate,
-                                 mnodeEntry.getValueDataId())) {
+                                 mnodeEntry.getValueDataId(),
+                                 mnodeEntry.getLastAccessedTime(),
+                                 mnodeEntry.getLastModifiedTime())) {
         isSave = true;
       }
       else if (_mnodeStore.insert(key, 
                                   mnodeUpdate,
-                                  mnodeEntry.getValueDataId())) {
+                                  mnodeEntry.getValueDataId(),
+                                  mnodeEntry.getLastAccessedTime(),
+                                  mnodeEntry.getLastModifiedTime())) {
         isSave = true;
         
         addCreateCount();

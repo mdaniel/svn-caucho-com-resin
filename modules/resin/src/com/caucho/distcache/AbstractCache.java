@@ -654,6 +654,30 @@ public class AbstractCache
    * @param idleTimeout the idle timeout for the item
    */
   @Override
+  public ExtCacheEntry put(Object key,
+                           InputStream is,
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout,
+                           long lastAccessTime,
+                           long lastModifiedTime)
+    throws IOException
+  {
+    return _delegate.put(key, is, 
+                         accessedExpireTimeout, 
+                         modifiedExpireTimeout,
+                         lastAccessTime,
+                         lastModifiedTime);
+  }
+
+  /**
+   * Puts a new item in the cache with a custom idle
+   * timeout (used for sessions).
+   *
+   * @param key         the key of the item to put
+   * @param is          the value of the item to put
+   * @param idleTimeout the idle timeout for the item
+   */
+  @Override
   public boolean putIfNew(Object key,
                           MnodeUpdate update,
                           InputStream is)

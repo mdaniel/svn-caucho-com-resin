@@ -79,6 +79,20 @@ public interface ByteStreamCache
                                 InputStream is,
                                 long accessedExpireTimeout,
                                 long modifiedExpireTimeout,
+                                long accessTime,
+                                long modifiedTime)
+    throws IOException;
+  
+  /**
+   * Puts a new item in the cache.
+   *
+   * @param key the key of the item to put
+   * @param is stream to contain the value
+   */
+  public ExtCacheEntry<?,?> put(Object key,
+                                InputStream is,
+                                long accessedExpireTimeout,
+                                long modifiedExpireTimeout,
                                 int flags)
     throws IOException;
   
