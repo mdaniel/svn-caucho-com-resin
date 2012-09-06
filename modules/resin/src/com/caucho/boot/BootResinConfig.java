@@ -31,7 +31,6 @@ package com.caucho.boot;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -746,6 +745,8 @@ public class BootResinConfig // implements EnvironmentBean
       throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. --elastic-server requires a <resin:ElasticCloudService> tag.",
                                     clusterId));
     }
+    
+    clusterId = cluster.getId();
     
     String serverId = args.getServerId();
     

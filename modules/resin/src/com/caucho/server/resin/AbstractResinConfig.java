@@ -32,6 +32,7 @@ package com.caucho.server.resin;
 import java.io.IOException;
 
 import com.caucho.config.Configurable;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.log.LogConfig;
 import com.caucho.log.LogHandlerConfig;
 import com.caucho.log.LoggerConfig;
@@ -41,7 +42,7 @@ import com.caucho.util.CurrentTime;
  * The ResinConfig class represents configuration for 
  * the top-level <resin> system.
  */
-abstract public class AbstractResinConfig
+abstract public class AbstractResinConfig implements EnvironmentBean
 {
   @Configurable
   public LoggerConfig createLogger()
@@ -62,7 +63,7 @@ abstract public class AbstractResinConfig
     try {
       if (! CurrentTime.isTest())
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
+
       logger.initImpl();
       
     } finally {
@@ -90,7 +91,7 @@ abstract public class AbstractResinConfig
     try {
       if (! CurrentTime.isTest())
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
+
       log.initImpl();
       
     } finally {

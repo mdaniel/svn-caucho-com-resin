@@ -78,12 +78,8 @@ class WatchdogChild
                 BootClusterConfig cluster,
                 int index)
   {
-    _id = id;
-    
-    _system = system;
-    _config = new WatchdogConfig(id, cluster, args, rootDirectory, index);
-
-    _admin = new WatchdogAdmin();
+    this(system,
+         new WatchdogConfig(id, cluster, args, rootDirectory, index));
   }
 
   WatchdogChild(ResinSystem system,

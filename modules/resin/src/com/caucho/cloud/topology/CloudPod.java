@@ -358,6 +358,17 @@ public class CloudPod
   }
   
   /**
+   * Creates a new dynamic server
+   */
+  public CloudServer createDynamicServer(String id,
+                                         String address,
+                                         int port,
+                                         boolean isSecure)
+  {
+    return createDynamicServer(id, id, address, port, isSecure);
+  }
+  
+  /**
    * Creates a new server
    */
   private CloudServer createServer(String id,

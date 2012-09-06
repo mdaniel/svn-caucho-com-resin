@@ -87,6 +87,7 @@ public class BootResinConfig extends AbstractResinConfig
     _resinSystem = resinSystem;
   }
   
+  @Override
   public EnvironmentClassLoader getClassLoader()
   {
     return _resinSystem.getClassLoader();

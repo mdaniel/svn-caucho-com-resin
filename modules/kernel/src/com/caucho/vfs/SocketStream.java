@@ -353,14 +353,17 @@ public class SocketStream extends StreamImpl {
     if (_s != null) {
       try {
         _s.shutdownOutput();
+      } catch (UnsupportedOperationException e) {
+        log.log(Level.FINEST, e.toString(), e);
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
       }
     }
 
     // SSLSocket doesn't support shutdownOutput()
-    if (os != null)
+    if (os != null) {
       os.close();
+    }
   }
 
   /**

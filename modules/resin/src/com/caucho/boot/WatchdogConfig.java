@@ -114,6 +114,7 @@ class WatchdogConfig
     
     _id = id;
     _cluster = cluster;
+    _elasticServerCluster = cluster.getId();
     _index = index;
     
     _args = args;

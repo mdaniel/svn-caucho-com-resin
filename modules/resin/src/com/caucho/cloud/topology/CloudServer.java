@@ -103,10 +103,7 @@ public class CloudServer {
     
     _id = id;
     _displayId = displayId;
-
-    if (_displayId.startsWith("dyn-")) {
-      Thread.dumpStack();
-    }
+    
     _pod = pod;
     _index = index;
     

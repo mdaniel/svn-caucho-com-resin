@@ -1071,7 +1071,7 @@ abstract public class AbstractHttpResponse {
 
     int maxAge = cookie.getMaxAge();
     if (version > 0) {
-      if (maxAge > 0) {
+      if (maxAge >= 0) {
         cb.append("; Max-Age=");
         cb.append(maxAge);
       }
