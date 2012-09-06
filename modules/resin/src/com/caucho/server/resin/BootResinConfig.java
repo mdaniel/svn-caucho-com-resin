@@ -52,7 +52,8 @@ import com.caucho.vfs.PersistentDependency;
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class BootResinConfig implements SchemaBean, DependencyBean
+public class BootResinConfig extends AbstractResinConfig
+  implements SchemaBean, DependencyBean
 {
   private static final Logger log
     = Logger.getLogger(BootResinConfig.class.getName());

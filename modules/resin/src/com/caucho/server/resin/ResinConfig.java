@@ -62,7 +62,7 @@ import com.caucho.vfs.Path;
  * The ResinConfig class represents configuration for 
  * the top-level <resin> system.
  */
-public class ResinConfig implements EnvironmentBean
+public class ResinConfig extends AbstractResinConfig implements EnvironmentBean
 {
   private static Logger log = Logger.getLogger(ResinConfig.class.getName());
   private static L10N L = new L10N(ResinConfig.class);
@@ -210,93 +210,6 @@ public class ResinConfig implements EnvironmentBean
   {
   }
   
-  @Configurable
-  public LoggerConfig createLogger()
-  {
-    return new LoggerConfig(true);
-  }
-  
-  /**
-   * Overrides standard <logger> configuration to change to 
-   * system-class-loader.
-   */
-  @Configurable
-  public void addLogger(LoggerConfig logger)
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-    
-    try {
-      if (! CurrentTime.isTest())
-        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
-      logger.initImpl();
-      
-    } finally {
-      thread.setContextClassLoader(loader);
-    }
-  }
-  
-  @Configurable
-  public LogConfig createLog()
-  {
-    return new LogConfig(true);
-  }
-  
-  /**
-   * Overrides standard <log> configuration to change to 
-   * system-class-loader.
-   */
-  @Configurable
-  public void addLog(LogConfig log)
-    throws IOException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-    
-    try {
-      if (! CurrentTime.isTest())
-        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
-      log.initImpl();
-      
-    } finally {
-      thread.setContextClassLoader(loader);
-    }
-  }
-  
-  /**
-   * Overrides standard <log-handler> configuration to change to 
-   * system-class-loader.
-   */
-  @Configurable
-  public LogHandlerConfig createLogHandler()
-  {
-    return new LogHandlerConfig(true);
-  }
-
-  /**
-   * Overrides standard <log-handler> configuration to change to 
-   * system-class-loader.
-   */
-  @Configurable
-  public void addLogHandler(LogHandlerConfig logHandler)
-  {
-    // env/02sf
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
-    try {
-      if (! CurrentTime.isTest())
-        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-
-      logHandler.initImpl();
-      
-    } finally {
-      thread.setContextClassLoader(loader);
-    }
-  }
-
   /**
    * Set true if system properties are global.
    */
