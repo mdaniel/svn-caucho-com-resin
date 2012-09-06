@@ -1169,13 +1169,25 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
         j++;
       }
       else {
+        int head = j;
+        int tail = j;
+        
         for (; j < end; j++) {
           ch = buf[j];
-          if (ch < 128 && VALUE[ch])
+          if (ch < 128 && VALUE[ch]) {
             cbValue.append(ch);
-          else
+            tail = j + 1;
+          }
+          else if (ch == ' ') {
+            cbValue.append(ch);
+            // server/01ed
+          }
+          else {
             break;
+          }
         }
+        
+        cbValue.setLength(tail - head);
       }
 
       if (! isSpecial) {

@@ -135,6 +135,6 @@ public class SecurityFilterChain implements FilterChain {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _webApp + "]";
+    return getClass().getSimpleName() + "[" + _webApp + "," + _next + "]";
   }
 }

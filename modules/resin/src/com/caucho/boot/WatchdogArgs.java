@@ -660,7 +660,8 @@ class WatchdogArgs
     }
   }
 
-  private List<String> parseDefaultArgs() {
+  private List<String> parseDefaultArgs()
+  {
     LinkedList<String> defaultArgs = new LinkedList<String>();
 
     for (int i = _tailArgs.size() - 1; i >= 0; i--) {

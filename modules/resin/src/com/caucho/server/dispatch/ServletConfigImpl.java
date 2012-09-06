@@ -1098,7 +1098,7 @@ public class ServletConfigImpl
 
     validateClass(true);
 
-    Class servletClass = getServletClass();
+    Class<?> servletClass = getServletClass();
 
     if (servletClass == null) {
       throw new IllegalStateException(L.l("servlet class for {0} can't be null",
@@ -1282,7 +1282,7 @@ public class ServletConfigImpl
 
       Servlet servlet
         = _protocolFactory.createServlet(getServletClass(), service);
-
+      
       servlet.init(this);
 
       return servlet;
@@ -1331,13 +1331,11 @@ public class ServletConfigImpl
         // ioc/0p2b
         if (_annType != null) {
           Set<Bean<?>> beanSet = inject.getBeans(servletClass);
+          
+          Bean<?> bean = findBean(beanSet, servletClass);
 
-          if (beanSet.size() > 0) {
-            Bean<?> bean = beanSet.iterator().next();
-            
-            if (bean instanceof ManagedBeanImpl<?>) {
-              _comp = ((ManagedBeanImpl) bean).getInjectionTarget();
-            }
+          if (bean instanceof ManagedBeanImpl<?>) {
+            _comp = ((ManagedBeanImpl) bean).getInjectionTarget();
           }
         }
 
@@ -1382,6 +1380,26 @@ public class ServletConfigImpl
     }
 
     return servlet;
+  }
+  
+  private Bean<?> findBean(Set<Bean<?>> beanSet, Class<?> cl)
+  {
+    if (beanSet.size() == 0) {
+      return null;
+    }
+
+    // server/13fh
+    for (Bean<?> bean : beanSet) {
+      if (bean.getBeanClass().equals(cl)) {
+        return bean;
+      }
+    }
+    
+    for (Bean<?> bean : beanSet) {
+      return bean;
+    }
+    
+    return null;
   }
 
   /**

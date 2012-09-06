@@ -1018,12 +1018,12 @@ abstract public class AbstractHttpResponse {
       
       for (int i = 0; i < len; i++) {
         char ch = v.charAt(i);
-        
+        /*
         if (ch == ' ') {
           // server/010y, #3897
           return fillCookie(cb, cookie, date, version, true);
         }
-        
+        */
         cb.append(ch);
       }
     }
@@ -1071,7 +1071,7 @@ abstract public class AbstractHttpResponse {
 
     int maxAge = cookie.getMaxAge();
     if (version > 0) {
-      if (maxAge >= 0) {
+      if (maxAge > 0) {
         cb.append("; Max-Age=");
         cb.append(maxAge);
       }
