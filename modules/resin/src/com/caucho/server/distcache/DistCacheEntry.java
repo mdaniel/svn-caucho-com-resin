@@ -74,14 +74,15 @@ public class DistCacheEntry {
 
   DistCacheEntry(CacheStoreManager engine,
                  HashKey keyHash,
-                 TriadOwner owner)
+                 TriadOwner owner,
+                 CacheConfig config)
   {
     _cacheService = engine;
     _keyHash = keyHash;
     
     _owner = TriadOwner.getHashOwner(keyHash.getHash());
     
-    _mnodeEntry.set(MnodeEntry.createInitialNull());
+    _mnodeEntry.set(MnodeEntry.createInitialNull(config));
   }
 
   /**

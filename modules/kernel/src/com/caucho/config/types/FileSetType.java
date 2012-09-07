@@ -122,11 +122,16 @@ public class FileSetType {
   {
     if (fileSet == this)
       return;
+    
+    if (_dir == null) {
+      _dir = fileSet.getDir();
+    }
 
-    if (! isSameDir(fileSet))
-      throw new IllegalArgumentException(L.l("can't add {0} to {1}",
+    if (! isSameDir(fileSet)) {
+      throw new IllegalArgumentException(L.l("fileset directory: mismatch can't add {0} to {1}",
                                              fileSet,
                                              this));
+    }
 
     if (fileSet._includeList != null) {
       for (PathPatternType include : fileSet._includeList){
@@ -145,9 +150,13 @@ public class FileSetType {
   {
     if (fileSet == this)
       return;
+    
+    if (_dir == null) {
+      _dir = fileSet.getDir();
+    }
 
     if (! isSameDir(fileSet))
-      throw new IllegalArgumentException(L.l("can't add {0} to {1}",
+      throw new IllegalArgumentException(L.l("fileset directory mismatch: can't add {0} to {1}",
                                              fileSet,
                                              this));
 

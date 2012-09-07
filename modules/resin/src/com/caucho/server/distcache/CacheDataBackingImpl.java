@@ -461,7 +461,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
   private boolean removeData(byte []key, long dataId)
   {
-    DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key));
+    CacheConfig config = null;
+    DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key), config);
     
     distEntry.clear();
 

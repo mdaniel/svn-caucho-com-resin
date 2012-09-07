@@ -101,6 +101,11 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * Returns true when the entry is expired.
    */
   public boolean isExpired(long now);
+  
+  /**
+   * Update the access time on a read.
+   */
+  public void updateAccessTime();
 
   /**
    * Returns the lease owner

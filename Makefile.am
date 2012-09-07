@@ -227,7 +227,7 @@ install	:
 	@ if test $(resin_pro) != "." -a -r $(resin_pro)/modules/c/src/Makefile; then \
 	  (cd $(resin_pro)/modules/c/src; $(MAKE) install) \
 	fi
-	if test "$(setuid_set)" = "true"; then \
+	@ if test "$(setuid_set)" = "true"; then \
 	  if test -n "$(group_add)"; then \
 	    echo "Creating setuid group $(setuid_group)."; \
 	    egrep '$$$(setuid_group):' /etc/group 1>/dev/null 2>/dev/null; \

@@ -36,5 +36,5 @@ import com.caucho.util.HashKey;
  */
 public interface CacheEntryFactory
 {
-  public DistCacheEntry createCacheEntry(HashKey key);
+  public DistCacheEntry createCacheEntry(HashKey key, CacheConfig config);
 }

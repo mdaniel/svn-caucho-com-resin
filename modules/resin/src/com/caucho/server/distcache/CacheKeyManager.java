@@ -72,7 +72,7 @@ public final class CacheKeyManager
   {
     HashKey hashKey = createHashKey(key, config);
 
-    DistCacheEntry entry = _cacheEntryManager.createCacheEntry(hashKey);
+    DistCacheEntry entry = _cacheEntryManager.createCacheEntry(hashKey, config);
     
     if (key != null)
       entry.setKey(key);
@@ -83,17 +83,17 @@ public final class CacheKeyManager
   /**
    * Returns the key entry.
    */
-  final public DistCacheEntry getCacheEntry(HashKey hashKey)
+  final public DistCacheEntry getCacheEntry(HashKey hashKey, CacheConfig config)
   {
-    return _cacheEntryManager.createCacheEntry(hashKey);
+    return _cacheEntryManager.createCacheEntry(hashKey, config);
   }
 
-  final DistCacheEntry getLocalEntry(HashKey key)
+  final DistCacheEntry getLocalEntry(HashKey key, CacheConfig config)
   {
     if (key == null)
       throw new NullPointerException();
 
-    DistCacheEntry entry = getCacheEntry(key);
+    DistCacheEntry entry = getCacheEntry(key, config);
 
     return entry;
   }

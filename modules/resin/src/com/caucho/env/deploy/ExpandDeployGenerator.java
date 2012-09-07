@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositorySystem;
@@ -80,8 +79,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   
   private final DeployControllerService _deployService;
   
-  private String _entryNamePrefix = "";
-
   private String _extension = ".jar";
   
   private String _expandPrefix = "";
@@ -111,7 +108,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   private long _lastCheckTime;
   private AtomicBoolean _isChecking = new AtomicBoolean();
   private long _checkInterval = 1000L;
-  private long _digest;
   private volatile boolean _isModified;
   private AtomicBoolean _isDeploying = new AtomicBoolean();
 
@@ -232,19 +228,21 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   }
 
   @Configurable
-  public void addExpandCleanupFileset(PathPatternType include) {
+  public void addExpandCleanupFileset(FileSetType include)
+  {
     if (_expandCleanupFileSet == null)
       _expandCleanupFileSet = new FileSetType();
 
-    _expandCleanupFileSet.addInclude(include);
+    _expandCleanupFileSet.add(include);
   }
 
   @Configurable
-  public void addExpandPreserveFileset(PathPatternType exclude) {
+  public void addExpandPreserveFileset(FileSetType exclude)
+  {
     if (_expandCleanupFileSet == null)
       _expandCleanupFileSet = new FileSetType();
 
-    _expandCleanupFileSet.addExclude(exclude);
+    _expandCleanupFileSet.addInverse(exclude);
   }
 
   /**
@@ -318,7 +316,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
   public void setEntryNamePrefix(String entryNamePrefix)
   {
-    _entryNamePrefix = entryNamePrefix;
+    // _entryNamePrefix = entryNamePrefix;
   }
 
   /**
@@ -469,7 +467,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
       if (_expandManager != null) {
         _isModified = _expandManager.isModified();
-        _digest = _expandManager.getDigest();
+        // _digest = _expandManager.getDigest();
       }
       else
         _isModified = true;

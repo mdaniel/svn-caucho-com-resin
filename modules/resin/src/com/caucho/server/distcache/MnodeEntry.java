@@ -174,13 +174,19 @@ public final class MnodeEntry extends MnodeValue {
       _valueRef = new SoftReference<Object>(value);
   }
   
-  public static MnodeEntry createInitialNull()
+  public static MnodeEntry createInitialNull(CacheConfig config)
   {
     long accessedExpireTimeout = 0;
     long modifiedExpireTimeout = 0;
     long leaseExpireTimeout = 0;
     
     long now = 0;//CurrentTime.getCurrentTime();
+    
+    if (config != null) {
+      accessedExpireTimeout = config.getAccessedExpireTimeout();
+      modifiedExpireTimeout = config.getModifiedExpireTimeout();
+      leaseExpireTimeout = config.getLeaseExpireTimeout();
+    }
     
     return new MnodeEntry(0, 0, 0, null, 
                           0, 
@@ -267,7 +273,8 @@ public final class MnodeEntry extends MnodeValue {
     else if (now <= _lastAccessTime + localExpireTimeout) {
       return false;
     }
-    else if (serverIndex <= 2 && getLeaseExpireTimeout() > 0
+    else if ((serverIndex <= 2 
+              && (localExpireTimeout > 0 || getLeaseExpireTimeout() > 0))
              || _leaseOwner == serverIndex && now <= _leaseExpireTime) {
       return false;
     }

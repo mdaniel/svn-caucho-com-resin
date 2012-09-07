@@ -698,13 +698,15 @@ public class SessionImpl implements HttpSession, CacheListener {
         // _idleTimeout = entry.getIdleTimeout() * 4 / 5;
         //_isIdleSet = true;
       }
-      
+ 
       if (entry != null && cacheEntry != null
           && cacheEntry.getValueHash() == entry.getValueHash()) {
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load-same valueHash="
                    + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
+        
+        entry.updateAccessTime();
         
         _isModified = false;
         

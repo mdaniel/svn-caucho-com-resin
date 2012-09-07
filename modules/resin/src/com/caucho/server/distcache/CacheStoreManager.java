@@ -141,7 +141,7 @@ public final class CacheStoreManager implements CacheEntryFactory
     HashKey hashKey = _keyManager.createHashKey(key, config);
 
     DistCacheEntry entry
-      = _cacheEntryManager.createCacheEntry(hashKey);
+      = _cacheEntryManager.createCacheEntry(hashKey, config);
     
     if (key != null) {
       entry.setKey(key);
@@ -158,26 +158,37 @@ public final class CacheStoreManager implements CacheEntryFactory
     if (key == null)
       throw new NullPointerException();
     
-    return _cacheEntryManager.createCacheEntry(key);
+    return _cacheEntryManager.createCacheEntry(key, null);
+  }
+
+  /**
+   * Returns the key entry.
+   */
+  final public DistCacheEntry getCacheEntry(HashKey key, CacheConfig config)
+  {
+    if (key == null)
+      throw new NullPointerException();
+    
+    return _cacheEntryManager.createCacheEntry(key, config);
   }
 
   /**
    * Returns the key entry.
    */
   @Override
-  public DistCacheEntry createCacheEntry(HashKey hashKey)
+  public DistCacheEntry createCacheEntry(HashKey hashKey, CacheConfig config)
   {
     TriadOwner owner = TriadOwner.getHashOwner(hashKey.getHash());
 
-    return new DistCacheEntry(this, hashKey, owner);
+    return new DistCacheEntry(this, hashKey, owner, config);
   }
 
-  public final DistCacheEntry loadLocalEntry(HashKey key)
+  public final DistCacheEntry loadLocalEntry(HashKey key, CacheConfig config)
   {
     if (key == null)
       throw new NullPointerException();
 
-    DistCacheEntry entry = getCacheEntry(key);
+    DistCacheEntry entry = getCacheEntry(key, config);
 
     entry.loadLocalEntry();
 
@@ -221,7 +232,8 @@ public final class CacheStoreManager implements CacheEntryFactory
     try {
       HashKey key = new HashKey(keyHash);
 
-      DistCacheEntry entry = loadLocalEntry(key);
+      CacheConfig config = null;
+      DistCacheEntry entry = loadLocalEntry(key, config);
     
       return entry.localUpdate(update, source.getInputStream());
     } catch (IOException e) {

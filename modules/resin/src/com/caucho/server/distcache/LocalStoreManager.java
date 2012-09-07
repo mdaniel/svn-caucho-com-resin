@@ -61,7 +61,8 @@ public final class LocalStoreManager
   {
     HashKey key = HashKey.create(keyHash);
     
-    DistCacheEntry entry = _cacheManager.loadLocalEntry(key);
+    CacheConfig config = null;
+    DistCacheEntry entry = _cacheManager.loadLocalEntry(key, config);
 
     return entry.getValueStream();
     /*

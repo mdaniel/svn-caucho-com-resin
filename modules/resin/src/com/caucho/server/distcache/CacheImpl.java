@@ -1076,7 +1076,7 @@ public class CacheImpl<K,V>
     ThreadPool.getCurrent().schedule(new Runnable() {
       public void run()
       {
-        DistCacheEntry entry = _manager.getCacheEntry(key);
+        DistCacheEntry entry = _manager.getCacheEntry(key, _config);
     
         if (entry != null) {
           entryUpdate(entry.getKey(), (V) entry.get(_config));
