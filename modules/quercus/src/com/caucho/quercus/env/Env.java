@@ -3708,7 +3708,7 @@ public class Env
     int id;
 
     if (isCaseInsensitive)
-      id = _quercus.addLowerConstantId(new ConstStringValue(name));
+      id = _quercus.addLowerConstantId(createString(name));
     else
       id = _quercus.getConstantId(name);
 
