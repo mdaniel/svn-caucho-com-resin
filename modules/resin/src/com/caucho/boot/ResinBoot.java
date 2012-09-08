@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
+import com.caucho.boot.BootResinConfig.ElasticServer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.core.ResinProperties;
@@ -210,6 +211,11 @@ public class ResinBoot
   boolean isElasticServer(WatchdogArgs args)
   {
     return _resinConfig.isElasticServer(args);
+  }
+  
+  ArrayList<ElasticServer> getElasticServerList()
+  {
+    return _resinConfig.getElasticServerList();
   }
   
   public boolean isElasticIp(WatchdogArgs args)

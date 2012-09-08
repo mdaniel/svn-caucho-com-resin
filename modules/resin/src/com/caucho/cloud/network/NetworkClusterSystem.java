@@ -339,9 +339,11 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   public static void configServer(Object server, CloudServer cloudServer)
   {
     String oldServerId = (String) Config.getCurrentVar("rvar0");
+    String oldClusterId = (String) Config.getCurrentVar("rvar1");
     
     try {
       Config.setProperty("rvar0", cloudServer.getDisplayId());
+      Config.setProperty("rvar1", cloudServer.getCluster().getId());
       
       CloudCluster cluster = cloudServer.getCluster();
       CloudPod pod = cloudServer.getPod();
@@ -370,6 +372,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       }
     } finally {
       Config.setProperty("rvar0", oldServerId);
+      Config.setProperty("rvar1", oldClusterId);
     }
   }
  

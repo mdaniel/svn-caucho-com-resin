@@ -89,7 +89,8 @@
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps"
                       expand-preserve-fileset="WEB-INF/work/**"
-                      multiversion-routing="${webapp_multiversion_routing}"/>
+                      multiversion-routing="${webapp_multiversion_routing}"
+                      path-suffix="${elastic_webapp?resin.id:}"/>
     </host-default>
 
     <!-- auto virtual host deployment in hosts/foo.example.com/webapps -->

@@ -1152,6 +1152,9 @@ r_web-app-deploy = element web-app-deploy {
 
   & r_lazy-init?
 
+  & (attribute path-suffix { string }
+     | element path-suffix { string })?
+
   & (attribute require-file { string }
      | element require-file { string })*
 

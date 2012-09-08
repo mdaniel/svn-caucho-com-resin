@@ -50,6 +50,9 @@ home_cluster : app
 # Used for an elastic server to join the cluster in home_cluster
 # elastic_server : true
 
+# Create a distinct webapps/ directory for each server, for vertical scaling
+# elastic_webapp : true
+
 # Used for cloud servers with dynamic IP addresses where the DNS name for the
 # server is assigned after the server starts. Resin will retry the start.
 # elastic_dns : true

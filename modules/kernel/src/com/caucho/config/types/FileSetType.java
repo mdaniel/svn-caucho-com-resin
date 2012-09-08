@@ -154,6 +154,8 @@ public class FileSetType {
     if (_dir == null) {
       _dir = fileSet.getDir();
     }
+    
+    System.out.println("ADDI: " + _dir + " " + fileSet._includeList);
 
     if (! isSameDir(fileSet))
       throw new IllegalArgumentException(L.l("fileset directory mismatch: can't add {0} to {1}",

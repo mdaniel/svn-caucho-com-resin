@@ -221,8 +221,10 @@ public class Resin
     if (args.isElasticServer()) {
       serverId = args.getServerId();
       
-      if (serverId == null || "".equals(serverId))
+      if (serverId == null || "".equals(serverId)) {
         serverId = "dyn";
+        displayServerId = "dyn";
+      }
       
       serverId = serverId + "-"+ getDynamicDisplayAddress() + ':' + getDynamicServerPort();
     }
@@ -764,7 +766,7 @@ public class Resin
       
       _bootConfig
         = new BootConfig(_resinSystem,
-                         getServerId(),
+                         getDisplayServerId(),
                          getResinHome(),
                          getRootDirectory(),
                          getLogDirectory(),
