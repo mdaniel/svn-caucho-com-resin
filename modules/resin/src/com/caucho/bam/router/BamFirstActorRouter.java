@@ -64,6 +64,7 @@ public class BamFirstActorRouter extends AbstractBamRouter
     return _actors;
   }
   
+  @Override
   public boolean isActive()
   {
     for (BamActorRef actor : getActors()) {
