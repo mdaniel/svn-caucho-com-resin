@@ -59,22 +59,22 @@ public class StringSanitizeFilter
       char ch = str.charAt(i);
 
       if (0x00 <= ch && ch <= 0x1f) {
-        if (isEncodeLow) {
+        if (isStripLow) {
+        }
+        else if (isEncodeLow) {
           appendEncoded(sb, ch);
         }
         else if (ch == 0x00) {
-        }
-        else if (isStripLow) {
         }
         else {
           sb.append(ch);
         }
       }
       else if (0x80 <= ch) {
-        if (isEncodeHigh) {
-          appendEncoded(sb, ch);
+        if (isStripHigh) {
         }
-        else if (isStripHigh) {
+        else if (isEncodeHigh) {
+          appendEncoded(sb, ch);
         }
         else {
           sb.append(ch);
