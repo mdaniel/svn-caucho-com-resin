@@ -36,7 +36,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
-public class IntValidateFilter extends ValidateFilter
+public class IntValidateFilter extends AbstractFilter implements ValidateFilter
 {
   @Override
   protected Value filterImpl(Env env, Value value, int flags, ArrayValue options)

@@ -57,15 +57,23 @@ public class FilterModule extends AbstractQuercusModule
   public static final int FILTER_VALIDATE_FLOAT = 0x103;   // 259
   public static final int FILTER_VALIDATE_EMAIL = 0x112;   // 274
   public static final int FILTER_VALIDATE_IP = 0x113;      // 275
+  public static final int FILTER_SANITIZE_STRING = 0x201;  // 513
   public static final int FILTER_DEFAULT = 0x204;          // 516
+  public static final int FILTER_SANITIZE_EMAIL = 0x205;   // 517
 
-  public static final int FILTER_FLAG_ALLOW_OCTAL = 0x01; // 1
+  public static final int FILTER_FLAG_ALLOW_OCTAL = 0x01;      // 1
+  public static final int FILTER_FLAG_STRIP_LOW = 0x04;        // 4
+  public static final int FILTER_FLAG_STRIP_HIGH = 0x08;       // 8
+  public static final int FILTER_FLAG_ENCODE_LOW = 0x10;       // 16
+  public static final int FILTER_FLAG_ENCODE_HIGH = 0x20;      // 32
+  public static final int FILTER_FLAG_ENCODE_AMP = 0x40;       // 64
+  public static final int FILTER_FLAG_NO_ENCODE_QUOTES = 0x80; // 128
 
   public static final int FILTER_FLAG_ALLOW_THOUSAND = 0x2000; // 8192
 
-  public static final int FILTER_NULL_ON_FAILURE = 0x8000000; // 134217728
+  public static final int FILTER_NULL_ON_FAILURE = 0x8000000;  // 134217728
 
-  public static final int FILTER_FLAG_IPV4 = 0x100000; // 1048576
+  public static final int FILTER_FLAG_IPV4 = 0x100000;         // 1048576
   public static final int FILTER_FLAG_IPV6 = 0x200000;
   public static final int FILTER_FLAG_NO_RES_RANGE = 0x400000;
   public static final int FILTER_FLAG_NO_PRIV_RANGE = 0x800000;
@@ -139,5 +147,7 @@ public class FilterModule extends AbstractQuercusModule
     _filterMap.put(FILTER_VALIDATE_FLOAT, new FloatValidateFilter());
     _filterMap.put(FILTER_VALIDATE_EMAIL, new EmailValidateFilter());
     _filterMap.put(FILTER_VALIDATE_IP, new IpValidateFilter());
+    _filterMap.put(FILTER_SANITIZE_STRING, new StringSanitizeFilter());
+    _filterMap.put(FILTER_SANITIZE_EMAIL, new EmailSanitizeFilter());
   }
 }

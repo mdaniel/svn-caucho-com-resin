@@ -35,7 +35,9 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
-public class BooleanValidateFilter extends ValidateFilter
+public class BooleanValidateFilter
+  extends AbstractFilter
+  implements ValidateFilter
 {
   @Override
   protected Value filterImpl(Env env, Value value,

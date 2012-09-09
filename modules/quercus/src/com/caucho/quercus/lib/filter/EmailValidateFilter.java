@@ -37,7 +37,9 @@ import com.caucho.quercus.env.Value;
 /**
  * Coded to RFC822 specifications. XXX: RFC2822.
  */
-public class EmailValidateFilter extends ValidateFilter
+public class EmailValidateFilter
+  extends AbstractFilter
+  implements ValidateFilter
 {
   @Override
   public Value filter(Env env, Value value, Value flagV)

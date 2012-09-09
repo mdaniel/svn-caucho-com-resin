@@ -36,7 +36,9 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
-public class FloatValidateFilter extends ValidateFilter
+public class FloatValidateFilter
+  extends AbstractFilter
+  implements ValidateFilter
 {
   private static final L10N L = new L10N(FloatValidateFilter.class);
 

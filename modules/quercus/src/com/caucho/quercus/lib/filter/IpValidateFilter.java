@@ -41,7 +41,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class IpValidateFilter extends ValidateFilter
+public class IpValidateFilter extends AbstractFilter implements ValidateFilter
 {
   @Override
   protected Value filterImpl(Env env, Value value,
