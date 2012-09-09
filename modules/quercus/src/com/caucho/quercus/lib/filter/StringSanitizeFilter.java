@@ -91,6 +91,13 @@ public class StringSanitizeFilter
           appendEncoded(sb, ch);
         }
       }
+      else if (ch == '<') {
+        while (++i < len) {
+          if (str.charAt(i) == '>') {
+            break;
+          }
+        }
+      }
       else {
         sb.append(ch);
       }
