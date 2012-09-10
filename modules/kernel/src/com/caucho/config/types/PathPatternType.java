@@ -44,6 +44,7 @@ public class PathPatternType {
   static final L10N L = new L10N(PathPatternType.class);
   static final Logger log = Logger.getLogger(PathPatternType.class.getName());
 
+  private String _prefix;
   private Pattern _pattern;
 
   public PathPatternType()
@@ -54,6 +55,18 @@ public class PathPatternType {
     throws ConfigException, PatternSyntaxException
   {
     setName(pattern);
+  }
+
+  public PathPatternType(String prefix, String pattern)
+    throws ConfigException, PatternSyntaxException
+  {
+    setPrefix(prefix);
+    setName(pattern);
+  }
+  
+  public void setPrefix(String prefix)
+  {
+    _prefix = prefix;
   }
 
   /**
@@ -123,6 +136,18 @@ public class PathPatternType {
   {
     if (_pattern == null)
       throw new ConfigException(L.l("pattern requires 'name' attribute."));
+  }
+  
+  /**
+   * Checks that the path is an allowable prefix.
+   */
+  
+  public boolean isValidPrefix(String path)
+  {
+    if (_prefix == null)
+      return true;
+    else
+      return path.startsWith(_prefix);
   }
 
   /**
