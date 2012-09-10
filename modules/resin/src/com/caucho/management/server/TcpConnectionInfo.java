@@ -51,9 +51,9 @@ public class TcpConnectionInfo implements java.io.Serializable
   // the request time
   private final long _requestStartTime;
   
-  private final String _remoteAddress;
+  private String _remoteAddress;
   
-  private final String _url;
+  private String _url;
 
   /**
    * null-arg constructor for Hessian.
@@ -73,17 +73,13 @@ public class TcpConnectionInfo implements java.io.Serializable
                            long threadId,
                            String portName,
                            String state,
-                           long requestStartTime,
-                           String remoteAddress,
-                           String url)
+                           long requestStartTime)
   {
     _id = id;
     _threadId = threadId;
     _portName = portName;
     _state = state;
     _requestStartTime = requestStartTime;
-    _remoteAddress = remoteAddress;
-    _url = url;
   }
 
   public int getId()
@@ -105,6 +101,11 @@ public class TcpConnectionInfo implements java.io.Serializable
   {
     return _state;
   }
+  
+  public boolean hasRequest()
+  {
+    return _requestStartTime > 0;
+  }
 
   public long getRequestStartTime()
   {
@@ -119,9 +120,19 @@ public class TcpConnectionInfo implements java.io.Serializable
       return -1;
   }
   
+  public void setRemoteAddress(String remoteAddress)
+  {
+    _remoteAddress = remoteAddress;
+  }
+  
   public String getRemoteAddress()
   {
     return _remoteAddress;
+  }
+  
+  public void setUrl(String url)
+  {
+    _url = url;
   }
   
   public String getUrl()

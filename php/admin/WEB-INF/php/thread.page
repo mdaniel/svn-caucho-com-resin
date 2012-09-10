@@ -52,7 +52,7 @@ foreach ($info_list as $info) {
   $thread = array("id" => $id,
                   "info" => $info);
   
-  if ($conn) {
+  if ($conn && $conn->hasRequest()) {
     $thread["url"] = $conn->getUrl();
   }
   

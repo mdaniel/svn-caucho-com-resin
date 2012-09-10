@@ -209,17 +209,22 @@ public class TcpSocketLink extends AbstractSocketLink
    */
   public TcpConnectionInfo getConnectionInfo()
   {
-    if (isActive() && _requestStartTime > 0) {
-      return new TcpConnectionInfo(getId(), 
-                                   getThreadId(), 
-                                   _port.getAddress() + ":" + _port.getPort(), 
-                                   getDisplayState() + ": " + getState(),
-                                   getRequestStartTime(), 
-                                   getRemoteHost(), 
-                                   getRequestUrl());
+    TcpConnectionInfo connectionInfo = null;
+    
+    if (isActive()) {
+      connectionInfo = new TcpConnectionInfo(getId(), 
+                                             getThreadId(), 
+                                             _port.getAddress() + ":" + _port.getPort(), 
+                                             getDisplayState(),
+                                             getRequestStartTime());
+      if (connectionInfo.hasRequest()) {
+        connectionInfo.setRemoteAddress(getRemoteHost());
+        connectionInfo.setUrl(getRequestUrl());
+      }
+      
     }
     
-    return null;
+    return connectionInfo;
   }
   
   public String getRequestUrl()

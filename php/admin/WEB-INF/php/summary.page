@@ -643,7 +643,9 @@ function print_connections()
   $connInfoList = array();
 
   foreach ($g_server->Ports as $port) {
+  	debug("port = " . $port);
     $portConnInfo = $port->connectionInfo();
+    debug("info = " . count($portConnInfo));
 
     if ($portConnInfo)
       $connInfoList = array_merge($connInfoList, $portConnInfo);
@@ -662,41 +664,43 @@ function print_connections()
   echo "<th scope='col'>" . gettext('IP') . "</th></tr>\n";
 
   foreach ($connInfoList as $connInfo) {
-    echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
-    echo "<td>\n";
-
-    $pname = "port_" . $row;
-    
-    $threadId = $connInfo->threadId;
-    
-    $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
-    $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
-    echo "<a id='s_$pname' href=\"javascript:$show\">" . gettext('[show]') . "</a> ";
-    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>" . gettext('[hide]') . "</a> ";
-    
-    echo "</td>\n<td>";
-    echo sprintf("%.3fs", $connInfo->requestActiveTime * 0.001);
-    
-    echo "</td>\n<td>";
-    echo $connInfo->id;
-    
-    echo "</td>\n<td>";
-    echo $connInfo->getUrl();
-
-    echo "</td>\n<td>";
-    echo $connInfo->getRemoteAddress();
-    echo "</td>\n";
-    echo "</tr>";
-
-    echo "<tr><td colspan='6'>";
-    echo "<pre id='h1_$pname' style='display:none'>";
-
-    $thread = $jvm_thread_mbean->getThreadInfo($threadId, 50);
-    echo $thread;
-
-    echo "</pre>";
-    echo "</td>";
-    echo "</tr>\n";
+  	if ($connInfo->hasRequest()) {
+	    echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
+	    echo "<td>\n";
+	
+	    $pname = "port_" . $row;
+	    
+	    $threadId = $connInfo->threadId;
+	    
+	    $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
+	    $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
+	    echo "<a id='s_$pname' href=\"javascript:$show\">" . gettext('[show]') . "</a> ";
+	    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>" . gettext('[hide]') . "</a> ";
+	    
+	    echo "</td>\n<td>";
+	    echo sprintf("%.3fs", $connInfo->requestActiveTime * 0.001);
+	    
+	    echo "</td>\n<td>";
+	    echo $connInfo->id;
+	    
+	    echo "</td>\n<td>";
+	    echo $connInfo->getUrl();
+	
+	    echo "</td>\n<td>";
+	    echo $connInfo->getRemoteAddress();
+	    echo "</td>\n";
+	    echo "</tr>";
+	
+	    echo "<tr><td colspan='6'>";
+	    echo "<pre id='h1_$pname' style='display:none'>";
+	
+	    $thread = $jvm_thread_mbean->getThreadInfo($threadId, 50);
+	    echo $thread;
+	
+	    echo "</pre>";
+	    echo "</td>";
+	    echo "</tr>\n";
+	}
   }
 
   echo "</table>\n";
