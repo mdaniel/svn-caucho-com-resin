@@ -239,6 +239,8 @@ namespace Caucho
           resin.Log = resinArgs.Log;
           resin.User = "************";
           resin.JavaHome = resinArgs.JavaHome;
+          resin.ElasticServerAddress = resinArgs.ElasticServerAddress;
+          resin.ElasticServerPort = resinArgs.ElasticServerPort;
           if (resinArgs.JmxPort != null && !"".Equals(resinArgs.JmxPort))
             resin.JmxPort = int.Parse(resinArgs.JmxPort);
 
@@ -627,12 +629,14 @@ namespace Caucho
     public String Server { get; set; }
     public bool DynamicServer { get; set; }
     public bool ElasticServer { get; set; }
+    public String ElasticServerAddress { get; set; }
+    public String ElasticServerPort { get; set; }
     public String Cluster { get; set; }
     public int DebugPort { get; set; }
     public int JmxPort { get; set; }
     public int WatchdogPort { get; set; }
     public String ExtraParams { get; set; }
-
+    
     public ResinService()
     {
       JmxPort = -1;
@@ -666,6 +670,12 @@ namespace Caucho
 
       if (ElasticServer)
         sb.Append(" --elastic-server ");
+
+      if (! String.IsNullOrEmpty(ElasticServerAddress))
+        sb.Append(" --elastic-server-address ").Append(ElasticServerAddress);
+
+      if (!String.IsNullOrEmpty(ElasticServerPort))
+        sb.Append(" --elastic-server-port ").Append(ElasticServerPort);
 
       if (DynamicServer) {
       } else if (Server != null && !"".Equals(Server)) {

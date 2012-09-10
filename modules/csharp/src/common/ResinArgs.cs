@@ -59,6 +59,8 @@ namespace Caucho
     public StringCollection RawArgs { get; private set; }
     public bool DynamicServer { get; private set; }
     public bool ElasticServer { get; private set; }
+    public String ElasticServerAddress { get; private set; }
+    public String ElasticServerPort { get; private set; }
     public String Cluster { get; private set; }
 
     public ResinArgs(String cmd)
@@ -247,6 +249,16 @@ namespace Caucho
                  || "--elastic-server".Equals(arguments[argsIdx])) {
           ElasticServer = true;
           argsIdx++;
+        } 
+        else if ("--elastic-server-address".Equals(arguments[argsIdx]) 
+                 || "-elastic-server-address".Equals(arguments[argsIdx])) {
+          ElasticServerAddress = arguments[argsIdx + 1];
+          argsIdx += 2;
+        } 
+        else if ("--elastic-server-port".Equals(arguments[argsIdx])
+                   || "-elastic-server-port".Equals(arguments[argsIdx])) {
+          ElasticServerPort = arguments[argsIdx + 1];
+          argsIdx += 2;
         }
         else if ("-conf".Equals(arguments[argsIdx])
                  || "--conf".Equals(arguments[argsIdx]))

@@ -252,6 +252,8 @@ namespace Caucho
       UpdateServers();
 
       UpdateJmxAndDebugPorts();
+
+      UpdateElasticAddress();
     }
 
     private void UpdateServers()
@@ -297,7 +299,14 @@ namespace Caucho
 
         _serviceUserCmbBox.DataSource = null;
       }
+    }
 
+    private void UpdateElasticAddress()
+    {
+      if (_resinService != null) {
+        ElasticAddressEdit.Text = _resinService.ElasticServerAddress;
+        ElasticPortEdit.Text = _resinService.ElasticServerPort;
+      }
     }
 
     private void UpdateJmxAndDebugPorts()
@@ -348,6 +357,7 @@ namespace Caucho
     {
       UpdateServers();
       UpdateJmxAndDebugPorts();
+      UpdateElasticAddress();
     }
 
     private void SelectJavaHome(object sender, EventArgs e)
@@ -445,6 +455,7 @@ namespace Caucho
     private void ServerSelectionChanged(object sender, EventArgs e)
     {
       UpdateJmxAndDebugPorts();
+      UpdateElasticAddress();
     }
 
     private void SelectLogDirectory(object sender, EventArgs e)
@@ -734,7 +745,14 @@ namespace Caucho
         resinService.Cluster = _resinService.Cluster;
         resinService.Server = _resinService.Server;
         resinService.DynamicServer = _resinService.DynamicServer;
+        resinService.ElasticServer = _resinService.ElasticServer;
       }
+
+      if (resinService.ElasticServer && ! String.IsNullOrEmpty(ElasticAddressEdit.Text))
+        resinService.ElasticServerAddress = ElasticAddressEdit.Text.Trim();
+
+      if (resinService.ElasticServer && ! String.IsNullOrEmpty(ElasticPortEdit.Text))
+        resinService.ElasticServerPort = ElasticPortEdit.Text.Trim();
 
       if (!"Not Specified".Equals(_jmxPortTxtBox.Text)) {
         String jmxPort = _resinConf.GetJmxPort(resinService.Cluster, resinService.Server);
