@@ -55,7 +55,7 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     addValueOption("stage", "stage", "select a configuration stage (production, preview)");
 
     addIntValueOption("elastic-server-port", "port",
-                      "cluster port anthe new elastic server");
+                      "cluster port for an elastic server");
     addIntValueOption("debug-port", "port", "listen to a JVM debug port");
     addIntValueOption("jmx-port", "port", "listen to an unauthenticated JMX port");
     addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
