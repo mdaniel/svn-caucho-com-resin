@@ -10,7 +10,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.31 - Aug 22, 2012">
+<s2 title="4.0.31 - Sep 12, 2012">
 <ul>
 <li>elastic: elastic server joining in EC2 configuration (#5177)</li>
 <li>servlet: parent/child servlet instantiation could result in incorrect instantiation (#5208, rep by Keith Fetterman)</li>
