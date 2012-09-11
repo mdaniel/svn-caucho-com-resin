@@ -294,13 +294,11 @@ namespace Caucho
     }
 
     static public ResinConfServer ParseDynamic(String value)
-    { //dynamic:app-tier:name
-      String[] values = value.Split(':');
+    {
+      String[] values = value.Split('-');
       String cluster = values[1];
-      String id = values[2];
-      if (values.Length == 4)
-        id = id + values[3];
-
+      String id = values[2]; 
+      
       ResinConfServer server = new ResinConfServer();
       server.IsDynamic = true;
       server.Cluster = cluster;

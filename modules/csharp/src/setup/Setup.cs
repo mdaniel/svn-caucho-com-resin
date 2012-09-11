@@ -678,6 +678,7 @@ namespace Caucho
         sb.Append(" --elastic-server-port ").Append(ElasticServerPort);
 
       if (DynamicServer) {
+        sb.Append(" -server ").Append("dyn-").Append(Cluster).Append('-').Append(Server);
       } else if (Server != null && !"".Equals(Server)) {
         sb.Append(" -server ").Append(Server);
       }

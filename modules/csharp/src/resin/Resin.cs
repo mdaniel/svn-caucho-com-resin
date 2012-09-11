@@ -187,12 +187,6 @@ namespace Caucho
       if (ResinArgs.ElasticServer)
         arguments.Append(" --elastic-server ");
 
-      if (ResinArgs.ElasticServer && !String.IsNullOrEmpty(ResinArgs.ElasticServerAddress))
-        arguments.Append(" --elastic-server-address ").Append(ResinArgs.ElasticServerAddress).Append(' ');
-
-      if (ResinArgs.ElasticServer && !String.IsNullOrEmpty(ResinArgs.ElasticServerPort))
-        arguments.Append(" --elastic-server-port ").Append(ResinArgs.ElasticServerPort).Append(' ');
-
           /*
       else if (ResinArgs.DynamicServer != null)
         arguments.Append(" -dynamic-server ").Append(ResinArgs.DynamicServer);
@@ -208,6 +202,18 @@ namespace Caucho
 
       if (isStart && ResinArgs.Cluster != null)
         arguments.Append(" -cluster ").Append(ResinArgs.Cluster);
+
+      if (isStart
+        && ResinArgs.ElasticServer
+        && ! String.IsNullOrEmpty(ResinArgs.ElasticServerAddress)) {
+        arguments.Append(" --elastic-server-address ").Append(ResinArgs.ElasticServerAddress).Append(' ');
+      }
+
+      if (isStart
+        && ResinArgs.ElasticServer
+        && ! String.IsNullOrEmpty(ResinArgs.ElasticServerPort)) {
+        arguments.Append(" --elastic-server-port ").Append(ResinArgs.ElasticServerPort).Append(' ');
+      }
 
       arguments.Append(' ').Append(ResinArgs.ResinArguments);
 

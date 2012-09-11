@@ -268,7 +268,7 @@ namespace Caucho
         foreach (Object o in servers) {
           ResinConfServer server = (ResinConfServer)o;
           if (_resinConf.IsDynamicServerEnabled(server.Cluster)) {
-            String dynamic = "dynamic:" + server.Cluster + ":dyn-0";
+            String dynamic = "dyn-" + server.Cluster + "-0";
             if (! dynamicServers.Contains(dynamic))
               dynamicServers.Add(dynamic);
           }
@@ -291,7 +291,7 @@ namespace Caucho
       } else {
         _serviceNameTxtBox.Text = _resinService.Name;
         if (_resinService.DynamicServer)
-          _serverCmbBox.Text = "dynamic:" + _resinService.Server;
+          _serverCmbBox.Text = _resinService.Server;
         else if (_resinService.Server == null)
           _serverCmbBox.Text = "default";
         else
@@ -723,7 +723,7 @@ namespace Caucho
 
       ResinConfServer server = null;
       if (_serverCmbBox.SelectedItem is ResinConfServer)
-        server = (ResinConfServer)_serverCmbBox.SelectedItem;
+        server = (ResinConfServer)_serverCmbBox.SelectedItem; 
 
       if (isNew)
       {
@@ -1302,7 +1302,7 @@ namespace Caucho
         return;
       }
 
-      if (_serverCmbBox.Text.StartsWith("dynamic")) {
+      if (_serverCmbBox.Text.StartsWith("dyn")) {
         try {
           ResinConfServer r = ResinConf.ParseDynamic(_serverCmbBox.Text);
         }
