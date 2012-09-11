@@ -97,9 +97,19 @@ public class FileSetType {
     int starP = text.indexOf('*');
     
     if (starP > 0) {
+      int colonP = text.indexOf(':');
       int slashP = text.lastIndexOf('/', starP);
       
-      if (slashP >= 0) {
+      if (colonP > 0 && colonP < slashP) {
+        String prefix = text.substring(0, slashP);
+        
+        // server/6p04
+        _dir = Vfs.lookup(prefix);
+        
+        addInclude(new PathPatternType(text.substring(slashP + 1)));
+        return;
+      }
+      else if (slashP >= 0) {
         String prefix = text.substring(0, slashP);
         
         addInclude(new PathPatternType(prefix, text));
@@ -375,6 +385,12 @@ public class FileSetType {
     public void onMatch(Path path)
     {
       _list.add(path);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + _list;
     }
   }
 }

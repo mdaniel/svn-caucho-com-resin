@@ -86,7 +86,6 @@ class WatchdogManagerConfig {
     throws ConfigException
   {
     if (_resin.findClient(config.getId()) != null) {
-      Thread.dumpStack();
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
                                     config.getId()));
     }

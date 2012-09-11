@@ -753,11 +753,10 @@ public class ManagementAdmin extends AbstractManagedObject
 
     if (server == null)
       cloudServer = NetworkClusterSystem.getCurrent().getSelfServer();
-    else cloudServer = NetworkClusterSystem.getCurrent()
-                                           .getSelfServer()
-                                           .getPod()
-                                           .findServer(
-                                             server);
+    else {
+      CloudServer selfServer = NetworkClusterSystem.getCurrent().getSelfServer(); 
+      cloudServer = selfServer.getPod().findServerByDisplayId(server);
+    }
 
     return cloudServer;
   }

@@ -122,8 +122,10 @@ public class BlockManagerSubSystem extends AbstractResinSubSystem
     }
     
     BlockManager blockManager = BlockManager.getBlockManager();
-    
-    blockManager.destroy();
+
+    if (blockManager != null) {
+      blockManager.destroy();
+    }
   }
   
   class BlockFlushHandler implements AlarmListener {

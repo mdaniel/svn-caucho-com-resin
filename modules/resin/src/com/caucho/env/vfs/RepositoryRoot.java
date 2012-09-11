@@ -105,7 +105,7 @@ public class RepositoryRoot
   {
     String tag = getId();
     String treeHash = _repository.getTagContentHash(tag);
-    
+
     if (treeHash == null)
       return false;
     else

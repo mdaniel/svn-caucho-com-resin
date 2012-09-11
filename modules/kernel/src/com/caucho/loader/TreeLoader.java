@@ -219,6 +219,7 @@ public class TreeLoader extends JarListLoader implements Dependency
       }
       
     } catch (IOException e) {
+      e.printStackTrace();
     }
   }
   

@@ -183,6 +183,27 @@ public class CloudPod
   }
   
   /**
+   * Finds the first server with the given server-id.
+   */
+  public CloudServer findServerByDisplayId(String id)
+  {
+    for (int i = 0; i <= _maxIndex; i++) {
+      CloudServer server = _servers[i];
+      
+      if (server == null)
+        continue;
+      
+      if (server.getId().equals(id))
+        return server;
+      
+      if (server.getDisplayId().equals(id))
+        return server;
+    }
+
+    return null;
+  }
+  
+  /**
    * Finds the first server with the given cluster id, the
    * three-digit base-64 identifier.
    */

@@ -153,8 +153,9 @@ abstract public class JarListLoader extends Loader implements Dependency {
     JarEntry jarEntry = new JarEntry(jarPath);
 
     if (getClassLoader() != null) {
-      if (! getClassLoader().addURL(jarPath))
+      if (! getClassLoader().addURL(jarPath)) {
         return;
+      }
     }
 
     // skip duplicates
