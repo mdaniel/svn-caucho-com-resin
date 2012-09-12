@@ -64,8 +64,9 @@ public class DependencyCheckInterval {
       }
     }
 
-    if (loader == null)
+    if (loader == null) {
       DynamicClassLoader.setGlobalDependencyCheckInterval(_interval);
+    }
   }
 
   public String toString()

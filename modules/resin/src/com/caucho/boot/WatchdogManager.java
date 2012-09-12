@@ -1002,6 +1002,7 @@ class WatchdogManager implements AlarmListener {
 
     try {
       DynamicClassLoader.setJarCacheEnabled(false);
+      DynamicClassLoader.setGlobalDependencyCheckInterval(-1);
 
       JniCauchoSystem.create().initJniBackground();
 

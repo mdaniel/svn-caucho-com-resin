@@ -357,6 +357,31 @@ public class FileSetType {
 
     return false;
   }
+  
+  public ArrayList<Path> getRoots()
+  {
+    ArrayList<Path> roots = new ArrayList<Path>();
+    
+    if (_includeList == null || _includeList.size() == 0) {
+      roots.add(_dir);
+      
+      return roots;
+    }
+    
+    for (PathPatternType pattern : _includeList) {
+      String prefix = pattern.getPrefix();
+      
+      if (prefix == null || "".equals(prefix)) {
+        roots.add(_dir);
+        
+        return roots;
+      }
+      
+      roots.add(_dir.lookup(prefix));
+    }
+    
+    return roots;
+  }
 
   @Override
   public String toString()

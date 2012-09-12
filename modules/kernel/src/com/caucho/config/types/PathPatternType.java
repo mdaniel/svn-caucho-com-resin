@@ -68,6 +68,11 @@ public class PathPatternType {
   {
     _prefix = prefix;
   }
+  
+  public String getPrefix()
+  {
+    return _prefix;
+  }
 
   /**
    * Sets the pattern name.

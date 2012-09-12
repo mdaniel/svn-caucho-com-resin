@@ -302,6 +302,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public static void setGlobalDependencyCheckInterval(long interval)
   {
+    if (interval < 0)
+      interval = Integer.MAX_VALUE;
+    
     _globalDependencyCheckInterval = interval;
   }
 
