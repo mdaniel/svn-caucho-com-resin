@@ -17,7 +17,7 @@
     <!-- shared jars and drivers for the app-tier -->
     <class-loader>
       <tree-loader path="${resin.root}/${cluster.id}-inf"/>
-      <tree-loader path="cloud:/{cluster.id}-inf"/>
+      <tree-loader path="cloud:/${cluster.id}-inf"/>
     </class-loader>
 
     <!-- include resources config files in resources/ -->
