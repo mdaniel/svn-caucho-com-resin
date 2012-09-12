@@ -643,10 +643,7 @@ function print_connections()
   $connInfoList = array();
 
   foreach ($g_server->Ports as $port) {
-  	debug("port = " . $port);
     $portConnInfo = $port->connectionInfo();
-    debug("info = " . count($portConnInfo));
-
     if ($portConnInfo)
       $connInfoList = array_merge($connInfoList, $portConnInfo);
   }
