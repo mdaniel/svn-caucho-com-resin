@@ -871,6 +871,7 @@
       <include name="${dist.name}/endorsed/**"/>
       <include name="${dist.name}/init.d/**"/>
       <include name="${dist.name}/lib/**"/>
+      <include name="${dist.name}/ext-lib/**"/>
       <include name="${dist.name}/project-jars/**"/>
       <include name="${dist.name}/webapp-jars/**"/>
       <include name="${dist.name}/webapps/**"/>
