@@ -50,6 +50,7 @@ import com.caucho.network.listen.TcpPort;
 import com.caucho.server.hmux.HmuxProtocol;
 import com.caucho.util.HostUtil;
 import com.caucho.util.L10N;
+import com.caucho.vfs.net.NetworkSystem;
 
 /**
  * NetworkClusterService manages the cluster network code, the communication
@@ -84,6 +85,8 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     _selfServer.getSystem().addClusterListener(new NetworkClusterListener());
     
     ClusterServer clusterServer = selfServer.getData(ClusterServer.class);
+    
+    NetworkSystem.createSubSystem(selfServer.getId());
     
     if (clusterServer.getPort() >= 0) {
       _clusterListener = new ClusterTcpPort(clusterServer);
