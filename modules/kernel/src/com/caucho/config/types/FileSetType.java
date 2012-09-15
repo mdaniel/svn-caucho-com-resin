@@ -320,9 +320,10 @@ public class FileSetType {
   {
     String suffix = "";
     String fullPath = path.getPath();
-
-    if (prefix.length() < fullPath.length())
-      suffix = path.getPath().substring(prefix.length());
+    
+    if (prefix.length() < fullPath.length()) {
+      suffix = fullPath.substring(prefix.length());
+    }
 
     for (int i = 0; i < _excludeList.size(); i++) {
       PathPatternType pattern = _excludeList.get(i);
@@ -337,8 +338,9 @@ public class FileSetType {
     for (int i = 0; i < _includeList.size(); i++) {
       PathPatternType pattern = _includeList.get(i);
 
-      if (pattern.isMatch(suffix))
+      if (pattern.isMatch(suffix)) {
         return true;
+      }
     }
 
     return false;

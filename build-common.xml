@@ -36,6 +36,7 @@
   <property name="dist" location="${basedir}/dist"/>
   <property name="resin.dist" location="${resindir}/dist"/>
 
+  <property name="javac" value="javac"/>
   <property name="javac.verbose" value="off"/>
   <property name="javac.debug" value="on"/>
   <property name="javac.optimize" value="off"/>
@@ -193,7 +194,8 @@
     </copy>
 
     <javac srcdir="${module.src}" destdir="${module.build}"
-           fork="true" 
+           fork="true"
+           executable="${javac}"
            verbose="${javac.verbose}" 
            debug="${javac.debug}" optimize="${javac.optimize}"
            deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"

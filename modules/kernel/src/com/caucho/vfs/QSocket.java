@@ -206,5 +206,12 @@ abstract public class QSocket {
   
   abstract public void close()
     throws IOException;
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + getLocalAddress() + ":" + getLocalPort() + "]");
+  }
 }
 

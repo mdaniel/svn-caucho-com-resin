@@ -70,6 +70,7 @@ import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SSLFactory;
+import com.caucho.vfs.net.NetworkSystem;
 
 /**
  * Represents a protocol connection.
@@ -1093,6 +1094,8 @@ public class TcpPort
     // server 1e07
     if (_port < 0)
       return;
+    
+    NetworkSystem system = NetworkSystem.getCurrent();
 
     if (_throttle == null)
       _throttle = new Throttle();
@@ -1122,19 +1125,21 @@ public class TcpPort
       }
     }
     else if (_socketAddress != null) {
-      _serverSocket = QJniServerSocket.create(_socketAddress, _port,
+      _serverSocket = system.openServerSocket(_socketAddress, _port,
                                               _acceptListenBacklog,
                                               _isEnableJni);
 
       log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _serverSocket.getLocalPort());
     }
     else {
-      _serverSocket = QJniServerSocket.create(null, _port, _acceptListenBacklog,
+      _serverSocket = system.openServerSocket(null, _port, _acceptListenBacklog,
                                               _isEnableJni);
 
       log.info(_protocol.getProtocolName() + " listening to *:"
                + _serverSocket.getLocalPort());
     }
+    
+    System.out.println("SS: " + _serverSocket);
 
     assert(_serverSocket != null);
 

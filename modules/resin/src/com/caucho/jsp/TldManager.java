@@ -43,6 +43,7 @@ import java.util.zip.ZipFile;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.PathPatternType;
 import com.caucho.jsp.cfg.JsfTldPreload;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.TldPreload;
@@ -188,6 +189,8 @@ public class TldManager {
     if (fileSet == null) {
       fileSet = new FileSetType();
       fileSet.setDir(_resourceManager.resolvePath(dir));
+      fileSet.addInclude(new PathPatternType("**/*.tld"));
+      fileSet.addInclude(new PathPatternType("**/*.ftld"));
       try {
         fileSet.init();
       } catch (Exception e) {
@@ -325,7 +328,6 @@ public class TldManager {
     throws JspParseException, IOException
   {
     for (Path path : fileSet.getPaths()) {
-
       if (path.getPath().startsWith(".")) {
       }
       else if ((path.getPath().endsWith(".tld")
