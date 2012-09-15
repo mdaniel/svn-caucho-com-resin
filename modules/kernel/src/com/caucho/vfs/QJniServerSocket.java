@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  */
 public class QJniServerSocket {
   private static final L10N L = new L10N(QJniServerSocket.class);
-  private static final Logger log = Log.open(QJniServerSocket.class);
+  private static final Logger log = Logger.getLogger(QJniServerSocket.class.getName());
   
   private QJniServerSocket()
   {

@@ -62,6 +62,22 @@ abstract public class NetworkSystem {
     return system;
   }
   
+  public static NetworkSystem createSubSystem(String name)
+  {
+    NetworkSystem system = getCurrent();
+    
+    NetworkSystem subSystem = system.createSubSystemImpl(name);
+    
+    _localSystem.set(subSystem);
+    
+    return subSystem;
+  }
+  
+  protected NetworkSystem createSubSystemImpl(String name)
+  {
+    return this;
+  }
+  
   public QServerSocket openServerSocket(String address, int port)
     throws IOException
   {
