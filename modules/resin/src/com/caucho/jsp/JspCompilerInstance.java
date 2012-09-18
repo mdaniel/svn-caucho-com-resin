@@ -348,14 +348,15 @@ public class JspCompilerInstance {
 
       pageConfig.setStaticEncoding(jspPropertyGroup.isStaticEncoding());
 
-      _parseState.setRecycleTags(jspPropertyGroup.isRecycleTags());
-      
       _parseState.setTrimWhitespace(jspPropertyGroup.isTrimDirectiveWhitespaces());
       _parseState.setDeferredSyntaxAllowedAsLiteral(jspPropertyGroup.isDeferredSyntaxAllowedAsLiteral());
 
       if (jspPropertyGroup.getTldFileSet() != null)
         taglibManager.setTldFileSet(jspPropertyGroup.getTldFileSet());
     }
+
+    if (app.getJsp() != null)
+      _parseState.setRecycleTags(app.getJsp().isRecycleTags());
 
     _parseState.setResourceManager(resourceManager);
     LineMap lineMap = null;
