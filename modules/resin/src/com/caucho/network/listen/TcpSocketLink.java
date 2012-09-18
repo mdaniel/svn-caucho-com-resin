@@ -1452,7 +1452,6 @@ public class TcpSocketLink extends AbstractSocketLink
         if (getReadStream().fillWithTimeout(delta) > 0) {
           return RequestState.REQUEST_COMPLETE;
         }
-        break;
       } catch (SocketTimeoutException e) {
         log.log(Level.FINEST, e.toString(), e);
       } catch (IOException e) {
@@ -1462,7 +1461,7 @@ public class TcpSocketLink extends AbstractSocketLink
     } while (CurrentTime.getCurrentTimeActual() < expires);
 
     // close();
-    killKeepalive("thread-keepalive timeout");
+    killKeepalive("thread-keepalive timeout (" + timeout + "ms)");
     
     return RequestState.CLOSED;
   }

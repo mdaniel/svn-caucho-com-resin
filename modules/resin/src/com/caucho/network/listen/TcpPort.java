@@ -1139,8 +1139,6 @@ public class TcpPort
                + _serverSocket.getLocalPort());
     }
     
-    System.out.println("SS: " + _serverSocket);
-
     assert(_serverSocket != null);
 
     postBind();

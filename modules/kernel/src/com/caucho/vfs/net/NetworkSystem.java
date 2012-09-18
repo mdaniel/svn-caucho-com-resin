@@ -81,9 +81,9 @@ abstract public class NetworkSystem {
   public QServerSocket openServerSocket(String address, int port)
     throws IOException
   {
-      InetAddress inetAddr = InetAddress.getByName(address);
+    InetAddress inetAddr = InetAddress.getByName(address);
       
-      return openServerSocket(inetAddr, port, 100, true);
+    return openServerSocket(inetAddr, port, 100, true);
   }
   
   public abstract QServerSocket openServerSocket(InetAddress address,

@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.channels.SelectableChannel;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -76,9 +77,16 @@ public class QSocketWrapper extends QSocket {
     _os = null;
   }
   
+  @Override
   public Socket getSocket()
   {
     return _s;
+  }
+  
+  @Override
+  public void setSocket(Socket s)
+  {
+    _s = s;
   }
 
   /**
@@ -112,6 +120,20 @@ public class QSocketWrapper extends QSocket {
     throws IOException
   {
     _s.setSoTimeout(ms);
+  }
+
+  @Override
+  public void setSoTimeout(int ms)
+    throws SocketException
+  {
+    _s.setSoTimeout(ms);
+  }
+  
+  @Override
+  public void setTcpNoDelay(boolean isNoDelay)
+    throws SocketException
+  {
+    _s.setTcpNoDelay(isNoDelay);
   }
 
   /**

@@ -224,6 +224,11 @@ public class ProxySkeleton<S>
         log.finer(actor + " query " + payload + " is unsupported");
       }
       
+      broker.queryError(id, from, to, payload,
+                        new BamError(BamError.TYPE_CANCEL,
+                                     BamError.FEATURE_NOT_IMPLEMENTED,
+                                     actor + " query " + payload + " is unsupported"));
+      
       return;
     }
     
@@ -431,73 +436,6 @@ public class ProxySkeleton<S>
     }
   }
 
-  private Class<?> getPayloadType(Class<? extends Annotation> annotationType, 
-                                  Method method)
-  {
-    Class<?> []paramTypes = method.getParameterTypes();
-
-    if (paramTypes.length < 3)
-      return null;
-
-    if (method.isAnnotationPresent(annotationType))
-      return paramTypes[2];
-    else
-      return null;
-  }
-
-  private Class<?> getQueryPayloadType(Class<? extends Annotation> annotationType, 
-                                       Method method)
-  {
-    if (! method.isAnnotationPresent(annotationType))
-      return null;
-
-    Class<?> []paramTypes = method.getParameterTypes();
-
-    if (paramTypes.length == 1
-        && Serializable.class.isAssignableFrom(paramTypes[0]))
-      return paramTypes[0];
-    else if (paramTypes.length == 4
-             && long.class.equals(paramTypes[0])
-             && String.class.equals(paramTypes[1])
-             && String.class.equals(paramTypes[2])
-             && Serializable.class.isAssignableFrom(paramTypes[3])) {
-      return paramTypes[3];
-    }
-    else {
-      throw new BamException(method + " is an invalid "
-                             + " @" + annotationType.getSimpleName()
-                             + " because queries require (long, String, String, MyPayload)");
-    }
-  }
-
-  private Class<?> getQueryErrorPayloadType(Class<? extends Annotation> annotationType, Method method)
-  {
-    if (! method.isAnnotationPresent(annotationType))
-      return null;
-
-    Class<?> []paramTypes = method.getParameterTypes();
-
-    if (paramTypes.length != 5
-        || ! long.class.equals(paramTypes[0])
-        || ! String.class.equals(paramTypes[1])
-        || ! String.class.equals(paramTypes[2])
-        || ! Serializable.class.isAssignableFrom(paramTypes[3])
-        || ! BamError.class.isAssignableFrom(paramTypes[4])) {
-      throw new BamException(method + " is an invalid "
-                             + " @" + annotationType.getSimpleName()
-                             + " because queries require (long, String, String, MyPayload, ActorError)");
-    }
-    /*
-    else if (! void.class.equals(method.getReturnType())) {
-      throw new ActorException(method + " is an invalid @"
-                             + annotationType.getSimpleName()
-                             + " because queries must return void");
-    }
-    */
-
-    return paramTypes[3];
-  }
-
   @Override
   public String toString()
   {
@@ -536,7 +474,6 @@ public class ProxySkeleton<S>
       throws IllegalAccessException, InvocationTargetException
     {
       if (args != null && args.length != _paramTypes.length) {
-        System.out.println("BAD-METHOD:" + _method);
         throw new IllegalArgumentException(L.l("'{0}.{1}' has an incorrect number of arguments (received {2} but expected {3})\n  {4}",
                                                actor.getClass().getSimpleName(),
                                                name,

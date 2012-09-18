@@ -94,8 +94,10 @@ abstract public class FrameInputStream extends InputStream
     }
 
     while (true) {
-      if (! readFrameHeaderImpl())
+      if (! readFrameHeaderImpl()) {
+        System.out.println("NO_FRAME: " + this);
         return false;
+      }
       
       if (handleFrame()) {
         return true;

@@ -50,9 +50,12 @@ class TcpStream extends StreamImpl {
   private static final Logger log
     = Logger.getLogger(TcpStream.class.getName());
 
-  private Socket _s;
+  private QSocket _s;
+  private StreamImpl _stream;
+  /*
   private InputStream _is;
   private OutputStream _os;
+  */
 
   private TcpStream(TcpPath path,
                     long connectTimeout,
@@ -66,10 +69,11 @@ class TcpStream extends StreamImpl {
     
     InetSocketAddress addr = (InetSocketAddress) path.getSocketAddress();
     
-    QSocket s = network.connect(addr.getAddress(), addr.getPort(), connectTimeout);
+    _s = network.connect(addr.getAddress(), addr.getPort(), connectTimeout);
 
+    /*
     //_s = new Socket(path.getHost(), path.getPort());
-    _s = new Socket();
+    //_s = new Socket();
 
     if (connectTimeout > 0)
       _s.connect(path.getSocketAddress(), (int) connectTimeout);
@@ -78,6 +82,7 @@ class TcpStream extends StreamImpl {
 
     if (! _s.isConnected())
       throw new IOException("connection timeout");
+      */
 
     if (socketTimeout < 0)
       socketTimeout = 120000;
@@ -108,8 +113,12 @@ class TcpStream extends StreamImpl {
 
         context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
         SSLSocketFactory factory = context.getSocketFactory();
+        
+        Socket socket = _s.getSocket();
 
-        _s = factory.createSocket(_s, path.getHost(), path.getPort(), true);
+        socket = factory.createSocket(socket, path.getHost(), path.getPort(), true);
+        
+        _s.setSocket(socket);
       }
     } catch (IOException e) {
       throw e;
@@ -118,9 +127,13 @@ class TcpStream extends StreamImpl {
     } catch (Exception e) {
       throw new IOExceptionWrapper(e);
     }
+    
+    _stream = _s.getStream();
 
-    _is = _s.getInputStream();
-    _os = _s.getOutputStream();
+    /*
+    _is = new ReadStream(stream);
+    _os = new WriteStream(stream);
+    */
   }
 
   public void setAttribute(String name, Object value)
@@ -164,9 +177,10 @@ class TcpStream extends StreamImpl {
     return new TcpStream(path, connectTimeout, socketTimeout, isNoDelay);
   }
 
+  @Override
   public boolean canWrite()
   {
-    return _os != null;
+    return _stream != null && _stream.canWrite();
   }
 
   /**
@@ -180,32 +194,41 @@ class TcpStream extends StreamImpl {
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
-    if (_os != null)
-      _os.write(buf, offset, length);
+    StreamImpl stream = _stream;
+    
+    if (stream != null) {
+      stream.write(buf, offset, length, isEnd);
+    }
   }
 
+  @Override
   public boolean canRead()
   {
-    return _is != null;
+    StreamImpl stream = _stream;
+    
+    return stream != null && stream.canRead();
   }
 
+  @Override
   public int getAvailable() throws IOException
   {
-    if (_is != null)
-      return _is.available();
+    StreamImpl stream = _stream;
+    
+    if (stream != null)
+      return stream.getAvailable();
     else
       return -1;
   }
 
   public int read(byte []buf, int offset, int length) throws IOException
   {
-    InputStream is = _is;
+    StreamImpl stream = _stream;
     
-    if (is != null) {
+    if (stream != null) {
       int len;
       
       try {
-        len = is.read(buf, offset, length);
+        len = stream.read(buf, offset, length);
       } catch (SocketException e) {
         log.log(Level.FINER, e.toString(), e);
 
@@ -224,41 +247,27 @@ class TcpStream extends StreamImpl {
   @Override
   public void closeWrite() throws IOException
   {
-    OutputStream os = _os;
-    _os = null;
+    StreamImpl stream = _stream;
+    _stream = null;
     
-    try {
-      if (os != null)
-        _s.shutdownOutput();
-    } finally {
-      if (_is == null) {
-        Socket s = _s;
-        _s = null;
-
-        if (s != null)
-          s.close();
-      }
+    if (stream != null) {
+      stream.closeWrite();
     }
   }
 
   @Override
   public void close() throws IOException
   {
-    InputStream is = _is;
-    _is = null;
+    StreamImpl stream = _stream;
+    _stream = null;
 
-    OutputStream os = _os;
-    _os = null;
-
-    Socket s = _s;
+    QSocket s = _s;
     _s = null;
 
     try {
-      if (os != null)
-        os.close();
-
-      if (is != null)
-        is.close();
+      if (stream != null) {
+        stream.close();
+      }
     } finally {
       if (s != null)
         s.close();

@@ -74,7 +74,7 @@ public class WebSocketInputStream extends InputStream
     while (! _isFinal || _length > 0) {
       skip(_length);
     }
-      
+    
     if (! _is.readFrameHeader()) {
       return false;
     }

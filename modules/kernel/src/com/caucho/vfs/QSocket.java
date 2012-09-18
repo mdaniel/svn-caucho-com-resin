@@ -30,6 +30,8 @@ package com.caucho.vfs;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
 import java.nio.channels.SelectableChannel;
 import java.security.cert.X509Certificate;
 
@@ -99,6 +101,16 @@ abstract public class QSocket {
     return len;
   }
 
+  public Socket getSocket()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void setSocket(Socket socket)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   /**
    * Returns the remote client's inet address.
    */
@@ -112,6 +124,16 @@ abstract public class QSocket {
    * Returns the remote client's port.
    */
   abstract public int getRemotePort();
+
+  public void setTcpNoDelay(boolean value)
+    throws SocketException
+  {
+  }
+
+  public void setSoTimeout(int ms)
+    throws SocketException
+  {
+  }
 
   /**
    * Returns true if the connection is secure.
@@ -202,6 +224,12 @@ abstract public class QSocket {
 
   public void forceShutdown()
   {
+  }
+  
+  public void closeWrite()
+    throws IOException
+  {
+    close();
   }
   
   abstract public void close()

@@ -134,7 +134,7 @@ public class HmtpRequest extends AbstractProtocolConnection
     ReadStream is = _rawRead;
     
     int ch = is.read();
-    
+
     if (ch < 0)
       return false;
     
