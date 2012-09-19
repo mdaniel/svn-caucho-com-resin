@@ -46,11 +46,17 @@ public class BamFirstActorRouter extends AbstractBamRouter
   private final ActorSender _sender;
   private final BamActorRef []_actors;
   
-  public BamFirstActorRouter(ActorSender sender, BamActorRef ...actors)
+  private final long _actorTimeout;
+  
+  public BamFirstActorRouter(ActorSender sender,
+                             long timeout,
+                             BamActorRef ...actors)
   {
     _broker = sender.getBroker();
     _sender = sender;
     _actors = actors;
+    
+    _actorTimeout = timeout;
   }
 
   @Override
@@ -96,23 +102,26 @@ public class BamFirstActorRouter extends AbstractBamRouter
   @Override
   public void query(long id, String from, Serializable payload)
   {
-    new FirstMethodCallback(id, from, payload).start();
+    new FirstMethodCallback(id, from, payload, _actorTimeout).start();
   }
   
   class FirstMethodCallback implements QueryCallback {
     private final long _id;
     private final String _from;
     private final Serializable _payload;
+    private final long _actorTimeout;
     
     private int _index;
     
     FirstMethodCallback(long id, 
                         String from,
-                        Serializable payload)
+                        Serializable payload,
+                        long actorTimeout)
     {
       _id = id;
       _from = from;
       _payload = payload;
+      _actorTimeout = actorTimeout;
     }
     
     void start()
@@ -160,8 +169,7 @@ public class BamFirstActorRouter extends AbstractBamRouter
         BamActorRef actor = _actors[index];
         
         if (actor.isActive()) {
-          // XXX: timeout?
-          _sender.query(actor.getAddress(), _payload, this);
+          _sender.query(actor.getAddress(), _payload, this, _actorTimeout);
           return true;
         }
       }

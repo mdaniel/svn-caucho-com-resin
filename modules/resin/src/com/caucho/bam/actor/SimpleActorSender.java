@@ -29,16 +29,11 @@
 
 package com.caucho.bam.actor;
 
-import java.io.Serializable;
-
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.query.QueryActorFilter;
-import com.caucho.bam.query.QueryCallback;
-import com.caucho.bam.query.QueryFuture;
-import com.caucho.bam.query.QueryManager;
 import com.caucho.bam.stream.MessageStream;
 
 /**

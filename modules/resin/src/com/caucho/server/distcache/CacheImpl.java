@@ -43,6 +43,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -85,6 +87,7 @@ public class CacheImpl<K,V>
   implements ObjectCache<K,V>, ByteStreamCache, Closeable
 {
   private static final L10N L = new L10N(CacheImpl.class);
+  private static final Logger log = Logger.getLogger(CacheImpl.class.getName());
 
   private CacheManagerImpl _localManager;
   private final CacheStoreManager _manager;
@@ -296,6 +299,10 @@ public class CacheImpl<K,V>
     
     if (_readListeners != null) {
       entryRead(key, value);
+    }
+    
+    if (log.isLoggable(Level.FINEST)){
+      log.finest(this + " get " + key + " -> " + value);
     }
     
     return value;

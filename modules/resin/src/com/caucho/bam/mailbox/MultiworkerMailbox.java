@@ -291,19 +291,13 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       log.finest(this + " enqueue(" + size + ") " + packet);
     }
     
-    long timeout = 1;
     if (! workerQueue.offer(packet, false)) {
-      if (! _isFull) {
-        _isFull = true;
-        ThreadDump.create().dumpThreads();
-      }
-      throw new QueueFullException(this + " size=" + workerQueue.getSize() + " " + packet);
+      throw new QueueFullException("BAM queue is full size=" + workerQueue.getSize() + "\n  " + this + " " + packet);
     }
     workerQueue.wake();
   }
   
-  private boolean _isFull;
-  
+
   private MailboxQueue2 findWorker()
   {
     for (MailboxQueue2 queue : _queues) {

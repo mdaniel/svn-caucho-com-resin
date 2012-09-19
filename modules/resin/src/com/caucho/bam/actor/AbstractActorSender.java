@@ -249,9 +249,34 @@ abstract public class AbstractActorSender implements ActorSender {
                     Serializable payload,
                     QueryCallback callback)
   {
+    query(to, payload, callback, getTimeout());
+  }
+
+  /**
+   * Sends a query information call (get) to an actor,
+   * providing a callback to receive the result or error.
+   *
+   * The target actor of a <code>queryGet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's address
+   * @param payload the query payload
+   * @param callback the application's callback for the result
+   */
+  @Override
+  public void query(String to,
+                    Serializable payload,
+                    QueryCallback callback,
+                    long timeout)
+  {
     long qId = getQueryManager().nextQueryId();
     
-    getQueryManager().addQueryCallback(qId, callback, getTimeout());
+    getQueryManager().addQueryCallback(qId, callback, timeout);
 
     try {
       getBroker().query(qId, to, getAddress(), payload);
@@ -282,9 +307,34 @@ abstract public class AbstractActorSender implements ActorSender {
                     Serializable payload,
                     QueryCallback callback)
   {
+    query(to, payload, callback, getTimeout());
+  }
+
+  /**
+   * Sends a query information call (get) to an actor,
+   * providing a callback to receive the result or error.
+   *
+   * The target actor of a <code>queryGet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's address
+   * @param payload the query payload
+   * @param callback the application's callback for the result
+   */
+  @Override
+  public void query(BamActorRef to,
+                    Serializable payload,
+                    QueryCallback callback,
+                    long timeout)
+  {
     long qId = getQueryManager().nextQueryId();
     
-    getQueryManager().addQueryCallback(qId, callback, getTimeout());
+    getQueryManager().addQueryCallback(qId, callback, timeout);
 
     try {
       to.query(qId, getAddress(), payload);

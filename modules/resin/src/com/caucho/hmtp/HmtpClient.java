@@ -376,9 +376,27 @@ public class HmtpClient implements RemoteActorSender
   }
 
   @Override
+  public void query(String to, 
+                    Serializable payload, 
+                    QueryCallback callback,
+                    long timeout)
+  {
+    _linkClient.getSender().query(to, payload, callback, timeout);
+  }
+
+  @Override
   public void query(BamActorRef to, Serializable payload, QueryCallback callback)
   {
     _linkClient.getSender().query(to, payload, callback);
+  }
+
+  @Override
+  public void query(BamActorRef to, 
+                    Serializable payload, 
+                    QueryCallback callback,
+                    long timeout)
+  {
+    _linkClient.getSender().query(to, payload, callback, timeout);
   }
 
   @Override

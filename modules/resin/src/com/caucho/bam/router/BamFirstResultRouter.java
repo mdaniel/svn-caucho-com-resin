@@ -47,11 +47,17 @@ public class BamFirstResultRouter extends AbstractBamRouter
   private final ActorSender _sender;
   private final BamActorRef []_actors;
   
-  public BamFirstResultRouter(ActorSender sender, BamActorRef ...actors)
+  private final long _actorTimeout;
+  
+  public BamFirstResultRouter(ActorSender sender,
+                              long timeout,
+                              BamActorRef ...actors)
   {
     _broker = sender.getBroker();
     _sender = sender;
     _actors = actors;
+    
+    _actorTimeout = timeout;
   }
 
   @Override
@@ -168,8 +174,7 @@ public class BamFirstResultRouter extends AbstractBamRouter
         BamActorRef actor = _actors[index];
         
         if (actor.isActive()) {
-          // XXX: timeout?
-          _sender.query(actor.getAddress(), _payload, this);
+          _sender.query(actor.getAddress(), _payload, this, _actorTimeout);
           return true;
         }
       }

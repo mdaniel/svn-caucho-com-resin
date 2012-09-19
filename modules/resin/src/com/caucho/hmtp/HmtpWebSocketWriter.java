@@ -32,6 +32,7 @@ package com.caucho.hmtp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,6 +100,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
                       Serializable payload)
   {
     try {
+      startWrite();
+      
       _wsOut.init();
       
       _hOut.message(_wsOut, to, from, payload);
@@ -106,6 +109,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
       _wsOut.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      endWrite();
     }
   }
 
@@ -124,6 +129,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
                            BamError error)
   {
     try {
+      startWrite();
+      
       _wsOut.init();
       
       _hOut.messageError(_wsOut, to, from, payload, error);
@@ -131,6 +138,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
       _wsOut.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      endWrite();
     }
   }
 
@@ -149,6 +158,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
                     Serializable payload)
   {
     try {
+      startWrite();
+      
       _wsOut.init();
       
       _hOut.query(_wsOut, id, to, from, payload);
@@ -156,6 +167,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
       _wsOut.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      endWrite();
     }
   }
 
@@ -174,6 +187,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
                           Serializable payload)
   {
     try {
+      startWrite();
+      
       _wsOut.init();
       
       _hOut.queryResult(_wsOut, id, to, from, payload);
@@ -181,6 +196,8 @@ public class HmtpWebSocketWriter extends AbstractBroker
       _wsOut.close();
     } catch (IOException e) {
       throw new ProtocolException(e);
+    } finally {
+      endWrite();
     }
   }
 
@@ -236,6 +253,20 @@ public class HmtpWebSocketWriter extends AbstractBroker
   public void close()
   {
     
+  }
+  
+  private final AtomicInteger _useCount = new AtomicInteger();
+  
+  private void startWrite()
+  {
+    if (_useCount.incrementAndGet() > 1) {
+      Thread.dumpStack();
+    }
+  }
+  
+  private void endWrite()
+  {
+    _useCount.decrementAndGet();
   }
 
 }
