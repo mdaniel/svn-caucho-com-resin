@@ -1,4 +1,4 @@
-  <?php
+<?php
 
 require_once "WEB-INF/php/inc.php";
 require_once 'PdfCanvas.php';
@@ -77,7 +77,7 @@ function pdf_header()
   global $g_start, $g_end, $g_title, $g_canvas, $g_jmx_dump_time;
   global $g_pdf_warnings;
     
-  $g_canvas->writeSection("$g_title Report $jmx_time_warning", false);
+  $g_canvas->writeSection("$g_title Report", false);
   
   $col1 = 85;
   $col2 = 300;
@@ -241,6 +241,9 @@ function pdf_summary_fill()
 {
   global $g_jmx_dump;
   
+  if (!$g_jmx_dump)
+    return null;
+  
   $server = $g_jmx_dump["resin:type=Server"];
   $resin = $g_jmx_dump["resin:type=Resin"];  
   $runtime = $g_jmx_dump["java.lang:type=Runtime"];
@@ -388,7 +391,7 @@ function pdf_load_json_dump($name, $start=0, $end=0)
   if (! $time)
     return;
   
-  //debug("pdf_load_json_dump using time " . date('Y-m-d H:i', $time/1000));
+  //debug("pdf_load_json_dump using time " . date('Y-m-d H:i:s', $time/1000));
     
   $msgs = $log_mbean->findMessagesByType("$g_si|$name",
                                          "info", $time, $time);
@@ -414,27 +417,30 @@ function pdf_get_dump_data(&$json, $key=null)
 
 function pdf_format_memory($memory)
 {
-  return sprintf("%.2fMB", $memory / (1024 * 1024))
+  return sprintf("%.2fMB", $memory / (1024 * 1024));
 }
 
 function pdf_health_status_label($val) 
 {
   global $g_jmx_dump;
   
+  if (!$g_jmx_dump)
+    return $val;
+  
   $index = (double) $val;
   
   if ($index < 0 || floor($index) != $index)
-    return null;
-    
+    return $val;
+  
   $labels_mbean = $g_jmx_dump["resin:type=HealthSystem"];
   if ($labels_mbean) {
     $labels = $labels_mbean["Labels"];
-		if ($labels && $index <= count($labels)) {
-		  return $labels[$index];
-		}
+      if ($labels && $index <= count($labels)) {
+        return $labels[$index];
+      }
   }
   
-  return null;
+  return $val;
 }
 
 function pdf_availability_label($val)
@@ -449,73 +455,76 @@ function pdf_availability_label($val)
 function pdf_health()
 {
   global $g_jmx_dump, $g_jmx_dump_time, $g_si, $g_start, $g_end, $g_canvas, $g_health_colors;
-
+  
   $g_canvas->writeSection("Health");
   
-  $resin_health = $g_jmx_dump["resin:type=HealthCheck,name=Resin"];
-  if ($resin_health) {
-    $status_index = $resin_health["StatusOrdinal"];
-    $color = $g_health_colors[$status_index];
+  if ($g_jmx_dump) {
+    $resin_health = $g_jmx_dump["resin:type=HealthCheck,name=Resin"];
     
-    $g_canvas->setFontAndColor("Courier-Bold", 16, "white");
+    if ($resin_health) {
+      $status_index = $resin_health["StatusOrdinal"];
+      $color = $g_health_colors[$status_index];
+      
+      $g_canvas->setFontAndColor("Courier-Bold", 16, "white");
+      
+      $y = $g_canvas->text_y - ($g_canvas->getLineHeight()/4);
+  
+      $g_canvas->setColor($color);
+      $g_canvas->setLineWidth($g_canvas->getLineHeight());
+  
+      $g_canvas->moveToXY($g_canvas->getLeftMargin(), $y);
+      $g_canvas->lineToXY($g_canvas->getRightMargin(), $y);
+      $g_canvas->stroke();
+      
+      $g_canvas->setFontAndColor("Courier-Bold", 16, "white");
+      $g_canvas->writeTextLineCenter($resin_health["Status"]);
+    }
     
-    $y = $g_canvas->text_y - ($g_canvas->getLineHeight()/4);
-
-    $g_canvas->setColor($color);
-    $g_canvas->setLineWidth($g_canvas->getLineHeight());
-
-    $g_canvas->moveToXY($g_canvas->getLeftMargin(), $y);
-    $g_canvas->lineToXY($g_canvas->getRightMargin(), $y);
-    $g_canvas->stroke();
+    $g_canvas->setFontAndColor("Courier-Bold", 8, "black");
+    $g_canvas->writeText("Timestamp: $g_jmx_dump_time");
     
-    $g_canvas->setFontAndColor("Courier-Bold", 16, "white");
-    $g_canvas->writeTextLineCenter($resin_health["Status"]);
-  }
-  
-  $g_canvas->setFontAndColor("Courier-Bold", 8, "black");
-  $g_canvas->writeText("Timestamp: $g_jmx_dump_time");
-  
-  $g_canvas->setTextFont();
-  
-  $g_canvas->graph_padding_x = 55;
-  $g_canvas->allocateGraphSpace(4,1);
-  
-  $pattern = "/Resin\|Health/";
-
-  pdf_stat_graph_regexp("", $pattern, $g_si, "pdf_health_status_label");
-  
-  $g_canvas->newLine();
-  $g_canvas->writeSubSection("Health Check Status");
-  
-  $w1 = 65;
-  $w2 = 165;
-  $w3 = 290;
-
-  $g_canvas->setFont("Courier-Bold", "8");
-  
-  $g_canvas->writeTextColumnHeader($w1, 'c', "Status");
-  $g_canvas->writeTextColumnHeader($w2, 'l', "Check");
-  $g_canvas->writeTextColumnHeader($w3, 'l', "Message");
-  $g_canvas->newLine();
-  $g_canvas->newLine();
-  
-  $g_canvas->setFont("Courier", "8");
-  
-  $health_dump = preg_grep_keys("/type=HealthCheck/", $g_jmx_dump);
-  
-  if (! $health_dump) {
     $g_canvas->setTextFont();
+    
+    $g_canvas->graph_padding_x = 55;
+    $g_canvas->allocateGraphSpace(4,1);
+    
+    $pattern = "/Resin\|Health/";
+  
+    pdf_stat_graph_regexp("", $pattern, $g_si, "pdf_health_status_label");
+    
     $g_canvas->newLine();
-    $g_canvas->writeTextLineIndent(20, "No health checks were enabled in the selected timeframe.");
-  } else {
-    foreach ($health_dump as $check) {
-      $g_canvas->writeTextColumn($w1, 'c', $check["Status"]);
-      $g_canvas->writeTextColumn($w2, 'l', $check["Name"]);
-      $g_canvas->writeTextColumn($w3, 'l', $check["Message"]);
+    $g_canvas->writeSubSection("Health Check Status");
+    
+    $w1 = 65;
+    $w2 = 165;
+    $w3 = 290;
+  
+    $g_canvas->setFont("Courier-Bold", "8");
+    
+    $g_canvas->writeTextColumnHeader($w1, 'c', "Status");
+    $g_canvas->writeTextColumnHeader($w2, 'l', "Check");
+    $g_canvas->writeTextColumnHeader($w3, 'l', "Message");
+    $g_canvas->newLine();
+    $g_canvas->newLine();
+    
+    $g_canvas->setFont("Courier", "8");
+    
+    $health_dump = preg_grep_keys("/type=HealthCheck/", $g_jmx_dump);
+    
+    if (! $health_dump) {
+      $g_canvas->setTextFont();
       $g_canvas->newLine();
+      $g_canvas->writeTextLineIndent(20, "No health checks were enabled in the selected timeframe.");
+    } else {
+      foreach ($health_dump as $check) {
+        $g_canvas->writeTextColumn($w1, 'c', $check["Status"]);
+        $g_canvas->writeTextColumn($w2, 'l', $check["Name"]);
+        $g_canvas->writeTextColumn($w3, 'l', $check["Message"]);
+        $g_canvas->newLine();
+      }
     }
   }
-  
+    
   pdf_health_events($g_start, $g_end);
 }
 
@@ -663,7 +672,7 @@ function pdf_availability()
     if ($downtime->isDataAbsent()) {
       $note = '* No data: using report start time';
     } else if ($downtime->isEstimated()) {
-      $note = '* Approximate: due to hard shutdown';
+      $note = '* Approximate';
     } else {
       $note = '';
     }
@@ -734,6 +743,9 @@ function pdf_config()
   global $g_jmx_dump, $g_jmx_dump_time;
   global $g_start, $g_end;
   global $g_si, $g_label;
+  
+  if (!$g_jmx_dump)
+    return;
 
   $g_canvas->writeSection("Configuration");
   
@@ -886,9 +898,12 @@ function pdf_display_configs($config_names)
   }  
 }
 
-function pdf_draw_cluster_graphs($mPage)
+function pdf_draw_cluster_graphs()
 {
   global $g_jmx_dump, $g_jmx_dump_time, $g_end, $g_canvas, $g_label;
+  
+  if (!$g_jmx_dump)
+    return;
   
   $server = $g_jmx_dump["resin:type=Server"];
 
@@ -1265,7 +1280,7 @@ function pdf_draw_graph_lines($graph, $gds)
 
   foreach($gds as $gd) {
     if (sizeof($gd->dataLine) > 0)
-    	$graph->drawLineGraph($gd->dataLine, $gd->color, 1);
+      $graph->drawLineGraph($gd->dataLine, $gd->color, 1);
   }
 }
 
@@ -1276,17 +1291,17 @@ function pdf_draw_graphs($mPage)
   foreach ($mPage->getMeterSections() as $section) {
     $graphs = $section->getMeterGraphs();
 
-    $g_canvas->writeSection("Server Graphs: $g_label : ${section->name}");
-  
+    $g_canvas->writeSection("Server Graphs: $g_label : " . $section->name);
+
     $g_canvas->graph_padding_x = 25;
     $g_canvas->allocateGraphSpace(3,2);
- 
+
     foreach ($graphs as $graphData) {
       $meterNames = $graphData->getMeterNames();
-    //debug("Working on graph " . $graphData->getName() . " with " . count($meterNames) . " meters");
+      //debug("Working on graph " . $graphData->getName() . " with " . count($meterNames) . " meters");
       pdf_stat_graph($graphData->getName(), $meterNames, $g_si);
     }
-  }   
+  }
 }
 
 function pdf_heap_dump()
@@ -1433,7 +1448,7 @@ function pdf_profile()
   
   $timestamp = create_timestamp($profile);
   if (! $timestamp) { 
-    $timestamp = date("Y-m-d H:i", $profile["end_time"] / 1000) // for bc
+    $timestamp = date("Y-m-d H:i", $profile["end_time"] / 1000); // for bc
   }
   
   $g_canvas->setFont("Courier-Bold", "8");
@@ -1774,7 +1789,7 @@ function pdf_write_log()
 {
   global $g_canvas, $g_end, $g_start;
   
-  $g_canvas->writeSection("Full Log");
+  $g_canvas->writeSection("Recent Logs");
   
   pdf_log_messages(null,
                    null,
@@ -1786,8 +1801,15 @@ function pdf_write_log()
 function pdf_jmx_dump()
 {
   global $g_canvas, $g_jmx_dump, $g_jmx_dump_time;
-
+  
   $g_canvas->writeSection("JMX Dump");
+  
+  if (!$g_jmx_dump) {
+    $g_canvas->setTextFont();
+    $g_canvas->newLine();
+    $g_canvas->writeTextLineIndent(20, "A JMX dump was not generated during the selected timeframe.");
+    return;
+  }
   
   $g_canvas->setFont("Courier-Bold", "8");
   $g_canvas->writeTextLine("Timestamp: $g_jmx_dump_time");
@@ -1875,7 +1897,7 @@ function pdf_attribute_value($value, $depth = 0)
     
     $v .= "  }";
     
-    return $v
+    return $v;
   }
   else {
     return $value;

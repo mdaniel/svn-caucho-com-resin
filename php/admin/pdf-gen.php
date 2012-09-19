@@ -22,6 +22,7 @@ global $g_pdf_warnings;
 global $g_start, $g_end, $g_end_unadjusted;
 global $g_canvas;
 global $g_server;
+global $majorTicks, $minorTicks;
 
 $g_pdf_warnings = Array();
 
@@ -32,9 +33,9 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   $snapshot = $g_mbean_server->lookup("resin:type=SnapshotService");
 
   if ($snapshot) {
-    $snapshot->snapshotJmx();
-    $snapshot->snapshotHeap();
     $snapshot->snapshotThreadDump();
+    $snapshot->snapshotHeap();
+    $snapshot->snapshotJmx();
 
     if ($profile_time || $_REQUEST["profile_time"]) {
 
@@ -79,12 +80,18 @@ if (!$title)
 if (!$title)
   $title = "Snapshot";
 
+$g_title = $title;
+
 $g_canvas->header_center_text = "$g_title Report";
 
-if (!$period) {
-  $period = $_REQUEST['period'] ? (int)$_REQUEST['period'] :
-    ($mPage->period / 1000);
-}
+if (!$period)
+  $period = (int)$_REQUEST['period'];
+
+if (!$period && $mPage)
+  $period = $mPage->period / 1000;
+
+if (!$period)
+  $period = 2 * HOUR;
 
 $g_period = $period;
 
@@ -150,58 +157,40 @@ if (! $jmx_dump) {
   if ($jmx_dump) {
     $timestamp = $jmx_dump["timestamp"]/1000;
     
-    array_push($g_pdf_warnings, "A saved JMX snapshot not was found in the selected data range.");   
+    array_push($g_pdf_warnings, "A saved JMX snapshot not was found in the selected data range.");
     array_push($g_pdf_warnings, "Using an earlier JMX snapshot from  " . date("Y-m-d H:i", $timestamp));
-    array_push($g_pdf_warnings, "");
-    array_push($g_pdf_warnings, "The information included in this report may " . 
-      "be out out-of-date! Be sure to check timestamps!");
   }
 }
 
 if ($jmx_dump) {
   $g_jmx_dump_time = create_timestamp($jmx_dump);
   $g_jmx_dump =& $jmx_dump["jmx"];
+}
 
-  pdf_header();
+pdf_header();
 
-  pdf_summary();
+pdf_summary();
 
-  pdf_health();
-  
-  pdf_availability();
+pdf_health();
 
-  pdf_draw_cluster_graphs($mPage);
+pdf_availability();
 
+pdf_draw_cluster_graphs();
+
+if ($mPage)
   pdf_draw_graphs($mPage);
 
-  if ($mPage->isHeapDump()) {
-    pdf_heap_dump();
-  }
+pdf_heap_dump();
 
-  if ($mPage->isProfile()) {
-    pdf_profile();
-  }
+pdf_profile();
 
-  if ($mPage->isThreadDump()) {
-    pdf_thread_dump();
-  }
+pdf_thread_dump();
 
-  if ($mPage->isLog()) {
-    pdf_write_log();
-  }
+pdf_write_log();
 
-  pdf_config();
-  
-  if ($mPage->isJmxDump()) {
-    pdf_jmx_dump();
-  }
-  
-} else {
-  $g_canvas->newLine();
-  $g_canvas->writeTextLine(
-    "Error: A saved JMX snapshot was not found in the timeframe "
-      . date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
-}  
+pdf_config();
+
+pdf_jmx_dump();
 
 $g_canvas->end();
 

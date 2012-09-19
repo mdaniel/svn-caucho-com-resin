@@ -408,7 +408,7 @@ function display_health_availability()
     if ($downtime->isDataAbsent()) {
       $note = gettext('* No data: using report start time');
     } else if ($downtime->isEstimated()) {
-      $note = gettext('* Approximate: due to hard shutdown');
+      $note = gettext('* Approximate');
     } else {
       $note = '';
     }

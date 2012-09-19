@@ -85,7 +85,7 @@ echo "</select>\n";
 echo "</form>";
 
 echo "<h2>";
-echo gettext('Restart at');
+echo gettext('Restart at ');
 echo date("Y-m-d H:i", $restart_time);
 echo "</h2>\n";
 
