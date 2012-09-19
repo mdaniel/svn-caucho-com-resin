@@ -241,6 +241,12 @@ public class ClusterServerAdmin extends AbstractManagedObject
   }
   
   @Override
+  public String getHeartbeatState()
+  {
+    return _server.getHeartbeatState();
+  }
+  
+  @Override
   public Date getLastHeartbeatTime()
   {
     long lastHeartbeatTime = _server.getLastHeartbeatTime();
