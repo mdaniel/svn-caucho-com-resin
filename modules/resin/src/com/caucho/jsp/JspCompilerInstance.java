@@ -244,12 +244,12 @@ public class JspCompilerInstance {
     if (_uri.endsWith("x"))
       _parseState.setXml(true);
 
-    WebApp app = _jspCompiler.getWebApp();
+    WebApp webApp = _jspCompiler.getWebApp();
     Path appDir = _jspCompiler.getAppDir();
-    if (appDir == null && app != null)
-      appDir = app.getRootDirectory();
+    if (appDir == null && webApp != null)
+      appDir = webApp.getRootDirectory();
 
-    if (app != null && app.hasPre23Config()
+    if (webApp != null && webApp.hasPre23Config()
         && _parseState.getELIgnoredDefault() == null
         && ! _parseState.isXml()) { // jsp/100a
       _parseState.setELIgnoredDefault(true);
@@ -257,8 +257,8 @@ public class JspCompilerInstance {
 
     JspConfig jspConfig = null;
 
-    if (jspConfig == null && app != null)
-      jspConfig = (JspConfig) app.getExtension("jsp-config");
+    if (jspConfig == null && webApp != null)
+      jspConfig = (JspConfig) webApp.getExtension("jsp-config");
 
     ArrayList<JspPropertyGroup> jspList = new ArrayList<JspPropertyGroup>();
     _jspPropertyGroup = null;
@@ -271,8 +271,8 @@ public class JspCompilerInstance {
       }
     }
 
-    if (_jspPropertyGroup == null && app != null) {
-      _jspPropertyGroup = app.getJsp();
+    if (_jspPropertyGroup == null && webApp != null) {
+      _jspPropertyGroup = webApp.getJsp();
       
       if (_jspPropertyGroup != null)
         jspList.add(_jspPropertyGroup);
@@ -295,8 +295,8 @@ public class JspCompilerInstance {
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
     if (resourceManager != null) {
     }
-    else if (app != null)
-      resourceManager = new AppResourceManager(app);
+    else if (webApp != null)
+      resourceManager = new AppResourceManager(webApp);
     else {
       resourceManager = new AppDirResourceManager(appDir);
     }
@@ -355,8 +355,9 @@ public class JspCompilerInstance {
         taglibManager.setTldFileSet(jspPropertyGroup.getTldFileSet());
     }
 
-    if (app.getJsp() != null)
-      _parseState.setRecycleTags(app.getJsp().isRecycleTags());
+    if (webApp != null && webApp.getJsp() != null) {
+      _parseState.setRecycleTags(webApp.getJsp().isRecycleTags());
+    }
 
     _parseState.setResourceManager(resourceManager);
     LineMap lineMap = null;

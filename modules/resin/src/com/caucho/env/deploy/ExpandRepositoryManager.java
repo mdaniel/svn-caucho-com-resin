@@ -167,8 +167,13 @@ class ExpandRepositoryManager
       if (tag.startsWith(prefix)) {
         String key = tag.substring(prefix.length());
         
-        if (key.indexOf('/') >= 0)
-          continue;
+        int p = key.indexOf('/');
+        if (p >= 0) {
+          // server/2509
+          key = key.substring(0, p);
+          
+          // continue;
+        }
         
         keySet.add(key);
       }

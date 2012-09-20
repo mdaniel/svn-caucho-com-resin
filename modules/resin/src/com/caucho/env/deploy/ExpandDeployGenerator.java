@@ -611,6 +611,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     try {
       thread.setContextClassLoader(_loader);
       
+      beforeUpdate();
+      
       Set<String> oldKeys = _deployedKeys;
       Set<String> oldVersion = _versionKeys;
       
@@ -618,7 +620,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       
       Set<String> newKeys = _deployedKeys;
       Set<String> newVersion = _versionKeys;
-      
+
       if (! oldKeys.equals(newKeys)) {
         ArrayList<String> updatedKeys = new ArrayList<String>();
 
@@ -646,6 +648,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       
       _isDeploying.set(false);
     }
+  }
+  
+  protected void beforeUpdate()
+  {
+    
   }
   
   protected void afterUpdate()

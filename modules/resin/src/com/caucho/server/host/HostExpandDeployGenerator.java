@@ -60,6 +60,8 @@ public class HostExpandDeployGenerator
 
   private final HostExpandDeployGeneratorAdmin _admin
     = new HostExpandDeployGeneratorAdmin(this);
+  
+  private final HostWebAppDeployListener _webappListener;
 
   private HostContainer _container;
 
@@ -75,8 +77,10 @@ public class HostExpandDeployGenerator
                                    HostContainer hostContainer)
   {
     super(id, container, hostContainer.getRootDirectory());
-    
+
     _container = hostContainer;
+    
+    _webappListener = new HostWebAppDeployListener(this);
   }
 
   /**
@@ -143,9 +147,16 @@ public class HostExpandDeployGenerator
   /**
    * Returns the log.
    */
+  @Override
   protected Logger getLog()
   {
     return log;
+  }
+  
+  @Override
+  protected void beforeUpdate()
+  {
+    _webappListener.update();
   }
 
   /**
@@ -269,6 +280,7 @@ public class HostExpandDeployGenerator
     super.destroyImpl();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == null || ! getClass().equals(o.getClass()))
