@@ -31,11 +31,21 @@ package com.caucho.boot;
 
 import com.caucho.env.repository.CommitBuilder;
 
-public class ConfigLsCommand extends AbstractDeployLsCommand {
+public class DeployCatCommand extends AbstractDeployCatCommand {
+  public DeployCatCommand()
+  {
+    addValueOption("host", "host", "virtual host to make application available on");
+  }
+  
+  @Override
+  public String getDescription()
+  {
+    return "pulls a deployed web-app file";
+  }
   
   @Override
   protected CommitBuilder createCommitBuilder(WatchdogArgs args)
   {
-    return ConfigDeployCommand.createConfigCommitBuilder(args);
+    return DeployCommand.createWebAppCommit(args, null);
   }
 }

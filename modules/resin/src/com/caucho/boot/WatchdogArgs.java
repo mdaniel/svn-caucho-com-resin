@@ -1122,9 +1122,11 @@ class WatchdogArgs
     addCommand(new ConfigUndeployCommand());
 
     addCommand(new ConsoleCommand());
+    addCommand(new DeployCatCommand());
     addCommand(new DeployCopyCommand());
     addCommand(new DeployCommand());
     addCommand(new DeployListCommand());
+    addCommand(new DeployLsCommand());
     addCommand(new DisableCommand());
     addCommand(new DisableSoftCommand());
     addCommand(new EnableCommand());

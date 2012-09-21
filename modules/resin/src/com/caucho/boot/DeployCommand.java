@@ -31,22 +31,16 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.server.deploy.DeployClient;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class DeployCommand extends AbstractRepositoryCommand {
+public class DeployCommand extends AbstractDeployCommand {
   private static final L10N L = new L10N(ConfigDeployCommand.class);
 
   public DeployCommand()
   {
     addValueOption("host", "host", "virtual host to make application available on");
-    addValueOption("name", "name", "name of the context to deploy to, defaults to war-file name");
-    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
-    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
-    addValueOption("m", "message", "commit message");
   }
 
   @Override
@@ -56,9 +50,7 @@ public class DeployCommand extends AbstractRepositoryCommand {
   }
   
   @Override
-  public int doCommand(WatchdogArgs args,
-                       WatchdogClient client,
-                       WebAppDeployClient deployClient)
+  protected Path getDeployPath(WatchdogArgs args)
   {
     String war = args.getDefaultArg();
     
@@ -72,12 +64,19 @@ public class DeployCommand extends AbstractRepositoryCommand {
       throw new ConfigException(L.l("Deploy expects to be used with a *.war file or a directory at {0}",
                                     war));
     }
-
-    String host = args.getArg("-host");
     
-    if (host == null)
-      host = "default";
-    
+    return path;
+  }
+  
+  @Override
+  protected CommitBuilder createCommitBuilder(WatchdogArgs args,
+                                              Path path)
+  {
+    return createWebAppCommit(args, path);
+  }
+  
+  static CommitBuilder createWebAppCommit(WatchdogArgs args, Path path)
+  {
     CommitBuilder commit = new CommitBuilder();
     commit.type("webapp");
     
@@ -86,57 +85,21 @@ public class DeployCommand extends AbstractRepositoryCommand {
     if (stage != null)
       commit.stage(stage);
     
-    String name = getName(args, path);
+    String host = args.getArg("-host");
+    
+    if (host == null)
+      host = "default";
+    
+    String name = getWebAppName(args, path);
     
     commit.tagKey(host + "/" + name);
-
-    /*
-    String tag = args.getArg("-tag");
-    if (tag != null)
-      commit.tagKey(tag);
-      */
     
-    if (! path.isFile() && ! path.isDirectory()) {
-      throw new ConfigException(L.l("'{0}' is not a readable file.",
-                                    path.getFullPath()));
-    }
-    
-    String message = args.getArg("-m");
-    
-    if (message == null)
-      message = args.getArg("-message");
-    
-    if (message == null)
-      message = "deploy " + war + " from command line";
-    
-    commit.message(message);
-    
-    commit.attribute("user", System.getProperty("user.name"));
-
-    String version = args.getArg("-version");
-    if (version != null)
-      DeployClient.fillInVersion(commit, version);
-
-    if (path.isDirectory())
-      deployClient.commitPath(commit, path);
-    else
-      deployClient.commitArchive(commit, path);
-
-    System.out.println("Deployed " + commit.getId() + " from " + war + " to "
-                       + deployClient.getUrl());
-
-    return 0;
+    return commit;
   }
   
   @Override
   public String getUsageArgs()
   {
     return " <war-file>";
-  }
-
-  @Override
-  public boolean isDefaultArgsAccepted()
-  {
-    return true;
   }
 }

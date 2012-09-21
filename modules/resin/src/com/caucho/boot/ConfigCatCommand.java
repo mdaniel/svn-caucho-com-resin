@@ -29,73 +29,17 @@
 
 package com.caucho.boot;
 
-import java.io.IOException;
-
-import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
-public class ConfigCatCommand extends AbstractRepositoryCommand {
-  private static final L10N L = new L10N(ConfigCatCommand.class);
-  
-  @Override
-  public boolean isDefaultArgsAccepted()
-  {
-    return true;
-  }
-  
+public class ConfigCatCommand extends AbstractDeployCatCommand {
   @Override
   public String getDescription()
   {
     return "pulls a configuration file";
   }
   
-  @Override
-  public int doCommand(WatchdogArgs args,
-                       WatchdogClient client,
-                       WebAppDeployClient deployClient)
+  protected CommitBuilder createCommitBuilder(WatchdogArgs args)
   {
-    String fileName = args.getDefaultArg();
-    
-    if (fileName == null) {
-      throw new ConfigException(L.l("Cannot find a filename in command line"));
-    }
-    
-    String name = args.getArg("-name");
-    
-    CommitBuilder commit = new CommitBuilder();
-    commit.type("config");
-    
-    String stage = args.getArg("-stage");
-    
-    if (stage != null)
-      commit.stage(stage);
-    
-    if (name == null) {
-      name = "resin";
-    }
-    
-    commit.tagKey(name);
-
-    try {
-      WriteStream out = Vfs.openWrite(System.out);
-    
-      deployClient.getFile(commit.getId(), fileName, out);
-    
-      out.flush();
-    } catch (IOException e) {
-      throw ConfigException.create(e);
-    }
-
-    return 0;
-  }
-  
-  @Override
-  public String getUsageArgs()
-  {
-    return " <filename>";
+    return ConfigDeployCommand.createConfigCommitBuilder(args);
   }
 }

@@ -29,47 +29,60 @@
 
 package com.caucho.boot;
 
-import com.caucho.env.repository.CommitBuilder;
-import com.caucho.vfs.Path;
+import java.io.IOException;
 
-public class ConfigDeployCommand extends AbstractDeployCommand {
-  ConfigDeployCommand()
+import com.caucho.config.ConfigException;
+import com.caucho.env.repository.CommitBuilder;
+import com.caucho.server.admin.WebAppDeployClient;
+
+abstract public class AbstractDeployLsCommand extends AbstractRepositoryCommand {
+  AbstractDeployLsCommand()
   {
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
-    addValueOption("name", "name", "name of application");
+    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+  }
+  
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
   }
   
   @Override
   public String getDescription()
   {
-    return "deploys a configuration directory or jar file";
-  }
-
-  @Override
-  protected CommitBuilder createCommitBuilder(WatchdogArgs args, Path path)
-  {
-    return createConfigCommitBuilder(args);
+    return "lists the configuration files";
   }
   
-  static CommitBuilder createConfigCommitBuilder(WatchdogArgs args)
+  @Override
+  public String getUsageArgs()
   {
-    CommitBuilder commit = new CommitBuilder();
-    
-    commit.type("config");
-    
-    String stage = args.getArg("-stage");
-    
-    if (stage != null)
-      commit.stage(stage);
-    
-    String name = args.getArg("-name");
-    
-    if (name == null) {
-      name = "resin";
-    }
-    
-    commit.tagKey(name);
-    
-    return commit;
+    return " <filename>";
   }
+  
+  @Override
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       WebAppDeployClient deployClient)
+  {
+    String fileName = args.getDefaultArg();
+    
+    CommitBuilder commit = createCommitBuilder(args);
+
+    try {
+      String []files = deployClient.listFiles(commit.getId(), fileName);
+      
+      if (files != null) {
+        for (String file : files) {
+          System.out.println(file);
+        }
+      }
+    } catch (IOException e) {
+      throw ConfigException.create(e);
+    }
+
+    return 0;
+  }
+  
+  abstract protected CommitBuilder createCommitBuilder(WatchdogArgs args);
 }

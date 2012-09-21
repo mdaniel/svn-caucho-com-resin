@@ -12,6 +12,7 @@
 
 <s2 title="4.0.32 - snapshot">
 <ul>
+<li>cli: unify deploy and config-deploy commands</li>
 <li>deploy: with --host and host-deploy, use proper directory (#5215, rep by Gerrit Janssen)</li>
 <li>heartbeat: added heartbeat timeout</li>
 <li>cache: negative caching for null values on triad</li>

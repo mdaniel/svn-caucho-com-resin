@@ -100,7 +100,12 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     return new WebAppDeployClient(sender.getUrl(), sender);
   }
   
-  protected String getName(WatchdogArgs args, Path path)
+  String getName(WatchdogArgs args, Path path)
+  {
+    return getWebAppName(args, path);
+  }
+  
+  static String getWebAppName(WatchdogArgs args, Path path)
   {
     String name = args.getArg("-name");
     
