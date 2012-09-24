@@ -60,7 +60,8 @@
 
   <property name="debian.stability" value="unstable"/>
 
-  <property name="jsf.jar" value="javax.faces-2.1.11.jar"/>
+  <property name="jsf.jar" value="javax.faces-2.1.13.jar"/>
+  <property name="eclipselink.jar" value="eclipselink-2.4.0.jar"/>
 
   <target name="update">
     <!-- <mkdir dir="${maven.lib}"/>-->
@@ -718,7 +719,7 @@
 	
         <include name="lib/activation.jar"/>
         <include name="lib/activation.LICENSE"/>
-        <include name="lib/eclipselink-2.3.0.jar"/>
+        <include name="lib/${eclipselink.jar}"/>
         <include name="lib/resin-eclipselink.jar"/>
 
         <include name="lib/hibernate-validator-4.3.0.Final.jar"/>
@@ -1511,7 +1512,7 @@
         <!--
         <include name="lib/jaxstream-15.jar"/>
         -->
-        <include name="lib/eclipselink-2.3.0.jar"/>
+        <include name="lib/${eclipselink.jar}"/>
 
         <include name="lib/hibernate-validator-4.3.0.Final.jar"/>
         <include name="lib/jboss-logging-3.1.0.CR2.jar"/>
