@@ -86,6 +86,11 @@ public class MergePath extends FilesystemPath {
     }
   }
 
+  public MergePath(Path ... paths)
+  {
+    this(paths[0].getUserPath(), paths[0].getFullPath(), paths);
+  }
+
   /**
    * @param path canonical path
    */
