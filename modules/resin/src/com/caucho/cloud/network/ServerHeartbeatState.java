@@ -142,9 +142,9 @@ public final class ServerHeartbeatState {
     if (oldState != State.ACTIVE) {
       return;
     }
-    
+
     long now = CurrentTime.getCurrentTime();
-    long lastTime = _stateTimestamp.get();
+    long lastTime = _lastHeartbeatTime.get();
     
     if (timeout < now - lastTime) {
       if (_heartbeatState.compareAndSet(State.ACTIVE, State.TIMEOUT)) {
