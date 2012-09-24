@@ -29,8 +29,6 @@
 
 package com.caucho.management.server;
 
-import java.io.Serializable;
-
 import com.caucho.util.CurrentTime;
 
 /**
@@ -44,7 +42,9 @@ public class TcpConnectionInfo implements java.io.Serializable
   private final long _threadId;
   
   // the port id
-  private final String _portName;
+  private final String _address;
+  
+  private final int _port;
 
   // the connection state
   private final String _state;
@@ -62,7 +62,8 @@ public class TcpConnectionInfo implements java.io.Serializable
   {
     _id = 0;
     _threadId = 0;
-    _portName = null;
+    _address = null;
+    _port = 0;
     _state = null;
     _requestStartTime = 0;
     _remoteAddress = null;
@@ -71,13 +72,15 @@ public class TcpConnectionInfo implements java.io.Serializable
 
   public TcpConnectionInfo(int id,
                            long threadId,
-                           String portName,
+                           String address,
+                           int port,
                            String state,
                            long requestStartTime)
   {
     _id = id;
     _threadId = threadId;
-    _portName = portName;
+    _address = address;
+    _port = port;
     _state = state;
     _requestStartTime = requestStartTime;
   }
@@ -91,10 +94,20 @@ public class TcpConnectionInfo implements java.io.Serializable
   {
     return _threadId;
   }
+  
+  public String getAddress()
+  {
+    return _address;
+  }
+  
+  public int getPort()
+  {
+    return _port;
+  }
 
   public String getPortName()
   {
-    return _portName;
+    return (_address == null ? "*" : _address) + ":" + _port;
   }
 
   public String getState()
@@ -144,7 +157,7 @@ public class TcpConnectionInfo implements java.io.Serializable
   {
     return (getClass().getSimpleName()
             + "[" + _id
-            + "," + _portName
+            + "," + getPortName()
             + "]");
   }
 }

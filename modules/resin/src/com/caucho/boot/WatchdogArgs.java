@@ -1151,6 +1151,7 @@ class WatchdogArgs
 
     addCommand(new RestartCommand());
 
+    addCommand(new ScoreboardCommand());
     addCommand(new ShutdownCommand());
     // addCommand(new StartCloudCommand());
     addCommand(new StartCommand());

@@ -352,6 +352,7 @@ namespace Caucho
                      || "pdf-report".Equals(arguments[argsIdx])
                      || "profile".Equals(arguments[argsIdx])
                      || "restart".Equals(arguments[argsIdx])
+                     || "scoreboard".Equals(arguments[argsIdx])
                      || "shutdown".Equals(arguments[argsIdx])
                      || "start".Equals(arguments[argsIdx])
                      || "start-all".Equals(arguments[argsIdx])

@@ -375,6 +375,13 @@ public class ManagerClient
     return (StringQueryReply) query(status);
   }
 
+  public StringQueryReply scoreboard(String type, boolean greedy)
+  {
+    ScoreboardQuery query = new ScoreboardQuery(type, greedy);
+
+    return (StringQueryReply) query(query);
+  }
+
   //
   // enable/disable
   //

@@ -213,8 +213,9 @@ public class TcpSocketLink extends AbstractSocketLink
     
     if (isActive()) {
       connectionInfo = new TcpConnectionInfo(getId(), 
-                                             getThreadId(), 
-                                             _port.getAddress() + ":" + _port.getPort(), 
+                                             getThreadId(),
+                                             _port.getAddress(),
+                                             _port.getPort(),
                                              getDisplayState(),
                                              getRequestStartTime());
       if (connectionInfo.hasRequest()) {

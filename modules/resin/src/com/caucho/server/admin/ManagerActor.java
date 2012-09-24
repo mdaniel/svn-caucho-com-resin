@@ -29,24 +29,10 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.admin.action.AddLicenseAction;
-import com.caucho.admin.action.AddUserAction;
-import com.caucho.admin.action.CallJmxAction;
-import com.caucho.admin.action.GetStatsAction;
-import com.caucho.admin.action.HeapDumpAction;
-import com.caucho.admin.action.JmxDumpAction;
-import com.caucho.admin.action.ListJmxAction;
-import com.caucho.admin.action.ListUsersAction;
-import com.caucho.admin.action.PdfReportAction;
-import com.caucho.admin.action.ProfileAction;
-import com.caucho.admin.action.RemoveUserAction;
-import com.caucho.admin.action.SetJmxAction;
-import com.caucho.admin.action.SetLogLevelAction;
-import com.caucho.admin.action.ThreadDumpAction;
+import com.caucho.admin.action.*;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.boot.ResinGUI;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
@@ -517,5 +503,21 @@ public class ManagerActor extends SimpleActor
     getBroker().queryResult(id, from, to, reply);
 
     return reply;
+  }
+  
+  @Query
+  public StringQueryReply scoreboard(long id,
+                                           String to,
+                                           String from,
+                                           ScoreboardQuery query)
+  {
+    String message = new ScoreboardAction().excute(query.getType(),
+                                                   query.isGreedy());
+
+    StringQueryReply result = new StringQueryReply(message);
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
   }
 }
