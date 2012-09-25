@@ -100,7 +100,7 @@ public final class FreeRingDual<T> {
    */
   public boolean free(T value)
   {
-    if (! _freeRing.free(value))
+    if (_freeRing.free(value))
       return true;
     else
       return _freeRingSoft.free(value);
