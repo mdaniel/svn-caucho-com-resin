@@ -798,11 +798,11 @@ public class DistCacheEntry {
     MnodeEntry mnodeEntry = loadLocalMnodeValue();
     
     int server = config.getEngine().getServerIndex();
-
+    
     if (mnodeEntry == null || mnodeEntry.isLocalExpired(server, now, config)) {
       reloadValue(config, now, isUpdateAccessTime);
     }
-
+    
     // server/016q
     if (isUpdateAccessTime) {
       updateAccessTime();
@@ -1243,8 +1243,9 @@ public class DistCacheEntry {
   {
     MnodeEntry newEntryValue = saveLocalUpdateTime(mnodeValue);
 
-    if (newEntryValue.getVersion() != mnodeValue.getVersion())
+    if (newEntryValue.getVersion() != mnodeValue.getVersion()) {
       return newEntryValue;
+    }
 
     _cacheService.getCacheEngine().updateTime(getKeyHash(), mnodeValue);
 
@@ -1263,7 +1264,9 @@ public class DistCacheEntry {
       return oldEntryValue;
     }
     
+    // cloud/60e3
     if (oldEntryValue != null
+        && mnodeValue != oldEntryValue
         && mnodeValue.getLastAccessedTime() == oldEntryValue.getLastAccessedTime()
         && mnodeValue.getLastModifiedTime() == oldEntryValue.getLastModifiedTime()) {
       return oldEntryValue;

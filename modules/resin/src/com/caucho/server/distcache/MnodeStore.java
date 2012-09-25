@@ -208,7 +208,7 @@ public class MnodeStore {
 
     _selectExpireQuery = ("SELECT resin_oid,id,value_data_id FROM " + _tableName
                           + " WHERE ? < resin_oid"
-                          + " AND (access_time + 5 * access_timeout / 4 < ?"
+                          + " AND (access_time + 1.25 * access_timeout < ?"
                           + "      OR modified_time + modified_timeout < ?)"
                           + " LIMIT 4096");
 
@@ -737,7 +737,7 @@ public class MnodeStore {
       PreparedStatement stmt = conn.preparedUpdateAccessTime();
       stmt.setLong(1, accessTimeout);
       stmt.setLong(2, accessTime);
-      
+
       stmt.setBytes(3, id.getHash());
       stmt.setLong(4, itemVersion);
 
