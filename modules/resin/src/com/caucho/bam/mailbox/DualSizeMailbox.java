@@ -70,6 +70,21 @@ public class DualSizeMailbox implements Mailbox
     
     _smallMailbox = smallMailbox;
   }
+  
+  public int getSize()
+  {
+    return getSmallQueueSize() + getLargeQueueSize();
+  }
+  
+  public int getSmallQueueSize()
+  {
+    return _smallMailbox.getSize();
+  }
+  
+  public int getLargeQueueSize()
+  {
+    return _largeMailbox.getSize();
+  }
 
   /**
    * Returns the actor's address

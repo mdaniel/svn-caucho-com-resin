@@ -260,6 +260,16 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The latency factor of the backend server")
   public double getLatencyFactor();
+  
+  //
+  // hmux data
+  //
+  
+  @Description("The number of messages in the outgoing message queue")
+  public int getMessageQueueSize();
+  
+  @Description("The number of messages in the outgoing large message queue")
+  public int getLargeMessageQueueSize();
 
   //
   // operations

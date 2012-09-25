@@ -80,6 +80,12 @@ public class PassthroughMailbox implements Mailbox
   {
     return _broker;
   }
+  
+  @Override
+  public int getSize()
+  {
+    return 0;
+  }
 
   @Override
   public boolean isClosed()

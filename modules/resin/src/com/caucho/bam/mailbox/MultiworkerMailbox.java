@@ -132,6 +132,17 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     return _queues.length;
   }
+  
+  public int getSize()
+  {
+    int size = 0;
+    
+    for (MailboxQueue2 mailbox : _queues) {
+      size += mailbox.getSize();
+    }
+    
+    return size;
+  }
 
   /**
    * Returns the actor's address
@@ -292,8 +303,11 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     }
     
     if (! workerQueue.offer(packet, false)) {
+      workerQueue.wake();
+      
       throw new QueueFullException("BAM queue is full size=" + workerQueue.getSize() + "\n  " + this + " " + packet);
     }
+    
     workerQueue.wake();
   }
   

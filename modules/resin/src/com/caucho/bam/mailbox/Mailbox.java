@@ -42,6 +42,11 @@ public interface Mailbox extends MessageStream
   public MessageStream getActorStream();
   
   /**
+   * Returns the queue size
+   */
+  public int getSize();
+  
+  /**
    * Closes the mailbox
    */
   public void close();

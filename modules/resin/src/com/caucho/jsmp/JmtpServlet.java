@@ -172,6 +172,11 @@ public class JmtpServlet extends GenericServlet {
       return _listener._jmtpBroker;
     }
     
+    public int getSize()
+    {
+      return -1;
+    }
+    
     @Override
     public MessageStream getActorStream()
     {
