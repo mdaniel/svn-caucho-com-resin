@@ -70,8 +70,6 @@ public class TcpSocketLink extends AbstractSocketLink
   private static final ThreadLocal<ProtocolConnection> _currentRequest
     = new ThreadLocal<ProtocolConnection>();
 
-  private static ClassLoader _systemClassLoader;
-
   private final int _connectionId;  // The connection's id
   private final String _id;
   private final String _name;
@@ -1807,10 +1805,6 @@ public class TcpSocketLink extends AbstractSocketLink
   public String toString()
   {
     return getClass().getSimpleName() + "[id=" + _id + "," + _port.toURL() + "," + _state + "]";
-  }
-
-  static {
-    _systemClassLoader = ClassLoader.getSystemClassLoader();
   }
   
   enum Task {

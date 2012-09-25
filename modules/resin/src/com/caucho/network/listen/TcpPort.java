@@ -62,6 +62,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
+import com.caucho.util.FreeRingDual;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JsseSSLFactory;
@@ -107,8 +108,8 @@ public class TcpPort
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
-  private FreeRing<TcpSocketLink> _idleConn
-    = new FreeRing<TcpSocketLink>(32);
+  private FreeRingDual<TcpSocketLink> _idleConn
+    = new FreeRingDual<TcpSocketLink>(256, 2 * 1024);
   
   // The owning server
   // private ProtocolDispatchServer _server;
