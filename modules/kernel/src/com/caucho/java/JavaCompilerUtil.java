@@ -314,8 +314,9 @@ public class JavaCompilerUtil {
   {
     String classPath = null;//_classPath;
 
-    if (classPath != null)
+    if (classPath != null) {
       return classPath;
+    }
 
     if (classPath == null && _loader instanceof DynamicClassLoader) {
       classPath = ((DynamicClassLoader) _loader).getClassPath();
@@ -355,7 +356,14 @@ public class JavaCompilerUtil {
     if (parent != null)
       buildClassPath(sb, parent);
 
-    if (loader instanceof URLClassLoader) {
+    if (loader instanceof DynamicClassLoader) {
+      DynamicClassLoader dynLoader = (DynamicClassLoader) loader;
+      
+      sb.append(dynLoader.getClassPath());
+      
+      return;
+    }
+    else if (loader instanceof URLClassLoader) {
       for (URL url : ((URLClassLoader) loader).getURLs()) {
         if (sb.length() > 0)
           sb.append(CauchoSystem.getPathSeparatorChar());
