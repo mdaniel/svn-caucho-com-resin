@@ -36,6 +36,7 @@ public final class JniSocketImpl extends QSocket {
 
   private JniServerSocketImpl _ss;
   private long _socketFd;
+  private int _nativeFd;
   private JniStream _stream;
 
   private final byte []_localAddrBuffer = new byte[16];
@@ -95,8 +96,9 @@ public final class JniSocketImpl extends QSocket {
   {
     JniSocketImpl socket = new JniSocketImpl();
     
-    if (socket.connectImpl(host, port))
+    if (socket.connectImpl(host, port)) {
       return socket;
+    }
     else {
       socket.close();
       
@@ -112,6 +114,7 @@ public final class JniSocketImpl extends QSocket {
   {
     _socketTimeout = 10000;
     
+    _nativeFd = -1;
     _isClosed.set(false);
     
     synchronized (_writeLock) {
@@ -134,6 +137,7 @@ public final class JniSocketImpl extends QSocket {
     
     _socketTimeout = socketTimeout;
     _requestExpireTime = 0;
+    _nativeFd = -1;
 
     _isSecure = false;
     _isClosed.set(false);
@@ -175,9 +179,11 @@ public final class JniSocketImpl extends QSocket {
 
   public int getNativeFd()
   {
-    int fd = getNativeFd(_socketFd);
+    if (_nativeFd < 0) {
+      _nativeFd = getNativeFd(_socketFd);
+    }
     
-    return fd;
+    return _nativeFd;
   }
 
   /**
@@ -676,11 +682,13 @@ public final class JniSocketImpl extends QSocket {
     
     _ss = null;
     
-    if (_stream != null)
+    if (_stream != null) {
       _stream.close();
+    }
 
     // XXX: can't be locked because of shutdown
-
+    
+    _nativeFd = -1;
     nativeClose(_socketFd);
   }
 

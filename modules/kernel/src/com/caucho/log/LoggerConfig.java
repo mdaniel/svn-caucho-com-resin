@@ -93,10 +93,14 @@ public class LoggerConfig {
     throws ConfigException
   {
     try {
-      _level = Level.parse(level.toUpperCase());
+      if (level == null || level.equals(""))
+        _level = Level.INFO;
+      else
+        _level = Level.parse(level.toUpperCase());
     } catch (Exception e) {
       throw new ConfigException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
-                                    level));
+                                    level),
+                                    e);
     }
   }
   

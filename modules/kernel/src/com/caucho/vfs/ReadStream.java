@@ -1115,8 +1115,9 @@ public final class ReadStream extends InputStream
   public int fillWithTimeout(long timeout)
     throws IOException
   {
-    if (_readOffset < _readLength)
+    if (_readOffset < _readLength) {
       return _readLength - _readOffset;
+    }
 
     if (_readBuffer == null) {
       _readOffset = 0;

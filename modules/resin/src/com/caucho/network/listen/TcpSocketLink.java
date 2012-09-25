@@ -1447,11 +1447,18 @@ public class TcpSocketLink extends AbstractSocketLink
     do {
       try {
         long delta = expires - CurrentTime.getCurrentTimeActual();
-        if (delta < 0)
+        
+        if (delta < 0) {
           delta = 0;
-
-        if (getReadStream().fillWithTimeout(delta) > 0) {
+        }
+        
+        long result = getReadStream().fillWithTimeout(delta);
+        
+        if (result > 0) {
           return RequestState.REQUEST_COMPLETE;
+        }
+        else if (result < 0) {
+          return RequestState.CLOSED;
         }
       } catch (SocketTimeoutException e) {
         log.log(Level.FINEST, e.toString(), e);
