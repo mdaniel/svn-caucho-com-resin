@@ -43,7 +43,8 @@ public class Body extends ContainerNode {
   private Navigation _navigation;
   private Index _index;
   private String _class;
-  private boolean _cacuhoSite=true;
+  private String _title = "Resin Documentation";
+  private boolean _isCauchoSite = true;
 
   public Body(Document document)
   {
@@ -59,7 +60,7 @@ public class Body extends ContainerNode {
   }
 
   public void setCauchoSite(boolean cauchoSite) {
-      _cacuhoSite = cauchoSite;
+      _isCauchoSite  = cauchoSite;
   }
   public void setClass(String styleClass)
   {
@@ -125,6 +126,12 @@ public class Body extends ContainerNode {
   {
     _index = new Index(getDocument());
     return _index;
+  }
+  
+  
+  public void setTitle(String title)
+  {
+    _title = title;
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -262,7 +269,7 @@ public class Body extends ContainerNode {
     out.writeCharacters("tm");
     out.writeEndElement();
     out.writeCharacters(" are trademarks of Caucho Technology.");
-    if (this._cacuhoSite) {
+    if (this._isCauchoSite ) {
         out.writeEmptyElement("br");
         out.writeEmptyElement("br");
         out.writeCharacters("Cloud-optimized Resin Server is a Java EE certified Java Application Server, and Web Server, and Distributed Cache Server (Memcached).");
@@ -279,7 +286,7 @@ public class Body extends ContainerNode {
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-    if (_cacuhoSite) {
+    if (_isCauchoSite ) {
         out.writeStartElement("tr");
         out.writeStartElement("td");
         out.writeStartElement("center");
@@ -309,8 +316,9 @@ public class Body extends ContainerNode {
     out.writeEndElement(); //body
   }
 
-private NavigationItem writeHeaderTable(XMLStreamWriter out)
-        throws XMLStreamException {
+  private NavigationItem writeHeaderTable(XMLStreamWriter out)
+        throws XMLStreamException
+  {
     //header table
 
     out.writeStartElement("table");
@@ -360,7 +368,10 @@ private NavigationItem writeHeaderTable(XMLStreamWriter out)
     out.writeStartElement("td");
     out.writeAttribute("width","70%");
     out.writeStartElement("h1");
-    out.writeCharacters("Resin Documentation");
+    
+    // out.writeCharacters("Resin Documentation");
+    out.writeCharacters(_title);
+    
     out.writeEndElement();
     out.writeStartElement("div");
     out.writeAttribute("style","float: right; border: 1px solid; padding: 10px;  margin: 10px; opacity:1.0; background-color:white;");
@@ -418,9 +429,10 @@ private NavigationItem writeHeaderTable(XMLStreamWriter out)
     out.writeEndElement(); //tr
     out.writeEndElement(); //table
     return item;
-}
+  }
 
-private void writeTopLinks(XMLStreamWriter out) throws XMLStreamException {
+  private void writeTopLinks(XMLStreamWriter out) throws XMLStreamException 
+  {
     out.writeStartElement("a");
     out.writeAttribute("href", "http://www.caucho.com/");
     out.writeAttribute("title", "Caucho home, makers of Resin Server, Java Application Server, Web Server and Querus PHP engine.");

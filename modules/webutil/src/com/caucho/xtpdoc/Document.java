@@ -59,7 +59,7 @@ public class Document {
   private boolean _isArticle;
   private boolean _isDisableAction;
   private boolean _isJavascriptEnabled = true;
-  private boolean _cacuhoSite=true;
+  private boolean _isCauchoSite = true;
 
 
   private String _redirect;
@@ -89,7 +89,7 @@ public class Document {
     _encoding = encoding;
   }
   public void setCauchoSite(boolean cauchoSite) {
-      _cacuhoSite = cauchoSite;
+      _isCauchoSite  = cauchoSite;
   }
 
   public boolean isArticle()
@@ -372,12 +372,12 @@ public class Document {
     out.writeAttribute("lang", "en");
 
     if (_header != null) {
-      _header.setCauchoSite(_cacuhoSite); 
+      _header.setCauchoSite(_isCauchoSite ); 
       _header.writeHtml(out);
     }
 
     if (_body != null) {
-      _body.setCauchoSite(_cacuhoSite);
+      _body.setCauchoSite(_isCauchoSite );
       _body.writeHtml(out);
     }
 
