@@ -269,7 +269,7 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   public int getMessageQueueSize();
   
   @Description("The number of messages in the outgoing large message queue")
-  public int getLargeMessageQueueSize();
+  public int getMessageQueueLargeSize();
 
   //
   // operations

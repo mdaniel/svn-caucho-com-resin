@@ -395,7 +395,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   }
 
   @Override
-  public int getLargeMessageQueueSize()
+  public int getMessageQueueLargeSize()
   {
     DualSizeMailbox mbox = _server.getCloudServer().getData(DualSizeMailbox.class);
     
