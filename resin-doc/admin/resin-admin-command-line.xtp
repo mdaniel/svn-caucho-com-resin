@@ -867,6 +867,59 @@ Resin/4.0.30 restarted -server 'app-0' for watchdog at 127.0.0.1:6600
 </deftable>
 </defun> <!-- restart -->
 
+
+<defun title="scoreboard: thread activity summary">
+
+<p><code>scoreboard</code> produces a concise thread activity report for 
+groups of related threads.</p>
+  
+<def>
+resinctl scoreboard [options]
+</def>
+
+<example title="Example: scoreboard">
+unix> resinctl scoreboard
+[Port 127.0.0.1:6800 Threads]
+____R
+
+[Port *:8080 Threads]
+____RRRRR
+
+[Resin Threads]
+ww.....w......RwR.Rwwww....w.....wwwww..www
+
+[Other Threads]
+wRww
+
+[Scoreboard Key]
+w   WAITING
+b   BLOCKED
+R   RUNNING
+_   ACCEPT
+N   NATIVE
+.   IDLE
+
+</example>
+
+<deftable title="scoreboard options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--type</td>
+    <td>Scoreboard report type</td>
+    <td>resin</td>
+  </tr>
+  <tr>
+    <td>--greedy</td>
+    <td>If false threads can be categoried into more than one group</td>
+    <td>true</td>
+  </tr>
+</deftable>
+</defun> <!-- scoreboard -->
+
 <defun title="shutdown: shutdown all daemon servers">
 
 <p>Shutdown all Resin daemon servers and watchdog with <code>shutdown</code>.</p>

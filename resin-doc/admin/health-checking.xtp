@@ -443,6 +443,8 @@ once per period.</p>
 
 <include-defun name="health:Restart"/>
 
+<include-defun name="health:ScoreboardReport"/>
+
 <include-defun name="health:SendMail"/>
 
 <include-defun name="health:SetJmxAttribute"/>

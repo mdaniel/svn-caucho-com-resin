@@ -102,7 +102,7 @@ public class ResinThreadActivityReport extends AbstractThreadActivityReport
     groups.add(new ThreadActivityGroup("Resin Threads", cauchoFilter));
     
     AnyThreadFilter miscFilter = new AnyThreadFilter();
-    groups.add(new ThreadActivityGroup("Misc Threads", miscFilter));
+    groups.add(new ThreadActivityGroup("Other Threads", miscFilter));
     
     ThreadActivityGroup []array = new ThreadActivityGroup[groups.size()];
     groups.toArray(array);

@@ -65,7 +65,6 @@ public class ScoreboardAction implements AdminAction
     sb.append("{\n");
     sb.append("  \"create_time\": \"" + new Date(timestamp) + "\",\n");
     sb.append("  \"timestamp\": " + timestamp + ",\n");
-    sb.append("  \"type\": \"" + type + "\",\n");
 
     AbstractThreadActivityReport report = getReportType(type);
     

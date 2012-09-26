@@ -5272,6 +5272,115 @@ OnStart</a> will fire during this event also.</p>
 
 </defun>
 
+<defun title="&lt;health:ScoreboardReport>" name="health:ScoreboardReport">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.ScoreboardReport"/>
+
+<description>
+<p>Produces a concise thread activity report for groups of related threads.</p>
+<p>Note: A scoreboard report can also be produced using the  
+<var>scoreboard</var> command line.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>log</td>
+    <td>Output to server log in addition to pdf report</td>
+    <td>Boolean</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>type</td>
+    <td>Scoreboard report type</td>
+    <td>String</td>
+    <td>resin</td>
+  </tr>
+  <tr>
+    <td>greedy</td>
+    <td>If false threads can be categoried into more than one group</td>
+    <td>Boolean</td>
+    <td>true</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:ScoreboardReport> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:ScoreboardReport>
+    &lt;health:OnAbnormalStop/>
+  &lt;/health:ScoreboardReport>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:SetJmxAttribute>" name="health:SetJmxAttribute">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.SetJmxAttribute"/>
+
+<description>
+<p>Sets a JMX attribute to a value.</p>
+<p>Note: Setting a JMX attribute can also be performed on-demand using the 
+<var>jmx-set</var> command line.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>objectName</td>
+    <td>The JMX MBean name</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>attribute</td>
+    <td>The attribute name</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>New attribute value that will be converted to the appropriate type.</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:SetJmxAttribute> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:SetJmxAttribute>
+    &lt;objectName>java.lang:type=ClassLoading&lt;/objectName>
+    &lt;attribute>Verbose&lt;/attribute>
+    &lt;value>true&lt;/value>
+    &lt;health:OnStart/>
+  &lt;/health:SetJmxAttribute>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:SendMail>" name="health:SendMail">
 
 <parents>cluster</parents>

@@ -1239,3 +1239,35 @@ table.data-detail {
 	font-weight : bold;
 	color: red;
 }
+
+.scoreboards {
+  font-size: 120%;
+  color: black;
+  float: left;
+  width: 650px;
+  margin-right: 5px;
+}
+
+.scoreboard-header {
+  margin-bottom: 2px;
+  margin-top: 2px;
+  padding: 1px;
+  width: 95%;
+}
+
+.scoreboard-data {
+  background-color: #F4F4F4;
+  padding: 5px;
+  font-family: monospace;
+  font-size: 13px;
+  display: inline-block;
+  margin: 0px;
+}
+
+.scoreboard_key {
+  font-size: 90%;
+  color: black;
+  font-family: monospace;
+  font-size: 13px;
+}
+

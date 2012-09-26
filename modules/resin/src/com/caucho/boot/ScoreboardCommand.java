@@ -46,7 +46,7 @@ public class ScoreboardCommand extends AbstractManagementCommand
   @Override
   public String getDescription()
   {
-    return "report thread activity by thread group";
+    return "produces a concise thread activity report for groups of related threads";
   }
 
   @Override
