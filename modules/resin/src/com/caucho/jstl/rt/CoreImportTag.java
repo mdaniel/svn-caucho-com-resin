@@ -301,7 +301,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       // jsp/1ei0
       // out.flush();
     }
-
+    
     if (_context != null) {
       String context = _context;
 
@@ -358,8 +358,9 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
         }
         */
       }
-      else
+      else {
         handleExternalBody(context + url);
+      }
       
       return;
     }
@@ -390,9 +391,12 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
           url);
 
         throw new JspException(message);
+      }
+      /* jsp/1jii - response does not change status by JSTL spec.
       } else {
         response.setStatus(status);
       }
+      */
 
     }
     else
@@ -463,7 +467,8 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     JstlImportResponseWrapper(HttpServletResponse response)
     {
       super(response);
-      _status = response.getStatus();
+      
+      _status = 200;
     }
 
     @Override

@@ -1322,7 +1322,7 @@
     <delete dir="build-debian"/>
   </target>
 
-  <target name="debian" depends="init,debian-clean,debian-compile">
+  <target name="debian" depends="init,debian-compile">
     <exec executable="uname" outputproperty="debian.architecture">
       <arg value="-m"/>
  
