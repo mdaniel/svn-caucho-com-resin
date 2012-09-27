@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.util.concurrent.locks.LockSupport;
 
 import com.caucho.bam.BamError;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -91,16 +92,20 @@ public class QueryFutureCallback extends AbstractQueryCallback {
 
       default:
       {
-        LockSupport.parkNanos(timeout * 1000000L);
+        long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
+        
+        do {
+          LockSupport.parkUntil(expireTime);
 
-        switch (_state) {
-        case REPLY:
-          return _result;
-        case ERROR:
-          throw _error.createException();
-        default:
-          throw new IllegalStateException(L.l("future timeout"));
-        }
+          switch (_state) {
+          case REPLY:
+            return _result;
+          case ERROR:
+            throw _error.createException();
+          }
+        } while (CurrentTime.getCurrentTimeActual() < expireTime);
+        
+        throw new IllegalStateException(L.l(this + " future timeout: " + timeout + "ms"));
       }
       }
     } finally {

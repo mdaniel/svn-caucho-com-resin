@@ -1041,6 +1041,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
         _idle[_idleHead] = null;
         _idleHead = (_idleHead + _idle.length - 1) % _idle.length;
 
+        // System.out.println("RECYCLE: " + stream + " " + (freeTime - now) + " " + _loadBalanceIdleTime);
+        
         if (now < freeTime + _loadBalanceIdleTime) {
           _activeCount.incrementAndGet();
           _keepaliveCountTotal++;

@@ -319,8 +319,9 @@ public class ClientSocket implements ClientSocketApi {
   @Override
   public void close()
   {
-    if (_is != null)
+    if (_is != null) {
       _pool.close(this);
+    }
 
     closeImpl();
   }
