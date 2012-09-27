@@ -297,7 +297,7 @@ public class SocketStream extends StreamImpl {
       } catch (IOException e1) {
       }
 
-      throw ClientDisconnectException.create(e);
+      throw ClientDisconnectException.create(this + ":" + e, e);
     }
   }
 

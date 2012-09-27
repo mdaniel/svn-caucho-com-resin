@@ -95,8 +95,9 @@ public class SocketLinkDuplexController extends AsyncController {
       idleTime = Long.MAX_VALUE / 2;
 
     TcpSocketLink conn = _conn;
-    if (conn != null)
+    if (conn != null) {
       conn.setIdleTimeout(idleTime);
+    }
   }
 
   /**

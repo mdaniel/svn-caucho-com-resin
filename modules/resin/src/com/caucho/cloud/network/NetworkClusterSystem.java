@@ -65,7 +65,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     Logger.getLogger(NetworkClusterSystem.class.getName());
   
   private static final long CLUSTER_IDLE_TIME_MAX = Long.MAX_VALUE / 2;
-  private static final long CLUSTER_IDLE_PADDING = 2 * 60 * 1000;
+  private static final long CLUSTER_IDLE_PADDING = 5 * 60000;
   
   private final CloudServer _selfServer;
   

@@ -215,6 +215,12 @@ public class BamAllActorRouter extends AbstractBamRouter
         }
       }
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _id + "," + _from + "," + _sender + "]";
+    }
   }
   
   class AllMethodCallback implements QueryCallback {
@@ -241,6 +247,12 @@ public class BamAllActorRouter extends AbstractBamRouter
       log.finer(this + " " + error);
       
       _scoreboard.complete(_index, error);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _index + "," + _scoreboard + "]";
     }
   }
 }

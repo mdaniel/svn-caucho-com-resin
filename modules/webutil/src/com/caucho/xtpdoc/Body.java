@@ -187,8 +187,10 @@ public class Body extends ContainerNode {
 
     out.writeStartElement("h1");
     out.writeAttribute("class", "title");
+    
     if (getDocument().getHeader() != null)
       out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase(Locale.ENGLISH));
+    
     out.writeEndElement();
 
     out.writeStartElement("hr");
