@@ -559,13 +559,13 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     if (now <= _failTime + _dynamicFailRecoverTime) {
       // we are in a possible failure and recover time has not yet expired
       
-      if (_lastFailConnectTime >= _failTime) {
+      if (_failTime <= _lastFailConnectTime) {
         // it was a connect failure, fail immediately
         logFinest("isFailed TRUE: prior connect failure");
         return true;
       }
       
-      if (_failTime >= _lastSuccessTime) {
+      if (_lastSuccessTime <= _failTime) {
         // only fail for a read if there were no more recent successful reads
         logFinest("isFailed TRUE: prior read failure with no recent successes");
         return true;  

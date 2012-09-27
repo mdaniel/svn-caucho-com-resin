@@ -155,6 +155,11 @@ public final class ServerHeartbeatState {
     }
   }
   
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _server + "," + _heartbeatState.get() + "]";
+  }
+  
   static enum State {
     STOP,
     
