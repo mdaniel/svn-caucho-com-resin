@@ -58,6 +58,7 @@ class BamProxyHandler implements InvocationHandler
   private static final HashMap<Class<?>,Object> _nullResultMap
     = new HashMap<Class<?>,Object>();
   
+  private final Class<?> _api;
   private final HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
   private final ActorSender _sender;
@@ -69,6 +70,7 @@ class BamProxyHandler implements InvocationHandler
                   BamActorRef to,
                   long timeout)
   {
+    _api = api;
     _sender = sender;
     _to = to;
     _timeout = timeout;
@@ -120,7 +122,7 @@ class BamProxyHandler implements InvocationHandler
     int size = args != null ? args.length : 0;
     
     if ("toString".equals(name) && size == 0) {
-      return "BamProxyHandler[" + _to + "]";
+      return "BamProxyHandler[" + _to + "," + _api.getSimpleName() + "]";
     }
     
     return null;

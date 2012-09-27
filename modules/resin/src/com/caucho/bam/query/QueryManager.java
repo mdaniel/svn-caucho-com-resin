@@ -267,7 +267,7 @@ public class QueryManager {
             if (item != null) {
               QueryCallback cb = item._callback;
               
-              Exception exn = new TimeoutException(item._id + " " + cb);
+              Exception exn = new TimeoutException(item.toString());
               BamError error = BamError.create(exn);
               
               cb.onQueryError(null, null, null, error);

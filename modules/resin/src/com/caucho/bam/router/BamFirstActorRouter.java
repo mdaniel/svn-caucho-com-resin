@@ -176,5 +176,10 @@ public class BamFirstActorRouter extends AbstractBamRouter
       
       return false;
     }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _sender + "," + _from + "," + _payload + "]";
+    }
   }
 }
