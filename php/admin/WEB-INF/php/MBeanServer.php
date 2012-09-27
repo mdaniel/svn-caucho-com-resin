@@ -12,9 +12,9 @@ class MBeanServer
   public function MBeanServer($id = null)
   {
     if (isset($id))
-      $this->$delegate = java("com.caucho.quercus.lib.resin.MBeanServer", $id);
+      $this->delegate = java("com.caucho.quercus.lib.resin.MBeanServer", $id);
     else
-      $this->$delegate = java("com.caucho.quercus.lib.resin.MBeanServer");
+      $this->delegate = java("com.caucho.quercus.lib.resin.MBeanServer");
   }
 
   public function getServer()
@@ -38,7 +38,7 @@ class MBeanServer
   public function query($query)
   {
     try {
-      return $this->$delegate->query($query);
+      return $this->delegate->query($query);
     } catch (Exception $e) {
       return null;
     }
@@ -47,7 +47,7 @@ class MBeanServer
   function lookup($type)
   {
     try {
-      return $this->$delegate->lookup($type);
+      return $this->delegate->lookup($type);
     } catch (Exception $e) {
       return null;
     }
@@ -56,7 +56,7 @@ class MBeanServer
   function isConnected()
   {
     try {
-      $this->$delegate->lookup("resin:type=Server");
+      $this->delegate->lookup("resin:type=Server");
 
       return true;
     } catch (Exception $e) {
