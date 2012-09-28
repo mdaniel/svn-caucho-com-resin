@@ -201,10 +201,6 @@ public class HmtpRequest extends AbstractProtocolConnection
 
     do {
       Broker broker = _proxyBroker;
-      
-      if (log.isLoggable(Level.FINER)) {
-        log.finer(this + " dispatch");
-      }
 
       if (! in.readPacket(broker)) {
         return false;
