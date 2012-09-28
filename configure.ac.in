@@ -18,7 +18,8 @@ AC_PROG_LD
 AC_PROG_EGREP
 
 dnl Checks for poll.h
-AC_CHECK_HEADER(sys/poll.h, [ CFLAGS="$CFLAGS -DPOLL"; poll=1 ])
+#AC_CHECK_HEADER(sys/poll.h, [ CFLAGS="$CFLAGS -DPOLL"; poll=1 ])
+AC_CHECK_HEADER(sys/poll.h, [ poll=1 ])
 dnl Checks for epoll.h
 AC_CHECK_HEADER(sys/epoll.h, [ CFLAGS="$CFLAGS -DEPOLL"; epoll=1 ])
 
@@ -861,7 +862,7 @@ if test -z "${jni_ld_shlib}"; then
 
       plugin_ld_shlib=${jni_ld_shlib}
       plugin_ldflags_shlib=${jni_ldflags_shlib}
-      
+
       if test -n "$b64"; then
         CFLAGS="$CFLAGS -arch x86_64"
         jni_ldflags_shlib="$-arch x86_64 $jni_ldflags_shlib"
@@ -916,8 +917,14 @@ case "$target_os" in
   ;;
   darwin*)
         CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"
+        # disable poll on macosx, temporarily
+        poll=""
   ;;
 esac
+
+if test -n "${poll}"; then
+   CFLAGS="$CFLAGS -DPOLL"
+fi   
 
 if test -z "$apache"; then
   a=b
