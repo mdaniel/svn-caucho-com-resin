@@ -785,6 +785,41 @@
     </jar>
 
   </target>
+  
+  <target name="rpm" depends="init">
+    <copy tofile="${user.home}/rpmbuild/SOURCES/${shortproduct}-${version}.tar.gz"
+          file="${dist}/${shortproduct}-${version}.tar.gz"
+          overwrite="true"/>
+
+    <copy file="resin.spec.in"
+          tofile="resin.spec"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+
+    <exec executable="rpmbuild">
+      <arg line="-bb resin.spec"/>
+    </exec>
+  </target>
+  
+  <target name="rpm-sign" depends="init">
+    <copy tofile="${user.home}/rpmbuild/SOURCES/${shortproduct}-${version}.tar.gz"
+          file="${dist}/${shortproduct}-${version}.tar.gz"/>
+
+    <copy file="resin.spec.in"
+          tofile="resin.spec"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+
+    <exec executable="rpmbuild">
+      <arg line="-bb resin.spec --sign"/>
+    </exec>
+  </target>
 
   <target name="pdf" depends="init">
     <delete dir="${build}/pdf" />
