@@ -8,8 +8,10 @@ chown -R resin.resin /var/log/resin
 if [ -x "/etc/init.d/resin" ]; then
 	update-rc.d resin defaults 90 10 >/dev/null 2>/dev/null
 	if [ -x "`which service 2>/dev/null`" ]; then
+		service resin stop 2>/dev/null 1>/dev/null
 		service resin start || exit $?
 	else
+		/etc/init.d/resin stop 2>/dev/null 1>/dev/null
 		/etc/init.d/resin start || exit $?
 	fi
 fi
