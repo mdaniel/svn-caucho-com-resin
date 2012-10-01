@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 
 useradd -d /nonexistent -s /bin/false -M resin 2> /dev/null
 
