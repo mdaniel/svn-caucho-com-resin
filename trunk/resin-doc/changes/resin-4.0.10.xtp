@@ -1,0 +1,37 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.10 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 4.0.10 Overview">
+
+<p>Resin 4.0.10 is a stability/bug fix release.</p>
+
+<p>There is an important Alarm fix where the Resin timers could be
+frozen, causing sessions to not expire and &lt;ping> timers to not fire .</p>
+
+<p>WebServiceContext is now available for CXF as an @Inject or a @Resource,
+when deploying a CXF WebService through the servlet interface.</p>
+
+<p>The ping capabilities have been generalized and refactored into a 
+general health service that checks the Resin health every 60 seconds.</p>
+
+<p>Resin exits and restarts are now logged with more information, giving
+the reason in both the watchdog and jvm logs.</p>
+
+<p>ResinEmbed how has a setRootDirectory and the WebAppEmbed has
+a setArchivePath to match the &lt;root-directory> and &lt;archive-path> tags
+in the resin.xml.</p>
+
+<p>JPA: eclipselink properties for Resin JTA were not properly set when
+eclipselink was discovered using scanning.</p>
+
+</s1>
+
+</body>
+</document>

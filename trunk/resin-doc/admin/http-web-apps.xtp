@@ -1,0 +1,293 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Web Apps</title>
+    <description>
+<p>Web Apps are the servlets, HTML and images that are the core
+HTTP application. This section shows how to configure and deploy web-apps
+and their resources.</p>
+    </description>
+
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="Overview">
+
+<ul>
+<li>configuration</li>
+<li>Deploying with the command-line.</li>
+<li>Servlets and Filters</li>
+<li>resin:import app-default.xml</li>
+<li>Resources: databases, queues, beans.</li>
+<li>URL rewrite</li>
+<li>Security</li>
+</ul>
+
+</s1>
+
+<s1 title="defining web-xml in resin.xml">
+
+<p>All web-apps are defined in the resin.xml, because Resin uses
+explicit configuration over defaults. While this gives flexibility,
+most sites use one of a few basic configurations. The most common is
+a &lt;web-app-deploy> which defines a dynamic directory for both
+command-line deployment and a place to copy .war files.</p>
+
+<s2 title="web-app-deploy">
+
+<p>The following example shows the most minimal configuration for a
+web app deployment using the webapps directory.</p>
+
+<ul>
+<li>The &lt;web-app-deploy> enables both command-line and
+explicit jar deployment.</li>
+<li>The &lt;resin:import> of app-default.xml defines default servlet behavior
+like WEB-INF/web.xml, WEB-INF/lib, JSPs and the static file
+servlet.</li>
+<li>The default &lt;cluster> and default &lt;host> give a place for
+the web-app to exist.</li>
+</ul>
+
+<example title="Example: basic web-app-deploy">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+&lt;cluster id="">
+
+  &lt;resin:import path="classpath:META-INF/app-default.xml"/>
+
+&lt;host id="">
+
+  <b>&lt;web-app-deploy path="webapps"/></b>
+  
+&lt;/host>
+
+&lt;/cluster>
+          
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="web-app">
+
+<p>In some deployments, the web-apps are defined in the resin.xml
+instead of a general deployment in a webapps directory. A site might
+want more specific control in the resin.xml or might just prefer to
+have all the web-apps listed explicitly. The &lt;web-app> tag defines
+a new web-application.</p>
+
+
+<example title="Example: explicit web-app">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+&lt;cluster id="">
+
+  &lt;resin:import path="classpath:META-INF/app-default.xml"/>
+
+&lt;host id="">
+
+  <b>&lt;web-app id="/my-web-app root-directory="my-root-dir"/></b>
+  
+&lt;/host>
+
+&lt;/cluster>
+          
+&lt;/resin>
+</example>
+
+<p>Each web-app has several components: the URL path, the root
+directory, an archive path, the internal cloud identifier, and the
+internal cloud archive.</p>
+
+<ul>
+<li>URL path - the context-path for servlets. It's the URL
+prefix that dispatches to the web-app.</li>
+<li>root-directory - the expanded directory on the filesystem
+which contains the files and classes for the web-app.</li>
+<li>archive-path - the path to a .war file with the archived web-app
+(optional).</li>
+<li>internal id - the internal unique cloud name of the web-app, typically
+something like "production/webapp/foo.com/my-web-app".</li>
+<li>internal cloud archive - an internal copy of the web-app archive
+which is distributed across all servers in the cloud.</li>
+</ul>
+
+</s2>
+
+<s2 title="web-app deployment in the cloud and the command-line">
+
+<p>When you deploy a .war on the command-line, Resin first stores the
+archive in its internal cloud repository using the internal unique
+identifier. The &lt;web-app> or &lt;web-app-deploy> will look in the
+internal repository for that name and deploy it just as if it was a
+.war file.</p>
+
+<p>For example, the default root web-app is
+named "production/webapp/default/ROOT". When you deploy the ROOT.war
+to the default virtual-host, Resin saves it internally as
+"production/webapp/default/ROOT", copies the .war to all servers in
+the cluster, and then expands it just like a ROOT.war file. The
+ROOT.war is saved in triplicate on the three triad
+servers for reliability.</p>
+
+<p>Thinking of the command-line deployment as an internal cloud
+archive is an accurate model.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="web-app-default">
+
+<p>Web-app configuration can be shared across several web-apps using
+the web-app-default tag. The contents are applied to all
+web-apps. Resin's app-default.xml uses the web-app-default to define
+standard servlets like the *.jsp mapping, the WEB-INF/lib directory
+and the static file servlet.</p>
+
+<p>If you have a shared *.jar library, you can define the shared
+classloaders a web-app-default. Each web-app will then use the same
+*.jar files without needing to copy them into each .war file.</p>
+
+<example title="Example: web-app-default of website-jars">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+&lt;cluster id="">
+
+&lt;host-default>
+  &lt;web-app-default>
+
+    &lt;class-loader>
+      &lt;library-loader path="/var/resin/website-jars"/>
+    &lt;/class-loader>
+    
+  &lt;/web-app-default>
+&lt;/host-default>
+      
+&lt;host id="">
+
+  &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+  
+&lt;/host>
+
+&lt;/cluster>
+          
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="Servlets and Filters">
+
+<p>Resin's &lt;web-app> includes all the standard Servlet
+configuration. The WEB-INF/web.xml parsing uses the same Resin code as
+the &lt;web-app> or resin-web.xml configuration. So all standard
+Servlet configuration is possible in a &lt;web-app>
+or &lt;web-app-default>.</p>
+
+<p>In fact, the web.xml is just a convention handled by the
+app-default.xml file. It's defined as:</p>
+
+<example title="Definition: web.xml in app-default.xml">
+&lt;web-app-default>
+
+  &lt;resin:import path="WEB-INF/web.xml" optional="true"/>
+
+&lt;/web-app-default>
+</example>
+
+</s1>
+
+<s1 title="app-default.xml">
+
+<p>Resin's standard servlet implementation is configured with a
+resin:import of the app-default.xml. app-default.xml defines the
+WEB-INF/web.xml, WEB-INF/classes, WEB-INF/lib, JSPs and the static
+servlet. In other words, if it's missing from the resin.xml, Resin
+will not behave as a standard servlet engine.</p>
+
+</s1>
+
+<s1 title="Resources: databases, queues, beans">
+
+<p>Resources in a web-app are typically defined in the resin-web.xml
+file. The resin-web.xml has the same syntax as the web.xml. Using two
+files lets you split out the Resin-specific configuration into the
+resin-web.xml and keep the standard servlet configuration in the
+web.xml.</p>
+
+<p>Common resources like &lt;database> have their own configuration
+tags listed in the reference guide.. Other resources like third-party
+libraries and application beans can use the CDI-style XML
+configuration, which is general enough to configure non-CDI objects
+and store them in JNDI as well as configure CDI-style beans.</p>
+
+<example title="Example: WEB-INF/resin-web.xml database
+configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+&lt;database jndi-name='jdbc/test_mysql'&gt;
+  &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"&gt;
+    &lt;url&gt;jdbc:mysql://localhost:3306/test&lt;/url&gt;
+    &lt;user&gt;&lt;/user&gt;
+    &lt;password&gt;&lt;/password&gt;
+  &lt;/driver&gt;
+&lt;/database&gt;
+
+&lt;/web-app>
+</example>
+
+<p>Third party libraries and application beans can be configured using
+the CDI XML configuration and saved to JNDI. The class name is given
+by the XML namespace and the tag name.</p>
+
+<p>The following example creates a com.mycom.mylib.MyBean instance,
+configures a field, and saves it in JNDI at the
+name "java:comp/env/my-bean".</p>
+
+<example title="Example: WEB-INF/resin-web.xml JNDI configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+&lt;mylib:MyBean xmlns:mylib="urn:java:com.mycom.mylib"
+                 resin:Jndi="java:comp/env/my-bean">
+    &lt;myField>myValue&lt;/myField>
+&lt;/mylib:MyBean>
+
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="URL rewriting">
+
+<p>
+Resin's URL rewriting tags can be configured in the resin-web.xml to
+conditionally rewrite URLs from a "pretty" external view to a more
+practical internal one and redirect pages.
+</p>
+
+<example title="Example: dispatch for a wiki">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+            
+&lt;resin:Dispatch target="\.(php|gif|css|png|js)"/>
+&lt;resin:Dispatch>
+  &lt;resin:IfFileExists/>
+&lt;/resin:Dispatch>
+
+&lt;resin:Dispatch regexp="^" target="/index.php"/>
+
+&lt;/web-app>
+</example>
+
+</s1>
+
+</body>
+</document>

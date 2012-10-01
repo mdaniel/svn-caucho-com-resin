@@ -1,0 +1,93 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.27 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>Thanks to everyone who reported bugs in 4.0.26. We encourage people to
+report 4.0.27 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>Resin 4.0.27 is primarily a reliability and performance release.</p>
+
+</s1>
+
+<s1 title="100,000 requests per second: performance improvements">
+
+<p>Resin's performance and threading scalability have been improved
+considerably in Resin 4.0.27.</p>
+
+<p>We've replaced locking has with non-locking atomic operations,
+cleared contention bottlenecks, improved the async/epoll performance,
+and reduced thread overhead.</p>
+
+</s1>
+
+<s1 title="port-max thread throttling">
+
+<p>The maximum number of active threads for a port can be restricted with
+port-max thread throttling (port_thread_max in the resin.properties).</p>
+
+<p>The number of requests can be much larger, because async keepalives and
+comet/async threads and inactive websocket connections, are not counted as
+active threads. The throttling can improve performance by reducing thread
+contention.</p>
+
+<example title="resin.properties: port_thread_max">
+# throttle the number of active threads for a port
+port_thread_max   : 256
+</example>
+
+</s1>
+
+
+<s1 title="http_ping_urls for watchdog reliability checks">
+
+<p>The resin.properties now has a http_ping_urls for improved reliability.
+You can add a list of URLs to be checked periodically to ensure the site
+is responding properly at all times. If the HTTP response fails, the watchdog will restart Resin automatically, after retrying.</p>
+
+<example title="resin.properties">
+http_ping_urls : http://my.example.org/test_page.jsp
+</example>
+
+<s2 title="Ping Time meters and anomaly detection">
+
+<p>The HTTP Ping Time is metered and checked as part of the health system.
+The PDF report and the /resin-admin meters will show the ping time. An
+anomaly analyzer is attached to the Ping Time, to detect if the response
+time cchanges.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="WebSocket messaging model improvements">
+
+<p>Since WebSockets is a messaging protocol, it's best to program using
+a messaging model, sending messages to queues to be sent to the client.
+Following this model, we've changed the WebSockets API to allow for
+custom marshalling and queue handling to the stream.</p>
+
+<example title="WebSocket: creating an output queue">
+...
+public void service(WebSocketContext ws)
+{
+  WebSocketEncoder&lt;MyMsg> myEncoder = new MyWebSocketEncoder();
+
+  BlockingQueue&lt;MyMsg> queue = ws.createOutputQueue(myEncoder);
+
+  queue.offer(new MyMsg("my-data"));
+}  
+</example>
+
+</s1>
+
+</body>
+</document>

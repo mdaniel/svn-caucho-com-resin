@@ -1,0 +1,297 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.24 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.24 introduces the resin.properties and configuration simplification
+to make cloud deployments simpler. It also includes new memcache support.</p>
+
+<p>Thanks to everyone who reported bugs in 4.0.23. We encourage people to
+report 4.0.24 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+</s1>
+
+<s1 title="RPM">
+
+<p>RPMs are now available for Resin-Pro</p>
+
+<example title="installing RPM">
+unix> sudo rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
+unix> sudo yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
+</example>
+
+</s1>
+
+<s1 title="resin.properties">
+
+<p>The configuration for common deployments has been simplified,
+moving the most often changed values into a separate
+resin.properties file. While Resin's resin.xml is still the basis for the
+configuration, it now includes the resin.properties
+with a &lt;resin:properties> tag.</p>
+
+<example title="Example: sample /etc/resin/resin.properties">
+log_level     : info
+dev_mode      : true
+resin_doc     : true
+
+app_tier      : 192.168.1.10 192.168.1.11
+web_tier      : 192.168.1.20
+
+http          : 8080
+app-0.http    : 8081
+
+setuid_user   : resin
+setuid_group  : resin
+
+jvm_args      : -Xmx2048m
+
+system_key    : changeme
+admin_enable  : true
+admin_user    : admin
+admin_password: {SSHA}xxxxxxx
+</example>
+
+<p>The variables are all defined and controlled by
+the /etc/resin/resin.xml file. If you are already modifying the resin.xml,
+you can use this technique for your own properties.</p>
+
+</s1>
+
+<s1 title="resin:properties">
+
+<p>Resin has a new &lt;resin:properties> tag that works similarly to
+the &lt;resin:import>, but populates the EL configuration variables.
+You can use this to implement /etc/resin/resin.properties and you
+can use it in systems like Amazon EC2 where per-instance user-data
+is available via an http URL.</p>
+
+<example title="Example: local.d/amazon.xml EC2 properties import">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+      xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:properties path="http://169.254.169.254/latest/user-data"
+                    optional="true">
+
+&lt;/resin>
+</example>
+</s1>
+
+<s1 title="rvar(): EL config function for properties">
+
+<p>The new "rvar()" function in the resin.xml is used with resin.properties
+to allow server-specific configuration to override general configuration.
+For example, "http : 8080" defines the default HTTP port as port 8080,
+and "app-0.http : 8081" sets the HTTP port to 8081 when the server
+is named "app-0".</p>
+
+</s1>
+
+<s1 title="resin.xml Local Config files: /etc/resin/local.d/*.xml">
+
+<p>Resin's default /etc/resin/resin.xml now imports files from
+/etc/resin/local.d/*.xml as local additions to the resin configuration.
+It uses an existing capability of the &lt;resin:import> to include
+a fileset of paths.</p>
+
+<p>The standard health.xml configuration has been moved to local.d.</p>
+
+<p>The local.d can be used for simple configuration extensions, like adding
+a cluster-wide mysql configuration, or importing EC2/cloud properties
+file as in the above example. The top-level tag for the *.xml will
+be &lt;resin> because the &lt;resin:import> occurs at the &lt;resin>
+level.</p>
+
+<p>The resin.xml to implement the local.d looks as follows:</p>
+
+<example title="Example: resin.xml configuration for local.d">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  ...
+  &lt;resin:import fileset="${__DIR__}/local.d/*.xml"/>
+
+  ...
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="resin.properties openssl configuration">
+
+<p>The standard resin.xml now includes openssl configuration. To enable
+openssl, upload the certificate files and update the resin.properties.</p>
+
+<example title="Example: resin.properties with openssl">
+openssl_file : keys/gryffindor.crt
+openssl_key : keys/gryffindor.key
+openssl_password : changeme
+</example>
+
+</s1>
+
+<s1 title="server-multi: allowing cluster definition in resin.properties">
+
+<p>The new &lt;server-multi> tag is designed to work with the
+resin.properties file to allow multiple servers to be defined
+with a single property. The address-list attribute allows a
+space delimited list of addresses. The server-multi will expand into
+multiple &lt;server> tags, one for each address.</p>
+
+<p>For example, you can use this system to configure
+the triad in the resin.properties without needing to modify the
+resin.xml file.
+</p>
+
+<p>The following example defines three servers named "app-0", "app-1",
+and "app-2" which are configured for internal IP addresses
+192.168.1.10, 192.168.1.11, and 192.168.1.12. The ":6801" overrides
+the default server port.</p>
+
+<example title="Example: app_tier configuration in resin.properties">
+app_tier : 192.168.1.10 192.168.1.11:6801 192.168.1.12:6802
+http     : 8080
+</example>
+
+<p>The configuration for the app_tier is in the default resin.xml</p>
+
+<example title="Example: app_tier configuration in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+ ...
+ &lt;cluster id="app-tier">
+
+   &lt;server-multi id-prefix="app-" address_list="${app_tier}" port="6800">
+   &lt;/server-multi>
+   ...
+ &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="join-cluster: allowing dynamic servers resin.properties">
+
+<p>The &lt;join-cluster> tag in the resin.xml informs the watchdog
+which cluster the server instance should join. It is equivalent to
+the -join-cluster command line argument. The join-cluster tag allows
+dynamic servers to work with the same /etc/resin.d/resin, and allows
+EC2-cloud servers to be configured with just the cloud /user-data
+configuration.</p>
+
+</s1>
+
+<s1 title="resinctl and bin/resin.sh">
+
+<p>A new command-line script "resinctl" has been added as an alternative
+to bin/resin.sh. "resinctl" differs from bin/resin.sh by including
+the OS paths in the script itself. In other words, on a linux system,
+resinctl knows that the default resin.xml is in /etc/resin and the default
+root-directory is /var/www.</p>
+
+<p>With the .rpm and .deb, resinctl is now installed in /usr/bin/resinctl,
+which makes it easily available from the command-line.</p>
+
+</s1>
+
+<s1 title="CLI: license-add">
+
+<p>resinctl now has a "license-add" command which copies a license to
+the license directory, as a convenience.</p>
+
+<example title="Example: uploading a license">
+unix> resinctl license-add 1013009.license
+</example>
+
+</s1>
+
+<s1 title="CLI: start-all">
+
+<p>The resinctl start-all command starts all servers on the local host by
+looking at the IP interfaces and matching them with the &lt;server>
+and &lt;server-multi> definitions. The start-all lets
+the /etc/init.d/resin start all servers without needing to be modified.
+</p>
+
+</s1>
+
+<s1 title="Unix startup: /etc/init.d/resin">
+
+<p>The /etc/init.d/resin script has been changed so fewer sites
+will need to modify it. 
+Since it also uses "start-all" to start all &lt;server> configurations
+on the current machine, it no longer needs a -server configuration.
+The script now calls /usr/bin/resinctl to start
+and stop Resin.</p>
+
+</s1>
+
+<s1 title="memcache client/server">
+
+<p>Resin's cache now supports a memcache interface for both the client
+and the server. When Resin is used as both the client and
+the server, adding and removing cache servers are automatically rescaled
+and updated in the client.</p>
+
+<p>The client API for Resin's memcache is jcache (javax.cache). The
+configured cache can be injected like any CDI object.</p>
+
+<example title="Example: resin-web.xml memcache client config">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:memcache="urn:java:com.caucho.memcache">
+
+  &lt;memcache:MemcacheClient cluster="cache-tier" port="11212"/>
+
+&lt;/web-app>
+</example>
+
+<example title="Example: CDI memcache injection">
+package example;
+
+import javax.inject.*;
+import javax.cache.*;
+
+public class MyBean {
+  @Inject Cache _memcache;
+}
+</example>
+
+<p>Resin can also be configured as a memcache server. The following
+&lt;listen> configures it.</p>
+
+<example title="Example: resin.xml memcache server">
+&lt;resin xmlns="http://caucho.com.ns/resin"
+    xmlns:memcache="urn:java:com.caucho.memcache">
+
+  &lt;cluster id="cache_tier">
+
+    &lt;server-multi id-prefix="cache-"
+                  address-list="${cache_tier}"
+                  port="6820">
+
+      &lt;listen port="${rvar('memcache_port')?:11212}"
+              keepalive-timeout="600s" socket-timeout="600s">
+        &lt;memcache:MemcacheProtocol/>
+      &lt;/listen>
+    &lt;/server-multi>
+  &lt;/cluster>
+    
+&lt;/resin>
+</example>
+</s1>
+
+<s1 title="IIS .NET Plugin: added support for Windows Authentication">
+
+<p>User credentials established with Windows Authentication are made available
+  in Resin's HttpServletRequest.getRemoteUser() and
+  HttpServletRequest.getUserPrincipal()</p>
+</s1>
+
+</body>
+</document>

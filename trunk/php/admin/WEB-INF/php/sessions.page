@@ -1,0 +1,203 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (!admin_init()) {
+  return;
+}
+
+$client = @new Java("com.caucho.server.admin.WebAppDeployClient");
+
+print_title("sessions", "Http Sessions");
+
+$request = quercus_servlet_request();
+$user = quercus_get_request()->getUserPrincipal();
+
+display_webapp_summary_page($g_mbean_server);
+
+function display_webapp_summary_page($g_mbean_server)
+{
+  echo "<div id='webapp-tabs' style='display: none'>\n";
+
+  echo "<div id='webapp-active'>\n";
+  display_webapp_summary($g_mbean_server, false);
+  echo "</div>\n";
+
+  echo "</div>\n";
+}
+
+/**
+ * summary of all
+ */
+function display_webapp_summary($g_mbean_server, $is_idle)
+{
+  $cluster = $g_mbean_server->Cluster;
+  $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
+
+  echo "<h1>" . gettext('Cluster') . ": $cluster_name</h1>";
+  echo "<div class='section'>\n";
+
+  $webapp_id = 0;
+
+  $hosts = $g_mbean_server->query("resin:*,type=Host");
+  usort($hosts, "sort_host");
+  foreach ($hosts as $host) {
+    $hostName = empty($host->HostName) ? "default" : $host->HostName;
+
+    echo "<h2>" . gettext('Host') . ": $hostName</h2>\n";
+    echo "<div class='section'>\n";
+
+    $webapps = $host->WebApps;
+    usort($webapps, "sort_webapp");
+
+    $count = 0;
+
+    foreach ($webapps as $webapp) {
+
+      if ($is_idle != ($webapp->State == "STOPPED_IDLE")) {
+        continue;
+      }
+
+      $webapp_name = $webapp->mbean_name;
+      $webapp_id++;
+
+      $id = "sw_webapp_" . ($is_idle ? "idle" : "") . $webapp_id;
+
+      echo "<h3>" . gettext('WebApp') . " : $webapp_name</h3>\n";
+
+      echo "<table class='data webapp-data'>\n";
+      echo " <tr>\n";
+      echo "	<th scope='col' title='Expand'></th>\n";
+
+      echo"  <th scope='col' title='"
+        . gettext('The context root of the application') . "'>";
+      echo gettext('Path');
+      echo "  </th>\n";
+
+      echo"  <th scope='col' title='"
+        . gettext('The current number of active sessions') . "'>";
+      echo gettext('Active Sessions');
+      echo "  </th>\n";
+
+      echo"  <th scope='col' title='"
+        . gettext('Total number of sessions that have been created') . "'>";
+      echo gettext('Total Sessions Created');
+      echo "  </th>\n";
+
+      echo"  <th scope='col' title='"
+        . gettext('Total number of sessions invalidated') . "'>";
+      echo gettext('Invalidated Sessions');
+      echo "  </th>\n";
+
+      echo"  <th scope='col' title='"
+        . gettext('Total number of timed out sessions') . "'>";
+      echo gettext('Timed Out Sessions');
+      echo "  </th>\n";
+
+      echo"  <th scope='col' title='" . gettext('Estimated memory consumed')
+        . "'>";
+      echo gettext('Estimated Memory Size');
+      echo "  </th>\n";
+
+      echo"  <th scope='col' title='"
+        . gettext('Requests Currently Active / Serving') . "'>";
+      echo gettext('Active Requests');
+      echo "  </th>\n";
+
+      echo " </tr>\n";
+
+      echo " <tr class='" . row_style($count++) . "'>";
+      echo "  <td><span id='${id}' class='switch'></span></td>\n";
+
+      display_session_manager($webapp);
+
+      echo " </tr>\n";
+      echo "</table>\n";
+
+      echo "<br/>\n";
+
+      echo "<div class='toggle-${id} sessions-expand'>\n";
+      display_sessions($webapp, $host);
+      echo "</div>\n";
+    }
+
+    echo "</div>\n";
+  }
+
+  echo "</div>\n";
+}
+
+function display_session_manager($webapp)
+{
+  $sessionManager = $webapp->SessionManager;
+  $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
+
+  echo "<td class='item'>$context_path</td>\n";
+
+  echo "<td>";
+  echo $sessionManager->getSessionActiveCount();
+  echo " </td>\n";
+
+  echo "<td>";
+  echo $sessionManager->getSessionCreateCountTotal();
+  echo " </td>\n";
+
+  echo "<td>";
+  echo $sessionManager->getSessionInvalidateCountTotal();
+  echo " </td>\n";
+
+  echo "<td>";
+  echo $sessionManager->getSessionTimeoutCountTotal();
+  echo " </td>\n";
+
+  echo "<td>";
+  echo format_bytes($sessionManager->getEstimatedMemorySize());
+  echo " </td>\n";
+
+  echo "<td>";
+  echo $webapp->getRequestCount();
+  echo " </td>\n";
+}
+
+function display_sessions($webapp, $host)
+{
+  global $g_server_index;
+  $hostName = $host->HostName;
+  $context = $webapp->ContextPath;
+
+  if ($context === "")
+    $context = "ROOT";
+
+  $manager_suffix = $hostName . preg_replace('/^//', "", $context);
+
+  echo "<div class='refresh-sessions'>";
+  echo "<a class='refresh-sessions' id='sessions-refresh-${manager_suffix}'>show sessions</a>";
+  echo "</div>";
+
+  echo "<div id='sessions-list-${manager_suffix}'>";
+  echo "</div>";
+
+  echo <<<END
+<script language="javascript">
+  var showLink = $("#sessions-refresh-${manager_suffix}");
+  showLink.click(function(context, event)
+   {
+    var parent = showLink.parent();
+
+    var sessionsDiv = $(this).parent().next();
+
+    var link ="sessions.php?s=${g_server_index}&host=${hostName}&webapp=${webapp->ContextPath}&manager-suffix=${manager_suffix}";
+
+    $(this).text('refresh sessions');
+
+    sessionsDiv.load(link);
+  });
+
+</script>
+END;
+}
+
+$javascript = javascript_create_tab("webapp-tabs");
+
+display_footer($g_page, $javascript);
+?>

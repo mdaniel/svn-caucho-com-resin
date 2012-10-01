@@ -1,0 +1,163 @@
+#!/usr/local/bin/bash
+#
+#  Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+# 
+#  This file is part of Resin(R) Open Source
+# 
+#  Each copy or derived work must preserve the copyright notice and this
+#  notice unmodified.
+# 
+#  Resin Open Source is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+# 
+#  Resin Open Source is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+#  of NON-INFRINGEMENT.  See the GNU General Public License for more
+#  details.
+# 
+#  You should have received a copy of the GNU General Public License
+#  along with Resin Open Source; if not, write to the
+# 
+#    Free Software Foundation, Inc.
+#    59 Temple Place, Suite 330
+#    Boston, MA 02111-1307  USA
+#
+################################################################################
+#
+# To install, configure this file as needed and copy to /etc/rc.d
+# Add resin_enable="YES" to /etc/rc.conf
+################################################################################
+# Script variables description
+#
+# JAVA_HOME - directory containing JDK1.6 or higher
+# RESIN_HOME - directory where Resin binary is installed
+# RESIN_ROOT - Resin's root directory
+# RESIN_CONF - Resin's configuration file
+# RESIN_LOG - Resin's logging directory
+# CONSOLE - File where script outputs startup messages
+#
+### BEGIN FreeBSD
+# PROVIDE: resin
+### END FreeBSD
+#
+#
+#
+. /etc/rc.subr
+name=resin
+rc_var=`set_rcvar`
+start_cmd="resin start"
+stop_cmd="resin stop"
+restart_cmd="resin restart"
+
+load_rc_config $name
+
+JAVA_HOME=
+RESIN_HOME=
+RESIN_ROOT=
+RESIN_CONF=conf/resin.xml
+RESIN_LOG=log
+CONSOLE="/tmp/resin/log/console.log"
+
+if [ -z $JAVA_HOME ]; then
+  echo "JAVA_HOME can not be empty"
+  exit 1
+fi
+
+if [ -z $RESIN_HOME ]; then
+  echo "RESIN_HOME can not be empty"
+  exit 1
+fi
+
+if [ -z $RESIN_ROOT ]; then
+  echo "RESIN_ROOT can not be empty"
+  exit 1
+fi
+
+if [ -z $RESIN_CONF ]; then
+  echo "RESIN_CONF can not be empty"
+  exit 1
+fi
+
+export JAVA_HOME RESIN_HOME
+
+JAVA="$JAVA_HOME/bin/java -d64"
+
+#
+# Set to the server id to start
+#
+#SERVER="-server app-a"
+#
+# -join-cluster app-tier        -- elastic servers
+#
+#JOIN_CLUSTER="-join-cluster app-tier"
+
+ARGS="-conf $RESIN_CONF -log-directory $RESIN_LOG -root-directory $RESIN_ROOT $JOIN_CLUSTER $SERVER"
+
+log_daemon_msg () {
+  if [ -z "$1" ]; then
+    return 1
+  fi
+
+  if [ -z "$2" ]; then
+    echo -n "$1:"
+    return
+  fi
+
+  echo -n "$1: $2"
+  }
+
+log_end_msg () {
+  [ -z "$1" ] && return 1
+  if [ $1 -eq 0 ]; then
+    echo " ."
+  else
+    echo " failed!"
+  fi
+
+  return $1
+}
+
+resin () {
+case "$1" in
+  start)
+	log_daemon_msg "Starting resin"
+	if test -n "$USER"; then
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start""" 1>> $CONSOLE 2>> $CONSOLE
+	else
+	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 2>&1`
+	    if [ $? != 0 ]; then
+		log_daemon_msg $errors
+	    fi
+	fi
+
+	log_end_msg $?
+	;;
+  stop)
+	log_daemon_msg "Stopping resin"
+	if test -n "$USER"; then
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown""" 1>> $CONSOLE 2>> $CONSOLE
+	else
+	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown 2>&1`
+	    if [ $? != 0 ]; then
+		log_daemon_msg $errors
+	    fi
+	fi
+	
+	log_end_msg $?
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|status|restart}"
+	return 1
+esac
+
+return 0
+}
+
+run_rc_command "$1"

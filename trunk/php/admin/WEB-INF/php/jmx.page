@@ -1,0 +1,97 @@
+<?php
+/**
+ * JMX display
+ */
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+print_title("jmx", "JMX MBeans");
+
+function collect_mbean_groups()
+{
+  global $g_mbean_server;
+
+  $mbean_list = $g_mbean_server->query("*:*");
+
+  $mbean_group = jmx_partition($mbean_list, array(":domain:"));
+
+  $application_mbeans = array();
+  $jvm_mbeans = array();
+  $resin_mbeans = array();
+
+  foreach ($mbean_group as $group_name => $group_mbeans) {
+    if (preg_match("/^com.sun/", $group_name) 
+        || preg_match("/^java/", $group_name)) {
+      $jvm_mbeans[$group_name] = $group_mbeans;
+    }
+    elseif (preg_match("/^resin/", $group_name))  {
+      $resin_mbeans[$group_name] = $group_mbeans;
+    }
+    else {
+      $application_mbeans[$group_name] = $group_mbeans;
+    }
+  }
+
+  ksort($application_mbeans);
+  ksort($jvm_mbeans);
+  ksort($resin_mbeans);
+
+  return array($application_mbeans, $jvm_mbeans, $resin_mbeans);
+}
+
+function display_mbeans($id, $mbean_group) 
+{
+  echo "<div id='${id}'>\n";
+
+  foreach ($mbean_group as $group_name => $group_mbeans) {
+    echo "<h1>" . $group_name . "</h1>\n";
+    display_jmx($group_mbeans);
+  }
+
+  echo "</div>\n";
+}
+
+function display_tabs()
+{
+  list($application_mbeans, $jvm_mbeans, $resin_mbeans) 
+    = collect_mbean_groups();
+
+  echo "<div id='jmx-tabs' style='display: none'>\n";
+  echo "<ul>\n";
+
+  if (count($application_mbeans) != 0) {
+    echo "<li><a href='#application-tab'>Application</a></li>\n";
+  }
+
+  if (count($jvm_mbeans) != 0) {
+    echo "<li><a href='#jvm-tab'>JVM</a></li>\n";
+  }
+
+  if (count($resin_mbeans) != 0) {
+    echo "<li><a href='#resin-tab'>Resin</a></li>\n";
+  }
+
+  echo "</ul>\n";
+
+  if (count($application_mbeans) != 0) {
+    display_mbeans("application-tab", $application_mbeans);
+  }
+
+  if (count($jvm_mbeans) != 0) {
+    display_mbeans("jvm-tab", $jvm_mbeans);
+  }
+
+  if (count($resin_mbeans) != 0) {
+    display_mbeans("resin-tab", $resin_mbeans);
+  }
+
+  echo "</div>\n";
+}
+
+display_tabs();
+display_footer($g_page, javascript_create_tab("jmx-tabs"));
+?>

@@ -1,0 +1,682 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>resin.xml: overview</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+      Full Resin customization is configured by the resin.xml.
+      The resin.xml overview describes resources,
+      clustering, HTTP hosts and URL dispatching, and custom CanDI
+      configuration.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Concepts and naming conventions">
+
+<ul>
+<li><b>cluster</b> - a collection of identically-configured servers.</li>
+<li><b>environment</b> - isolated class-loader contexts with shared resources:
+server, host and web-app are the main environments.</li>
+<li><b>host</b> - a HTTP virtual host.</li>
+<li><b>proxy cache</b> - HTTP proxy cache.</li>
+<li><b>resource</b> - drivers or services available to the application
+though JNDI or CDI like databases, JMS queues, custom
+CDI-configured service. Resin-specific resources include security,
+authenticators, health-checks and the rewrite/dispatch system.</li>
+<li><b>rewrite/dispatch</b> - the configuration for dispatching HTTP URLs
+to servlets and response codes like Apache's mod_rewrite.</li>
+<li><b>server</b> - a Resin JVM instance. There may be multiple servers on
+a machine.</li>
+<li><b>watchdog</b> - a JVM instance which watches over the Resin server
+and restarts the server if necessary.</li>
+<li><b>web-app</b> - a HTTP web-application which runs servlets.</li>
+</ul>
+
+</s1>
+
+<s1 title="resin.xml outline">
+
+<example title="Example: resin.xml outline">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;cluster-default>          
+    &lt;!-- shared configuration across all clusters -->
+    
+    &lt;resin:import path="classpath:META-INF/caucho/app-default.xml"/>
+    
+    &lt;resin:import path="${__DIR__}/health.xml" optional="true"/>
+  &lt;/cluster-default>          
+    
+  &lt;cluster id="my-cluster">
+
+    &lt;server-default>
+      &lt;!-- thread limits, JVM config, keepalives, ports, HTTP -->
+
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+    &lt;server id="server-a" address="192.168.1.10" port="6800"/>
+    &lt;server id="server-b" address="192.168.1.11" port="6800"/>
+
+    &lt;host id="www.myhost.com" root-directory="hosts/myhost.com">
+
+      &lt;resin:MovedPermanently regexp="/old-file" target="/new-path"/>
+    
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+
+      &lt;web-app id="/custom">
+      &lt;/web-app>
+      
+    &lt;/host>
+  
+  &lt;/cluster>
+          
+&lt;/resin>
+</example>
+
+<p><b>&lt;cluster></b> is an environment container for servers, HTTP
+virtual hosts, and common resources. All Resin servers in a
+cluster share configuration.</p>
+
+</s1>
+
+<s1 title="defaults: server-default, cluster-default, web-app-default">
+
+<p>When configuration is the same across several servers,
+like a thread-max or http ports, you can save typing by putting the common
+configuration in a server-default. Similarly, if all your clusters
+share common configuration, or all virtual-hosts are organized in the
+same way, you can use a cluster-default, host-default, and web-app-default
+to group the shared configuration.</p>
+
+<p>The following example from the sample resin.xml uses a cluster-default
+and a &lt;resin:import> to share common web-app configuration and the
+health-system configuration across all clusters in the system.</p>
+
+<example title="Example: cluster-default for health">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;cluster-default>
+    &lt;resin:import path="classpath:META-INF/caucho/app-default.xml"/>
+    
+    &lt;resin:import path="${__DIR__}/health.xml" optional="true"/>
+  &lt;/cluster-default>
+
+  &lt;cluster id="my-cluster-a">
+    ...
+  &lt;/cluster>
+
+  &lt;cluster id="my-cluster-b">
+    ...
+  &lt;/cluster>
+
+&lt;/resin>  
+</example>
+
+</s1>
+
+<s1 title="Server: configuring a JVM instance">
+
+<p web-only='true'>
+See <a href="cluster-server.xtp">server configuration</a> for more
+details on configuring the server.
+</p>
+
+<p>The &lt;server> tag configures specific JVMs in a cluster, the
+server-specific configuration, not the shared cluster configuration.
+Because the watchdog uses the &lt;server> tag to launch the Resin JVM,
+the &lt;server> tag also configures JVM parameters.</p>
+
+<ul>
+<li>the server id used to identify the server.</li>
+<li>the IP local address and port for communication within the server.</li>
+<li>JVM parameters like -Xmx</li>
+<li>thread limits like thread-idle-min and thread-idle-max.</li>
+<li>TCP ports including the HTTP ports, keepalive timeouts
+and the cluster port.</li>
+<li>load balancing configuration, including timeouts and weighting.</li>
+<li>user-name and group-name for Unix setuid security.</li>
+</ul>
+
+<p>The &lt;server> tags configure the servers in a cluster. Dynamic
+servers launched with the --elastic-server and --cluster
+command-line arguments
+will use the same &lt;server-default> configuration as other servers.</p>
+
+<p>The first three servers in the cluster automatically form
+the <b>triad</b> which is Resin's triple-redundant cluster hub. If you
+have fewer than three servers, Resin will create a smaller hub.</p>
+
+</s1>
+
+<s1 title="Watchdog: protecting the server">
+
+<p>The watchdog JVM watches over a Resin server and automatically restarts
+it when something goes wrong. The watchdog is responsible for setting the
+JVM arguments for the Resin server, logging its output, and handling the
+Unix setuid for user-name and group-name.</p>
+
+<p>The configuration for the watchdog itself is inside the &lt;server>
+that it manages like &lt;watchdog-port>.</p>
+
+</s1>
+
+<s1 title="Cluster: multiple servers performing a common task">
+
+<p web-only='true'>
+See <a href="clustering.xtp">clustering configuration</a> for more
+details on configuring the clustering.
+</p>
+
+<p>A Resin cluster gathers a set of servers to perform a common task,
+like serving HTTP requests, or load balancing, or processing a JMS queue.
+All Resin servers belong to a cluster. Even if you have one server, it
+belongs to a cluster of one.</p>
+
+<p>The shared task is configured inside the &lt;cluster> tag, whether it's
+traditional HTTP requests or JMS queues or SOA-style services. While HTTP has
+special configuration tags like &lt;host> and the rewrite system, non-HTTP
+resources can use CanDI-style configuration for their services.</p>
+
+<example title="Example: cluster for http servlets">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  ...
+
+  &lt;cluster id="http">
+    &lt;server id="a" address="192.168.1.10" port="6800">
+      &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;host id="">
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>A Resin cluster can also serve non-HTTP resources. The JVM lifecycle,
+watchdog restarts, health checks, and cluster communication will
+be managed by Resin, while the service itself will be managed
+by application code.</p>
+
+<example title="Example: cluster for http servlets">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:myservice="urn:java:com.mycom.myservice">
+  ...
+
+  &lt;cluster id="http">
+    &lt;server id="a" address="192.168.1.10" port="6800"/>
+
+    &lt;myservice:MyService address="${resin.address}">
+      ... &lt;!-- CanDI configuration for the service -->
+    &lt;/myservice:MyService>
+
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>The &lt;cluster> tag forms a class-loader resource <b>environment</b>
+that is shared across all hosts and web-apps on the server. Shared
+CDI resources like databases, queues, and caches can be configured in
+the &lt;cluster> tag and will be visible in all environment contexts.</p>
+
+</s1>
+
+<s1 title="Host: HTTP virtual hosts">
+
+<p web-only='true'>
+See <a href="http-virtual-hosts.xtp">virtual host configuration</a> for more
+details on configuring the virtual host.
+</p>
+
+<p>A HTTP virtual host is configured with the &lt;host> tag. The
+host name is given by the "id" attribute or the "host-name" attribute.
+The host with an empty name, like id="", is the default host.</p>
+
+<p>Hosts can be configured with a specific &lt;host> tag or implicitly
+with a &lt;host-deploy> tag. Hosts share common configuring using the
+&lt;host-default> tag. &lt;host-deploy> specifies a "hosts" directory
+which implicitly creates hosts like the "webapps" directory
+for &lt;web-app-deploy>.</p>
+
+<p>The &lt;host> tag dispatches HTTP urls to a virtual host. The host will
+typically contain one or more web-apps, which will be configured with
+the &lt;web-app-default>, &lt;web-app> and &lt;web-app-deploy> tags.</p>
+
+<p>For clustered deployment, the &lt;host-deploy is used as a destination
+for a command-line deployment. The command-line deployed host will
+expand across the cluster into the "hosts" directory for each server in the
+cluster.</p>
+
+<p>Since the host defines a resource environment, it can define shared
+resources like databases, caches, CDI services, and queues. The host can
+also define rewrite-dispatch URL rules.</p>
+
+</s1>
+
+<s1 title="Web-App: HTTP/servlet applications">
+
+<p web-only='true'>
+See <a href="deploy.xtp">deploy configuration</a> for more
+details on configuring the web-app.
+</p>
+
+<p>A web-app is an application based around HTTP requests using
+and servlets to process the request. Web-apps are typically configured
+with a WEB-INF/web.xml and a WEB-INF/resin-web.xml and are typically
+deployed with a my-web-app.war file either by a command-line cluster deploy
+or by placing it directly in a webapps directory.</p>
+
+<p>Web-apps can be configured with a specific &lt;web-app> tag in
+a resin.xml &lt;host> or implicitly
+with a &lt;web-app-deploy> tag. Web-apps share common configuring using the
+&lt;web-app-default> tag. &lt;web-app-deploy> specifies a "webapps"
+directory.</p>
+
+<p>Since the web-app defines a resource environment, it can define shared
+resources like databases, caches, CDI services, and queues. The host can
+also define rewrite-dispatch URL rules.</p>
+
+</s1>
+
+<s1 title="Rewrite: controlling URL dispatch">
+
+<p web-only='true'>
+See <a href="http-rewrite.xtp">rewrite/dispatch configuration</a> for more
+details on configuring the rewrite/dispatch.
+</p>
+
+<p>When you need to control URL formatting and dispatching, because URLs
+moved, or for better-looking URLs or for marketing tests, Resin's rewrite
+tags can help. The rewrite capabilities are similar to Apache's mod_rewrite
+and are integrated with Resin's HTTP and servlet dispatching.</p>
+
+<p>As a simple example, sites like wikis often change readable URLs into
+a servlet URL and a query string. The following example passes through
+*.php, *.gif, etc. files and any URL that maps to a file. It rewrites
+any other URL to use the /index.php file.</p>
+
+<example title="Example: dispatch for a wiki">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+            
+&lt;resin:Dispatch target="\.(php|gif|css|png|js)"/>
+&lt;resin:Dispatch>
+  &lt;resin:IfFileExists/>
+&lt;/resin:Dispatch>
+
+&lt;resin:Dispatch regexp="^" target="/index.php"/>
+
+&lt;/web-app>
+</example>
+
+<p>Resin's load balancing, http proxying and fast-cgi is configured
+with the rewrite-dispatch configuration. This means you can forward
+HTTP requests for a single web-app to a separate cluster of backend servers.
+</p>
+
+
+<example title="Example: load balancing">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+            
+&lt;resin:LoadBalance regexp="^/test" cluster="backend-cluster"/>
+
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="Load balancing: using backend servers for HTTP">
+
+<p web-only='true'>
+See <a href="cluster-load-balancer.xtp">load balancing
+configuration</a> for more
+details on configuring the load balancer.
+</p>
+
+<p>HTTP load balancing is integrated in Resin using adaptive round-robin
+scheduling with failover to spread the HTTP traffic across backend servers.
+Because it is integrated with Resin's clustering, the load-balancer will
+automatically be informed when servers are added or removed elastically.</p>
+
+<p>The load balancer is dispatched with a standard rewrite action.
+The socket parameters and timeouts are configured as part of
+the target &lt;server>. The load-balancer will read the server's keepalive,
+timeouts and weights.</p>
+
+<example title="Example: load balancing dispatch">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+            
+&lt;resin:LoadBalance regexp="^/test" cluster="backend-cluster"/>
+
+&lt;/web-app>
+</example>
+
+<example title="Example: load balancing timing configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+
+&lt;cluster id="backend-cluster>            
+  &lt;server id="a" address="192.168.1.10" port="6800">
+    &lt;load-balance-socket-timeout>60&lt;load-balance-socket-timeout>
+    &lt;load-weight>200&lt;load-balance-weight>
+  &lt;/server>
+
+  ...
+
+</example>
+
+</s1>
+
+<s1 title="Logging: JDK java.util.logging">
+
+<p web-only='true'>
+See <a href="logging.xtp">logging
+configuration</a> for more details on configuring logging.
+</p>
+
+<p>Resin's logging configuration is based on the JDKs java.util.logging
+capabilities. In addition, the watchdog saves the standard output from the
+JDK in a log/jvm-server.log file.</p>
+
+<p>JDK logging has two components: log handlers and loggers. Log handlers
+take log messages and process them. Resin's primary log handler formats
+messages and saves them to a log file. JDK loggers are used by Java code to
+send messages.  Each logger has a name, often the same as the Java class name
+that logs the message, like "com.caucho.util.ThreadPool".</p>
+
+<p>Logging is configured by attaching log-handler to logger names
+and enabling logging levels. The logging level for both a log-handler and
+the logger must match for the item to be logged. So some handlers might
+accept all logging messages, but the loggers only receive "info"
+messages.</p>
+
+<p>The following log-handler sends all logging messages to the JVM's standard
+output. It also enables all loggers at the "info" level and the MyBean
+logger at the "finer" level. So the standard output will contain both
+the info and the finer logs.</p>
+
+<example title="Example: basic logging configuration">
+&lt;resin xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;log-handler name="" level="all" path="stdout:"
+               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
+
+  &lt;logger name="" level="info"/>
+  &lt;logger name="com.foo.MyBean" level="finer"/>
+
+  ...
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="Resources: databases, queues, caches, and custom">
+
+<p web-only='true'>
+See <a href="database.xtp">database
+configuration</a> for more details on configuring databases.
+</p>
+
+<p>Resources can be configured using a general XML syntax that will
+support any Java-based resource, for example an ActiveMQ queue.
+Resin will register the resource with CDI or JNDI, letting your
+application pick up the resource.</p>
+
+<p>Some common resources like databases have their own Resin configuration
+tags. Most will use a CDI-based syntax.</p>
+
+<p>Resources are stored in class-loader environments like the web-app,
+host or cluster. Since the environments are isolated from each other, a
+database "foo" configured in web-app /foo will not affect a web-app /bar.</p>
+
+<p>The CDI-style configuration is a straight mapping between XML and
+Java classes. You can instantiate Java beans, configure their CDI
+annotations and properties, and even inject other beans using JSP/EL.</p>
+
+<p>For example, the following configures a Resin clustered jcache,
+making it available as a CDI injection for any application with the same
+@Inject @Named. In other words, your application can be written using
+standard CDI injection with standard jcache and use Resin's configured
+implementation.</p>
+
+<p>The ClusterCache implementation shares cache data across the cluster.</p>
+
+<example title="Example: jcache configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin"
+        xmlns:ee="urn:java:ee">
+
+  &lt;resin:ClusterCache ee:Named="test-cache" resin:Jndi="cache/test">
+    &lt;expire-timeout>1h&lt;/expire-timeout>
+  &lt;/resin:ClusterCache>        
+   
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="Health: monitors, actions, and reports">
+
+<p web-only='true'>
+See <a href="health.xtp">health
+configuration</a> for more details on configuring the health system.
+</p>
+
+<p>Resin's health system continually monitors the server's health.</p>
+
+<ul>
+<li><b>sensors:</b> gather data from Resin internal state.</li>
+<li><b>meters:</b> save sensor and JMX data in an internal database.</li>
+<li><b>health-checks:</b> evaluate the health of a Resin system.</li>
+<li><b>actions:</b> take actions based on the Resin health like sending
+mail, gathering more detailed information, or restarting the server.</li>
+<li><b>reports:</b> prints pdf reports for the server's history.</li>
+</ul>
+
+<s2 title="Health Checks">
+
+<p>Health checks are run every few minutes, check the JVM state, and
+return a simple response whether the health is OK, WARNING, CRITICAL or
+FATAL. If you've used the Nagios administration tool, the concept
+is similar. Resin has several built-in health checks, and it's
+straight-forward to write a custom health check.</p>
+
+<p>The health check results will be logged if they are not okay, and can
+be used to trigger actions like sending mail or restarting the server.</p>
+
+<p>In the following example, the JvmDeadlockHealthCheck asks the JVM to
+check for thread deadlocks. If a deadlock is detected, the health check
+returns a fatal. The MemoryTenuredHealthCheck looks at the JVM's free memory.
+If the free memory is too low, it will force a heap garbage-collection, and
+if that fails it will return a "critical" result.</p>
+  
+<example title="Example: Health Checks">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+&lt;cluster-default>
+  
+  &lt;health:JvmDeadlockHealthCheck/>
+
+  &lt;health:MemoryTenuredHealthCheck>
+    &lt;memory-free-min>1m&lt;/memory-free-min>
+  &lt;/health:MemoryTenuredHealthCheck>
+
+&lt;/cluster-default>
+
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Health Actions">
+
+<p>Health actions can be triggered based on the health check results, JMX
+values, or as timed events. Each minute Resin will run through the health
+actions and will execute any that match their predicates.</p>
+
+<p>Built-in actions include restarting, generating reports, sending mail,
+and gathering information like thread dumps, executing custom PHP pages.
+Custom actions are straightforward to implement.</p>
+
+<p>The following Restart action will force a Resin restart if any health
+check returns a fatal or if the health checks are critical for more than
+five minutes.</p>
+
+<example title="Example: Restart Actions">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+&lt;cluster-default>
+  
+  &lt;health:Restart>
+    &lt;health:Or>
+      &lt;health:IfHealthFatal/>
+      &lt;health:IfHealthCritical time="5m"/>
+    &lt;/health:Or>
+  &lt;/health:Restart>
+
+...  
+&lt;/cluster-default>
+...
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Health Meters">
+
+<p>Health meters gather data every minute and record the data in an
+internal database for graphing in the /resin-admin or reporting as a
+PDF.</p>
+
+<p>Two examples from the standard health.xml configuration store JDK
+data from internal JDK MBeans. The first is a direct meter which saves
+the operating system's physical memory. The second is a delta meter
+which saves the JIT compilation time for the 60s interval.</p>
+
+<example title="Example: JMX meters">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+&lt;cluster-default>
+  
+  &lt;health:JmxMeter>
+    &lt;name>OS|Memory|Physical Memory Free&lt;/name>
+    &lt;objectName>java.lang:type=OperatingSystem&lt;/objectName>
+    &lt;attribute>FreePhysicalMemorySize&lt;/attribute>
+  &lt;/health:JmxMeter>
+  
+  &lt;health:JmxDeltaMeter>
+    &lt;name>JVM|Compilation|Compilation Time&lt;/name>
+    &lt;objectName>java.lang:type=Compilation&lt;/objectName>
+    &lt;attribute>TotalCompilationTime&lt;/attribute>
+  &lt;/health:JmxDeltaMeter>
+
+...  
+&lt;/cluster-default>
+...
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Health Reports">
+
+<p>The PDF reports can be customized to select the graphs and meters
+displayed. Each graph consists of a set of meters. For example, a graph
+about threads might show the JDK thread state counts (runnable, blocked, etc)
+or it might show the state of the Resin thread pool.</p>
+
+<example title="Example: Summary Report">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+&lt;cluster-default>
+  
+  &lt;health:MeterGraphPage>
+    &lt;name>Summary&lt;/name>
+    &lt;period>6h&lt;/period>
+    &lt;columns>3&lt;/columns>
+      
+    &lt;graph name="Request Count">
+      &lt;meter>Resin|Http|Request Count&lt;/meter>
+    &lt;/graph>
+      
+    &lt;graph name="Threads">
+      &lt;meter>JVM|Thread|JVM Thread Count&lt;/meter>
+      &lt;meter>Resin|Thread|Thread Count&lt;/meter>
+      &lt;meter>Resin|Thread|Thread Idle Count&lt;/meter>
+      &lt;meter>JVM|Thread|JVM Runnable Count&lt;/meter>
+      &lt;meter>JVM|Thread|JVM Blocked Count&lt;/meter>
+      &lt;meter>JVM|Thread|JVM Native Count&lt;/meter>
+      &lt;meter>JVM|Thread|JVM Waiting Count&lt;/meter>
+    &lt;/graph>
+    
+&lt;/cluster-default>
+&lt;/resin>
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Security: Authenticators and Contraints">
+
+<p web-only='true'>
+See <a href="security.xtp">security
+configuration</a> for more details on configuring security.
+</p>
+
+<p>Security can be configured using CanDI-style resources or with the
+standard servlet &lt;security-constraints.</p>
+
+<ul>
+<li><b>authenticator</b>: checks credentials (password) for users.</li>
+<li><b>login</b>: gets credentials from HTTP/servlet and passes to the authenticator.</li>
+
+<li><b>constraints</b>: allows or disallows access to resources.</li>
+</ul>
+
+<p>The following example uses form-based login to protect a /admin.jsp
+page. Only users with the "admin" role are allowed access. The
+&lt;resin:XmlAuthenticator> configures a file-based authenticator.
+The &lt;resin:FormLogin> configures form-based login. And &lt;resin:Allow>
+restricts access to the page.</p>
+
+<example title="Example: form-based authentication">
+&lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+  
+  &lt;resin:XmlAuthenticator>
+    &lt;user name="admin"
+             password="{SSHA}h5QdSulQyqIgYo7BIJ3YfnRSY56kD847"
+             role="user,admin"/>
+  &lt;/resin:XmlAuthenticator>
+
+  &lt;resin:FormLogin>
+     &lt;login-page>/login.jsp&lt;/login-page>
+     &lt;error-page>/form_error.jsp&lt;/error-page>
+  &lt;/resin:FormLogin>
+
+  &lt;resin:Allow url-pattern="/admin.jsp">
+     &lt;resin:IfUserInRole role="admin"/>
+  &lt;/resin:Allow>
+  
+&lt;/web-app>
+</example>
+
+</s1>
+
+</body>
+</document>

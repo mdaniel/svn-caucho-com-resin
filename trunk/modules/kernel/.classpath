@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/webbeans"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ejb"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jta"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/servlet16"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jpa"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jcache"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jca"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

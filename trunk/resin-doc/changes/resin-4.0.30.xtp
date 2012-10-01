@@ -1,0 +1,55 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.30 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.30 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.30 is a release candidate for 4.1.0. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="CLI: dynamic server clarification">
+
+<p>Dynamic servers are started on the command line with
+an "--elastic-server" flag. The "--elastic-server" flag lets you configure dynamic
+servers on the same machine as your triad servers.</p>
+
+<p>As before, the "--cluster" option tells Resin which cluster to
+join.</p>
+
+<example title="dynamic server start">
+unix> resinctl start --elastic-server --cluster app
+</example>
+
+</s1>
+
+<s1 title="CLI: --elastic-dns for cloud environments">
+
+<p>For cloud environments where a dynamic IP address is assigned and
+bound to a DNS value, Resin can start immediately with the --elastic-dns
+flag, and continue checking the addresses until one resolves to
+a local IP address.</p>
+
+</s1>
+
+<s1 title="Performance and Scalability">
+
+<p>See <a href="http://wiki4.caucho.com/NginX_1.2.0_versus_Resin_4.0.29_performance_tests">Wiki: Resin 4.0.x vs nginx 1.2 performance</a> for a comparison
+of Resin's performance vs nginx, a fast C-based HTTP server.</p>
+
+<p>In that benchmark, Resin serves 100,000 requests per second.</p>
+
+</s1>
+
+</body>
+</document>

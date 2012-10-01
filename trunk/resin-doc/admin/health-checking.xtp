@@ -1,0 +1,548 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Health Checking</title>
+  <description>
+  <p>Resin Professional includes a powerful and configurable system for monitoring 
+  application server health. The system is intentionally similar to the 
+  Resin's "URL Rewrite" rules, based on a configurable set of checks, conditions, 
+  and actions. The health checking system runs internal to Resin on a periodic 
+  basis. Checks are generally always performed on the local Resin node, and if 
+  actions are to be taken, they are performed against the local Resin node as 
+  well.</p>
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Configuration">
+
+<p>Health configuration is an extension of the standard Resin configuration 
+file resin.xml.  Because Resin uses 
+<a href="../admin/config-candi.xtp">CanDI</a> to create and update Java 
+objects, each XML tag exactly matches either a Java class or a Java property.
+As a result, the <a javadoc="com.caucho.health.HealthSystem">HealthSystem</a> 
+JavaDoc and the JavaDoc of the various <a javadoc="com.caucho.health.check.package-summary">checks</a>, 
+<a javadoc="com.caucho.health.action.package-summary">actions</a>, and 
+<a javadoc="com.caucho.health.predicate.package-summary">predicates</a> help 
+to supplement the documentation as much as this reference.</p>
+
+<s2 title="health.xml">
+
+<p>Resin version 4.0.16 and later includes <b>health.xml</b> as a standard 
+Resin configuration file alongside <b>resin.xml</b> and 
+<b>app-default.xml</b>.</p>
+
+<p>health.xml is imported into resin.xml as a 
+child of <code>&lt;cluster&gt;</code> or <code>&lt;cluster-default&gt;</code>.</p>
+
+<example title="Example: importing health.xml into resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+  &lt;cluster-default>  
+    ...
+    &lt;!--
+       - Admin services
+      -->
+    &lt;resin:DeployService/>
+    
+    &lt;resin:if test="${resin.professional}">
+      &lt;resin:AdminServices/>
+    &lt;/resin:if>
+
+    &lt;!--
+       - Configuration for the health monitoring system
+      -->
+    &lt;resin:if test="${resin.professional}">
+      &lt;resin:import path="${__DIR__}/health.xml" optional="true"/>
+    &lt;/resin:if>
+    ...
+  &lt;/cluster-default>
+&lt;/resin>
+</example>
+
+<example title="Example: simple health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:Restart>
+    &lt;health:IfHealthFatal/>
+  &lt;/health:Restart>
+  
+&lt;/cluster>
+</example>
+
+</s2>
+
+<s2 title="health: namespace">
+
+<p>health.xml introduces a new XML namespace, <var>health:</var>, 
+defined by <code>xmlns:health="urn:java:com.caucho.health"</code>.  
+<code>health:</code> separates health objects from standard <code>resin:</code> 
+elements for clarity and performance.  The packages references by 
+<code>health:</code> are:</p>
+<ul>
+ <li><a javadoc="com.caucho.health.package-summary">com.caucho.health</a></li>
+ <li><a javadoc="com.caucho.health.check.package-summary">com.caucho.health.check</a></li> 
+ <li><a javadoc="com.caucho.health.action.package-summary">com.caucho.health.action</a></li>
+ <li><a javadoc="com.caucho.health.predicate.package-summary">com.caucho.health.predicate</a></li>
+ <li><a javadoc="com.caucho.health.meter.package-summary">com.caucho.health.meter</a></li>
+</ul>
+
+</s2>
+
+<s2 title="Health check naming">
+
+<s3 title="ee: namespace">
+
+<p>The <var>ee:</var> namespace is used for naming objects, for example 
+<code>ee:Named="someName"</code>, so that they may be referred to 
+by name later in the configuration. This is sometimes necessary as some health 
+conditions permit referencing a specific health check, as 
+demonstrated in the following example.</p>
+
+<example title="Example: referencing named objects">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:HttpStatusHealthCheck ee:Named="pingJspCheck">
+    &lt;url>http://localhost:8080/test-ping.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+  &lt;health:Restart>
+    &lt;health:IfHealthCritical healthCheck="${pingJspCheck}"/>
+    &lt;health:IfRechecked/>
+  &lt;/health:Restart>
+  
+&lt;/cluster>
+</example>
+
+<p>In this example, an instance of HttpStatusHealthCheck is named 
+'pingJspCheck' and referred 
+to by name in the IfHealthCritical criteria using an EL expression.  The 
+Restart action will only trigger if the health status is <var>CRITICAL</var> 
+for this specific health check and no others.</p> 
+
+</s3>
+
+<s3 title="Default names">
+
+<p>All health checks classes are annotated with <code>@Named</code>, and 
+therefore have a default name that corresponds to their bean name.  For example 
+<code>&lt;health:CpuHealthCheck/></code> can be referred to by 
+<code>${cpuHealthCheck}</code> without the use of <code>ee:Named</code>.</p>
+
+<example title="Example: default health check name">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:CpuHealthCheck>
+    &lt;warning-threshold>95&lt;/warning-threshold>
+  &lt;/health:CpuHealthCheck>
+  
+  &lt;health:DumpThreads>
+    &lt;health:IfHealthWarning healthCheck="${cpuHealthCheck}"/>
+  &lt;/health:DumpThreads>  
+  
+&lt;/cluster>
+</example>
+
+</s3>
+
+<s3 title="Duplicate names">
+
+<p>Duplicate health check names are not permitted.  Resin will fail to 
+startup due to invalid configuration in this case.  This can be caused by 
+configuring duplicate checks without using <code>ee:Named</code>, or 
+by configuring more than one check with the same name.  The following examples 
+demonstrate both illegal cases.</p>
+
+<example title="Example: illegal unnamed duplicate checks">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:HttpStatusHealthCheck">
+    &lt;url>http://localhost:8080/test1.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+  &lt;health:HttpStatusHealthCheck">
+    &lt;url>http://localhost:8080/test2.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+&lt;/cluster>
+</example>
+
+<p>In the preceding example, use of <code>ee:Named</code> is required.</p>
+
+<example title="Example: illegal duplicate names">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:HttpStatusHealthCheck" ee:Named="healthCheck">
+    &lt;url>http://localhost:8080/test1.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+  &lt;health:CpuHealthCheck ee:Named="healthCheck">
+    &lt;warning-threshold>95&lt;/warning-threshold>
+  &lt;/health:CpuHealthCheck>
+  
+&lt;/cluster>
+</example>
+
+<p>In the preceding example, the health check names must be different, regardless 
+of the type of check.</p>
+
+</s3>
+
+</s2>
+
+<s2 title="Default health configuration">
+
+<p>If for any reason you are missing health.xml, for example you are upgrading from an 
+older version of Resin and don't have the health.xml import in resin.xml, 
+there's no need to worry.  Resin creates some checks by default regardless of 
+the presence of health.xml.  Furthermore, Resin will detect if no checks are 
+configured and setup default actions and conditions.</p>
+
+<s3 title="Standard health checks">
+
+<p>The following health checks are considered critical to standard operation 
+and thus will be created by Resin regardless of the presence of 
+health.xml.  If you wish to disabled any of these standard health checks, 
+configure the check in health.xml and set the attribute 
+<code>enabled="false"</code>.</p>
+
+<ul>
+ <li><a href="#health:JvmDeadlockHealthCheck">&lt;health:JvmDeadlockHealthCheck></a></li>
+ <li><a href="#health:MemoryTenuredHealthCheck">&lt;health:MemoryTenuredHealthCheck></a></li>
+ <li><a href="#health:MemoryPermGenHealthCheck">&lt;health:MemoryPermGenHealthCheck></a></li>
+ <li><a href="#health:CpuHealthCheck">&lt;health:CpuHealthCheck></a></li>
+ <li><a href="#health:TransactionHealthCheck">&lt;health:TransactionHealthCheck></a></li>
+ <li><a href="#health:HealthSystemHealthCheck">&lt;health:HealthSystemHealthCheck></a></li>
+</ul>
+
+</s3>
+
+<s3 title="Default actions">
+
+<p>If any <a href="#Health checks">health checks</a> are configured besides the 
+standard checks mentioned above, Resin will assume the user is using health.xml 
+and will not setup any <a href="#Health actions">health actions</a>.  If 
+however health.xml is missing or empty, the following basic actions will be 
+created.</p>
+
+<example>
+  &lt;health:Restart>
+    &lt;health:IfHealthFatal/>
+  &lt;/health:Restart>
+</example>
+
+</s3>
+
+</s2>
+
+</s1>
+
+<include-defun name="health:HealthSystem"/>
+
+<s1 title="Health checks">
+
+<p>Health checks are status monitors which are executed on a periodic basis 
+by the health system to determine an individual health status.  Health checks 
+are designed to be simple; repeatedly evaluating the same data.  The 
+health system determines an overall Resin health status by aggregating the 
+results of all the configured health checks.</p>
+
+<s2 title="Health status">
+<p>Every time a health check executes it produces a 
+<a javadoc="com.caucho.env.health.HealthStatus">HealthStatus</a> and a 
+message.  The 
+following is a list of all health statuses and their generally implied 
+meaning.</p>
+
+<deftable title="HealthStatus">
+  <tr>
+    <th>name</th>
+    <th>ordinal value</th>
+    <th>description</th>
+  </tr>
+  <tr>
+    <td>UNKNOWN</td>
+    <td>0</td>
+    <td>Health check has not yet executed or failed to execute properly; status is inconclusive.</td>
+  </tr>
+  <tr>
+    <td>OK</td>
+    <td>1</td>
+    <td>Health check reported healthy status.  This does not imply recovery.</td>
+  </tr>
+  <tr>
+    <td>WARNING</td>
+    <td>2</td>
+    <td>Health check reported warning threshold reached or critical is possible.</td>
+  </tr>
+  <tr>
+    <td>CRITICAL</td>
+    <td>3</td>
+    <td>Health check reported critical status; action should be taken.</td>
+  </tr>
+  <tr>
+    <td>FATAL</td>
+    <td>4</td>
+    <td>Health check reported fatal; restart expected.</td>
+  </tr>
+</deftable>
+
+<p>The descriptions above should be understood to be entirely dependent on 
+health action and predicate configuration.  For example, a FATAL status does 
+not imply a restart will occur unless <code>health:Restart</code> is configured 
+with the <code>health:IfHealthFatal</code> predicate, as it is in the default 
+health.xml.</p>
+
+</s2>
+
+<s2 title="System checks">
+
+<p>System checks are health checks that can only exist once per JVM due to 
+the nature of the data they sample.  Most system checks are 
+pre-configured in the default health.xml.</p>
+
+<p>Note: System checks are singletons.  Configuring duplicate system checks 
+with different names will not result in the creation of duplicate system 
+checks.  The following is technically valid configuration, but results in 
+configuring the same system check twice.</p>
+
+<example title="Example: duplicate system checks">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:CpuHealthCheck ee:Named="cpuCheck1">
+    &lt;warning-threshold>95&lt;/warning-threshold>
+  &lt;/health:CpuHealthCheck>
+  
+  &lt;health:CpuHealthCheck ee:Named="cpuCheck2">
+    &lt;warning-threshold>99&lt;/warning-threshold>
+  &lt;/health:CpuHealthCheck>
+
+&lt;/cluster>
+</example>
+
+<p>In this example, <code>warning-threshold</code> will be set to 95 and then 
+overrided to 99.</p>
+
+<include-defun name="health:ConnectionPoolHealthCheck"/>
+
+<include-defun name="health:CpuHealthCheck"/>
+
+<include-defun name="health:HealthSystemHealthCheck"/>
+
+<include-defun name="health:HeartbeatHealthCheck"/>
+
+<include-defun name="health:JvmDeadlockHealthCheck"/>
+
+<include-defun name="health:LicenseHealthCheck"/>
+
+<include-defun name="health:MemoryPermGenHealthCheck"/>
+
+<include-defun name="health:MemoryTenuredHealthCheck"/>
+
+<include-defun name="health:TransactionHealthCheck"/>
+
+</s2>
+
+<s2 title="User checks">
+
+<p>User checks are not pre-defined in health.xml; an administrator must 
+configure them in health.xml as appropriate for an application.  User checks 
+are not singletons; the same check type can be configured in health.xml more 
+than once provided they have different names.</p>
+
+<example title="Example: duplicate user checks">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;!-- Http status check 1 for database with email to database admin -->
+  
+  &lt;health:HttpStatusHealthCheck ee:Named="databaseCheck">
+    &lt;url>http://localhost:8080/databaseCheck.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+  &lt;health:SendMail>
+    &lt;to>database_team@yourdomain.com&lt;/to>
+    &lt;health:IfHealthCritical healthCheck="${databaseCheck}"/>
+    &lt;health:IfRechecked/>
+  &lt;/health:SendMail>
+  
+  &lt;!-- Http status check 2 for application with email to application admin -->
+
+  &lt;health:HttpStatusHealthCheck" ee:Named="appCheck">
+    &lt;url>http://localhost:8080/applicationTest.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+  &lt;health:SendMail>
+    &lt;to>app_team@yourdomain.com&lt;/to>
+    &lt;health:IfHealthCritical healthCheck="${appCheck}"/>
+    &lt;health:IfRechecked/>
+  &lt;/health:SendMail>
+
+&lt;/cluster>
+</example>
+
+<include-defun name="health:HttpStatusHealthCheck"/>
+
+<include-defun name="health:ExprHealthCheck"/>
+
+</s2>
+
+</s1>
+
+<s1 title="Health actions">
+
+<p>Health actions perform a task, usually in response to specific conditions, 
+or as remediation for a health check status.  Like health checks, health actions 
+are configured in health.xml and executed by the health system on a periodic 
+basis.  Health actions are usually accompanied by one or more conditions, 
+or <i>predicates</i>, but this is not required.  All actions have the potential 
+to be executed once per period, determined by evaluation of 
+associated conditions.  A health action with no conditions will execute 
+once per period.</p>  
+
+<include-defun name="health:ActionSequence"/>
+
+<include-defun name="health:CallJmxOperation"/>
+
+<include-defun name="health:DumpHeap"/>
+
+<include-defun name="health:DumpHprofHeap"/>
+
+<include-defun name="health:DumpJmx"/>
+
+<include-defun name="health:DumpThreads"/>
+
+<include-defun name="health:ExecCommand"/>
+
+<include-defun name="health:FailSafeRestart"/>
+
+<include-defun name="health:PdfReport"/>
+
+<include-defun name="health:Restart"/>
+
+<include-defun name="health:ScoreboardReport"/>
+
+<include-defun name="health:SendMail"/>
+
+<include-defun name="health:SetJmxAttribute"/>
+
+<include-defun name="health:Snapshot"/>
+
+<include-defun name="health:StartProfiler"/>
+
+</s1>
+
+<s1 title="Health conditions">
+
+<p>Health condition, or <i>predicates</i>, qualify an action to execute based 
+on a set of criteria.  The action/condition pattern is intentionally 
+similar to Resin's rewrite dispatch/condition pattern, so it should be 
+familiar to some users.  Health actions are evaluated every period. 
+Conditions prevent the execution of an action unless all condition evaluate to true.  
+A health action with no conditions will execute once per period.  When more 
+than one condition is present for an action, the default combining condion 
+is <a href="#health:And">&lt;health;And></a>.</p>
+
+<s2 title="Basic conditions">
+
+<p>Basic conditions evaluate some general criteria and return true if the 
+condition  matches.  Basic conditions do not evaluate the status of a health 
+check.  Instead they evaluate some general criteria like the time of day.</p>
+
+<include-defun name="health:IfCron"/>
+
+<include-defun name="health:IfExpr"/>
+
+<include-defun name="health:IfNotRecent"/>
+
+<include-defun name="health:IfRechecked"/>
+
+<include-defun name="health:IfUptime"/>
+
+</s2>
+
+<s2 title="Combining conditions">
+
+<p>General condition or health check conditions can be combined or negated using 
+these conditions.</p>
+
+<include-defun name="health:And"/>
+
+<include-defun name="health:Nand"/>
+
+<include-defun name="health:Nor"/>
+
+<include-defun name="health:Not"/>
+
+<include-defun name="health:Or"/>
+
+</s2>
+
+<s2 title="Health check conditions">
+
+<p>All health check conditions evaluate some aspect of the results of a health 
+check.  All optionally accept the parameter <var>health-check</var>, which 
+can reference a specific named health check.  In absence of this 
+parameter, overall aggregated Resin health will be used.</p>
+
+<include-defun name="health:IfHealthOk"/>
+
+<include-defun name="health:IfHealthWarning"/>
+
+<include-defun name="health:IfHealthCritical"/>
+
+<include-defun name="health:IfHealthFatal"/>
+
+<include-defun name="health:IfHealthUnknown"/>
+
+<include-defun name="health:IfMessage"/>
+
+<include-defun name="health:IfRecovered"/>
+
+<include-defun name="health:IfHealthEvent"/>
+
+</s2>
+
+<s2 title="Lifecycle conditions">
+
+<p>Lifecycle conditions evaluate the current state of Resin, qualifying actions 
+to execute only during a Resin lifecycle state change.</p>
+
+<include-defun name="health:OnStart"/>
+
+<include-defun name="health:OnStop"/>
+
+<include-defun name="health:OnAbnormalStop"/>
+
+<include-defun name="health:OnRestart"/>
+
+</s2>
+
+</s1>
+
+</body>
+
+</document>

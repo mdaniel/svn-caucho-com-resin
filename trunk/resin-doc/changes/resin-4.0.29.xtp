@@ -1,0 +1,37 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.29 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.29 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.29 is a bug fix release. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="CLI: dynamic server clarification">
+
+<p>Dynamic servers are started on the command line with
+an "--elastic" flag. The "--elastic" flag lets you configure dynamic
+servers on the same machine as your triad servers.</p>
+
+<p>As before, the "--cluster" option tells Resin which cluster to
+join.</p>
+
+<example title="dynamic server start">
+unix> resinctl start --elastic --cluster app
+</example>
+
+</s1>
+
+</body>
+</document>

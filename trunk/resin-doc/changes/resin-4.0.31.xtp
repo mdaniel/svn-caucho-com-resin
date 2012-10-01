@@ -1,0 +1,83 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.31 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.31 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.31 is a release candidate for 4.1.0. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+<ul>
+<li>Dynamic servers for Amazon EC2 have been improved for Resin's "Deploy Once" support.</li>
+<li>Misc bugs</li>
+</ul>
+
+</s1>
+
+<s1 title="dynamic server for Amazon EC2">
+
+<p>Resin App Server elastic deployments on EC2 have been simplified and
+improved. You can start a new Resin App Server instance, by launching
+a new instance from a saved image. Because of Resin's "Deploy Once" model,
+the deployed application will appear on the new server automatically.
+</p>
+
+<p>When you're configuring a Resin cluster, you need to configure the
+IP addresses for the hub servers (the triad). But because the local IP
+addresses on EC2 are assigned randomly and only later attached to well-known
+addresses, you need to configure the triad with well-known
+external IP addresses or dynamic DNS names. Resin will use the well-known
+addresses to discover the internal random IP addresses.</p>
+
+<p>The Resin configuration is straightforward in
+the /etc/resin/resin.properties. The permanent addresses are configured
+in <em>app_servers</em> with the "ext:" prefix. The <em>home_server</em>
+tells Resin which app server you're trying to start. The other flags and
+HTTPS ports are used by Resin to enable the internal IP discovery.</p>
+
+<p>For each hub server, you'll replace the <em>home_server</em> with the
+appropriate index.</p>
+
+<example title="resin.properties for a ec2 triad">
+home_server : app-0
+
+app_servers : ext:10.0.0.1:6800 ext:10.0.0.2:6800 ext:10.0.0.3:6800
+
+app.https : 8443
+
+elastic_cloud_enable : true
+remote_admin_enable : true
+cluster_system_key : changeme
+</example>
+
+<p>After configuring the hub, you'll configure the dynamic servers to
+register with the hub when they boot and attach to the cluster. Because
+every dynamic server uses the same configuration, you can create an
+Amazon EC2 snapshot image and reuse it for each server.</p>
+
+<p>In the following, the <em>elastic_server</em> value "app:1" tells Resin
+to start one dynamic server instance in the "app" cluster.</p>
+
+<example title="resin.properties for a ec2 elastic server">
+app_servers : ext:10.0.0.1:6800 ext:10.0.0.2:6800 ext:10.0.0.3:6800
+
+elastic_server : app:1
+
+elastic_cloud_enable : true
+remote_admin_enable : true
+cluster_system_key : changeme
+</example>
+
+</s1>
+
+</body>
+</document>

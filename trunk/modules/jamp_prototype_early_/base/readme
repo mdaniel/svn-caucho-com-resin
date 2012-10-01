@@ -1,0 +1,105 @@
+Updated 4/1/2012 at 10:25 PM
+
+
+Prototype project for jamp (json actor message protocol)
+See: http://hessian.caucho.com/jamp/index.xtp
+
+WebSocket JavaScript API is described here http://dev.w3.org/html5/websockets/
+http://net.tutsplus.com/tutorials/javascript-ajax/start-using-html5-websockets-today/
+
+
+
+Project Goal: 
+
+   Make calls from HTML 5.0 web application to JAMP websocket tier. DONE!
+   It works. 
+
+
+Status: 
+
+   Current Status:
+      Wrote simple JavaScript/HTML 5 client for WebSocket and it works
+      Found problem with websocket. It was a typo in the JavaScript. I hate JavaScript. No warning or error. Just did not work.
+
+
+   Older Status:
+     Wrote simple JavaScript/HTML 5 client for Ajax and it works
+     Wrote WebSocket client, and WebSocket Listeners in Java. The listeners in Java handle the message fine, but it does not seem to send back the message very well.
+     I am getting WebSocket messages to Java handlers, but they are not able to send text back yet.
+
+
+   Older Status:
+     2nd Early prototype working.
+     Prototype sent AMP message from HTTP request to Servlet.
+     I have enough where I can start writing the HTML 5 client. 
+     New class added HttpMessageSender (MessageSender).
+     Also created JampServlet which uses a ServiceInvoker and the new JampMessageReaderDecoder.
+     It works round trip. Just implemented void calls, i.e., jamp send.
+
+   Older still Status:
+     1st early prototype working. 
+     Prototype sends method calls to file system via JampFileSenderMain.
+
+   Client role of prototype:
+      JampFileSenderMain uses AmpProxyCreator passing AmpProxyCreator and interface and a MessageSender.
+      FileMessageSender just writes method calls as binary or text files to the file system.
+      AmpProxyCreator is responsible for encoding the method calls into JAMP or HAMP messages via a MethodEncoder (JampMethodEncoder or HampMethodEncoder).
+      
+      AmpProxyCreator uses simple reflection.
+      
+      In the example,  AmpProxyCreator creates a proxy EmployeeService. Calls to employeeService.addEmployee() equate to JSON files being written
+      to a directory.
+   
+      To change how the message gets sent replace FileMessageSender with WebSocketMessageSender, RESTMessageSender or STOMPMessageSender.
+
+
+   Server role of the prototype:
+      JampFileProcessorMain reads JSON files from a directory that contain JAMP messages.
+      JampFileProcessorMain uses a ServiceInvoker to invoke a method on an actual service.
+      ServiceInvoker gets bound to EmployeeServiceImpl.
+      JampFileProcessorMain invokes serviceInvoker.invokeMessage(payload) passing it the raw payload (String containing JAMP/JSON message).
+      ServiceInvoker uses two decoders to decode the Message, namely, JampMessageDecoder and JSONDecoder.
+      JampMessageDecoder is used to quickly decode the payload into a Message object (representing the fields of a JAMP message).
+      Then JSONDecoder is used to parse the message argument list.
+      
+      JSONDecoder decodes the incoming objects from the argument list into String, Integer, Double, booleans, Maps (JSON object), 
+      and Lists (JSON arrays), BUT no user classes. This can be an entire nested hierarchy as JSONDecoder is a recursive descent parser
+      that handles JSON syntax fairly well.
+      
+      ServiceInvoker finds the correct method to call on the service (method name and number of arguments must match).
+      ServiceInvoker then coerces the entire argument list (hierarchy) into Java equivalents. It converts JSON Objects (Java Map at this point)
+      into Java classes. It copies over properties from map entries. Again it does this recursively.
+      ServiceInvoker then invokes the method passing it the arguments.
+      
+      
+      Note: ServiceInvoker uses type information from the argument list as the authority on final conversion and coercion.
+      ServiceInvoker also coerces and converts from Integer, Double, Boolean (JSON types)
+      into int, short, long, double, float, byte, Integer, Short, Long, Double, Float, Byte, boolean, Boolean. 
+      The idea from Scott is that JSON payload does not need type information as methods arguments is the metadata source.
+      
+ Caveats:
+    This is prototype code. There is no logging, code conventions, etc.
+    Also this code (at this point), does not depend on anything outside of the Java SE.
+    It does not use any Cacuho classes or any library.
+    
+    
+ Known limitations (and TODO list):
+
+     JampServlet not generic. It could and should be.
+     JampListener (implements WebSocketListener) not generic either.
+     WebSocketMessageSender, STOMPMessageSender are not implemented.
+     JSONEncoder does not properly encode unicode /uXXX, tabs, formfeeds and more (it does 2 out of 9 which is fine for a prototype).
+     JSONDecoder is String/character array based, it should be Reader based.
+     JSONStringDecoder decodes all escape characters specified in JSON but does not handle null, +NAN, -NAN  
+             (minor oversights which may be okay for prototype).
+     JavaDocs mostly missing.
+     Resin coding style, mostly ignored for now, which may be ok if this is published tutorial/cookbook as it uses more common { placements.
+     ServiceInvoker does not handle List (not needed for first prototype, may be ok to leave out of prototype tutorial, easy to add).
+     Code quality prototype mode (error checking minimal, no logging, etc.)
+     Unit tesitng (not TDD, more like, just enough to feel confident that things are working) not robust
+
+     
+     
+  Next steps: 
+      HTML 5 client, Jamp Resin Web Socket Handler (WebSocketListener see http://caucho.com/resin-4.0/examples/websocket-java/)
+     

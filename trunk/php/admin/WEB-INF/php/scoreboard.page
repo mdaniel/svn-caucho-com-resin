@@ -1,0 +1,129 @@
+<?php
+require_once "WEB-INF/php/inc.php";
+
+import com.caucho.admin.action.ScoreboardAction;
+
+if (! admin_init()) {
+  return;
+}
+
+print_title("scoreboard", "Scoreboards");
+
+if (! require_professional()) {
+  return;
+}
+
+thread_display_summary_graph();
+
+thread_scoreboards();
+
+display_footer($g_page, $javascript);
+
+function thread_scoreboards()
+{
+  try {
+    $action = new ScoreboardAction();
+  } catch (Exception $e) {
+  }
+  
+  if (! $action) {
+    return;
+  }
+  
+  $json = $action->executeJson("resin", true);
+  if (! $json) {
+    return;
+  }
+
+  $dump = json_decode($json, true);
+  
+  $scoreboards =& $dump["scoreboards"];
+  $keys =& $dump["keys"];
+  
+  $row = 0;
+    
+  echo "<h2>" . gettext('Thread Scoreboards') . "</h2>\n";
+  echo "<div class='scoreboards'>";
+    
+  foreach ($scoreboards as $name => $value) {
+    echo "<div id='scoreboard-${row}'";
+    echo " class='switch scoreboard-header " . row_style($row) . "'>\n";
+    echo "$name";
+    echo "</div>";
+    echo "<pre class='scoreboard-data toggle-scoreboard-${row}'>";
+    echo chunk_split($value, 80);
+    echo "</pre>\n";
+    
+    $row++;
+  }
+    
+  echo "</div>\n";
+    
+  echo "<div class='scoreboard_key'>";
+  echo "<table id='scoreboard_key' class='data'>\n";
+  echo "<tbody>";
+
+  $row = 0;
+  foreach ($keys as $name => $value) {
+    echo "<tr class='" . row_style($row++) . "'>";
+    echo "<th scope='row'>$name</th><td>$value</td>";
+    echo "</tr>\n";
+  }
+  
+  echo "</tbody>\n";
+  echo "</table>\n";
+  echo "</div>\n";
+}
+
+function thread_display_summary_graph()
+{
+  global $g_server;
+
+  $stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+
+  enable_graph_controls();
+
+  $si = sprintf("%02d", $g_server->Index);
+
+  $width = 250;
+  $height = 150;
+
+  echo "<div style='display:inline-block;'>\n";
+  echo " <div style='float:left;padding:.5em;'>\n";
+
+  $resin_threads_params = new GraphParams("resin-threads", $width, $height);
+  $resin_threads_params->title = "Resin Threads";
+  $resin_threads_params->alt = "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.";
+
+  stat_graph($resin_threads_params,
+      array("$si|JVM|Thread|JVM Thread Count",
+          "$si|Resin|Thread|Thread Count",
+          "$si|Resin|Thread|Thread Active Count",
+          "$si|Resin|Thread|Thread Idle Count",
+          "$si|Resin|Thread|Thread Task Queue",
+          "$si|Resin|Thread|Thread Priority Queue",
+          "$si|Resin|Thread|Thread Overflow Count"));
+   
+  echo " </div>\n";
+  echo " <div style='float:right;padding:.5em;'>\n";
+
+  $jvm_threads_params = new GraphParams("jvm-threads", $width, $height);
+  $jvm_threads_params->title = "JVM Threads";
+  $jvm_threads_params->alt = "A line graph representing the number of threads in JVM thread states over the last 6 hours.";
+
+  stat_graph($jvm_threads_params,
+      array("$si|JVM|Thread|JVM Thread Count",
+          "$si|JVM|Thread|JVM Runnable Count",
+          "$si|JVM|Thread|JVM Blocked Count",
+          "$si|JVM|Thread|JVM Native Count",
+          "$si|JVM|Thread|JVM Waiting Count"));
+
+  echo " </div>";
+  echo "</div>";
+}
+
+?>
+

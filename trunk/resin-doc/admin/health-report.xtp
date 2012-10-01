@@ -1,0 +1,287 @@
+<document>
+<header>
+  <title>Health Report</title>
+  <description>
+  <p>Resin Professional includes a PDF report of your system's health.</p>
+  </description>
+</header>
+
+<body>
+<s1 title="Getting a Health Report">
+<p>test</p>
+</s1>
+
+<localtoc/>
+
+<s1 title="Getting a Health Report">
+
+<p>The quickest method to get a health report is to use the
+command-line "pdf-report". The pdf-report will ask the server to generate
+a report immediately.</p>
+
+<example title="Example: generating a PDF report">
+unix> resinctl pdf-report
+
+generated /var/resin/log/default-Summary-20110921T1218.pdf
+</example>
+
+<s2 title="resin.xml automatic pdf report generation">
+
+<p>PDFs can also be configured in the resin.xml to be generated weekly,
+or on events like a restart.</p>
+
+<example title="Example: PDF weekly summary generation">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+&lt;cluster id="">
+
+  &lt;resin:import path="${__DIR__}/health.xml"/>
+  
+  &lt;health:PdfReport>
+     &lt;path>${resin.root}/doc/admin/pdf-gen.php&lt;/path>
+     &lt;report>Summary&lt;/report>
+     &lt;snapshot/>
+     &lt;mailto>user@example.com&lt;/mailto>
+     &lt;profile-time>60s&lt;/profile-time>
+     
+     &lt;health:IfCron value="0 0 * * 0"/>
+   &lt;/health:PdfReport>
+
+   ...
+&lt;/cluster>   
+&lt;/resin>   
+</example>
+
+<p>The previous example generates weekly report by creating a
+snapshot (heap, threads, jmx, and profile), generating the PDF, and
+mailing the report to <em>user@example.com</em>.</p>
+
+<p>The next example generates a PDF on a restart by the watchdog system.</p>
+
+<example title="Example: PDF watchdogreport">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+&lt;cluster id="">
+
+  &lt;resin:import path="${__DIR__}/health.xml"/>
+  
+  &lt;health:PdfReport>
+     &lt;path>${resin.root}/doc/admin/pdf-gen.php&lt;/path>
+     &lt;title>Restart&lt;/title>
+     &lt;watchdog/>
+     &lt;mailto>user@example.com&lt;/mailto>
+     
+     &lt;health:OnRestart/>
+   &lt;/health:PdfReport>
+
+   ...
+&lt;/cluster>   
+&lt;/resin>   
+</example>
+
+</s2>
+</s1>
+
+<s1 title="Report Overview">
+
+<ul>
+<li><b>Summary</b>: The key JVM, OS and Resin versions.</li>
+<li><b>Meter Graphs</b>: Graphs of statistics
+over the reported time.</li>
+<li><b>Heap Dump</b>: The top heap memory usage.</li>
+<li><b>CPU Profile</b>: A CPU profile of the system, showing the most active locations.</li>
+<li><b>Thread Dump</b>: All the threads in Resin at the time
+the snapshot was taken.</li>
+<li><b>Log Report</b>: The most recent "warning" level messages from
+java.util.logging.</li>
+<li><b>JMX Dump</b>: Data from all the JMX mbeans at the time
+the snapshot was taken.</li>
+</ul>
+
+<p>The reports are designed be used in several situations:</p>
+
+<ul>
+<li><b>bug report/support</b>: for Resin's own support, it's much easier
+to debug a problem when we have a full snapshot to work from.</li>
+<li><b>restart/crach analysis</b>: if the JVM crashes for some
+reason, the watchdog system report can help track down the cause.</li>
+<li><b>CPU and performance</b>: if the JVM shows unexpected CPU use or
+sluggish performance, the report can help show the main causes.</li>
+<li><b>thread spikes and locking</b>: the thread dump and CPU can be
+used to track down locked code.</li>
+</ul>
+
+</s1>
+
+<s1 title="Heap Dump">
+
+<p>The heap dump gives a quick overview of the memory allocation of the
+system. It's generally useful as a check for any unusual allocations.</p>
+
+<p>The heap dump is sorted by "self+desc", which is the objects own size
+plus its descendant size. A <em>java.lang.String</em> for example would
+include the <em>char[]</em> as part of its "self+desc".</p>
+
+<p>The following is an example of a basic idle Resin heap dump.</p>
+
+<example title="Example: Heap Dump">
+ Class Name                                self+desc  self  count
+
+ byte[]                                     22.23M  22.23M   14741
+ com.caucho.db.block.Block                  20.28M  134.9K    2410
+ char[]                                     13.89M  13.89M  122606
+ com.caucho.util.LruCache                    7.52M   30.4K     317
+ java.lang.String                            7.15M   1.97M   61426
+ ...
+</example>
+
+<p>The first items, the <em>byte[]</em> and <em>Block</em> are
+primarily Resin's internal proxy cache and distributed cache database.
+Notice that the "self" for the <em>Block</em> is much smaller than its.
+"self+desc", because each <em>Block</em> has a large <em>byte[]</em> buffer.</p>
+
+<p>Similarly, the <em>String</em> "self+desc" is much large than
+its "self" because it includes the <em>char[]</em> buffer.</p>
+
+<s2 title="ClassLoader Heap Dump">
+
+<p>The Heap Dump section has a separate ClassLoader heap dump section which
+just displays the ClassLoader usage. You can use this report to check for
+class-based memory leaks.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="Thread Dump">
+
+<p>For CPU problems and stuck threads, the Thread Dump will show what
+each thread is doing in the system. You can use the report to see
+if many threads are piled up in an unusual location, like and unexpected
+lock, or track down a spinning thread.</p>
+
+<p>The thread dump report merges threads which share the same stack
+trace. The merged threads will all be listed together, followed by their
+stack trace.</p>
+
+<p>Blocked threads and the lock's owning thread are grouped together, so
+it's easier to see which thread is preventing many threads from continuing.</p>
+
+<p>The following example shows a normal blocking situation. The JDK's
+SSL implementation only allows one thread to accept a connection at a time.
+All other threads will wait for the first thread. In this case, the thread
+named <em>"http://*:8444-17"</em> owns the <em>SocksSocketImpl</em>. Three
+threads are waiting in line for the lock: <em>"http://*:8444-1"</em>,
+<em>"http://*:8444-1"</em>, and <em>"http://*:8444-1"</em>.</p>
+
+<example title="Example: Thread Dump">
+http://*:8444-17
+    java.net.PlainSocketImpl.socketAccept
+    -- locked java.net.SocksSocketImpl@1199747469
+    java.net.PlainSocketImpl.accept
+    java.net.ServerSocket.implAccept
+    ...
+    com.caucho.env.thread.ResinThread.runTasks
+    com.caucho.env.thread.ResinThread.run
+  
+http://*:8444-1
+  waiting on java.net.SocksSocketImpl@4782b18d owned by [126] http://*:8444-17
+http://*:8444-10
+  waiting on java.net.SocksSocketImpl@4782b18d owned by [126] http://*:8444-17
+http://*:8444-11
+  waiting on java.net.SocksSocketImpl@4782b18d owned by [126] http://*:8444-17
+    java.net.PlainSocketImpl.accept
+    java.net.ServerSocket.implAccept
+    com.sun.net.ssl.internal.ssl.SSLServerSocketImpl.accept
+    ...
+    com.caucho.env.thread.ResinThread.runTasks
+    com.caucho.env.thread.ResinThread.run
+
+...
+</example>
+
+</s1>
+
+<s1 title="CPU Profile">
+
+<p>Because the CPU profile is calculated by repeated thread dumps, it's
+possible for a single stack trace to have more than 100% of the time when
+multiple threads are waiting at the same place.</p>
+
+<p>You may need to skip the first set of waiting threads to see the
+profile traces you're interested in.</p>
+
+<example title="Example: CPU Profile">
+CPU Profile
+
+Time:    60.1s
+GC-Time: 0.303s
+Ticks:   601
+Sample-Period: 100
+End: 2011-09-21 16:33
+
+5000.00% 3005.00s  com.caucho.vfs.JniSocketImpl.nativeAccept()  RUNNABLE (JNI)
+                   com.caucho.vfs.JniSocketImpl.nativeAccept()
+                   com.caucho.vfs.JniSocketImpl.accept()
+                   com.caucho.vfs.JniServerSocketImpl.accept()
+                   com.caucho.network.listen.TcpSocketLinkListener.accept()
+                   com.caucho.network.listen.TcpSocketLink.accept()
+                   com.caucho.network.listen.TcpSocketLink.handleAcceptTask()
+
+3564.23% 2142.10s  com.caucho.env.thread.ResinThread.waitForTask()   WAITING
+                   sun.misc.Unsafe.park()
+                   java.util.concurrent.locks.LockSupport.park()
+                   com.caucho.env.thread.ResinThread.waitForTask()
+                   com.caucho.env.thread.ResinThread.runTasks()
+                   com.caucho.env.thread.ResinThread.run()
+
+...
+</example>
+
+</s1>
+
+<s1 title="Logging">
+
+<p>The most recent warning logs are reported as part of the heap dump.</p>
+
+<example title="Example: Warning Logs">
+Log(Warning)
+
+2011-09-21 11:06:07 warning  WarningService: Resin restarting due to
+                                    configuration change
+</example>
+
+</s1>
+
+<s1 title="JMX Dump">
+
+<p>The JMX dump includes the full report of all the JMX MBeans in the system
+along with their values. Using this part of the report is
+somewhat specialized, either checking configured values against
+expectations or looking at statistics that aren't graphed as part of the
+metering system.</p>
+
+<p>The JMX beans are sorted alphabetically.</p>
+
+<example title="Example: JMX Dump">
+JMX Dump
+
+JMImplementation:type=MBeanServerDelegate
+   ImplementationName     Resin-JMX
+   ImplementationVendor   Caucho Technology
+   ImplementationVersion  Resin-4.0.s110921
+   MBeanServerId          Resin-JMX
+   SpecificationName      Java Management Extensions
+   SpecificationVendor    Sun Microsystems
+   SpecificationVersion  1.4
+    
+com.sun.management:type=HotSpotDiagnostic
+  ...
+
+</example>
+
+</s1>
+
+</body>
+
+</document>

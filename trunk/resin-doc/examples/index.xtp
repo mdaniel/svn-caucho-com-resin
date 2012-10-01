@@ -1,0 +1,95 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0 Tutorials and Examples</title>
+  </header>
+
+  <body>
+    <s1 title="Tutorials and Examples">
+    	<p>
+	<a href="http://wiki4.caucho.com/Java_EE_Tutorial_covering_JSP_2.2,_and_Servlets_3.0">
+        Java EE Tutorial covering JSP and Servlet development</a>
+	</p>
+
+
+
+    	<s2 title="Candi: Java EE 6 | CDI and Java Dependency Injection (a.k.a. IoC)">
+	    <ol>
+	    <li>
+    	    <a href="http://wiki4.caucho.com/Resin_4_CDI_Dependency_Injection_Application_Configuration_Example">CDI Dependency Injection Application Configuration Example</a>
+	    </li>
+	    <li>
+	    <a href="http://wiki4.caucho.com/Resin_4_CDI_Dependency_Injection_Basic_Example">CDI Dependency Injection Basic Example</a>
+	    </li>
+
+	    <li><a href="http://wiki4.caucho.com/Resin_4_CDI_Dependency_Injection_Example">CDI Dependency Injection Example (Java EE 6)</a>
+	    </li>
+
+	    <li><a href="http://wiki4.caucho.com/Resin_4_CDI_Dependency_Injection_Periodic_Task_Example">Resin 4 CDI Dependency Injection Periodic Task Example</a>
+	    </li>
+            <li>
+	    <a href="http://wiki4.caucho.com/Example_of_Resin_4%27s_JUnit_support_for_unit_testing_with_CDI">Examples of using Resin's JUnit CDI framework for unit testing Java EE 6 applications</a>
+            </li>
+	    </ol>
+	</s2>
+
+	<s2 title="Other Resin Java Application Server tutorials">
+	    <ol>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Database_Setup">JDBC Resin Setup, plain and CDI/Java Dependency Injection
+		</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Java_EE_Application_Server_EJB_Tutorial">Resin's EJB support as part of its support of Java EE 6
+		</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Security_Tutorial">Using Java EE Security in Resin
+		</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Java_EE_Basic_Servlet,_Comet,_and_WebSocket_Tutorial">Basic Servlet Tutorial covering Servlets, Comet and WebSockets
+		</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Application_Server_JMX_Tutorial">JMX Tutorial covering Resin's JMX support used for application server management
+		</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Java_EE_Servlet_tutorial_:_Adding_MySQL_and_JDBC_to_bookstore_example">Using Resin Java Application Server with MySQL
+		</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Understanding_WebSockets_versus_Ajax/REST_for_Java_EE_Developers">Understanding WebSockets versus Ajax/REST for Java EE Developers"</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Java_EE_Java_Application_Server_JMS_Support_Tutorial">JMS: Resin the Java Application Server | Java EE | Java Messaging Service Tutorial</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_built-in_fast_PHP_support_called_Quercus_:_covers_Java_integration,_JSON_support_and_more">Resin 4 built-in fast PHP support called Quercus : Covers Java integration, JSON support and more</a>
+		</li>
+	    </ol>
+	</s2>
+
+    	<s2 title="Remoting and Hessian">
+	    <ol>
+	    <li>
+    	    <a href="http://wiki4.caucho.com/Hessian_Service_Example">Hessian Service Example</a>
+	    </li>
+	    <li>
+    	    <a href="http://wiki4.caucho.com/Hessian_Add_Example">Hessian Math Service Example</a>
+	    </li>
+	    <li>
+	    <a href="http://wiki4.caucho.com/Hessian_Serialize_Example">Hessian Serialize Example</a>
+	    </li>
+	    <li>
+	    <a href="http://wiki4.caucho.com/Does_Resin_4_Support_Remoting">Does Resin 4 support EJB remoting?</a>
+	    </li>
+	    </ol>
+	</s2>
+
+    </s1>
+
+
+  </body>
+</document>

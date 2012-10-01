@@ -1,0 +1,62 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 4.0</version>
+    <title>Resin Eclipse Support</title>
+
+    <description>
+<p>Resin includes excellent support for Eclipse. The Resin Eclipse plugin is based on the proven Eclipse
+<i>Web Tools Platform (WTP)</i> included by default in the <i>Eclipse IDE for Java EE 
+Developers</i>. Using the Resin plugin you can start servers, stop servers,
+deploy/undeploy applications, debug on the server and so on. You can even
+automatically download and install the latest version of Resin or apply 
+for a development license for Resin Pro. The Eclipse plugin is by far the 
+easiest way to get started with Resin.</p>
+    </description>
+  </header>
+
+  <body>
+<s1 title="Installing the Resin Plugin">
+
+<p>The Resin Eclipse plugin supports Helios (Eclipse 3.6) and above.
+Indigo (Eclipse 3.7) and above already comes with the Resin plugin
+registered. To download the Resin plugin, go to the 'New Server' dialog
+and click on 'Download additional server adapters'. In the 
+'Install New Extension' dialog, you'll see Resin as an option.</p>
+
+<p><figure src="eclipse_new_extension.png" alt="Installing Resin Eclipse Plugin"/></p>
+
+<p>Once the plugin is installed, you'll see Resin 4.0 as an option in the 
+'New Server' dialog. When you select Resin, the wizard will take you 
+through the steps to create a server instance in Eclipse.</p>
+
+<p><figure src="new_server_resin.png" alt="Creating new Resin Server"/></p>
+
+<p>If you're using Helios, you will need to install the Resin plugin yourself 
+directly from the Resin Eclipse plugin website 
+(<a href="http://www.caucho.com/eclipse/">http://www.caucho.com/eclipse/</a>).
+You can do this by registering the plugin website as an Available Software Site
+in Eclipse. Once you've done that, you'll be able to install the plugin manually.</p>
+
+<p><figure src="install_resin_plugin.png" alt="Installing Resin Eclipse Plugin Manually"/></p>
+
+</s1>
+
+<s1 title="Using the Eclipse Plugin">
+
+<p>The Resin plugin supports all of the common server operations supported by WTP. You can 
+start a server, stop a server, restart a server, debug on the server (including debugging remote 
+servers), profile a server, add/remove projects to the server, clean the server, 
+deploy/redeploy applications and so on. These operations are accessed either by right-clicking 
+the server instance or right-clicking a project associated with a Resin server. If you are an 
+experienced Eclipse user you should feel right at home.</p>
+
+<p><figure src="eclipse_server_operations.png" alt="Using the Resin Eclipse Plugin"/></p>
+
+<p>For greater details on the Resin Eclipse plugin, check out the 
+<a href="http://wiki.caucho.com/Eclipse">Caucho Wiki page for Eclipse</a>.</p>
+
+</s1>
+
+</body>
+</document>
