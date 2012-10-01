@@ -36,6 +36,7 @@ import javax.el.ELException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SuppressWarnings("serial")
 public class MethodExpr extends Expr {
-  private ConcurrentHashMap<Class<?>,MethodCall> _methodMap
+  private transient ConcurrentHashMap<Class<?>,MethodCall> _methodMap
     = new ConcurrentHashMap<Class<?>,MethodCall>();
   
   private Expr _expr;
@@ -124,13 +125,13 @@ public class MethodExpr extends Expr {
     if (type == null)
       return null;
     
-    MethodCall method = _methodMap.get(type);
+    MethodCall method = getMethodMap().get(type);
     
     if (method == null) {
       method = findMethodImpl(type);
 
       if (method != null)
-        _methodMap.put(type, method);
+        getMethodMap().put(type, method);
     }
     
     return method;
@@ -171,6 +172,15 @@ public class MethodExpr extends Expr {
     }
     
     return findMethod(type.getSuperclass());
+  }
+  
+  private Map<Class<?>,MethodCall> getMethodMap()
+  {
+    if (_methodMap == null) {
+      _methodMap = new ConcurrentHashMap<Class<?>,MethodCall>();
+    }
+      
+    return _methodMap;
   }
   
   static Object evalArg(Class<?> cl, Expr expr, ELContext env)
