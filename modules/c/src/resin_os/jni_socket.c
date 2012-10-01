@@ -929,7 +929,6 @@ Java_com_caucho_vfs_JniSocketImpl_nativeIsEof(JNIEnv *env,
                                               jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
-  struct pollfd poll_item[1];
   int fd;
   int result;
   char buffer[1];
