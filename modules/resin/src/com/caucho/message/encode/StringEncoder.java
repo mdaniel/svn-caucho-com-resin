@@ -27,18 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.encode;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.caucho.util.Utf8;
 
 /**
- * local connection to the message store
+ * string encoder to utf-8
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
+public class StringEncoder extends AbstractNautilusEncoder<String>
+{
+  public static final StringEncoder ENCODER = new StringEncoder();
+  
   @Override
-  public MessageSender<?> build()
+  public void encode(OutputStream os, String value)
+    throws IOException
   {
-    return new LocalSender(this);
+    os.write(NautilusCodes.STRING.getValue());
+    encodeLength(os, value.length());
+    Utf8.write(os, value);
   }
 }

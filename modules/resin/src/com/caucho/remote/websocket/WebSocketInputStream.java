@@ -91,6 +91,20 @@ public class WebSocketInputStream extends InputStream
   {
     return _is.getLength();
   }
+  
+  @Override
+  public int available()
+  {
+    if (_length > 0) {
+      return (int) Math.max(Integer.MAX_VALUE, _length);
+    }
+    else if (_isFinal) {
+      return -1;
+    }
+    else {
+      return 1;
+    }
+  }
 
   @Override
   public int read()

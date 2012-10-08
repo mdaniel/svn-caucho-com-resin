@@ -30,23 +30,25 @@
 package com.caucho.message.common;
 
 import com.caucho.message.DistributionMode;
+import com.caucho.message.MessageDecoder;
 import com.caucho.message.MessageReceiver;
 import com.caucho.message.MessageReceiverFactory;
+import com.caucho.message.MessageReceiverListener;
 import com.caucho.message.SettleMode;
 import com.caucho.message.SettleTime;
-import com.caucho.util.L10N;
+import com.caucho.message.encode.NautilusDecoder;
 
 /**
  * local connection to the message store
  */
 abstract public class AbstractMessageReceiverFactory implements MessageReceiverFactory {
-  private static final L10N L = new L10N(AbstractMessageReceiverFactory.class);
-  
   private String _address;
   private int _prefetch;
   private SettleMode _settleMode = SettleMode.ALWAYS;
   private SettleTime _settleTime = SettleTime.QUEUE_REMOVE;
   private DistributionMode _distributionMode;
+  private MessageReceiverListener<?> _listener;
+  private MessageDecoder<?> _decoder = NautilusDecoder.DECODER;
 
   @Override
   public MessageReceiverFactory setAddress(String address)
@@ -60,6 +62,20 @@ abstract public class AbstractMessageReceiverFactory implements MessageReceiverF
   public String getAddress()
   {
     return _address;
+  }
+  
+  @Override
+  public MessageReceiverFactory setListener(MessageReceiverListener<?> listener)
+  {
+    _listener = listener;
+    
+    return this;
+  }
+  
+  @Override
+  public MessageReceiverListener<?> getListener()
+  {
+    return _listener;
   }
   
   @Override
@@ -116,6 +132,20 @@ abstract public class AbstractMessageReceiverFactory implements MessageReceiverF
   public SettleTime getSettleTime()
   {
     return _settleTime;
+  }
+  
+  @Override
+  public MessageReceiverFactory setMessageDecoder(MessageDecoder<?> decoder)
+  {
+    _decoder = decoder;
+    
+    return this;
+  }
+  
+  @Override
+  public MessageDecoder<?> getMessageDecoder()
+  {
+    return _decoder;
   }
 
   @Override

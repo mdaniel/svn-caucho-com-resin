@@ -27,18 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * local connection to the message store
+ * decode a message in the store.
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
-  {
-    return new LocalSender(this);
-  }
+public interface MessageDecoder<T>
+{
+  public T decode(InputStream is)
+    throws IOException;
 }

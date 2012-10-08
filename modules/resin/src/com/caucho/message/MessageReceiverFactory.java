@@ -29,6 +29,7 @@
 
 package com.caucho.message;
 
+
 /**
  * AMQP client receiver factory
  */
@@ -36,6 +37,10 @@ public interface MessageReceiverFactory {
   public MessageReceiverFactory setAddress(String address);
   
   public String getAddress();
+  
+  public MessageReceiverFactory setListener(MessageReceiverListener<?> listener);
+  
+  public MessageReceiverListener<?> getListener();
   
   public MessageReceiverFactory setDistributionMode(DistributionMode mode);
   
@@ -54,6 +59,10 @@ public interface MessageReceiverFactory {
   public SettleTime getSettleTime();
   
   // public MessageReceiverFactory setMessageListener(MessageListener listener);
+  
+  public MessageReceiverFactory setMessageDecoder(MessageDecoder<?> decoder);
+  
+  public MessageDecoder<?> getMessageDecoder();
   
   public MessageReceiver<?> build();
 }

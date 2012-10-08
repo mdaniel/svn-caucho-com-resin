@@ -27,18 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
-
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+package com.caucho.message;
 
 /**
- * local connection to the message store
+ * Callbacks when a sent message is settled on the broker, i.e. it
+ * has been received.
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
+@SuppressWarnings("serial")
+public class MessageException extends RuntimeException {
+  public MessageException()
   {
-    return new LocalSender(this);
+    
+  }
+  
+  public MessageException(Throwable e)
+  {
+    super(e);
+  }
+  
+  public MessageException(String msg)
+  {
+    super(msg);
+  }
+  
+  public MessageException(String msg, Throwable e)
+  {
+    super(msg, e);
   }
 }

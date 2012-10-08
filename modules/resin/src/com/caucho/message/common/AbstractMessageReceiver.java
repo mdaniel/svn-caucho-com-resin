@@ -43,6 +43,10 @@ abstract public class AbstractMessageReceiver<T> implements MessageReceiver<T> {
    * Polls the queue with a timeout.
    */
   abstract protected T pollMicros(long timeoutMicros);
+  
+  protected void onBuild()
+  {
+  }
 
   @Override
   public boolean isEmpty()

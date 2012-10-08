@@ -32,7 +32,7 @@ package com.caucho.message;
 import com.caucho.util.L10N;
 
 /**
- * Selects how a message should be treated when it's ackquired from the node.
+ * Selects how a message should be treated when it's acquired from the node.
  *   "MOVE" is like a queue, it deletes the node.
  *   "COPY" is like a topic, it copies the node.
  */

@@ -27,18 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.tourmaline;
 
+import com.caucho.message.MessageConnection;
+import com.caucho.message.MessageReceiver;
+import com.caucho.message.MessageReceiverFactory;
 import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import com.caucho.message.MessageSenderFactory;
 
 /**
  * local connection to the message store
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
+public class NautilusClientConnection implements MessageConnection {
+
   @Override
-  public MessageSender<?> build()
+  public MessageReceiver<?> createReceiver(String queueName)
   {
-    return new LocalSender(this);
+    MessageReceiverFactory factory = createReceiverFactory();
+    factory.setAddress(queueName);
+    
+    return factory.build();
+  }
+
+  @Override
+  public NautilusReceiverFactory createReceiverFactory()
+  {
+    return new NautilusReceiverFactory(this);
+  }
+
+  @Override
+  public MessageSender<?> createSender(String queueName)
+  {
+    MessageSenderFactory factory = createSenderFactory();
+    factory.setAddress(queueName);
+    
+    return factory.build();
+  }
+
+  @Override
+  public NautilusSenderFactory createSenderFactory()
+  {
+    return new NautilusSenderFactory(this);
   }
 }

@@ -27,18 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.tourmaline;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
 
 /**
- * local connection to the message store
+ * Custom serialization for the cache
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
-  {
-    return new LocalSender(this);
-  }
+public enum NautilusCode
+{
+  NULL,
+  PUBLISH,
+  RECEIVE,
+  PROPERTIES,
+  SEND,
+  FLOW,
+  ACK,
+  XA_BEGIN,
+  XA_PREPARE,
+  XA_ROLLBACK,
+  XA_COMMIT,
+  CLOSE;
 }

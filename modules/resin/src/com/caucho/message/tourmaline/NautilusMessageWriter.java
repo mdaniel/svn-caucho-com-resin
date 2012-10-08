@@ -27,18 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.tourmaline;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * local connection to the message store
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
+public class NautilusMessageWriter extends OutputStream {
+  private OutputStream _os;
+  
+  void init(OutputStream os)
   {
-    return new LocalSender(this);
+    _os = os;
+  }
+  
+  @Override
+  public void write(int value)
+    throws IOException
+  {
+    _os.write(value);
+  }
+  
+  @Override
+  public void write(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    _os.write(buffer, offset, length);
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

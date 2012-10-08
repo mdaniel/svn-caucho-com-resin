@@ -27,18 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.tourmaline;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import com.caucho.message.MessageConnectionFactory;
 
 /**
- * local connection to the message store
+ * Message facade for creating a connection
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
+public class NautilusConnectionFactoryImpl implements MessageConnectionFactory {
   @Override
-  public MessageSender<?> build()
+  public NautilusClientConnection connect()
   {
-    return new LocalSender(this);
+    return new NautilusClientConnection();
   }
 }

@@ -27,18 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
-
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+package com.caucho.message;
 
 /**
- * local connection to the message store
+ * message receiver
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
-  {
-    return new LocalSender(this);
-  }
+public interface MessageReceiverListener<T> {
+  /**
+   * Receives the next message.
+   */
+  public void onMessage(long mid, T value, MessageReceiver<T> receiver);
 }

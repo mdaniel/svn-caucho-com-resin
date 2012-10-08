@@ -29,6 +29,7 @@
 
 package com.caucho.message;
 
+
 /**
  * client sender factory
  */
@@ -44,6 +45,10 @@ public interface MessageSenderFactory {
   public MessageSenderFactory setSettleListener(MessageSettleListener listener);
   
   public MessageSettleListener getSettleListener();
+  
+  public MessageSenderFactory setMessageEncoder(MessageEncoder<?> encoder);
+  
+  public MessageEncoder<?> getMessageEncoder();
   
   public MessageSender<?> build();
 }

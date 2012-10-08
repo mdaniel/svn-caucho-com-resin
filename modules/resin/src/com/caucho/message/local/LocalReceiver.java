@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
 import com.caucho.message.DistributionMode;
+import com.caucho.message.MessageDecoder;
 import com.caucho.message.MessageReceiver;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.BrokerReceiver;
@@ -64,7 +65,7 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
   private int _prefetch;
   private int _linkCredit;
   
-  private AmqpMessageDecoder<T> _decoder;
+  private MessageDecoder<T> _decoder;
   
   private LinkedBlockingQueue<QueueEntry> _queue
     = new LinkedBlockingQueue<QueueEntry>();
@@ -75,7 +76,8 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
   {
     _address = factory.getAddress();
     _prefetch = factory.getPrefetch();
-    _decoder = (AmqpMessageDecoder) factory.getDecoder();
+
+    _decoder = (MessageDecoder) factory.getMessageDecoder();
     
     EnvironmentMessageBroker broker = EnvironmentMessageBroker.getCurrent();
     
@@ -117,10 +119,8 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
       isFlow = true;
       
       InputStream is = entry.getInputStream();
-      AmqpReader ain = new AmqpReader();
-      ain.init(is);
       
-      T value = _decoder.decode(ain, null);
+      T value = _decoder.decode(is);
 
       return value;
     } catch (IOException e) {

@@ -27,18 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
-
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+package com.caucho.message.encode;
 
 /**
- * local connection to the message store
+ * null decoder to ignore messages.
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
+public enum NautilusCodes {
+  NULL(0x00),
+  STRING('S');
+  
+  private final int _value;
+  
+  private NautilusCodes(int value)
   {
-    return new LocalSender(this);
+    if (value < 0 || value >= 0xff) {
+      throw new IllegalStateException();
+    }
+    
+    _value = value;
+  }
+  
+  public int getValue()
+  {
+    return _value;
   }
 }

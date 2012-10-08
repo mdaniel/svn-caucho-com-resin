@@ -27,18 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.encode;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import com.caucho.message.MessageDecoder;
 
 /**
- * local connection to the message store
+ * abstract decoder
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
-  {
-    return new LocalSender(this);
-  }
+abstract public class AbstractMessageDecoder<T> implements MessageDecoder<T>
+{
 }

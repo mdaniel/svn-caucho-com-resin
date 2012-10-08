@@ -27,18 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.encode;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.caucho.amqp.io.AmqpStreamWriter;
+import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.message.MessagePropertiesFactory;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
 /**
- * local connection to the message store
+ * null encoder to ignore messages.
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
+public class AmqpEncoder<T> extends AbstractMessageEncoder<T>
+{
+  private AmqpMessageEncoder<T> _encoder;
+  
+  public AmqpEncoder(AmqpMessageEncoder<T> encoder)
   {
-    return new LocalSender(this);
+    _encoder = encoder;
+  }
+
+  @Override
+  public void encode(OutputStream out,
+                     T value)
+    throws IOException
+  {
+    WriteStream os = new WriteStream();
+    os.init(new VfsStream(null, out));
+    AmqpStreamWriter sout = new AmqpStreamWriter(os);
+    AmqpWriter aout = new AmqpWriter();
+    aout.initBase(sout);
+    
+    MessagePropertiesFactory<T> factory = null;
+    
+    _encoder.encode(aout, factory, value);
+    
+    sout.flush();
+    os.flush();
   }
 }

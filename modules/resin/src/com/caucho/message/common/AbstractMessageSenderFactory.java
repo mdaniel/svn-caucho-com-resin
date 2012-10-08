@@ -29,9 +29,11 @@
 
 package com.caucho.message.common;
 
+import com.caucho.message.MessageEncoder;
 import com.caucho.message.MessageSenderFactory;
 import com.caucho.message.MessageSettleListener;
 import com.caucho.message.SettleMode;
+import com.caucho.message.encode.StringEncoder;
 import com.caucho.util.L10N;
 
 /**
@@ -43,6 +45,7 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   private String _address;
   private SettleMode _settleMode = SettleMode.ALWAYS;
   private MessageSettleListener _settleListener;
+  private MessageEncoder<?> _encoder = StringEncoder.ENCODER;
 
   @Override
   public AbstractMessageSenderFactory setAddress(String address)
@@ -84,5 +87,19 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   public MessageSettleListener getSettleListener()
   {
     return _settleListener;
+  }
+  
+  @Override
+  public AbstractMessageSenderFactory setMessageEncoder(MessageEncoder<?> encoder)
+  {
+    _encoder = encoder;
+    
+    return this;
+  }
+  
+  @Override
+  public MessageEncoder<?> getMessageEncoder()
+  {
+    return _encoder;
   }
 }

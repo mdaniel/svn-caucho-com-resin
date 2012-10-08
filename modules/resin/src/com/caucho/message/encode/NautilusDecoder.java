@@ -27,18 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.encode;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.caucho.message.MessageDecoder;
 
 /**
- * local connection to the message store
+ * string decoder from utf-8
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
+public class NautilusDecoder extends AbstractNautilusDecoder<Object>
+{
+  public static final NautilusDecoder DECODER = new NautilusDecoder();
+  
+  private final MessageDecoder<?> []_decoderArray;
+  
+  public NautilusDecoder()
   {
-    return new LocalSender(this);
+    _decoderArray = new MessageDecoder[256];
+    
+    for (int i = 0; i < _decoderArray.length; i++) {
+      _decoderArray[i] = new UnsupportedDecoder("code = 0x" + Integer.toHexString(i));
+    }
+    
+    _decoderArray[NautilusCodes.NULL.getValue()] = NullDecoder.DECODER;
+    _decoderArray[NautilusCodes.STRING.getValue()] = StringDecoder.DECODER;
+  }
+  
+  @Override
+  public Object decode(InputStream is)
+    throws IOException
+  {
+    int code = is.read();
+    
+    if (code < 0)
+      throw new EOFException();
+    
+    return _decoderArray[code].decode(is);
   }
 }

@@ -27,18 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.encode;
 
-import com.caucho.message.MessageSender;
-import com.caucho.message.common.AbstractMessageSenderFactory;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
 
 /**
- * local connection to the message store
+ * null encoder to ignore messages.
  */
-public class LocalSenderFactory extends AbstractMessageSenderFactory {
-  @Override
-  public MessageSender<?> build()
+public class AmqpDecoder<T> extends AbstractMessageDecoder<T>
+{
+  private AmqpMessageDecoder<T> _decoder;
+  
+  public AmqpDecoder(AmqpMessageDecoder<T> decoder)
   {
-    return new LocalSender(this);
+    _decoder = decoder;
+  }
+  
+  @Override
+  public T decode(InputStream is) throws IOException
+  {
+    AmqpReader ain = new AmqpReader();
+    ain.init(is);
+    
+    return _decoder.decode(ain, null);
   }
 }

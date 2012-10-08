@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="modules/deploy/src"/>
+	<classpathentry kind="src" path="modules/gae/src"/>
 	<classpathentry kind="src" path="modules/resource/src"/>
 	<classpathentry kind="src" path="modules/eclipselink/src"/>
 	<classpathentry kind="src" path="modules/junit/src"/>
@@ -24,7 +25,6 @@
 	<classpathentry kind="src" path="modules/webbeans/src"/>
 	<classpathentry kind="src" path="modules/webutil/src"/>
 	<classpathentry kind="src" path="modules/ecmascript/src"/>
-	<classpathentry kind="src" path="modules/gae/src"/>
 	<classpathentry kind="lib" path="modules/ext/activation.jar"/>
 	<classpathentry exported="true" kind="lib" path="modules/ext/javamail-141.jar"/>
 	<classpathentry kind="lib" path="modules/ext/jsr173_1.0_api.jar"/>

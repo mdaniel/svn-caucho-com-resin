@@ -27,55 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.local;
+package com.caucho.message.tourmaline;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
 import java.util.Map;
 
-import com.caucho.amqp.AmqpException;
 import com.caucho.message.MessageEncoder;
+import com.caucho.message.MessageException;
 import com.caucho.message.MessagePropertiesFactory;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
 import com.caucho.message.common.AbstractMessageSender;
+import com.caucho.remote.websocket.WebSocketClient;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempOutputStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 /**
  * local connection to the message store
  */
-public class LocalSender<T> extends AbstractMessageSender<T> {
-  private static final L10N L = new L10N(LocalSender.class);
+public class NautilusClientSender<T> extends AbstractMessageSender<T> {
+  private static final L10N L = new L10N(NautilusClientSender.class);
   
-  private String _address;
-  private MessageEncoder<T> _encoder;
+  private final String _address;
+  private final String _queue;
+  private final MessageEncoder<T> _encoder;
   
   private BrokerSender _publisher;
   private long _lastMessageId;
   
+  private NautilusClientSenderEndpoint<T> _endpoint;
+  
   private WriteStream _os;
   
-  LocalSender(LocalSenderFactory factory)
+  NautilusClientSender(NautilusSenderFactory factory)
   {
     super(factory);
     
     _address = factory.getAddress();
-    
     _encoder = (MessageEncoder) factory.getMessageEncoder();
     
-    EnvironmentMessageBroker broker = EnvironmentMessageBroker.getCurrent();
-        
-    Map<String,Object> nodeProperties = null;
-    _publisher = broker.createSender(_address, nodeProperties);
+    int q = _address.indexOf("?queue=");
     
-    if (_publisher == null) {
-      throw new IllegalArgumentException(L.l("'{0}' is an unknown queue",
-                                             _address));
-    }
-    
-    _os = new WriteStream();
-    _os.setReuseBuffer(true);
+    _queue = _address.substring(q + "?queue=".length());
+
+    connect();
   }
   
   public String getAddress()
@@ -83,35 +83,37 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
     return _address;
   }
   
+  MessageEncoder<T> getEncoder()
+  {
+    return _encoder;
+  }
+  
+  private void connect()
+  {
+    try {
+      _endpoint = new NautilusClientSenderEndpoint(this);
+      
+      WebSocketClient client = new WebSocketClient(_address, _endpoint);
+      
+      client.connect();
+
+      _endpoint.sendPublish(_queue);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    
+    _os = new WriteStream();
+    _os.setReuseBuffer(true);
+  }
+  
   @Override
   protected boolean offerMicros(MessagePropertiesFactory<T> factory,
                                 T value,
                                 long timeoutMicros)
   {
-    try {
-      TempOutputStream tOut = new TempOutputStream();
-     
-      _encoder.encode(tOut, value);
-
-      tOut.flush();
-      tOut.close();
-
-      long xid = 0;
-      long mid = _publisher.nextMessageId();
-      boolean isDurable = false;
-      int priority = factory.getPriority();
-      long expireTime = 0;
+    _endpoint.send(factory, value, timeoutMicros);
       
-      _lastMessageId = mid;
-      
-      _publisher.message(xid, mid, isDurable, priority, expireTime,
-                         tOut.getHead().getBuffer(), 0, tOut.getLength(), 
-                         tOut.getHead(), null);
-      
-      return true;
-    } catch (IOException e) {
-      throw new AmqpException(e);
-    }
+    return true;
   }
   
   @Override
@@ -129,11 +131,11 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   @Override
   public void close()
   {
-    BrokerSender pub = _publisher;
-    _publisher = null;
+    AbstractNautilusEndpoint endpoint = _endpoint;
+    _endpoint = null;
     
-    if (pub != null) {
-      pub.close();
+    if (endpoint != null) {
+      endpoint.close();
     }
   }
   
