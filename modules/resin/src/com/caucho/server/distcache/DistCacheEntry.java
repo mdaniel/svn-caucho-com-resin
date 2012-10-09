@@ -64,6 +64,7 @@ public class DistCacheEntry {
   private final TriadOwner _owner;
 
   private Object _key;
+  private CacheConfig _config;
 
   private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
 
@@ -83,6 +84,8 @@ public class DistCacheEntry {
     _owner = TriadOwner.getHashOwner(keyHash.getHash());
     
     _mnodeEntry.set(MnodeEntry.createInitialNull(config));
+    
+    _config = config;
   }
 
   /**
@@ -228,6 +231,34 @@ public class DistCacheEntry {
     MnodeEntry mnodeValue = loadMnodeValue(config, now, true); // , false);
 
     put(value, config, now, mnodeValue);
+  }
+
+  /**
+   * Sets the value by an input stream
+   */
+  public void put(InputStream is)
+    throws IOException
+  {
+    put(is, _config);
+  }
+
+  /**
+   * Sets the value by an input stream
+    */
+  public void put(InputStream is,
+                  CacheConfig config)
+    throws IOException
+  {
+    long now = CurrentTime.getCurrentTime();
+    long lastAccessTime = now;
+    long lastModifiedTime = now;
+    
+    putStream(is, config, 
+              config.getAccessedExpireTimeout(),
+              config.getModifiedExpireTimeout(), 
+              0,
+              lastAccessTime,
+              lastModifiedTime);
   }
 
   /**
@@ -791,6 +822,55 @@ public class DistCacheEntry {
     return value;
   }
 
+  public Object getValue()
+  {
+    long now = CurrentTime.getCurrentTime();
+    
+    MnodeEntry entry = getMnodeEntry();
+    
+    return getValue(entry, _config, now);
+  }
+  
+  private Object getValue(MnodeEntry mnodeEntry,
+                          CacheConfig config,
+                          long now)
+    {
+    if (mnodeEntry == null) {
+      return null;
+    }
+
+    Object value = mnodeEntry.getValue();
+
+    if (value != null) {
+      return value;
+    }
+
+    long valueHash = mnodeEntry.getValueHash();
+
+    if (valueHash == 0) {
+      return null;
+    }
+    
+    updateAccessTime(mnodeEntry, now);
+
+    value = _cacheService.getLocalDataManager().readData(getKeyHash(),
+                                                         valueHash,
+                                                         mnodeEntry.getValueDataId(),
+                                                         config.getValueSerializer(),
+                                                         config);
+    
+    if (value == null) {
+      // Recovery from dropped or corrupted data
+      log.warning("Missing or corrupted data in get for " 
+                  + mnodeEntry + " " + this);
+      remove(config);
+    }
+
+    mnodeEntry.setObjectValue(value);
+
+    return value;
+  }
+
   final private MnodeEntry loadMnodeValue(CacheConfig config, 
                                           long now,
                                           boolean isUpdateAccessTime)
@@ -880,6 +960,7 @@ public class DistCacheEntry {
       MnodeEntry mnodeEntry = getMnodeEntry();
       
       Cache.Entry loaderEntry = loader.load(getKeyHash().getHash(),
+                                            config.getCacheKey().getHash(),
                                             getKey(), 
                                             mnodeEntry.getValueHash(),
                                             mnodeEntry.getVersion());

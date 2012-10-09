@@ -33,8 +33,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.caucho.cloud.network.NetworkClusterSystem;
-import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
@@ -52,6 +50,9 @@ public final class CacheStoreManager implements CacheEntryFactory
   
   private final CacheEntryManager _cacheEntryManager;
   private final CacheKeyManager _keyManager;
+  
+  private final CacheRegionManager _regionManager
+    = new CacheRegionManager();
   
   private CacheDataBackingImpl _dataBacking;
   
@@ -145,6 +146,23 @@ public final class CacheStoreManager implements CacheEntryFactory
     
     if (key != null) {
       entry.setKey(key);
+    }
+    
+    return entry;
+  }
+
+  /**
+   * Returns the key entry.
+   */
+  public final DistCacheEntry getCacheEntry(HashKey hashKey,
+                                            Object oKey,
+                                            CacheConfig config)
+  {
+    DistCacheEntry entry
+      = _cacheEntryManager.createCacheEntry(hashKey, config);
+    
+    if (oKey != null) {
+      entry.setKey(oKey);
     }
     
     return entry;
@@ -309,6 +327,9 @@ public final class CacheStoreManager implements CacheEntryFactory
    */
   public void initCache(CacheImpl cache)
   {
+    CacheConfig config = cache.getConfig();
+    
+    _regionManager.putCacheConfig(config.getCacheKey(), config);
     // XXX: engine.initCache
   }
 
@@ -318,6 +339,28 @@ public final class CacheStoreManager implements CacheEntryFactory
   public void destroyCache(CacheImpl cache)
   {
     
+  }
+  
+  public void addCacheConfig(byte []cacheHash, CacheConfig config)
+  {
+    HashKey cacheKey = HashKey.create(cacheHash);
+    
+    _regionManager.putCacheConfig(cacheKey, config);
+  }
+
+  /**
+   * @param cacheHash
+   * @return
+   */
+  public CacheConfig getCacheConfig(byte[] cacheHash)
+  {
+    if (cacheHash == null) {
+      return null;
+    }
+    
+    HashKey cacheKey = HashKey.create(cacheHash);
+   
+    return _regionManager.getCacheConfig(cacheKey);
   }
 
   /**

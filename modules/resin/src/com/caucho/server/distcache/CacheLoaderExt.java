@@ -37,7 +37,8 @@ import javax.cache.Cache.Entry;
  */
 public interface CacheLoaderExt<K,V> extends CacheLoader<K,V>
 {
-  public Entry<K,V> load(byte []keyHash, 
+  public Entry<K,V> load(byte []keyHash,
+                         byte []cacheHash,
                          Object key, 
                          long valueHash,
                          long version);

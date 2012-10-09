@@ -160,6 +160,11 @@ public class CacheImpl<K,V>
   {
     return _guid;
   }
+  
+  public CacheConfig getConfig()
+  {
+    return _config;
+  }
 
   /**
    * The maximum valid time for an item.  Items stored in the cache

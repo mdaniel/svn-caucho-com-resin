@@ -138,6 +138,15 @@ public class DistCacheSystem extends AbstractResinSubSystem
   {
     _managerMap.remove(guid);
   }
+
+  /**
+   * @param cacheHash
+   * @return
+   */
+  public CacheConfig getCacheConfig(byte[] cacheHash)
+  {
+    return getDistCacheManager().getCacheConfig(cacheHash);
+  }
   
   @Override
   public int getStartPriority()

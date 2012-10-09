@@ -47,7 +47,11 @@ public class CacheLoaderAdapter<K,V> implements CacheLoaderExt<K,V>
   }
 
   @Override
-  public Entry<K,V> load(byte []keyHash, Object key, long hash, long version)
+  public Entry<K,V> load(byte []keyHash,
+                         byte []cacheHash,
+                         Object key, 
+                         long hash,
+                         long version)
   {
     return _loader.load(key);
   }

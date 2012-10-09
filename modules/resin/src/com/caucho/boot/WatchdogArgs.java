@@ -52,6 +52,7 @@ import javax.management.ObjectName;
 import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.license.LicenseCheck;
+import com.caucho.loader.Environment;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CurrentTime;
@@ -811,6 +812,7 @@ class WatchdogArgs
     ArrayList<String> args = new ArrayList<String>();
 
     try {
+      Environment.init();
       MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
       ObjectName name = new ObjectName("java.lang:type=Runtime");
 
