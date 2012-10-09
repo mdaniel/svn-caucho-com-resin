@@ -874,14 +874,17 @@ public class DistCacheEntry {
   
   private boolean loadFromCacheLoader(CacheConfig config, long now)
   {
-    CacheLoader loader = config.getCacheLoader();
+    CacheLoaderExt loader = config.getCacheLoaderExt();
 
     if (loader != null && config.isReadThrough() && getKey() != null) {
-      Object arg = null;
-      
-      Cache.Entry loaderEntry = loader.load(getKey());
-      
       MnodeEntry mnodeEntry = getMnodeEntry();
+      
+      Cache.Entry loaderEntry = loader.load(getKeyHash().getHash(),
+                                            getKey(), 
+                                            mnodeEntry.getValueHash(),
+                                            mnodeEntry.getVersion());
+      
+      mnodeEntry = getMnodeEntry();
 
       if (loaderEntry != null) {
         put(loaderEntry.getValue(), config);

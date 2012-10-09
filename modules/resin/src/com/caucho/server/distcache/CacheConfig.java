@@ -81,7 +81,7 @@ public class CacheConfig implements CacheConfiguration
   private AbstractCache.Scope _scope = Scope.CLUSTER;
 
   private boolean _isReadThrough;
-  private CacheLoader _cacheLoader;
+  private CacheLoaderExt _cacheLoader;
   
   private boolean _isWriteThrough;
   private CacheWriter _cacheWriter;
@@ -105,12 +105,28 @@ public class CacheConfig implements CacheConfiguration
   }
 
   /**
+   * The Cache will use a CacheLoader to populate cache misses.
+   */
+  public CacheLoaderExt getCacheLoaderExt()
+  {
+    return _cacheLoader;
+  }
+
+  /**
    * Sets the CacheLoader that the Cache can then use to
    * populate cache misses for a reference store (database)
    */
   public void setCacheLoader(CacheLoader cacheLoader)
   {
-    _cacheLoader = cacheLoader;
+    if (cacheLoader == null) {
+      _cacheLoader = null;
+    }
+    else if (cacheLoader instanceof CacheLoaderExt) {
+      _cacheLoader = (CacheLoaderExt) cacheLoader;
+    }
+    else {
+      _cacheLoader = new CacheLoaderAdapter(cacheLoader);
+    }
   }
 
   @Override

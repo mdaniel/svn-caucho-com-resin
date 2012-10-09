@@ -49,6 +49,7 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
+import javax.cache.CacheWriter;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.Filter;
@@ -143,6 +144,28 @@ public class AbstractCache
   public void setCacheLoader(CacheLoader loader)
   {
     _config.setCacheLoader(loader);
+  }
+  
+  @Configurable
+  public void setReadThrough(boolean isReadThrough)
+  {
+    _config.setReadThrough(isReadThrough);
+  }
+  
+  /**
+   * Sets the CacheWrite that the Cache can then use to save
+   * cache misses from a reference store (database).
+   */
+  @Configurable
+  public void setCacheWriter(CacheWriter writer)
+  {
+    _config.setCacheWriter(writer);
+  }
+  
+  @Configurable
+  public void setWriteThrough(boolean isWriteThrough)
+  {
+    _config.setWriteThrough(isWriteThrough);
   }
 
   /**

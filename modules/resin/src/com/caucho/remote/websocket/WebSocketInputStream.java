@@ -57,7 +57,6 @@ public class WebSocketInputStream extends InputStream
   private boolean _isFinal = true;
 
   public WebSocketInputStream(FrameInputStream is)
-    throws IOException
   {
     _is = is;
   }
