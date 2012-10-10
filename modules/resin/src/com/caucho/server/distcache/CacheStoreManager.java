@@ -60,8 +60,10 @@ public final class CacheStoreManager implements CacheEntryFactory
   private final LocalDataManager _localDataManager;
   private final LocalStoreManager _localStoreManager;
   
-  private ConcurrentHashMap<HashKey,CacheMnodeListener> _cacheListenMap
+  private final ConcurrentHashMap<HashKey,CacheMnodeListener> _cacheListenMap
     = new ConcurrentHashMap<HashKey,CacheMnodeListener>();
+  
+  private final CacheConfig _defaultCacheConfig = new CacheConfig();
   
   private boolean _isCacheListen;
   
@@ -126,6 +128,11 @@ public final class CacheStoreManager implements CacheEntryFactory
   public CacheKeyManager getKeyManager()
   {
     return _keyManager;
+  }
+  
+  public final CacheConfig getDefaultCacheConfig()
+  {
+    return _defaultCacheConfig;
   }
   
   public void addCacheListener(HashKey cacheKey, CacheMnodeListener listener)
@@ -197,6 +204,11 @@ public final class CacheStoreManager implements CacheEntryFactory
   public DistCacheEntry createCacheEntry(HashKey hashKey, CacheConfig config)
   {
     TriadOwner owner = TriadOwner.getHashOwner(hashKey.getHash());
+    
+    if (config == null) {
+      // XXX: problems with overriding and create order
+      config = getDefaultCacheConfig();
+    }
 
     return new DistCacheEntry(this, hashKey, owner, config);
   }

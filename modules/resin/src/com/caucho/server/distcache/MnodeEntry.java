@@ -197,6 +197,24 @@ public final class MnodeEntry extends MnodeValue {
                           now, now, false, true);
   }
   
+  public MnodeEntry updateModifiedTime(long now)
+  {
+    return new MnodeEntry(getValueHash(),
+                          getValueLength(),
+                          getVersion(),
+                          getCacheHash(),
+                          getFlags(),
+                          getAccessedExpireTimeout(),
+                          getModifiedExpireTimeout(),
+                          getLeaseExpireTimeout(),
+                          getValueDataId(),
+                          getValue(),
+                          now,
+                          now,
+                          isServerVersionValid(),
+                          isImplicitNull());
+  }
+  
   public long getValueDataId()
   {
     return _valueDataId;

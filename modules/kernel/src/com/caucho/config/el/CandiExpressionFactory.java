@@ -58,7 +58,7 @@ public class CandiExpressionFactory extends ExpressionFactory {
                                                  String expression,
                                                  Class<?> expectedReturnType,
                                                  Class<?>[] expectedParamTypes)
-      throws ELException
+    throws ELException
   {
     MethodExpression expr 
       = _factory.createMethodExpression(context, expression,

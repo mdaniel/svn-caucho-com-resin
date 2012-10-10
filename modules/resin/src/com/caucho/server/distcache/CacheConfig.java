@@ -84,7 +84,7 @@ public class CacheConfig implements CacheConfiguration
   private CacheLoaderExt _cacheLoader;
   
   private boolean _isWriteThrough;
-  private CacheWriter _cacheWriter;
+  private CacheWriterExt _cacheWriter;
   
   private boolean _isStoreByValue = true;
   private boolean _isStatisticsEnabled;
@@ -93,7 +93,7 @@ public class CacheConfig implements CacheConfiguration
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
 
-  private CacheEngine _engine;
+  private CacheEngine _engine = new AbstractCacheEngine();
 
   /**
    * The Cache will use a CacheLoader to populate cache misses.
@@ -148,7 +148,23 @@ public class CacheConfig implements CacheConfiguration
   
   public void setCacheWriter(CacheWriter cacheWriter)
   {
-    _cacheWriter = cacheWriter;
+    if (cacheWriter == null) {
+      _cacheWriter = null;
+    }
+    else if (cacheWriter instanceof CacheWriterExt) {
+      _cacheWriter = (CacheWriterExt) cacheWriter;
+    }
+    else {
+      _cacheWriter = new CacheWriterAdapter(cacheWriter);
+    }
+  }
+
+  /**
+   * The Cache will use a CacheWriter to write-through on puts
+   */
+  public CacheWriterExt getCacheWriterExt()
+  {
+    return _cacheWriter;
   }
 
   @Override
@@ -513,6 +529,11 @@ public class CacheConfig implements CacheConfiguration
   public CacheEngine getEngine()
   {
     return _engine;
+  }
+  
+  public int getServerIndex()
+  {
+    return getEngine().getServerIndex();
   }
 
   /**
