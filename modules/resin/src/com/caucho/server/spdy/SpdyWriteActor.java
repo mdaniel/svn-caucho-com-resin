@@ -31,8 +31,8 @@ package com.caucho.server.spdy;
 
 import java.io.IOException;
 
-import com.caucho.env.thread.ActorQueue;
-import com.caucho.env.thread.ActorQueue.ItemProcessor;
+import com.caucho.env.actor.ActorProcessor;
+import com.caucho.env.actor.ActorQueue;
 import com.caucho.util.RingItemFactory;
 import com.caucho.vfs.WriteStream;
 
@@ -41,7 +41,7 @@ import com.caucho.vfs.WriteStream;
  */
 class SpdyWriteActor 
   implements RingItemFactory<SpdyWriteItem>,
-             ItemProcessor<SpdyWriteItem>
+             ActorProcessor<SpdyWriteItem>
 {
   private static final int VERSION = 3;
   

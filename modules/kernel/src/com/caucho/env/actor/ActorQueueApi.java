@@ -27,23 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.mailbox;
-
-import com.caucho.bam.packet.Packet;
-import com.caucho.env.actor.ActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+package com.caucho.env.actor;
 
 /**
- * Queue/worker for a mailbox. 
+ * Interface for an actor queue
  */
-public class MailboxQueue2 extends ValueActorQueue<Packet>
+public interface ActorQueueApi<T>
 {
-  /**
-   * @param capacity
-   * @param processor
-   */
-  public MailboxQueue2(int capacity, ActorProcessor<Packet> processor)
-  {
-    super(capacity, processor);
-  }
+  public boolean isEmpty();
+  
+  public int getSize();
+  
+  public int getAvailable();
+  
+  public void offer(T item);
+  
+  public boolean offer(T item, boolean isWait);
+  
+  public void wake();
 }

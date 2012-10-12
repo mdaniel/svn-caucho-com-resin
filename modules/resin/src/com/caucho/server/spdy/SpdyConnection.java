@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 
 import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.AmqpReceiverFactory;
-import com.caucho.env.thread.ActorQueue;
+import com.caucho.env.actor.ActorQueue;
 import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.TcpSocketLink;

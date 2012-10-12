@@ -43,8 +43,8 @@ import javax.inject.Singleton;
 
 import com.caucho.config.ConfigException;
 import com.caucho.db.block.BlockStore;
+import com.caucho.env.actor.ActorQueue;
 import com.caucho.env.service.RootDirectorySystem;
-import com.caucho.env.thread.ActorQueue;
 import com.caucho.loader.Environment;
 import com.caucho.message.DistributionMode;
 import com.caucho.message.broker.AbstractMessageBroker;

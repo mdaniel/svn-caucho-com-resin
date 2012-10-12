@@ -27,23 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.mailbox;
-
-import com.caucho.bam.packet.Packet;
-import com.caucho.env.actor.ActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+package com.caucho.env.actor;
 
 /**
- * Queue/worker for a mailbox. 
+ * index for the disruptor.
  */
-public class MailboxQueue2 extends ValueActorQueue<Packet>
+abstract class ActorQueueIndex
 {
-  /**
-   * @param capacity
-   * @param processor
-   */
-  public MailboxQueue2(int capacity, ActorProcessor<Packet> processor)
-  {
-    super(capacity, processor);
-  }
+  abstract int get();
 }

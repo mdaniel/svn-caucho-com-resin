@@ -34,8 +34,8 @@ import java.util.logging.Filter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-import com.caucho.env.thread.ValueActorQueue;
-import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
+import com.caucho.env.actor.ActorProcessor;
+import com.caucho.env.actor.ValueActorQueue;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
@@ -147,7 +147,7 @@ abstract public class AbstractLogHandler extends Handler {
     return getClass().getSimpleName() + "[]";
   }
   
-  private class LogQueue implements ValueProcessor<LogRecord>
+  private class LogQueue implements ActorProcessor<LogRecord>
   {
     @Override
     public String getThreadName()

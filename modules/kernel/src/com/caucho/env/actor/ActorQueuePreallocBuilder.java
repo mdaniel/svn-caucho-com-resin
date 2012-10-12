@@ -27,23 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.mailbox;
+package com.caucho.env.actor;
 
-import com.caucho.bam.packet.Packet;
-import com.caucho.env.actor.ActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+import com.caucho.util.L10N;
+import com.caucho.util.RingItem;
+import com.caucho.util.RingItemFactory;
 
 /**
- * Queue/worker for a mailbox. 
+ * Interface for an actor queue
  */
-public class MailboxQueue2 extends ValueActorQueue<Packet>
+public class ActorQueuePreallocBuilder<T extends RingItem>
+  extends AbstractActorQueueBuilder<T>
 {
-  /**
-   * @param capacity
-   * @param processor
-   */
-  public MailboxQueue2(int capacity, ActorProcessor<Packet> processor)
+  private static final L10N L = new L10N(ActorQueuePreallocBuilder.class);
+  
+  private RingItemFactory<T> _factory;
+  
+  public ActorQueuePreallocBuilder<T> factory(RingItemFactory<T> factory)
   {
-    super(capacity, processor);
+    _factory = factory;
+    
+    return this;
+  }
+  
+  public RingItemFactory<T> getFactory()
+  {
+    return _factory;
+  }
+  
+  @Override
+  protected void validateBuilder()
+  {
+    super.validateBuilder();
+    
+    if (_factory == null) {
+      throw new IllegalStateException(L.l("itemFactory is required"));
+    }
+  }
+  
+  public ActorQueuePreallocApi<T> build()
+  {
+    validateBuilder();
+    
+    return new ActorQueue<T>(getCapacity(),
+                             getFactory(),
+                             getProcessors());
   }
 }

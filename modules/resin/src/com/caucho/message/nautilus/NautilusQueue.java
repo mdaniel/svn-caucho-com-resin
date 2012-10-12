@@ -29,10 +29,7 @@
 
 package com.caucho.message.nautilus;
 
-import java.util.logging.Logger;
-
 import com.caucho.db.block.BlockStore;
-import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.message.journal.JournalFile;
 import com.caucho.util.ConcurrentArrayList;
 
@@ -44,9 +41,6 @@ import com.caucho.util.ConcurrentArrayList;
  */
 class NautilusQueue
 {
-  private static final Logger log
-    = Logger.getLogger(ItemProcessor.class.getName());
-  
   private final long _qid;
   
   private QueueEntry _head;

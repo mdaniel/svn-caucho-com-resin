@@ -27,12 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.actor;
 
 /**
- * index for the disruptor.
+ * Interface for an actor queue
  */
-abstract class ActorQueueIndex
+public class ActorQueueBuilder<T> extends AbstractActorQueueBuilder<T>
 {
-  abstract int get();
+  public ActorQueueApi<T> build()
+  {
+    validateBuilder();
+    
+    return new ValueActorQueue<T>(getCapacity(), getProcessors());
+  }
 }

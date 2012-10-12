@@ -29,17 +29,13 @@
 
 package com.caucho.message.nautilus;
 
-import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.ActorQueue;
-import com.caucho.env.thread.ActorQueue.ItemProcessor;
+import com.caucho.env.actor.ActorQueue;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.ReceiverMessageHandler;
 import com.caucho.message.nautilus.NautilusQueue.QueueEntry;
-import com.caucho.util.Friend;
-import com.caucho.util.RingItemFactory;
 
 /**
  * Subscription to a destination

@@ -27,23 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.mailbox;
-
-import com.caucho.bam.packet.Packet;
-import com.caucho.env.actor.ActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+package com.caucho.env.actor;
 
 /**
- * Queue/worker for a mailbox. 
+ * Processes an actor item.
  */
-public class MailboxQueue2 extends ValueActorQueue<Packet>
+public interface ActorProcessor<T>
 {
   /**
-   * @param capacity
-   * @param processor
+   * Returns the current thread name.
    */
-  public MailboxQueue2(int capacity, ActorProcessor<Packet> processor)
-  {
-    super(capacity, processor);
-  }
+  public String getThreadName();
+
+  /**
+   * Process a single item.
+   */
+  public void process(T item) throws Exception;
+
+  /**
+   * Called when all items in the queue are processed. This can be
+   * used to flush buffers.
+   */
+  public void onProcessComplete() throws Exception;
 }

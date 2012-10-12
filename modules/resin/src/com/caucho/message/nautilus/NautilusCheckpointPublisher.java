@@ -29,9 +29,9 @@
 
 package com.caucho.message.nautilus;
 
-import com.caucho.env.thread.ActorQueue;
-import com.caucho.env.thread.ValueActorQueue;
-import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
+import com.caucho.env.actor.ActorProcessor;
+import com.caucho.env.actor.ActorQueue;
+import com.caucho.env.actor.ValueActorQueue;
 
 /**
  * Custom serialization for the cache
@@ -57,7 +57,7 @@ class NautilusCheckpointPublisher
     return isValid;
   }
   
-  class CheckpointProcessor implements ValueProcessor<Long> {
+  class CheckpointProcessor implements ActorProcessor<Long> {
     @Override
     public String getThreadName()
     {

@@ -27,14 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.actor;
 
-import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
 
 /**
  * Ring-based memory queue processed by a single worker.
  */
-abstract public class AbstractWorkerQueue<T> implements ValueProcessor<T> 
+abstract public class AbstractWorkerQueue<T> implements ActorProcessor<T> 
 {
   private final ValueActorQueue<T> _queueConsumer;
   

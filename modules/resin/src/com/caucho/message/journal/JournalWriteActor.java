@@ -31,14 +31,14 @@ package com.caucho.message.journal;
 
 import java.io.IOException;
 
-import com.caucho.env.thread.ActorQueue.ItemProcessor;
+import com.caucho.env.actor.ActorProcessor;
 
 /**
  * Actor-processor for writing to the transaction log. The actor is a
  * single-threaded process.
  */
 public class JournalWriteActor
-  implements ItemProcessor<JournalRingItem>
+  implements ActorProcessor<JournalRingItem>
 {
   private final JournalFile _journalFile;
   private String _threadName;

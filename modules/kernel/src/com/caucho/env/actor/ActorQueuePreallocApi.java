@@ -27,23 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.mailbox;
+package com.caucho.env.actor;
 
-import com.caucho.bam.packet.Packet;
-import com.caucho.env.actor.ActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+import com.caucho.util.RingItem;
 
 /**
- * Queue/worker for a mailbox. 
+ * Interface for an actor queue
  */
-public class MailboxQueue2 extends ValueActorQueue<Packet>
+public interface ActorQueuePreallocApi<T extends RingItem>
 {
-  /**
-   * @param capacity
-   * @param processor
-   */
-  public MailboxQueue2(int capacity, ActorProcessor<Packet> processor)
-  {
-    super(capacity, processor);
-  }
+  public boolean isEmpty();
+  
+  public int getSize();
+  
+  public int getAvailable();
+  
+  public T startOffer(boolean isWait);
+  
+  public void finishOffer(T item);
+  
+  public void wake();
 }

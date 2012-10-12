@@ -27,9 +27,8 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.actor;
 
-import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.util.RingItem;
 import com.caucho.util.RingItemFactory;
 
@@ -37,31 +36,48 @@ import com.caucho.util.RingItemFactory;
 /**
  * Interface for the transaction log.
  */
-public class ValueActorQueue<T>
+public class ValueActorQueue<T> implements ActorQueueApi<T>
 {
   private final ActorQueue<ValueItem<T>> _actorQueue;
  
   public ValueActorQueue(int capacity,
-                         ValueProcessor<T> processor)
+                         ActorProcessor<? super T> ...processors)
   {
-    if (processor == null)
+    if (processors == null)
       throw new NullPointerException();
     
+    ActorProcessor<ValueItem<T>> []valueProcessors;
+    
+    valueProcessors = new ActorProcessor[processors.length];
+    
+    for (int i = 0; i < processors.length; i++) {
+      valueProcessors[i] = new ValueItemProcessor(processors[i]);
+    }
+    
     _actorQueue = new ActorQueue<ValueItem<T>>(capacity,
-                                 new ValueItemFactory<T>(),
-                                 new ValueItemProcessor<T>(processor));
+                                               new ValueItemFactory<T>(),
+                                               valueProcessors);
   }
   
+  @Override
+  public int getAvailable()
+  {
+    return _actorQueue.getAvailable();
+  }
+  
+  @Override
   public boolean isEmpty()
   {
     return _actorQueue.isEmpty();
   }
   
+  @Override
   public int getSize()
   {
     return _actorQueue.getSize();
   }
   
+  @Override
   public final void offer(T value)
   {
     ActorQueue<ValueItem<T>> actorQueue = _actorQueue;
@@ -102,14 +118,6 @@ public class ValueActorQueue<T>
     return getClass().getSimpleName() + "[" + _actorQueue + "]";
   }
   
-  public interface ValueProcessor<T> {
-    public String getThreadName();
-    
-    public void process(T value) throws Exception;
-    
-    public void onProcessComplete() throws Exception;
-  }
-  
   private static final class ValueItem<T> extends RingItem {
     private T _value;
     
@@ -142,11 +150,11 @@ public class ValueActorQueue<T>
   }
   
   private static final class ValueItemProcessor<T> 
-    implements ItemProcessor<ValueItem<T>>
+    implements ActorProcessor<ValueItem<T>>
   {
-    private final ValueProcessor<T> _processor;
+    private final ActorProcessor<T> _processor;
     
-    ValueItemProcessor(ValueProcessor<T> processor)
+    ValueItemProcessor(ActorProcessor<T> processor)
     {
       _processor = processor;
     }

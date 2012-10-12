@@ -29,7 +29,7 @@
 
 package com.caucho.message.nautilus;
 
-import com.caucho.env.thread.ActorQueue;
+import com.caucho.env.actor.ActorQueue;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.TempBuffer;

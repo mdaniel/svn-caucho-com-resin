@@ -27,15 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.actor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.CurrentTime;
+import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.util.RingItem;
 import com.caucho.util.RingItemFactory;
 
@@ -44,6 +43,7 @@ import com.caucho.util.RingItemFactory;
  * Interface for the transaction log.
  */
 public final class ActorQueue<T extends RingItem>
+  implements ActorQueuePreallocApi<T>
 {
   private static final Logger log
     = Logger.getLogger(ActorQueue.class.getName());
@@ -67,7 +67,7 @@ public final class ActorQueue<T extends RingItem>
  
   public ActorQueue(int capacity,
                     RingItemFactory<T> itemFactory,
-                    ItemProcessor<? super T> ...processors)
+                    ActorProcessor<? super T> ...processors)
   {
     if (processors.length < 1)
       throw new IllegalArgumentException();
@@ -340,7 +340,7 @@ public final class ActorQueue<T extends RingItem>
     
     private final int _tailChunk;
     
-    private final ItemProcessor<? super T> _processor;
+    private final ActorProcessor<? super T> _processor;
     
     private final AtomicLong _headAllocRef;
     private final AtomicLong _headRef;
@@ -351,7 +351,7 @@ public final class ActorQueue<T extends RingItem>
     
     ActorConsumer(ActorQueue<T> queue,
                   T []ring,
-                  ItemProcessor<? super T> processor,
+                  ActorProcessor<? super T> processor,
                   AtomicLong headAllocRef,
                   AtomicLong headRef,
                   AtomicLong tailRef,
@@ -427,7 +427,7 @@ public final class ActorQueue<T extends RingItem>
 
       long nextTailEnd = nextTailEnd(head, tail, tailChunk);
       
-      final ItemProcessor<? super T> processor = _processor;
+      final ActorProcessor<? super T> processor = _processor;
       // final ActorWorker<T> nextWorker = _nextWorker;
       
       // final AtomicBoolean isWait = _isWaitRef;
@@ -545,13 +545,5 @@ public final class ActorQueue<T extends RingItem>
     {
       return getClass().getSimpleName() + "[" + _consumer + "]";
     }
-  }
-  
-  public interface ItemProcessor<T extends RingItem> {
-    public String getThreadName();
-    
-    public void process(T item) throws Exception;
-    
-    public void onProcessComplete() throws Exception;
   }
 }

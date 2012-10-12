@@ -34,8 +34,8 @@ import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.caucho.env.thread.ValueActorQueue;
-import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
+import com.caucho.env.actor.ActorProcessor;
+import com.caucho.env.actor.ValueActorQueue;
 import com.caucho.websocket.WebSocketContext;
 import com.caucho.websocket.WebSocketEncoder;
 
@@ -226,7 +226,7 @@ public class WebSocketBlockingQueue<T> implements BlockingQueue<T>
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-  static class WebSocketWriterActor<T> implements ValueProcessor<T> {
+  static class WebSocketWriterActor<T> implements ActorProcessor<T> {
     private final WebSocketContext _ws;
     private final WebSocketEncoder<T> _encoder;
     

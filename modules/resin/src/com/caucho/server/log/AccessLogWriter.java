@@ -34,9 +34,9 @@ import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.actor.AbstractWorkerQueue;
 import com.caucho.env.meter.SemaphoreMeter;
 import com.caucho.env.thread.AbstractTaskWorker;
-import com.caucho.env.thread.AbstractWorkerQueue;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.server.httpcache.TempFileService;
 import com.caucho.util.Alarm;
