@@ -27,63 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.server.distcache;
 
-import java.util.logging.*;
-import java.io.*;
+import com.caucho.util.CurrentTime;
 
 /**
- * convenience methods for io
+ * callback listener for a load complete
  */
-public class IoUtil {
-  private static final Logger log
-    = Logger.getLogger(IoUtil.class.getName());
+class DistCacheLoadTask implements Runnable {
+  private final DistCacheEntry _entry;
+  private final CacheConfig _config;
+  private final DistCacheLoadListener _listener;
   
-  public static int readInt(InputStream is)
-    throws IOException
+  DistCacheLoadTask(DistCacheEntry entry,
+                    CacheConfig config,
+                    DistCacheLoadListener listener)
   {
-    return ((is.read() << 24)
-        + (is.read() << 16)
-        + (is.read() << 8)
-        + is.read());
+    if (entry == null)
+      throw new NullPointerException();
+    
+    if (config == null)
+      throw new NullPointerException();
+    
+    if (listener == null)
+      throw new NullPointerException();
+    
+    _entry = entry;
+    _config = config;
+    _listener = listener;
   }
   
-  public static void writeInt(OutputStream os, int v)
-    throws IOException
-  {
-    os.write(v >> 24);
-    os.write(v >> 16);
-    os.write(v >> 8);
-    os.write(v);
-  }
-
-  public static void close(InputStream is)
+  public void run()
   {
     try {
-      if (is != null)
-        is.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
+      long now = CurrentTime.getCurrentTime();
+      
+      _entry.reloadValue(_config, now, true);
+    } finally {
+      _listener.onLoad(_entry);
     }
   }
 
-  public static void close(OutputStream os)
-  {
-    try {
-      if (os != null)
-        os.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-  }
-
-  public static void close(Writer os)
-  {
-    try {
-      if (os != null)
-        os.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-  }
 }

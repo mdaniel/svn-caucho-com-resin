@@ -73,12 +73,12 @@ public class DistCacheEntry {
   
   private final AtomicInteger _loadCount = new AtomicInteger();
 
-  DistCacheEntry(CacheStoreManager engine,
+  DistCacheEntry(CacheStoreManager cacheService,
                  HashKey keyHash,
                  TriadOwner owner,
                  CacheConfig config)
   {
-    _cacheService = engine;
+    _cacheService = cacheService;
     _keyHash = keyHash;
     
     _owner = TriadOwner.getHashOwner(keyHash.getHash());
@@ -847,6 +847,25 @@ public class DistCacheEntry {
   //
   // get/load operations
   //
+  
+  public void load()
+  {
+    long now = CurrentTime.getCurrentTime();
+    
+    loadMnodeValue(_config, now, true);
+  }
+  
+  public void load(CacheConfig config)
+  {
+    long now = CurrentTime.getCurrentTime();
+    
+    loadMnodeValue(config, now, true);
+  }
+  
+  public void load(DistCacheLoadListener listener)
+  {
+    loadMnodeValue(_config, listener);
+  }
 
   private Object get(CacheConfig config,
                      long now)
@@ -931,7 +950,7 @@ public class DistCacheEntry {
   {
     long now = CurrentTime.getCurrentTime();
     
-    MnodeEntry entry = loadMnodeValue(_config, now, true);
+    MnodeEntry entry = getMnodeEntry();
 
     return entry.getValueHash();
   }
@@ -1007,6 +1026,29 @@ public class DistCacheEntry {
     return mnodeEntry;
   }
 
+  final private void loadMnodeValue(CacheConfig config,
+                                    DistCacheLoadListener listener)
+  {
+    MnodeEntry mnodeEntry = loadLocalMnodeValue();
+    
+    int server = config.getServerIndex();
+    
+    long now = CurrentTime.getCurrentTime();
+    
+    if (mnodeEntry == null 
+        || mnodeEntry.isLocalExpired(server, now, config)) {
+      DistCacheLoadTask task
+        = new DistCacheLoadTask(this, config, listener);
+      
+      _cacheService.schedule(task);
+    }
+    else {
+      updateAccessTime();
+      
+      listener.onLoad(this);
+    }
+  }
+
   private boolean isLocalExpired(CacheConfig config,
                                  HashKey key,
                                  MnodeEntry mnodeEntry,
@@ -1015,9 +1057,9 @@ public class DistCacheEntry {
     return config.getEngine().isLocalExpired(config, key, mnodeEntry, now);
   }
 
-  private void reloadValue(CacheConfig config,
-                           long now,
-                           boolean isUpdateAccessTime)
+  void reloadValue(CacheConfig config,
+                   long now,
+                   boolean isUpdateAccessTime)
   {
     // only one thread may update the expired data
     if (startReadUpdate()) {

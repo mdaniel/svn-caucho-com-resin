@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
@@ -373,6 +374,14 @@ public final class CacheStoreManager implements CacheEntryFactory
     HashKey cacheKey = HashKey.create(cacheHash);
    
     return _regionManager.getCacheConfig(cacheKey);
+  }
+
+  /**
+   * @param task
+   */
+  void schedule(Runnable task)
+  {
+    ThreadPool.getCurrent().schedule(task);
   }
 
   /**
