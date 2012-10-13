@@ -154,10 +154,11 @@ public class JavaValue extends ObjectValue
   public StringValue toString(Env env)
   {
     StringValue value = _classDef.toString(env, this);
-
-    if (value == null)
+    
+    if (value == null) {
       value = env.createString(toString());
-
+    }
+    
     return value;
   }
 
@@ -168,8 +169,9 @@ public class JavaValue extends ObjectValue
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    if (_classDef.printRImpl(env, _object, out, depth, valueSet))
+    if (_classDef.printRImpl(env, _object, out, depth, valueSet)) {
       return;
+    }
 
     Set<? extends Map.Entry<Value,Value>> entrySet = entrySet();
 
@@ -510,9 +512,12 @@ public class JavaValue extends ObjectValue
    */
   public String toString()
   {
-    //return toString(Env.getInstance()).toString();
-
-    return String.valueOf(_object);
+    if (_object != null) {
+      return String.valueOf(_object);
+    }
+    else {
+      return String.valueOf(_classDef.getName());
+    }
   }
 
 
