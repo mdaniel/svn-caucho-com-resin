@@ -29,19 +29,52 @@
 
 package com.caucho.server.distcache;
 
-import javax.cache.CacheLoader;
-import javax.cache.Cache.Entry;
+import java.util.concurrent.locks.LockSupport;
 
 /**
- * Extended cache loader
+ * callback listener for a load complete
  */
-public interface CacheLoaderExt<K,V> extends CacheLoader<K,V>
-{
-  public void load(byte []keyHash,
-                   DistCacheEntry entry,
-                   byte []cacheHash,
-                   Object key, 
-                   long valueHash,
-                   long version,
-                   CacheLoaderCallback cb);
+class DistCacheEntryLoadCallback implements CacheLoaderCallback {
+  private final CacheConfig _config;
+  
+  private volatile Thread _thread;
+  private volatile boolean _isDone;
+  private volatile boolean _isValue;
+  
+  DistCacheEntryLoadCallback(CacheConfig config)
+  {
+    _config = config;
+  }
+
+  @Override
+  public void onLoad(DistCacheEntry entry, Object value)
+  {
+    entry.putInternal(value, _config);
+    
+    _isValue = value != null;
+    _isDone = true;
+    
+    Thread thread = _thread;
+    
+    if (thread != null) {
+      LockSupport.unpark(thread);
+    }
+  }
+  
+  boolean get()
+  {
+    _thread = Thread.currentThread();
+    
+    try {
+      long expire = System.currentTimeMillis() + 60 * 1000L;
+      
+      while (! _isDone && System.currentTimeMillis() < expire) {
+        LockSupport.parkUntil(expire);
+      }
+      
+      return _isValue;
+    } finally {
+      _thread = null;
+    }
+  }
 }

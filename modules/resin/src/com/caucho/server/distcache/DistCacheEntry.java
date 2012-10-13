@@ -1115,19 +1115,17 @@ public class DistCacheEntry {
     if (loader != null && config.isReadThrough() && getKey() != null) {
       MnodeEntry mnodeEntry = getMnodeEntry();
       
-      Cache.Entry loaderEntry = loader.load(getKeyHash().getHash(),
-                                            config.getCacheKey().getHash(),
-                                            getKey(), 
-                                            mnodeEntry.getValueHash(),
-                                            mnodeEntry.getVersion());
+      DistCacheEntryLoadCallback cb = new DistCacheEntryLoadCallback(config);
       
-      mnodeEntry = getMnodeEntry();
+      loader.load(getKeyHash().getHash(),
+                  this,
+                  config.getCacheKey().getHash(),
+                  getKey(), 
+                  mnodeEntry.getValueHash(),
+                  mnodeEntry.getVersion(),
+                  cb);
 
-      if (loaderEntry != null) {
-        putInternal(loaderEntry.getValue(), config);
-
-        return true;
-      }
+      return cb.get();
     }
     
     return false;
