@@ -12,6 +12,7 @@
 
 <s2 title="4.0.33 - snapshot">
 <ul>
+<li>servlet: @HandlesTypes scanning for ServletContainerInitializer</li>
 <li>hessian: IdentityIntMap needs Math.abs for System.identityHashCode (#52399, rep by S Francis)</li>
 <li>jsp-el: improve serialization for JSF (#5231, rep by Mattias Jiderhamn)</li>
 </ul>
