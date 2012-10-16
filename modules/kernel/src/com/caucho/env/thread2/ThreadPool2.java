@@ -670,10 +670,10 @@ public class ThreadPool2 implements Executor {
   
   public final void scheduleUnpark(Thread thread)
   {
-    // LockSupport.unpark(thread);
+    LockSupport.unpark(thread);
     
-    _unparkQueue.put(thread);
-    _scheduleWorker.wake();
+    // _unparkQueue.put(thread);
+    // _scheduleWorker.wake();
   }
   
   //

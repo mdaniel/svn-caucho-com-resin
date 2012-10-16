@@ -78,6 +78,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletSecurityElement;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.UnavailableException;
+import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
@@ -184,7 +185,6 @@ import com.caucho.server.security.WebResourceCollection;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webbeans.SessionContextContainer;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -429,6 +429,7 @@ public class WebApp extends ServletContextImpl
   private Ordering _absoluteOrdering;
   private List<WebAppFragmentConfig> _webFragments;
   private boolean _isApplyingWebFragments = false;
+  private ClassHierarchyScanListener _classHierarchyScanListener;
 
   /**
    * Creates the webApp with its environment loader.
@@ -503,6 +504,8 @@ public class WebApp extends ServletContextImpl
       EjbModule.setAppName(getModuleName(), _classLoader);
 
       _classLoader.addScanListener(new WebFragmentScanner());
+      
+      loadInitializers();
 
       // map.put("app", _appVar);
 
@@ -3378,12 +3381,62 @@ public class WebApp extends ServletContextImpl
     return result;
   }
 
+  private void loadInitializers()
+    throws Exception
+  {
+    Class<?> cl = ServletContainerInitializer.class;
+    
+    Enumeration<URL> e;
+    e = getClassLoader().getResources("META-INF/services/" + cl.getName());
+    
+    if (e == null) {
+      return;
+    }
+    
+    while (e.hasMoreElements()) {
+      URL url = e.nextElement();
+      
+      // might parse to check that the loader has a handles
+      
+      if (_classHierarchyScanListener == null) {
+        _classHierarchyScanListener = new ClassHierarchyScanListener(getClassLoader());
+      
+        getEnvironmentClassLoader().addScanListener(_classHierarchyScanListener);
+      }
+    }
+  }
+
   private void callInitializers()
     throws Exception
   {
     for (ServletContainerInitializer init
           : _cdiManager.loadLocalServices(ServletContainerInitializer.class)) {
+      callInitializer(init);
+    }
+    
+    _classHierarchyScanListener = null;
+  }
+  
+  private void callInitializer(ServletContainerInitializer init)
+    throws ServletException
+  {
+    HandlesTypes handlesTypes
+      = init.getClass().getAnnotation(HandlesTypes.class);
+    
+    if (handlesTypes == null) {
       init.onStartup(null, this);
+      return;
+    }
+    
+    if (_classHierarchyScanListener == null) {
+      return;
+    }
+    
+    HashSet<Class<?>> classes 
+       = _classHierarchyScanListener.findClasses(handlesTypes.value());
+    
+    if (classes != null) {
+      init.onStartup(classes, this);
     }
   }
 
@@ -3543,8 +3596,9 @@ public class WebApp extends ServletContextImpl
 
       // configuration exceptions discovered by resources like
       // the persistence manager
-      if (_configException == null)
+      if (_configException == null) {
         _configException = Environment.getConfigException();
+      }
 
       startAuthenticators();
 
