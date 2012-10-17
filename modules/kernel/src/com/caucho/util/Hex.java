@@ -111,4 +111,17 @@ public class Hex {
 
     return bytes;
   }
+  
+  public static long toLong(byte []bytes)
+  {
+    int length = Math.min(8, bytes.length);
+    
+    long value = 0;
+    
+    for (int i = 0; i < length; i++) {
+      value |= (bytes[bytes.length - i - 1] & 0xffL) << (8 * i); 
+    }
+    
+    return value;
+  }
 }

@@ -33,6 +33,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.server.http.AbstractHttpProtocol;
@@ -46,8 +47,8 @@ public class HmuxProtocol extends AbstractHttpProtocol {
   private static EnvironmentLocal<HmuxProtocol> _localManager
     = new EnvironmentLocal<HmuxProtocol>();
 
-  private HashMap<Integer,HmuxExtension> _extensionMap
-    = new HashMap<Integer,HmuxExtension>();
+  private HashMap<Integer,Protocol> _extensionMap
+    = new HashMap<Integer,Protocol>();
 
   // public for server/69g0
   public HmuxProtocol()
@@ -87,13 +88,13 @@ public class HmuxProtocol extends AbstractHttpProtocol {
     return new HmuxRequest(getServletSystem(), conn, this);
   }
 
-  public HmuxExtension getExtension(Integer id)
+  public Protocol getExtension(Integer id)
   {
     return _extensionMap.get(id);
   }
 
-  public void putExtension(int id, HmuxExtension extension)
+  public void putExtension(int id, Protocol protocol)
   {
-    _extensionMap.put(id, extension);
+    _extensionMap.put(id, protocol);
   }
 }

@@ -45,6 +45,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.AbstractResinSubSystem;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.SocketPollService;
 import com.caucho.network.listen.TcpPort;
 import com.caucho.server.hmux.HmuxProtocol;
@@ -70,6 +71,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   private final CloudServer _selfServer;
   
   private TcpPort _clusterListener;
+  private HmuxProtocol _clusterProtocol;
   
   private CopyOnWriteArrayList<ClusterServerListener> _serverListeners
     = new CopyOnWriteArrayList<ClusterServerListener>();
@@ -90,7 +92,9 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     
     if (clusterServer.getPort() >= 0) {
       _clusterListener = new ClusterTcpPort(clusterServer);
+      _clusterProtocol = HmuxProtocol.create(); 
      }
+    
   }
 
   /**
@@ -216,6 +220,11 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     }
   }
   
+  public void addClusterExtensionProtocol(int id, Protocol protocol)
+  {
+    _clusterProtocol.putExtension(id, protocol);
+  }
+  
   //
   // lifecycle
   //
@@ -237,32 +246,6 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     ClusterServer selfServer = _selfServer.getData(ClusterServer.class);
     
     selfServer.notifyHeartbeatStart();
-
-    /*
-    CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
-    
-    for (CloudCluster cluster : cloudSystem.getClusterList()) {
-      for (CloudPod pod : cluster.getPodList()) {
-        int serverLength = pod.getServerLength();
-
-        for (int i = 0; i < serverLength; i++) {
-          CloudServer cloudServer = pod.getServerList()[i];
-
-          if (cloudServer == null)
-            continue;
-
-          ClusterServer server = cloudServer.getData(ClusterServer.class);
-
-          if (server != null) {
-            ClientSocketFactory pool = server.getClusterSocketPool();
-
-            if (pool != null)
-              pool.start();
-          }
-        }
-      }
-    }
-      */
     
     validateTriad(_selfServer.getPod());
   }
@@ -311,8 +294,9 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     super.stop();
     
     try {
-      if (_clusterListener != null)
+      if (_clusterListener != null) {
         _clusterListener.close();
+      }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -396,7 +380,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       listener.setKeepaliveTimeoutMillis(idleTime);
       listener.setSocketTimeoutMillis(clusterServer.getClusterSocketTimeout());
       
-      listener.setProtocol(HmuxProtocol.create());
+      listener.setProtocol(_clusterProtocol);
       listener.init();
       
       validateClusterServer(listener, clusterServer);
