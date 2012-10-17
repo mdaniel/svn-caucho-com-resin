@@ -36,4 +36,6 @@ package com.caucho.server.distcache;
 public interface CacheLoaderCallback
 {
   public void onLoad(DistCacheEntry entry, Object value);
+
+  public void onLoadFail(DistCacheEntry entry);
 }

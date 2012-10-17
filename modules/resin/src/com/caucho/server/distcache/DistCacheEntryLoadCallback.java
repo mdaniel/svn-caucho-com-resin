@@ -60,6 +60,18 @@ class DistCacheEntryLoadCallback implements CacheLoaderCallback {
       LockSupport.unpark(thread);
     }
   }
+
+  @Override
+  public void onLoadFail(DistCacheEntry entry)
+  {
+    _isDone = true;
+    
+    Thread thread = _thread;
+    
+    if (thread != null) {
+      LockSupport.unpark(thread);
+    }
+  }
   
   boolean get()
   {

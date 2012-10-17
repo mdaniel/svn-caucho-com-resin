@@ -44,13 +44,17 @@ public class AbstractReplyCallback<T> implements ReplyCallback<T> {
   @Override
   public void onReply(T result)
   {
-    log.log(Level.FINER, this + " onResult() -> " + result);
+    if (log.isLoggable(Level.FINEST)) { 
+      log.log(Level.FINEST, this + " onResult() -> " + result);
+    }
   }
   
   @Override
   public void onError(BamError error)
   {
-    log.log(Level.FINER, this + " onError() -> " + error);
+    if (log.isLoggable(Level.FINEST)) { 
+      log.log(Level.FINEST, this + " onError() -> " + error);
+    }
   }
   
   @Override

@@ -606,7 +606,7 @@ public class TypeFactory implements AddLoaderListener
         throw ConfigException.create(e);
       }
     }
-    else if (type.getEnumConstants() != null) {
+    else if (Enum.class.isAssignableFrom(type)) {
       return new EnumType(type);
     }
     else if ((editor = findEditor(type)) != null)
