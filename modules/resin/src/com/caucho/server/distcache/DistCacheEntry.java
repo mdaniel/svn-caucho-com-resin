@@ -476,10 +476,10 @@ public class DistCacheEntry {
     
     config.getEngine().remove(key, mnodeUpdate);
     
-    CacheWriter writer = config.getCacheWriter();
+    CacheWriterExt writer = config.getCacheWriterExt();
     
     if (writer != null && config.isWriteThrough()) {
-      writer.delete(getKey());
+      writer.delete(this);
     }
 
     return oldValueHash != 0;

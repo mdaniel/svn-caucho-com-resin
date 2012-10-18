@@ -75,4 +75,10 @@ public class CacheWriterAdapter<K,V> implements CacheWriterExt<K,V>
   {
     write(new ExtCacheEntryFacade(entry));
   }
+
+  @Override
+  public void delete(DistCacheEntry entry)
+  {
+    delete(entry.getKey());
+  }
 }

@@ -37,4 +37,6 @@ import javax.cache.CacheWriter;
 public interface CacheWriterExt<K,V> extends CacheWriter<K,V>
 {
   void write(DistCacheEntry entry);
+  
+  void delete(DistCacheEntry entry);
 }
