@@ -167,6 +167,24 @@ public class AbstractCache
   {
     _config.setWriteThrough(isWriteThrough);
   }
+  
+  /**
+   * Sets the CacheLoader and CacheWriter which the Cache can then use 
+   * to populate cache misses from a reference store (database).
+   */
+  @Configurable
+  public void setCacheReaderWriter(CacheLoader loader)
+  {
+    if (! (loader instanceof CacheWriter)) {
+      throw new ConfigException(L.l("cache-reader-writer '{0}' must implements both CacheLoader and CacheWriter.",
+                                    loader));
+    }
+    
+    _config.setCacheLoader(loader);
+    _config.setReadThrough(true);
+    _config.setCacheWriter((CacheWriter) loader);
+    _config.setWriteThrough(true);
+  }
 
   /**
    * Assign the serializer used on values.
