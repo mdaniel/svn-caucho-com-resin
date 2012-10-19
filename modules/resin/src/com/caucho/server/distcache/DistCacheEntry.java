@@ -45,6 +45,7 @@ import com.caucho.util.Hex;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
+import com.sun.tools.javac.resources.version;
 
 /**
  * An entry in the cache map
@@ -245,9 +246,11 @@ public class DistCacheEntry {
    final public void put(Object value)
    {
      long now = CurrentTime.getCurrentTime();
-
+     
      // server/60a0 - on server '4', need to read update from triad
-     MnodeEntry mnodeValue = loadMnodeValue(now, true); // , false);
+     // MnodeEntry mnodeValue = loadMnodeValue(now, true); // , false);
+     
+     MnodeEntry mnodeValue = loadLocalMnodeValue();
 
      put(value, now, mnodeValue, true);
    }
@@ -260,31 +263,34 @@ public class DistCacheEntry {
       long now = CurrentTime.getCurrentTime();
 
       // server/60a0 - on server '4', need to read update from triad
-      MnodeEntry mnodeValue = loadMnodeValue(now, true); // , false);
+      // MnodeEntry mnodeValue = loadMnodeValue(now, true); // , false);
+      
+      MnodeEntry mnodeValue = loadLocalMnodeValue();
 
       put(value, now, mnodeValue, false);
     }
 
-  /**
-   * Sets the value by an input stream
-    */
-  public void put(InputStream is)
-    throws IOException
-  {
-    long now = CurrentTime.getCurrentTime();
-    long lastAccessTime = now;
-    long lastModifiedTime = now;
-    
-    CacheConfig config = getConfig();
-    
-    putStream(is,
-              config.getAccessedExpireTimeout(),
-              config.getModifiedExpireTimeout(), 
-              0,
-              lastAccessTime,
-              lastModifiedTime,
-              false);
-  }
+    /**
+     * Sets the value by an input stream
+      */
+    public void put(InputStream is)
+      throws IOException
+    {
+      long now = CurrentTime.getCurrentTime();
+      long lastAccessTime = now;
+      long lastModifiedTime = now;
+      
+      CacheConfig config = getConfig();
+      
+      putStream(is,
+                config.getAccessedExpireTimeout(),
+                config.getModifiedExpireTimeout(), 
+                0,
+                lastAccessTime,
+                lastModifiedTime,
+                0,
+                false);
+    }
 
   /**
    * Sets the value by an input stream
@@ -304,6 +310,7 @@ public class DistCacheEntry {
               0,
               lastAccessTime,
               lastModifiedTime,
+              0,
               true);
   }
 
@@ -325,6 +332,7 @@ public class DistCacheEntry {
               0,
               lastAccessTime,
               lastModifiedTime,
+              0,
               false);
   }
 
@@ -344,6 +352,7 @@ public class DistCacheEntry {
               0,
               lastAccessTime,
               lastModifiedTime,
+              0,
               false);
   }
 
@@ -366,6 +375,29 @@ public class DistCacheEntry {
               flags,
               lastAccessTime,
               lastModifiedTime,
+              0,
+              false);
+  }
+
+  /**
+   * Sets the value by an input stream
+    */
+  public void putIfNewer(long version, InputStream is)
+    throws IOException
+  {
+    long now = CurrentTime.getCurrentTime();
+    long lastAccessTime = now;
+    long lastModifiedTime = now;
+    
+    CacheConfig config = getConfig();
+    
+    putStream(is,
+              config.getAccessedExpireTimeout(),
+              config.getModifiedExpireTimeout(), 
+              0,
+              lastAccessTime,
+              lastModifiedTime,
+              version,
               false);
   }
 
@@ -375,6 +407,7 @@ public class DistCacheEntry {
                                int userFlags,
                                long lastAccessTime,
                                long lastModifiedTime,
+                               long newVersion,
                                boolean isLocal)
     throws IOException
   {
@@ -386,7 +419,17 @@ public class DistCacheEntry {
     long valueDataId = valueItem.getValueDataId();
     
     long valueLength = valueItem.getLength();
-    long newVersion = getNewVersion(getMnodeEntry());
+    
+    MnodeEntry mnodeEntry = getMnodeEntry();
+    
+    if (newVersion <= 0) {
+      newVersion = getNewVersion(getMnodeEntry());
+    }
+    else if (newVersion < mnodeEntry.getVersion()) {
+      log.finer(this + " put with obsolete version"
+          + " current=0x" + Long.toHexString(mnodeEntry.getVersion())
+          + " new=0x" + Long.toHexString(newVersion));
+    }
     
     CacheConfig config = getConfig();
     
@@ -1355,7 +1398,9 @@ public class DistCacheEntry {
     
     if (oldLeaseOwner != mnodeUpdate.getLeaseOwner()) {
       clearLease(oldLeaseOwner);
-      _cacheService.getCacheEngine().notifyLease(key, oldLeaseOwner);
+      _cacheService.getCacheEngine().notifyLease(key, 
+                                                 getCacheKey(),
+                                                 oldLeaseOwner);
     }
     
     return mnodeValue;
@@ -1520,7 +1565,9 @@ public class DistCacheEntry {
       return newEntryValue;
     }
 
-    _cacheService.getCacheEngine().updateTime(getKeyHash(), mnodeValue);
+    _cacheService.getCacheEngine().updateTime(getKeyHash(), 
+                                              getCacheKey(),
+                                              mnodeValue);
 
     return mnodeValue;
   }

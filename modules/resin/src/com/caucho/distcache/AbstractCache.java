@@ -99,6 +99,14 @@ public class AbstractCache
 
   public AbstractCache()
   {
+    
+    DistCacheSystem cacheService = DistCacheSystem.getCurrent();
+
+    if (cacheService == null)
+      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
+                                    getClass().getSimpleName()));
+    
+    _config.setEngine(cacheService.getDistCacheManager().getCacheEngine());
   }
 
   /**
@@ -1120,6 +1128,10 @@ public class AbstractCache
       manager = cacheService.getCacheManager(managerName);
     else
       manager = cacheService.getCacheManager();
+    
+    if (_config.getEngine() == null) {
+      _config.setEngine(cacheService.getDistCacheManager().getCacheEngine());
+    }
     
     _delegate = manager.createIfAbsent(_name, _config);
   }

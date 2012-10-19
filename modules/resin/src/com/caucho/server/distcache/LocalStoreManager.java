@@ -57,12 +57,15 @@ public final class LocalStoreManager
     _localDataManager = cacheStore.getLocalDataManager();
   }
 
-  public StreamSource loadDataSource(byte[] keyHash)
+  public StreamSource loadDataSource(byte[] keyHash,
+                                     byte []cacheHash)
   {
     HashKey key = HashKey.create(keyHash);
+    HashKey cacheKey = HashKey.create(cacheHash);
     
     CacheConfig config = null;
-    DistCacheEntry entry = _cacheManager.loadLocalEntry(key, config);
+    
+    DistCacheEntry entry = _cacheManager.loadLocalEntry(key, cacheKey);
 
     return entry.getValueStream();
     /*

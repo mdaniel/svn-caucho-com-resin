@@ -66,7 +66,7 @@ public interface CacheEngine
                   MnodeUpdate mnodeUpdate,
                   long valueDataId);
 
-  public void updateTime(HashKey key, MnodeEntry mnodeValue);
+  public void updateTime(HashKey key, HashKey cacheKey, MnodeEntry mnodeValue);
 
   public void remove(HashKey key, 
                      HashKey cacheKey,
@@ -81,5 +81,5 @@ public interface CacheEngine
                                MnodeUpdate update,
                                long valueDataId);
 
-  public void notifyLease(HashKey key, int leaseOwner);
+  public void notifyLease(HashKey key, HashKey cacheKey, int leaseOwner);
 }

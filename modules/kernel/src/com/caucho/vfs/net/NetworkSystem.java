@@ -101,8 +101,8 @@ abstract public class NetworkSystem {
   }
   
   public final QSocket connect(InetAddress address,
-                         int port,
-                         long timeout)
+                               int port,
+                               long timeout)
     throws IOException
   {
     return connect(new InetSocketAddress(address, port), timeout);

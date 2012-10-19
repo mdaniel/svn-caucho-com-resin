@@ -259,6 +259,18 @@ public final class CacheStoreManager implements CacheEntryFactory
     return entry;
   }
 
+  public final DistCacheEntry loadLocalEntry(HashKey key, HashKey cacheKey)
+  {
+    if (key == null)
+      throw new NullPointerException();
+
+    DistCacheEntry entry = getCacheEntry(key, cacheKey);
+
+    entry.loadLocalEntry();
+
+    return entry;
+  }
+
   /**
    * Sets a cache entry
    */

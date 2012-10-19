@@ -250,8 +250,11 @@ public class CacheImpl<K,V>
 
       // initServer();
       
-      if (_config.getEngine() == null)
+      /*
+      if (_config.getEngine() == null) {
         _config.setEngine(_manager.getCacheEngine());
+      }
+      */
       
       CacheHandle cache = _manager.getCache(_config.getGuid(),
                                             _config.getKeySerializer());

@@ -56,6 +56,32 @@ public class IoUtil {
     os.write(v >> 8);
     os.write(v);
   }
+  
+  public static long readLong(InputStream is)
+    throws IOException
+  {
+    return (((long) is.read() << 56)
+        + ((long) is.read() << 48)
+        + ((long) is.read() << 40)
+        + ((long) is.read() << 32)
+        + ((long) is.read() << 24)
+        + ((long) is.read() << 16)
+        + ((long) is.read() << 8)
+        + ((long) is.read()));
+  }
+  
+  public static void writeLong(OutputStream os, long v)
+    throws IOException
+  {
+    os.write((int) (v >> 56));
+    os.write((int) (v >> 48));
+    os.write((int) (v >> 40));
+    os.write((int) (v >> 32));
+    os.write((int) (v >> 24));
+    os.write((int) (v >> 16));
+    os.write((int) (v >> 8));
+    os.write((int) v);
+  }
 
   public static void close(InputStream is)
   {

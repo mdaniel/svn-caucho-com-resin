@@ -93,9 +93,12 @@ public class AbstractCacheEngine implements CacheEngine
   }
 
   @Override
-  public void updateTime(HashKey key, MnodeEntry mnodeValue)
+  public void updateTime(HashKey key,
+                         HashKey cacheKey,
+                         MnodeEntry mnodeValue)
   {
   }
+  
   @Override
   public boolean compareAndPut(DistCacheEntry entry,
                                long testValue,
@@ -114,7 +117,9 @@ public class AbstractCacheEngine implements CacheEngine
   }
 
   @Override
-  public void notifyLease(HashKey key, int leaseOwner)
+  public void notifyLease(HashKey key,
+                          HashKey cacheKey,
+                          int leaseOwner)
   {
   }
 }
