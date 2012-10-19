@@ -35,21 +35,18 @@ import java.util.concurrent.locks.LockSupport;
  * callback listener for a load complete
  */
 class DistCacheEntryLoadCallback implements CacheLoaderCallback {
-  private final CacheConfig _config;
-  
   private volatile Thread _thread;
   private volatile boolean _isDone;
   private volatile boolean _isValue;
   
-  DistCacheEntryLoadCallback(CacheConfig config)
+  DistCacheEntryLoadCallback()
   {
-    _config = config;
   }
 
   @Override
   public void onLoad(DistCacheEntry entry, Object value)
   {
-    entry.putInternal(value, _config);
+    entry.putInternal(value);
     
     _isValue = value != null;
     _isDone = true;

@@ -41,8 +41,6 @@ public class MnodeValue implements java.io.Serializable {
   private final long _valueLength;
   private final long _version;
   
-  private final byte[] _cacheHash;
-  
   private final long _flags;
   
   private final long _accessedExpireTimeout;
@@ -52,7 +50,6 @@ public class MnodeValue implements java.io.Serializable {
   public MnodeValue(long valueHash,
                     long valueLength,
                     long version,
-                    byte []cacheHash,
                     long flags,
                     long accessedExpireTimeout,
                     long modifiedExpireTimeout,
@@ -60,8 +57,6 @@ public class MnodeValue implements java.io.Serializable {
   {
     _valueHash = valueHash;
     _valueLength = valueLength;
-    
-    _cacheHash = cacheHash;
     
     _flags = flags;
     
@@ -76,7 +71,7 @@ public class MnodeValue implements java.io.Serializable {
                     long valueLength,
                     long version)
   {
-    this(valueHash, valueLength, version, null, 0, 0, 0, 0);
+    this(valueHash, valueLength, version, 0, 0, 0, 0);
   }
   
   public MnodeValue(MnodeValue mnodeValue)
@@ -84,7 +79,6 @@ public class MnodeValue implements java.io.Serializable {
     this(mnodeValue._valueHash,
          mnodeValue._valueLength,
          mnodeValue._version,
-         mnodeValue._cacheHash,
          mnodeValue._flags,
          mnodeValue._accessedExpireTimeout,
          mnodeValue._modifiedExpireTimeout,
@@ -102,14 +96,12 @@ public class MnodeValue implements java.io.Serializable {
     _version = version;
     
     if (oldValue != null) {
-      _cacheHash = oldValue._cacheHash;
       _flags = oldValue._flags;
       _modifiedExpireTimeout = oldValue._modifiedExpireTimeout;
       _accessedExpireTimeout = oldValue._accessedExpireTimeout;
       _leaseExpireTimeout = oldValue._leaseExpireTimeout;
     }
     else {
-      _cacheHash = null;
       _flags = 0;
       _modifiedExpireTimeout = -1;
       _accessedExpireTimeout = -1;
@@ -125,7 +117,6 @@ public class MnodeValue implements java.io.Serializable {
     this(valueHash,
          valueLength,
          version,
-         HashKey.getHash(config.getCacheKey()),
          config.getFlags(),
          config.getAccessedExpireTimeout(),
          config.getModifiedExpireTimeout(),
@@ -153,11 +144,6 @@ public class MnodeValue implements java.io.Serializable {
   public final long getVersion()
   {
     return _version;
-  }
-  
-  public final byte []getCacheHash()
-  {
-    return _cacheHash;
   }
   
   public final long getFlags()

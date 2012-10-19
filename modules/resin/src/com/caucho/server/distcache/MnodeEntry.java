@@ -43,7 +43,7 @@ public final class MnodeEntry extends MnodeValue {
   private static final L10N L = new L10N(MnodeEntry.class);
   
   public static final MnodeEntry NULL
-  = new MnodeEntry(0, 0, 0, null, 0, 0, 0, 0, 0, null, 0, 0, false, true);
+  = new MnodeEntry(0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, false, true);
   
   public static final long NULL_KEY = 0;
   public static final long ANY_KEY = createAnyKey();
@@ -71,7 +71,6 @@ public final class MnodeEntry extends MnodeValue {
   public MnodeEntry(long valueHash,
                     long valueLength,
                     long version,
-                    byte []cacheHash,
                     long flags,
                     long accessedExpireTimeout,
                     long modifiedExpireTimeout,
@@ -84,7 +83,6 @@ public final class MnodeEntry extends MnodeValue {
                     boolean isImplicitNull)
   {
     super(valueHash, valueLength, version,
-          cacheHash,
           flags,
           accessedExpireTimeout, modifiedExpireTimeout, leaseExpireTimeout);
     
@@ -122,7 +120,6 @@ public final class MnodeEntry extends MnodeValue {
     this(mnodeValue.getValueHash(),
          mnodeValue.getValueLength(),
          mnodeValue.getVersion(),
-         mnodeValue.getCacheHash(),
          mnodeValue.getFlags(),
          mnodeValue.getAccessedExpireTimeout(),
          mnodeValue.getModifiedExpireTimeout(),
@@ -147,7 +144,6 @@ public final class MnodeEntry extends MnodeValue {
     super(oldMnodeValue.getValueHash(),
           oldMnodeValue.getValueLength(),
           oldMnodeValue.getVersion(),
-          oldMnodeValue.getCacheHash(),
           oldMnodeValue.getFlags(),
           accessTimeout,
           oldMnodeValue.getModifiedExpireTimeout(),
@@ -188,7 +184,7 @@ public final class MnodeEntry extends MnodeValue {
       leaseExpireTimeout = config.getLeaseExpireTimeout();
     }
     
-    return new MnodeEntry(0, 0, 0, null, 
+    return new MnodeEntry(0, 0, 0, 
                           0, 
                           accessedExpireTimeout, 
                           modifiedExpireTimeout,
@@ -202,7 +198,6 @@ public final class MnodeEntry extends MnodeValue {
     return new MnodeEntry(getValueHash(),
                           getValueLength(),
                           getVersion(),
-                          getCacheHash(),
                           getFlags(),
                           getAccessedExpireTimeout(),
                           getModifiedExpireTimeout(),
@@ -445,11 +440,6 @@ public final class MnodeEntry extends MnodeValue {
     return new MnodeUpdate(getValueHash(), getValueLength(), getVersion(),
                            this,
                            getLeaseOwner());
-  }
-
-  public HashKey getCacheHashKey()
-  {
-    return HashKey.create(getCacheHash());
   }
 
   /**

@@ -268,18 +268,17 @@ public class MemcachedClient implements Cache
   
   MnodeUpdate getResinIfModified(String key, 
                                  long oldValue,
-                                 DistCacheEntry entry,
-                                 CacheConfig config)
+                                 DistCacheEntry entry)
     throws CacheException
   {
     try {
-      return resinGetIfModifiedImpl(key, oldValue, entry, config);
+      return resinGetIfModifiedImpl(key, oldValue, entry);
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }
 
     try {
-      return resinGetIfModifiedImpl(key, oldValue, entry, config);
+      return resinGetIfModifiedImpl(key, oldValue, entry);
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -289,8 +288,7 @@ public class MemcachedClient implements Cache
   
   private MnodeUpdate resinGetIfModifiedImpl(String key,
                                              long oldValueHash,
-                                             DistCacheEntry entry,
-                                             CacheConfig config)
+                                             DistCacheEntry entry)
     throws IOException
   {
     CacheImpl cache = getLocalCache();
@@ -336,6 +334,8 @@ public class MemcachedClient implements Cache
       if (_cb.matches("END")) {
         skipToEndOfLine(is);
         isValid = true;
+        
+        CacheConfig config = entry.getConfig();
 
         MnodeUpdate update = new MnodeUpdate(0, 0, version, config);
 

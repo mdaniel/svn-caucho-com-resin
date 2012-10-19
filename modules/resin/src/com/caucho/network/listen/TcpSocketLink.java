@@ -783,6 +783,9 @@ public class TcpSocketLink extends AbstractSocketLink
         destroy();
       }
     }
+    else {
+      closeConnection();
+    }
   }
   
   private void destroy()

@@ -43,13 +43,16 @@ public class AbstractCacheBackupEngine implements CacheBackupEngine
   }
 
   @Override
-  public MnodeValue get(DistCacheEntry entry, CacheConfig config)
+  public MnodeValue get(DistCacheEntry entry)
   {
     return null;
   }
 
   @Override
-  public void put(byte []key, MnodeUpdate mnodeUpdate, StreamSource valueStream)
+  public void put(byte []key, 
+                  byte []cacheHash,
+                  MnodeUpdate mnodeUpdate, 
+                  StreamSource valueStream)
   {
   }
 
@@ -59,7 +62,7 @@ public class AbstractCacheBackupEngine implements CacheBackupEngine
   }
 
   @Override
-  public void remove(byte []key, MnodeUpdate mnodeUpdate)
+  public void remove(byte []key, byte []cacheHash, MnodeUpdate mnodeUpdate)
   {
   }
 }

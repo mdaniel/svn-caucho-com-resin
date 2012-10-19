@@ -413,8 +413,8 @@ public class MnodeStore {
           continue;
 
         entryList.add(new CacheData(new HashKey(keyHash),
-                                    valueHash, valueIndex, valueLength, version,
                                     cacheKey,
+                                    valueHash, valueIndex, valueLength, version,
                                     flags,
                                     accessTimeout,
                                     modifiedTimeout,
@@ -488,11 +488,11 @@ public class MnodeStore {
           continue;
 
         entryList.add(new CacheData(new HashKey(keyHash),
+                                    HashKey.create(cacheHash),
                                     valueHash,
                                     valueIndex,
                                     valueLength,
                                     version,
-                                    HashKey.create(cacheHash),
                                     flags,
                                     accessTimeout,
                                     modifiedTimeout,
@@ -554,7 +554,6 @@ public class MnodeStore {
         MnodeEntry entry;
         entry = new MnodeEntry(valueHash, valueLength, 
                                itemVersion,
-                               cacheHash,
                                flags,
                                accessedExpireTimeout, modifiedExpireTimeout,
                                leaseTimeout,
@@ -594,6 +593,7 @@ public class MnodeStore {
    * @param idleTimeout the item's timeout
    */
   public boolean insert(HashKey id,
+                        HashKey cacheKey,
                         MnodeValue mnodeUpdate,
                         long valueDataId,
                         long lastAccessTime,
@@ -620,7 +620,7 @@ public class MnodeStore {
         */
       stmt.setLong(3, valueDataId);
       stmt.setLong(4, mnodeUpdate.getValueLength());
-      stmt.setBytes(5, mnodeUpdate.getCacheHash());
+      stmt.setBytes(5, cacheKey.getHash());
 
       stmt.setLong(6, mnodeUpdate.getFlags());
       stmt.setLong(7, mnodeUpdate.getVersion());
@@ -661,6 +661,7 @@ public class MnodeStore {
    * @param idleTimeout the item's timeout
    */
   public boolean updateSave(byte []key,
+                            byte []cacheHash,
                             MnodeValue mnodeUpdate,
                             long valueDataId,
                             long lastAccessTime,
@@ -676,7 +677,7 @@ public class MnodeStore {
       stmt.setLong(1, mnodeUpdate.getValueHash());
       stmt.setLong(2, valueDataId);
       stmt.setLong(3, mnodeUpdate.getValueLength());
-      stmt.setBytes(4, mnodeUpdate.getCacheHash());
+      stmt.setBytes(4, cacheHash);
       stmt.setLong(5, mnodeUpdate.getFlags());
       
       stmt.setLong(6, mnodeUpdate.getVersion());

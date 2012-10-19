@@ -53,7 +53,7 @@ public interface CacheEngine
                                 MnodeEntry mnodeEntry, 
                                 long now);
   
-  public MnodeValue get(DistCacheEntry entry, CacheConfig config);
+  public MnodeValue get(DistCacheEntry entry);
   
   /*
   public boolean loadData(HashKey key, 
@@ -62,12 +62,14 @@ public interface CacheEngine
                           */
 
   public void put(HashKey key, 
+                  HashKey cacheKey,
                   MnodeUpdate mnodeUpdate,
                   long valueDataId);
 
   public void updateTime(HashKey key, MnodeEntry mnodeValue);
 
   public void remove(HashKey key, 
+                     HashKey cacheKey,
                      MnodeUpdate mnodeUpdate);
 
   public InputStream getAndPut(DistCacheEntry entry, 

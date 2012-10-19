@@ -115,6 +115,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
    */
   @Override
   public MnodeEntry insertLocalValue(HashKey key, 
+                                     HashKey cacheKey,
                                      MnodeEntry mnodeUpdate,
                                      MnodeEntry oldEntryValue)
   {
@@ -123,7 +124,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeEntry.NULL) {
-      if (_mnodeStore.insert(key, mnodeUpdate, 
+      if (_mnodeStore.insert(key, cacheKey, mnodeUpdate, 
                              mnodeUpdate.getValueDataId(),
                              mnodeUpdate.getLastAccessedTime(),
                              mnodeUpdate.getLastModifiedTime())) {
@@ -135,14 +136,15 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         return oldEntryValue;
       }
     } else {
-      if (_mnodeStore.updateSave(key.getHash(), 
+      if (_mnodeStore.updateSave(key.getHash(),
+                                 cacheKey.getHash(),
                                  mnodeUpdate,
                                  mnodeUpdate.getValueDataId(),
                                  mnodeUpdate.getLastAccessedTime(),
                                  mnodeUpdate.getLastModifiedTime())) {
         return mnodeUpdate;
       }
-      else if (_mnodeStore.insert(key, mnodeUpdate, 
+      else if (_mnodeStore.insert(key, cacheKey, mnodeUpdate, 
                                   mnodeUpdate.getValueDataId(),
                                   mnodeUpdate.getLastAccessedTime(),
                                   mnodeUpdate.getLastModifiedTime())) {
@@ -160,6 +162,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   @Override
   public boolean putLocalValue(MnodeEntry mnodeEntry,
                                HashKey key,
+                               HashKey cacheKey,
                                MnodeEntry oldEntryEntry,
                                MnodeUpdate mnodeUpdate)
   {
@@ -172,7 +175,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       long lastAccessTime = mnodeUpdate.getLastAccessTime();
       long lastModifiedTime = mnodeUpdate.getLastAccessTime();
       
-      if (_mnodeStore.insert(key, mnodeUpdate, mnodeEntry.getValueDataId(),
+      if (_mnodeStore.insert(key, cacheKey,
+                             mnodeUpdate, mnodeEntry.getValueDataId(),
                              lastAccessTime, lastModifiedTime)) {
         isSave = true;
         
@@ -182,7 +186,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     } else {
-      if (_mnodeStore.updateSave(key.getHash(), 
+      if (_mnodeStore.updateSave(key.getHash(),
+                                 cacheKey.getHash(),
                                  mnodeUpdate,
                                  mnodeEntry.getValueDataId(),
                                  mnodeEntry.getLastAccessedTime(),
@@ -190,6 +195,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         isSave = true;
       }
       else if (_mnodeStore.insert(key, 
+                                  cacheKey,
                                   mnodeUpdate,
                                   mnodeEntry.getValueDataId(),
                                   mnodeEntry.getLastAccessedTime(),

@@ -29,13 +29,10 @@
 
 package com.caucho.server.distcache;
 
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
 import com.caucho.util.HashKey;
-import com.caucho.util.LruCache;
 
 /**
  * Manages the server entries for the distributed cache
@@ -43,62 +40,42 @@ import com.caucho.util.LruCache;
 @Module
 final class CacheRegionManager
 {
-  private final ConcurrentHashMap<HashKey, CacheRegionEntry> _regionCache
-    = new ConcurrentHashMap<HashKey, CacheRegionEntry>();
+  private final ConcurrentHashMap<HashKey, CacheHandle> _regionCache
+    = new ConcurrentHashMap<HashKey, CacheHandle>();
   
-  public CacheConfig getCacheConfig(HashKey key)
+  public CacheHandle getCache(HashKey key)
   {
     if (key == null) {
       return null;
     }
     
-    CacheRegionEntry entry = _regionCache.get(key);
-    
-    if (entry != null) {
-      return entry.getConfig();
-    }
-    else {
-      return null;
-    }
+    return _regionCache.get(key);
   }
   
-  public void putCacheConfig(HashKey key, CacheConfig config)
+  public CacheHandle createCache(HashKey key, CacheConfig config)
   {
-    CacheRegionEntry entry = _regionCache.get(key);
-    
-    if (entry == null) {
-      entry = new CacheRegionEntry(config);
-      
-      _regionCache.putIfAbsent(key, entry);
-      
-      entry = _regionCache.get(key);
+    if (key == null) {
+      throw new NullPointerException();
     }
     
-    entry.setConfig(config);
+    CacheHandle cache = _regionCache.get(key);
+    
+    if (cache == null) {
+      cache = new CacheHandle(key, config);
+      
+      cache.setConfig(config);
+      
+      _regionCache.putIfAbsent(key, cache);
+      
+      cache = _regionCache.get(key);
+    }
+    
+    return cache;
   }
 
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
-  }
-  
-  private static class CacheRegionEntry {
-    private CacheConfig _config;
-    
-    CacheRegionEntry(CacheConfig config)
-    {
-      setConfig(config);
-    }
-    
-    void setConfig(CacheConfig config)
-    {
-      _config = config;
-    }
-    
-    CacheConfig getConfig()
-    {
-      return _config;
-    }
   }
 }

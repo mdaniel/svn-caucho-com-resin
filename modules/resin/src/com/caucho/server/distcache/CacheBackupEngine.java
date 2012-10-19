@@ -29,10 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import java.io.InputStream;
-
-import com.caucho.server.distcache.LocalDataManager.DataItem;
-import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
 
 /**
@@ -45,14 +41,15 @@ public interface CacheBackupEngine
    */
   public void start();
   
-  public MnodeValue get(DistCacheEntry entry, CacheConfig config);
+  public MnodeValue get(DistCacheEntry entry);
 
   public void put(byte []key, 
+                  byte []cacheHash,
                   MnodeUpdate mnodeUpdate,
                   StreamSource valueStream);
 
   public void updateTime(byte []key, MnodeEntry mnodeValue);
 
-  public void remove(byte []key, 
+  public void remove(byte []key, byte []cacheHash,
                      MnodeUpdate mnodeUpdate);
 }

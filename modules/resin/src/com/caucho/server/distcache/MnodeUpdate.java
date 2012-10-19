@@ -37,7 +37,7 @@ import com.caucho.util.CurrentTime;
 @SuppressWarnings("serial")
 public class MnodeUpdate extends MnodeValue {
   public static final MnodeUpdate NULL
-    = new MnodeUpdate(0, 0, 0, null, 0, 0, 0, -1, -1, -1, -1);
+    = new MnodeUpdate(0, 0, 0, 0, 0, 0, -1, -1, -1, -1);
   
   private final int _leaseOwner;
   private final long _accessTime;
@@ -46,7 +46,6 @@ public class MnodeUpdate extends MnodeValue {
   public MnodeUpdate(long valueHash,
                      long valueLength,
                      long version,
-                     byte []cacheHash,
                      long flags,
                      long accessedExpireTime,
                      long modifiedExpireTime,
@@ -56,7 +55,6 @@ public class MnodeUpdate extends MnodeValue {
                      long modifiedTime)
   {
     super(valueHash, valueLength, version,
-          cacheHash, 
           flags, 
           accessedExpireTime, modifiedExpireTime, leaseExpireTime);
     

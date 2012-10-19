@@ -29,37 +29,47 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.util.CurrentTime;
+import com.caucho.util.HashKey;
+import com.caucho.util.Hex;
 
 /**
- * callback listener for a load complete
+ * Implements the distributed cache
  */
-class DistCacheLoadTask implements Runnable {
-  private final DistCacheEntry _entry;
-  private final DistCacheLoadListener _listener;
+
+public class CacheHandle
+{
+  private final HashKey _cacheKey;
   
-  DistCacheLoadTask(DistCacheEntry entry,
-                    DistCacheLoadListener listener)
+  private CacheConfig _config;
+    
+  public CacheHandle(HashKey cacheKey, CacheConfig config)
   {
-    if (entry == null)
-      throw new NullPointerException();
-    
-    if (listener == null)
-      throw new NullPointerException();
-    
-    _entry = entry;
-    _listener = listener;
+    _cacheKey = cacheKey;
+    _config = config;
   }
   
-  public void run()
+  public HashKey getCacheKey()
   {
-    try {
-      long now = CurrentTime.getCurrentTime();
-      
-      _entry.reloadValue(now, true);
-    } finally {
-      _listener.onLoad(_entry);
-    }
+    return _cacheKey;
+  }
+  
+  public byte []getCacheKeyHash()
+  {
+    return _cacheKey.getHash();
   }
 
+  CacheConfig getConfig()
+  {
+    return _config;
+  }
+
+  void setConfig(CacheConfig config)
+  {
+    _config = config;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + Hex.toHex(_cacheKey.getHash(), 0, 4) + "]";
+  }
 }

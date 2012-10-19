@@ -68,7 +68,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   */
 
   @Override
-  public MnodeValue get(DistCacheEntry entry, CacheConfig config)
+  public MnodeValue get(DistCacheEntry entry)
   {
     CharBuffer cb = new CharBuffer();
     
@@ -78,8 +78,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
     
     MnodeUpdate update = _client.getResinIfModified(key, 
                                                     entry.getMnodeEntry().getValueHash(),
-                                                    entry,
-                                                    config);
+                                                    entry);
     
     if (update != null)
       return entry.putLocalValue(update, null);
@@ -89,6 +88,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
 
   @Override
   public void put(HashKey hashKey, 
+                  HashKey cacheKey,
                   MnodeUpdate mnodeUpdate,
                   long valueDataId)
   {
@@ -102,7 +102,8 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   }
   
   @Override
-  public void remove(HashKey hashKey, 
+  public void remove(HashKey hashKey,
+                     HashKey cacheKey,
                      MnodeUpdate mnodeUpdate)
   {
     CharBuffer cb = new CharBuffer();

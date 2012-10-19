@@ -67,15 +67,15 @@ public final class CacheEntryManager
    * Returns the key entry, creating on if necessary.
    */
   public final DistCacheEntry createCacheEntry(HashKey key,
-                                               CacheConfig config)
+                                               CacheHandle cache)
   {
     DistCacheEntry cacheEntry = _entryCache.get(key);
     
     if (cacheEntry != null) {
       return cacheEntry;
     }
-
-    cacheEntry = _cacheEntryFactory.createCacheEntry(key, config);
+    
+    cacheEntry = _cacheEntryFactory.createCacheEntry(key, cache);
 
     cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
     

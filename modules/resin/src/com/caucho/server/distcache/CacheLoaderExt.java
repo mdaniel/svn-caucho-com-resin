@@ -30,18 +30,12 @@
 package com.caucho.server.distcache;
 
 import javax.cache.CacheLoader;
-import javax.cache.Cache.Entry;
 
 /**
  * Extended cache loader
  */
 public interface CacheLoaderExt<K,V> extends CacheLoader<K,V>
 {
-  public void load(byte []keyHash,
-                   DistCacheEntry entry,
-                   byte []cacheHash,
-                   Object key, 
-                   long valueHash,
-                   long version,
+  public void load(DistCacheEntry entry,
                    CacheLoaderCallback cb);
 }

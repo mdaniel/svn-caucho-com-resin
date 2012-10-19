@@ -63,7 +63,8 @@ public class CacheConfig implements CacheConfiguration
 
   private String _guid;
   private int _guidHash;
-  private HashKey _cacheKey;
+  
+  private CacheHandle _cache;
 
   private int _flags = (FLAG_BACKUP | FLAG_TRIPLICATE);
 
@@ -205,15 +206,20 @@ public class CacheConfig implements CacheConfiguration
    */
   public HashKey getCacheKey()
   {
-    return _cacheKey;
+    return _cache.getCacheKey();
   }
 
   /**
    * Sets the globally-unique id for the cache
    */
-  public void setCacheKey(HashKey cacheKey)
+  public void setCache(CacheHandle cache)
   {
-    _cacheKey = cacheKey;
+    _cache = cache;
+  }
+  
+  public CacheHandle getCache()
+  {
+    return _cache;
   }
 
   /**

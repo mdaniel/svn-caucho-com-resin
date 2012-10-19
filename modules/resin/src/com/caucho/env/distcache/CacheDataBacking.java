@@ -58,7 +58,8 @@ public interface CacheDataBacking {
   
   public MnodeEntry loadLocalEntryValue(HashKey key);
   
-  public MnodeEntry insertLocalValue(HashKey key, 
+  public MnodeEntry insertLocalValue(HashKey key,
+                                     HashKey cacheKey,
                                      MnodeEntry mnodeValue,
                                      MnodeEntry oldMnodeValue);
   
@@ -71,6 +72,7 @@ public interface CacheDataBacking {
    */
   public boolean putLocalValue(MnodeEntry mnodeValue,
                                HashKey key,
+                               HashKey cacheKey,
                                MnodeEntry oldEntryValue,
                                MnodeUpdate mnodeUpdate);
   

@@ -165,6 +165,11 @@ public class CacheImpl<K,V>
   {
     return _config;
   }
+  
+  public CacheHandle getCacheHandle()
+  {
+    return _config.getCache();
+  }
 
   /**
    * The maximum valid time for an item.  Items stored in the cache
@@ -247,9 +252,11 @@ public class CacheImpl<K,V>
       
       if (_config.getEngine() == null)
         _config.setEngine(_manager.getCacheEngine());
+      
+      CacheHandle cache = _manager.getCache(_config.getGuid(),
+                                            _config.getKeySerializer());
 
-      _config.setCacheKey(_manager.getKeyManager().createSelfHashKey(_config.getGuid(),
-                                                                     _config.getKeySerializer()));
+      _config.setCache(cache);
 
       // _entryCache = new LruCache<Object,DistCacheEntry>(512);
       
@@ -300,7 +307,7 @@ public class CacheImpl<K,V>
       _missCount.incrementAndGet();
     }
 
-    V value = (V) entry.get(_config);
+    V value = (V) entry.get();
     
     if (_readListeners != null) {
       entryRead(key, value);
@@ -336,7 +343,7 @@ public class CacheImpl<K,V>
   public boolean get(Object key, OutputStream os)
     throws IOException
   {
-    return getDistCacheEntry(key).getStream(os, _config);
+    return getDistCacheEntry(key).getStream(os);
   }
 
   /**
@@ -347,7 +354,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    entry.loadMnodeValue(_config);
+    entry.loadMnodeValue();
     
     return getExtCacheEntry(entry);
   }
@@ -356,7 +363,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    entry.loadMnodeValue(_config);
+    entry.loadMnodeValue();
     
     return getExtCacheEntry(entry);
   }
@@ -394,7 +401,7 @@ public class CacheImpl<K,V>
   @Override
   public void put(K key, V value)
   {
-    getDistCacheEntry(key).put(value, _config);
+    getDistCacheEntry(key).put(value);
 
     _putCount.incrementAndGet();
     entryUpdate(key, value);
@@ -419,7 +426,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    entry.put(is, _config, 
+    entry.put(is,
               accessedExpireTimeout,
               modifiedExpireTimeout,
               flags);
@@ -444,7 +451,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    entry.put(is, _config, 
+    entry.put(is,
               accessedExpireTimeout,
               modifiedExpireTimeout);
     
@@ -470,7 +477,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    entry.put(is, _config, 
+    entry.put(is,
               accessedExpireTimeout,
               modifiedExpireTimeout,
               lastAccessTime,
@@ -488,7 +495,7 @@ public class CacheImpl<K,V>
   @Override
   public Object getAndPut(Object key, Object value)
   {
-    return getDistCacheEntry(key).getAndPut(value, _config);
+    return getDistCacheEntry(key).getAndPut(value);
     
     // notifyPut(key);
   }
@@ -527,7 +534,7 @@ public class CacheImpl<K,V>
                           InputStream is)
     throws IOException
   {
-    return getDistCacheEntry(key).putIfNew(update, is, _config);
+    return getDistCacheEntry(key).putIfNew(update, is);
   }
 
   /*
@@ -546,7 +553,7 @@ public class CacheImpl<K,V>
   {
     long testHash = 0;
     
-    return getDistCacheEntry(key).compareAndPut(testHash, value, _config);
+    return getDistCacheEntry(key).compareAndPut(testHash, value);
   }
 
   @Override
@@ -557,7 +564,7 @@ public class CacheImpl<K,V>
     
     long oldHash = entry.getValueHash(oldValue, _config);
     
-    boolean isReplace = entry.compareAndPut(oldHash, value, _config);
+    boolean isReplace = entry.compareAndPut(oldHash, value);
      
     return isReplace;
   }
@@ -569,7 +576,7 @@ public class CacheImpl<K,V>
     
     long oldHash = MnodeEntry.ANY_KEY;
     
-    boolean isChanged = entry.compareAndPut(oldHash, value, _config);
+    boolean isChanged = entry.compareAndPut(oldHash, value);
     
     if (isChanged) {
       entryUpdate((K) key, (V) value);
@@ -585,7 +592,7 @@ public class CacheImpl<K,V>
     
     long oldHash = MnodeEntry.ANY_KEY;
     
-    return entry.getAndReplace(oldHash, value, _config);
+    return entry.getAndReplace(oldHash, value);
   }
 
   /**
@@ -596,7 +603,7 @@ public class CacheImpl<K,V>
   @Override
   public boolean remove(Object key)
   {
-    boolean isRemoved = getDistCacheEntry(key).remove(_config);
+    boolean isRemoved = getDistCacheEntry(key).remove();
     
     if (isRemoved) {
       entryRemoved(key);
@@ -614,7 +621,7 @@ public class CacheImpl<K,V>
   @Override
   public boolean remove(Object key, Object oldValue)
   {
-    getDistCacheEntry(key).remove(_config);
+    getDistCacheEntry(key).remove();
     
     return true;
   }
@@ -622,7 +629,7 @@ public class CacheImpl<K,V>
   @Override
   public Object getAndRemove(Object key) throws CacheException
   {
-    return getDistCacheEntry(key).getAndRemove(_config);
+    return getDistCacheEntry(key).getAndRemove();
   }
 
   /**
@@ -651,7 +658,7 @@ public class CacheImpl<K,V>
    
     //long now = CurrentTime.getCurrentTime();
     
-    distEntry.loadMnodeValue(_config);
+    distEntry.loadMnodeValue();
     //_manager.load(distEntry, _config, now);
     
     return getExtCacheEntry(distEntry);
@@ -685,7 +692,7 @@ public class CacheImpl<K,V>
    */
   protected final DistCacheEntry getDistCacheEntry(HashKey key)
   {
-    return _manager.getCacheEntry(key, _config);
+    return _manager.getCacheEntry(key, getCacheHandle());
   }
 
   /**
@@ -1091,7 +1098,7 @@ public class CacheImpl<K,V>
         DistCacheEntry entry = _manager.getCacheEntry(key, _config);
     
         if (entry != null) {
-          entryUpdate(entry.getKey(), (V) entry.get(_config));
+          entryUpdate(entry.getKey(), (V) entry.get());
         }
       }
     });
@@ -1190,13 +1197,13 @@ public class CacheImpl<K,V>
     @Override
     public void remove()
     {
-      _entry.remove(_config);
+      _entry.remove();
     }
 
     @Override
     public void setValue(Object value)
     {
-      _entry.put(value, _config);
+      _entry.put(value);
     }
 
     @Override
@@ -1255,7 +1262,7 @@ public class CacheImpl<K,V>
       while (_storeIterator.hasNext()) {
         DistCacheEntry entry = _storeIterator.next();
 
-        if (_cacheKey.equals(entry.getMnodeEntry().getCacheHashKey())) {
+        if (_cacheKey.equals(entry.getCacheKey())) {
           _next = entry;
           return;
         }

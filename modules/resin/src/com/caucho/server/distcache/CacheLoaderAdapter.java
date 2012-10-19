@@ -47,15 +47,10 @@ public class CacheLoaderAdapter<K,V> implements CacheLoaderExt<K,V>
   }
 
   @Override
-  public void load(byte []keyHash,
-                   DistCacheEntry entry,
-                   byte []cacheHash,
-                   Object key, 
-                   long hash,
-                   long version,
+  public void load(DistCacheEntry entry,
                    CacheLoaderCallback cb)
   {
-    Object value = _loader.load(key);
+    Object value = _loader.load(entry.getKey());
     
     cb.onLoad(entry, value);
   }

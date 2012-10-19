@@ -74,20 +74,21 @@ public class AbstractCacheEngine implements CacheEngine
   */
 
   @Override
-  public MnodeValue get(DistCacheEntry entry, CacheConfig config)
+  public MnodeValue get(DistCacheEntry entry)
   {
     return null;
   }
 
   @Override
   public void put(HashKey key, 
+                  HashKey cacheKey,
                   MnodeUpdate mnodeUpdate,
                   long valueDataId)
   {
   }
 
   @Override
-  public void remove(HashKey key, MnodeUpdate mnodeUpdate)
+  public void remove(HashKey key, HashKey cacheKey, MnodeUpdate mnodeUpdate)
   {
   }
 
