@@ -1082,23 +1082,26 @@ public class CacheImpl<K,V>
     }
   }
   
-  private void mnodeOnPutUpdate(final HashKey key, MnodeValue value)
+  private void mnodeOnPutUpdate(final HashKey key,
+                                final HashKey cacheKey,
+                                MnodeValue value)
   {
     ConcurrentArrayList<UpdatedListener<K,V>> updatedListeners = _updatedListeners;
     
     if (updatedListeners == null || updatedListeners.size() == 0)
       return;
 
-    scheduleUpdate(key);
+    scheduleUpdate(key, cacheKey);
   }
   
-  private void scheduleUpdate(final HashKey key)
+  private void scheduleUpdate(final HashKey key,
+                              final HashKey cacheKey)
   {
     // must be run outside of thread, because the callback is single threaded
     ThreadPool.getCurrent().schedule(new Runnable() {
       public void run()
       {
-        DistCacheEntry entry = _manager.getCacheEntry(key, _config);
+        DistCacheEntry entry = _manager.getCacheEntry(key, cacheKey);
     
         if (entry != null) {
           entryUpdate(entry.getKey(), (V) entry.get());
@@ -1623,9 +1626,9 @@ public class CacheImpl<K,V>
   
   private class CacheMnodeListenerImpl implements CacheMnodeListener {
     @Override
-    public void onPut(HashKey key, MnodeValue value)
+    public void onPut(HashKey key, HashKey cacheKey, MnodeValue value)
     {
-      mnodeOnPutUpdate(key, value);
+      mnodeOnPutUpdate(key, cacheKey, value);
     }
   }
 }

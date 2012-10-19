@@ -328,7 +328,7 @@ public final class CacheStoreManager implements CacheEntryFactory
       CacheMnodeListener listener = _cacheListenMap.get(cacheKey);
 
       if (listener != null) {
-        listener.onPut(key, mnodeValue);
+        listener.onPut(key, cacheKey, mnodeValue);
       }
     }
   }

@@ -35,5 +35,5 @@ import com.caucho.util.HashKey;
  * Callback for a cache put.
  */
 public interface CacheMnodeListener {
-  public void onPut(HashKey key, MnodeValue value);
+  public void onPut(HashKey key, HashKey cacheKey, MnodeValue value);
 }
