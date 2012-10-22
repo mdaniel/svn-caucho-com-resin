@@ -1176,6 +1176,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   /**
    * Gets the remote user from the authorization type
    */
+  @Override
   public String getRemoteUser()
   {
     Principal principal = getUserPrincipal();
@@ -1197,7 +1198,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       return null;
     */
 
-    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_USER_NAME);
+    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_USER);
 
     if (user == null && create)
       user = getUserPrincipal();

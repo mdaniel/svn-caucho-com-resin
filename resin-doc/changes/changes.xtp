@@ -12,6 +12,8 @@
 
 <s2 title="4.0.33 - snapshot">
 <ul>
+<li>servlet: access-log of %u wasn't properly grabbing user (#5250, rep by W. Tao)</li>
+<li>cli: -verbose needs to enable finer logging and display exceptions (#5237, rep by Steve Francis)</li>
 <li>servlet: jersey compatibility (related to @HandlesTypes issue) (#5228, rep by Ryan T)</li>
 <li>servlet: getCookies timing/NPE (#5252, rep by harsha)</li>
 <li>ioc: check for Enum using isAssignableFrom to work around IBM JDK (#5240, rep by S Francis)</li>
