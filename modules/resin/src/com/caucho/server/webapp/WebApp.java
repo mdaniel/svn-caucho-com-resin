@@ -3422,8 +3422,11 @@ public class WebApp extends ServletContextImpl
   {
     HandlesTypes handlesTypes
       = init.getClass().getAnnotation(HandlesTypes.class);
-    
+
     if (handlesTypes == null) {
+      if (log.isLoggable(Level.FINER)){
+        log.finer("ServletContainerInitializer " + init + " {in " + this + "}");
+      }
       init.onStartup(null, this);
       return;
     }
@@ -3436,6 +3439,10 @@ public class WebApp extends ServletContextImpl
        = _classHierarchyScanListener.findClasses(handlesTypes.value());
     
     if (classes != null) {
+      if (log.isLoggable(Level.FINER)){
+        log.finer("ServletContainerInitializer " + init + "(" + classes + ") {in " + this + "}");
+      }
+      
       init.onStartup(classes, this);
     }
   }

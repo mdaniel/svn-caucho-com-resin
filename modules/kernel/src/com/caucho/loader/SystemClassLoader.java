@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.AllPermission;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 
 import com.caucho.config.Config;
 import com.caucho.server.util.CauchoSystem;
@@ -58,6 +59,7 @@ public class SystemClassLoader
   extends EnvironmentClassLoader
   implements EnvironmentBean
 {
+  private static Logger _log;
   private AtomicBoolean _isInit = new AtomicBoolean();
   private boolean _hasBootClassPath;
 
@@ -81,8 +83,9 @@ public class SystemClassLoader
 
     String smallmem = System.getProperty("caucho.smallmem");
     
-    if (smallmem != null && ! "false".equals(smallmem))
+    if (smallmem != null && ! "false".equals(smallmem)) {
       DynamicClassLoader.setJarCacheEnabled(false);
+    }
   }
 
   @Override
@@ -229,19 +232,52 @@ public class SystemClassLoader
     Class<?> cl = findLoadedClass(name);
 
     if (cl != null) {
-      if (resolve)
+      if (resolve) {
         resolveClass(cl);
+      }
+      
       return cl;
     }
 
+    String className = name;
+    
     if (_hasBootClassPath) {
-      String className = name.replace('.', '/') + ".class";
+      className = name.replace('.', '/') + ".class";
 
-      if (findPath(className) == null)
+      if (findPath(className) == null) {
         return null;
+      }
     }
 
-    return super.loadClassImpl(name, resolve);
+    try {
+      return super.loadClassImpl(name, resolve);
+    } catch (Error e) {
+      className = name.replace('.', '/') + ".class";
+      
+      if (findPath(className) != null) {
+        String msg =  (e + "\n  while loading " + name + " in " + this
+                       + "\n  which exists in " + findPath(className)
+                       + "\n  check for missing dependencies");
+        
+        log().warning(msg);
+      }
+      
+      throw e;
+    } catch (ClassNotFoundException e) {
+      className = name.replace('.', '/') + ".class";
+      
+      if (findPath(className) != null) {
+        String msg =  (e + "\n  " + name + " in " + this
+            + "\n  exists in " + findPath(className)
+            + "\n  check for missing dependencies");
+        
+        log().fine(msg);
+        
+        throw new ClassNotFoundException(e.getMessage() + "\n" + msg, e);
+      }
+      
+      throw e;
+    }
   }
 
   protected String getSchema()
@@ -299,6 +335,15 @@ public class SystemClassLoader
   private void initSecurity()
   {
     addPermission(new AllPermission());
+  }
+  
+  private static Logger log()
+  {
+    if (_log == null) {
+      _log = Logger.getLogger(SystemClassLoader.class.getName());
+    }
+    
+    return _log;
   }
 }
 

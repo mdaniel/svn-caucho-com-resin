@@ -441,7 +441,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
             return;
           }
           
-          if (removeData(data.getKey(), data.getDataId())) {
+          if (removeData(data.getKey(),
+                         data.getCacheHash(),
+                         data.getDataId())) {
             removeCount++;
             isExpire = true;
             
@@ -465,10 +467,13 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                        */
     
   }
-  private boolean removeData(byte []key, long dataId)
+  private boolean removeData(byte []key,
+                             byte []cacheHash,
+                             long dataId)
   {
     CacheConfig config = null;
-    DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key), config);
+    DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key), 
+                                                      HashKey.create(cacheHash));
     
     distEntry.clear();
 

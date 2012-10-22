@@ -206,7 +206,7 @@ public class MnodeStore {
          + " SET access_timeout=?,access_time=?"
          + " WHERE id=? AND item_version=?");
 
-    _selectExpireQuery = ("SELECT resin_oid,id,value_data_id FROM " + _tableName
+    _selectExpireQuery = ("SELECT resin_oid,id,cache_id,value_data_id FROM " + _tableName
                           + " WHERE ? < resin_oid"
                           + " AND (access_time + 1.25 * access_timeout < ?"
                           + "      OR modified_time + modified_timeout < ?)"
@@ -825,9 +825,10 @@ public class MnodeStore {
       while (rs.next()) {
         long oid = rs.getLong(1);
         byte []key = rs.getBytes(2);
-        long dataId = rs.getLong(3);
+        byte []cacheHash = rs.getBytes(3);
+        long dataId = rs.getLong(4);
         
-        expireList.add(new ExpiredMnode(oid, key, dataId));
+        expireList.add(new ExpiredMnode(oid, key, cacheHash, dataId));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -1004,12 +1005,17 @@ public class MnodeStore {
   public static final class ExpiredMnode {
     private final long _oid;
     private final byte []_key;
+    private final byte []_cacheHash;
     private final long _dataId;
     
-    ExpiredMnode(long oid, byte []key, long dataId)
+    ExpiredMnode(long oid, 
+                 byte []key,
+                 byte []cacheHash,
+                 long dataId)
     {
       _oid = oid;
       _key = key;
+      _cacheHash = cacheHash;
       _dataId = dataId;
     }
     
@@ -1021,6 +1027,11 @@ public class MnodeStore {
     public final byte []getKey()
     {
       return _key;
+    }
+    
+    public final byte []getCacheHash()
+    {
+      return _cacheHash;
     }
     
     public final long getDataId()

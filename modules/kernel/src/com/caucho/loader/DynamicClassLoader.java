@@ -1494,12 +1494,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     // XXX: removed sync block, since handled below
     Class<?> cl = null;
 
-    cl = loadClassImpl(name, resolve);
+    try {
+      cl = loadClassImpl(name, resolve);
+    } catch (ClassNotFoundException e) {
+      throw new ClassNotFoundException(e.getMessage() + " (in " + this + ")", e);
+    } catch (NoClassDefFoundError e) {
+      log().finer(e.toString() + " (in " + this + ")");
+      throw e;
+    }
 
     if (cl != null)
       return cl;
     else {
-      ClassNotFoundException exn = new ClassNotFoundException(name + " in " + this);
+      ClassNotFoundException exn = new ClassNotFoundException(name + " (in " + this + ")");
       
       throw exn;
     }
@@ -1553,17 +1560,23 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     // sendAddLoaderEvent();
 
     if (normalJdkOrder) {
-      try {
-        ClassLoader parent = getParent();
+      ClassLoader parent = getParent();
 
+      try {
         if (parent instanceof DynamicClassLoader)
           cl = ((DynamicClassLoader) parent).loadClassImpl(name, resolve);
         else if (parent != null) {
           cl = Class.forName(name, false, parent);
         }
-        else
+        else {
           cl = findSystemClass(name);
+        }
       } catch (ClassNotFoundException e) {
+      } catch (Error e) {
+        if (! (parent instanceof DynamicClassLoader)) {
+          log().warning(e + "\n  while loading " + name + " (in " + this + ")");
+        }
+        throw e;
       }
       
 
