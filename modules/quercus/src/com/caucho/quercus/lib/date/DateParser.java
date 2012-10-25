@@ -192,7 +192,7 @@ public class DateParser
   }
 
   private void parseISODate(int value1)
-  {
+  {    
     //int year = _date.getYear();
     //int month = 0;
     //int day = 0;
@@ -201,7 +201,7 @@ public class DateParser
       value1 = - value1;
 
     int token = nextToken();
-
+    
     int value2 = 0;
 
     if (token == INT) {
@@ -214,10 +214,10 @@ public class DateParser
     }
 
     token = nextToken();
-
+    
     if (token == '-') {
       token = nextToken();
-
+      
       if (token == INT) {
         if (value1 < 0)
           _date.setYear(value1);
@@ -401,7 +401,6 @@ public class DateParser
   {
     int hour = _value;
     _value = NULL_VALUE;
-
     if (hour < 0)
       hour = - hour;
 
@@ -411,7 +410,7 @@ public class DateParser
     _date.setMillisecond(0);
 
     int token = nextToken();
-
+    
     if (token == INT) {
       _date.setMinute(_value);
       _value = NULL_VALUE;
@@ -422,10 +421,10 @@ public class DateParser
     }
 
     token = nextToken();
-
+    
     if (token == ':') {
       token = nextToken();
-
+      
       if (token == INT) {
         _date.setSecond(_value);
         _value = NULL_VALUE;
@@ -436,13 +435,17 @@ public class DateParser
       }
 
       token = nextToken();
-
+      
       if (token == '.') { // milliseconds
         token = nextToken();
-
-        _value = NULL_VALUE;
-        if (token != INT) {
+        
+        if (token == INT) {
+          token = nextToken();
+        }
+        else {          
           _peekToken = token;
+          //_value = NULL_VALUE;
+
           return;
         }
       }
@@ -469,17 +472,17 @@ public class DateParser
   }
 
   private void parseTimezone()
-  {
+  {    
     int token = nextToken();
     int sign = 1;
     boolean hasUTC = false;
-
+    
     if (token == UTC) {
       token = nextToken();
 
       hasUTC = true;
     }
-
+    
     if (token == '-')
       sign = -1;
     else if (token == '+')
@@ -487,20 +490,21 @@ public class DateParser
     else {
       _peekToken = token;
 
-      if (hasUTC)
+      if (hasUTC) {
         _date.setGMTTime(_date.getGMTTime() + _date.getZoneOffset());
+      }
 
       return;
     }
 
-    //int offset = 0;
-
     token = nextToken();
+        
     if (token != INT) {
       _peekToken = token;
 
-      if (hasUTC)
+      if (hasUTC) {
         _date.setGMTTime(_date.getGMTTime() + _date.getZoneOffset());
+      }
 
       return;
     }
@@ -513,11 +517,13 @@ public class DateParser
 
       // php/191g - php ignores any explicit
       // offset if the date specifies UTC/z/GMT
-      if (hasUTC)
+      if (hasUTC) {
         _date.setGMTTime(_date.getGMTTime() + _date.getZoneOffset());
-      else
-        _date.setGMTTime(
-            _date.getGMTTime() - value * 60000L + _date.getZoneOffset());
+      }
+      else {
+        _date.setGMTTime(_date.getGMTTime() - value * 60000L + _date.getZoneOffset());
+      }
+      
       return;
     }
     else if (_digits == 2) {
@@ -529,23 +535,31 @@ public class DateParser
         _value = sign * _value;
         _peekToken = token;
 
-        if (hasUTC)
+        if (hasUTC) {
           _date.setGMTTime(_date.getGMTTime() + _date.getZoneOffset());
+        }
+        
         return;
       }
-
-      value = sign * (100 * value + _value);
-
-      _date.setGMTTime(
-          _date.getGMTTime() - value * 60000L + _date.getZoneOffset());
+      
+      token = nextToken();
+      
+      if (token != INT) {
+        return;
+      }
+      
+      value = sign * (60 * value + _value);
+      
+      _date.setGMTTime(_date.getGMTTime() - value * 60000L + _date.getZoneOffset());
       return;
     }
     else {
       _value = sign * _value;
       _peekToken = token;
 
-      if (hasUTC)
+      if (hasUTC) {
         _date.setGMTTime(_date.getGMTTime() + _date.getZoneOffset());
+      }
 
       return;
     }
