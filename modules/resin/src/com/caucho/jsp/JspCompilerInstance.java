@@ -329,6 +329,7 @@ public class JspCompilerInstance {
       }
       
       _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
+      _parseState.setContentType(jspPropertyGroup.getDefaultContentType());
       _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
       
       if (Boolean.TRUE.equals(jspPropertyGroup.isXml()))

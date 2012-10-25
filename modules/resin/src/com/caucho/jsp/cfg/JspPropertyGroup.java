@@ -573,6 +573,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
       _isDeferredSyntaxAllowedAsLiteral.toString();
   }
 
+  @Override
   public String getDefaultContentType()
   {
     return _defaultContentType;

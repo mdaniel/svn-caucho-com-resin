@@ -12,6 +12,11 @@
 
 <s2 title="4.0.33 - snapshot">
 <ul>
+<li>jsp: add jsp-property-group default-content-type (#4232, rep by mattp)</li>
+<li>jsp: let BeanELResolver auto-convert to Enum (#5230, rep by mate)</li>
+<li>loader: added setDisableURLs to DynamicClassLoader to work around RMI bug (#5186)</li>
+<li>jmx: needs to support @MXBean (#5212, rep by kay)</li>
+<li>jamm/health: event firing needs to work from null classloader context (#4254, rep by Luke Bigum)</li>
 <li>servlet: access-log of %u wasn't properly grabbing user (#5250, rep by W. Tao)</li>
 <li>cli: -verbose needs to enable finer logging and display exceptions (#5237, rep by Steve Francis)</li>
 <li>servlet: jersey compatibility (related to @HandlesTypes issue) (#5228, rep by Ryan T)</li>

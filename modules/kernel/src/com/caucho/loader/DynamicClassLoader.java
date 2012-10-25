@@ -112,6 +112,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     = new ConcurrentHashMap<String,ClassEntry>(8);
 
   private TimedCache<String,URL> _resourceCache;
+  
+  private boolean _isDisableURLs;
 
   // Dependencies
   private DependencyContainer _dependencies = new DependencyContainer(this);
@@ -580,6 +582,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return true;
     }
   }
+  
+  public void setDisableURLs(boolean isDisable)
+  {
+    _isDisableURLs = isDisable;
+  }
+  
+  public boolean isDisableURLs()
+  {
+    return _isDisableURLs;
+  }
 
   /**
    * Adds the URL to the URLClassLoader.
@@ -664,7 +676,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   @Override
   public URL []getURLs()
   {
-    return _urls;
+    if (isDisableURLs()) {
+      // #5186
+      return new URL[0];
+    }
+    else {
+      return _urls;
+    }
   }
 
   /**

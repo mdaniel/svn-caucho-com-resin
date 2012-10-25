@@ -30,6 +30,7 @@
 package com.caucho.env.service;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -61,6 +62,8 @@ public class ResinSystem
   
   private static final EnvironmentLocal<ResinSystem> _serverLocal
     = new EnvironmentLocal<ResinSystem>();
+  
+  private static WeakReference<ResinSystem> _globalSystemRef;
 
   private String _id;
   private EnvironmentClassLoader _classLoader;
@@ -116,6 +119,8 @@ public class ResinSystem
     }
 
     _serverLocal.set(this, _classLoader);
+    
+    _globalSystemRef = new WeakReference<ResinSystem>(this);
 
     _lifecycle = new Lifecycle(log, toString(), Level.FINE);
     
@@ -189,7 +194,17 @@ public class ResinSystem
    */
   public static ResinSystem getCurrent()
   {
-    return _serverLocal.get();
+    ResinSystem system = _serverLocal.get();
+    
+    if (system == null) {
+      WeakReference<ResinSystem> globalRef = _globalSystemRef;
+          
+      if (globalRef != null) {
+        system = globalRef.get();
+      }
+    }
+    
+    return system;
   }
   
   /**
@@ -623,6 +638,12 @@ public class ResinSystem
         }
       }
 
+      WeakReference<ResinSystem> globalRef = _globalSystemRef;
+      
+      if (globalRef != null && globalRef.get() == this) {
+        _globalSystemRef = null;
+      }
+      
       /*
        * destroy
        */

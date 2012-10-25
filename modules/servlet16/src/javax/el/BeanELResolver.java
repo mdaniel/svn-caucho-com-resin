@@ -267,6 +267,14 @@ public class BeanELResolver extends ELResolver {
       throw new PropertyNotFoundException(fieldName);
     else if (_isReadOnly || prop.getWriteMethod() == null)
       throw new PropertyNotWritableException(fieldName);
+    
+    Class<?> type = prop.getWriteMethod().getParameterTypes()[0];
+    
+    if (value != null
+        && type.isEnum()
+        && ! type.isAssignableFrom(value.getClass())) {
+      value = Enum.valueOf((Class) type, String.valueOf(value));
+    }
 
     try {
       prop.getWriteMethod().invoke(base, value);
@@ -302,6 +310,7 @@ public class BeanELResolver extends ELResolver {
     Method method = null;
     try {
       method = base.getClass().getDeclaredMethod(methodName, paramTypes);
+      
       try {
         Object result = method.invoke(base, params);
         context.setPropertyResolved(true);

@@ -1608,8 +1608,9 @@ public class JspParser {
             ch = read();
           }
         }
-        else
+        else {
           _value.append('&');
+        }
       }
       else {
         _value.append((char) ch);
@@ -1641,8 +1642,9 @@ public class JspParser {
     }
 
     CharBuffer cb = CharBuffer.allocate();
-    for (; ch >= 'a' && ch <= 'z'; ch = read())
+    for (; ch >= 'a' && ch <= 'z'; ch = read()) {
       cb.append((char) ch);
+    }
 
     if (ch != ';') {
 
