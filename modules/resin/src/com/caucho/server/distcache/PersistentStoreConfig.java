@@ -29,14 +29,14 @@
 
 package com.caucho.server.distcache;
 
-import java.util.logging.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.db.block.BlockManager;
+import com.caucho.distcache.jdbc.JdbcCacheBacking;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -46,6 +46,9 @@ import com.caucho.vfs.Path;
 public class PersistentStoreConfig
 {
   private static final L10N L = new L10N(PersistentStoreConfig.class);
+  
+  private static EnvironmentLocal<PersistentStoreConfig> _current
+    = new EnvironmentLocal<PersistentStoreConfig>();
 
   private String _type;
 
@@ -55,6 +58,13 @@ public class PersistentStoreConfig
   private boolean _isBackup = true;
   private boolean _isTriplicate = true;
   private boolean _isAlwaysSave = false;
+  
+  private AbstractCacheBacking<?,?> _backing;
+  
+  public static PersistentStoreConfig getCurrent()
+  {
+    return _current.get();
+  }
 
   /**
    * Sets the persistent store name.
@@ -79,7 +89,7 @@ public class PersistentStoreConfig
     
     _dataSource = dataSource;
   }
-
+  
   @Deprecated
   public void setPath(Path path)
   {
@@ -146,18 +156,34 @@ public class PersistentStoreConfig
   {
     return this;
   }
+  
+  public boolean isJdbc()
+  {
+    return "jdbc".equals(_type);
+  }
+  
+  public AbstractCacheBacking<?,?> getBacking()
+  {
+    return _backing;
+  }
 
   @PostConstruct
   public void init()
     throws Exception
   {
-    if ("jdbc".equals(_type) && _dataSource == null)
+    if (isJdbc() && _dataSource == null) {
       throw new ConfigException(L.l("'jdbc' persistent-store requires a data-source"));
-    
-    if (_dataSource != null) {
-      DistCacheSystem system = DistCacheSystem.getCurrent();
-
-      system.setJdbcDataSource(_dataSource);
     }
+    
+    if (isJdbc()) {
+      JdbcCacheBacking backing = new JdbcCacheBacking();
+      _backing = backing;
+      
+      backing.setDatabase(_dataSource);
+      
+      backing.init();
+    }
+    
+    _current.set(this);
   }
 }

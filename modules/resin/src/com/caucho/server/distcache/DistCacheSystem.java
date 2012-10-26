@@ -53,7 +53,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
   
   private CacheStoreManager _distCacheManager;
 
-  private DataSource _jdbcDataSource;
+  // private DataSource _jdbcDataSource;
   
   public DistCacheSystem(CacheStoreManager distCacheManager)
   {
@@ -79,10 +79,12 @@ public class DistCacheSystem extends AbstractResinSubSystem
     return ResinSystem.getCurrentService(DistCacheSystem.class);
   }
 
+  /*
   public void setJdbcDataSource(DataSource dataSource)
   {
     throw new ConfigException(L.l("jdbc persistent-store requires Resin Professional"));
   }
+  */
 
   public static CacheImpl getMatchingCache(String name)
   {

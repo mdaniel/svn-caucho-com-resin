@@ -12,6 +12,8 @@
 
 <s2 title="4.0.33 - snapshot">
 <ul>
+<li>cache: add jdbc cache as backing</li>
+<li>cache: add tiered cache</li>
 <li>jsp: add jsp-property-group default-content-type (#4232, rep by mattp)</li>
 <li>jsp: let BeanELResolver auto-convert to Enum (#5230, rep by mate)</li>
 <li>loader: added setDisableURLs to DynamicClassLoader to work around RMI bug (#5186)</li>

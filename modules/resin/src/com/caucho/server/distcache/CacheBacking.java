@@ -29,16 +29,9 @@
 
 package com.caucho.server.distcache;
 
-import javax.cache.CacheWriter;
-
 /**
- * Extended cache writer
+ * Extended cache loader
  */
-public interface CacheWriterExt<K,V> extends CacheWriter<K,V>
+public interface CacheBacking<K,V> extends CacheLoaderExt<K,V>, CacheWriterExt<K,V>
 {
-  void write(DistCacheEntry entry);
-  
-  void delete(DistCacheEntry entry);
-
-  void updateTime(DistCacheEntry distCacheEntry);
 }

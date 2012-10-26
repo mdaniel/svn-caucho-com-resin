@@ -470,8 +470,6 @@ public class DistCacheEntry {
     CacheWriterExt writer = config.getCacheWriterExt();
 
     if (! isLocal && writer != null && config.isWriteThrough()) {
-      // XXX: save facade?
-      // writer.write(new ExtCacheEntryFacade(this));
       loadValue(config);
       
       writer.write(this);
@@ -571,7 +569,7 @@ public class DistCacheEntry {
     long valueDataId = dataItem.getValueDataId();
     long newVersion = getNewVersion(oldMnodeEntry);
     
-    long oldValueDataId = oldMnodeEntry.getValueDataId();
+    // long oldValueDataId = oldMnodeEntry.getValueDataId();
     
     
     try {
@@ -602,8 +600,6 @@ public class DistCacheEntry {
                                           MnodeUpdate update,
                                           StreamSource source)
   {
-    long prevDataItem = getMnodeEntry().getValueDataId();
-
     // long version = getNewVersion(getMnodeEntry());
     long version = update.getVersion();
     
@@ -615,23 +611,7 @@ public class DistCacheEntry {
     
     Object value = null;
     
-    try {
-      return compareAndPutLocal(testValue, update, valueDataId, value);
-    } finally {
-      /*
-      MnodeEntry newMnodeValue = getMnodeEntry();
-      
-      if (newMnodeValue.getValueDataId() != valueDataId) {
-        if (valueDataId != 0) {
-          getLocalDataManager().removeData(valueDataId);
-        }
-      }
-      else if (prevDataItem != 0) {
-        // XXX:
-        getLocalDataManager().removeData(prevDataItem);
-      }
-      */
-    }
+    return compareAndPutLocal(testValue, update, valueDataId, value);
   }
   
   public boolean compareAndPutLocal(long testValueHash,
@@ -918,6 +898,7 @@ public class DistCacheEntry {
     }
     
     updateAccessTime(mnodeEntry, now);
+    // asdf
     
     CacheConfig config = getConfig();
 
@@ -1529,7 +1510,6 @@ public class DistCacheEntry {
 
       if (idleTimeout < CacheConfig.TIME_INFINITY
           && updateTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
-        // XXX:
         mnodeValue.setLastAccessTime(now);
 
         saveUpdateTime(mnodeValue);
@@ -1568,6 +1548,12 @@ public class DistCacheEntry {
     _cacheService.getCacheEngine().updateTime(getKeyHash(), 
                                               getCacheKey(),
                                               mnodeValue);
+    
+    CacheWriterExt writer = getConfig().getCacheWriterExt();
+
+    if (writer != null && getConfig().isWriteThrough()) {
+      writer.updateTime(this);
+    }
 
     return mnodeValue;
   }

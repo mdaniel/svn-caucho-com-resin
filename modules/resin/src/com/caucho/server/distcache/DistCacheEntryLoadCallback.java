@@ -46,9 +46,9 @@ class DistCacheEntryLoadCallback implements CacheLoaderCallback {
   @Override
   public void onLoad(DistCacheEntry entry, Object value)
   {
-    entry.putInternal(value);
+    // entry.putInternal(value);
     
-    _isValue = value != null;
+    _isValue = ! entry.getMnodeEntry().isValueNull();
     _isDone = true;
     
     Thread thread = _thread;

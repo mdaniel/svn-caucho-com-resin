@@ -176,7 +176,7 @@ public class MnodeValue implements java.io.Serializable {
   {
     return (getClass().getSimpleName()
             + "["
-            + ",value=" + Long.toHexString(getValueHash())
+            + ",valueHash=" + Long.toHexString(getValueHash())
             + ",flags=" + Long.toHexString(getFlags())
             + ",version=" + getVersion()
             + "]");

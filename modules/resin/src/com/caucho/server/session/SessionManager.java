@@ -58,6 +58,7 @@ import com.caucho.distcache.ByteStreamCache;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ResinCacheBuilder.Scope;
+import com.caucho.distcache.jdbc.JdbcCacheBacking;
 import com.caucho.env.meter.AverageSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.hessian.io.HessianDebugInputStream;
@@ -67,6 +68,8 @@ import com.caucho.json.ser.JsonSerializer;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.ServletService;
+import com.caucho.server.distcache.AbstractCacheBacking;
+import com.caucho.server.distcache.CacheBacking;
 import com.caucho.server.distcache.CacheImpl;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.webapp.WebApp;
@@ -1135,6 +1138,16 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       cacheBuilder.setLeaseExpireTimeoutMillis(5 * 60 * 1000);
       // server/0b12
       cacheBuilder.setLocalExpireTimeoutMillis(100);
+      
+      PersistentStoreConfig persistConfig = PersistentStoreConfig.getCurrent();
+      
+      if (persistConfig != null) {
+        CacheBacking<?,?> backing = persistConfig.getBacking();
+        
+        if (backing != null) {
+          cacheBuilder.setBacking(backing);
+        }
+      }
 
       _sessionStore = cacheBuilder.createIfAbsent();
     }

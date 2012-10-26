@@ -61,6 +61,7 @@ import com.caucho.config.types.Period;
 import com.caucho.distcache.jcache.CacheManagerFacade;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.loader.Environment;
+import com.caucho.server.distcache.CacheBacking;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheImpl;
 import com.caucho.server.distcache.CacheManagerImpl;
@@ -425,6 +426,17 @@ public class AbstractCache
   public boolean isTriplicate()
   {
     return _config.isTriplicate();
+  }
+
+  /**
+   * @param backing
+   */
+  public void setBacking(CacheBacking<?, ?> backing)
+  {
+    _config.setCacheLoader(backing);
+    _config.setReadThrough(true);
+    _config.setCacheWriter(backing);
+    _config.setWriteThrough(true);
   }
   
   public void setPersistenceMode(Persistence persistence)

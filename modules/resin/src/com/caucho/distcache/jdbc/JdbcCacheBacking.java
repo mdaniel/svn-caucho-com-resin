@@ -27,63 +27,65 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.distcache.jdbc;
 
-import java.util.Collection;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
-import javax.cache.Cache.Entry;
-import javax.cache.CacheWriter;
+import com.caucho.config.ConfigException;
+import com.caucho.server.distcache.AbstractCacheBacking;
+import com.caucho.server.distcache.CacheLoaderCallback;
+import com.caucho.server.distcache.DistCacheEntry;
+
 
 /**
- * Extended cache loader
+ * Manages backing for the cache map.
  */
-public class CacheWriterAdapter<K,V> implements CacheWriterExt<K,V>
-{
-  private final CacheWriter<K,V> _writer;
+public class JdbcCacheBacking extends AbstractCacheBacking<Object,Object> {
+  private JdbcCacheBacking _delegate;
   
-  public CacheWriterAdapter(CacheWriter<K,V> writer)
+  public JdbcCacheBacking()
   {
-    _writer = writer;
+    try {
+      Class<?> cl = Class.forName("com.caucho.distcache.jdbc.JdbcCacheBackingImpl");
+      
+      _delegate = (JdbcCacheBacking) cl.newInstance();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
-
+  
+  protected JdbcCacheBacking(boolean dummy)
+  {
+  }
+  
+  public void setDatabase(DataSource database)
+  {
+    _delegate.setDatabase(database);
+  }
+  
+  @PostConstruct
+  public void init()
+  {
+    _delegate.init();
+  }
+  
   @Override
-  public void write(Entry<K, V> entry)
+  public void load(DistCacheEntry entry, CacheLoaderCallback cb)
   {
-    _writer.write(entry);
+    _delegate.load(entry, cb);
   }
-
-  @Override
-  public void writeAll(Collection<Entry<? extends K, ? extends V>> entries)
-  {
-    _writer.writeAll(entries);
-  }
-
-  @Override
-  public void delete(Object key)
-  {
-    _writer.delete(key);
-  }
-
-  @Override
-  public void deleteAll(Collection<?> entries)
-  {
-    _writer.deleteAll(entries);
-  }
-
+  
   @Override
   public void write(DistCacheEntry entry)
   {
-    write(new ExtCacheEntryFacade(entry));
+    _delegate.write(entry);
   }
 
   @Override
   public void delete(DistCacheEntry entry)
   {
-    delete(entry.getKey());
+    _delegate.delete(entry);
   }
-
-  @Override
-  public void updateTime(DistCacheEntry distCacheEntry)
-  {
-  }
+  
 }

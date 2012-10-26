@@ -30,60 +30,69 @@
 package com.caucho.server.distcache;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.cache.Cache.Entry;
-import javax.cache.CacheWriter;
 
 /**
  * Extended cache loader
  */
-public class CacheWriterAdapter<K,V> implements CacheWriterExt<K,V>
+public class AbstractCacheBacking<K,V> implements CacheBacking<K,V>
 {
-  private final CacheWriter<K,V> _writer;
+  @Override
+  public void load(DistCacheEntry entry, CacheLoaderCallback cb)
+  {
+    cb.onLoadFail(entry);
+  }
   
-  public CacheWriterAdapter(CacheWriter<K,V> writer)
-  {
-    _writer = writer;
-  }
-
-  @Override
-  public void write(Entry<K, V> entry)
-  {
-    _writer.write(entry);
-  }
-
-  @Override
-  public void writeAll(Collection<Entry<? extends K, ? extends V>> entries)
-  {
-    _writer.writeAll(entries);
-  }
-
-  @Override
-  public void delete(Object key)
-  {
-    _writer.delete(key);
-  }
-
-  @Override
-  public void deleteAll(Collection<?> entries)
-  {
-    _writer.deleteAll(entries);
-  }
-
   @Override
   public void write(DistCacheEntry entry)
   {
-    write(new ExtCacheEntryFacade(entry));
   }
 
   @Override
   public void delete(DistCacheEntry entry)
   {
-    delete(entry.getKey());
   }
 
   @Override
   public void updateTime(DistCacheEntry distCacheEntry)
   {
+  }
+  
+  @Override
+  public Entry<K, V> load(Object key)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public Map<K, V> loadAll(Iterable<? extends K> keys)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public void write(Entry<K, V> entry)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public void writeAll(Collection<Entry<? extends K, ? extends V>> entries)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public void delete(Object key)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public void deleteAll(Collection<?> entries)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }
