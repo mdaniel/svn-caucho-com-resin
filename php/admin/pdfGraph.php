@@ -114,8 +114,9 @@ function pdf_summary()
   global $g_si, $g_canvas;
 
   $summary = pdf_summary_fill();
-  if (! $summary)
+  if (! $summary) {
     return;
+  }
     
   $g_canvas->writeSubsection("Environment");
   
@@ -186,54 +187,97 @@ function pdf_summary()
     $g_canvas->writeTextLineIndent(20, $license_data[1]);
     $g_canvas->writeTextLineIndent(20, $license_data[2]);
   }
-  
-  pdf_ports($summary);
 }
 
-function pdf_ports($summary)
+function pdf_threads($summary)
 {
-  global $g_canvas;
+  global $g_canvas, $g_jmx_dump;
   
-  $g_canvas->writeSubsection("TCP Ports");
+  $g_canvas->writeSection("Threads", true);
   
-  $g_canvas->setFont("Courier-Bold", "8");
+  $ports = pdf_ports_fill();
   
-  $col1 = 140;
-  $col = 45;
+  if ($ports) {
+    $g_canvas->writeSubsection("Port Threads");
   
-  $g_canvas->setFont("Courier", "8");
+    $col1 = 140;
+    $col = 45;
   
-  $g_canvas->writeTextColumn($col1, 'c', "");
+    $g_canvas->setFont("Courier", "8");
+    
+    $g_canvas->writeTextColumn($col1, 'c', "");
   
-  $g_canvas->writeTextColumn($col*3, 'c', "Threads");
-  $g_canvas->writeTextColumn($col*4, 'c', "Keepalive");
-  $g_canvas->newLine();
-  
-  $g_canvas->writeTextColumnHeader($col1, 'r', "Listener");
-  $g_canvas->writeTextColumnHeader($col, 'l', "Status");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Active");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Idle");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Total");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Total");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Thread");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Non-Block");
-  $g_canvas->writeTextColumnHeader($col, 'c', "Comet");
-  $g_canvas->newLine();
-  $g_canvas->newLine();
-  
-  $ports = $summary["ports"];
-  foreach($ports as $port) {
-    $g_canvas->writeTextColumn($col1, 'r', $port[0]);
-    $g_canvas->writeTextColumn($col, 'l', $port[1]);
-    $g_canvas->writeTextColumn($col, 'c', $port[2]);
-    $g_canvas->writeTextColumn($col, 'c', $port[3]);
-    $g_canvas->writeTextColumn($col, 'c', $port[4]);
-    $g_canvas->writeTextColumn($col, 'c', $port[5]);
-    $g_canvas->writeTextColumn($col, 'c', $port[6]);
-    $g_canvas->writeTextColumn($col, 'c', $port[7]);
-    $g_canvas->writeTextColumn($col, 'c', $port[8]);
-    $g_canvas->writeTextColumn($col, 'c', $port[9]);
+    $g_canvas->writeTextColumn($col*3, 'c', "Threads");
+    $g_canvas->writeTextColumn($col*4, 'c', "Keepalive");
     $g_canvas->newLine();
+  
+    $g_canvas->writeTextColumnHeader($col1, 'r', "Listener");
+    $g_canvas->writeTextColumnHeader($col, 'l', "Status");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Active");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Idle");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Total");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Total");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Thread");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Non-Block");
+    $g_canvas->writeTextColumnHeader($col, 'c', "Comet");
+    $g_canvas->newLine();
+    $g_canvas->newLine();
+  
+    foreach($ports as $port) {
+      $g_canvas->writeTextColumn($col1, 'r', $port[0]);
+      $g_canvas->writeTextColumn($col, 'l', $port[1]);
+      $g_canvas->writeTextColumn($col, 'c', $port[2]);
+      $g_canvas->writeTextColumn($col, 'c', $port[3]);
+      $g_canvas->writeTextColumn($col, 'c', $port[4]);
+      $g_canvas->writeTextColumn($col, 'c', $port[5]);
+      $g_canvas->writeTextColumn($col, 'c', $port[6]);
+      $g_canvas->writeTextColumn($col, 'c', $port[7]);
+      $g_canvas->writeTextColumn($col, 'c', $port[8]);
+      $g_canvas->writeTextColumn($col, 'c', $port[9]);
+      $g_canvas->newLine();
+    }
+  }
+  
+  $g_canvas->newLine();
+  
+  $g_canvas->writeSubsection("Thread Scoreboards");
+  
+  $dump = pdf_load_json_dump("Resin|Scoreboard|resin");
+  if (! $dump) {
+    $g_canvas->setTextFont();
+    $g_canvas->newLine();
+    $g_canvas->writeTextLineIndent(20, "A scoreboard report was not generated during the selected timeframe.");
+  } else {
+    $timestamp = create_timestamp($dump);
+    $g_canvas->setFont("Courier-Bold", "8");
+    $g_canvas->writeTextLine("Timestamp: $timestamp");
+    $g_canvas->newLine();
+  
+    $scoreboards =& $dump["scoreboards"];
+    $keys =& $dump["keys"];
+    
+    foreach ($scoreboards as $name => $value) {
+      $g_canvas->setFont("Courier-Bold", "10");
+      $g_canvas->writeTextColumnHeader($g_canvas->getLineWidth(), 'l', $name);
+      $g_canvas->newLine();
+      
+      $g_canvas->setFont("Courier", "10");
+      $g_canvas->writeTextColumn($g_canvas->getLineWidth(), 'l', $value);
+      $g_canvas->newLine();
+      $g_canvas->newLine();
+    }
+    
+    $g_canvas->setFont("Courier-Bold", "10");
+    $g_canvas->writeTextColumnHeader(220, 'l', "Scoreboard Key");
+    $g_canvas->newLine();
+    
+    $g_canvas->setFont("Courier", "10");
+        
+    foreach ($keys as $name => $value) {
+      $g_canvas->writeTextColumn(20,  'c', $name);
+      $g_canvas->writeTextColumn(100, 'l', $value);
+      $g_canvas->newLine();
+    }
   }
 }
 
@@ -316,39 +360,49 @@ function pdf_summary_fill()
   
   $summary["licenses"] = $licenses;
   
+  return $summary;
+}
+
+function pdf_ports_fill()
+{
+  global $g_jmx_dump;
+  
+  if (!$g_jmx_dump)
+    return null;
+  
+  $server = $g_jmx_dump["resin:type=Server"];
+    
   $ports = array();
   
   $port_names = $server["Ports"];
   foreach($port_names as $port_name) {
     $port = $g_jmx_dump[$port_name];
-    
+  
     $port_data = array();
-    
+  
     $address = ($port['Address'] ?: '*') . ":" . $port['Port'];
-    
-    if ($port['ProtocolName'] == 'http' && $port['SSL']) 
+  
+    if ($port['ProtocolName'] == 'http' && $port['SSL'])
       $protocol = 'https';
     else
       $protocol = $port['ProtocolName'];
-      
+  
     array_push($port_data, "$protocol://$address");
     array_push($port_data, $port["State"]);
-    
+  
     array_push($port_data, $port["ThreadActiveCount"]);
     array_push($port_data, $port["ThreadIdleCount"]);
     array_push($port_data, $port["ThreadCount"]);
-    
+  
     array_push($port_data, $port["KeepaliveCount"]);
     array_push($port_data, $port["KeepaliveThreadCount"]);
     array_push($port_data, $port["KeepaliveSelectCount"]);
     array_push($port_data, $port["CometIdleCount"]);
-    
+  
     array_push($ports, $port_data);
   }
   
-  $summary["ports"] = $ports;
-  
-  return $summary;
+  return $ports;
 }
 
 function getMeterGraphPage($pdfName)
@@ -399,8 +453,6 @@ function pdf_load_json_dump($name, $start=0, $end=0)
   $msg = $msgs[0];
   if (! $msg)
     return;
-    
-  //debug($msg->getMessage());
     
   return json_decode($msg->getMessage(), true);
 }

@@ -26,16 +26,34 @@
  *
  */
 
-package com.caucho.admin.thread.filter;
+package com.caucho.admin.thread;
 
-import java.lang.Thread.State;
-
-import com.caucho.admin.thread.ThreadSnapshot;
-
-public class BlockedThreadFilter implements ThreadSnapshotFilter
+public enum ThreadActivityCode
 {
-  public boolean isMatch(ThreadSnapshot thread)
+  // THREADS
+  RUNNING('R'),
+  BLOCKED('B'),
+  NATIVE('n'),
+  LOCKING('L'),
+  WAITING('w'),
+  ACCEPT('_'),
+  // DATABASE
+  SELECT('S'),
+  INSERT('I'),
+  UPDATE('U'),
+  DELETE('D'),
+  // GENERAL
+  IDLE('.');
+
+  final char _char;
+  
+  private ThreadActivityCode(char c)
   {
-    return thread.getState() == State.BLOCKED;
+    _char = c;
+  }
+  
+  public char getChar()
+  {
+    return _char;
   }
 }

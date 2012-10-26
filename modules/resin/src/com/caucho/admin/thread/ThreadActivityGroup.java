@@ -1,3 +1,31 @@
+/*
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ */
+
 package com.caucho.admin.thread;
 
 import java.util.*;
@@ -6,12 +34,12 @@ import com.caucho.admin.thread.filter.ThreadSnapshotFilter;
 
 public class ThreadActivityGroup
 {
-  private String _name;
+  private final String _name;
   
-  private List<ThreadSnapshotFilter> _filters = 
+  private final List<ThreadSnapshotFilter> _filters = 
     new ArrayList<ThreadSnapshotFilter>();
   
-  private List<ThreadSnapshot> _threads = 
+  private final List<ThreadSnapshot> _threads = 
     new ArrayList<ThreadSnapshot>();
   
   public ThreadActivityGroup(String name)
@@ -38,7 +66,7 @@ public class ThreadActivityGroup
   
   public boolean addIfMatches(ThreadSnapshot thread)
   {
-    for(ThreadSnapshotFilter filter : _filters) {
+    for (ThreadSnapshotFilter filter : _filters) {
       if (! filter.isMatch(thread))
         return false;
     }
@@ -50,7 +78,7 @@ public class ThreadActivityGroup
   public String toScoreboard()
   {
     StringBuilder sb = new StringBuilder();
-    for(ThreadSnapshot thread : _threads) {
+    for (ThreadSnapshot thread : _threads) {
       sb.append(thread.getCode());
     }
     

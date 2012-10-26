@@ -45,6 +45,7 @@
     <health:FailSafeRestart timeout="10m"/>
     <health:DumpJmx/>
     <health:DumpThreads/>
+    <health:ScoreboardReport/>
     <health:DumpHeap/>
     <health:DumpHeap hprof="true"
                      hprof-path="${resin.logDirectory}/heap.hprof"/>

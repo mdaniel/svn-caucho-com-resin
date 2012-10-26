@@ -1236,15 +1236,17 @@ table.data-detail {
 }
 
 .error {
-	font-weight : bold;
-	color: red;
+  font-weight : bold;
+  color: red;
+}
+
+.scoreboard-container {
+  display: inline-block;
 }
 
 .scoreboards {
-  font-size: 120%;
   color: black;
   float: left;
-  width: 650px;
   margin-right: 5px;
 }
 
@@ -1252,22 +1254,28 @@ table.data-detail {
   margin-bottom: 2px;
   margin-top: 2px;
   padding: 1px;
-  width: 95%;
+  margin-left: 0px;
+  margin-right: 0px;
+  width: 580px;
 }
 
 .scoreboard-data {
   background-color: #F4F4F4;
   padding: 5px;
   font-family: monospace;
-  font-size: 13px;
-  display: inline-block;
-  margin: 0px;
+  font-size: 12px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 0px;
+  margin-bottom: 1em;
+  width: 570px;
 }
 
-.scoreboard_key {
+.scoreboard-key {
   font-size: 90%;
   color: black;
   font-family: monospace;
   font-size: 13px;
+  float: right;
 }
 

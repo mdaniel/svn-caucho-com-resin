@@ -36,8 +36,8 @@ class PdfCanvas
   
   // state
   private $font;
-  private $color
-  private $line_width
+  private $color;
+  private $line_width;
   private $origin;
   
   private $font_name;
@@ -73,7 +73,7 @@ class PdfCanvas
   private $data_font_name = "Courier";
   private $data_font_size = 8;
   
-  private $header_font_name = "Helvetica"
+  private $header_font_name = "Helvetica";
   private $header_font_size = 8;
   
   private $column_spacing = 5;
@@ -857,12 +857,12 @@ class PdfCanvas
   
   public function writeTextLineCenter($text)
   {
-    $this->writeTextOpts(array('align'=>'c','newline'=>true), $text)
+    $this->writeTextOpts(array('align'=>'c','newline'=>true), $text);
   }
   
   public function writeTextLineRight($text)
   {
-    $this->writeTextOpts(array('align'=>'r','newline'=>true), $text)
+    $this->writeTextOpts(array('align'=>'r','newline'=>true), $text);
   }
   
   // 

@@ -34,6 +34,7 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
 
   if ($snapshot) {
     $snapshot->snapshotThreadDump();
+    $snapshot->snapshotScoreboards();
     $snapshot->snapshotHeap();
     $snapshot->snapshotJmx();
 
@@ -170,6 +171,8 @@ if ($jmx_dump) {
 pdf_header();
 
 pdf_summary();
+
+pdf_threads();
 
 pdf_health();
 

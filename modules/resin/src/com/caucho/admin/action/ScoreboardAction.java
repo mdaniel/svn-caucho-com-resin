@@ -29,7 +29,7 @@ public class ScoreboardAction implements AdminAction
     
     StringBuilder sb = new StringBuilder();
     
-    for(ThreadActivityGroup group : groups) {
+    for (ThreadActivityGroup group : groups) {
       String scoreboard = group.toScoreboard();
       
       sb.append("[");
@@ -46,7 +46,7 @@ public class ScoreboardAction implements AdminAction
     sb.append("\n");
    
     Map<Character, String> key = report.getScoreboardKey();
-    for(Map.Entry<Character, String> entry : key.entrySet()) {
+    for (Map.Entry<Character, String> entry : key.entrySet()) {
       sb.append(entry.getKey());
       sb.append("   ");
       sb.append(entry.getValue());
@@ -73,7 +73,7 @@ public class ScoreboardAction implements AdminAction
       ThreadActivityGroup []groups = report.execute(greedy);
       if (groups != null) {
         boolean isFirst = true;
-        for(ThreadActivityGroup group : groups) {
+        for (ThreadActivityGroup group : groups) {
           if (! isFirst)
             sb.append(",\n");
           isFirst = false;
@@ -91,7 +91,7 @@ public class ScoreboardAction implements AdminAction
       Map<Character, String> key = report.getScoreboardKey();
       
       boolean isFirst = true;
-      for(Map.Entry<Character, String> entry : key.entrySet()) {
+      for (Map.Entry<Character, String> entry : key.entrySet()) {
         if (! isFirst)
           sb.append(",\n");
         isFirst = false;
