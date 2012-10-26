@@ -29,18 +29,20 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -272,14 +274,26 @@ public class HttpModule extends AbstractQuercusModule {
         cookie.setMaxAge(0); //php/1b0i
     }
 
-    if (path != null && ! path.equals(""))
+    if (path != null && ! path.equals("")) {
       cookie.setPath(path);
+    }
 
-    if (domain != null && ! domain.equals(""))
+    if (domain != null && ! domain.equals("")) {
       cookie.setDomain(domain);
+    }
 
-    if (secure)
+    if (secure) {
       cookie.setSecure(true);
+    }
+    
+    if (httpOnly) {
+      try {
+        cookie.setHttpOnly(true);
+      }
+      catch (Exception e) {
+        env.warning("HttpOnly requires Servlet 3.0", e);
+      }
+    }
 
     response.addCookie(cookie);
 
@@ -314,8 +328,13 @@ public class HttpModule extends AbstractQuercusModule {
       cookieHeader.append(domain);
     }
 
-    if (secure)
+    if (secure) {
       cookieHeader.append("; secure");
+    }
+    
+    if (httpOnly) {
+      cookieHeader.append("; HttpOnly");
+    }
 
     getHeaders(env).add(cookieHeader.toString());
 

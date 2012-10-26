@@ -179,6 +179,7 @@ public class SessionModule extends AbstractQuercusModule
     array.put(env, "path", env.getIniString("session.cookie_path"));
     array.put(env, "domain", env.getIniString("session.cookie_domain"));
     array.put(env, "secure", env.getIniBoolean("session.cookie_secure"));
+    array.put(env, "httponly", env.getIniBoolean("session.cookie_httponly"));
 
     return array;
   }
@@ -365,15 +366,21 @@ public class SessionModule extends AbstractQuercusModule
   {
     env.setIni("session.cookie_lifetime", String.valueOf(lifetime));
 
-    if (path.isset())
+    if (path.isset()) {
       env.setIni("session.cookie_path", path.toString());
+    }
 
-    if (domain.isset())
+    if (domain.isset()) {
       env.setIni("session.cookie_domain", domain.toString());
+    }
 
-    if (isSecure.isset())
-      env.setIni("session.cookie_secure",
-                 isSecure.toBoolean() ? "1" : "0");
+    if (isSecure.isset()) {
+      env.setIni("session.cookie_secure", isSecure.toBoolean() ? "1" : "0");
+    }
+    
+    if (isHttpOnly.isset()) {
+      env.setIni("session.cookie_httponly", isHttpOnly.toBoolean() ? "1" : "0");
+    }
 
     return NullValue.NULL;
   }
@@ -587,6 +594,17 @@ public class SessionModule extends AbstractQuercusModule
 
       Value secure = env.getIni("session.cookie_secure");
       cookie.setSecure(secure.toBoolean());
+      
+      Value httpOnly = env.getIni("session.cookie_httponly");
+      
+      if (httpOnly.toBoolean()) {
+        try {
+          cookie.setHttpOnly(true);
+        }
+        catch (Exception e) {
+          env.warning("HttpOnly requires Servlet 3.0", e);
+        }
+      }
 
       response.addCookie(cookie);
     }
