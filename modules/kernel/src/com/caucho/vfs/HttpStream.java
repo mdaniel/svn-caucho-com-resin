@@ -390,10 +390,12 @@ class HttpStream extends StreamImpl {
   /**
    * Sets a header for the request.
    */
+  @Override
   public void setAttribute(String name, Object value)
   {
-    if (name.equals("method"))
+    if (name.equals("method")) {
       setMethod((String) value);
+    }
     else if (name.equals("socket-timeout")) {
       if (value instanceof Integer) {
         int socketTimeout = ((Integer) value).intValue();
@@ -460,14 +462,17 @@ class HttpStream extends StreamImpl {
    * @param length the number of bytes to write.
    * @param isEnd true when the write is flushing a close.
    */
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
-    if (! _isPost)
+    if (! _isPost) {
       return;
+    }
 
-    if (_tempStream == null)
+    if (_tempStream == null) {
       _tempStream = new MemoryStream();
+    }
 
     _tempStream.write(buf, offset, length, isEnd);
   }
@@ -503,11 +508,13 @@ class HttpStream extends StreamImpl {
    */
   public int readInt(byte []buf, int offset, int length) throws IOException
   {
-    if (! _didGet)
+    if (! _didGet) {
       getConnInput();
+    }
 
-    if (_isRequestDone)
+    if (_isRequestDone) {
       return -1;
+    }
 
     try {
       int len = length;
@@ -601,7 +608,7 @@ class HttpStream extends StreamImpl {
     
     if (log.isLoggable(Level.FINER))
       log.finer(this + " connect " + _method + " post=" + _isPost);
-
+System.out.println("CONN: " + _ws + " " + _method);
     if (_method != null) {
       _ws.print(_method);
       _ws.print(' ');
@@ -873,6 +880,16 @@ class HttpStream extends StreamImpl {
     else
       return _rs.getAvailable();
   }
+  
+  @Override
+  public void closeWrite()
+    throws IOException
+  {
+    if (! _didGet) {
+      getConnInput();
+    }
+  }
+
 
   /**
    * Close the connection.

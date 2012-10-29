@@ -148,8 +148,9 @@ public class HttpStreamWrapper extends StreamImpl
    */
   public void setAttribute(String name, Object value)
   {
-    if (_stream != null)
+    if (_stream != null) {
       _stream.setAttribute(name, value);
+    }
   }
 
   /**
