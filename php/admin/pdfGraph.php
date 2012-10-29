@@ -408,6 +408,10 @@ function pdf_ports_fill()
 function getMeterGraphPage($pdfName)
 {
   global $stat;
+
+  if ($stat == null) {
+    return null;
+  }
   
   $mpages = $stat->getMeterGraphPages();
   
@@ -421,9 +425,14 @@ function getMeterGraphPage($pdfName)
 function pdf_load_json_dump($name, $start=0, $end=0)
 {
   global $g_si, $log_mbean, $g_start, $g_end;
+
+  if (! $log_mbean) {
+    return;
+  }
   
- if (! $end)
-    $end = $g_end;
+  if (! $end) {
+   $end = $g_end;
+  }
  
   if (! $start)
     $start = $end - (2 * WEEK);
@@ -746,9 +755,14 @@ function pdf_log_messages($title,
                           $max=-1)
 {
   global $log_mbean, $g_canvas;
+
+  if (! $log_mbean) {
+    return;
+  }
   
-  if ($title)
+  if ($title) {
     $g_canvas->writeSubsection($title);
+  }
   
   $messages = $log_mbean->findMessages("warning",
                                        $start * 1000,

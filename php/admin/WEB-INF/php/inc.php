@@ -89,12 +89,6 @@ function mbean_init()
 
   $g_mbean_server = new MBeanServer();
 
-  $server = server_find_by_index($g_mbean_server, $server_index);
-
-  if ($server) {
-    $g_server_index = $server->ClusterIndex;
-  }
-
   if (! isset($g_server_index)) {
     $g_server = $g_mbean_server->getServer();
     $g_server_index = $g_server->SelfServer->ClusterIndex;
@@ -106,6 +100,7 @@ function mbean_init()
   else {
     $server = server_find_by_index($g_mbean_server, $g_server_index);
     $g_server_id = $server->Name;
+    $g_server_index = $server->ClusterIndex;
 
     try {
       $mbean_server = new MBeanServer($g_server_id);

@@ -15,6 +15,9 @@ class MBeanServer
       $this->delegate = java("com.caucho.quercus.lib.resin.MBeanServer", $id);
     else
       $this->delegate = java("com.caucho.quercus.lib.resin.MBeanServer");
+
+      resin_var_dump($id);
+      resin_var_dump($this->delegate);
   }
 
   public function getServer()
@@ -27,11 +30,13 @@ class MBeanServer
     return $this->lookup("resin:type=Resin");
   }
 
-  public function getStatService() {
+  public function getStatService()
+  {
     return $this->lookup("resin:type=StatService");
   }
 
-  public function getLogService() {
+  public function getLogService()
+  {
     return $this->lookup("resin:type=LogService");
   }
 

@@ -12,6 +12,7 @@
 
 <s2 title="4.0.33 - snapshot">
 <ul>
+<li>cli: remote management was not properly using -server in some cases (#5226)</li>
 <li>cache: add jdbc cache as backing</li>
 <li>cache: add tiered cache</li>
 <li>jsp: add jsp-property-group default-content-type (#4232, rep by mattp)</li>

@@ -50,6 +50,7 @@ public class DataStreamSource extends StreamSource
   {
     _valueDataId = valueDataId;
     _dataBacking = dataBacking;
+    
     if (dataBacking == null)
       throw new NullPointerException();
   }

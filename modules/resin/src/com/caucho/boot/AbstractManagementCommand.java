@@ -69,8 +69,9 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
         System.out.println(cause.toString());
       }
 
-      if (args.isVerbose())
+      if (args.isVerbose()) {
         e.printStackTrace();
+      }
 
       if (e instanceof NotAuthorizedException)
         return 1;
