@@ -29,6 +29,7 @@
 
 package com.caucho.message.nautilus;
 
+import com.caucho.env.actor.AbstractActorProcessor;
 import com.caucho.env.actor.ActorProcessor;
 import com.caucho.env.actor.ActorQueue;
 import com.caucho.env.actor.ValueActorQueue;
@@ -57,7 +58,7 @@ class NautilusCheckpointPublisher
     return isValid;
   }
   
-  class CheckpointProcessor implements ActorProcessor<Long> {
+  class CheckpointProcessor extends AbstractActorProcessor<Long> {
     @Override
     public String getThreadName()
     {

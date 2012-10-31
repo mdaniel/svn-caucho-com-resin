@@ -47,6 +47,7 @@ import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.QueryResult;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.env.actor.AbstractActorProcessor;
 import com.caucho.env.actor.ActorProcessor;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
@@ -381,7 +382,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     return getClass().getSimpleName() + "[" + _name + "]";
   }
   
-  private class PacketProcessor implements ActorProcessor<Packet> {
+  private class PacketProcessor extends AbstractActorProcessor<Packet> {
     PacketProcessor()
     {
     }

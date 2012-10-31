@@ -40,6 +40,12 @@ public interface ActorProcessor<T>
   public String getThreadName();
 
   /**
+   * Called before items in the queue are processed. This can be
+   * used to establish a context
+   */
+  public void onProcessStart() throws Exception;
+
+  /**
    * Process a single item.
    */
   public void process(T item) throws Exception;

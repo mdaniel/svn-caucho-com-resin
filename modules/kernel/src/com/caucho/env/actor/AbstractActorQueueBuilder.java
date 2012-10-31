@@ -42,6 +42,7 @@ abstract class AbstractActorQueueBuilder<T>
   private int _initial;
   private int _capacity;
   private boolean _isMultiworker;
+  private int _multiworkerOffset = 4;
   
   public AbstractActorQueueBuilder<T>
   processors(ActorProcessor<? super T> ...processors)
@@ -96,13 +97,30 @@ abstract class AbstractActorQueueBuilder<T>
   {
     return _isMultiworker;
   }
+  
+  public AbstractActorQueueBuilder<T> multiworkerOffset(int offset)
+  {
+    _multiworkerOffset = offset;
+    
+    return this;
+  }
+  
+  public int getMultiworkerOffset()
+  {
+    return _multiworkerOffset;
+  }
 
-  protected void validateBuilder()
+  protected void validateFullBuilder()
   {
     if (_processors == null) {
       throw new IllegalStateException(L.l("processors is required"));
     }
     
+    validateBuilder();
+  }
+
+  protected void validateBuilder()
+  {
     if (_capacity <= 0) {
       throw new IllegalStateException(L.l("capacity is required"));
     }

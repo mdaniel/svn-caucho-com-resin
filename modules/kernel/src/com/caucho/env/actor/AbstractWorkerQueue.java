@@ -33,7 +33,7 @@ package com.caucho.env.actor;
 /**
  * Ring-based memory queue processed by a single worker.
  */
-abstract public class AbstractWorkerQueue<T> implements ActorProcessor<T> 
+abstract public class AbstractWorkerQueue<T> extends AbstractActorProcessor<T> 
 {
   private final ValueActorQueue<T> _queueConsumer;
   

@@ -34,6 +34,7 @@ import java.util.logging.Filter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
+import com.caucho.env.actor.AbstractActorProcessor;
 import com.caucho.env.actor.ActorProcessor;
 import com.caucho.env.actor.ValueActorQueue;
 import com.caucho.util.CurrentTime;
@@ -147,7 +148,7 @@ abstract public class AbstractLogHandler extends Handler {
     return getClass().getSimpleName() + "[]";
   }
   
-  private class LogQueue implements ActorProcessor<LogRecord>
+  private class LogQueue extends AbstractActorProcessor<LogRecord>
   {
     @Override
     public String getThreadName()

@@ -150,7 +150,7 @@ public class ValueActorQueue<T> implements ActorQueueApi<T>
   }
   
   private static final class ValueItemProcessor<T> 
-    implements ActorProcessor<ValueItem<T>>
+    extends AbstractActorProcessor<ValueItem<T>>
   {
     private final ActorProcessor<T> _processor;
     

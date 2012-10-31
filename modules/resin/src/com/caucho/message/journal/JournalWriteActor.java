@@ -31,6 +31,7 @@ package com.caucho.message.journal;
 
 import java.io.IOException;
 
+import com.caucho.env.actor.AbstractActorProcessor;
 import com.caucho.env.actor.ActorProcessor;
 
 /**
@@ -38,7 +39,7 @@ import com.caucho.env.actor.ActorProcessor;
  * single-threaded process.
  */
 public class JournalWriteActor
-  implements ActorProcessor<JournalRingItem>
+  extends AbstractActorProcessor<JournalRingItem>
 {
   private final JournalFile _journalFile;
   private String _threadName;

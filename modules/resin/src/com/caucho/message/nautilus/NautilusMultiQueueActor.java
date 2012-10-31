@@ -32,6 +32,7 @@ package com.caucho.message.nautilus;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import com.caucho.env.actor.AbstractActorProcessor;
 import com.caucho.env.actor.ActorProcessor;
 import com.caucho.message.journal.JournalResult;
 
@@ -42,7 +43,7 @@ import com.caucho.message.journal.JournalResult;
  * single thread.
  */
 class NautilusMultiQueueActor
-  implements ActorProcessor<NautilusRingItem>
+  extends AbstractActorProcessor<NautilusRingItem>
 {
   private static final Logger log
     = Logger.getLogger(NautilusMultiQueueActor.class.getName());

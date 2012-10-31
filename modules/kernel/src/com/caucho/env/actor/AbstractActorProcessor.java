@@ -30,28 +30,39 @@
 package com.caucho.env.actor;
 
 /**
- * Interface for an actor queue
+ * Processes an actor item.
  */
-public class ActorQueueBuilder<T> extends AbstractActorQueueBuilder<T>
+abstract public class AbstractActorProcessor<T> implements ActorProcessor<T>
 {
-  public ActorQueueApi<T> build()
+  /**
+   * Returns the current thread name.
+   */
+  @Override
+  public String getThreadName()
   {
-    validateFullBuilder();
-    
-    return build(getProcessors());
+    return getClass().getSimpleName() + "-" + Thread.currentThread().getId();
   }
-  
-  public ActorQueueApi<T> build(ActorProcessor<? super T> ...processors)
+
+  /**
+   * Called when all items in the queue are processed. This can be
+   * used to flush buffers.
+   */
+  @Override
+  public void onProcessStart() throws Exception
   {
-    validateBuilder();
-    
-    if (processors.length == 1) {
-      return new ValueActorQueue<T>(getCapacity(), processors);
-    }
-    else {
-      return new MultiworkerActorQueue<T>(getCapacity(), 
-                                          getMultiworkerOffset(),
-                                          processors);
-    }
+  }
+
+  /**
+   * Process a single item.
+   */
+  abstract public void process(T item) throws Exception;
+
+  /**
+   * Called when all items in the queue are processed. This can be
+   * used to flush buffers.
+   */
+  @Override
+  public void onProcessComplete() throws Exception
+  {
   }
 }
