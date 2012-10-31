@@ -96,8 +96,9 @@ public class CandiUtil {
                                          Annotation ...bindings)
   {
     // ioc/05ah
-    if (manager.isChildManager())
+    if (manager.isChildManager()) {
       manager = manager.getParent();
+    }
     
     ArrayList<Integer> indexList = new ArrayList<Integer>();
     

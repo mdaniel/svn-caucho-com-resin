@@ -56,16 +56,17 @@ import com.caucho.inject.Module;
 public class WebComponent {
   private InjectManager _beanManager;
 
-  private Class<?> _rawType;
+  private String _className;
 
   private BeanEntry _injectionPointEntry;
 
   private ArrayList<BeanEntry> _beanList = new ArrayList<BeanEntry>();
 
-  public WebComponent(InjectManager beanManager, Class<?> rawType)
+  public WebComponent(InjectManager beanManager, 
+                      String className)
   {
     _beanManager = beanManager;
-    _rawType = rawType;
+    _className = className;
   }
 
   public void addComponent(BaseType type, Annotated annotated, Bean<?> bean)
@@ -93,8 +94,9 @@ public class WebComponent {
       
       Annotated ann = entry.getAnnotated();
       
-      if (ann == null || ! ann.isAnnotationPresent(Specializes.class))
+      if (ann == null || ! ann.isAnnotationPresent(Specializes.class)) {
         continue;
+      }
     }
   }
 
@@ -212,7 +214,7 @@ public class WebComponent {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _rawType + "]";
+    return getClass().getSimpleName() + "[" + _className + "]";
   }
 
   class BeanEntry implements Comparable<BeanEntry> {

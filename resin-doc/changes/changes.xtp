@@ -12,6 +12,7 @@
 
 <s2 title="4.0.33 - snapshot">
 <ul>
+<li>cdi: memory held by CDI as negative caching across web-app restarts (rep by Mattais Jiderhamn)</li>
 <li>cli: remote management was not properly using -server in some cases (#5226)</li>
 <li>cache: add jdbc cache as backing</li>
 <li>cache: add tiered cache</li>

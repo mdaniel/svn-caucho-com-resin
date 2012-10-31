@@ -37,7 +37,7 @@ enable_graph_controls();
 print_title("watchdog", "Watchdog Analysis");
 
 $now = time();
-$start = $now - 7 * 24 * 60 * 60;
+$start = $now - 14 * 24 * 60 * 60;
 
 $restart_list = $stat->getStartTimes($g_server_index, $start * 1000, $now * 1000);
 

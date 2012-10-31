@@ -15,9 +15,6 @@ class MBeanServer
       $this->delegate = java("com.caucho.quercus.lib.resin.MBeanServer", $id);
     else
       $this->delegate = java("com.caucho.quercus.lib.resin.MBeanServer");
-
-      resin_var_dump($id);
-      resin_var_dump($this->delegate);
   }
 
   public function getServer()
