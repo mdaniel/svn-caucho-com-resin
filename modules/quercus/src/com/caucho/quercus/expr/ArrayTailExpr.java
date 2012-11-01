@@ -105,7 +105,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   public Var evalVar(Env env)
   {
     Value obj = _expr.evalVar(env);
-
+    
     return obj.putVar();
   }
 
@@ -155,13 +155,20 @@ public class ArrayTailExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignValue(Env env, Value value)
   {
+    /*
     Value array = _expr.evalVar(env);
-
+    
     array = array.toAutoArray();
     
     array.put(value);
     
     return value;
+    */
+    
+    // php/048b
+    Value array = _expr.evalArrayAssignTail(env, value);
+
+    return array;
   }
 
   /**
