@@ -48,6 +48,9 @@ public @interface CacheResult
   boolean skipGet() default false;
   
   @Nonbinding
+  boolean cacheNull() default true;
+  
+  @Nonbinding
   Class<? extends CacheResolverFactory> cacheResolverFactory()
     default CacheResolverFactory.class;
   

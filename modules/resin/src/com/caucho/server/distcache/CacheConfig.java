@@ -593,7 +593,7 @@ public class CacheConfig implements CacheConfiguration
   {
     TimeUnit unit = duration.getTimeUnit();
     
-    long timeout = unit.toMillis(duration.getTimeToLive());
+    long timeout = unit.toMillis(duration.getDurationAmount());
     
     switch (type) {
     case ACCESSED:

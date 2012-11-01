@@ -47,7 +47,6 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.Filter;
 import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
@@ -927,8 +926,7 @@ public class MemcachedClient implements Cache
    * @see javax.cache.Cache#registerCacheEntryListener(javax.cache.event.CacheEntryListener, javax.cache.event.NotificationScope, boolean)
    */
   @Override
-  public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            Filter filter)
+  public boolean registerCacheEntryListener(CacheEntryListener listener)
   {
     // TODO Auto-generated method stub
     return false;

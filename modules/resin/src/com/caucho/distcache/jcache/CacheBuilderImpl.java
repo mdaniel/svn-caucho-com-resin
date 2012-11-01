@@ -38,7 +38,6 @@ import javax.cache.CacheWriter;
 import javax.cache.CacheConfiguration.Duration;
 import javax.cache.CacheConfiguration.ExpiryType;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.Filter;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -80,8 +79,7 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
   }
 
   @Override
-  public CacheBuilder<K,V> registerCacheEntryListener(CacheEntryListener<K,V> listener,
-                                                      Filter filter)
+  public CacheBuilder<K,V> registerCacheEntryListener(CacheEntryListener<K,V> listener)
   {
     return this;
   }

@@ -41,7 +41,7 @@ public interface CacheManager
   
   public <K,V> Cache<K,V> getCache(String name);
   
-  public <K,V> Iterable<Cache<K,V>> getCaches();
+  public Iterable<Cache<?,?>> getCaches();
   
   public boolean removeCache(String cacheName);
   

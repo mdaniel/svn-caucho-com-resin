@@ -60,7 +60,6 @@ import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
-import javax.cache.event.Filter;
 import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.config.ConfigException;
@@ -723,8 +722,7 @@ public class CacheImpl<K,V>
    * Adds a listener to the cache.
    */
   @Override
-  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener,
-                                            Filter filter)
+  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener)
   {
     if (listener instanceof CacheEntryReadListener<?,?>) {
       synchronized (this) {
@@ -732,7 +730,7 @@ public class CacheImpl<K,V>
           _readListeners = new ConcurrentArrayList(ReadListener.class);
       }
       
-      _readListeners.add(new ReadListener<K,V>(listener, filter));
+      _readListeners.add(new ReadListener<K,V>(listener));
     }
     
     if (listener instanceof CacheEntryUpdatedListener) {
@@ -741,7 +739,7 @@ public class CacheImpl<K,V>
           _updatedListeners = new ConcurrentArrayList(UpdatedListener.class);
       }
       
-      _updatedListeners.add(new UpdatedListener<K,V>(listener, filter));
+      _updatedListeners.add(new UpdatedListener<K,V>(listener));
     }
     
     if (listener instanceof CacheEntryRemovedListener) {
@@ -749,7 +747,7 @@ public class CacheImpl<K,V>
         if (_removedListeners == null)
           _removedListeners = new ConcurrentArrayList(RemovedListener.class);
         
-        _removedListeners.add(new RemovedListener<K,V>(listener, filter));
+        _removedListeners.add(new RemovedListener<K,V>(listener));
       }
     }
     
@@ -1283,12 +1281,10 @@ public class CacheImpl<K,V>
   static class ReadListener<K,V> extends Listener<K,V>
     implements CacheEntryReadListener<K,V> {
     private CacheEntryReadListener<K,V> _listener;
-    private Filter _filter;
     
-    ReadListener(CacheEntryListener<? super K,? super V> listener, Filter filter)
+    ReadListener(CacheEntryListener<? super K,? super V> listener)
     {
       _listener = (CacheEntryReadListener<K,V>) listener;
-      _filter = filter;
     }
     
     @Override
@@ -1301,21 +1297,17 @@ public class CacheImpl<K,V>
     public void entryRead(CacheEntryEvent<? extends K,? extends V> event)
         throws CacheEntryListenerException
     {
-      if (_filter.evaluate(event)) {
-        _listener.entryRead(event);
-      }
+      _listener.entryRead(event);
     }
   }
   
   static class UpdatedListener<K,V> extends Listener<K,V>
     implements CacheEntryUpdatedListener<K,V> {
     private CacheEntryUpdatedListener<K,V> _listener;
-    private Filter _filter;
     
-    UpdatedListener(CacheEntryListener<? super K,? super V> listener, Filter filter)
+    UpdatedListener(CacheEntryListener<? super K,? super V> listener)
     {
       _listener = (CacheEntryUpdatedListener<K,V>) listener;
-      _filter = filter;
     }
     
     @Override
@@ -1328,23 +1320,17 @@ public class CacheImpl<K,V>
     public void entryUpdated(CacheEntryEvent<? extends K,? extends V> event)
         throws CacheEntryListenerException
     {
-      Filter filter = _filter;
-      
-      if (filter == null || filter.evaluate(event)) {
-        _listener.entryUpdated(event);
-      }
+      _listener.entryUpdated(event);
     }
   }
   
   static class RemovedListener<K,V> extends Listener<K,V>
     implements CacheEntryRemovedListener<K,V> {
     private CacheEntryRemovedListener<K,V> _listener;
-    private Filter _filter;
     
-    RemovedListener(CacheEntryListener<? super K,? super V> listener, Filter filter)
+    RemovedListener(CacheEntryListener<? super K,? super V> listener)
     {
       _listener = (CacheEntryRemovedListener<K,V>) listener;
-      _filter = filter;
     }
     
     @Override
@@ -1357,9 +1343,7 @@ public class CacheImpl<K,V>
     public void entryRemoved(CacheEntryEvent<? extends K,? extends V> event)
         throws CacheEntryListenerException
     {
-      if (_filter.evaluate(event)) {
-        _listener.entryRemoved(event);
-      }
+      _listener.entryRemoved(event);
     }
   }
 

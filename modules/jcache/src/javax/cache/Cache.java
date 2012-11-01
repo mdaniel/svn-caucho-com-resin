@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.Filter;
 import javax.cache.mbeans.CacheMXBean;
 
 /**
@@ -98,8 +97,7 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   // listeners
   //
   
-  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener,
-                                            Filter filter);
+  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener);
   
   public boolean unregisterCacheEntryListener(CacheEntryListener<?,?> listener);
   

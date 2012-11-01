@@ -27,9 +27,30 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.event;
+package javax.cache.annotation;
 
-public interface Filter
+import javax.cache.CacheException;
+
+public class CacheAnnotationConfigurationException extends CacheException
 {
-  public boolean evaluate(CacheEntryEvent event);
+  private static final long serialVersionUID = 1L;
+
+  public CacheAnnotationConfigurationException()
+  {
+  }
+  
+  public CacheAnnotationConfigurationException(String msg)
+  {
+    super(msg);
+  }
+  
+  public CacheAnnotationConfigurationException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+  
+  public CacheAnnotationConfigurationException(Throwable e)
+  {
+    super(e);
+  }
 }

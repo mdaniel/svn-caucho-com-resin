@@ -47,6 +47,8 @@ public interface CacheConfiguration<K,V>
   
   public boolean isStatisticsEnabled();
   
+  public void setStatisticsEnabled(boolean isEnabled);
+  
   public boolean isTransactionEnabled();
   
   public IsolationLevel getTransactionIsolationLevel();
@@ -91,7 +93,7 @@ public interface CacheConfiguration<K,V>
       return this.timeUnit;
     }
     
-    public long getTimeToLive()
+    public long getDurationAmount()
     {
       return this.timeToLive;
     }
@@ -100,7 +102,7 @@ public interface CacheConfiguration<K,V>
     public String toString()
     {
       return (getClass().getSimpleName()
-              + "[" + getTimeToLive() + "," + getTimeUnit() + "]");
+              + "[" + getDurationAmount() + "," + getTimeUnit() + "]");
     }
   }
   

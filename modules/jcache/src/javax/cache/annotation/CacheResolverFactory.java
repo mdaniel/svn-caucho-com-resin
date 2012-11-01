@@ -34,4 +34,6 @@ import java.lang.annotation.Annotation;
 public interface CacheResolverFactory
 {
   CacheResolver getCacheResolver(CacheMethodDetails<? extends Annotation> cacheMethodDetails);
+  
+  CacheResolver getExceptionCacheResolver(CacheMethodDetails<CacheResult> cacheMethodDetails);
 }

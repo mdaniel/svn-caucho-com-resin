@@ -48,6 +48,9 @@ public @interface CachePut
   boolean afterInvocation() default true;
   
   @Nonbinding
+  boolean cacheNull() default true;
+  
+  @Nonbinding
   Class<? extends CacheResolverFactory> cacheResolverFactory()
     default CacheResolverFactory.class;
   

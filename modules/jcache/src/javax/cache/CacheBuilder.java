@@ -30,7 +30,6 @@
 package javax.cache;
 
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.Filter;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -48,8 +47,7 @@ public interface CacheBuilder<K,V> {
   public CacheBuilder<K,V> setCacheWriter(CacheWriter<? super K,? super V> cacheWriter);
   
   public CacheBuilder<K,V> 
-  registerCacheEntryListener(CacheEntryListener<K,V> listener,
-                             Filter filter);
+  registerCacheEntryListener(CacheEntryListener<K,V> listener);
   
   public CacheBuilder<K,V> setStoreByValue(boolean storeByValue);
   

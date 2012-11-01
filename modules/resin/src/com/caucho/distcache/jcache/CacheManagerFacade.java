@@ -91,7 +91,7 @@ public class CacheManagerFacade implements CacheManager
 
   @Override
   @SuppressWarnings("unchecked")
-  public <K, V> Set<Cache<K, V>> getCaches()
+  public Set<Cache<?, ?>> getCaches()
   {
     return new HashSet(_cacheMap.values());
   }
