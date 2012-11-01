@@ -442,16 +442,22 @@ public class FileServlet extends GenericServlet {
       }
     }
 
-    res.setContentLength((int) cache.getLength());
-
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;
+      
+      cRes.setContentLength(cache.getLength());
 
       cRes.getResponseStream().sendFile(cache.getPath(),
                                         0,
                                         cache.getLength());
     }
     else {
+      long length = cache.getLength();
+      
+      if (length >= 0 && length < Integer.MAX_VALUE) {
+        res.setContentLength((int) length);
+      }
+        
       OutputStream os = res.getOutputStream();
       cache.getPath().writeToStream(os);
     }
@@ -643,7 +649,14 @@ public class FileServlet extends GenericServlet {
         os.write('\n');
       }
       else {
-        res.setContentLength((int) (last - first + 1));
+        if (res instanceof CauchoResponse) {
+          CauchoResponse cRes = (CauchoResponse) res;
+
+          cRes.setContentLength((last - first + 1));
+        }
+        else {
+          res.setContentLength((int) (last - first + 1));
+        }
 
         res.addHeader("Content-Range", chunkRange);
       }

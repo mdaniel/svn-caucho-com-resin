@@ -52,18 +52,26 @@ public class StubServletResponse implements CauchoResponse {
     return new StubResponseStream();
   }
   
+  @Override
   public String getCharacterEncoding()
   {
     return "ISO-8859-1";
   }
   
+  @Override
   public void setLocale(Locale locale)
   {
   }
   
+  @Override
   public Locale getLocale()
   {
     return null;
+  }
+
+  @Override
+  public void setContentLength(long length)
+  {
   }
   
   public boolean writeHeadersInt(WriteStream out, int length, boolean isHead)
@@ -71,113 +79,139 @@ public class StubServletResponse implements CauchoResponse {
     return false;
   }
 
+  @Override
   public void setBufferSize(int size)
   {
   }
   
+  @Override
   public int getBufferSize()
   {
     return 0;
   }
   
+  @Override
   public void flushBuffer()
   {
   }
   
+  @Override
   public boolean isCommitted()
   {
     return false;
   }
   
+  @Override
   public void reset()
   {
   }
   
+  @Override
   public void resetBuffer()
   {
   }
   
+  @Override
   public void setContentLength(int length)
   {
   }
   
+  @Override
   public void setContentType(String type)
   {
   }
 
+  @Override
   public void setStatus(int status)
   {
   }
   
+  @Override
   public void setStatus(int status, String messages)
   {
   }
   
+  @Override
   public void sendRedirect(String location)
   {
   }
   
+  @Override
   public void sendError(int i)
   {
   }
   
+  @Override
   public void sendError(int i, String message)
   {
   }
     
+  @Override
   public String encodeUrl(String url)
   {
     return url;
   }
   
+  @Override
   public String encodeURL(String url)
   {
     return url;
   }
   
+  @Override
   public String encodeRedirectUrl(String url)
   {
     return url;
   }
   
+  @Override
   public String encodeRedirectURL(String url)
   {
     return url;
   }
 
+  @Override
   public void addCookie(Cookie cookie)
   {
   }
   
+  @Override
   public boolean containsHeader(String header)
   {
     return false;
   }
   
+  @Override
   public void setHeader(String header, String value)
   {
   }
   
+  @Override
   public void setIntHeader(String header, int value)
   {
   }
   
+  @Override
   public void setDateHeader(String header, long value)
   {
   }
   
+  @Override
   public void addHeader(String header, String value)
   {
   }
   
+  @Override
   public void addIntHeader(String header, int value)
   {
   }
   
+  @Override
   public void addDateHeader(String header, long value)
   {
   }
 
+  @Override
   public String getHeader(String key)
   {
     return null;
@@ -192,6 +226,7 @@ public class StubServletResponse implements CauchoResponse {
   {
   }
   
+  @Override
   public void close() throws IOException
   {
   }
@@ -206,61 +241,74 @@ public class StubServletResponse implements CauchoResponse {
     return 0;
   }
 
+  @Override
   public void setForbidForward(boolean forbid)
   {
   }
   
+  @Override
   public boolean getForbidForward()
   {
     return false;
   }
   
+  @Override
   public void setHasError(boolean hasError)
   {
   }
   
+  @Override
   public boolean hasError()
   {
     return true;
   }
   
+  @Override
   public void killCache()
   {
   }
   
+  @Override
   public void setPrivateCache(boolean isPrivate)
   {
   }
   
+  @Override
   public void setSessionId(String id)
   {
   }
 
+  @Override
   public int getStatus()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Collection<String> getHeaders(String name)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Collection<String> getHeaderNames()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public AbstractHttpResponse getAbstractHttpResponse()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public ServletResponse getResponse()
   {
     return null;
   }
   
+  @Override
   public void setNoCache(boolean killCache)
   {
   }
@@ -270,16 +318,19 @@ public class StubServletResponse implements CauchoResponse {
     return 200;
   }
 
+  @Override
   public String getStatusMessage()
   {
     return null;
   }
   
+  @Override
   public void setFooter(String key, String value)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
     
+  @Override
   public void addFooter(String key, String value)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -294,15 +345,18 @@ public class StubServletResponse implements CauchoResponse {
     return null;
   }
 
+  @Override
   public boolean isCauchoResponseStream()
   {
     return true;
   }
 
+  @Override
   public void setResponseStream(AbstractResponseStream stream)
   {
   }
 
+  @Override
   public AbstractResponseStream getResponseStream()
   {
     return new WrapperResponseStream();
@@ -321,12 +375,14 @@ public class StubServletResponse implements CauchoResponse {
   {
   }
 
+  @Override
   public PrintWriter getWriter()
     throws IOException
   {
     return new PrintWriterImpl(new NullWriter());
   }
 
+  @Override
   public ServletOutputStream getOutputStream()
     throws IOException
   {
@@ -337,15 +393,18 @@ public class StubServletResponse implements CauchoResponse {
     return out;
   }
 
+  @Override
   public void setCharacterEncoding(String enc)
   {
   }
 
+  @Override
   public String getContentType()
   {
     return null;
   }
 
+  @Override
   public boolean isNoCacheUnlessVary()
   {
     return false;
@@ -366,14 +425,17 @@ public class StubServletResponse implements CauchoResponse {
   {
   }
 
+  @Override
   public void setForwardEnclosed(boolean isForwardEnclosed) {
   }
 
+  @Override
   public boolean isForwardEnclosed()
   {
     return false;
   }
   
+  @Override
   public void writeHeaders(int length)
   {
   }

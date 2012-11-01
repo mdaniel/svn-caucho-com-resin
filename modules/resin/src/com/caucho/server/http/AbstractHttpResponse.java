@@ -708,7 +708,7 @@ abstract public class AbstractHttpResponse {
    *
    * @param length the length of the content.
    */
-  public void setContentLength(int length)
+  public void setContentLength(long length)
   {
     _contentLength = length;
   }

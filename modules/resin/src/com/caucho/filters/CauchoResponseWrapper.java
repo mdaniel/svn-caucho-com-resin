@@ -270,6 +270,17 @@ public class CauchoResponseWrapper extends ResponseWrapper
   {
     return false;
   }
+  
+  @Override
+  public void setContentLength(long length)
+  {
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setContentLength(length);
+    else if (length <= Integer.MAX_VALUE) {
+      _response.setContentLength((int) length);
+    }
+    
+  }
 
   @Override
   public void setFooter(String key, String value)

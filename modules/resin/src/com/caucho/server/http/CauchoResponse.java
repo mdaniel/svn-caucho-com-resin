@@ -65,6 +65,8 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setHasError(boolean error);
 
   public void setSessionId(String id);
+  
+  public void setContentLength(long length);
 
   public void killCache();
   public void setNoCache(boolean killCache);

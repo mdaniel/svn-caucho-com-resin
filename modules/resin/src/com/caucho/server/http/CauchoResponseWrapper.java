@@ -163,6 +163,19 @@ public class CauchoResponseWrapper implements CauchoResponse {
     _response.setContentLength(len);
   }
 
+  @Override
+  public void setContentLength(long length)
+  {
+    if (_response instanceof CauchoResponse) {
+      CauchoResponse cRes = (CauchoResponse) _response;
+
+      cRes.setContentLength(length);
+    }
+    else if (length <= Integer.MAX_VALUE) {
+      _response.setContentLength((int) length);
+    }
+  }
+
   //
   // HttpServletResponse
   //

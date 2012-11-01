@@ -203,6 +203,12 @@ public class ResponseAdapter extends ResponseWrapper
     }
   }
 
+  @Override
+  public void setContentLength(long length)
+  {
+    super.setContentLength((int) length);
+  }
+
   public void addCookie(Cookie cookie)
   {
     if (_request != null)
