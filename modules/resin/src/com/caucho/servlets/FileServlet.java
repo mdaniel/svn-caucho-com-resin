@@ -76,15 +76,15 @@ public class FileServlet extends GenericServlet {
   private static final L10N L = new L10N(FileServlet.class);
   private static final Logger log
     = Logger.getLogger(FileServlet.class.getName());
-  
+
   private static final EnvironmentLocal<LruCache<String,Cache>> _pathCacheLocal
     = new EnvironmentLocal<LruCache<String,Cache>>();
-  
+
   private final LruCache<String,Cache> _pathCache;
-  
+
   private final LruCache<String,Cache> _localCache
     = new LruCache<String,Cache>(16 * 1024);
-  
+
   private Path _context;
   private WebApp _app;
   private RequestDispatcher _dir;
@@ -97,17 +97,17 @@ public class FileServlet extends GenericServlet {
   public FileServlet()
   {
     ResinSystem resin = ResinSystem.getCurrent();
-    
+
     LruCache<String,Cache> pathCache;
-    
+
     pathCache = _pathCacheLocal.get(resin.getClassLoader());
     if (pathCache == null) {
       pathCache = new LruCache<String,Cache>(256 * 1024);
       _pathCacheLocal.set(pathCache, resin.getClassLoader());
     }
-    
+
     _pathCache = pathCache;
-    
+
     _isCaseInsensitive = CaseInsensitive.isCaseInsensitive();
   }
 
@@ -126,7 +126,7 @@ public class FileServlet extends GenericServlet {
   {
     _isEnableRange = isEnable;
   }
-  
+
   /**
    * Flag to generate sessions on requests.
    */
@@ -202,22 +202,22 @@ public class FileServlet extends GenericServlet {
       isInclude = true;
     else
       uri = req.getRequestURI();
-    
+
     Cache cache = _localCache.get(uri);
 
     String filename = null;
-    
+
     String cacheUrl = null;
 
     if (cache == null) {
       cacheUrl = getCacheUrl(req, uri);
-      
+
       cache = _pathCache.get(cacheUrl);
-      
+
       if (cache != null)
         _localCache.put(uri, cache);
     }
-    
+
     if (cache == null) {
       CharBuffer cb = new CharBuffer();
       String servletPath;
@@ -311,15 +311,15 @@ public class FileServlet extends GenericServlet {
       cache = new Cache(path, jarPath, relPath, mimeType);
 
       _localCache.put(uri, cache);
-      
+
       _pathCache.put(cacheUrl, cache);
     }
     else if (cache.isModified()) {
-      cache = new Cache(cache.getFilePath(), 
-                        cache.getJarPath(), 
+      cache = new Cache(cache.getFilePath(),
+                        cache.getJarPath(),
                         cache.getRelPath(),
                         cache.getMimeType());
-      
+
       cacheUrl = getCacheUrl(req, uri);
       _pathCache.put(cacheUrl, cache);
       _localCache.put(uri, cache);
@@ -331,7 +331,7 @@ public class FileServlet extends GenericServlet {
     if (cache.isDirectory()) {
       if (! uri.endsWith("/")) {
         String queryString = req.getQueryString();
-        
+
         if (queryString != null)
           sendRedirect(res, uri + "/?" + queryString);
         else
@@ -341,7 +341,7 @@ public class FileServlet extends GenericServlet {
         _dir.forward(req, res);
       else
         res.sendError(HttpServletResponse.SC_NOT_FOUND);
-      
+
       return;
     }
 
@@ -358,7 +358,7 @@ public class FileServlet extends GenericServlet {
     if (! method.equalsIgnoreCase("GET")
         && ! method.equalsIgnoreCase("HEAD")
         && ! method.equalsIgnoreCase("POST")) {
-      res.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, 
+      res.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED,
                     "Method not implemented");
       return;
     }
@@ -386,7 +386,7 @@ public class FileServlet extends GenericServlet {
       }
       else {
         long ifModifiedTime;
-        
+
         QDate date = QDate.allocateLocalDate();
 
         try {
@@ -396,7 +396,7 @@ public class FileServlet extends GenericServlet {
 
           ifModifiedTime = 0;
         }
-        
+
         QDate.freeLocalDate(date);
 
         isModified = (ifModifiedTime == 0
@@ -413,7 +413,7 @@ public class FileServlet extends GenericServlet {
 
     res.addHeader("ETag", etag);
     res.addHeader("Last-Modified", lastModified);
-    
+
     if (_isEnableRange && cauchoReq != null && cauchoReq.isTop())
       res.addHeader("Accept-Ranges", "bytes");
 
@@ -425,7 +425,13 @@ public class FileServlet extends GenericServlet {
       res.setContentType(mime);
 
     if (method.equalsIgnoreCase("HEAD")) {
-      res.setContentLength((int) cache.getLength());
+      if (res instanceof CauchoResponse) {
+        CauchoResponse cRes = (CauchoResponse) res;
+        cRes.setContentLength(cache.getLength());
+      }
+      else if (cache.getLength() <= Integer.MAX_VALUE) {
+        res.setContentLength((int) cache.getLength());
+      }
       return;
     }
 
@@ -444,7 +450,7 @@ public class FileServlet extends GenericServlet {
 
     if (res instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) res;
-      
+
       cRes.setContentLength(cache.getLength());
 
       cRes.getResponseStream().sendFile(cache.getPath(),
@@ -453,29 +459,29 @@ public class FileServlet extends GenericServlet {
     }
     else {
       long length = cache.getLength();
-      
+
       if (length >= 0 && length < Integer.MAX_VALUE) {
         res.setContentLength((int) length);
       }
-        
+
       OutputStream os = res.getOutputStream();
       cache.getPath().writeToStream(os);
     }
   }
-  
+
   private String getCacheUrl(HttpServletRequest req, String uri)
   {
     WebApp webApp = (WebApp) req.getServletContext();
     return webApp.getId() + "|" + uri;
   }
-  
-  private void sendRedirect(HttpServletResponse res, String url) 
+
+  private void sendRedirect(HttpServletResponse res, String url)
     throws IOException
   {
     String encUrl;
-    
+
     HttpServletResponseImpl resImpl = null;
-    
+
     if (res instanceof HttpServletResponseImpl) {
       resImpl = (HttpServletResponseImpl) res;
 
@@ -483,21 +489,21 @@ public class FileServlet extends GenericServlet {
     }
     else
       encUrl = res.encodeRedirectURL(url);
-    
+
     try {
       res.reset();
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
-    
+
     res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
     res.setHeader("Location", encUrl);
     res.setContentType("text/html; charset=utf-8");
-    
+
     PrintWriter out = res.getWriter();
-    
+
     out.println("The URL has moved <a href=\"" + encUrl + "\">here</a>");
-    
+
     if (resImpl != null)
       resImpl.close();
   }
@@ -514,7 +520,7 @@ public class FileServlet extends GenericServlet {
     int length = range.length();
 
     boolean hasMore = range.indexOf(',') > 0;
-    
+
     long cacheLength = cache.getLength();
     long bytesMax = 2 * cacheLength;
     long bytesWritten = 0;
@@ -524,7 +530,7 @@ public class FileServlet extends GenericServlet {
     String boundary = null;
     int off = range.indexOf("bytes=", head);
     ServletOutputStream os = null;
-    
+
     if (off < 0)
       return false;
 
@@ -600,22 +606,22 @@ public class FileServlet extends GenericServlet {
       cb.append('/');
       cb.append(cacheLength);
       String chunkRange = cb.toString();
-      
+
       bytesWritten += last - first + 1;
       if (bytesMax <= bytesWritten) {
         String msg;
-        
+
         msg = L.l("{0} too many range bytes requested {1} for uri={2} IP={3}",
                   this,
                   bytesWritten,
                   req.getRequestURL(),
                   req.getRemoteAddr());
-        
+
         log.warning(msg);
-        
+
         if (msg != null)
           throw new IOException(msg);
-        
+
       }
 
       if (hasMore) {
@@ -681,7 +687,7 @@ public class FileServlet extends GenericServlet {
 
     if (hasMore) {
       os = res.getOutputStream();
-      
+
       os.write('\r');
       os.write('\n');
       os.write('-');
@@ -728,7 +734,7 @@ public class FileServlet extends GenericServlet {
     {
       return _path;
     }
-    
+
     Path getJarPath()
     {
       return _jarPath;
@@ -808,10 +814,10 @@ public class FileServlet extends GenericServlet {
       _etag = sb.toString();
 
       QDate cal = QDate.allocateGmtDate();
-        
+
       cal.setGMTTime(lastModified);
       _lastModifiedString = cal.printDate();
-        
+
       QDate.freeGmtDate(cal);
 
       if (lastModified == 0) {
