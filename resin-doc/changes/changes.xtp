@@ -30,6 +30,10 @@
 <li>servlet: @HandlesTypes scanning for ServletContainerInitializer</li>
 <li>hessian: IdentityIntMap needs Math.abs for System.identityHashCode (#5239, rep by S Francis)</li>
 <li>jsp-el: improve serialization for JSF (#5231, rep by Mattias Jiderhamn)</li>
+<li>quercus: cannot reference nested java classes (#5245, rep by ismak)</li>
+<li>quercus: strtotime returns null value on DST when given an ISO-8601 timestamp as an argument (#5259, rep by gbruins)</li>
+<li>quercus: session_set_cookie_params() does not support HttpOnly (#5249, rep by ottomatico)</li>
+<li>quercus: drupal facebook activity stream doesn't work (#5264, rep by jordi)</li>
 </ul>
 </s2>
 
