@@ -34,6 +34,7 @@
 <li>quercus: strtotime returns null value on DST when given an ISO-8601 timestamp as an argument (#5259, rep by gbruins)</li>
 <li>quercus: session_set_cookie_params() does not support HttpOnly (#5249, rep by ottomatico)</li>
 <li>quercus: drupal facebook activity stream doesn't work (#5264, rep by jordi)</li>
+<li>quercus: Serialize() not supportes using curl in GAE (#5199, rep by ismak)</li>
 </ul>
 </s2>
 
