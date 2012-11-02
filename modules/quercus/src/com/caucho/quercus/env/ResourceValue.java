@@ -31,7 +31,6 @@ package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.IdentityHashMap;
 
@@ -74,6 +73,15 @@ public class ResourceValue extends Value
   public Value toKey()
   {
     return new LongValue(System.identityHashCode(this));
+  }
+  
+  /**
+   * Serializes the value.
+   */
+  @Override
+  public void serialize(Env env, StringBuilder sb)
+  {
+    sb.append("i:0;");
   }
 
   /**
