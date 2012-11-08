@@ -892,8 +892,9 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     Login login = webApp.getLogin();
 
-    if (login == null)
+    if (login == null) {
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+    }
 
     Principal principal = login.login(this, response, true);
 

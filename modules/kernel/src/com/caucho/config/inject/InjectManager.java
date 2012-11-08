@@ -1399,6 +1399,9 @@ public final class InjectManager
       if (pass.getId() != null)
         _selfPassivationBeanMap.put(pass.getId(), bean);
     }
+    
+    // server/1aj1
+    clearBeanCache();
 
     registerJmx(bean);
   }
@@ -1748,6 +1751,12 @@ public final class InjectManager
     }
 
     return beanSet;
+  }
+  
+  private void clearBeanCache()
+  {
+    _namedRefFactoryMap.clear();
+    _beanMap.clear();
   }
 
   private void fillByType(BaseType baseType,
