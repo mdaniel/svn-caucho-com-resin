@@ -811,9 +811,10 @@ public class WebAppContainer
                                                       chain);
 
       if (rewriteChain != chain) {
-        // server/13sf, server/1kq1
-        WebApp rootWebApp = findWebAppByURI("/");
-
+        // server/13sf, server/1kq1, server/1krd
+        // WebApp rootWebApp = findWebAppByURI("/");
+        WebApp rootWebApp = findWebAppByURI(uri);
+        
         if (rootWebApp == null) {
           // server/1u12
           rootWebApp = getErrorWebApp();
