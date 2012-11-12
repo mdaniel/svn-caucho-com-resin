@@ -1202,14 +1202,17 @@ public class ArrayModule
         else
           value = entry.getValue();
 
-        if (! (value instanceof Var))
+        if (! (value instanceof Var)) {
           value = value.copy();
+        }
 
         // php/1745
-        if (key.isNumberConvertible())
+        if (key.isNumberConvertible()) {
           result.put(value);
-        else
+        }
+        else {
           result.append(key, value);
+        }
       }
     }
 
@@ -1232,14 +1235,20 @@ public class ArrayModule
         // php/1744, php/1746
         value = ((ArrayValue.Entry) entry).getRawValue();
       }
-      else
+      else {
         value = entry.getValue();
+      }
 
-      if (! (value instanceof Var))
-        value = value.copy();
+      // php/1746
+      if (! (value instanceof Var)) {
+        // php/174b
+        value = value.copyDeep();
+      }
 
-      if (key.isNumberConvertible())
+      if (key.isNumberConvertible()) {
+        // php/1744
         result.put(value);
+      }
       else {
         Value oldValue = result.get(key).toValue();
 
@@ -1253,7 +1262,12 @@ public class ArrayModule
             oldValue.put(value);
           }
           else if (value.isArray()) {
-            value.put(oldValue);
+            ArrayValueImpl newArray = new ArrayValueImpl();
+
+            newArray.put(oldValue);
+            newArray.putAll(value.toArrayValue(env));
+
+            result.put(key, newArray);
           }
           else {
             ArrayValue newArray = new ArrayValueImpl();
@@ -1264,8 +1278,9 @@ public class ArrayModule
             result.put(key, newArray);
           }
         }
-        else
+        else {
           result.put(key, value);
+        }
       }
     }
   }
