@@ -1685,16 +1685,21 @@ abstract public class ArrayValue extends Value {
 
     public Entry(Entry entry)
     {
+      this(entry, false);
+    }
+
+    public Entry(Entry entry, boolean isCopyDeep)
+    {
       _key = entry._key;
 
-      /*
-      if (entry._var != null)
-        _var = entry._var;
-      else
-        _value = entry._value.copyArrayItem();
-      */
+      Value value = entry._value;
 
-      _value = entry._value.copyArrayItem();
+      if (isCopyDeep) {
+        _value = value.copyDeep();
+      }
+      else {
+        _value = value.copyArrayItem();
+      }
     }
 
     public final Entry getNext()

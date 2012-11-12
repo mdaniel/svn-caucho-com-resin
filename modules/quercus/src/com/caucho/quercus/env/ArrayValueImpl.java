@@ -233,6 +233,11 @@ public class ArrayValueImpl extends ArrayValue
 
   private void copyOnWrite()
   {
+    copyOnWrite(false);
+  }
+
+  private void copyOnWrite(boolean isDeep)
+  {
     if (! _isDirty)
       return;
 
@@ -249,7 +254,7 @@ public class ArrayValueImpl extends ArrayValue
 
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr.getNext()) {
-      Entry ptrCopy = new Entry(ptr);
+      Entry ptrCopy = new Entry(ptr, isDeep);
 
       if (entries != null) {
         int hash = ptr.getKey().hashCode() & _hashMask;
@@ -342,7 +347,7 @@ public class ArrayValueImpl extends ArrayValue
 
     ArrayValueImpl copy = new ArrayValueImpl(this);
 
-    copy.copyOnWrite();
+    copy.copyOnWrite(true);
 
     return copy;
   }
