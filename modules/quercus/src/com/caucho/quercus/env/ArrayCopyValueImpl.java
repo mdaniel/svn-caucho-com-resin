@@ -29,12 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.util.IdentityHashMap;
-
 /**
  * Represents a PHP array value copied as part of deserialization or APC.
  *
- * Any modification to the array will set the CopyRoot modified 
+ * Any modification to the array will set the CopyRoot modified
  */
 public class ArrayCopyValueImpl extends ArrayValueImpl
 {
@@ -61,7 +59,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
 
     super.clear();
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -72,7 +70,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
 
     return super.put(key, value);
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -123,7 +121,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
 
     return super.getDirty(index);
   }
-  
+
   /**
    * Add
    */
@@ -175,7 +173,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
 
     return super.shuffle();
   }
-  
+
   /**
    * Copy the value.
    */
@@ -183,7 +181,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   {
     return copy(Env.getInstance());
   }
-  
+
   /**
    * Convert to an argument value.
    */
@@ -192,7 +190,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   {
     return copy();
   }
-  
+
   /**
    * Copy for return.
    */
@@ -201,7 +199,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   {
     return copy();
   }
-  
+
   /**
    * Copy for saving a method's arguments.
    */

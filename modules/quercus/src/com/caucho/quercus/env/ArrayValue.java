@@ -1693,6 +1693,7 @@ abstract public class ArrayValue extends Value {
       else
         _value = entry._value.copyArrayItem();
       */
+
       _value = entry._value.copyArrayItem();
     }
 
