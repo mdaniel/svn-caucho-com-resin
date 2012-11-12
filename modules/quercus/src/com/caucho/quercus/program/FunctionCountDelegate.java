@@ -29,10 +29,10 @@
 
 package com.caucho.quercus.program;
 
-import java.util.Map;
-import java.util.Iterator;
-
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.CountDelegate;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaInvoker;
+import com.caucho.quercus.env.ObjectValue;
 
 /**
  * A delegate that performs Array operations for Quercus objects.
@@ -56,10 +56,10 @@ public class FunctionCountDelegate implements CountDelegate {
    * Returns the value for the specified key.
    */
   @Override
-  public int count(ObjectValue qThis)
+  public int count(Env env, ObjectValue qThis)
   {
     if (_count != null) {
-      return _count.callMethod(Env.getInstance(),
+      return _count.callMethod(env,
                                _count.getQuercusClass(),
                                qThis).toInt();
     }
