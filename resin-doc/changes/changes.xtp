@@ -35,6 +35,7 @@
 <li>quercus: session_set_cookie_params() does not support HttpOnly (#5249, rep by ottomatico)</li>
 <li>quercus: drupal facebook activity stream doesn't work (#5264, rep by jordi)</li>
 <li>quercus: Serialize() not supportes using curl in GAE (#5199, rep by ismak)</li>
+<li>quercus: array_merge_recursive() modifies input array arguments (#5269, rep by jordi)</li>
 </ul>
 </s2>
 
