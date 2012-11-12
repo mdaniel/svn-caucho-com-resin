@@ -894,15 +894,6 @@ public class Var extends Value
   }
 
   /**
-   * Copy recursively.  Used by Java modules that deal with nested arrays.
-   */
-  @Override
-  public Value copyDeep()
-  {
-    return _value.copyDeep();
-  }
-
-  /**
    * Copy for serialization
    */
   public Value copyTree(Env env, CopyRoot root)

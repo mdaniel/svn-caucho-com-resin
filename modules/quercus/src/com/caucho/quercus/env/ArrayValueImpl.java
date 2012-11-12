@@ -233,11 +233,6 @@ public class ArrayValueImpl extends ArrayValue
 
   private void copyOnWrite()
   {
-    copyOnWrite(false);
-  }
-
-  private void copyOnWrite(boolean isDeep)
-  {
     if (! _isDirty)
       return;
 
@@ -254,7 +249,7 @@ public class ArrayValueImpl extends ArrayValue
 
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr.getNext()) {
-      Entry ptrCopy = new Entry(ptr, isDeep);
+      Entry ptrCopy = new Entry(ptr);
 
       if (entries != null) {
         int hash = ptr.getKey().hashCode() & _hashMask;
@@ -333,21 +328,6 @@ public class ArrayValueImpl extends ArrayValue
 
     Value copy = new ArrayValueImpl(this);
     // copy.reset();
-
-    return copy;
-  }
-
-  /**
-   * Copy recursively.  Used by Java modules that deal with nested arrays.
-   */
-  @Override
-  public Value copyDeep()
-  {
-    reset();
-
-    ArrayValueImpl copy = new ArrayValueImpl(this);
-
-    copy.copyOnWrite(true);
 
     return copy;
   }

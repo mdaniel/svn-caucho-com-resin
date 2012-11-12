@@ -1217,14 +1217,6 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Copy recursively.  Used by Java modules that deal with nested arrays.
-   */
-  public Value copyDeep()
-  {
-    return copy();
-  }
-
-  /**
    * Copy as an array item
    */
   public Value copyArrayItem()

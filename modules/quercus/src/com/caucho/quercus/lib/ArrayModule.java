@@ -1261,7 +1261,7 @@ public class ArrayModule
       // php/1746
       if (! (value instanceof Var)) {
         // php/174b
-        value = value.copyDeep();
+        value = value.copy();
       }
 
       if (key.isNumberConvertible()) {
@@ -1269,7 +1269,7 @@ public class ArrayModule
         result.put(value);
       }
       else {
-        Value oldValue = result.get(key).toValue();
+        Value oldValue = result.getDirty(key).toValue();
 
         if (oldValue != null && oldValue.isset()) {
           if (oldValue.isArray() && value.isArray()) {
