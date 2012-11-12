@@ -50,12 +50,26 @@ public class QuercusEngine
 {
   private QuercusContext _quercus;
   private OutputStream _out;
-  
+
+  private boolean _isInitialized;
+
   public QuercusEngine()
   {
     _quercus = new QuercusContext();
   }
-  
+
+  public void init()
+  {
+    if (_isInitialized) {
+      return;
+    }
+
+    _quercus.init();
+    _quercus.start();
+
+    _isInitialized = true;
+  }
+
   /**
    * Returns the Quercus object.
    */
@@ -63,7 +77,7 @@ public class QuercusEngine
   {
     return _quercus;
   }
-  
+
   /**
    * Sets a php-ini value.
    */
@@ -71,7 +85,7 @@ public class QuercusEngine
   {
     _quercus.setIni(name, value);
   }
-  
+
   /**
    * Sets the output stream.
    */
@@ -79,18 +93,20 @@ public class QuercusEngine
   {
     _out = out;
   }
-  
+
   /**
    * Executes the script
    */
   public Value executeFile(String filename)
     throws IOException
   {
+    init();
+
     Path path = _quercus.getPwd().lookup(filename);
-    
+
     return execute(path);
   }
-  
+
   /**
    * Executes the script.
    */
@@ -99,24 +115,26 @@ public class QuercusEngine
   {
     return execute(new StringPath(script));
   }
-  
+
   /**
    * Executes the script.
    */
   public Value execute(Path path)
     throws IOException
   {
+    init();
+
     ReadStream reader = path.openRead();
-    
+
     QuercusProgram program = QuercusParser.parse(_quercus, null, reader);
-    
+
     OutputStream os = _out;
     WriteStream out;
 
     if (os != null) {
       OutputStreamStream s = new OutputStreamStream(os);
       WriteStream ws = new WriteStream(s);
-      
+
       ws.setNewlineString("\n");
 
       try {
@@ -128,37 +146,39 @@ public class QuercusEngine
     }
     else
       out = new WriteStream(StdoutStream.create());
-    
+
     QuercusPage page = new InterpretedPage(program);
 
     Env env = new Env(_quercus, page, out, null, null);
-    
+
     Value value = NullValue.NULL;
-    
+
     try {
+      env.start();
+
       value = program.execute(env);
     }
     catch (QuercusExitException e) {
     }
-    
+
     out.flushBuffer();
     out.free();
-    
+
     if (os != null)
       os.flush();
-    
+
     return value;
   }
-  
+
   class OutputStreamStream extends StreamImpl
   {
     OutputStream _out;
-    
+
     OutputStreamStream(OutputStream out)
     {
       _out = out;
     }
-    
+
     /**
      * Returns true if this is a writable stream.
      */
