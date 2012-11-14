@@ -116,7 +116,7 @@ public class HttpModule extends AbstractQuercusModule {
         // replaces the previous one
         //res.sendRedirect(value);
         //return NullValue.NULL;
-        
+
         res.setStatus(302, "Found");
       }
 
@@ -199,7 +199,7 @@ public class HttpModule extends AbstractQuercusModule {
                                      @Optional @Reference Value line)
   {
     HttpServletResponse res = env.getResponse();
-    
+
     // php/1b0n
     return res != null && res.isCommitted();
   }
@@ -217,11 +217,11 @@ public class HttpModule extends AbstractQuercusModule {
                                   @Optional boolean httpOnly)
   {
     HttpServletResponse response = env.getResponse();
-    
+
     if (response == null) {
       return false;
     }
-    
+
     long now = env.getCurrentTime();
 
     if (value == null || value.equals(""))
@@ -267,7 +267,7 @@ public class HttpModule extends AbstractQuercusModule {
 
     if (expire > 0) {
       maxAge = (int) (expire - now / 1000);
-      
+
       if (maxAge > 0)
         cookie.setMaxAge(maxAge);
       else
@@ -285,7 +285,7 @@ public class HttpModule extends AbstractQuercusModule {
     if (secure) {
       cookie.setSecure(true);
     }
-    
+
     if (httpOnly) {
       try {
         cookie.setHttpOnly(true);
@@ -312,7 +312,7 @@ public class HttpModule extends AbstractQuercusModule {
     }
     else {
       QDate date = env.getGmtDate();
-      
+
       date.setGMTTime(now + 1000L * (long) maxAge);
       cookieHeader.append("; expires=");
       cookieHeader.append(date.format("%a, %d-%b-%Y %H:%M:%S GMT"));
@@ -331,7 +331,7 @@ public class HttpModule extends AbstractQuercusModule {
     if (secure) {
       cookieHeader.append("; secure");
     }
-    
+
     if (httpOnly) {
       cookieHeader.append("; HttpOnly");
     }

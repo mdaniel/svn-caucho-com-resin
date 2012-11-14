@@ -298,7 +298,7 @@ public class QuercusServletImpl extends HttpServlet
     Path path = pwd.lookupChild(servletPath);
 
     // php/2010, php/2011, php/2012
-    if (path.exists()) {
+    if (path.isFile()) {
       return path;
     }
 
