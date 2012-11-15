@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.*;
@@ -41,6 +40,7 @@ import java.security.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.Adler32;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -85,7 +85,14 @@ public class HashModule extends AbstractQuercusModule {
     try {
       algorithm = getAlgorithm(algorithm);
 
-      MessageDigest digest = MessageDigest.getInstance(algorithm);
+      MessageDigest digest;
+
+      if ("ADLER32".equals(algorithm)) {
+        digest = new Adler32MessageDigest();
+      }
+      else {
+        digest = MessageDigest.getInstance(algorithm);
+      }
 
       int len = string.length();
 
@@ -563,6 +570,8 @@ public class HashModule extends AbstractQuercusModule {
     _algorithmMap.put("sha384", "SHA-384");
     _algorithmMap.put("sha512", "SHA-512");
 
+    _algorithmMap.put("adler32", "ADLER32");
+
     _hmacAlgorithmMap.put("md5", "HmacMD5");
     _hmacAlgorithmMap.put("sha1", "HmacSHA1");
     _hmacAlgorithmMap.put("sha256", "HmacSHA256");
@@ -570,6 +579,51 @@ public class HashModule extends AbstractQuercusModule {
     _hmacAlgorithmMap.put("sha512", "HmacSHA512");
 
 
+  }
+
+  static class Adler32MessageDigest extends MessageDigest
+  {
+    private Adler32 _adler;
+
+    public Adler32MessageDigest()
+    {
+      super("ADLER32");
+
+      _adler = new Adler32();
+    }
+
+    @Override
+    public void engineUpdate(byte b)
+    {
+      _adler.update(b);
+    }
+
+    @Override
+    public void engineUpdate(byte[] bytes, int offset, int length)
+    {
+      _adler.update(bytes, offset, length);
+    }
+
+    @Override
+    protected byte[] engineDigest()
+    {
+      long value = _adler.getValue();
+
+      byte[] bytes = new byte[4];
+
+      bytes[0] = (byte) (value >>> 24);
+      bytes[1] = (byte) (value >>> 16);
+      bytes[2] = (byte) (value >>> 8);
+      bytes[3] = (byte) (value);
+
+      return bytes;
+    }
+
+    @Override
+    protected void engineReset()
+    {
+      _adler.reset();
+    }
   }
 }
 
