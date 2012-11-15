@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 
@@ -167,6 +168,28 @@ public class ObjectExtJavaValue extends ObjectExtValue
     }
 
     _javaClassDef.printRImpl(env, _object, out, depth, valueSet);
+  }
+
+  /**
+   * Converts to a string.
+   * @param env
+   */
+  @Override
+  public StringValue toString(Env env)
+  {
+    AbstractFunction toString = _quercusClass.getToString();
+
+    if (toString != null) {
+      return toString.callMethod(env, _quercusClass, this).toStringValue();
+    }
+    else if (_javaClassDef.getToString() != null) {
+      JavaValue value = new JavaValue(env, _object, _javaClassDef);
+
+      return _javaClassDef.toString(env, value);
+    }
+    else {
+      return env.createString(_className + "[]");
+    }
   }
 
   /**
