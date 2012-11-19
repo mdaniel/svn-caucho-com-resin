@@ -164,14 +164,14 @@ public class HttpResponse extends AbstractHttpResponse {
     int statusCode = _statusCode;
     if (statusCode == 200) {
       if (version < HttpRequest.HTTP_1_1)
-	os.write(_http10ok, 0, _http10ok.length);
+        os.write(_http10ok, 0, _http10ok.length);
       else
-	os.write(_http11ok, 0, _http11ok.length);
+        os.write(_http11ok, 0, _http11ok.length);
     } else {
       if (version < HttpRequest.HTTP_1_1)
-	os.print("HTTP/1.0 ");
+        os.print("HTTP/1.0 ");
       else
-	os.print("HTTP/1.1 ");
+        os.print("HTTP/1.1 ");
 
       os.write((statusCode / 100) % 10 + '0');
       os.write((statusCode / 10) % 10 + '0');
@@ -182,7 +182,7 @@ public class HttpResponse extends AbstractHttpResponse {
 
     if (debug) {
       log.fine(_request.dbgId() + "HTTP/1.1 " +
-	       _statusCode + " " + _statusMessage);
+               _statusCode + " " + _statusMessage);
     }
 
     if (! containsHeader("Server"))
@@ -232,10 +232,10 @@ public class HttpResponse extends AbstractHttpResponse {
       String key = (String) _headerKeys.get(i);
       os.write('\r');
       os.write('\n');
-      os.print(key);
+      printNoLf(os, key);
       os.write(':');
       os.write(' ');
-      os.print((String) _headerValues.get(i));
+      printNoLf(os, _headerValues.get(i));
 
       if (debug) {
         log.fine(_request.dbgId() + "" +
@@ -331,8 +331,8 @@ public class HttpResponse extends AbstractHttpResponse {
     }
 
     if (HttpRequest.HTTP_1_1 <= version &&
-	! hasContentLength &&
-	! isHead()) {
+        ! hasContentLength &&
+        ! isHead()) {
       os.print("\r\nTransfer-Encoding: chunked");
       isChunked = true;
 
@@ -350,6 +350,27 @@ public class HttpResponse extends AbstractHttpResponse {
       os.write(_dateBuffer, 0, _dateBufferLength);
 
     return isChunked;
+  }
+
+  private void printNoLf(WriteStream os, String value)
+    throws IOException
+  {
+    if (value == null) {
+      return;
+    }
+
+    int length = value.length();
+
+    for (int i = 0; i < length; i++) {
+      char ch = value.charAt(i);
+
+      if (ch == '\r' || ch == '\n') {
+        continue;
+      }
+      else {
+        os.print(ch);
+      }
+    }
   }
 
   private void fillDate(long now)

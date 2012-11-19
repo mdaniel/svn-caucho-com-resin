@@ -23,6 +23,7 @@
   <property name="javac.nowarn" value="on"/>
   <property name="javac.memoryMaximumSize" value="256m"/>
 
+  <property name="javac" value="javac5"/>
   <property name="javac.source" value="1.4"/>
 
   <property name="jar.compress" value="false"/>
@@ -284,6 +285,7 @@
            deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
            source="${javac.source}"
            excludes="**/.svn/**"
+           executable="${javac}"
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
         <dirset dir="${modules}">
