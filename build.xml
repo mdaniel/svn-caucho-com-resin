@@ -21,10 +21,15 @@
   <property name="javac.optimize" value="off"/>
   <property name="javac.deprecation" value="off"/>
   <property name="javac.nowarn" value="on"/>
-  <property name="javac.memoryMaximumSize" value="256m"/>
+  <property name="javac.memoryMaximumSize" value="1024m"/>
 
+  <property name="build.compiler" value="javac1.5"/>
+  <property name="java.home" value="/usr/java5"/>
   <property name="javac" value="javac5"/>
-  <property name="javac.source" value="1.4"/>
+  <!--
+  -->
+  <property name="javac.source" value="1.5"/>
+  <property name="javac.target" value="1.5"/>
 
   <property name="jar.compress" value="false"/>
   <property name="jar.index" value="true"/>
@@ -278,14 +283,18 @@
       </fileset>
     </copy>
 
+           <!--
+           -->
     <javac srcdir="${module.src}" destdir="${module.build}"
-           fork="true" 
-           verbose="${javac.verbose}" 
+           fork="true"
+           verbose="${javac.verbose}"
            debug="${javac.debug}" optimize="${javac.optimize}"
            deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
            source="${javac.source}"
            excludes="**/.svn/**"
            executable="${javac}"
+           includeAntRuntime="false"
+           includeJavaRuntime="false"
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
         <dirset dir="${modules}">
@@ -293,6 +302,9 @@
        </dirset>
         <fileset dir="${ext}">
           <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="/usr/java5/lib">
+          <include name="tools.jar"/>
         </fileset>
       </classpath>
     </javac>
