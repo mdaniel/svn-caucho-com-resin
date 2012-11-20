@@ -4157,11 +4157,12 @@ public class Env
    * @param code the code to evalute
    * @return the result
    */
-  public Value evalCode(String code)
+  public Value evalCode(StringValue code)
     throws IOException
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(code);
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(code.toString());
+    }
 
     QuercusContext quercus = getQuercus();
 

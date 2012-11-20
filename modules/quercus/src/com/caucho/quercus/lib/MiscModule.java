@@ -179,7 +179,7 @@ public class MiscModule extends AbstractQuercusModule {
    * Comples and evaluates an expression.
    */
   @UsesSymbolTable
-  public Value eval(Env env, String code)
+  public Value eval(Env env, StringValue code)
   {
     try {
       if (log.isLoggable(Level.FINER))
@@ -676,7 +676,7 @@ public class MiscModule extends AbstractQuercusModule {
       }
 
       args[2] = command;
-      
+
       if (log.isLoggable(Level.FINER)) {
         log.finer("Quercus: passthru " + args[0] + " " + args[1] + " " + args[2]);
       }

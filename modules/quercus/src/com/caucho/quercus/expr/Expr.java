@@ -604,7 +604,7 @@ abstract public class Expr {
     //return array.get(index); // php/03mm php/03mn
     return value;
   }
-  
+
   /**
    * Evaluates as an array tail assign ($a[] = value).
    * @return what was assigned
@@ -613,7 +613,7 @@ abstract public class Expr {
   {
     Value array = evalArray(env);
     array.put(value);
-    
+
     return value;
   }
 

@@ -352,22 +352,37 @@ public class QuercusParser {
     return new QuercusParser(quercus, path, is).parse();
   }
 
-  public static QuercusProgram parseEval(QuercusContext quercus, String str)
+  public static QuercusProgram parseEval(QuercusContext quercus, StringValue str)
     throws IOException
   {
-    Path path = new StringPath(str);
+    ReadStream is;
 
-    QuercusParser parser = new QuercusParser(quercus, path, path.openRead());
+    if (str.isUnicode()) {
+      is = ReaderStream.open(str.toSimpleReader());
+    }
+    else {
+      is = new ReadStream(new VfsStream(str.toInputStream(), null));
+    }
+
+    QuercusParser parser = new QuercusParser(quercus, null, is);
 
     return parser.parseCode();
   }
 
-  public static QuercusProgram parseEvalExpr(QuercusContext quercus, String str)
+  public static QuercusProgram parseEvalExpr(QuercusContext quercus,
+                                             StringValue str)
     throws IOException
   {
-    Path path = new StringPath(str);
+    ReadStream is;
 
-    QuercusParser parser = new QuercusParser(quercus, path, path.openRead());
+    if (str.isUnicode()) {
+      is = ReaderStream.open(str.toSimpleReader());
+    }
+    else {
+      is = new ReadStream(new VfsStream(str.toInputStream(), null));
+    }
+
+    QuercusParser parser = new QuercusParser(quercus, null, is);
 
     return parser.parseCode().createExprReturn();
   }

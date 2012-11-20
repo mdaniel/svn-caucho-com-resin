@@ -1551,7 +1551,23 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
     public Value next()
     {
-      return _env.wrapJava(_iterator.next());
+      Object next = _iterator.next();
+
+      if (next instanceof Map.Entry) {
+        Map.Entry entry = (Map.Entry) next;
+
+        Object value = entry.getValue();
+
+        if (value instanceof Value) {
+          return (Value) value;
+        }
+        else {
+          return _env.wrapJava(value);
+        }
+      }
+      else {
+        return _env.wrapJava(next);
+      }
     }
 
     public boolean hasNext()
@@ -1590,16 +1606,22 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       if (next instanceof Map.Entry) {
         Map.Entry entry = (Map.Entry) next;
 
-        if (entry.getKey() instanceof Value
-            && entry.getValue() instanceof Value)
-        {
+        Object key = entry.getKey();
+        Object value = entry.getValue();
+
+        if (key instanceof Value
+            && value instanceof Value) {
           return (Map.Entry<Value, Value>) entry;
         }
-        else {
-          Value key = _env.wrapJava(entry.getKey());
-          Value val = _env.wrapJava(entry.getValue());
+        else if (key instanceof Value) {
+          Value v = _env.wrapJava(value);
 
-          return new JavaEntry(key, val);
+          return new JavaEntry((Value) key, v);
+        }
+        else {
+          Value k = _env.wrapJava(key);
+
+          return new JavaEntry(k, (Value) value);
         }
       }
       else {

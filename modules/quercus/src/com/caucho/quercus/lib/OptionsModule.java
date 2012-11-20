@@ -107,7 +107,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   @UsesSymbolTable(replace = false)
   @Name("assert")
-  public static Value q_assert(Env env, String code)
+  public static Value q_assert(Env env, StringValue code)
   {
     try {
       QuercusContext quercus = env.getQuercus();

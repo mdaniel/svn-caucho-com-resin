@@ -180,8 +180,8 @@ public class QuercusContext
 
   private AbstractFunction []_functionMap = new AbstractFunction[256];
 
-  private LruCache<String, QuercusProgram> _evalCache
-    = new LruCache<String, QuercusProgram>(4096);
+  private LruCache<StringValue, QuercusProgram> _evalCache
+    = new LruCache<StringValue, QuercusProgram>(4096);
 
   private int _includeCacheMax = 8192;
   private long _includeCacheTimeout = 10000L;
@@ -1241,7 +1241,7 @@ public class QuercusContext
    * @return the parsed program
    * @throws IOException
    */
-  public QuercusProgram parseCode(String code)
+  public QuercusProgram parseCode(StringValue code)
     throws IOException
   {
     QuercusProgram program = _evalCache.get(code);
@@ -1261,7 +1261,7 @@ public class QuercusContext
    * @return the parsed program
    * @throws IOException
    */
-  public QuercusProgram parseEvalExpr(String code)
+  public QuercusProgram parseEvalExpr(StringValue code)
     throws IOException
   {
     // XXX: possible conflict with parse eval because of the

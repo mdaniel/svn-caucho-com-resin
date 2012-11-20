@@ -42,9 +42,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
@@ -1415,7 +1413,7 @@ public class RegexpModule
 
         try {
           if (evalString.length() > 0) { // php/152z
-            result = result.append(env.evalCode(evalString.toString()));
+            result = result.append(env.evalCode(evalString));
           }
         } catch (Exception e) {
           env.warning(e);
