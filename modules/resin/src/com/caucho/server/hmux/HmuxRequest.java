@@ -529,7 +529,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
       request.setAttribute("javax.servlet.request.X509Certificate",
                            new X509Certificate[]{cert});
-      request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER_NAME,
+      request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_USER,
                            ((X509Certificate) cert).getSubjectDN());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
