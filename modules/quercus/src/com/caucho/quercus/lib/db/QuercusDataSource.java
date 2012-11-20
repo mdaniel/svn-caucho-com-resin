@@ -23,7 +23,7 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- * 
+ *
  * @author Nam Nguyen
  */
 
@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.db;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -39,9 +40,9 @@ public class QuercusDataSource implements DataSource {
   private final DataSource _ds;
   private final String _user;
   private final String _pass;
-  
+
   private final boolean _isAllowPerConnectionUserPass;
-  
+
   /**
    * @param ds
    * @param user
@@ -56,13 +57,13 @@ public class QuercusDataSource implements DataSource {
                            boolean isAllowPerConnectionUserPass)
   {
     _ds = ds;
-    
+
     _user = user;
     _pass = pass;
-    
+
     _isAllowPerConnectionUserPass = isAllowPerConnectionUserPass;
   }
-  
+
   public Connection getConnection()
     throws SQLException
   {
@@ -73,7 +74,7 @@ public class QuercusDataSource implements DataSource {
       return _ds.getConnection();
     }
   }
-  
+
   public Connection getConnection(String user, String pass)
     throws SQLException
   {
@@ -84,49 +85,57 @@ public class QuercusDataSource implements DataSource {
       return getConnection();
     }
   }
-  
+
   @Override
   public int getLoginTimeout()
     throws SQLException
   {
     return _ds.getLoginTimeout();
   }
-  
+
   @Override
   public PrintWriter getLogWriter()
     throws SQLException
   {
     return _ds.getLogWriter();
   }
-  
+
   @Override
   public void setLoginTimeout(int seconds)
     throws SQLException
   {
     _ds.setLoginTimeout(seconds);
   }
-  
+
   @Override
   public void setLogWriter(PrintWriter out)
     throws SQLException
   {
     _ds.setLogWriter(out);
   }
-  
+
   @Override
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
     return _ds.isWrapperFor(iface);
   }
-  
+
   @Override
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
     return _ds.unwrap(iface);
   }
-  
+
+  /**
+   * new interface method in JDK 1.7 CommonDataSource
+   */
+  public Logger getParentLogger()
+  {
+    throw new UnsupportedOperationException();
+  }
+
   @Override
   public String toString() {
     return getClass().getSimpleName() + "[" + _ds
