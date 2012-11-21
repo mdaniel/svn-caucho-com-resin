@@ -34,6 +34,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * javax.sql.DataSource adapter for java.sql.Driver
@@ -49,6 +50,7 @@ public class JavaSqlDriverWrapper implements javax.sql.DataSource
     _url = url;
   }
 
+  @Override
   public Connection getConnection()
     throws SQLException
   {
@@ -59,6 +61,7 @@ public class JavaSqlDriverWrapper implements javax.sql.DataSource
     return _driver.connect(_url, props);
   }
 
+  @Override
   public Connection getConnection(String user, String password)
     throws SQLException
   {
@@ -77,35 +80,49 @@ public class JavaSqlDriverWrapper implements javax.sql.DataSource
     return _driver.connect(_url, props);
   }
 
+  @Override
   public int getLoginTimeout()
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public PrintWriter getLogWriter()
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void setLoginTimeout(int seconds)
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void setLogWriter(PrintWriter out)
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * new interface method in JDK 1.7 CommonDataSource
+   */
+  public Logger getParentLogger()
+  {
+    throw new UnsupportedOperationException();
   }
 }

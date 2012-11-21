@@ -966,6 +966,10 @@ public class PDO implements EnvCleanup {
 
     url.append('/');
     url.append(dbname);
+    
+    // php/1s78
+    url.append('?');
+    url.append("stringtype=unspecified");
 
     try {
       DataSource ds = env.getDataSource(driver, url.toString());
