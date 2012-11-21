@@ -39,6 +39,7 @@
 <li>quercus: javax.script cannot call PHP library functions (#5270, rep by udvs)</li>
 <li>quercus: eval() does work with large code with utf8 data (#5280, rep by tobias)</li>
 <li>quercus: QuercusDataSource needs to implement getParentLogger() for JDK 1.7 (#5281, rep by ottomatico)</li>
+<li>quercus: postgresql - pdo parameters need to be casted to actual column types (#5285, rep by tobias)</li>
 </ul>
 </s2>
 
