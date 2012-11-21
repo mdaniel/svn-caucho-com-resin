@@ -58,10 +58,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Do not add new compile dependencies (use reflection instead)
-// import org.postgresql.largeobject.*;
-
-
 /**
  * Quercus postgres routines.
  */
@@ -717,14 +713,13 @@ public class PostgresModule extends AbstractQuercusModule {
 
       ArrayValueImpl newArray = new ArrayValueImpl();
 
-      Object value;
+      Value value;
 
       int curr = 0;
 
-      while ((value = result.fetchArray(env, PGSQL_NUM)) != BooleanValue.FALSE) {
-
-        ArrayValueImpl arr = (ArrayValueImpl) value;
-        int count = arr.size();
+      while ((value = result.fetchArray(env, PGSQL_NUM)).isArray()) {
+        ArrayValue arr = value.toArrayValue(env);
+        int count = arr.getSize();
 
         StringValue sb = env.createUnicodeBuilder();
 
@@ -756,8 +751,8 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return newArray;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    } catch (Exception e) {      
+      log.log(Level.FINE, e.toString(), e);
       return null;
     }
   }
@@ -775,8 +770,8 @@ public class PostgresModule extends AbstractQuercusModule {
 
       return conn.getDbName();
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
       return null;
     }
   }
@@ -951,7 +946,7 @@ public class PostgresModule extends AbstractQuercusModule {
       int curr = 0;
 
       for (Value row = result.fetchRow(env);
-           row != BooleanValue.FALSE;
+           row != NullValue.NULL;
            row = result.fetchRow(env)) {
 
         newArray.put(LongValue.create(curr++), row.get(column));
@@ -984,7 +979,7 @@ public class PostgresModule extends AbstractQuercusModule {
       int curr = 0;
 
       for (Value row = result.fetchAssoc(env);
-           row != BooleanValue.FALSE;
+           row != NullValue.NULL;
            row = result.fetchAssoc(env)) {
 
         newArray.put(LongValue.create(curr++), row);
