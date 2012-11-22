@@ -202,13 +202,15 @@ public class HttpProxyServlet extends GenericServlet {
 
       out.print("Host: ");
       String host = req.getHeader("Host");
-      if (host != null)
-        out.println(host);
-      else
-        out.println(req.getServerName() + ":" + req.getServerPort());
+      if (host == null)
+        host = req.getServerName() + ":" + req.getServerPort();
+
+      out.print(host);
+      out.print("\r\n");
 
       out.print("X-Forwarded-For: ");
-      out.println(req.getRemoteAddr());
+      out.print(req.getRemoteAddr());
+      out.print("\r\n");
 
       Enumeration<String> e = req.getHeaderNames();
       while (e.hasMoreElements()) {
@@ -219,11 +221,12 @@ public class HttpProxyServlet extends GenericServlet {
 
         Enumeration<String> e1 = req.getHeaders(name);
         while (e1.hasMoreElements()) {
-          String value = (String) e1.nextElement();
+          String value = e1.nextElement();
 
           out.print(name);
           out.print(": ");
-          out.println(value);
+          out.print(value);
+          out.print("\r\n");
         }
       }
 
