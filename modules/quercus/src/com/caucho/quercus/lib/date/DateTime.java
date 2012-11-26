@@ -31,7 +31,6 @@ package com.caucho.quercus.lib.date;
 
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -93,9 +92,7 @@ public class DateTime implements Cloneable
 
     DateParser parser = new DateParser(timeString, _qDate);
 
-    long time = parser.parse();
-
-    _qDate.setGMTTime(time);
+    parser.parse();
   }
 
   public static DateTime __construct(Env env,
@@ -216,12 +213,12 @@ public class DateTime implements Cloneable
 
   protected long getTime()
   {
-    return _qDate.getLocalTime();
+    return _qDate.getGMTTime();
   }
 
   protected void setTime(long time)
   {
-    _qDate.setLocalTime(time);
+    _qDate.setGMTTime(time);
   }
 
   public String toString()

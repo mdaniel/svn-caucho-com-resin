@@ -1038,7 +1038,6 @@ public class DateModule extends AbstractQuercusModule {
 
       return new LongValue(parser.parse() / 1000L);
     } catch (Exception e) {
-      // env.warning(e.getMessage());
       env.warning(e);
 
       return BooleanValue.FALSE;
@@ -1100,11 +1099,18 @@ public class DateModule extends AbstractQuercusModule {
     return DateTime.__construct(env, time, dateTimeZone);
   }
 
-  public static void date_date_set(DateTime dateTime,
+  public static void date_date_set(Env env,
+                                   DateTime dateTime,
                                    int year,
                                    int month,
                                    int day)
   {
+    if (dateTime == null) {
+      env.warning(L.l("DateTime arg is null"));
+
+      return;
+    }
+
     dateTime.setDate(year, month, day);
   }
 
@@ -1122,18 +1128,29 @@ public class DateModule extends AbstractQuercusModule {
     return true;
   }
 
-  public static StringValue date_format(Env env,
-                                        DateTime dateTime,
-                                        StringValue format)
+  public static Value date_format(Env env,
+                                  DateTime dateTime,
+                                  StringValue format)
   {
+    if (dateTime == null) {
+      return BooleanValue.FALSE;
+    }
+
     return dateTime.format(env, format);
   }
 
-  public static void date_isodate_set(DateTime dateTime,
+  public static void date_isodate_set(Env env,
+                                      DateTime dateTime,
                                       int year,
                                       int week,
                                       int day)
   {
+    if (dateTime == null) {
+      env.warning(L.l("DateTime arg is null"));
+
+      return;
+    }
+
     dateTime.setISODate(year, week, day);
   }
 
@@ -1144,13 +1161,20 @@ public class DateModule extends AbstractQuercusModule {
 
   public static long date_offset_get(DateTime dateTime)
   {
+    if (dateTime == null) {
+      return -1;
+    }
+
     return dateTime.getOffset();
   }
 
   public static Value date_parse(Env env, StringValue date)
   {
-    DateTime dateTime = new DateTime(env, date);
-    QDate qDate = dateTime.getQDate();
+    DateTimeZone dateTimeZone = new DateTimeZone(env);
+    QDate qDate = new QDate(dateTimeZone.getTimeZone(), env.getCurrentTime());
+    
+    DateParser parser = new DateParser(date, qDate);
+    parser.parse();
 
     ArrayValue array = new ArrayValueImpl();
 
