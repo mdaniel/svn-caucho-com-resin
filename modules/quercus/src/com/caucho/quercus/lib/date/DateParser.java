@@ -590,22 +590,22 @@ public class DateParser
         break;
       }
       case UNIT_FORTNIGHT:
-        _date.setGMTTime(_date.getGMTTime() + 14 * DAY * value);
+        _date.setDayOfMonth(_date.getDayOfMonth() + 14 * value);
         break;
       case UNIT_WEEK:
-        _date.setGMTTime(_date.getGMTTime() + 7 * DAY * value);
+        _date.setDayOfMonth(_date.getDayOfMonth() + 7 * value);
         break;
       case UNIT_DAY:
-        _date.setGMTTime(_date.getGMTTime() + DAY * value);
+        _date.setDayOfMonth(_date.getDayOfMonth() + value);
         break;
       case UNIT_HOUR:
-        _date.setGMTTime(_date.getGMTTime() + HOUR * value);
+        _date.setHour(_date.getHour() + value);
         break;
       case UNIT_MINUTE:
-        _date.setGMTTime(_date.getGMTTime() + MINUTE * value);
+        _date.setMinute(_date.getMinute() + value);
         break;
       case UNIT_SECOND:
-        _date.setGMTTime(_date.getGMTTime() + 1000L * value);
+        _date.setSecond(_date.getSecond() + value);
         break;
     }
   }
