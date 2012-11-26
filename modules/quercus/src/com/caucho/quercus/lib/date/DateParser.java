@@ -576,9 +576,19 @@ public class DateParser
       case UNIT_YEAR:
         _date.setYear(_date.getYear() + value);
         break;
-      case UNIT_MONTH:
-        _date.setMonth(_date.getMonth() + value);
+      case UNIT_MONTH: {
+        int month = _date.getMonth() + value;
+        int year = _date.getYear();
+
+        if (month < 0 || month >= 12) {
+          year = year + month / 12;
+
+          month = month % 12;
+        }
+
+        _date.setDate(year, month, _date.getDayOfMonth());
         break;
+      }
       case UNIT_FORTNIGHT:
         _date.setGMTTime(_date.getGMTTime() + 14 * DAY * value);
         break;
