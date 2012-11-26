@@ -41,7 +41,7 @@ public class FunCloneExpr extends AbstractUnaryExpr {
   {
     super(location, expr);
   }
-  
+
   public FunCloneExpr(Expr expr)
   {
     super(expr);

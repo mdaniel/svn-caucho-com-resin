@@ -126,7 +126,8 @@ public class DateTime implements Cloneable
   */
 
   @Override
-  public Object clone() {
+  public Object clone()
+  {
     QDate qDate = (QDate) _qDate.clone();
     DateTimeZone dateTimeZone = (DateTimeZone) _dateTimeZone.clone();
 
@@ -148,7 +149,7 @@ public class DateTime implements Cloneable
 
     long time = parser.parse();
 
-    setTime(time);
+    //setTime(time);
   }
 
   public long getTimestamp()

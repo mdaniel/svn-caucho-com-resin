@@ -36,6 +36,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -154,11 +156,11 @@ public class JavaValue extends ObjectValue
   public StringValue toString(Env env)
   {
     StringValue value = _classDef.toString(env, this);
-    
+
     if (value == null) {
       value = env.createString(toString());
     }
-    
+
     return value;
   }
 
@@ -461,6 +463,39 @@ public class JavaValue extends ObjectValue
   {
     return _classDef.callMethod(env, this, methodName, hash,
                                 a1, a2, a3, a4, a5);
+  }
+
+  @Override
+  public Value clone(Env env)
+  {
+    Object obj = null;
+
+    if (_object != null) {
+      if (! (_object instanceof Cloneable)) {
+        return env.error(L.l("Java class {0} does not implement Cloneable",
+                             _object.getClass().getName()));
+      }
+
+      Class<?> cls = _classDef.getType();
+
+      try {
+        Method method = cls.getMethod("clone", new Class[0]);
+        method.setAccessible(true);
+
+        obj = method.invoke(_object);
+      }
+      catch (NoSuchMethodException e) {
+        throw new QuercusException(e);
+      }
+      catch (InvocationTargetException e) {
+        throw new QuercusException(e.getCause());
+      }
+      catch (IllegalAccessException e) {
+        throw new QuercusException(e);
+      }
+    }
+
+    return new JavaValue(obj, _classDef, getQuercusClass());
   }
 
   /**
