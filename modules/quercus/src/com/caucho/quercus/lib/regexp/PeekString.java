@@ -43,23 +43,25 @@ class PeekString extends PeekStream {
     _index = 0;
   }
 
-  int read() 
-  { 
-    if (_index < _length)
+  int read()
+  {
+    if (_index < _length) {
       return _string.charAt(_index++);
-    else
-      return -1; 
+    }
+    else {
+      return -1;
+    }
   }
 
-  int peek() 
+  int peek()
   {
     if (_index < _length)
       return _string.charAt(_index);
     else
-      return -1; 
+      return -1;
   }
 
-  void ungetc(int ch) { 
+  void ungetc(int ch) {
     if (_index <= 0)
       throw new RuntimeException();
 

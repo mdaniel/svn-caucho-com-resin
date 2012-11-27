@@ -257,6 +257,14 @@ class RegexpNode {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  int match(StringValue string, int length, int offset, RegexpState state,
+            int group, int oldGroupBegin)
+  {
+    state.setFinalized(group, true);
+
+    return match(string, length, offset, state);
+  }
+
   @Override
   public String toString()
   {
@@ -852,6 +860,18 @@ class RegexpNode {
     }
 
     @Override
+    int match(StringValue string, int length, int offset, RegexpState state,
+              int group, int oldBegin)
+    {
+      offset = _head.match(string, length, offset, state, group, oldBegin);
+
+      if (offset < 0)
+        return -1;
+      else
+        return _next.match(string, length, offset, state, group, oldBegin);
+    }
+
+    @Override
     protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
       if (toStringAdd(sb, map))
@@ -1163,10 +1183,11 @@ class RegexpNode {
       int oldBegin = state.getBegin(_group);
       state.setBegin(_group, offset);
 
-      int tail = _node.match(string, length, offset, state);
+      int tail = _node.match(string, length, offset, state, _group, oldBegin);
 
-      if (tail >= 0)
+      if (tail >= 0) {
         return tail;
+      }
       else {
         state.setBegin(_group, oldBegin);
         return tail;
@@ -1869,6 +1890,21 @@ class RegexpNode {
     }
 
     @Override
+    int match(StringValue string, int strlen, int offset, RegexpState state,
+              int group, int oldBegin)
+    {
+      for (Or ptr = this; ptr != null; ptr = ptr._right) {
+        int value
+          = ptr._left.match(string, strlen, offset, state, group, oldBegin);
+
+        if (value >= 0)
+          return value;
+      }
+
+      return -1;
+    }
+
+    @Override
     protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
       if (toStringAdd(sb, map))
@@ -2461,6 +2497,27 @@ class RegexpNode {
     int match(StringValue string, int length, int offset, RegexpState state)
     {
       return _top.match(string, length, offset, state);
+    }
+
+    @Override
+    int match(StringValue string, int length, int offset, RegexpState state,
+              int group, int oldBegin)
+    {
+      int match = match(string, length, offset, state);
+
+      if (match >= 0) {
+        if (! state.isFinalized(group) && oldBegin >= 0) {
+          state.setBegin(group, oldBegin);
+        }
+        else {
+          state.setBegin(group, offset);
+        }
+      }
+      else {
+        state.setFinalized(group, true);
+      }
+
+      return match;
     }
   }
 

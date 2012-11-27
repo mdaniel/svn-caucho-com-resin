@@ -157,8 +157,7 @@ class Regcomp {
         RegexpNode.Concat topConcat = (RegexpNode.Concat) top;
 
         if (topConcat.getConcatHead() instanceof RegexpNode.AnchorBegin
-            || topConcat.getConcatHead() instanceof RegexpNode
-            .AnchorBeginRelative) {
+            || topConcat.getConcatHead() instanceof RegexpNode.AnchorBeginRelative) {
           top = topConcat.getConcatNext();
         }
       }
@@ -538,8 +537,9 @@ class Regcomp {
 
       return parseGroup(pattern, tail, group, _flags);
     }
-    else
+    else {
       throw error(L.l("Expected '(?:P=name' or '(?:P<name' for named group"));
+    }
   }
 
   private RegexpNode parseConditional(PeekStream pattern, RegexpNode tail)
