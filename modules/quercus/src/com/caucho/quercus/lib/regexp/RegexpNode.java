@@ -2510,6 +2510,8 @@ class RegexpNode {
           state.setBegin(group, oldBegin);
         }
         else {
+          state.setFinalized(group, false);
+
           state.setBegin(group, offset);
         }
       }
