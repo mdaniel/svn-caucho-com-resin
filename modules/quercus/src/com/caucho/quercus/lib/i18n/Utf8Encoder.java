@@ -29,25 +29,17 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import java.util.logging.Logger;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.util.L10N;
 
 public class Utf8Encoder
   extends Encoder
 {
-  private static final Logger log
-    = Logger.getLogger(Utf8Encoder.class.getName());
-
-  private static final L10N L = new L10N(Utf8Encoder.class);
-  
   public Utf8Encoder()
   {
     super("utf-8");
   }
-  
+
   @Override
   public boolean isUtf8()
   {
@@ -59,13 +51,13 @@ public class Utf8Encoder
     int len = str.length();
     for (int i = 0; i < len; i++) {
       char ch = str.charAt(i);
-      
+
       if (ch <= 0x7F)
         continue;
-      
+
       if (0xD800 <= ch && ch <= 0xDBFF) {
         char ch2;
-        
+
         if (i + 1 < len
             && 0xDC00 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xDFFF) {
           i++;
@@ -74,34 +66,34 @@ public class Utf8Encoder
           return false;
       }
     }
-    
+
     return true;
   }
-  
+
   @Override
   public StringValue encode(Env env, CharSequence str)
   {
     StringValue sb = env.createBinaryBuilder();
-    
+
     int len = str.length();
     for (int i = 0; i < len; i++) {
       char ch = str.charAt(i);
-      
+
       if (ch <= 0x7F) {
         sb.appendByte(ch);
         continue;
       }
-      
+
       int code = ch;
-      
-      
+
+
       if (0xD800 <= ch && ch <= 0xDBFF) {
         char ch2;
-        
+
         if (i + 1 < len
             && 0xDC00 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xDFFF) {
           i++;
-          
+
           code = 0x10000 + ((ch - 0xD800) << 10) + (ch2 - 0xDC00);
         }
         else {
@@ -111,11 +103,11 @@ public class Utf8Encoder
             sb.append(_replacement);
           else
             return sb;
-          
+
           continue;
         }
       }
-            
+
       if (0x80 <= code && code <= 0x7FF) {
         sb.appendByte(0xC0 | (code >> 6));
         sb.appendByte(0x80 | (code & 0x3F));
@@ -132,8 +124,8 @@ public class Utf8Encoder
         sb.appendByte(0x80 | (code & 0x3F));
       }
     }
-    
+
     return sb;
   }
-  
+
 }
