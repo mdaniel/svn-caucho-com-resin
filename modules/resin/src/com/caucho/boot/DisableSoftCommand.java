@@ -82,7 +82,7 @@ public class DisableSoftCommand extends AbstractScalingCommand
   @Override
   public String getUsageArgs()
   {
-    return " <server>";
+    return " [<server>]";
   }
 
   @Override

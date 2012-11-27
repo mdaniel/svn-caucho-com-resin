@@ -44,9 +44,12 @@ public class JmxDumpCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxDumpCommand.class);
   
-  public JmxDumpCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("file", "file", "file where the JMX dump will be saved");
+    
+    super.initBootOptions();
   }
   
   @Override

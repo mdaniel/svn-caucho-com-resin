@@ -278,7 +278,7 @@ public class ResinBoot
     BootCommand command = getCommand();
 
     if (command != null && _args.isHelp()) {
-      command.usage();
+      command.usage(_args.isVerbose());
 
       return false;
     }
@@ -360,7 +360,7 @@ public class ResinBoot
       printException(e, boot);
 
       if (command != null)
-        command.usage();
+        command.usage(false);
 
       System.exit(ExitCode.UNKNOWN_ARGUMENT.ordinal());
     } catch (ConfigException e) {

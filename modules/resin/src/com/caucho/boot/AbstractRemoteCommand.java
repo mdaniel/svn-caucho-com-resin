@@ -48,14 +48,21 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
   private static final Logger log
     = Logger.getLogger(AbstractRemoteCommand.class.getName());
   
-  protected AbstractRemoteCommand()
+  @Override
+  protected void initBootOptions()
   {
+    addSubsectionHeaderOption("remote connection options:");
+
     addValueOption("server", "id", "id of a server in the config file");
     addValueOption("address", "ip", "IP address or host name of (triad) server");
     addIntValueOption("port", "port", "IP port of (triad) server");
     
+    addSpacerOption();
+    
     addValueOption("user", "user", "admin user name for authentication");
     addValueOption("password", "password", "admin password for authentication");
+    
+    super.initBootOptions();
   }
   
   protected RemoteActorSender createBamClient(WatchdogArgs args,

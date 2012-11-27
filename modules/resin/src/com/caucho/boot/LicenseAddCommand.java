@@ -44,12 +44,18 @@ public class LicenseAddCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(LicenseAddCommand.class);
 
-  public LicenseAddCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("license", "license file", "path to license file to add (required)");
+    
+    addSpacerOption();
+    
     addValueOption("to", "filename","file name license will be written to (defaults to name of license file)");
     addFlagOption("overwrite", "overwrite existing license file if exists");
     addFlagOption("restart", "restart Resin after license is added");
+    
+    super.initBootOptions();
   }
 
   @Override
@@ -62,12 +68,6 @@ public class LicenseAddCommand extends AbstractManagementCommand
   public boolean isProOnly()
   {
     return false;
-  }
-
-  @Override
-  public boolean isDefaultArgsAccepted()
-  {
-    return true;
   }
 
   @Override
@@ -86,7 +86,7 @@ public class LicenseAddCommand extends AbstractManagementCommand
     
     if (licenses.size() == 0) {
       System.err.println(L.l("-license is required"));
-      usage();
+      usage(false);
       return 1;
     }
     

@@ -41,12 +41,14 @@ public class JmxSetCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxSetCommand.class);
 
-  public JmxSetCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("pattern", "pattern",
       "pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo");
-
     addValueOption("attribute", "attribute", "name of the attribute");
+    
+    super.initBootOptions();
   }
   
   @Override
@@ -58,7 +60,7 @@ public class JmxSetCommand extends JmxCommand
   @Override
   public String getUsageArgs()
   {
-    return " value";
+    return " <value>";
   }
 
   @Override

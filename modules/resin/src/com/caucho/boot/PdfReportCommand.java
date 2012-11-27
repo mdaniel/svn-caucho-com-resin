@@ -45,17 +45,29 @@ public class PdfReportCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(PdfReportCommand.class);
   
-  public PdfReportCommand()
+  @Override
+  protected void initBootOptions()
   {
-    addValueOption("period", "time", "specifies look-back period of time (default 7D)");
     addValueOption("report", "value", "specifies the report-type key (default Snapshot)");
-    addValueOption("logdir", "dir", "PDF output directory (default to resin log)");
-    addValueOption("local-dir", "dir", "writes a local copy of PDF report to a specified directory");
-    addFlagOption("snapshot", "saves heap-dump, thread-dump, jmx-dump before generating report");
+    
+    addSpacerOption();
+
+    addValueOption("period", "time", "specifies look-back period of time (default 7D)");
     addValueOption("profile-time", "time", "turns code profiling on for a time before generating report");
     addValueOption("profile-sample", "time", "specifies profiling sampling frequency (100ms)");
-    addFlagOption("local", "writes a local copy of PDF report");
+    
+    addSpacerOption();
+
+    addFlagOption("snapshot", "saves heap-dump, thread-dump, jmx-dump before generating report");
     addFlagOption("watchdog", "specifies look-back period starting at last Resin start");
+
+    addSpacerOption();
+
+    addValueOption("logdir", "dir", "PDF output directory (default to resin log)");
+    addValueOption("local-dir", "dir", "writes a local copy of PDF report to a specified directory");
+    addFlagOption("local", "writes a local copy of PDF report");
+    
+    super.initBootOptions();
   }
   
   @Override

@@ -37,10 +37,14 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.vfs.Path;
 
-public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
-  protected AbstractRepositoryCommand()
+public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand 
+{
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("name", "name", "name of the deployment context");
+    
+    super.initBootOptions();
   }
 
   @Override

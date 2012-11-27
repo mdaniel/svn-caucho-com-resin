@@ -37,13 +37,6 @@ public class WebAppRestartCommand extends WebAppCommand
 {
   private static final L10N L = new L10N(WebAppRestartCommand.class);
 
-  public WebAppRestartCommand()
-  {
-    addValueOption("host", "host", "virtual host to make application available on");
-    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
-    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
-  }
-
   @Override
   public String getDescription()
   {
@@ -64,7 +57,7 @@ public class WebAppRestartCommand extends WebAppCommand
   @Override
   public String getUsageArgs()
   {
-    return "<name>";
+    return " <name>";
   }
 
   @Override

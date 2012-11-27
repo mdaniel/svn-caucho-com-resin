@@ -36,7 +36,15 @@ public class ValueBootOption extends AbstractBootOption {
                          String value,
                          String description)
   {
-    super(name, description);
+    this(name, value, description, false);
+  }
+
+  public ValueBootOption(String name,
+                         String value,
+                         String description,
+                         boolean deprecated)
+  {
+    super(name, description, deprecated);
     
     _value = value;
   }

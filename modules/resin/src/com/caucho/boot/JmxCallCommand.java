@@ -45,10 +45,13 @@ public class JmxCallCommand extends JmxCommand
   private static final L10N L = new L10N(JmxCallCommand.class);
   private static final Set<String> options = new HashSet<String>();
   
-  public JmxCallCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("pattern", "pattern", "pattern to match MBean");
     addValueOption("operation", "operation", "operation to invoke");
+    
+    super.initBootOptions();
   }
   
   @Override

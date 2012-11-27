@@ -40,13 +40,16 @@ import com.caucho.vfs.Vfs;
 abstract public class AbstractDeployCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(AbstractDeployCommand.class);
 
-  public AbstractDeployCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
     addValueOption("m", "message", "commit message");
+    
+    super.initBootOptions();
   }
-
+  
   @Override
   public boolean isDefaultArgsAccepted()
   {
@@ -57,6 +60,12 @@ abstract public class AbstractDeployCommand extends AbstractRepositoryCommand {
   public String getDescription()
   {
     return "deploys a configuration directory or jar file";
+  }
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " <filename>";
   }
   
   @Override

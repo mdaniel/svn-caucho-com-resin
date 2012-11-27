@@ -42,7 +42,8 @@ public class JmxListCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxListCommand.class);
 
-  public JmxListCommand()
+  @Override
+  protected void initBootOptions()
   {
     addFlagOption("attributes", "prints MBean's attributes");
     addFlagOption("values", "prints attribute values");
@@ -51,6 +52,8 @@ public class JmxListCommand extends JmxCommand
                   "when <pattern> not specified sets the wildcard pattern (*:*)");
     addFlagOption("platform",
                   "when <pattern> not specified sets the pattern to (java.lang:*)");
+    
+    super.initBootOptions();
   }
 
   @Override

@@ -29,27 +29,12 @@
 
 package com.caucho.boot;
 
-import com.caucho.env.repository.CommitBuilder;
-
-public class DeployLsCommand extends AbstractDeployCatCommand 
+public abstract class InfoBootOption extends AbstractBootOption 
 {
-  @Override
-  protected void initBootOptions()
-  {
-    addValueOption("host", "host", "virtual host to make application available on");
-    
-    super.initBootOptions();
-  }
+  private static int _counter = 0;
   
-  @Override
-  public String getDescription()
+  public InfoBootOption()
   {
-    return "lists deployed web-app files";
-  }
-  
-  @Override
-  protected CommitBuilder createCommitBuilder(WatchdogArgs args)
-  {
-    return DeployCommand.createWebAppCommit(args, null);
+    super(InfoBootOption.class.getSimpleName() + _counter++,"");
   }
 }

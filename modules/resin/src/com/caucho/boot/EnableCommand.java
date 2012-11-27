@@ -42,6 +42,18 @@ public class EnableCommand extends AbstractManagementCommand
   {
     return "enables a server for http/load-balancing";
   }
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " [<server>]";
+  }
+
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, 

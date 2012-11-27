@@ -41,10 +41,13 @@ import com.caucho.vfs.WriteStream;
 abstract public class AbstractDeployCatCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(AbstractDeployCatCommand.class);
   
-  AbstractDeployCatCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    
+    super.initBootOptions();
   }
   
   @Override
@@ -56,7 +59,7 @@ abstract public class AbstractDeployCatCommand extends AbstractRepositoryCommand
   @Override
   public String getDescription()
   {
-    return "pulls a deployed file";
+    return "prints a deployed file";
   }
   
   @Override

@@ -44,10 +44,13 @@ public class PasswordEncryptCommand extends AbstractBootCommand
 {
   private static final L10N L = new L10N(PasswordEncryptCommand.class);
   
-  public PasswordEncryptCommand()
+  @Override
+  protected void initBootOptions()
   {
-    addValueOption("salt", "salt", "optional salt for the password");
     addValueOption("password", "password", "the password to be encrypted");
+    addValueOption("salt", "salt", "optional salt for the password");
+    
+    super.initBootOptions();
   }
 
   @Override

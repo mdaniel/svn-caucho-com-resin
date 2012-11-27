@@ -29,14 +29,22 @@
 
 package com.caucho.boot;
 
-public abstract class AbstractBootOption implements BootOption {
+public abstract class AbstractBootOption implements BootOption
+{
   private String _name;
   private String _description;
+  private boolean _deprecated = false;
   
   public AbstractBootOption(String name, String description)
   {
+    this(name, description, false);
+  }
+
+  public AbstractBootOption(String name, String description, boolean deprecated)
+  {
     _name = name;
     _description = description;
+    _deprecated = deprecated;
   }
 
   @Override
@@ -56,12 +64,22 @@ public abstract class AbstractBootOption implements BootOption {
     return "value";
   }
   
+  public boolean isDeprecated()
+  {
+    return _deprecated;
+  }
+  
+  public void setDeprecated(boolean deprecated)
+  {
+    _deprecated = deprecated;
+  }
+  
   @Override
   public String getUsage()
   {
     StringBuilder sb = new StringBuilder();
     
-    sb.append("--");
+    sb.append("  --");
     sb.append(getName());
     
     if (isIntValue()) {
@@ -75,6 +93,9 @@ public abstract class AbstractBootOption implements BootOption {
     }
     
     sb.append(" : ").append(getDescription());
+    
+    if (isDeprecated())
+      sb.append(" (deprecated)");
     
     return sb.toString();
   }

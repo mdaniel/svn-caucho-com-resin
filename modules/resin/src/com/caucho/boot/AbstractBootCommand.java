@@ -29,11 +29,7 @@
 
 package com.caucho.boot;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.caucho.Version;
 import com.caucho.config.ConfigException;
@@ -43,21 +39,33 @@ public abstract class AbstractBootCommand implements BootCommand {
   private static final L10N L = new L10N(AbstractBootCommand.class);
   
   private final Map<String,BootOption> _optionMap
-    = new HashMap<String,BootOption>();
-
+    = new LinkedHashMap<String,BootOption>();
+  
   protected AbstractBootCommand()
   {
+    initBootOptions();
+  }
+  
+  protected void initBootOptions()
+  {
+    addSubsectionHeaderOption("general options:");
+
     addValueOption("conf", "file", "alternate resin.xml file");
-    addValueOption("mode", "string", "select .resin properties mode");
-    addValueOption("resin-home", "dir", "alternate resin home");
-    addValueOption("server", "id", "select Resin server from config");
     addValueOption("user-properties", "file", "select an alternate $HOME/.resin file");
+    addValueOption("mode", "string", "select .resin properties mode");
     
+    addSpacerOption();
+
+    addValueOption("resin-home", "dir", "alternate resin home");
     addValueOption("root-directory", "dir", "alternate root directory");
+    addValueOption("resin-root", "dir", "alternate root directory", true);
+    addValueOption("server-root", "dir", "alternate root directory", true);
     addValueOption("log-directory", "dir", "alternate log directory");
     addValueOption("license-directory", "dir", "alternate license directory");
+    addValueOption("data-directory", "dir", "alternate resin-data directory");
     
-    addFlagOption("elastic-server", "use an elastic server in the cluster");
+    addSpacerOption();
+    
     addFlagOption("verbose", "produce verbose output");
   }
 
@@ -226,6 +234,11 @@ public abstract class AbstractBootCommand implements BootCommand {
   
   protected void addOption(BootOption option)
   {
+    addOption(option, 0);
+  }
+
+  protected void addOption(BootOption option, int orderOffset)
+  {
     _optionMap.put(option.getName(), option);
   }
   
@@ -233,12 +246,20 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     addOption(new FlagBootOption(name, description));
   }
-  
+
   protected void addValueOption(String name,
                                 String value,
                                 String description)
   {
-    addOption(new ValueBootOption(name, value, description));
+    addValueOption(name, value, description, false);
+  }
+
+  protected void addValueOption(String name,
+                                String value,
+                                String description, 
+                                boolean deprecated)
+  {
+    addOption(new ValueBootOption(name, value, description, deprecated));
   }
   
   protected void addIntValueOption(String name, 
@@ -248,17 +269,33 @@ public abstract class AbstractBootCommand implements BootCommand {
     addOption(new ValueIntBootOption(name, value, description));
   }
   
-  public String getOptionUsage()
+  protected void addSpacerOption()
+  {
+    addOption(new SpacerBootOption());
+  }
+  
+  protected void addSubsectionHeaderOption(String header)
+  {
+    addOption(new SubsectionBootOption(header));
+  }
+  
+  public String getOptionUsage(boolean verbose)
   {
     StringBuilder sb = new StringBuilder();
     
-    ArrayList<BootOption> optionList = new ArrayList<BootOption>();
-    optionList.addAll(_optionMap.values());
-    
-    Collections.sort(optionList, new BootOptionComparator());
-    
-    for (BootOption option : optionList) {
-      sb.append("  " + option.getUsage() + "\n");
+    BootOption lastOption = null;
+    for (BootOption option : _optionMap.values()) {
+      if (option instanceof SpacerBootOption && 
+        lastOption instanceof SpacerBootOption) {
+        continue;
+      }
+      
+      if (! verbose && option.isDeprecated()) {
+        continue;
+      }
+      
+      sb.append(option.getUsage() + "\n");
+      lastOption = option;
     }
     
     return sb.toString();
@@ -321,7 +358,7 @@ public abstract class AbstractBootCommand implements BootCommand {
   }
 
   @Override
-  public final void usage()
+  public final void usage(boolean verbose)
   {
     System.err.println("usage: resinctl " + getName() + " [--options]"
                        + getUsageArgs());
@@ -329,8 +366,9 @@ public abstract class AbstractBootCommand implements BootCommand {
     System.err.println("  " + getDescription()
                        + (isProOnly() ? " (Resin Pro)" : ""));
     System.err.println();
-    System.err.println("where options include:");
-    System.err.print(getOptionUsage());
+    System.err.println("where command options include:");
+    System.err.println();
+    System.err.print(getOptionUsage(verbose));
   }
   
   public String getUsageArgs()
@@ -372,12 +410,5 @@ public abstract class AbstractBootCommand implements BootCommand {
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
-  }
-  
-  static class BootOptionComparator implements Comparator<BootOption> {
-    public int compare(BootOption a, BootOption b)
-    {
-      return a.getName().compareTo(b.getName());
-    }
   }
 }

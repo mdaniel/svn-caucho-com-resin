@@ -41,9 +41,12 @@ public class HeapDumpCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(HeapDumpCommand.class);
 
-  public HeapDumpCommand()
+  @Override
+  protected void initBootOptions()
   {
     addFlagOption("raw", "creates a JVM hprof file");
+    
+    super.initBootOptions();
   }
 
   @Override

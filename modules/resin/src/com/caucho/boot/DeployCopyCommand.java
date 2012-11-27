@@ -38,18 +38,26 @@ import com.caucho.util.L10N;
 public class DeployCopyCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployCopyCommand.class);
 
-  public DeployCopyCommand()
+  @Override
+  protected void initBootOptions()
   {
-    addValueOption("conf", "conf", "resin configuration file");
     addValueOption("source", "source", "source context");
     addValueOption("source-host", "source-host", "source host");
     addValueOption("source-stage", "source-stage", "source stage");
     addValueOption("source-version", "source-version", "source version");
+    
+    addSpacerOption();
+    
     addValueOption("target", "target", "target context");
     addValueOption("target-host", "target-host", "target host");
     addValueOption("target-stage", "target-stage", "target stage");
     addValueOption("target-version", "target-version", "target version");
+    
+    addSpacerOption();
+
     addValueOption("m", "message", "commit message");
+    
+    super.initBootOptions();
   }
 
   @Override

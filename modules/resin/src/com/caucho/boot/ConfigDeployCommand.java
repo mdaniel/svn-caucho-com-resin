@@ -32,11 +32,10 @@ package com.caucho.boot;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.vfs.Path;
 
-public class ConfigDeployCommand extends AbstractDeployCommand {
+public class ConfigDeployCommand extends AbstractDeployCommand 
+{
   ConfigDeployCommand()
   {
-    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
-    addValueOption("name", "name", "name of application");
   }
   
   @Override

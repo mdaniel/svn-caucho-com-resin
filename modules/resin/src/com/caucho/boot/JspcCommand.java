@@ -41,12 +41,17 @@ public class JspcCommand extends AbstractBootCommand
   private final static Logger log
     = Logger.getLogger(JspcCommand.class.getName());
   
-  public JspcCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("app-dir", "dir", "Directory root of the web-app");
     addValueOption("class-dir", "dir", "The work directory to compile as output");
+    
+    addSpacerOption();
+    
     addValueOption("compiler", "value", "The java compiler for javac");
-    addValueOption("conf", "path", "The resin.xml for the compiler");
+    
+    super.initBootOptions();
   }
   
   @Override
@@ -57,7 +62,7 @@ public class JspcCommand extends AbstractBootCommand
   
   public String getUsageArgs()
   {
-    return " jsp1 jsp2 ...";
+    return " <jsp1> <jsp2> ...";
   }
 
   @Override

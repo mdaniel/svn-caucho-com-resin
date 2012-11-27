@@ -40,25 +40,40 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
 {
   private static final L10N L = new L10N(AbstractStartCommand.class);
   
-  protected AbstractStartCommand()
+  @Override
+  protected void initBootOptions()
   {
-    addFlagOption("verbose", "log command-line and environment information");
-    addFlagOption("preview", "run as a preview (staging) server");
-    addFlagOption("elastic-server", "join a cluster as an elastic server (pro)");
-    
-    addValueOption("cluster", "id", "cluster to join as an elastic server (pro)");
-    addValueOption("data-directory", "dir", "override the working directory");
-    addValueOption("elastic-server-address", "ip", "cluster IP address for an elastic server");
-    addValueOption("root-directory", "dir", "set the root directory");
-    addValueOption("log-directory", "dir", "set the log directory");
     addValueOption("server", "id", "select a configured server");
-    addValueOption("stage", "stage", "select a configuration stage (production, preview)");
 
+    addSpacerOption();
+
+    addFlagOption("elastic-server", 
+                  "join a cluster as an elastic server (pro)");
+    addValueOption("elastic-server-address", "ip", 
+                   "cluster IP address for an elastic server");
     addIntValueOption("elastic-server-port", "port",
                       "cluster port for an elastic server");
+    addValueOption("cluster", 
+                   "id", "cluster to join as an elastic server (pro)");
+    addValueOption("join-cluster", 
+                   "id", "cluster to join as an elastic server (pro)", true);
+    
+    addSpacerOption();
+
+    addFlagOption("preview", "run as a preview (staging) server");
+    addValueOption("stage", 
+                   "stage", 
+                   "select a configuration stage (production, preview)");
+
+    addSpacerOption();
+
     addIntValueOption("debug-port", "port", "listen to a JVM debug port");
-    addIntValueOption("jmx-port", "port", "listen to an unauthenticated JMX port");
-    addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
+    addIntValueOption("jmx-port", 
+                      "port", "listen to an unauthenticated JMX port");
+    addIntValueOption("watchdog-port", 
+                      "port", "set watchdog port to listen to");
+    
+    super.initBootOptions();
   }
 
   @Override

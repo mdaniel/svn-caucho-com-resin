@@ -45,7 +45,8 @@ public class LogLevelCommand extends AbstractManagementCommand
   private static final Map<String,Level> _options
     = new LinkedHashMap<String,Level>();
 
-  public LogLevelCommand()
+  @Override
+  protected void initBootOptions()
   {
     addFlagOption("all", "all logs (rare to use)");
     addFlagOption("finest", "finest debugging log");
@@ -56,16 +57,20 @@ public class LogLevelCommand extends AbstractManagementCommand
     addFlagOption("warning", "non-fatal warnings");
     addFlagOption("severe", "severe, typically fatal warnings");
     addFlagOption("off", "disable logging");
+    
+    addSpacerOption();
 
     addValueOption("active-time",
                    "time",
                    "specifies temporary level active time (default permanent). e.g. 5s");
+    
+    super.initBootOptions();
   }
 
   @Override
   public String getUsageArgs()
   {
-    return " loggers...";
+    return " <logger> <logger> ...";
   }
 
   @Override
@@ -95,7 +100,7 @@ public class LogLevelCommand extends AbstractManagementCommand
     }
 
     if (logLevel == null) {
-      usage();
+      usage(false);
 
       return 3;
     }

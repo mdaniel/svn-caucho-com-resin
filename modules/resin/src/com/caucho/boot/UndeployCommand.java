@@ -39,13 +39,15 @@ public class UndeployCommand extends AbstractRepositoryCommand
 {
   private static final L10N L = new L10N(UndeployCommand.class);
 
-  public UndeployCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("host", "host", "virtual host to make application available on");
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
-    addValueOption("name", "name", "name of application");
     addValueOption("m", "message", "commit message");
+    
+    super.initBootOptions();
   }
 
   @Override
@@ -111,7 +113,7 @@ public class UndeployCommand extends AbstractRepositoryCommand
   @Override
   public String getUsageArgs()
   {
-    return " <name>";
+    return " [<name>]";
   }
 
   @Override

@@ -37,11 +37,14 @@ public class ProfileCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ProfileCommand.class);
   
-  public ProfileCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("active-time", "time", "profiling time span, defualts to 5 sec");
     addValueOption("sampling-rate", "ms", "the sample rate defaults to 10ms");
     addValueOption("depth", "count", "the stack trace depth (default 16)");
+    
+    super.initBootOptions();
   }
   
   @Override

@@ -40,11 +40,14 @@ public class ListRestartsCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ListRestartsCommand.class);
 
-  public ListRestartsCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("period",
                    "period",
                    "specifies look back period of time. e.g. '-period 1D' will list restarts since same time yesterday.");
+    
+    super.initBootOptions();
   }
 
   @Override

@@ -50,7 +50,8 @@ public interface BootCommand {
 
   public boolean isDefaultArgsAccepted();
 
-  public void usage();
+  public void usage(boolean verbose);
+  
   public boolean isStart();
   public boolean isStartAll();
   public boolean isShutdown();

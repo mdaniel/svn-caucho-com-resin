@@ -40,6 +40,20 @@ public class WebAppUndeployCommand extends AbstractRepositoryCommand
   private static final L10N L = new L10N(WebAppUndeployCommand.class);
   
   @Override
+  protected void initBootOptions()
+  {
+    addValueOption("host", "host", "virtual host to make application available on");
+    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
+    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    
+    addSpacerOption();
+    
+    addValueOption("m", "message", "commit message");
+    
+    super.initBootOptions();
+  }
+  
+  @Override
   public String getDescription()
   {
     return "undeploys an application";

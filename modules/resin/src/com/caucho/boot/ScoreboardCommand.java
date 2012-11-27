@@ -36,11 +36,14 @@ public class ScoreboardCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ScoreboardCommand.class);
 
-  public ScoreboardCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("type", "resin", "scoreboard report type");
     addValueOption("greedy", "true", 
                    "threads can not be in more than one scoreboard");
+    
+    super.initBootOptions();
   }
 
   @Override

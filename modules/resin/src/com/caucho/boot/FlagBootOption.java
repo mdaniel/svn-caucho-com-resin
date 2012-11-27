@@ -30,9 +30,15 @@
 package com.caucho.boot;
 
 public class FlagBootOption extends AbstractBootOption {
+
   public FlagBootOption(String name, String description)
   {
     super(name, description);
+  }
+
+  public FlagBootOption(String name, String description, boolean deprecated)
+  {
+    super(name, description, deprecated);
   }
   
   @Override

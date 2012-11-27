@@ -49,10 +49,13 @@ public class PasswordGenerateCommand extends AbstractBootCommand
   private static Logger _log;
   private static L10N _L;
   
-  public PasswordGenerateCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("user", "user", "the user name to generate a password hash");
     addValueOption("password", "password", "the password for the password hash (leave empty for prompt)");
+    
+    super.initBootOptions();
   }
 
   @Override

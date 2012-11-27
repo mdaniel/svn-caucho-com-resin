@@ -39,10 +39,13 @@ public class UserAddCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(UserAddCommand.class);
 
-  public UserAddCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("u", "new user name", "specifies name for a new user.");
     addValueOption("p", "new user password", "specifies password for a new user.");
+    
+    super.initBootOptions();
   }
 
   @Override
@@ -59,7 +62,7 @@ public class UserAddCommand extends AbstractManagementCommand
     final String user = args.getArg("-u");
 
     if (user == null) {
-      usage();
+      usage(false);
 
       return 3;
     }
@@ -106,6 +109,6 @@ public class UserAddCommand extends AbstractManagementCommand
   @Override
   public String getUsageArgs()
   {
-    return " role ...";
+    return " [<role>] [<role>] ...";
   }
 }

@@ -41,12 +41,18 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
   private static final L10N L = new L10N(AbstractScalingCommand.class);
   private static Class<?> _scalingClientClass;
 
-  protected AbstractScalingCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("address", "address", "ip or host name of the server");
     addIntValueOption("port", "port", "server http port");
+    
+    addSpacerOption();
+    
     addValueOption("user", "user", "user name used for authentication to the server");
     addValueOption("password", "password", "password used for authentication to the server");
+    
+    super.initBootOptions();
   }
 
   protected ResinScalingClient getScalingClient(WatchdogArgs args,

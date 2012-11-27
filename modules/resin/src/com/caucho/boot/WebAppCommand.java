@@ -35,6 +35,16 @@ import com.caucho.util.L10N;
 public abstract class WebAppCommand extends AbstractRepositoryCommand
 {
   private static final L10N L = new L10N(WebAppCommand.class);
+  
+  @Override
+  protected void initBootOptions()
+  {
+    addValueOption("host", "host", "virtual host to make application available on");
+    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
+    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    
+    super.initBootOptions();
+  }
 
   @Override
   public final int doCommand(WatchdogArgs args,

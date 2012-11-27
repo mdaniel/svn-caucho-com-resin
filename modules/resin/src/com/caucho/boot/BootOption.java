@@ -35,6 +35,8 @@ public interface BootOption {
   public String getDescription();
   
   public String getUsage();
+  
+  public boolean isDeprecated();
 
   public boolean isFlag();
   public boolean isValue();

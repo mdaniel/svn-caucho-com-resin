@@ -44,13 +44,12 @@ public class StatusCommand extends AbstractBootCommand
   private static Logger _log;
   private static L10N _L;
 
-  public StatusCommand()
+  protected void initBootOptions()
   {
-    addFlagOption("verbose", "log command-line and environment information");
-    addValueOption("root-directory", "dir", "set the root directory");
-    addValueOption("log-directory", "dir", "set the log directory");
     addValueOption("server", "id", "select a configured server");
-    addIntValueOption("debug-port", "port", "listen to a JVM debug port");
+    addFlagOption("elastic-server", "use an elastic server in the cluster");
+    
+    super.initBootOptions();
   }
 
   @Override

@@ -40,9 +40,12 @@ import java.io.Writer;
 
 public class ThreadDumpCommand extends AbstractManagementCommand
 {
-  public ThreadDumpCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("file", "file", "file name where thread dump will be stored");
+    
+    super.initBootOptions();
   }
   
   @Override

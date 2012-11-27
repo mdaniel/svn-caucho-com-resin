@@ -40,12 +40,15 @@ import com.caucho.vfs.Vfs;
 public class ConfigUndeployCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(ConfigUndeployCommand.class);
 
-  public ConfigUndeployCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
     //addValueOption("name", "name", "name of application");
     addValueOption("m", "message", "commit message");
+    
+    super.initBootOptions();
   }
 
   @Override

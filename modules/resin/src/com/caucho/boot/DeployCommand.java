@@ -38,9 +38,12 @@ import com.caucho.vfs.Vfs;
 public class DeployCommand extends AbstractDeployCommand {
   private static final L10N L = new L10N(ConfigDeployCommand.class);
 
-  public DeployCommand()
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("host", "host", "virtual host to make application available on");
+    
+    super.initBootOptions();
   }
 
   @Override

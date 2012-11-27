@@ -31,17 +31,21 @@ package com.caucho.boot;
 
 public abstract class AbstractStopCommand extends AbstractBootCommand
 {
-  protected AbstractStopCommand()
+  @Override
+  protected void initBootOptions()
   {
-    addFlagOption("verbose", "log command-line and environment information");
     addValueOption("server", "id", "select a configured server");
-    addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
+    addFlagOption("elastic-server", "use an elastic server in the cluster");
+    addIntValueOption("watchdog-port", "port", 
+                      "set watchdog port to connect to");
     
-    /*
+    addSpacerOption();
+
     addValueOption("user", "user", "admin user name for authentication");
     addValueOption("password", "password", "admin password for authentication");
-    */
-   }
+    
+    super.initBootOptions();
+  }
 
   @Override
   public boolean isRetry()

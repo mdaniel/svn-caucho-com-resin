@@ -67,7 +67,7 @@ public class DisableCommand extends AbstractManagementCommand
   @Override
   public String getUsageArgs()
   {
-    return " <server>";
+    return " [<server>]";
   }
 
   @Override

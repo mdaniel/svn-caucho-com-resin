@@ -35,11 +35,15 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.WebAppDeployClient;
 
-abstract public class AbstractDeployLsCommand extends AbstractRepositoryCommand {
-  AbstractDeployLsCommand()
+abstract public class AbstractDeployLsCommand extends AbstractRepositoryCommand 
+{
+  @Override
+  protected void initBootOptions()
   {
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    
+    super.initBootOptions();
   }
   
   @Override
