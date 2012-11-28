@@ -43,6 +43,7 @@
 <li>quercus: postgresql - pdo parameters need to be casted to actual column types (#5285, rep by tobias)</li>
 <li>quercus: clone() doesn't work with DateTime (#5287, rep by jordi)</li>
 <li>quercus: date_modify($date, "+37 month") does nothing (#5288, rep by jordi)</li>
+<li>quercus: servlet should not close ServletOutputStream, for ServletFilters downstream (#5293, rep by jornvl90)</li>
 </ul>
 </s2>
 
