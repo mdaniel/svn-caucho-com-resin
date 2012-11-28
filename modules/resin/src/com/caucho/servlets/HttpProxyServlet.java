@@ -29,12 +29,17 @@
 
 package com.caucho.servlets;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
+import com.caucho.cloud.loadbalance.LoadBalanceManager;
+import com.caucho.cloud.loadbalance.LoadBalanceService;
+import com.caucho.config.types.Period;
+import com.caucho.network.balance.ClientSocket;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.RequestDispatcher;
@@ -43,19 +48,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
-import com.caucho.cloud.loadbalance.LoadBalanceManager;
-import com.caucho.cloud.loadbalance.LoadBalanceService;
-import com.caucho.config.types.Period;
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * HTTP proxy
@@ -218,6 +216,8 @@ public class HttpProxyServlet extends GenericServlet {
 
         if (name.equalsIgnoreCase("Connection"))
           continue;
+        else if (name.equalsIgnoreCase("Host"))
+          continue;
 
         Enumeration<String> e1 = req.getHeaders(name);
         while (e1.hasMoreElements()) {
@@ -230,7 +230,7 @@ public class HttpProxyServlet extends GenericServlet {
         }
       }
 
-      int contentLength = req.getContentLength();
+      final int contentLength = req.getContentLength();
 
       InputStream is = req.getInputStream();
 
@@ -245,11 +245,11 @@ public class HttpProxyServlet extends GenericServlet {
       }
 
       int len;
+      int chunksCount = 0;
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
         if (isFirst) {
           out.print("Transfer-Encoding: chunked\r\n");
         }
-        isFirst = false;
 
         if (contentLength < 0) {
           out.print("\r\n");
@@ -258,15 +258,23 @@ public class HttpProxyServlet extends GenericServlet {
         }
 
         out.write(buffer, 0, len);
+
+        isFirst = false;
+        chunksCount++;
       }
 
-      if (isFirst) {
-        out.print("Content-Length: 0\r\n");
+      if (chunksCount == 0) {
+        out.print("Content-Length: 0\r\n\r\n");
       }
-      else
+      else if (chunksCount == 1) {
+        //
+      }
+      else if (chunksCount > 1) {
         out.print("\r\n0\r\n");
-
-      out.print("\r\n");
+      }
+      else {
+        out.print("\r\n");
+      }
 
       TempBuffer.free(tempBuffer);
 
