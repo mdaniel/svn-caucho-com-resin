@@ -245,7 +245,6 @@ public class HttpProxyServlet extends GenericServlet {
       }
 
       int len;
-      int chunksCount = 0;
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
         if (isFirst) {
           out.print("Transfer-Encoding: chunked\r\n");
@@ -260,20 +259,13 @@ public class HttpProxyServlet extends GenericServlet {
         out.write(buffer, 0, len);
 
         isFirst = false;
-        chunksCount++;
       }
 
-      if (chunksCount == 0) {
+      if (isFirst) {
         out.print("Content-Length: 0\r\n\r\n");
       }
-      else if (chunksCount == 1) {
-        //
-      }
-      else if (chunksCount > 1) {
+      else if (contentLength < 0) {
         out.print("\r\n0\r\n");
-      }
-      else {
-        out.print("\r\n");
       }
 
       TempBuffer.free(tempBuffer);
