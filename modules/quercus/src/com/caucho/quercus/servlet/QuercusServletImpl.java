@@ -159,6 +159,7 @@ public class QuercusServletImpl extends HttpServlet
       ws = openWrite(response);
 
       // php/2002
+      // for non-Resin containers
       // for servlet filters that do post-request work after Quercus
       ws.setDisableCloseSource(true);
 

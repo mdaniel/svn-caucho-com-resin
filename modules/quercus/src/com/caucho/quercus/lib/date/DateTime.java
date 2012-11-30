@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.date;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.QDate;
@@ -207,6 +208,74 @@ public class DateTime implements Cloneable
     throw new UnimplementedException("DateTime::setISODate()");
   }
 
+  public DateInterval diff(Env env, DateTime dateTime,
+                           @Optional boolean isAbsolute)
+  {
+    DateInterval dateInterval = new DateInterval();
+
+    QDate qDate0 = _qDate;
+    QDate qDate1 = dateTime._qDate;
+
+    if (qDate0.getLocalTime() < qDate1.getLocalTime()) {
+      qDate0 = dateTime._qDate;
+      qDate1 = _qDate;
+    }
+
+    int year = qDate0.getYear() - qDate1.getYear();
+    int month = qDate0.getMonth() - qDate1.getMonth();
+    int day = qDate0.getDayOfMonth() - qDate1.getDayOfMonth();
+
+    int hour = qDate0.getHour() - qDate1.getHour();;
+    int minute = qDate0.getMinute() - qDate1.getMinute();
+    int second = qDate0.getSecond() - qDate1.getSecond();
+
+    if (second < 0) {
+      minute--;
+
+      second += 60;
+    }
+
+    if (minute < 0) {
+      hour--;
+
+      minute += 60;
+    }
+
+    if (hour < 0) {
+      day--;
+
+      hour += 24;
+    }
+
+    if (day < 0) {
+      month--;
+
+      day += qDate1.getDaysInMonth();
+    }
+
+    if (month < 0) {
+      year--;
+
+      month += 12;
+    }
+
+    dateInterval.y = year;
+    dateInterval.m = month;
+    dateInterval.d = day;
+
+    dateInterval.h = hour;
+    dateInterval.i = minute;
+    dateInterval.s = second;
+
+    // php/1959
+    long diff = qDate0.getLocalTime() - qDate1.getLocalTime();
+    long days = diff / (1000 * 60 * 60 * 24);
+
+    dateInterval.days = LongValue.create(days);
+
+    return dateInterval;
+  }
+
   protected QDate getQDate()
   {
     return _qDate;
@@ -222,6 +291,7 @@ public class DateTime implements Cloneable
     _qDate.setGMTTime(time);
   }
 
+  @Override
   public String toString()
   {
     Env env = Env.getInstance();
