@@ -45,6 +45,7 @@
 <li>quercus: date_modify($date, "+37 month") does nothing (#5288, rep by jordi)</li>
 <li>quercus: servlet should not close ServletOutputStream, for ServletFilters downstream (#5293, rep by jornvl90)</li>
 <li>quercus: need to implement DateTime::diff() for PHP 5.3 (#5292, rep by LostInCloud)</li>
+<li>quercus: postgres PDO prepare does not work with "::interval" (#5297, rep by tobias)</li>
 </ul>
 </s2>
 
