@@ -117,17 +117,23 @@ elif test -d "/etc/rc.d"; then
   initd_dir="/etc/"
 fi
 
-AC_SUBST(initd_dir)
-
 AC_ARG_WITH(resin-init-d,
 [AS_HELP_STRING([--with-resin-init-d=PATH],
                 [resin startup (init.d) script path])],
 [
 case "${withval}" in
-  no)  resin_init_d= ;;
-  *)   resin_init_d=${withval};;
+  no)  
+    resin_init_d=
+    initd_dir= 
+    ;;
+  *)
+    resin_init_d=${withval}
+    initd_dir=`dirname $resin_init_d`
+    ;;
 esac
 ])
+
+echo "resin_init_d=$resin_init_d, initd_dir=$initd_dir"
 
 AC_SUBST(resin_init_d)
 AC_SUBST(initd_dir)
