@@ -166,13 +166,7 @@ public class PDOStatement
         if (i + 1 < len && query.charAt(i + 1) == ':') {
           int j = i + 1;
 
-          while (j < len) {
-            if (query.charAt(j + 1) == ':') {
-              j++;
-            }
-            else {
-              break;
-            }
+          for (; j < len && query.charAt(j) == ':'; j++) {
           }
 
           sb.append(query, i, j + 1);
