@@ -36,6 +36,7 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -144,13 +145,13 @@ public class PDFStream {
     flushToGraph();
 
     if (x1 == x2 && y1 == y2) {
-      println(String.format("%1.2f %1.2f %1.2f %1.2f y", x1, y1, x3, y3));
+      println(String.format(Locale.US, "%1.2f %1.2f %1.2f %1.2f y", x1, y1, x3, y3));
     }
     else if (x2 == x3 && y2 == y3) {
-      println(String.format("%1.2f %1.2f %1.2f %1.2f v",x1, y1, x2, y2));
+      println(String.format(Locale.US, "%1.2f %1.2f %1.2f %1.2f v",x1, y1, x2, y2));
     }
     else {
-      println(String.format("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f c", x1, y1, x2, y2, x3, y3));
+      println(String.format(Locale.US, "%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f c", x1, y1, x2, y2, x3, y3));
     }
 
     _x = x3;
@@ -198,7 +199,7 @@ public class PDFStream {
     flushToGraph();
 
     if (x != _x || y != _y || ! _hasGraphicsPos)
-      println(String.format("%1.2f %1.2f l", x, y));
+      println(String.format(Locale.US, "%1.2f %1.2f l", x, y));
 
     _x = x;
     _y = y;
@@ -209,7 +210,7 @@ public class PDFStream {
   {
     flushToGraph();
 
-    println(String.format("%1.2f %1.2f %1.2f %1.2f re", x, y, w, h));
+    println(String.format(Locale.US, "%1.2f %1.2f %1.2f %1.2f re", x, y, w, h));
   }
 
   public void moveTo(double x, double y)
@@ -240,25 +241,25 @@ public class PDFStream {
 
     if ("gray".equals(colorspace)) {
       if ((type & STROKE) != 0)
-        println(String.format("%1.4f G", c1));
+        println(String.format(Locale.US, "%1.4f G", c1));
       if ((type & FILL) != 0)
-        println(String.format("%1.4f g", c1));
+        println(String.format(Locale.US, "%1.4f g", c1));
 
       return true;
     }
     else if ("rgb".equals(colorspace)) {
       if ((type & STROKE) != 0) 
-        println(String.format("%1.4f %1.4f %1.4f RG", c1, c2, c3));
+        println(String.format(Locale.US, "%1.4f %1.4f %1.4f RG", c1, c2, c3));
       if ((type & FILL) != 0)
-        println(String.format("%1.4f %1.4f %1.4f rg", c1, c2, c3));
+        println(String.format(Locale.US, "%1.4f %1.4f %1.4f rg", c1, c2, c3));
 
       return true;
     }
     else if ("cmyk".equals(colorspace)) {
       if ((type & STROKE) != 0)
-        println(String.format("%1.4f %1.4f %1.4f %1.4f K", c1, c2, c3, c4));
+        println(String.format(Locale.US, "%1.4f %1.4f %1.4f %1.4f K", c1, c2, c3, c4));
       if ((type & FILL) != 0)
-        println(String.format("%1.4f %1.4f %1.4f %1.4f k", c1, c2, c3, c4));
+        println(String.format(Locale.US, "%1.4f %1.4f %1.4f %1.4f k", c1, c2, c3, c4));
 
       return true;
     }
@@ -271,12 +272,12 @@ public class PDFStream {
 
   public void setDash(double b, double w)
   {
-    println(String.format("[%1.2f %1.2f] 0 d", b, w));
+    println(String.format(Locale.US, "[%1.2f %1.2f] 0 d", b, w));
   }
 
   public boolean setlinewidth(double w)
   {
-    println(String.format("%1.2f w", w));
+    println(String.format(Locale.US, "%1.2f w", w));
 
     return true;
   }
@@ -308,7 +309,7 @@ public class PDFStream {
   public boolean concat(double a, double b, double c,
                         double d, double e, double f)
   {
-    println(String.format("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f cm",
+    println(String.format(Locale.US, "%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f cm",
                           a, b, c, d, e, f));
 
     return true;
@@ -329,7 +330,7 @@ public class PDFStream {
     }
 
     if (! _hasTextPos) {
-      println(String.format("%1.2f %1.2f Td", _textX, _textY));
+      println(String.format(Locale.US, "%1.2f %1.2f Td", _textX, _textY));
       _hasTextPos = true;
     }
 
@@ -369,7 +370,7 @@ public class PDFStream {
       flush();
 
       if (! _hasGraphicsPos) {
-        _out.println(String.format("%1.2f %1.2f m", _x, _y));
+        _out.println(String.format(Locale.US, "%1.2f %1.2f m", _x, _y));
         _hasGraphicsPos = true;
       }
     } catch (IOException e) {
