@@ -377,7 +377,7 @@ public class SessionModule extends AbstractQuercusModule
     if (isSecure.isset()) {
       env.setIni("session.cookie_secure", isSecure.toBoolean() ? "1" : "0");
     }
-    
+
     if (isHttpOnly.isset()) {
       env.setIni("session.cookie_httponly", isHttpOnly.toBoolean() ? "1" : "0");
     }
@@ -594,14 +594,14 @@ public class SessionModule extends AbstractQuercusModule
 
       Value secure = env.getIni("session.cookie_secure");
       cookie.setSecure(secure.toBoolean());
-      
+
       Value httpOnly = env.getIni("session.cookie_httponly");
-      
+
       if (httpOnly.toBoolean()) {
         try {
           cookie.setHttpOnly(true);
         }
-        catch (Exception e) {
+        catch (Throwable e) {
           env.warning("HttpOnly requires Servlet 3.0", e);
         }
       }
