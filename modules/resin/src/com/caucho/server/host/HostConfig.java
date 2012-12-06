@@ -30,6 +30,7 @@
 package com.caucho.server.host;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.RawString;
 import com.caucho.env.deploy.DeployConfig;
 import com.caucho.env.deploy.DeployMode;
@@ -122,6 +123,7 @@ public class HostConfig extends DeployConfig {
   /**
    * Sets the id.
    */
+  @Configurable
   public void setId(RawString id)
     throws ConfigException
   {

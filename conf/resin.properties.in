@@ -118,6 +118,9 @@ proxy_cache_enable : true
 # Enable clustered persistent sessions (for failover)
 session_store : true
 
+# disable the quercus *.php mapping when using Apache for PHP
+# quercus_disable : true
+
 # Web-apps named with numeric suffixes, e.g. foo-10.0.war and can be browsed
 # as /foo. When a new version of the web-app is deployed, Resin continues
 # to route active session requests to the previous web-app version while

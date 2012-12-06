@@ -608,7 +608,7 @@ class HttpStream extends StreamImpl {
     
     if (log.isLoggable(Level.FINER))
       log.finer(this + " connect " + _method + " post=" + _isPost);
-System.out.println("CONN: " + _ws + " " + _method);
+
     if (_method != null) {
       _ws.print(_method);
       _ws.print(' ');
