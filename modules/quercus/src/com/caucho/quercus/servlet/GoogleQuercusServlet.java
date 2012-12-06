@@ -66,7 +66,7 @@ public class GoogleQuercusServlet extends QuercusServlet
     }
 
     if (impl == null) {
-      impl = new GoogleQuercusServletImpl();
+      impl = new GoogleQuercusServletImpl(_gsBucket);
     }
 
     return impl;
