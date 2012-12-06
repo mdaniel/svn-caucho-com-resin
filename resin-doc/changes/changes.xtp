@@ -46,6 +46,7 @@
 <li>quercus: servlet should not close ServletOutputStream, for ServletFilters downstream (#5293, rep by jornvl90)</li>
 <li>quercus: need to implement DateTime::diff() for PHP 5.3 (#5292, rep by LostInCloud)</li>
 <li>quercus: postgres PDO prepare does not work with "::interval" (#5297, rep by tobias)</li>
+<li>quercus: add Cloud Storage and Cloud SQL support for Google App Engine</li>
 <li>cli: comand usage output reformatted to improve usability</li>
 <li>install: --with-resin-init.d does not create directory (#5244, rep by K. Fetterman)</li>
 <li>pdf: generated PDFs are corrupt in locales that use comma as decial separator (#5298, rep by F. Degen)</li>
