@@ -676,32 +676,31 @@ public class ServletContextImpl extends ServletContextCompat
     // TODO Auto-generated method stub
     return null;
   }
-}
 
-class FileNotFoundURLConnection extends URLConnection {
+  class FileNotFoundURLConnection extends URLConnection {
+    FileNotFoundURLConnection(URL url)
+    {
+      super(url);
+    }
 
-  FileNotFoundURLConnection(URL url)
-  {
-    super(url);
-  }
+    @Override
+    public void connect()
+        throws IOException
+    {
+    }
 
-  @Override
-  public void connect()
-    throws IOException
-  {
-  }
+    @Override
+    public InputStream getInputStream()
+      throws IOException
+    {
+      throw new FileNotFoundException(url.toString());
+    }
 
-  @Override
-  public InputStream getInputStream()
-    throws IOException
-  {
-    throw new FileNotFoundException(url.toString());
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + url + "]";
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + url + "]";
+    }
   }
 }
 
