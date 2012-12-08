@@ -65,14 +65,14 @@ public class QuercusScriptEngine
     _factory = factory;
     _quercus = quercus;
   }
-  
+
   private static QuercusContext createQuercus()
   {
     QuercusContext quercus = new QuercusContext();
-    
+
     quercus.init();
     quercus.start();
-    
+
     return quercus;
   }
 
@@ -95,18 +95,18 @@ public class QuercusScriptEngine
 
     try {
       ReadStream reader = ReaderStream.open(script);
-      
+
       QuercusProgram program = QuercusParser.parse(_quercus, null, reader);
 
       Writer writer = cxt.getWriter();
-      
+
       WriteStream out;
 
       if (writer != null) {
         WriterStreamImpl s = new WriterStreamImpl();
         s.setWriter(writer);
         WriteStream os = new WriteStream(s);
-        
+
         os.setNewlineString("\n");
 
         try {
@@ -127,19 +127,19 @@ public class QuercusScriptEngine
 
       // php/214c
       env.start();
-      
+
       Object result = null;
-      
+
       try {
         Value value = program.execute(env);
-        
+
         if (value != null)
           result = value.toJavaObject();
       }
       catch (QuercusExitException e) {
         //php/2148
       }
-      
+
       out.flushBuffer();
       out.free();
 
@@ -151,9 +151,9 @@ public class QuercusScriptEngine
       //
       // http://bugs.caucho.com/view.php?id=1914
       writer.flush();
-      
+
       return result;
-      
+
       /*
     } catch (ScriptException e) {
       throw e;
@@ -187,7 +187,7 @@ public class QuercusScriptEngine
   {
     try {
       ReadStream reader = ReaderStream.open(script);
-      
+
       QuercusProgram program = QuercusParser.parse(_quercus, null, reader);
 
       return new QuercusCompiledScript(this, program);
@@ -225,6 +225,24 @@ public class QuercusScriptEngine
     return new SimpleBindings();
   }
 
+  /**
+   * Shuts down Quercus and free resources.
+   */
+  public void close()
+  {
+    _quercus.close();
+  }
+
+  @Override
+  /**
+   * Calls close().
+   */
+  public void finalize()
+  {
+    _quercus.close();
+  }
+
+  @Override
   public String toString()
   {
     return "QuercusScriptEngine[]";
