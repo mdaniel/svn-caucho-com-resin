@@ -314,8 +314,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   @Override
   public void setContentLength(int len)
   {
-    if (_outputStream == null && _writer == null)
+    if (_outputStream == null && _writer == null) {
       _response.setContentLength(len);
+    }
   }
 
   /**

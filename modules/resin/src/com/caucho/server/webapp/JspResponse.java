@@ -65,4 +65,13 @@ public class JspResponse extends CauchoResponseWrapper {
       super.setContentLength(len);
     }
   }
+
+  @Override
+  public void setContentLength(long len)
+  {
+    if (! getResponse().isCommitted()) {
+      resetBuffer();
+      super.setContentLength(len);
+    }
+  }
 }
