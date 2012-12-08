@@ -2098,6 +2098,22 @@ public class QuercusContext
     }
   }
 
+  public void shutdown()
+  {
+    try {
+      QuercusTimer timer = _quercusTimer;
+
+      _quercusTimer = null;
+
+      if (timer != null) {
+        timer.shutdown();
+      }
+    }
+    catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+    }
+  }
+
   public Env createEnv(QuercusPage page,
                        WriteStream out,
                        HttpServletRequest request,
