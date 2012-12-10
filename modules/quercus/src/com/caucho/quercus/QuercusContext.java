@@ -560,6 +560,26 @@ public class QuercusContext
   {
     _scriptEncoding = encoding;
   }
+  
+  /**
+   * Returns the encoding used for output, null if unicode.semantics is off.
+   */
+  public String getOutputEncoding()
+  {
+    if (! _isUnicodeSemantics)
+      return null;
+
+    String encoding = QuercusContext.INI_UNICODE_OUTPUT_ENCODING.getAsString(this);
+
+    if (encoding == null)
+      encoding = QuercusContext.INI_UNICODE_FALLBACK_ENCODING.getAsString(this);
+
+    if (encoding == null)
+      encoding = "utf-8";
+
+    return encoding;
+  }
+
 
   /**
    * Returns the mysql version to report to to PHP applications.

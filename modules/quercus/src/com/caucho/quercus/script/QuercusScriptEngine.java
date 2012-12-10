@@ -90,6 +90,9 @@ public class QuercusScriptEngine
     try {
       ReadStream reader = ReaderStream.open(script);
 
+      String scriptEncoding = _quercus.getScriptEncoding();
+      reader.setEncoding(scriptEncoding);
+
       QuercusProgram program = QuercusParser.parse(_quercus, null, reader);
 
       Writer writer = cxt.getWriter();
@@ -103,8 +106,14 @@ public class QuercusScriptEngine
 
         os.setNewlineString("\n");
 
+        String outputEncoding = _quercus.getOutputEncoding();
+
+        if (outputEncoding == null) {
+          outputEncoding = "iso-8859-1";
+        }
+
         try {
-          os.setEncoding("iso-8859-1");
+          os.setEncoding(outputEncoding);
         } catch (Exception e) {
         }
 

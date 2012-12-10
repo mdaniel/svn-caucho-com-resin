@@ -275,6 +275,13 @@ public class IniDefinition {
     return (value.length() == 0) ? null : value.toString();
   }
 
+  public String getAsString(QuercusContext quercus)
+  {
+    StringValue value = getAsStringValue(quercus);
+
+    return (value.length() == 0) ? null : value.toString();
+  }
+
   public boolean getAsBoolean(QuercusContext quercus)
   {
     return getAsBooleanValue(quercus).toBoolean();
