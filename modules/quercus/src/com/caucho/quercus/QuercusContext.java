@@ -560,7 +560,7 @@ public class QuercusContext
   {
     _scriptEncoding = encoding;
   }
-  
+
   /**
    * Returns the encoding used for output, null if unicode.semantics is off.
    */
@@ -1865,16 +1865,30 @@ public class QuercusContext
    */
   private void initModules()
   {
+    HashSet<String> disableSet = null;
+
+    String value = getIniString("disable_functions");
+    if (value != null) {
+      disableSet = new HashSet<String>();
+
+      String[] values = value.split(",");
+
+      for (String name : values) {
+        disableSet.add(name.trim());
+      }
+    }
+
+
     for (ModuleInfo info : _moduleInitList) {
-      initModuleInfo(info);
+      initModuleInfo(info, disableSet);
     }
 
     for (ModuleInfo info : _moduleContext.getModules()) {
-      initModuleInfo(info);
+      initModuleInfo(info, disableSet);
     }
   }
 
-  private void initModuleInfo(ModuleInfo info)
+  private void initModuleInfo(ModuleInfo info, HashSet<String> disableSet)
   {
     _modules.put(info.getName(), info);
 
@@ -1907,6 +1921,10 @@ public class QuercusContext
            : info.getFunctions().entrySet()) {
       String funName = entry.getKey();
       Method[] methods = entry.getValue();
+
+      if (disableSet != null && disableSet.contains(funName)) {
+        continue;
+      }
 
       AbstractJavaMethod fun
         = _moduleContext.createStaticFunction(info.getModule(), methods[0]);
