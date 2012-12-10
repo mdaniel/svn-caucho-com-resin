@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.script;
 
-import com.caucho.quercus.QuercusContext;
-
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
@@ -199,20 +197,7 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
    */
   public ScriptEngine getScriptEngine()
   {
-    return new QuercusScriptEngine(this, createQuercus());
-  }
-
-  /**
-   * Creates a new Quercus, which can be overridden for security issues.
-   */
-  protected QuercusContext createQuercus()
-  {
-    QuercusContext quercus = new QuercusContext();
-
-    quercus.init();
-    quercus.start();
-
-    return quercus;
+    return new QuercusScriptEngine(this);
   }
 
   public String toString()

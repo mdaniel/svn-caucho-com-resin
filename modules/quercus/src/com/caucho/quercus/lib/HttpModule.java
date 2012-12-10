@@ -291,7 +291,7 @@ public class HttpModule extends AbstractQuercusModule {
         cookie.setHttpOnly(true);
       }
       catch (Throwable e) {
-        env.warning("HttpOnly requires Servlet 3.0", e);
+        env.warning(L.l("HttpOnly requires Servlet 3.0"), e);
       }
     }
 

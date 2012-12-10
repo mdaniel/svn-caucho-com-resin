@@ -56,14 +56,8 @@ public class QuercusScriptEngine
 
   QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
-    this(factory, createQuercus());
-  }
-
-  public QuercusScriptEngine(QuercusScriptEngineFactory factory,
-                             QuercusContext quercus)
-  {
     _factory = factory;
-    _quercus = quercus;
+    _quercus = createQuercus();
   }
 
   private static QuercusContext createQuercus()
@@ -229,15 +223,6 @@ public class QuercusScriptEngine
    * Shuts down Quercus and free resources.
    */
   public void close()
-  {
-    _quercus.close();
-  }
-
-  @Override
-  /**
-   * Calls close().
-   */
-  public void finalize()
   {
     _quercus.close();
   }

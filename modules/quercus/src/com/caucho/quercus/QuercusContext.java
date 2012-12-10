@@ -2133,17 +2133,42 @@ public class QuercusContext
 
   public void close()
   {
-    _isClosed = true;
+    synchronized (this) {
+      if (_isClosed) {
+        return;
+      }
+
+      _isClosed = true;
+    }
 
     _sessionManager.close();
     _pageManager.close();
 
-    if (_envTimeoutThread != null)
-      _envTimeoutThread.shutdown();
+    EnvTimeoutThread envTimeoutThread = _envTimeoutThread;
+    _envTimeoutThread = null;
 
-    if (_quercusTimer != null) {
-      _quercusTimer.shutdown();
+    if (envTimeoutThread != null) {
+      envTimeoutThread.shutdown();
     }
+
+    QuercusTimer quercusTimer = _quercusTimer;
+    _quercusTimer = null;
+
+    if (quercusTimer != null) {
+      quercusTimer.shutdown();
+    }
+  }
+
+  /**
+   * Calls close().
+   */
+  @Override
+  protected void finalize()
+    throws Throwable
+  {
+    super.finalize();
+
+    close();
   }
 
   static class IncludeKey {
