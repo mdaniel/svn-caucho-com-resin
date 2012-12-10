@@ -166,7 +166,6 @@ public class CauchoResponseWrapper implements CauchoResponse {
   @Override
   public void setContentLength(long length)
   {
-    System.out.println("SCL: " + getClass());
     if (_response instanceof CauchoResponse) {
       CauchoResponse cRes = (CauchoResponse) _response;
 
