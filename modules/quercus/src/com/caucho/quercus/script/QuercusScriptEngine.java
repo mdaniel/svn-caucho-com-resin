@@ -60,6 +60,13 @@ public class QuercusScriptEngine
     _quercus = createQuercus();
   }
 
+  QuercusScriptEngine(QuercusScriptEngineFactory factory,
+                      QuercusContext quercus)
+  {
+    _factory = factory;
+    _quercus = quercus;
+  }
+
   private static QuercusContext createQuercus()
   {
     QuercusContext quercus = new QuercusContext();
