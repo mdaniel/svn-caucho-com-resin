@@ -50,6 +50,8 @@
 <li>quercus: ' ' is an unknown regexp flag (#5304, rep by K. Patel)</li>
 <li>quercus: isset() complains about undefined variables in compiled mode (#5305, rep by K. Patel)</li>
 <li>quercus: /index.php/about returns a 404</li>
+<li>quercus: QuercusScriptEngine throws OOM if instantiated repeatedly (#5307, rep by woddle)</li>
+<li>quercus: QuercusScriptEngine needs to output unicode correctly (#5308, rep by woddle)</li>
 <li>cli: comand usage output reformatted to improve usability</li>
 <li>install: --with-resin-init.d does not create directory (#5244, rep by K. Fetterman)</li>
 <li>pdf: generated PDFs are corrupt in locales that use comma as decial separator (#5298, rep by F. Degen)</li>
