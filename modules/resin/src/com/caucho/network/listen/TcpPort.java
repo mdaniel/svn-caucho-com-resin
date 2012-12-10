@@ -1472,7 +1472,7 @@ public class TcpPort
   {
     int value = _keepaliveAllocateCount.decrementAndGet();
     
-    if (value < 0) {
+    if (value < 0 && isActive()) {
       System.out.println("FAILED keep-alive; " + value);
       Thread.dumpStack();
     }

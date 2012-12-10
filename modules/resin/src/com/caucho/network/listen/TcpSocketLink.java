@@ -927,10 +927,11 @@ public class TcpSocketLink extends AbstractSocketLink
       // network/0272
       close();
     }
-    else {
-      System.out.println(this + " Internal error unable to free: "
-                         + " result=" + resultState
-                         + " requestState=" + reqState + " " + _requestStateRef.get());
+    else if (_port.isActive()) {
+      String msg = (this + " Internal error unable to free: "
+                    + " result=" + resultState
+                    + " requestState=" + reqState + " " + _requestStateRef.get());
+      log.warning(msg);
     }
   }
   
