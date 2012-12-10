@@ -960,13 +960,13 @@ public class TcpSocketLink extends AbstractSocketLink
     RequestState result = RequestState.REQUEST_COMPLETE;
 
     while (result.isAcceptAllowed()
-           && ! listener.isClosed()
+           && listener.isActive()
            && ! getState().isDestroyed()) {
       
       setStatState("accept");
       _state = _state.toAccept();
 
-      if (! accept()) {
+      if (! accept() || ! listener.isActive()) {
         setStatState("close");
         close();
 
