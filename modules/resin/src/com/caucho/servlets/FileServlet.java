@@ -246,9 +246,10 @@ public class FileServlet extends GenericServlet {
 
       String relPath = cb.toString();
 
-      if (_isCaseInsensitive)
+      if (_isCaseInsensitive) {
         relPath = relPath.toLowerCase(Locale.ENGLISH);
-
+      }
+      
       filename = getServletContext().getRealPath(relPath);
       Path path = _context.lookupNative(filename);
 
