@@ -599,10 +599,11 @@ abstract public class Expr {
     //return var.put(index, value);
 
     Value array = evalArray(env);
-    array.put(index, value);
+    Value result = array.put(index, value);
 
     //return array.get(index); // php/03mm php/03mn
-    return value;
+
+    return result;
   }
 
   /**
