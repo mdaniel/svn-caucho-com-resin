@@ -54,14 +54,14 @@ public class QuercusScriptEngine
   private QuercusScriptEngineFactory _factory;
   private final QuercusContext _quercus;
 
-  QuercusScriptEngine(QuercusScriptEngineFactory factory)
+  public QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
     _factory = factory;
     _quercus = createQuercus();
   }
 
-  QuercusScriptEngine(QuercusScriptEngineFactory factory,
-                      QuercusContext quercus)
+  public QuercusScriptEngine(QuercusScriptEngineFactory factory,
+                             QuercusContext quercus)
   {
     _factory = factory;
     _quercus = quercus;
