@@ -721,7 +721,7 @@ public class VariableModule extends AbstractQuercusModule {
   public static Value var_dump(Env env,
                                @PassThru @ReadOnly Value v,
                                Value []args)
-  {    
+  {
     try {
       if (v == null)
         env.getOut().print("NULL#java");

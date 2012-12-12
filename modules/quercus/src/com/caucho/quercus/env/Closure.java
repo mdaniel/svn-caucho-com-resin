@@ -62,6 +62,13 @@ public class Closure extends Callback
   @Override
   public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef)
   {
+    return isCallableStatic(env, isCheckSyntaxOnly, nameRef);
+  }
+
+  public static boolean isCallableStatic(Env env,
+                                         boolean isCheckSyntaxOnly,
+                                         Value nameRef)
+  {
     if (nameRef != null) {
       StringValue sb = env.createString("Closure::__invoke");
 
