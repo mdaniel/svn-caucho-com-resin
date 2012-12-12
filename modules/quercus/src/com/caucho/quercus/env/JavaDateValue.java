@@ -68,9 +68,11 @@ public class JavaDateValue extends JavaValue {
     return _date;
   }
 
+  /*
   @Override
   public StringValue toString(Env env)
   {
     return env.createString(toLong());
   }
+  */
 }
