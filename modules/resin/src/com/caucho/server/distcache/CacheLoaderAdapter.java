@@ -66,4 +66,9 @@ public class CacheLoaderAdapter<K,V> implements CacheLoaderExt<K,V>
   {
     return _loader.loadAll(keys);
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _loader + "]";
+  }
 }

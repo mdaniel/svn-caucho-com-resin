@@ -99,7 +99,11 @@ public class MultiworkerActorQueue<T> implements ActorQueueApi<T>
   
   public final boolean offer(T value, boolean isWait)
   {
-    return _ringQueue.offer(value, isWait ? 600 * 1000L : 0);
+    boolean result =  _ringQueue.offer(value, isWait ? 600 * 1000L : 0);
+    
+    wake();
+    
+    return result;
   }
   
   @Override

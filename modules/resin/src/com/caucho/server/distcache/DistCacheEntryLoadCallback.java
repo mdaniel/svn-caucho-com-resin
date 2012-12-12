@@ -46,7 +46,8 @@ class DistCacheEntryLoadCallback implements CacheLoaderCallback {
   @Override
   public void onLoad(DistCacheEntry entry, Object value)
   {
-    // entry.putInternal(value);
+    // cloud/6900
+    entry.putInternal(value);
     
     _isValue = ! entry.getMnodeEntry().isValueNull();
     _isDone = true;

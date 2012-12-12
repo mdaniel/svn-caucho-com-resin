@@ -85,6 +85,8 @@ public class ValueActorQueue<T> implements ActorQueueApi<T>
     ValueItem<T> item = actorQueue.startOffer(true);
     item.init(value);
     actorQueue.finishOffer(item);
+    
+    wake();
   }
   
   public final boolean offer(T value, boolean isWait)
@@ -99,6 +101,8 @@ public class ValueActorQueue<T> implements ActorQueueApi<T>
     
     item.init(value);
     actorQueue.finishOffer(item);
+    
+    wake();
     
     return true;
   }

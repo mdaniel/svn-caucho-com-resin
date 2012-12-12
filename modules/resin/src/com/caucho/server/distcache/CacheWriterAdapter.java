@@ -86,4 +86,10 @@ public class CacheWriterAdapter<K,V> implements CacheWriterExt<K,V>
   public void updateTime(DistCacheEntry distCacheEntry)
   {
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _writer + "]";
+  }
 }

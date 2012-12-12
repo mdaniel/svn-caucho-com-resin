@@ -113,6 +113,11 @@ public class QueryFutureCallback extends AbstractQueryCallback {
     }
   }
   
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
+  
   static enum ResultStateEnum {
     WAITING,
     REPLY,

@@ -547,26 +547,37 @@ public class CacheConfig implements CacheConfiguration
    */
   public void init()
   {
-    if (_keySerializer == null)
+    if (_keySerializer == null) {
       _keySerializer = new HessianSerializer();
+    }
 
-    if (_valueSerializer == null)
+    if (_valueSerializer == null) {
       _valueSerializer = new HessianSerializer();
-
+    }
+    
     switch (_scope) {
     case TRANSIENT:
       setTransient(true);
       setTriplicate(false);
       setBackup(false);
-      if (getEngine() == null)
+      /*
+      if (getEngine() == null) {
         setEngine(new AbstractCacheEngine());
+      }
+      */
+      setEngine(new AbstractCacheEngine());
       break;
       
     case LOCAL:
       setTriplicate(false);
       setBackup(false);
-      if (getEngine() == null)
+      // cloud/6d00
+      /*
+      if (getEngine() == null) {
         setEngine(new AbstractCacheEngine());
+      }
+      */
+      setEngine(new AbstractCacheEngine());
       break;
       
     case CLUSTER:
@@ -587,6 +598,7 @@ public class CacheConfig implements CacheConfiguration
       */
     }
     // _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
+    
   }
 
   public void setExpiry(ExpiryType type, Duration duration)
