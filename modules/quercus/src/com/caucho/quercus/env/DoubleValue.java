@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
+import java.util.Locale;
 
 /**
  * Represents a PHP double value.
@@ -397,9 +398,37 @@ public class DoubleValue extends NumberValue
 
   /**
    * Converts to a string.
+   */
+  @Override
+  public String toString()
+  {
+    // XXX: pass in Env
+    Env env = Env.getInstance();
+
+    if (env != null) {
+      return toString(env.getLocaleInfo().getNumeric());
+    }
+    else {
+      return toString(LocaleInfo.getDefault().getNumeric());
+    }
+  }
+
+  /**
+   * Converts to a string.
+   *
    * @param env
    */
-  public String toString()
+  public StringValue toString(Env env)
+  {
+    String str = toString(env.getLocaleInfo().getNumeric());
+
+    return env.createStringBuilder().append(str);
+  }
+
+  /**
+   * Converts to a string.
+   */
+  public String toString(QuercusLocale quercusLocale)
   {
     long longValue = (long) _value;
 
@@ -407,10 +436,15 @@ public class DoubleValue extends NumberValue
     int exp = (int) Math.log10(abs);
 
     // php/0c02
-    if (longValue == _value && exp < 18)
+    if (longValue == _value && exp < 18) {
       return String.valueOf(longValue);
+    }
+
+    Locale locale = quercusLocale.getLocale();
 
     if (-5 < exp && exp < 18) {
+      char decimalSeparator = quercusLocale.getDecimalSeparator();
+
       int digits = 13 - exp;
 
       if (digits > 13)
@@ -418,7 +452,7 @@ public class DoubleValue extends NumberValue
       else if (digits < 0)
         digits = 0;
 
-      String v = String.format("%." + digits + "f", _value);
+      String v = String.format(locale, "%." + digits + "f", _value);
 
       int len = v.length();
       int nonzero = -1;
@@ -427,11 +461,11 @@ public class DoubleValue extends NumberValue
       for (len--; len >= 0; len--) {
         int ch = v.charAt(len);
 
-        if (ch == '.')
+        if (ch == decimalSeparator)
           dot = true;
 
         if (ch != '0' && nonzero < 0) {
-          if (ch == '.')
+          if (ch == decimalSeparator)
             nonzero = len - 1;
           else
             nonzero = len;
@@ -443,8 +477,9 @@ public class DoubleValue extends NumberValue
       else
         return v;
     }
-    else
-      return String.format("%.13E", _value);
+    else {
+      return String.format(locale, "%.13E", _value);
+    }
   }
 
   /**
