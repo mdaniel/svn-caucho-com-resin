@@ -1143,7 +1143,17 @@ public class WebApp extends ServletContextImpl
   public ServletRegistration.Dynamic addServlet(String servletName,
                                                 String className)
   {
-    return addServlet(servletName, className, null, null);
+    Class<? extends Servlet> servletClass;
+    
+    try {
+      servletClass = (Class) Class.forName(className, false, getClassLoader());
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown class in {1}",
+                                             className, this),
+                                         e);
+    }
+    
+    return addServlet(servletName, className, servletClass, null);
   }
 
   @Override
@@ -1172,8 +1182,9 @@ public class WebApp extends ServletContextImpl
                                                  Class<? extends Servlet> servletClass,
                                                  Servlet servlet)
   {
-    if (! isInitializing())
+    if (! isInitializing()) {
       throw new IllegalStateException(L.l("addServlet may only be called during initialization"));
+    }
 
     try {
       ServletConfigImpl config
@@ -1197,6 +1208,11 @@ public class WebApp extends ServletContextImpl
 
         if (config.getServlet() == null)
           config.setServlet(servlet);
+      }
+      
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(L.l("dynamic servlet added [name: '{0}', class: '{1}'] (in {2})",
+                     servletName, servletClassName, this));
       }
 
       return config;

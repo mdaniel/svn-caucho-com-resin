@@ -32,6 +32,8 @@ package com.caucho.quercus.env;
 import java.util.Locale;
 
 public class LocaleInfo {
+  private static LocaleInfo _default = new LocaleInfo();
+  
   private QuercusLocale _collate;
   private QuercusLocale _ctype;
   private QuercusLocale _monetary;
@@ -44,6 +46,11 @@ public class LocaleInfo {
     Locale locale = Locale.getDefault();
     
     setAll(new QuercusLocale(locale, null));
+  }
+  
+  public static LocaleInfo getDefault()
+  {
+    return _default;
   }
 
   public void setAll(QuercusLocale locale)

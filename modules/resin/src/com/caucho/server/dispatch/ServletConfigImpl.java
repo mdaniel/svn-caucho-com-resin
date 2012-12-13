@@ -304,23 +304,30 @@ public class ServletConfigImpl
    * @param urlPatterns
    * @return a Set of patterns previously mapped to a different servlet
    */
+  @Override
   public Set<String> addMapping(String... urlPatterns)
   {
-    if (! _webApp.isInitializing())
+    if (! _webApp.isInitializing()) {
       throw new IllegalStateException();
+    }
 
     try {
       Set<String> result = new HashSet<String>();
+      
+      // server/12t8 vs server/12uc
 
       for (String urlPattern : urlPatterns) {
         String servletName = _servletMapper.getServletName(urlPattern);
 
-        if (! _servletName.equals(servletName) && servletName != null)
+        if (! _servletName.equals(servletName)
+            && servletName != null) {
           result.add(urlPattern);
+        }
       }
 
-      if (result.size() > 0)
+      if (result.size() > 0) {
         return result;
+      }
 
       ServletMapping mapping = _webApp.createServletMapping();
       mapping.setIfAbsent(true);
@@ -475,8 +482,9 @@ public class ServletConfigImpl
   @DisableConfig
   public void setServletClass(Class<? extends Servlet> servletClass)
   {
-    if (_servletClass == null)
-      throw new IllegalStateException();
+    if (_servletClass == null) {
+      throw new NullPointerException();
+    }
 
     _servletClass = servletClass;
   }
