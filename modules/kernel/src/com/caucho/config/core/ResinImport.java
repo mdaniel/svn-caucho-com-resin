@@ -154,6 +154,10 @@ public class ResinImport extends ResinControl implements FlowBean
 
     for (int i = 0; i < paths.size(); i++) {
       Path path = paths.get(i);
+      
+      if (path.isDirectory()) {
+        continue;
+      }
 
       log.config(L.l("resin:import '{0}'", path.getNativePath()));
 

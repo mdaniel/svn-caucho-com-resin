@@ -658,8 +658,9 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     long now = CurrentTime.getCurrentTime();
     
-    if (! _isValid)
+    if (! _isValid) {
       return false;
+    }
     else if (_isIdleSet && _accessTime + _idleTimeout < now) {
       // server/01o2 (tck)
     
@@ -667,8 +668,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
 
     // server/01k0
-    if (_useCount.get() > 1)
+    if (_useCount.get() > 1) {
       return true;
+    }
 
     try {
       ByteStreamCache cache = _manager.getCache();
@@ -770,7 +772,7 @@ public class SessionImpl implements HttpSession, CacheListener {
         try {
           int size = in.readInt();
 
-          //System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+          // System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
 
           for (int i = 0; i < size; i++) {
             String key = (String) in.readObject();
@@ -1015,8 +1017,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
         out.writeInt(size);
 
-        if (size == 0)
+        if (size == 0) {
           return;
+        }
 
         boolean ignoreNonSerializable
           = getManager().getIgnoreSerializationErrors();
