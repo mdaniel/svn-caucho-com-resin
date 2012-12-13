@@ -133,8 +133,6 @@ case "${withval}" in
 esac
 ])
 
-echo "resin_init_d=$resin_init_d, initd_dir=$initd_dir"
-
 AC_SUBST(resin_init_d)
 AC_SUBST(initd_dir)
 
