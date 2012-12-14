@@ -181,9 +181,9 @@ else
 
     # we're in $JAVA_HOME/jre
     if test -f "$JAVA_BIN/include/jni.h"; then
-      JAVA_HOME=$JAVA_BIN
-    elif test -f "$JAVA_BIN/../include/jni.h"; then
       JAVA_HOME="$JAVA_BIN"
+    elif test -f "$JAVA_BIN/../include/jni.h"; then
+      JAVA_HOME="$JAVA_BIN/.."
     elif test -f "$JAVA_BIN/../../include/jni.h"; then
       JAVA_HOME="$JAVA_BIN/../.."
     elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
