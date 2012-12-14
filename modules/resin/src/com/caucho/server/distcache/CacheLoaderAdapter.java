@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import java.util.Map;
 
+import javax.cache.Cache;
 import javax.cache.CacheLoader;
 import javax.cache.Cache.Entry;
 
@@ -50,9 +51,14 @@ public class CacheLoaderAdapter<K,V> implements CacheLoaderExt<K,V>
   public void load(DistCacheEntry entry,
                    CacheLoaderCallback cb)
   {
-    Object value = _loader.load(entry.getKey());
+    Cache.Entry<K,V> loadedEntry = _loader.load(entry.getKey());
     
-    cb.onLoad(entry, value);
+    if (loadedEntry != null) {
+      cb.onLoad(entry, loadedEntry.getValue());
+    }
+    else {
+      cb.onLoad(entry, null);
+    }
   }
 
   @Override
