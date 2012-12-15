@@ -1,7 +1,7 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Resin 4.2.31 Release Notes</title>
+    <title>Resin 4.0.32 Release Notes</title>
   </header>
 
 <body>
@@ -18,7 +18,7 @@
 
 <ul>
 <li>Restart report no longer requires a JMX dump to produce data.</li>
-<li>Heartbeat and cluster system reliability under freeze conditions.</li>
+<li>Heartbeat and cluster system function reliability under freeze conditions.</li>
 <li>deploy with --host now properly uses &lt;host-deploy> directory.</li>
 </ul>
 
