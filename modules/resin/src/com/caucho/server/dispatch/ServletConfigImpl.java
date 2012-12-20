@@ -317,10 +317,21 @@ public class ServletConfigImpl
       // server/12t8 vs server/12uc
 
       for (String urlPattern : urlPatterns) {
-        String servletName = _servletMapper.getServletName(urlPattern);
+        ServletMapping map = _servletMapper.getServletMapping(urlPattern);
+        
+        if (map == null || map.isDefault()) {
+          continue;
+        }
+        
+        String servletName = map.getServletName();
 
         if (! _servletName.equals(servletName)
             && servletName != null) {
+          if (log.isLoggable(Level.FINE)) {
+            log.fine(L.l("programmatic addMapping for '{0}' ignored because of existing servlet-mapping to '{1}'",
+                     urlPattern, servletName));
+          }
+          
           result.add(urlPattern);
         }
       }

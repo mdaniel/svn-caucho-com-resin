@@ -34,12 +34,10 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import javax.el.ELContext;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.server.webapp.WebApp;
@@ -57,6 +55,7 @@ public class ServletMapping extends ServletConfigImpl {
   private boolean _isStrictMapping;
   private boolean _isRegexp;
   private boolean _ifAbsent;
+  private boolean _isDefault;
 
   /**
    * Creates a new servlet mapping object.
@@ -108,6 +107,22 @@ public class ServletMapping extends ServletConfigImpl {
   public void setStrictMapping(boolean isStrictMapping)
   {
     _isStrictMapping = isStrictMapping;
+  }
+
+  /**
+   * Set for default mapping that can be overridden by programmatic mapping.
+   */
+  public void setDefault(boolean isDefault)
+  {
+    _isDefault = isDefault;
+  }
+
+  /**
+   * True for default mapping that can be overridden by programmatic mapping.
+   */
+  public boolean isDefault()
+  {
+    return _isDefault;
   }
 
   /**

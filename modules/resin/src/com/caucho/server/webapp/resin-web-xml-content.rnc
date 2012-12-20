@@ -928,6 +928,9 @@ r_servlet-mapping = element servlet-mapping {
   & (r_url-pattern | r_url-regexp)+
 
   & r_strict-mapping?
+  
+  & (attribute default { r_boolean-Type }
+     | element default { r_boolean-Type })?
 }
 
 r_servlet-regexp = element servlet-regexp {

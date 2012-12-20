@@ -77,8 +77,8 @@ public class ServletMapper {
     = new HashMap<String, Set<String>>();
 
   //Servlet 3.0 urlPattern to servletName
-  private Map<String, String> _servletNamesMap
-    = new HashMap<String, String>();
+  private Map<String, ServletMapping> _servletNamesMap
+    = new HashMap<String, ServletMapping>();
 
   public ServletMapper(WebApp webApp)
   {
@@ -177,7 +177,7 @@ public class ServletMapper {
         _urlPatterns.put(servletName, patterns);
       }
 
-      _servletNamesMap.put(urlPattern, servletName);
+      _servletNamesMap.put(urlPattern, mapping);
 
       patterns.add(urlPattern);
 
@@ -499,7 +499,7 @@ public class ServletMapper {
     return patterns;
   }
 
-  public String getServletName(String pattern)
+  public ServletMapping getServletMapping(String pattern)
   {
     return _servletNamesMap.get(pattern);
   }

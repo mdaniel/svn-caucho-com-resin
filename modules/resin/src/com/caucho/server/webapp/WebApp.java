@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,6 +120,7 @@ import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.env.deploy.DeployMode;
 import com.caucho.env.deploy.EnvironmentDeployInstance;
 import com.caucho.env.deploy.RepositoryDependency;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.java.WorkDir;
 import com.caucho.jsp.JspServlet;
@@ -185,6 +188,7 @@ import com.caucho.server.security.WebResourceCollection;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webbeans.SessionContextContainer;
+import com.caucho.util.BasicFuture;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -2606,6 +2610,11 @@ public class WebApp extends ServletContextImpl
   {
     _activeWaitTime = wait.getPeriod();
   }
+  
+  public long getActiveWaitTime()
+  {
+    return _activeWaitTime;
+  }
 
   /**
    * Sets the delay time waiting for requests to end.
@@ -3572,8 +3581,23 @@ public class WebApp extends ServletContextImpl
   @Override
   public void start()
   {
-    if (! _lifecycle.isAfterInit())
+    if (! _lifecycle.isAfterInit()) {
       throw new IllegalStateException(L.l("webApp must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
+    }
+
+    StartupTask task = new StartupTask();
+    
+    ThreadPool.getCurrent().execute(task);
+
+    task.waitFor(getActiveWaitTime());
+    // asdf: wait
+  }
+  
+  public void startImpl(StartupTask ask)
+  {
+    if (! _lifecycle.isAfterInit()) {
+      throw new IllegalStateException(L.l("webApp must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
+    }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -5137,6 +5161,42 @@ public class WebApp extends ServletContextImpl
       }
       else
         return false;
+    }
+  }
+  
+  private class StartupTask implements Runnable {
+    private BasicFuture<Boolean> _future
+      = new BasicFuture<Boolean>();
+    
+    void waitFor(long timeout)
+    {
+      try {
+        _future.get(timeout, TimeUnit.MILLISECONDS);
+      } catch (TimeoutException e) {
+        log.log(Level.FINER, e.toString(), e);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+    
+    @Override
+    public void run()
+    {
+      boolean isValid = false;
+      
+      try {
+        startImpl(this);
+        
+        _future.complete(true);
+        isValid = true;
+      } catch (RuntimeException exn) {
+        _future.complete(exn);
+        isValid = true;
+      } finally {
+        if (! isValid) {
+          _future.complete(new IllegalStateException());
+        }
+      }
     }
   }
   
