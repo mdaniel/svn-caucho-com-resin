@@ -536,9 +536,6 @@ public class JdbcResultResource
   protected Value getColumnValue(Env env, int column, int type)
     throws SQLException
   {
-    // Note: typically, the PHP column value is returned as
-    // a String, except for binary values.
-
     ResultSet rs = _rs;
 
     try {

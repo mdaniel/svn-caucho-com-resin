@@ -60,7 +60,6 @@ import java.util.logging.Logger;
 public class JdbcPreparedStatementResource
   extends JdbcStatementResource
 {
-  private static final Logger log = Log.open(JdbcPreparedStatementResource.class);
   private static final L10N L = new L10N(JdbcPreparedStatementResource.class);
 
   private PreparedStatement _preparedStmt;

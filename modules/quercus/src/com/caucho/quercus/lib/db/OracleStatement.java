@@ -31,7 +31,6 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.util.L10N;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -46,9 +45,10 @@ import java.util.logging.Logger;
  * this is essentially a JdbcStatementResource.
  */
 public class OracleStatement extends JdbcPreparedStatementResource {
-  private static final Logger log = Logger.getLogger(
-      OracleStatement.class.getName());
-  private static final L10N L = new L10N(OracleStatement.class);
+  private static final Logger log
+    = Logger.getLogger(OracleStatement.class.getName());
+
+  private Oracle _conn;
 
   // Oracle statement has a notion of number of fetched rows
   // (See also: OracleModule.oci_num_rows)
@@ -191,7 +191,7 @@ public class OracleStatement extends JdbcPreparedStatementResource {
       }
 
       // Case (1) or executing a more complex query.
-      execute(env);
+      execute(env, false);
 
       OracleOciLob ociLob = getOutParameter();
       if (ociLob != null) {
@@ -210,14 +210,19 @@ public class OracleStatement extends JdbcPreparedStatementResource {
 
       return true;
     }
-    catch (SQLException ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    catch (SQLException e) {
+      env.warning(e);
 
       resetBindingVariables();
       resetByNameVariables();
 
       return false;
     }
+  }
+
+  protected JdbcResultResource createResultSet(ResultSet rs)
+  {
+    return new OracleResult(rs, _conn);
   }
 
   /**

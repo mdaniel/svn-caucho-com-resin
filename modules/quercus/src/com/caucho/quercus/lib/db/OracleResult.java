@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -39,16 +37,11 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 
 /**
  * oracle result set class (postgres has NO object oriented API)
  */
 public class OracleResult extends JdbcResultResource {
-  private static final Logger log
-    = Logger.getLogger(OracleResult.class.getName());
-  private static final L10N L = new L10N(OracleResult.class);
-
   private final Oracle _conn;
 
   /**
@@ -58,8 +51,7 @@ public class OracleResult extends JdbcResultResource {
    * @param rs the corresponding result set
    * @param conn the corresponding connection
    */
-  public OracleResult(ResultSet rs,
-                      Oracle conn)
+  public OracleResult(ResultSet rs, Oracle conn)
   {
     super(rs);
 
@@ -72,8 +64,7 @@ public class OracleResult extends JdbcResultResource {
    * @param metaData the corresponding result set meta data
    * @param conn the corresponding connection
    */
-  public OracleResult(ResultSetMetaData metaData,
-                      Oracle conn)
+  public OracleResult(ResultSetMetaData metaData, Oracle conn)
   {
     super(metaData);
 

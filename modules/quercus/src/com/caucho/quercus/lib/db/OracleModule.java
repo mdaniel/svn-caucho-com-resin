@@ -52,7 +52,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Locale;
 import java.util.Map;
@@ -60,7 +59,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 /**
  * Quercus oracle routines.
@@ -153,7 +151,6 @@ public class OracleModule extends AbstractQuercusModule {
   public static final int OCI_SEEK_SET                   = 0x5E;
   public static final int OCI_SEEK_CUR                   = 0x5F;
   public static final int OCI_SEEK_END                   = 0x6A;
-
 
   // Cache class oracle.jdbc.OracleTypes to be used below.
   private static Class<?> classOracleTypes;
@@ -358,8 +355,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       Integer index = stmt.getBindingVariable(name);
 
-      if (index == null)
+      if (index == null) {
         return false;
+      }
 
       int i = index.intValue();
       Object object = varArray.toJavaObject();
@@ -367,12 +365,14 @@ public class OracleModule extends AbstractQuercusModule {
       if (object instanceof OracleOciCollection) {
         oracleArray = ((OracleOciCollection) object).getCollection();
         oracleStmt.setArray(i, oracleArray);
-      } else if (varArray.isArray()) {
+      }
+      else if (varArray.isArray()) {
         // oracleStmt.setObject(i, varArray.getKeyArray());
         // Object objectArray[] = new Object[] {"aaa", "bbb", "ccc"};
         // oracleStmt.setObject(i, objectArray);
         oracleStmt.setArray(i, oracleArray);
-      } else {
+      }
+      else {
         oracleStmt.setObject(i, object);
       }
 
@@ -380,8 +380,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       return true;
 
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
   }
@@ -499,8 +500,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       Integer index = stmt.getBindingVariable(placeholderName);
 
-      if (index == null)
+      if (index == null) {
         return false;
+      }
 
       int i = index.intValue();
 
@@ -591,14 +593,16 @@ public class OracleModule extends AbstractQuercusModule {
 
       return true;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
 
       try {
         stmt.resetBindingVariables();
         stmt.resetByNameVariables();
-      } catch (Exception ex2) {
-        log.log(Level.FINE, ex2.toString(), ex2);
+      }
+      catch (Exception e2) {
+        log.log(Level.FINE, e2.toString(), e2);
       }
     }
 
@@ -620,19 +624,22 @@ public class OracleModule extends AbstractQuercusModule {
   public static boolean oci_close(Env env,
                                   @NotNull Oracle conn)
   {
-    if (conn == null)
+    if (conn == null) {
       conn = getConnection(env);
+    }
 
     if (conn != null) {
-      if (conn == getConnection(env))
+      if (conn == getConnection(env)) {
         env.removeSpecialValue("caucho.oracle");
+      }
 
       conn.close();
 
       return true;
     }
-    else
+    else {
       return false;
+    }
   }
 
   /**
@@ -643,8 +650,10 @@ public class OracleModule extends AbstractQuercusModule {
   {
     try {
       return conn.commit();
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
+
       return false;
     }
   }
@@ -706,9 +715,12 @@ public class OracleModule extends AbstractQuercusModule {
 
     try {
       stmt.putByNameVariable(columnName, variable);
+
       return true;
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
+
       return false;
     }
   }
@@ -781,8 +793,9 @@ public class OracleModule extends AbstractQuercusModule {
 
     int curr = 0;
 
-    if (maxrows == 0)
+    if (maxrows == 0) {
       maxrows = Integer.MAX_VALUE / 2;
+    }
 
     while (value.isArray() && curr < maxrows) {
       newArray.put(LongValue.create(curr), value);
@@ -818,12 +831,14 @@ public class OracleModule extends AbstractQuercusModule {
     JdbcResultResource resource = stmt.getResultSet();
 
     switch (mode) {
-    case OCI_ASSOC:
-      return resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
-    case OCI_NUM:
-      return resource.fetchArray(env, JdbcResultResource.FETCH_NUM);
-    default: // case OCI_BOTH:
-      return resource.fetchArray(env, JdbcResultResource.FETCH_BOTH);
+      case OCI_ASSOC:
+        return resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
+
+      case OCI_NUM:
+        return resource.fetchArray(env, JdbcResultResource.FETCH_NUM);
+
+      default: // case OCI_BOTH:
+        return resource.fetchArray(env, JdbcResultResource.FETCH_BOTH);
     }
   }
 
@@ -833,8 +848,9 @@ public class OracleModule extends AbstractQuercusModule {
   public static Value oci_fetch_assoc(Env env,
                                       @NotNull OracleStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return BooleanValue.FALSE;
+    }
 
     JdbcResultResource resource = stmt.getResultSet();
 
@@ -847,8 +863,9 @@ public class OracleModule extends AbstractQuercusModule {
   public static Value oci_fetch_object(Env env,
                                        @NotNull OracleStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return BooleanValue.FALSE;
+    }
 
     JdbcResultResource resource = stmt.getResultSet();
 
@@ -861,8 +878,9 @@ public class OracleModule extends AbstractQuercusModule {
   public static Value oci_fetch_row(Env env,
                                     @NotNull OracleStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return BooleanValue.FALSE;
+    }
 
     JdbcResultResource resource = stmt.getResultSet();
 
@@ -876,9 +894,9 @@ public class OracleModule extends AbstractQuercusModule {
                                   @NotNull OracleStatement stmt)
   {
     try {
-
-      if (stmt == null)
+      if (stmt == null) {
         return false;
+      }
 
       JdbcResultResource resource = stmt.getResultSet();
 
@@ -893,8 +911,8 @@ public class OracleModule extends AbstractQuercusModule {
       ArrayValue arrayValue = (ArrayValue) result;
 
       for (
-        Map.Entry<String, Value> entry : stmt.getByNameVariables().entrySet()
-        ) {
+        Map.Entry<String, Value> entry : stmt.getByNameVariables().entrySet()) {
+
         String fieldName = entry.getKey();
         Value var = entry.getValue();
 
@@ -906,14 +924,17 @@ public class OracleModule extends AbstractQuercusModule {
       stmt.increaseFetchedRows();
 
       return true;
+    }
+    catch (Exception e) {
+      env.warning(e);
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
       try {
         stmt.resetByNameVariables();
-      } catch (Exception ex2) {
-        log.log(Level.FINE, ex2.toString(), ex2);
       }
+      catch (Exception e2) {
+        log.log(Level.FINE, e2.toString(), e2);
+      }
+
       return false;
     }
   }
@@ -929,24 +950,27 @@ public class OracleModule extends AbstractQuercusModule {
                                           @NotNull OracleStatement stmt,
                                           @NotNull Value fieldNameOrNumber)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
     try {
       JdbcResultResource rs = stmt.getResultSet();
 
       int fieldNumber = rs.getColumnNumber(fieldNameOrNumber, 1);
 
-      if (fieldNumber < 0)
+      if (fieldNumber < 0) {
         return false;
+      }
 
       ResultSetMetaData metaData = rs.getMetaData();
 
       return metaData.isNullable(fieldNumber + 1)
              == ResultSetMetaData.columnNullable;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
   }
@@ -959,14 +983,16 @@ public class OracleModule extends AbstractQuercusModule {
                                      @NotNull int fieldNumber)
   {
     try {
-      if (stmt == null)
+      if (stmt == null) {
         return BooleanValue.FALSE;
+      }
 
       JdbcResultResource resource = stmt.getResultSet();
 
       return resource.getFieldName(env, fieldNumber);
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return BooleanValue.FALSE;
     }
   }
@@ -979,19 +1005,19 @@ public class OracleModule extends AbstractQuercusModule {
                                               @NotNull OracleStatement stmt,
                                               @NotNull int field)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return null;
+    }
 
     try {
-
       JdbcResultResource rs = stmt.getResultSet();
       ResultSetMetaData metaData = rs.getMetaData();
 
       int precision = metaData.getPrecision(field);
       return LongValue.create(precision);
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
@@ -1004,19 +1030,19 @@ public class OracleModule extends AbstractQuercusModule {
                                           @NotNull OracleStatement stmt,
                                           @NotNull int field)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return null;
+    }
 
     try {
-
       JdbcResultResource rs = stmt.getResultSet();
       ResultSetMetaData metaData = rs.getMetaData();
 
       int precision = metaData.getScale(field);
       return LongValue.create(precision);
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
@@ -1033,7 +1059,6 @@ public class OracleModule extends AbstractQuercusModule {
                                      @Optional("-1") Value fieldNameOrNumber)
   {
     try {
-
       if (stmt == null) {
         return BooleanValue.FALSE;
       }
@@ -1044,8 +1069,8 @@ public class OracleModule extends AbstractQuercusModule {
 
       return rs.getFieldLength(env, fieldNumber);
     }
-    catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    catch (Exception e) {
+      env.warning(e);
       return BooleanValue.FALSE;
     }
   }
@@ -1060,19 +1085,19 @@ public class OracleModule extends AbstractQuercusModule {
                                        int field)
   {
     try {
-
-      if (stmt == null)
+      if (stmt == null) {
         return -1;
+      }
 
-      if (field <= 0)
+      if (field <= 0) {
         return -1;
+      }
 
       JdbcResultResource resource = stmt.getResultSet();
 
       Value typeV = resource.getJdbcType(--field);
 
       if (typeV instanceof LongValue) {
-
         int type = typeV.toInt();
 
         switch (type) {
@@ -1108,8 +1133,8 @@ public class OracleModule extends AbstractQuercusModule {
         return type;
       }
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    } catch (Exception e) {
+      env.warning(e);
     }
 
     return -1;
@@ -1123,14 +1148,16 @@ public class OracleModule extends AbstractQuercusModule {
                                      int fieldNumber)
   {
     try {
-      if (stmt == null)
+      if (stmt == null) {
         return BooleanValue.FALSE;
+      }
 
       JdbcResultResource resource = stmt.getResultSet();
 
       return resource.getFieldType(env, fieldNumber);
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return BooleanValue.FALSE;
     }
   }
@@ -1162,11 +1189,10 @@ public class OracleModule extends AbstractQuercusModule {
                                      @Optional("-1") int length)
   {
     try {
-
       return lobTo.save(env, lobFrom.read(env, length).toString(), 0);
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
   }
@@ -1179,11 +1205,10 @@ public class OracleModule extends AbstractQuercusModule {
                                          @NotNull OracleOciLob lob2)
   {
     try {
-
       return lob1.equals(lob2);
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
   }
@@ -1198,10 +1223,9 @@ public class OracleModule extends AbstractQuercusModule {
                                                        @Optional String schema)
   {
     try {
-
       String typeName = tdo;
 
-      if ((schema != null) && (schema.length() > 0)) {
+      if (schema != null && schema.length() > 0) {
         typeName = schema + "." + tdo;
       }
 
@@ -1221,10 +1245,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       Class<?> clArrayDescriptor = Class.forName("oracle.sql.ArrayDescriptor");
 
-      Method method = clArrayDescriptor.getDeclaredMethod(
-        "createDescriptor",
-        new Class[] {String.class,
-                     Connection.class});
+      Class<?>[] argTypes = new Class[] {String.class, Connection.class};
+      Method method = clArrayDescriptor.getDeclaredMethod("createDescriptor",
+                                                          argTypes);
 
       Object arrayDesc = method.invoke(clArrayDescriptor,
                                        new Object[] {typeName, jdbcConn});
@@ -1233,8 +1256,9 @@ public class OracleModule extends AbstractQuercusModule {
         return new OracleOciCollection(jdbcConn, arrayDesc);
       }
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
     }
 
     return null;
@@ -1268,14 +1292,14 @@ public class OracleModule extends AbstractQuercusModule {
                                                @NotNull Oracle conn)
   {
     try {
-
       OracleStatement stmt = new OracleStatement(
         (Oracle) conn.validateConnection(env));
 
       return stmt;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
@@ -1297,18 +1321,17 @@ public class OracleModule extends AbstractQuercusModule {
                                                 @Optional("-1") int type)
   {
     try {
-
-      if ((type == OCI_D_FILE)
-          || (type == OCI_D_LOB)
-          || (type == OCI_D_ROWID)) {
+      if (type == OCI_D_FILE
+          || type == OCI_D_LOB
+          || type == OCI_D_ROWID) {
 
         OracleOciLob oracleLob = new OracleOciLob(conn, type);
 
         return oracleLob;
       }
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
     }
 
     return null;
@@ -1321,14 +1344,17 @@ public class OracleModule extends AbstractQuercusModule {
                                      @NotNull OracleStatement stmt)
   {
     try {
-      if (stmt == null)
+      if (stmt == null) {
         return BooleanValue.FALSE;
+      }
 
       JdbcResultResource resource = stmt.getResultSet();
 
       return LongValue.create(resource.getFieldCount());
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
+
       return BooleanValue.FALSE;
     }
   }
@@ -1345,9 +1371,9 @@ public class OracleModule extends AbstractQuercusModule {
                                        @NotNull OracleStatement stmt)
   {
     try {
-
-      if (stmt == null)
+      if (stmt == null) {
         return null;
+      }
 
       // JdbcResultResource resource = new JdbcResultResource(
       // null, stmt.getResultSet(), null);
@@ -1356,8 +1382,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       return LongValue.create(stmt.getFetchedRows());
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
@@ -1385,11 +1412,11 @@ public class OracleModule extends AbstractQuercusModule {
           query = "begin " + query;
         }
 
-        if (!lowerCaseQuery.endsWith(";")) {
+        if (! lowerCaseQuery.endsWith(";")) {
           query += ";";
         }
 
-        if (!lowerCaseQuery.endsWith(" end;")) {
+        if (! lowerCaseQuery.endsWith(" end;")) {
           query += " end;";
         }
       }
@@ -1411,8 +1438,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       return pstmt;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
@@ -1442,8 +1470,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       return true;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
   }
@@ -1468,8 +1497,8 @@ public class OracleModule extends AbstractQuercusModule {
       throw new UnimplementedException("oci_pconnect with session mode");
     }
 
-    return connectInternal(
-      env, true, username, password, db, charset, sessionMode);
+    return connectInternal(env, true, username, password,
+                           db, charset, sessionMode);
   }
 
   /**
@@ -1486,8 +1515,9 @@ public class OracleModule extends AbstractQuercusModule {
       Value result = stmt.getResultBuffer();
 
       return ((ArrayValueImpl)result).get(field);
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return BooleanValue.FALSE;
     }
   }
@@ -1518,8 +1548,9 @@ public class OracleModule extends AbstractQuercusModule {
         conn = getConnection(env);
 
       return conn.getServerInfo();
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
@@ -1541,8 +1572,9 @@ public class OracleModule extends AbstractQuercusModule {
 
       return true;
 
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
   }
@@ -2089,7 +2121,7 @@ public class OracleModule extends AbstractQuercusModule {
 
     String url;
 
-    if (db.indexOf("//") == 0) {
+    if (db != null && db.indexOf("//") == 0) {
       // db is the url itself: "//db_host[:port]/database_name"
       url = "jdbc:oracle:thin:@" + db.substring(2);
       url = url.replace('/', ':');
@@ -2106,11 +2138,13 @@ public class OracleModule extends AbstractQuercusModule {
         && url.equals(connectionInfo.getUrl())) {
       // Reuse the cached connection
       conn = connectionInfo.getConnection();
-    } else {
+    }
+    else {
       conn = new Oracle(env, host, username, password, db, port, driver, url);
 
-      if (! conn.isConnected())
+      if (! conn.isConnected()) {
         return BooleanValue.FALSE;
+      }
 
       connectionInfo = new ConnectionInfo(url, conn);
 
