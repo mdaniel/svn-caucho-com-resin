@@ -38,10 +38,10 @@ import com.caucho.util.Log;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,10 +61,7 @@ public class JdbcStatementResource
   private String _errorMessage = "";
   private int _errorCode;
 
-  // Statement type
-  // (SELECT, UPDATE, DELETE, INSERT, CREATE,
-  // DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
-  private String _stmtType;
+  private StatementType _stmtType;
 
   public JdbcStatementResource(JdbcConnectionResource conn)
   {
@@ -78,34 +75,20 @@ public class JdbcStatementResource
 
   protected void setQuery(String query)
   {
+    _stmtType = null;
+
     _query = query;
   }
 
   /**
-   * Returns this statement type.
+   * Returns this statement type (i.e. SELECT, UPDATE, etc.).
    *
    * @return this statement type:
-   * SELECT, UPDATE, DELETE, INSERT, CREATE, DROP,
-   * ALTER, BEGIN, DECLARE, or UNKNOWN.
    */
-  public String getStatementType()
+  public StatementType getStatementType()
   {
-    // Oracle Statement type
-    // Also used internally in Postgres (see PostgresModule)
-    // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP,
-    // ALTER, BEGIN, DECLARE, UNKNOWN)
-
-    String query = getQuery();
-    query = query.replaceAll("\\s+.*", "");
-
-    if (query.length() == 0)
-      _stmtType = "UNKNOWN";
-    else {
-      _stmtType = query.toUpperCase(Locale.ENGLISH);
-      String s = _stmtType.replaceAll(
-          "(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
-      if (! s.equals(""))
-        _stmtType = "UNKNOWN";
+    if (_stmtType == null) {
+      _stmtType = StatementType.getStatementType(getQuery());
     }
 
     return _stmtType;
@@ -277,7 +260,19 @@ public class JdbcStatementResource
   protected boolean executeImpl(Env env)
     throws SQLException
   {
-    return _stmt.execute(_query);
+    if (getStatementType() == StatementType.INSERT) {
+      try {
+        return _stmt.execute(_query, Statement.RETURN_GENERATED_KEYS);
+      }
+      catch (SQLFeatureNotSupportedException e) {
+        log.log(Level.FINE, e.getMessage(), e);
+
+        return _stmt.execute(_query);
+      }
+    }
+    else {
+      return _stmt.execute(_query);
+    }
   }
 
   protected JdbcResultResource createResultSet(ResultSet rs)

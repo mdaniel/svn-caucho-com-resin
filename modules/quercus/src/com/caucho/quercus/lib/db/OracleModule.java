@@ -1585,7 +1585,14 @@ public class OracleModule extends AbstractQuercusModule {
   public static String oci_statement_type(Env env,
                                           @NotNull OracleStatement stmt)
   {
-    return stmt.getStatementType();
+    StatementType type = stmt.getStatementType();
+
+    if (type != null) {
+      return type.name();
+    }
+    else {
+      return null;
+    }
   }
 
   /**

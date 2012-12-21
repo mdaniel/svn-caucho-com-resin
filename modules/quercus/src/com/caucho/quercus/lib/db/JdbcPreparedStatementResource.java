@@ -32,7 +32,6 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.db.JdbcConnectionResource.SqlParseToken;
 import com.caucho.quercus.lib.file.FileReadValue;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -313,7 +312,11 @@ public class JdbcPreparedStatementResource
         return true;
       }
 
-      if (this instanceof OracleStatement) {
+      if (getStatementType() == StatementType.INSERT) {
+        preparedStmt = javaConn.prepareStatement(query,
+                                                 Statement.RETURN_GENERATED_KEYS);
+      }
+      else if (this instanceof OracleStatement) {
         preparedStmt = javaConn.prepareCall(query,
                                             ResultSet.TYPE_SCROLL_INSENSITIVE,
                                             ResultSet.CONCUR_READ_ONLY);

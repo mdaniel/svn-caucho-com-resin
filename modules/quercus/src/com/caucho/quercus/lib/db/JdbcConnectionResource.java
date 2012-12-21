@@ -854,7 +854,7 @@ public abstract class JdbcConnectionResource
     if (prevToken == null)
       i = 0;
     else
-      i = prevToken._end;
+      i = prevToken.getEnd();
 
     while (i < len && Character.isWhitespace(sql.charAt(i))) {
       i++;
@@ -1180,89 +1180,6 @@ public abstract class JdbcConnectionResource
         return false;
 
       return true;
-    }
-  }
-
-  /*
-   * This class enables efficient parsing of a SQL token from
-   * a String. An SQL statement can be parsed one token at a
-   * time. One can efficiently check that first letter of
-   * the parse token via matchesFirstChar() without creating
-   * a substring from the original.
-   */
-
-  protected static class SqlParseToken {
-    private String _query;
-    private String _token;
-    private int _start;
-    private int _end;
-    private char _firstChar;
-
-    public void init()
-    {
-      _query = null;
-      _token = null;
-      _start = -1;
-      _end = -1;
-      _firstChar = '\0';
-    }
-
-    public void assign(String query, int start, int end)
-    {
-      _query = query;
-      _token = null;
-      _start = start;
-      _end = end;
-      _firstChar = query.charAt(start);
-    }
-
-    public boolean matchesFirstChar(char upper, char lower)
-    {
-      return (_firstChar == upper) || (_firstChar == lower);
-    }
-
-    public char getFirstChar()
-    {
-      return _firstChar;
-    }
-
-    // Case insensitive compare of token string
-
-    public boolean matchesToken(String token)
-    {
-      if (_token == null)
-        _token = _query.substring(_start, _end);
-
-      return _token.equalsIgnoreCase(token);
-    }
-
-    public String toString()
-    {
-      if (_token == null)
-        _token = _query.substring(_start, _end);
-
-      return _token;
-    }
-
-    /*
-     * Return the SQL token as a string. If the token
-     * is back quoted, then remove the back quotes and
-     * return the string inside.
-     */
-
-    public String toUnquotedString()
-    {
-      String tok = toString();
-
-      // Extract database name if back quoted : "DROP DATABASE `DBNAME`"
-
-      if (tok.length() >= 2
-          && tok.charAt(0) == '`'
-          && tok.charAt(tok.length() - 1) == '`') {
-        tok = tok.substring(1, tok.length() - 1);
-      }
-
-      return tok;
     }
   }
 }
