@@ -13,6 +13,7 @@
 <s2 title="4.0.34 - snapshot">
 <ul>
 <li>servlet: add a default='true' attribute to servlet-mapping to allow programmatic overriding of default (#5314, rep by Rick Mann)</li>
+<li>quercus: oci_execute() always returns true (#5311, rep by EricESCP)</li>
 </ul>
 </s2>
 
