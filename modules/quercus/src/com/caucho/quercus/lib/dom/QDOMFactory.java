@@ -113,6 +113,12 @@ public class QDOMFactory
     throws IOException, SAXException
   {
     Html html = new Html();
+
+    // php/1z26
+    // 2012-12-18: hack to get wordpress-3.5.0 dashboard rss feeds to load
+    // XXX: switch to xerces from com.caucho.xml
+    html.setAutodetectXml(true);
+
     html.parseDocument((QDocument) document, is, path);
   }
 }

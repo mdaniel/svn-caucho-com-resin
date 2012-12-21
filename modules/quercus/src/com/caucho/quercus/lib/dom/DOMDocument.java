@@ -415,12 +415,16 @@ public class DOMDocument
        "http://www.w3.org/TR/REC-html40/loose.dtd"));
        */
     }
-    catch (SAXException ex) {
-      env.warning(ex);
+    catch (SAXException e) {
+      env.warning(e);
       return false;
     }
-    catch (IOException ex) {
-      env.warning(ex);
+    catch (IOException e) {
+      env.warning(e);
+      return false;
+    }
+    catch (Exception e) {
+      env.warning(e);
       return false;
     }
     finally {
