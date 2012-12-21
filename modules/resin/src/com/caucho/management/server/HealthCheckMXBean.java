@@ -52,4 +52,19 @@ public interface HealthCheckMXBean extends ManagedObjectMXBean
    * Returns the last status value as an integer for graphing.
    */
   public int getStatusOrdinal();
+
+  /**
+   * Prevents check result logging for a period of time
+   */
+  public void silenceForPeriodMs(long periodMs);
+
+  /**
+   * Sets intermittent periods of silence
+   */
+  public void setLogPeriodMs(long periodMs);
+  
+  /**
+   * Returns log period in millis
+   */
+  public long getLogPeriodMs();
 }
