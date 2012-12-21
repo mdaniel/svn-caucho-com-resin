@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.image;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -1700,18 +1701,28 @@ public class ImageModule extends AbstractQuercusModule {
                                @Optional Path filename,
                                @Optional int threshhold)
   {
-    throw new QuercusException("not supported");
+    throw new UnimplementedException("imagewbmp()");
   }
 
   // XXX: imagexbm
 
   /**
-   * Embe into single tags.
+   * Embed into single tags.
    */
   public static boolean iptcembed(String iptcdata, String jpegFileName,
                                   @Optional int spool)
   {
-    throw new QuercusException("iptcembed is not [yet] supported");
+    throw new UnimplementedException("iptcembed()");
+  }
+
+  /**
+   * Parses IPTC metadata.
+   */
+  public static Value iptcparse(Env env, StringValue block)
+  {
+    env.stub("iptcparse()");
+
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -1723,7 +1734,7 @@ public class ImageModule extends AbstractQuercusModule {
                                int d_width,
                                int threshhold)
   {
-    throw new QuercusException("not supported");
+    throw new UnimplementedException("jpeg2wbmp()");
   }
 
   /**
@@ -1735,7 +1746,7 @@ public class ImageModule extends AbstractQuercusModule {
                               int d_width,
                               int threshhold)
   {
-    throw new QuercusException("not supported");
+    throw new UnimplementedException("png2wbmp()");
   }
 
   // Private Helpers ////////////////////////////////////////////////////////

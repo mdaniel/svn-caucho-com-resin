@@ -380,10 +380,12 @@ public class ReflectionClass
 
   public Value newInstanceArgs(Env env, @Optional ArrayValue args)
   {
-    if (args == null)
+    if (args == null) {
       return _cls.callNew(env, new Value []{});
-    else
+    }
+    else {
       return _cls.callNew(env, args.getValueArray(env));
+    }
   }
 
   @ReturnNullAsFalse

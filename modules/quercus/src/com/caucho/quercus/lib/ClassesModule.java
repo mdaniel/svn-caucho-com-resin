@@ -339,13 +339,16 @@ public class ClassesModule extends AbstractQuercusModule {
   {
     QuercusClass qClass = obj.getQuercusClass();
 
-    if (qClass == null)
+    if (qClass == null) {
       qClass = env.findClass(obj.toString());
+    }
 
-    if (qClass != null)
+    if (qClass != null) {
       return qClass.findFunction(methodName) != null;
-    else
+    }
+    else {
       return false;
+    }
   }
 
   /**

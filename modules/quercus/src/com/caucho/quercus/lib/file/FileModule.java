@@ -1140,12 +1140,22 @@ public class FileModule extends AbstractQuercusModule {
       return array.isArray();
     }
 
-    Path path = env.lookupPwd(filename);
+    Path path;
 
-    if (path != null)
-      return path.exists();
-    else
+    try {
+      path = env.lookupPwd(filename);
+    }
+    catch (RuntimeException e) {
+      // for malformed http paths
       return false;
+    }
+
+    if (path != null) {
+      return path.exists();
+    }
+    else {
+      return false;
+    }
   }
 
   /**
