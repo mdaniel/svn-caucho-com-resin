@@ -3170,36 +3170,33 @@ public class ArrayModule
    * @return the new array
    */
   public static Value range(Env env,
-                            @ReadOnly Value start,
-                            @ReadOnly Value end,
+                            @ReadOnly Value startV,
+                            @ReadOnly Value endV,
                             @Optional("1") long step)
   {
-    if (step < 1)
-      step = 1;
-
-    if (!start.getType().equals(end.getType())) {
-      start = LongValue.create(start.toLong());
-      end = LongValue.create(end.toLong());
+    if (step < 1) {
+      step *= -1;
     }
-    else if (Character.isDigit(start.toChar())) {
-      start = LongValue.create(start.toLong());
-      end = LongValue.create(end.toLong());
+
+    long start;
+    long end;
+
+    boolean isAppendChars = false;
+
+    if (startV.isLongConvertible() && endV.isLongConvertible()) {
+      start = startV.toLong();
+      end = endV.toLong();
     }
     else {
-      start = rangeIncrement(start, 0);
-      end = rangeIncrement(end, 0);
+      start = startV.toChar();
+      end = endV.toChar();
+
+      isAppendChars = true;
     }
 
-    if (start.eq(end)) {
+    if (start == end) {
     }
-    else if (start instanceof StringValue
-             && (Math.abs(end.toChar() - start.toChar()) < step)) {
-      env.warning("steps exceeds the specified range");
-
-      return BooleanValue.FALSE;
-    }
-    else if (start instanceof LongValue
-        && (Math.abs(end.toLong() - start.toLong()) < step)) {
+    else if (Math.abs(end - start) < step) {
       env.warning("steps exceeds the specified range");
 
       return BooleanValue.FALSE;
@@ -3207,7 +3204,7 @@ public class ArrayModule
 
     boolean increment = true;
 
-    if (! end.geq(start)) {
+    if (end < start) {
       step *= -1;
       increment = false;
     }
@@ -3215,21 +3212,17 @@ public class ArrayModule
     ArrayValue array = new ArrayValueImpl();
 
     do {
-      array.put(start);
+      if (isAppendChars) {
+        array.put(env.createString((char) start));
+      }
+      else {
+        array.put(start);
+      }
 
-      start = rangeIncrement(start, step);
-    } while ((increment && start.leq(end))
-        || (!increment && start.geq(end)));
+      start += step;
+    } while (increment && start <= end || ! increment && start >= end);
 
     return array;
-  }
-
-  private static Value rangeIncrement(Value value, long step)
-  {
-    if (value.isString())
-      return StringValue.create((char) (value.toChar() + step));
-
-    return LongValue.create(value.toLong() + step);
   }
 
   /**
