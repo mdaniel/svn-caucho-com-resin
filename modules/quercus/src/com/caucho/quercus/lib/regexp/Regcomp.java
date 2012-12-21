@@ -33,14 +33,18 @@
 
 package com.caucho.quercus.lib.regexp;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.util.*;
+import com.caucho.quercus.lib.regexp.RegexpNode.GroupHead;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 /**
  * Regular expression compilation.
@@ -78,6 +82,9 @@ class Regcomp {
   int _maxGroup;
   int _flags;
 
+  HashMap<Integer,RegexpNode> _groupMap
+    = new HashMap<Integer,RegexpNode>();
+
   HashMap<Integer,StringValue> _groupNameMap
     = new HashMap<Integer,StringValue>();
 
@@ -86,6 +93,12 @@ class Regcomp {
 
   ArrayList<RegexpNode.Recursive> _recursiveList
     = new ArrayList<RegexpNode.Recursive>();
+
+  ArrayList<RegexpNode.GroupNumberRecursive> _groupNumberRecursiveList
+    = new ArrayList<RegexpNode.GroupNumberRecursive>();
+
+  ArrayList<RegexpNode.GroupNameRecursive> _groupNameRecursiveList
+    = new ArrayList<RegexpNode.GroupNameRecursive>();
 
   RegexpNode _groupTail;
 
@@ -165,8 +178,41 @@ class Regcomp {
       rec.setTop(top);
     }
 
-    if (log.isLoggable(Level.FINEST))
+    value = value != null ? value.getHead() : RegexpNode.N_END;
+
+    for (RegexpNode.GroupNumberRecursive rec : _groupNumberRecursiveList) {
+      int group = rec.getGroup();
+
+      RegexpNode node = _groupMap.get(group);
+
+      if (node == null) {
+        throw error(L.l("numeric recursive refers to invalid group number: {0}", group));
+      }
+
+      GroupHead groupHead = (GroupHead) node;
+
+      rec.setTop(groupHead.getNode());
+    }
+
+    for (RegexpNode.GroupNameRecursive rec : _groupNameRecursiveList) {
+      StringValue name = rec.getGroup();
+
+      Integer group = _groupNameReverseMap.get(name);
+
+      if (group == null) {
+        throw error(L.l("named recursive refers to invalid group: {0}", name));
+      }
+
+      RegexpNode node = _groupMap.get(group);
+
+      GroupHead groupHead = (GroupHead) node;
+
+      rec.setTop(groupHead.getNode());
+    }
+
+    if (log.isLoggable(Level.FINEST)) {
       log.finest("regexp[] " + value);
+    }
 
     return value;
   }
@@ -357,15 +403,18 @@ class Regcomp {
             return parseNamedGroup(pattern, tail);
 
           case 'R':
-            pattern.read();
-            RegexpNode.Recursive rec = new RegexpNode.Recursive();
-            _recursiveList.add(rec);
-            ch = pattern.read();
-            if (ch != ')')
-              throw error(L.l("expected ')' at '{0}'",
-                              String.valueOf((char) ch)));
+            {
+              pattern.read();
+              RegexpNode.Recursive rec = new RegexpNode.Recursive();
+              _recursiveList.add(rec);
 
-            return concat(tail, parseRec(pattern, rec));
+              ch = pattern.read();
+              if (ch != ')')
+                throw error(L.l("expected ')' at '{0}'",
+                                String.valueOf((char) ch)));
+
+              return concat(tail, parseRec(pattern, rec));
+            }
 
           case 'm': case 's': case 'i': case 'x': case 'g':
           case 'U': case 'X':
@@ -386,9 +435,8 @@ class Regcomp {
                     return parseGroup(pattern, tail, 0, flags);
                   }
                 default:
-                  throw error(
-                      L.l("'{0}' is an unknown (? code",
-                          String.valueOf((char) ch)));
+                  throw error(L.l("'{0}' is an unknown (? code",
+                                  String.valueOf((char) ch)));
                 }
               }
 
@@ -404,8 +452,47 @@ class Regcomp {
             }
 
           default:
+            {
+              ch = pattern.peek();
+
+              if ('0' <= ch && ch <= '9') {
+                pattern.read();
+
+                int group = 0;
+
+                while ('0' <= ch && ch <= '9') {
+                  group = group * 10 + ch - '0';
+
+                  ch = pattern.read();
+                }
+
+                if (ch != ')') {
+                  throw error(L.l("expected ')' at '{0}'",
+                                  String.valueOf((char) ch)));
+                }
+
+                GroupHead groupHead = (GroupHead) _groupMap.get(group);
+                RegexpNode node;
+
+                if (groupHead != null) {
+                  // is a subroutine
+                  node = new RegexpNode.Subroutine(group, groupHead.getNode());
+                }
+                else {
+                  RegexpNode.GroupNumberRecursive rec
+                    = new RegexpNode.GroupNumberRecursive(group);
+
+                  _groupNumberRecursiveList.add(rec);
+
+                  node = rec;
+                }
+
+                return concat(tail, parseRec(pattern, node));
+              }
+            }
+
             throw error(L.l("'{0}' is an unknown (? code",
-                String.valueOf((char) pattern.peek())));
+                            String.valueOf((char) pattern.peek())));
           }
 
         default:
@@ -532,10 +619,51 @@ class Regcomp {
 
       int group = _nGroup++;
 
-      _groupNameMap.put(group, new StringBuilderValue(name));
-      _groupNameReverseMap.put(new StringBuilderValue(name), group);
+      StringValue nameV = new ConstStringValue(name);
 
-      return parseGroup(pattern, tail, group, _flags);
+      _groupNameMap.put(group, nameV);
+      _groupNameReverseMap.put(nameV, group);
+
+      RegexpNode node = parseGroup(pattern, tail, group, _flags);
+
+      return node;
+    }
+    else if (ch == '>') {
+      StringBuilder sb = new StringBuilder();
+
+      while ((ch = pattern.read()) != ')' && ch >= 0) {
+        sb.append((char) ch);
+      }
+
+      if (ch != ')')
+        throw error(L.l("expected ')'"));
+
+      String name = sb.toString();
+      StringValue nameV = new ConstStringValue(name);
+
+      Integer group = _groupNameReverseMap.get(nameV);
+      GroupHead groupHead = null;
+
+      if (group != null) {
+        groupHead = (GroupHead) _groupMap.get(group);
+      }
+
+      RegexpNode node;
+
+      if (groupHead != null) {
+        // is a subroutine
+        node = new RegexpNode.Subroutine(group, groupHead.getNode());
+      }
+      else {
+        RegexpNode.GroupNameRecursive rec
+          = new RegexpNode.GroupNameRecursive(nameV);
+
+        _groupNameRecursiveList.add(rec);
+
+        node = rec;
+      }
+
+      return concat(tail, parseRec(pattern, node));
     }
     else {
       throw error(L.l("Expected '(?:P=name' or '(?:P<name' for named group"));
@@ -619,12 +747,16 @@ class Regcomp {
       throw error(L.l("expected ')'"));
 
     _flags = oldFlags;
-
     _groupTail = oldTail;
 
     groupHead.setNode(body.getHead());
 
-    return concat(tail, parseRec(pattern, groupTail).getHead());
+    RegexpNode copy = groupHead.copy();
+    _groupMap.put(group, copy);
+
+    RegexpNode node = concat(tail, parseRec(pattern, groupTail).getHead());
+
+    return node;
   }
 
   private void expect(char expected, int value)
