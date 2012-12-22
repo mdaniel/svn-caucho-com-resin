@@ -348,15 +348,19 @@ class Regcomp {
           case '<':
             pattern.read();
 
-            switch (pattern.read()) {
+            switch (pattern.peek()) {
             case '=':
               isPositive = true;
+              pattern.read();
               break;
             case '!':
               isPositive = false;
+              pattern.read();
               break;
             default:
-              throw error(L.l("expected '=' or '!'"));
+              pattern.ungetc('<');
+
+              return parseNamedGroup(pattern, tail);
             }
 
             groupTail = _groupTail;
@@ -400,6 +404,9 @@ class Regcomp {
 
           case 'P':
             pattern.read();
+            return parseNamedGroup(pattern, tail);
+
+          case '\'':
             return parseNamedGroup(pattern, tail);
 
           case 'R':
@@ -605,15 +612,21 @@ class Regcomp {
       else
         throw error(L.l("'{0}' is an unknown regexp group", name));
     }
-    else if (ch == '<') {
+    else if (ch == '<' || ch == '\'') {
+      int closeChar = '>';
+
+      if (ch == '\'') {
+        closeChar = '\'';
+      }
+
       StringBuilder sb = new StringBuilder();
 
-      while ((ch = pattern.read()) != '>' && ch >= 0) {
+      while ((ch = pattern.read()) != closeChar && ch >= 0) {
         sb.append((char) ch);
       }
 
-      if (ch != '>')
-        throw error(L.l("expected '>'"));
+      if (ch != closeChar)
+        throw error(L.l("expected '{0}'", String.valueOf((char) closeChar)));
 
       String name = sb.toString();
 
