@@ -14,6 +14,7 @@
 <ul>
 <li>servlet: add a default='true' attribute to servlet-mapping to allow programmatic overriding of default (#5314, rep by Rick Mann)</li>
 <li>quercus: oci_execute() always returns true (#5311, rep by EricESCP)</li>
+<li>quercus: Event endlessly repeated under Drupal Commons 6.x (#5290, rep by jordi)</li>
 </ul>
 </s2>
 
