@@ -133,28 +133,28 @@ public class MathModule extends AbstractQuercusModule {
       env.warning(L.l("invalid `{0}' ({1})", "to base", toBase));
       return BooleanValue.FALSE;
     }
-    
+
     Number num = baseToInt(env, str, fromBase);
-    
+
     if (num instanceof BigInteger)
       return intToBase(env, (BigInteger) num, toBase);
     else
       return intToBase(env, num.longValue(), toBase);
   }
-  
+
   private static Number baseToInt(Env env, StringValue str, int base)
   {
     long result = 0L;
 
     boolean isLong = true;
-    
+
     int len = str.length();
-    
+
     for (int i = 0; i < len; i++) {
       int ch = str.charAt(i);
-      
+
       int d;
-      
+
       if ('0' <= ch && ch <= '9')
         d = ch - '0';
       else if ('a' <= ch && ch <= 'z')
@@ -163,36 +163,36 @@ public class MathModule extends AbstractQuercusModule {
         d = ch - 'A' + 10;
       else
         continue;
-      
+
       if (base <= d)
         continue;
-      
+
       if (result * base + d < result) {
         isLong = false;
         break;
       }
-      
+
       result = result * base + d;
     }
-    
+
     if (isLong)
       return Long.valueOf(result);
     else
       return new BigInteger(str.toString(), base);
   }
-  
+
   private static StringValue intToBase(Env env, long num, int base)
   {
     if (num == 0)
       return env.createString((char) '0');
-    
+
     // ignore sign
     if (num < 0)
       num = num ^ Long.MAX_VALUE + 1;
-    
+
     int bufLen = 64;
     char []buffer = new char[bufLen];
-    
+
     int i = bufLen;
     while (num != 0 && i > 0) {
       int d = (int) (num % base);
@@ -204,36 +204,36 @@ public class MathModule extends AbstractQuercusModule {
 
       num = num / base;
     }
-    
+
     for (int j = i; j < bufLen; j++) {
       buffer[j - i] = buffer[j];
     }
 
     return env.createString(buffer, bufLen - i);
   }
-  
+
   private static StringValue intToBase(Env env, BigInteger num, int base)
   {
     BigInteger toBaseBig = BigInteger.valueOf(base);
     BigInteger zero = BigInteger.valueOf(0);
-    
+
     StringValue sb = env.createStringBuilder();
-    
+
     do {
       BigInteger []resultArray = num.divideAndRemainder(toBaseBig);
-      
+
       num = resultArray[0];
       int d = resultArray[1].intValue();
-      
+
       if (d < 10)
         sb.append((char) (d + '0'));
       else
         sb.append((char) (d + 'a' - 10));
-      
+
     } while (num.compareTo(zero) != 0);
 
     StringValue toReturn = env.createStringBuilder();
-    
+
     int len = sb.length();
     for (int i = len - 1; i >= 0; i--) {
       toReturn.append(sb.charAt(i));
@@ -252,7 +252,7 @@ public class MathModule extends AbstractQuercusModule {
   public static Value bindec(Env env, StringValue bin)
   {
      Number num = baseToInt(env, bin, 2);
-     
+
      if (num instanceof Long)
        return LongValue.create(num.longValue());
      else
@@ -281,21 +281,21 @@ public class MathModule extends AbstractQuercusModule {
   public static StringValue decbin(Env env, long value)
   {
     return intToBase(env, value, 2);
-    
+
     /*
     value = value & 037777777777L;
-    
+
     if (value == 0)
       return env.createString("0");
-    
+
     char []buffer = new char[32];
 
     int i = 32;
     while (value != 0 && i >= 0) {
       int d = (int) (value & 0x01);
-      
+
       value = value >>> 1;
-      
+
       buffer[--i] = (char) (d + '0');
     }
 
@@ -314,21 +314,21 @@ public class MathModule extends AbstractQuercusModule {
   public static StringValue dechex(Env env, long value)
   {
     return intToBase(env, value, 16);
-    
+
     /*
     value = value & 037777777777L;
-    
+
     if (value == 0)
       return env.createString("0");
-    
+
     char []buffer = new char[16];
 
     int i = 16;
     while (value != 0) {
       int d = (int) (value & 0xf);
-      
+
       value = value >>> 4;
-      
+
       if (d < 10)
         buffer[--i] = (char) (d + '0');
       else
@@ -350,21 +350,21 @@ public class MathModule extends AbstractQuercusModule {
   public static StringValue decoct(Env env, long value)
   {
     return intToBase(env, value, 8);
-    
+
     /*
     value = value & 037777777777L;
-    
+
     if (value == 0)
       return env.createString("0");
-    
+
     char []buffer = new char[11];
 
     int i = 11;
     while (value != 0 && i > 0) {
       int d = (int) (value & 0x7);
-      
+
       value = value >>> 3;
-      
+
       buffer[--i] = (char) (d + '0');
     }
 
@@ -404,7 +404,7 @@ public class MathModule extends AbstractQuercusModule {
   public static Value hexdec(Env env, StringValue s)
   {
     Number num = baseToInt(env, s, 16);
-    
+
     if (num instanceof Long)
       return LongValue.create(num.longValue());
     else
@@ -477,20 +477,19 @@ public class MathModule extends AbstractQuercusModule {
 
   public static Value max(Env env, Value []args)
   {
-    if (args.length == 1 && args[0] instanceof ArrayValue) {
-      Value array = args[0];
-      Value max = NullValue.NULL;
-      double maxValue = Double.MIN_VALUE;
-
+    if (args.length == 1 && args[0].isArray()) {
+      ArrayValue array = args[0].toArrayValue(env);
       Iterator<Value> iter = array.getValueIterator(env);
+
+      Value max = NullValue.NULL;
 
       while (iter.hasNext()) {
         Value value = iter.next();
 
-        double dValue = value.toDouble();
-
-        if (maxValue < dValue) {
-          maxValue = dValue;
+        if (max.isNull()) {
+          max = value;
+        }
+        else if (max.cmp(value) < 0) {
           max = value;
         }
       }
@@ -498,15 +497,16 @@ public class MathModule extends AbstractQuercusModule {
       return max;
     }
     else {
-      double maxValue = - Double.MAX_VALUE;
       Value max = NullValue.NULL;
 
       for (int i = 0; i < args.length; i++) {
-        double value = args[i].toDouble();
+        Value value = args[i];
 
-        if (maxValue < value) {
-          maxValue = value;
-          max = args[i];
+        if (max.isNull()) {
+          max = value;
+        }
+        else if (max.cmp(value) < 0) {
+          max = value;
         }
       }
 
@@ -516,20 +516,19 @@ public class MathModule extends AbstractQuercusModule {
 
   public static Value min(Env env, Value []args)
   {
-    if (args.length == 1 && args[0] instanceof ArrayValue) {
-      Value array = args[0];
-      Value min = NullValue.NULL;
-      double minValue = Double.MAX_VALUE;
-
+    if (args.length == 1 && args[0].isArray()) {
+      ArrayValue array = args[0].toArrayValue(env);
       Iterator<Value> iter = array.getValueIterator(env);
+
+      Value min = NullValue.NULL;
 
       while (iter.hasNext()) {
         Value value = iter.next();
 
-        double dValue = value.toDouble();
-
-        if (dValue < minValue) {
-          minValue = dValue;
+        if (min.isNull()) {
+          min = value;
+        }
+        else if (min.cmp(value) > 0) {
           min = value;
         }
       }
@@ -537,15 +536,16 @@ public class MathModule extends AbstractQuercusModule {
       return min;
     }
     else {
-      double minValue = Double.MAX_VALUE;
       Value min = NullValue.NULL;
 
       for (int i = 0; i < args.length; i++) {
-        double value = args[i].toDouble();
+        Value value = args[i];
 
-        if (value < minValue) {
-          minValue = value;
-          min = args[i];
+        if (min.isNull()) {
+          min = value;
+        }
+        else if (min.cmp(value) > 0) {
+          min = value;
         }
       }
 
@@ -577,7 +577,7 @@ public class MathModule extends AbstractQuercusModule {
   {
     return NullValue.NULL;
   }
-  
+
   public static double lcg_value()
   {
     return RandomUtil.nextDouble();
@@ -593,7 +593,7 @@ public class MathModule extends AbstractQuercusModule {
   public static Value octdec(Env env, StringValue oct)
   {
     Number num = baseToInt(env, oct, 8);
-    
+
     if (num instanceof Long)
       return LongValue.create(num.longValue());
     else

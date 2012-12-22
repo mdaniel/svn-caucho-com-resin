@@ -389,26 +389,36 @@ abstract public class StringValue
    */
   public int cmp(Value rValue)
   {
-    if (isNumberConvertible() || rValue.isNumberConvertible()) {
-      double l = toDouble();
-      double r = rValue.toDouble();
+    if (rValue.isString()) {
+      if (isNumberConvertible() && rValue.isNumberConvertible()) {
+        double l = toDouble();
+        double r = rValue.toDouble();
 
-      if (l == r)
-        return 0;
-      else if (l < r)
-        return -1;
-      else
-        return 1;
+        if (l == r) {
+          return 0;
+        }
+        else if (l < r) {
+          return -1;
+        }
+        else
+          return 1;
+      }
+      else {
+        return toString().compareTo(rValue.toString());
+      }
     }
     else {
-      int result = toString().compareTo(rValue.toString());
+      int result = rValue.cmp(this);
 
-      if (result == 0)
+      if (result == 0) {
         return 0;
-      else if (result > 0)
-        return 1;
-      else
+      }
+      else if (result > 0) {
         return -1;
+      }
+      else {
+        return 1;
+      }
     }
   }
 

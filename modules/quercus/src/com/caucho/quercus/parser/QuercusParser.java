@@ -3916,8 +3916,9 @@ public class QuercusParser {
     Expr expr;
 
     if (name != null) {
-      if (name.equals("static")) {
-        // php/039q
+      if (name.equals("static") || name.endsWith("\\static")) {
+        // php/093q
+        // php/0m27
         expr = _factory.createNewStatic(getLocation(), args);
       }
       else {

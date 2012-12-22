@@ -71,7 +71,7 @@ public class ObjectNewExpr extends Expr {
   {
     this(Location.UNKNOWN, name, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -86,9 +86,9 @@ public class ObjectNewExpr extends Expr {
     for (int i = 0; i < args.length; i++) {
       args[i] = _args[i].evalArg(env, true);
     }
-    
+
     env.pushCall(this, NullValue.NULL, args);
-    
+
     try {
       QuercusClass cl = env.findAbstractClass(_name);
 
@@ -99,7 +99,7 @@ public class ObjectNewExpr extends Expr {
       env.popCall();
     }
   }
-  
+
   public String toString()
   {
     return _name + "()";
