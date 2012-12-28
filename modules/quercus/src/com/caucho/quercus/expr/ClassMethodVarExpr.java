@@ -43,7 +43,8 @@ import java.util.ArrayList;
 /**
  * Represents a PHP static method expression.
  */
-public class ClassMethodVarExpr extends AbstractMethodExpr {
+public class ClassMethodVarExpr extends AbstractMethodExpr
+{
   private static final L10N L = new L10N(ClassMethodVarExpr.class);
 
   protected final String _className;
@@ -63,7 +64,6 @@ public class ClassMethodVarExpr extends AbstractMethodExpr {
     super(location);
 
     _className = className.intern();
-
     _nameExpr = nameExpr;
 
     _args = new Expr[args.size()];
@@ -78,7 +78,6 @@ public class ClassMethodVarExpr extends AbstractMethodExpr {
     super(location);
 
     _className = className.intern();
-
     _nameExpr = nameExpr;
 
     _args = args;

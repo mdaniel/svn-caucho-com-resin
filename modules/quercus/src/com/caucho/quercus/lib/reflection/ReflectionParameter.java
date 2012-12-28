@@ -67,7 +67,7 @@ public class ReflectionParameter
   }
 
   public static ReflectionParameter __construct(Env env,
-                                                String funName,
+                                                StringValue funName,
                                                 StringValue paramName)
   {
     AbstractFunction fun = env.findFunction(funName);

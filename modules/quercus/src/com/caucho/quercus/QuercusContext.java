@@ -139,11 +139,11 @@ public class QuercusContext
   private HashSet<String> _extensionSetLowerCase
   = new HashSet<String>();
 
-  private HashMap<String, AbstractFunction> _funMap
-    = new HashMap<String, AbstractFunction>();
+  private HashMap<StringValue, AbstractFunction> _funMap
+    = new HashMap<StringValue, AbstractFunction>();
 
-  private HashMap<String, AbstractFunction> _lowerFunMap
-    = new HashMap<String, AbstractFunction>();
+  private HashMap<StringValue, AbstractFunction> _lowerFunMap
+    = new HashMap<StringValue, AbstractFunction>();
 
   private ConcurrentHashMap<String, JavaClassDef> _javaClassWrappers
     = new ConcurrentHashMap<String, JavaClassDef>();
@@ -1313,12 +1313,13 @@ public class QuercusContext
   /**
    * Returns the function with the given name.
    */
-  public AbstractFunction findFunction(String name)
+  public AbstractFunction findFunction(StringValue name)
   {
     AbstractFunction fun = _funMap.get(name);
 
-    if ((fun == null) && ! isStrict())
+    if ((fun == null) && ! isStrict()) {
       fun = _lowerFunMap.get(name.toLowerCase(Locale.ENGLISH));
+    }
 
     return fun;
   }
@@ -1326,7 +1327,7 @@ public class QuercusContext
   /**
    * Returns the function with the given name.
    */
-  public AbstractFunction findFunctionImpl(String name)
+  public AbstractFunction findFunctionImpl(StringValue name)
   {
     AbstractFunction fun = _funMap.get(name);
 
@@ -1336,7 +1337,7 @@ public class QuercusContext
   /**
    * Returns the function with the given name.
    */
-  public AbstractFunction findLowerFunctionImpl(String lowerName)
+  public AbstractFunction findLowerFunctionImpl(StringValue lowerName)
   {
     AbstractFunction fun = _lowerFunMap.get(lowerName);
 
@@ -1350,7 +1351,7 @@ public class QuercusContext
   {
     ArrayValue internal = new ArrayValueImpl();
 
-    for (String name : _funMap.keySet()) {
+    for (StringValue name : _funMap.keySet()) {
       internal.put(name);
     }
 
@@ -1364,8 +1365,14 @@ public class QuercusContext
   /**
    * Returns the id for a function name.
    */
-  public int getFunctionId(String name)
+  public int getFunctionId(StringValue name)
   {
+    int id = _functionNameMap.get(name);
+
+    if (id >= 0) {
+      return id;
+    }
+
     if (! isStrict())
       name = name.toLowerCase(Locale.ENGLISH);
 
@@ -1374,10 +1381,11 @@ public class QuercusContext
       name = name.substring(1);
     }
 
-    int id = _functionNameMap.get(name);
+    id = _functionNameMap.get(name);
 
-    if (id >= 0)
+    if (id >= 0) {
       return id;
+    }
 
     synchronized (_functionNameMap) {
       id = _functionNameMap.get(name);
@@ -1397,7 +1405,7 @@ public class QuercusContext
     return id;
   }
 
-  protected void extendFunctionMap(String name, int id)
+  protected void extendFunctionMap(StringValue name, int id)
   {
     if (_functionMap.length <= id) {
       AbstractFunction []functionMap = new AbstractFunction[id + 256];
@@ -1412,19 +1420,27 @@ public class QuercusContext
       globalId = getFunctionId(name.substring(ns + 1));
     }
 
-    _functionMap[id] = new UndefinedFunction(id, name, globalId);
+    _functionMap[id] = new UndefinedFunction(id, name.toString(), globalId);
   }
 
   /**
    * Returns the id for a function name.
    */
-  public int findFunctionId(String name)
+  public int findFunctionId(StringValue name)
   {
-    if (! isStrict())
-      name = name.toLowerCase(Locale.ENGLISH);
+    int id = _functionNameMap.get(name);
 
-    if (name.startsWith("\\"))
+    if (id >= 0) {
+      return id;
+    }
+
+    if (! isStrict()) {
+      name = name.toLowerCase(Locale.ENGLISH);
+    }
+
+    if (name.startsWith("\\")) {
       name = name.substring(1);
+    }
 
     // IntMap is internally synchronized
     return _functionNameMap.get(name);
@@ -1446,7 +1462,7 @@ public class QuercusContext
     return _functionMap;
   }
 
-  public int setFunction(String name, AbstractFunction fun)
+  public int setFunction(StringValue name, AbstractFunction fun)
   {
     int id = getFunctionId(name);
 
@@ -1936,10 +1952,12 @@ public class QuercusContext
         fun = fun.overload(overload);
       }
 
-      _funMap.put(funName, fun);
-      _lowerFunMap.put(funName.toLowerCase(Locale.ENGLISH), fun);
+      StringValue funNameV = createString(funName);
 
-      setFunction(funName, fun);
+      _funMap.put(funNameV, fun);
+      _lowerFunMap.put(funNameV.toLowerCase(Locale.ENGLISH), fun);
+
+      setFunction(funNameV, fun);
     }
   }
 

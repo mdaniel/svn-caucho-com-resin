@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.parser;
 
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
@@ -40,18 +41,18 @@ import java.util.ArrayList;
  * Parse scope.
  */
 abstract public class Scope {
-  
+
   protected Scope _parent;
-  
+
   public Scope()
   {
   }
-  
+
   public Scope(Scope parent)
   {
     _parent = parent;
   }
-  
+
   /**
    * Returns true for an abstract scope, e.g. an abstract class or an
    * interface.
@@ -60,7 +61,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is global.
    */
@@ -68,7 +69,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is within a class.
    */
@@ -76,7 +77,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is local to a function.
    */
@@ -84,7 +85,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is local to an IF statement.
    */
@@ -92,7 +93,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is local to a switch case statement.
    */
@@ -100,7 +101,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is local to a while statement.
    */
@@ -108,7 +109,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns true if scope is local to a try statement.
    */
@@ -116,7 +117,7 @@ abstract public class Scope {
   {
     return false;
   }
-  
+
   /*
    * Returns the parent scope.
    */
@@ -124,7 +125,7 @@ abstract public class Scope {
   {
     return _parent;
   }
-  
+
   /**
    * Adds a constant.
    */
@@ -132,30 +133,30 @@ abstract public class Scope {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Adds a function.
    */
-  abstract public void addFunction(String name,
+  abstract public void addFunction(StringValue name,
                                    Function function,
                                    boolean isTop);
 
-  /*
+  /**
    *  Adds a function defined in a conditional block.
    */
-  protected void addConditionalFunction(String name,
+  protected void addConditionalFunction(StringValue name,
                                         Function function)
   {
     addConditionalFunction(function);
   }
 
-  /*
+  /**
    *  Adds a function defined in a conditional block.
    */
   protected void addConditionalFunction(Function function)
   {
   }
-  
+
   /**
    * Adds a class.
    */
@@ -165,7 +166,7 @@ abstract public class Scope {
                                                ArrayList<String> ifaceList,
                                                int index,
                                                boolean isTop);
-  
+
   /*
    *  Adds a conditional class.
    */

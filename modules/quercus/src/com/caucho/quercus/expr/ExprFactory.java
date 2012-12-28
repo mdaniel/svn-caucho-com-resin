@@ -235,18 +235,23 @@ public class ExprFactory {
   /**
    * Creates a "$this->foo" expression.
    */
-  public ThisFieldExpr createThisField(ThisExpr qThis,
-                                       StringValue name)
+  public ThisFieldExpr createThisField(Location location,
+                                       ThisExpr qThis,
+                                       StringValue name,
+                                       boolean isInStaticClassScope)
   {
-    return new ThisFieldExpr(qThis, name);
+    return new ThisFieldExpr(location, qThis, name, isInStaticClassScope);
   }
 
   /**
    * Creates a "$this->$foo" expression.
    */
-  public ThisFieldVarExpr createThisField(ThisExpr qThis, Expr name)
+  public ThisFieldVarExpr createThisField(Location location,
+                                          ThisExpr qThis,
+                                          Expr name,
+                                          boolean isInStaticClassScope)
   {
-    return new ThisFieldVarExpr(qThis, name);
+    return new ThisFieldVarExpr(location, qThis, name, isInStaticClassScope);
   }
 
   /**
@@ -255,9 +260,11 @@ public class ExprFactory {
   public Expr createThisMethod(Location loc,
                                ThisExpr qThis,
                                StringValue methodName,
-                               ArrayList<Expr> args)
+                               ArrayList<Expr> args,
+                               boolean isInStaticClassScope)
   {
-    return new ThisMethodExpr(loc, qThis, methodName, args);
+    return new ThisMethodExpr(loc, qThis, methodName, args,
+                              isInStaticClassScope);
   }
 
   /**
@@ -266,9 +273,11 @@ public class ExprFactory {
   public Expr createThisMethod(Location loc,
                                ThisExpr qThis,
                                Expr methodName,
-                               ArrayList<Expr> args)
+                               ArrayList<Expr> args,
+                               boolean isInStaticClassScope)
   {
-    return new ThisMethodVarExpr(loc, qThis, methodName, args);
+    return new ThisMethodVarExpr(loc, qThis, methodName, args,
+                                 isInStaticClassScope);
   }
 
   //
@@ -284,6 +293,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a class const expression.
+   */
+  public ClassVarNameConstExpr createClassConst(String className, Expr name)
+  {
+    return new ClassVarNameConstExpr(className, name);
+  }
+
+  /**
    * Creates an expression class const expression ($class::FOO).
    */
   public Expr createClassConst(Expr className, StringValue name)
@@ -292,11 +309,27 @@ public class ExprFactory {
   }
 
   /**
+   * Creates an expression class const expression ($class::{$foo}).
+   */
+  public Expr createClassConst(Expr className, Expr name)
+  {
+    return new ClassVarVarConstExpr(className, name);
+  }
+
+  /**
    * Creates a class const expression (static::FOO).
    */
   public ClassVirtualConstExpr createClassVirtualConst(StringValue name)
   {
     return new ClassVirtualConstExpr(name);
+  }
+
+  /**
+   * Creates a class const expression (static::{$foo}).
+   */
+  public ClassVarNameVirtualConstExpr createClassVirtualConst(Expr name)
+  {
+    return new ClassVarNameVirtualConstExpr(name);
   }
 
   //
@@ -960,18 +993,18 @@ public class ExprFactory {
    * Creates a new function call.
    */
   public Expr createCall(QuercusParser parser,
-                         String name,
+                         StringValue name,
                          ArrayList<Expr> args)
   {
     Location loc = parser.getLocation();
 
-    if ("isset".equals(name) && args.size() == 1)
+    if (name.equalsString("isset") && args.size() == 1)
       return new FunIssetExpr(args.get(0));
-    else if ("get_called_class".equals(name) && args.size() == 0)
+    else if (name.equalsString("get_called_class") && args.size() == 0)
       return new FunGetCalledClassExpr(loc);
-    else if ("get_class".equals(name) && args.size() == 0)
+    else if (name.equalsString("get_class") && args.size() == 0)
       return new FunGetClassExpr(parser);
-    else if ("each".equals(name) && args.size() == 1) {
+    else if (name.equalsString("each") && args.size() == 1) {
       Expr arg = args.get(0);
 
       if (! arg.isVar()) {
@@ -999,9 +1032,10 @@ public class ExprFactory {
    */
   public ClosureExpr createClosure(Location loc,
                                    Function fun,
-                                   ArrayList<VarExpr> useArgs)
+                                   ArrayList<VarExpr> useArgs,
+                                   boolean isInClassScope)
   {
-    return new ClosureExpr(loc, fun);
+    return new ClosureExpr(loc, fun, useArgs, isInClassScope);
   }
 
   //

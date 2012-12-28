@@ -29,34 +29,34 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.*;
-import com.caucho.quercus.env.Closure;
+import java.util.ArrayList;
+
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.InterpretedClosure;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.Function;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.util.L10N;
-
-import java.util.ArrayList;
 
 /**
  * Represents a PHP closure expression.
  */
 public class ClosureExpr extends Expr {
-  private static final L10N L = new L10N(ClosureExpr.class);
-
   protected final Function _fun;
+  protected final boolean _isInClassScope;
 
-  public ClosureExpr(Location location, Function fun)
+  protected final ArrayList<VarExpr> _useArgs;
+
+  public ClosureExpr(Location location, Function fun,
+                     ArrayList<VarExpr> useArgs, boolean isInClassScope)
   {
-    // quercus/120o
     super(location);
 
     _fun = fun;
+    _useArgs = useArgs;
+
+    _isInClassScope = isInClassScope;
   }
 
   /**
@@ -66,7 +66,7 @@ public class ClosureExpr extends Expr {
   {
     return _fun.getName();
   }
-  
+
   /**
    * Returns the function
    */
@@ -139,7 +139,13 @@ public class ClosureExpr extends Expr {
    */
   private Value evalImpl(Env env)
   {
-    return new Closure(env, _fun);
+    Value qThis = NullValue.NULL;
+
+    if (_isInClassScope && _fun.getInfo().hasThis()) {
+      qThis = env.getThis();
+    }
+
+    return new InterpretedClosure(env, _fun, qThis);
   }
 
   public String toString()

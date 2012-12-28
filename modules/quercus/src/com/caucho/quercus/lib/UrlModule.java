@@ -318,7 +318,8 @@ public class UrlModule
   /**
    * Extracts the meta tags from a file and returns them as an array.
    */
-  public static Value get_meta_tags(Env env, StringValue filename,
+  public static Value get_meta_tags(Env env,
+                                    StringValue filename,
                                     @Optional boolean useIncludePath)
   {
     InputStream in = null;
@@ -375,7 +376,6 @@ public class UrlModule
   }
 
   public static Value http_build_query(Env env,
-                                       @This Value obj,
                                        Value formdata,
                                        @Optional StringValue numeric_prefix,
                                        @Optional("'&'") StringValue separator)

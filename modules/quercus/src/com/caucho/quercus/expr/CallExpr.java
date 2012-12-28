@@ -29,13 +29,12 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.*;
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -47,15 +46,15 @@ import java.util.ArrayList;
 public class CallExpr extends Expr {
   private static final L10N L = new L10N(CallExpr.class);
 
-  protected final String _name;
-  protected final String _nsName;
+  protected final StringValue _name;
+  protected final StringValue _nsName;
   protected final Expr []_args;
 
   private int _funId;
 
   protected boolean _isRef;
 
-  public CallExpr(Location location, String name, ArrayList<Expr> args)
+  public CallExpr(Location location, StringValue name, ArrayList<Expr> args)
   {
     // quercus/120o
     super(location);
@@ -66,14 +65,15 @@ public class CallExpr extends Expr {
     if (ns > 0) {
       _nsName = _name.substring(ns + 1);
     }
-    else
+    else {
       _nsName = null;
+    }
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public CallExpr(Location location, String name, Expr []args)
+  public CallExpr(Location location, StringValue name, Expr []args)
   {
     // quercus/120o
     super(location);
@@ -90,12 +90,12 @@ public class CallExpr extends Expr {
     _args = args;
   }
 
-  public CallExpr(String name, ArrayList<Expr> args)
+  public CallExpr(StringValue name, ArrayList<Expr> args)
   {
     this(Location.UNKNOWN, name, args);
   }
 
-  public CallExpr(String name, Expr []args)
+  public CallExpr(StringValue name, Expr []args)
   {
     this(Location.UNKNOWN, name, args);
   }
@@ -103,7 +103,7 @@ public class CallExpr extends Expr {
   /**
    * Returns the name.
    */
-  public String getName()
+  public StringValue getName()
   {
     return _name;
   }

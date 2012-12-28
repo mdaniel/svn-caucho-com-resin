@@ -29,11 +29,11 @@
 
 package com.caucho.quercus.parser;
 
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.Location;
-import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,62 +43,63 @@ import java.util.Locale;
  * Parse scope.
  */
 public class FunctionScope extends Scope {
-  private final static L10N L = new L10N(FunctionScope.class);
-
   private ExprFactory _exprFactory;
 
-  private HashMap<String,Function> _functionMap
-  = new HashMap<String,Function>();
-  
+  private HashMap<StringValue,Function> _functionMap
+  = new HashMap<StringValue,Function>();
+
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
-  
+
   private HashMap<String,InterpretedClassDef> _conditionalClassMap;
-  
-  private HashMap<String,Function> _conditionalFunctionMap;
+
+  private HashMap<StringValue,Function> _conditionalFunctionMap;
 
   FunctionScope(ExprFactory exprFactory, Scope parent)
   {
     super(parent);
-    
+
     _exprFactory = exprFactory;
   }
 
-  /*
+  /**
    * Returns true if scope is local to a function.
    */
   public boolean isFunction()
   {
     return true;
   }
-  
+
   /**
    * Adds a function.
    */
-  public void addFunction(String name,
+  public void addFunction(StringValue name,
                           Function function,
                           boolean isTop)
   {
     name = name.toLowerCase(Locale.ENGLISH);
-    
+
     if (_functionMap.get(name) == null)
       _functionMap.put(name, function);
-    
+
     //_parent.addConditionalFunction(name, function);
     _parent.addFunction(name, function, false);
   }
-  
-  /*
-   *  Adds a function defined in a conditional block.
+
+  /**
+   * Adds a function defined in a conditional block.
    */
   @Override
-  protected void addConditionalFunction(String name, Function function)
+  protected void addConditionalFunction(StringValue name, Function function)
   {
     if (_conditionalFunctionMap == null)
-      _conditionalFunctionMap = new HashMap<String,Function>(4);
+      _conditionalFunctionMap = new HashMap<StringValue,Function>(4);
 
-    _conditionalFunctionMap.put(function.getCompilationName(), function);
-    
+    StringValue compilationName
+      = function.getInfo().getQuercus().createString(function.getCompilationName());
+
+    _conditionalFunctionMap.put(compilationName, function);
+
     _parent.addConditionalFunction(name, function);
   }
 
@@ -121,15 +122,15 @@ public class FunctionScope extends Scope {
       = _exprFactory.createClassDef(location,
                                     name, parentName, ifaceArray,
                                     index);
-    
+
     if (existingClass == null)
       _classMap.put(name, cl);
-      
+
     _parent.addConditionalClass(cl);
 
     return cl;
   }
-  
+
   /*
    *  Adds a conditional class.
    */
@@ -137,9 +138,9 @@ public class FunctionScope extends Scope {
   {
     if (_conditionalClassMap == null)
       _conditionalClassMap = new HashMap<String,InterpretedClassDef>(1);
-    
+
     _conditionalClassMap.put(def.getCompilationName(), def);
-    
+
     _parent.addConditionalClass(def);
   }
 }

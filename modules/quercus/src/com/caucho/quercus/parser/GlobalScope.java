@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.parser;
 
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
@@ -47,21 +48,21 @@ public class GlobalScope extends Scope {
 
   private ExprFactory _exprFactory;
 
-  private HashMap<String,Function> _functionMap
-    = new HashMap<String,Function>();
+  private HashMap<StringValue,Function> _functionMap
+    = new HashMap<StringValue,Function>();
 
   private ArrayList<Function> _functionList
     = new ArrayList<Function>();
-  
-  private HashMap<String,Function> _conditionalFunctionMap
-    = new HashMap<String,Function>();
-  
+
+  private HashMap<StringValue,Function> _conditionalFunctionMap
+    = new HashMap<StringValue,Function>();
+
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
-  
+
   private ArrayList<InterpretedClassDef> _classList
     = new ArrayList<InterpretedClassDef>();
-  
+
   private HashMap<String,InterpretedClassDef> _conditionalClassMap
     = new HashMap<String,InterpretedClassDef>();
 
@@ -77,24 +78,24 @@ public class GlobalScope extends Scope {
   {
     return true;
   }
-  
+
   /**
    * Adds a function.
    */
-  public void addFunction(String name,
+  public void addFunction(StringValue name,
                           Function function,
                           boolean isTop)
   {
     if (isTop)
       _functionMap.put(name.toLowerCase(Locale.ENGLISH), function);
-    
+
     _functionList.add(function);
   }
-  
+
   /*
    *  Adds a function defined in a conditional block.
    */
-  protected void addConditionalFunction(String name, Function function)
+  protected void addConditionalFunction(StringValue name, Function function)
   {
     _conditionalFunctionMap.put(name, function);
   }
@@ -124,25 +125,25 @@ public class GlobalScope extends Scope {
 
       if (isTop) {
         cl.setTopScope(true);
-        
+
         _classMap.put(name, cl);
       }
     }
     else {
       // class statically redeclared
       // XXX: should throw a runtime error?
-      
+
       // dummy classdef for parsing only
       cl = _exprFactory.createClassDef(location,
                                        name, parentName, new String[0],
                                        index);
     }
-    
+
     _classList.add(cl);
 
     return cl;
   }
-  
+
   /*
    *  Adds a class
    */
@@ -154,7 +155,7 @@ public class GlobalScope extends Scope {
   /**
    * Returns the function map.
    */
-  public HashMap<String,Function> getFunctionMap()
+  public HashMap<StringValue,Function> getFunctionMap()
   {
     return _functionMap;
   }
@@ -167,11 +168,11 @@ public class GlobalScope extends Scope {
   {
     return _functionList;
   }
-  
+
   /**
    * Returns the conditional function map.
    */
-  public HashMap<String,Function> getConditionalFunctionMap()
+  public HashMap<StringValue,Function> getConditionalFunctionMap()
   {
     return _conditionalFunctionMap;
   }
@@ -192,7 +193,7 @@ public class GlobalScope extends Scope {
   {
     return _classList;
   }
-  
+
   /**
    * Returns the conditional class map.
    */

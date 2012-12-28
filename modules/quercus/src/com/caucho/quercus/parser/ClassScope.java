@@ -35,7 +35,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.Location;
-import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 
@@ -44,8 +43,6 @@ import java.util.ArrayList;
  */
 public class ClassScope extends Scope
 {
-  private final static L10N L = new L10N(ClassScope.class);
-
   private final InterpretedClassDef _cl;
 
   public ClassScope(InterpretedClassDef cl)
@@ -74,7 +71,7 @@ public class ClassScope extends Scope
    * Adds a function.
    */
   @Override
-  public void addFunction(String name,
+  public void addFunction(StringValue name,
                           Function function,
                           boolean isTop)
   {
@@ -85,7 +82,7 @@ public class ClassScope extends Scope
    *  Adds a function defined in a conditional block.
    */
   @Override
-  public void addConditionalFunction(String name, Function function)
+  public void addConditionalFunction(StringValue name, Function function)
   {
     //addFunction(name, function);
   }

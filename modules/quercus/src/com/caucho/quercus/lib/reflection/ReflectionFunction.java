@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.reflection;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.function.AbstractFunction;
 
@@ -49,7 +50,7 @@ public class ReflectionFunction extends ReflectionFunctionAbstract
   {
   }
 
-  public static ReflectionFunction __construct(Env env, String name)
+  public static ReflectionFunction __construct(Env env, StringValue name)
   {
     AbstractFunction fun = env.findFunction(name);
 
