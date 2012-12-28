@@ -41,14 +41,12 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Represents a PHP expression.
  */
 abstract public class Expr {
   private static final L10N L = new L10N(Expr.class);
-  private static final Logger log = Logger.getLogger(Expr.class.getName());
 
   public static final int COMPILE_ARG_MAX = 5;
   public static final Expr[] NULL_ARGS = new Expr[0];
@@ -318,7 +316,9 @@ abstract public class Expr {
    * Creates a field ref
    */
   public Expr createFieldGet(ExprFactory factory,
-                             StringValue name)
+                             Location location,
+                             StringValue name,
+                             boolean isInClassScope)
   {
     return factory.createFieldGet(this, name);
   }
@@ -327,7 +327,9 @@ abstract public class Expr {
    * Creates a field ref
    */
   public Expr createFieldGet(ExprFactory factory,
-                             Expr name)
+                             Location location,
+                             Expr name,
+                             boolean isInClassScope)
   {
     return factory.createFieldVarGet(this, name);
   }
@@ -340,6 +342,16 @@ abstract public class Expr {
    * Creates a class field $class::foo
    */
   public Expr createClassConst(QuercusParser parser, StringValue name)
+  {
+    ExprFactory factory = parser.getExprFactory();
+
+    return factory.createClassConst(this, name);
+  }
+
+  /**
+   * Creates a class field $class::foo
+   */
+  public Expr createClassConst(QuercusParser parser, Expr name)
   {
     ExprFactory factory = parser.getExprFactory();
 

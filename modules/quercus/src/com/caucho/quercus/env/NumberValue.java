@@ -44,10 +44,12 @@ public abstract class NumberValue extends Value {
       boolean lBool = toBoolean();
       boolean rBool = rValue.toBoolean();
 
-      if (! lBool && rBool)
+      if (! lBool && rBool) {
         return -1;
-      if (lBool && ! rBool)
+      }
+      if (lBool && ! rBool) {
         return 1;
+      }
 
       return 0;
     }
@@ -55,12 +57,15 @@ public abstract class NumberValue extends Value {
     double l = toDouble();
     double r = rValue.toDouble();
 
-    if (l == r)
+    if (l == r) {
       return 0;
-    else if (l < r)
+    }
+    else if (l < r) {
       return -1;
-    else
+    }
+    else {
       return 1;
+    }
   }
 
   /**

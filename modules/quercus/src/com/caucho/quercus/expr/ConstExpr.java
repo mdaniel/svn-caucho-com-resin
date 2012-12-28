@@ -98,6 +98,35 @@ public class ConstExpr extends Expr {
    * Creates a class field Foo::$bar
    */
   @Override
+  public Expr createClassConst(QuercusParser parser, Expr name)
+  {
+    ExprFactory factory = parser.getExprFactory();
+
+    String className = _var;
+    String specialClassName = getSpecialClassName();
+
+    if ("self".equals(specialClassName)) {
+      className = parser.getSelfClassName();
+
+      return factory.createClassConst(className, name);
+    }
+    else if ("parent".equals(specialClassName)) {
+      className = parser.getParentClassName();
+
+      return factory.createClassConst(className, name);
+    }
+    else if ("static".equals(specialClassName)) {
+      return factory.createClassVirtualConst(name);
+    }
+    else {
+      return factory.createClassConst(className, name);
+    }
+  }
+
+  /**
+   * Creates a class field Foo::$bar
+   */
+  @Override
   public Expr createClassField(QuercusParser parser, StringValue name)
   {
     ExprFactory factory = parser.getExprFactory();
@@ -106,7 +135,7 @@ public class ConstExpr extends Expr {
     String specialClassName = getSpecialClassName();
 
     if ("self".equals(specialClassName)) {
-      if ("this".equals(name)) {
+      if ("this".equals(name.toString())) {
         return factory.createThis(parser.getClassDef());
       }
       else {

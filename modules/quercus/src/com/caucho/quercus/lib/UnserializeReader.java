@@ -164,8 +164,9 @@ public final class UnserializeReader {
           sb.append((char) ch);
         }
 
-        if (ch != ';')
+        if (ch != ';') {
           throw new IOException(L.l("expected ';'"));
+        }
 
         Value value = new DoubleValue(Double.parseDouble(sb.toString()));
 
@@ -184,8 +185,9 @@ public final class UnserializeReader {
 
         Value array = new ArrayValueImpl(len);
 
-        if (_useReference)
+        if (_useReference) {
           array = createReference(array);
+        }
 
         for (int i = 0; i < len; i++) {
           Value key = unserializeKey(env);
@@ -206,8 +208,9 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
-        if (! isValidString(len))
+        if (! isValidString(len)) {
           return BooleanValue.FALSE;
+        }
 
         String className = readString(len);
 
@@ -220,8 +223,9 @@ public final class UnserializeReader {
         QuercusClass qClass = env.findClass(className);
         Value obj;
 
-        if (qClass != null)
+        if (qClass != null) {
           obj = qClass.createObject(env);
+        }
         else {
           log.fine(L.l("{0} is an undefined class in unserialize",
                    className));
@@ -231,8 +235,9 @@ public final class UnserializeReader {
 
         Value ref = null;
 
-        if (_useReference)
+        if (_useReference) {
           ref = createReference(obj);
+        }
 
         for (int i = 0; i < count; i++) {
           StringValue key = unserializeKey(env).toStringValue();
@@ -248,14 +253,12 @@ public final class UnserializeReader {
                 visibility = FieldVisibility.PROTECTED;
                 break;
               default:
-                throw new IOException(
-                    L.l("field visibility modifier is not valid: 0x{0}",
+                throw new IOException(L.l("field visibility modifier is not valid: 0x{0}",
                                           Integer.toHexString(key.charAt(2))));
             }
 
             if (key.charAt(2) != 0) {
-              throw new IOException(
-                  L.l("end of field visibility modifier is not valid: 0x{0}",
+              throw new IOException(L.l("end of field visibility modifier is not valid: 0x{0}",
                                         Integer.toHexString(key.charAt(2))));
             }
 
@@ -295,8 +298,7 @@ public final class UnserializeReader {
         expect(';');
 
         if (index - 1 >= _valueList.size()) {
-          throw new IOException(
-              L.l("reference out of range: {0}, size {1}, index {2}",
+          throw new IOException(L.l("reference out of range: {0}, size {1}, index {2}",
                                     index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
@@ -314,8 +316,7 @@ public final class UnserializeReader {
         expect(';');
 
         if (index - 1 >= _valueList.size()) {
-          throw new IOException(
-              L.l("reference out of range: {0}, size {1}, index {2}",
+          throw new IOException(L.l("reference out of range: {0}, size {1}, index {2}",
                                     index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
@@ -330,8 +331,7 @@ public final class UnserializeReader {
       }
 
     default:
-      throw new IOException(
-          L.l("option not recognized '{0}' (0x{1}) at index {2} ({3})",
+      throw new IOException(L.l("option not recognized '{0}' (0x{1}) at index {2} ({3})",
                                 String.valueOf((char) ch),
                                 Integer.toHexString(ch),
                                 _index,

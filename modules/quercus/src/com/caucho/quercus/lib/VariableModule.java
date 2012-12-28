@@ -506,8 +506,9 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static boolean is_scalar(@ReadOnly Value v)
   {
-    if (v == null)
+    if (v == null) {
       return false;
+    }
 
     Value value = v.toValue();
 
@@ -574,7 +575,8 @@ public class VariableModule extends AbstractQuercusModule {
 
         return BooleanValue.TRUE;
       }
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
@@ -582,8 +584,9 @@ public class VariableModule extends AbstractQuercusModule {
   private static void printDepth(WriteStream out, int depth)
     throws IOException
   {
-    for (int i = 0; i < depth; i++)
+    for (int i = 0; i < depth; i++) {
       out.print(' ');
+    }
   }
 
   /**
@@ -639,14 +642,16 @@ public class VariableModule extends AbstractQuercusModule {
         ArrayValueImpl array = new ArrayValueImpl();
         var.set(array);
 
-        if (! value.isNull())
+        if (! value.isNull()) {
           array.append(value);
+        }
       }
 
       return true;
     }
-    else
+    else {
       return false;
+    }
   }
 
   /**
@@ -658,10 +663,7 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static Value strval(Env env, @ReadOnly Value v)
   {
-    if (v instanceof StringValue)
-      return (StringValue) v;
-    else
-      return v.toString(env);
+    return v.toString(env);
   }
 
   /**
@@ -682,8 +684,9 @@ public class VariableModule extends AbstractQuercusModule {
     if (entry != null) {
       v = entry.getValue(env);
 
-      if (v != null)
+      if (v != null) {
         return v;
+      }
     }
 
     UnserializeReader is = null;
@@ -692,8 +695,9 @@ public class VariableModule extends AbstractQuercusModule {
       is = new UnserializeReader(s);
 
       v = is.unserialize(env);
-    } catch (IOException e) {
-      env.warning(e);
+    }
+    catch (IOException e) {
+      env.notice(e);
 
       v = BooleanValue.FALSE;
     }

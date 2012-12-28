@@ -41,6 +41,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.IdentityHashMap;
+import java.util.Locale;
 import java.util.zip.CRC32;
 
 /**
@@ -888,7 +889,7 @@ public class StringBuilderValue
    * Convert to lower case.
    */
   @Override
-  public StringValue toLowerCase()
+  public StringValue toLowerCase(Locale locale)
   {
     int length = _length;
 
@@ -1339,10 +1340,12 @@ public class StringBuilderValue
   {
     final int matchLength = match.length();
 
-    if (matchLength <= 0)
+    if (matchLength <= 0) {
       return -1;
-    else if (head < 0)
+    }
+    else if (head < 0) {
       return -1;
+    }
 
     final int length = _length;
     final int end = length - matchLength;
@@ -1900,8 +1903,9 @@ public class StringBuilderValue
   @Override
   public boolean equals(Object o)
   {
-    if (o == this)
+    if (o == this) {
       return true;
+    }
 
     if (o instanceof StringBuilderValue) {
       StringBuilderValue value = (StringBuilderValue) o;
@@ -1939,15 +1943,52 @@ public class StringBuilderValue
 
       return true;
     }
-    /*
-    else if (o instanceof UnicodeValue) {
-      UnicodeValue value = (UnicodeValue)o;
-
-      return value.equals(this);
-    }
-    */
-    else
+    else {
       return false;
+    }
+  }
+
+  /**
+   * Test for equality
+   */
+  public boolean equalsIgnoreCase(Object o)
+  {
+    if (this == o) {
+      return true;
+    }
+    else if (! (o instanceof StringBuilderValue)) {
+      return super.equalsIgnoreCase(o);
+    }
+
+    StringBuilderValue s = (StringBuilderValue) o;
+
+    int len = _length;
+
+    if (len != s._length) {
+      return false;
+    }
+
+    for (int i = len - 1; i >= 0; i--) {
+      int chA = _buffer[i];
+      int chB = s._buffer[i];
+
+      if (chA == chB) {
+        continue;
+      }
+
+      if ('A' <= chA && chA <= 'Z') {
+        chA = chA - 'A' + 'a';
+      }
+      else if ('A' <= chB && chB <= 'Z') {
+        chB = chB - 'A' + 'a';
+      }
+
+      if (chA != chB) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   @Override

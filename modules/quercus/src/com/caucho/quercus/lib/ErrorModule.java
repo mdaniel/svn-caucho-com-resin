@@ -294,9 +294,10 @@ public class ErrorModule extends AbstractQuercusModule {
     if (expr instanceof CallExpr) {
       CallExpr callExpr = (CallExpr) expr;
 
-      String functionName = callExpr.getName();
-      if ("debug_backtrace".equals(functionName))
+      StringValue functionName = callExpr.getName();
+      if (functionName.equalsString("debug_backtrace")) {
         return;
+      }
 
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
@@ -308,8 +309,7 @@ public class ErrorModule extends AbstractQuercusModule {
                  LongValue.create(callExpr.getLine()));
       }
 
-      call.put(env.createString("function"),
-               env.createString(callExpr.getName()));
+      call.put(env.createString("function"), callExpr.getName());
 
       // Create "args" argument value array
 

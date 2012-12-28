@@ -183,24 +183,26 @@ public class MathModule extends AbstractQuercusModule {
 
   private static StringValue intToBase(Env env, long num, int base)
   {
-    if (num == 0)
+    if (num == 0) {
       return env.createString((char) '0');
+    }
 
     // ignore sign
-    if (num < 0)
+    if (num < 0) {
       num = num ^ Long.MAX_VALUE + 1;
+    }
 
     int bufLen = 64;
-    char []buffer = new char[bufLen];
+    byte []buffer = new byte[bufLen];
 
     int i = bufLen;
     while (num != 0 && i > 0) {
       int d = (int) (num % base);
 
       if (d < 10)
-        buffer[--i] = (char) (d + '0');
+        buffer[--i] = (byte) (d + '0');
       else
-        buffer[--i] = (char) (d + 'a' - 10);
+        buffer[--i] = (byte) (d + 'a' - 10);
 
       num = num / base;
     }
@@ -209,7 +211,7 @@ public class MathModule extends AbstractQuercusModule {
       buffer[j - i] = buffer[j];
     }
 
-    return env.createString(buffer, bufLen - i);
+    return env.createString(buffer, 0, bufLen - i);
   }
 
   private static StringValue intToBase(Env env, BigInteger num, int base)

@@ -78,6 +78,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * PHP functions implemented from the string module
@@ -126,11 +127,13 @@ public class StringModule extends AbstractQuercusModule {
    * @param characters the set of characters to convert
    * @return the escaped string
    */
-  public static StringValue addcslashes(
-      Env env, StringValue source, String characters)
+  public static StringValue addcslashes(Env env,
+                                        StringValue source,
+                                        String characters)
   {
-    if (characters == null)
+    if (characters == null) {
       characters = "";
+    }
 
     boolean []bitmap = parseCharsetBitmap(env, characters);
 
@@ -854,21 +857,31 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static Value md5(Env env,
                           InputStream is,
-                                          @Optional boolean rawOutput)
+                          @Optional boolean rawOutput)
   {
+    TempBuffer tempBuffer = TempBuffer.allocate();
+
     try {
       MessageDigest md = _md5FreeList.allocate();
 
-      if (md == null)
+      if (md == null) {
         md = MessageDigest.getInstance("MD5");
+      }
 
       md.reset();
 
+      byte[] buffer = tempBuffer.getBuffer();
+
       // XXX: iso-8859-1
 
-      int ch;
-      while ((ch = is.read()) >= 0) {
-        md.update((byte) ch);
+      while (true) {
+        int len = is.read(buffer, 0, buffer.length);
+
+        if (len < 0) {
+          break;
+        }
+
+        md.update(buffer, 0, len);
       }
 
       byte []digest = md.digest();
@@ -876,8 +889,12 @@ public class StringModule extends AbstractQuercusModule {
       _md5FreeList.free(md);
 
       return hashToValue(env, digest, rawOutput);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new QuercusModuleException(e);
+    }
+    finally {
+      TempBuffer.free(tempBuffer);
     }
   }
 
@@ -893,35 +910,51 @@ public class StringModule extends AbstractQuercusModule {
                                Path source,
                                @Optional boolean rawOutput)
   {
+    TempBuffer tempBuffer = TempBuffer.allocate();
+
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
       InputStream is = null;
 
       try {
         is = source.openRead();
-        int d;
 
-        while ((d = is.read()) >= 0) {
-          md.update((byte) d);
+        byte[] buffer = tempBuffer.getBuffer();
+
+        while (true) {
+          int len = is.read(buffer, 0, buffer.length);
+
+          if (len < 0) {
+            break;
+          }
+
+          md.update(buffer, 0, len);
         }
 
         byte []digest = md.digest();
 
         return hashToValue(env, digest, rawOutput);
 
-      } catch (IOException e) {
+      }
+      catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
 
         return BooleanValue.FALSE;
-      } finally {
+      }
+      finally {
         try {
           if (is != null)
             is.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new QuercusModuleException(e);
+    }
+    finally {
+      TempBuffer.free(tempBuffer);
     }
   }
 
@@ -1598,7 +1631,7 @@ public class StringModule extends AbstractQuercusModule {
         if (i == string.length())
           return string;
         else
-          return (StringValue) string.subSequence(0, i + 1);
+          return string.substring(0, i + 1);
       }
     }
 
@@ -1774,28 +1807,37 @@ public class StringModule extends AbstractQuercusModule {
    * @return a string of imploded values
    */
   public static Value sha1(Env env,
-                           String source,
+                           InputStream is,
                            @Optional boolean rawOutput)
   {
-    if (source == null)
-      source = "";
+    TempBuffer tempBuffer = TempBuffer.allocate();
 
     try {
       MessageDigest md = MessageDigest.getInstance("SHA1");
 
       // XXX: iso-8859-1
 
-      for (int i = 0; i < source.length(); i++) {
-        char ch = source.charAt(i);
+      byte[] buffer = tempBuffer.getBuffer();
 
-        md.update((byte) ch);
+      while (true) {
+        int len = is.read(buffer, 0, buffer.length);
+
+        if (len < 0) {
+          break;
+        }
+
+        md.update(buffer, 0, len);
       }
 
       byte []digest = md.digest();
 
       return hashToValue(env, digest, rawOutput);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new QuercusException(e);
+    }
+    finally {
+      TempBuffer.free(tempBuffer);
     }
   }
 
@@ -1811,34 +1853,51 @@ public class StringModule extends AbstractQuercusModule {
                                 Path source,
                                 @Optional boolean rawOutput)
   {
+    TempBuffer tempBuffer = TempBuffer.allocate();
+
     try {
       MessageDigest md = MessageDigest.getInstance("SHA1");
       InputStream is = null;
 
       try {
         is = source.openRead();
-        int d;
 
-        while ((d = is.read()) >= 0) {
-          md.update((byte) d);
+        byte[] buffer = tempBuffer.getBuffer();
+
+        while (true) {
+          int len = is.read(buffer, 0, buffer.length);
+
+          if (len < 0) {
+            break;
+          }
+
+          md.update(buffer, 0, len);
         }
 
         byte []digest = md.digest();
 
         return hashToValue(env, digest, rawOutput);
-      } catch (IOException e) {
+      }
+      catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
 
         return BooleanValue.FALSE;
-      } finally {
+      }
+      finally {
         try {
-          if (is != null)
+          if (is != null) {
             is.close();
-        } catch (IOException e) {
+          }
+        }
+        catch (IOException e) {
         }
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new QuercusException(e);
+    }
+    finally {
+      TempBuffer.free(tempBuffer);
     }
   }
 
@@ -4929,10 +4988,13 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    if (tail < head)
+    if (head == 0 && tail == len - 1) {
+      return string;
+    }
+    else if (tail < head)
       return env.getEmptyString();
     else {
-      return (StringValue) string.subSequence(head, tail + 1);
+      return string.substring(head, tail + 1);
     }
   }
 

@@ -920,6 +920,7 @@ public class RegexpModule
 
   /**
    * Loops through subject if subject is array of strings
+   * XXX: need to be able to take in Regexp[] for compiled code
    *
    * @param env
    * @param pattern string or array
@@ -930,7 +931,7 @@ public class RegexpModule
    * @return
    */
   @UsesSymbolTable
-  public static Value preg_replace(Env env,
+  private static Value preg_replace(Env env,
                                    Regexp regexp,
                                    Value replacement,
                                    Value subject,

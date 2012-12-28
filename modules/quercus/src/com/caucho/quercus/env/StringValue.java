@@ -38,6 +38,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.IdentityHashMap;
+import java.util.Locale;
 import java.util.zip.CRC32;
 
 import com.caucho.quercus.QuercusModuleException;
@@ -46,6 +47,7 @@ import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.util.ByteAppendable;
+import com.caucho.util.LruCache;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -64,6 +66,9 @@ abstract public class StringValue
   protected static final int IS_STRING = 0;
   protected static final int IS_LONG = 1;
   protected static final int IS_DOUBLE = 2;
+
+  private static final LruCache<StringValue,StringValue> _internMap
+    = new LruCache<StringValue,StringValue>(8192);
 
   /**
    * Creates a string builder of the same type.
@@ -237,7 +242,7 @@ abstract public class StringValue
       return true;
     }
 
-    return env.findFunction(this.toString()) != null;
+    return env.findFunction(this) != null;
   }
 
   //
@@ -921,20 +926,19 @@ abstract public class StringValue
   public Callable toCallable(Env env)
   {
     // php/1h0o
-    if (isEmpty())
+    if (isEmpty()) {
       return super.toCallable(env);
+    }
 
-    String s = toString();
-
-    int p = s.indexOf("::");
+    int p = indexOf("::");
 
     if (p < 0)
-      return new CallbackFunction(env, s);
+      return new CallbackFunction(env, this);
     else {
-      String className = s.substring(0, p);
-      String methodName = s.substring(p + 2);
+      StringValue className = substring(0, p);
+      StringValue methodName = substring(p + 2);
 
-      QuercusClass cl = env.findClass(className);
+      QuercusClass cl = env.findClass(className.toString());
 
       if (cl == null) {
         env.warning(L.l("can't find class {0}",
@@ -943,7 +947,7 @@ abstract public class StringValue
         return super.toCallable(env);
       }
 
-      return new CallbackClassMethod(cl, env.createString(methodName));
+      return new CallbackClassMethod(cl, methodName);
     }
   }
 
@@ -2003,16 +2007,6 @@ abstract public class StringValue
     sb.append("'");
   }
 
-  /**
-   * Interns the string.
-   */
-  /*
-  public StringValue intern(Quercus quercus)
-  {
-    return quercus.intern(toString());
-  }
-  */
-
   //
   // CharSequence
   //
@@ -2219,9 +2213,10 @@ abstract public class StringValue
   /**
    * Returns true if the region matches
    */
-  public boolean
-    regionMatchesIgnoreCase(int offset,
-                            char []match, int mOffset, int mLength)
+  public boolean regionMatchesIgnoreCase(int offset,
+                                         char []match,
+                                         int mOffset,
+                                         int mLength)
   {
     int length = length();
 
@@ -2240,9 +2235,29 @@ abstract public class StringValue
   }
 
   /**
+   * Returns true if the string begins with another string.
+   */
+  public boolean startsWith(CharSequence head)
+  {
+    int len = length();
+    int headLen = head.length();
+
+    if (len < headLen) {
+      return false;
+    }
+
+    for (int i = 0; i < headLen; i++) {
+      if (charAt(i) != head.charAt(i))
+        return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Returns true if the string ends with another string.
    */
-  public boolean endsWith(StringValue tail)
+  public boolean endsWith(CharSequence tail)
   {
     int len = length();
     int tailLen = tail.length();
@@ -2312,38 +2327,45 @@ abstract public class StringValue
       buffer[offset + i] = charAt(stringOffset + i);
   }
 
-  /**
-   * Convert to lower case.
-   */
-  public StringValue toLowerCase()
+  public final StringValue toLowerCase()
   {
-    int length = length();
-
-    UnicodeBuilderValue string = new UnicodeBuilderValue(length);
-
-    char []buffer = string.getBuffer();
-    getChars(0, buffer, 0, length);
-
-    for (int i = 0; i < length; i++) {
-      char ch = buffer[i];
-
-      if ('A' <= ch && ch <= 'Z')
-        buffer[i] = (char) (ch + 'a' - 'A');
-      else if (ch < 0x80) {
-      }
-      else if (Character.isUpperCase(ch))
-        buffer[i] = Character.toLowerCase(ch);
-    }
-
-    string.setLength(length);
-
-    return string;
+    return toLowerCase(Locale.ENGLISH);
   }
 
   /**
    * Convert to lower case.
    */
+  public StringValue toLowerCase(Locale locale)
+  {
+    int length = length();
+
+    StringValue sb = createStringBuilder(length);
+
+    for (int i = 0; i < length; i++) {
+      char ch = charAt(i);
+
+      if ('a' <= ch && ch <= 'z') {
+        sb.append(ch);
+      }
+      else if ('A' <= ch && ch <= 'Z') {
+        sb.append((char) (ch + 'a' - 'A'));
+      }
+      else if (Character.isUpperCase(ch))
+        sb.append(Character.toLowerCase(ch));
+    }
+
+    return sb;
+  }
+
   public StringValue toUpperCase()
+  {
+    return toUpperCase(Locale.ENGLISH);
+  }
+
+  /**
+   * Convert to upper case.
+   */
+  public StringValue toUpperCase(Locale locale)
   {
     int length = length();
 
@@ -2617,15 +2639,18 @@ abstract public class StringValue
    */
   public boolean equalsIgnoreCase(Object o)
   {
-    if (this == o)
+    if (this == o) {
       return true;
-    else if (! (o instanceof StringValue))
+    }
+    else if (! (o instanceof StringValue)) {
       return false;
+    }
 
     StringValue s = (StringValue) o;
 
-    if (s.isUnicode() != isUnicode())
+    if (s.isUnicode() != isUnicode()) {
       return false;
+    }
 
     int aLength = length();
     int bLength = s.length();
@@ -2634,20 +2659,14 @@ abstract public class StringValue
       return false;
 
     for (int i = aLength - 1; i >= 0; i--) {
-      int chA = charAt(i);
-      int chB = s.charAt(i);
+      char chA = charAt(i);
+      char chB = s.charAt(i);
 
-      if (chA == chB) {
-      }
-      else {
-        if ('A' <= chA && chA <= 'Z')
-          chA += 'a' - 'A';
+      chA = Character.toLowerCase(chA);
+      chB = Character.toLowerCase(chB);
 
-        if ('A' <= chB && chB <= 'Z')
-          chB += 'a' - 'A';
-
-        if (chA != chB)
-          return false;
+      if (chA != chB) {
+        return false;
       }
     }
 
@@ -2656,6 +2675,10 @@ abstract public class StringValue
 
   public boolean equalsString(CharSequence s)
   {
+    if (this == s) {
+      return true;
+    }
+
     int lenA = length();
     int lenB = s.length();
 
@@ -2677,6 +2700,10 @@ abstract public class StringValue
 
   public boolean equalsStringIgnoreCase(CharSequence s)
   {
+    if (this == s) {
+      return true;
+    }
+
     int lenA = length();
     int lenB = s.length();
 
@@ -2802,6 +2829,22 @@ abstract public class StringValue
 
       return sublen;
     }
+  }
+
+  /**
+   * Interns the string.
+   */
+  public StringValue intern()
+  {
+    StringValue value = _internMap.get(this);
+
+    if (value == null) {
+      _internMap.put(this, this);
+
+      value = this;
+    }
+
+    return value;
   }
 
   static class SimpleStringValueReader extends Reader

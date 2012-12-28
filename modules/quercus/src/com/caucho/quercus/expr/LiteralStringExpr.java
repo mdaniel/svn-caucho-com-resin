@@ -115,6 +115,34 @@ public class LiteralStringExpr extends Expr {
   }
 
   /**
+   * Creates a class field $class::foo
+   */
+  @Override
+  public Expr createClassConst(QuercusParser parser, Expr name)
+  {
+    ExprFactory factory = parser.getExprFactory();
+
+    String className = _value.toString();
+
+    if ("self".equals(className)) {
+      className = parser.getSelfClassName();
+
+      return factory.createClassConst(className, name);
+    }
+    else if ("parent".equals(className)) {
+      className = parser.getParentClassName();
+
+      return factory.createClassConst(className, name);
+    }
+    else if ("static".equals(className)) {
+      return factory.createClassVirtualConst(name);
+    }
+    else {
+      return factory.createClassConst(className, name);
+    }
+  }
+
+  /**
    * Evaluates the expression as a constant.
    *
    * @return the expression value.
