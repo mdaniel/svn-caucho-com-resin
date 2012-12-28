@@ -29,20 +29,18 @@
 
 package com.caucho.quercus.expr;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.program.InterpretedClassDef;
-import com.caucho.util.L10N;
 
 /**
  * Represents the 'this' expression.
  */
 public class ThisExpr extends AbstractVarExpr {
-  private static final L10N L = new L10N(ThisExpr.class);
-
   protected final InterpretedClassDef _quercusClass;
 
   public ThisExpr(InterpretedClassDef quercusClass)
@@ -60,9 +58,11 @@ public class ThisExpr extends AbstractVarExpr {
    */
   @Override
   public Expr createFieldGet(ExprFactory factory,
-                             StringValue name)
+                             Location location,
+                             StringValue name,
+                             boolean isInStaticClassScope)
   {
-    return factory.createThisField(this, name);
+    return factory.createThisField(location, this, name, isInStaticClassScope);
   }
 
   /**
@@ -70,9 +70,11 @@ public class ThisExpr extends AbstractVarExpr {
    */
   @Override
   public Expr createFieldGet(ExprFactory factory,
-                             Expr name)
+                             Location location,
+                             Expr name,
+                             boolean isInStaticClassScope)
   {
-    return factory.createThisField(this, name);
+    return factory.createThisField(location, this, name, isInStaticClassScope);
   }
 
   /**
