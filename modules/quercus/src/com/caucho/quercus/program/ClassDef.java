@@ -29,7 +29,13 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.FieldVisibility;
+import com.caucho.quercus.env.ObjectExtValue;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.Location;
@@ -167,7 +173,7 @@ abstract public class ClassDef {
     return false;
   }
 
-  /*
+  /**
    * Returns true for a final class.
    */
   public boolean isFinal()
@@ -175,7 +181,7 @@ abstract public class ClassDef {
     return false;
   }
 
-  /*
+  /**
    * Returns true if the class has private/protected methods.
    */
   public boolean hasNonPublicMethods()
@@ -207,7 +213,7 @@ abstract public class ClassDef {
     return new ObjectExtValue(qcl);
   }
 
-  /*
+  /**
    * Creates a new object.
    */
   public ObjectValue createObject(Env env, QuercusClass cls)
@@ -293,6 +299,7 @@ abstract public class ClassDef {
     return null;
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName()
@@ -311,7 +318,7 @@ abstract public class ClassDef {
     return null;
   }
 
-  public Set<Map.Entry<String, AbstractFunction>> functionSet()
+  public Set<Map.Entry<StringValue, AbstractFunction>> functionSet()
   {
     return null;
   }

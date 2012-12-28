@@ -29,10 +29,15 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.FieldVisibility;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.program.ClassDef.FieldEntry;
 import com.caucho.quercus.Location;
 
 import java.util.HashMap;
@@ -55,8 +60,8 @@ public class InterpretedClassDef extends ClassDef
   // true if defined in the top scope of a page
   private boolean _isTopScope;
 
-  protected final HashMap<String,AbstractFunction> _functionMap
-    = new HashMap<String,AbstractFunction>();
+  protected final HashMap<StringValue,AbstractFunction> _functionMap
+    = new HashMap<StringValue,AbstractFunction>();
 
   protected final HashMap<StringValue,FieldEntry> _fieldMap
     = new LinkedHashMap<StringValue,FieldEntry>();
@@ -131,7 +136,7 @@ public class InterpretedClassDef extends ClassDef
     return _isInterface;
   }
 
-  /*
+  /**
    * True for a final class.
    */
   public void setFinal(boolean isFinal)
@@ -139,7 +144,7 @@ public class InterpretedClassDef extends ClassDef
     _isFinal = isFinal;
   }
 
-  /*
+  /**
    * Returns true for a final class.
    */
   public boolean isFinal()
@@ -147,7 +152,7 @@ public class InterpretedClassDef extends ClassDef
     return _isFinal;
   }
 
-  /*
+  /**
    * Returns true if class has protected or private methods.
    */
   public boolean getHasNonPublicMethods()
@@ -201,7 +206,7 @@ public class InterpretedClassDef extends ClassDef
       cl.setDestructor(_destructor);
 
       // XXX: make sure we need to do this (test case), also look at ProClassDef
-      cl.addMethod("__destruct", _destructor);
+      cl.addMethod(cl.getModuleContext().createString("__destruct"), _destructor);
     }
 
     if (_getField != null)
@@ -227,7 +232,7 @@ public class InterpretedClassDef extends ClassDef
 
     cl.addInitializer(this);
 
-    for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
+    for (Map.Entry<StringValue,AbstractFunction> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
 
@@ -262,33 +267,33 @@ public class InterpretedClassDef extends ClassDef
   /**
    * Adds a function.
    */
-  public void addFunction(String name, Function fun)
+  public void addFunction(StringValue name, Function fun)
   {
-    _functionMap.put(name.intern(), fun);
+    _functionMap.put(name, fun);
 
     if (! fun.isPublic()) {
       _hasNonPublicMethods = true;
     }
 
-    if (name.equals("__construct"))
+    if (name.equalsString("__construct"))
       _constructor = fun;
-    else if (name.equals("__destruct"))
+    else if (name.equalsString("__destruct"))
       _destructor = fun;
-    else if (name.equals("__get"))
+    else if (name.equalsString("__get"))
       _getField = fun;
-    else if (name.equals("__set"))
+    else if (name.equalsString("__set"))
       _setField = fun;
-    else if (name.equals("__call"))
+    else if (name.equalsString("__call"))
       _call = fun;
-    else if (name.equals("__invoke"))
+    else if (name.equalsString("__invoke"))
       _invoke = fun;
-    else if (name.equals("__toString"))
+    else if (name.equalsString("__toString"))
       _toString = fun;
-    else if (name.equals("__isset"))
+    else if (name.equalsString("__isset"))
       _isset = fun;
-    else if (name.equals("__unset"))
+    else if (name.equalsString("__unset"))
       _unset = fun;
-    else if (name.equalsIgnoreCase(getName()) && _constructor == null)
+    else if (name.equalsStringIgnoreCase(getName()) && _constructor == null)
       _constructor = fun;
   }
 
@@ -467,7 +472,8 @@ public class InterpretedClassDef extends ClassDef
     return _staticFieldMap.entrySet();
   }
 
-  public Set<Map.Entry<String, AbstractFunction>> functionSet()
+  @Override
+  public Set<Map.Entry<StringValue, AbstractFunction>> functionSet()
   {
     return _functionMap.entrySet();
   }

@@ -755,21 +755,21 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
     if (_cons != null) {
       cl.setConstructor(_cons);
-      cl.addMethod("__construct", _cons);
+      cl.addMethod(_moduleContext.createString("__construct"), _cons);
     }
 
     if (__construct != null) {
       cl.setConstructor(__construct);
-      cl.addMethod("__construct", __construct);
+      cl.addMethod(_moduleContext.createString("__construct"), __construct);
     }
 
     if (__destruct != null) {
       cl.setDestructor(__destruct);
-      cl.addMethod("__destruct", __destruct);
+      cl.addMethod(_moduleContext.createString("__destruct"), __destruct);
     }
 
     for (AbstractJavaMethod value : _functionMap.values()) {
-      cl.addMethod(value.getName(), value);
+      cl.addMethod(_moduleContext.createString(value.getName()), value);
     }
 
     if (__fieldGet != null)
@@ -782,7 +782,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       cl.setCall(__call);
 
     if (__toString != null) {
-      cl.addMethod("__toString", __toString);
+      cl.addMethod(_moduleContext.createString("__toString"), __toString);
     }
 
     if (_arrayDelegate != null)

@@ -40,22 +40,22 @@ import com.caucho.util.L10N;
  */
 public class FunctionDefStatement extends Statement {
   private final static L10N L = new L10N(FunctionDefStatement.class);
-  
+
   protected Function _fun;
 
   public FunctionDefStatement(Location location, Function fun)
   {
     super(location);
-    
+
     _fun = fun;
   }
-  
+
   public Value execute(Env env)
   {
     try {
       String name = _fun.getName();
 
-      if (env.findFunction(name) == null)
+      if (env.findFunction(env.createString(name)) == null)
         env.addFunction(name, _fun);
       else
         env.error(getLocation(),

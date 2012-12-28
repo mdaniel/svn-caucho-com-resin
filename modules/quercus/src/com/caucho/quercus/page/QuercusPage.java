@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -51,11 +52,11 @@ abstract public class QuercusPage
 {
   private static final L10N L = new L10N(QuercusPage.class);
 
-  private HashMap<String,AbstractFunction> _funMap
-    = new HashMap<String,AbstractFunction>();
+  private HashMap<StringValue,AbstractFunction> _funMap
+    = new HashMap<StringValue,AbstractFunction>();
 
-  private HashMap<String,AbstractFunction> _funMapLowerCase
-    = new HashMap<String,AbstractFunction>();
+  private HashMap<StringValue,AbstractFunction> _funMapLowerCase
+    = new HashMap<StringValue,AbstractFunction>();
 
   private HashMap<String,ClassDef> _classMap
     = new HashMap<String,ClassDef>();
@@ -110,7 +111,7 @@ abstract public class QuercusPage
   /**
    * Finds a function.
    */
-  public AbstractFunction findFunction(String name)
+  public AbstractFunction findFunction(StringValue name)
   {
     AbstractFunction fun = _funMap.get(name);
 
@@ -231,7 +232,7 @@ abstract public class QuercusPage
    */
   public void importDefinitions(Env env)
   {
-    for (Map.Entry<String,AbstractFunction> entry : _funMap.entrySet()) {
+    for (Map.Entry<StringValue,AbstractFunction> entry : _funMap.entrySet()) {
       AbstractFunction fun = entry.getValue();
 
       if (fun.isGlobal())
@@ -246,7 +247,7 @@ abstract public class QuercusPage
   /**
    * Adds a function.
    */
-  protected void addFunction(String name, AbstractFunction fun)
+  protected void addFunction(StringValue name, AbstractFunction fun)
   {
     AbstractFunction oldFun = _funMap.put(name, fun);
 

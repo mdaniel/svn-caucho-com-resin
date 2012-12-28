@@ -59,6 +59,7 @@ public class FunctionInfo
   private boolean _isGlobal;
   private boolean _isClosure;
   private boolean _isConstructor;
+  private boolean _isStaticClassMethod;
 
   private boolean _isPageMain;
   private boolean _isPageStatic;
@@ -213,7 +214,7 @@ public class FunctionInfo
   {
     // php/396z
     // return _hasThis || (_classDef != null && ! _fun.isStatic());
-    return _hasThis || _classDef != null;
+    return _hasThis || _classDef != null && ! _isStaticClassMethod;
   }
 
   /**
@@ -233,11 +234,19 @@ public class FunctionInfo
   }
 
   /**
-   * True for a method.
+   * True for a static class method.
    */
-  public boolean isNonStaticMethod()
+  public boolean isStaticClassMethod()
   {
-    return _classDef != null && ! _fun.isStatic();
+    return _isStaticClassMethod;
+  }
+
+  /**
+   * True for a static class method.
+   */
+  public void setStaticClassMethod(boolean isStaticClassMethod)
+  {
+    _isStaticClassMethod = isStaticClassMethod;
   }
 
   /**
@@ -320,7 +329,7 @@ public class FunctionInfo
     _isUsesSymbolTable = isUsesSymbolTable;
   }
 
-  /*
+  /**
    * True if the global statement is used.
    */
   public boolean isUsesGlobal()
@@ -328,7 +337,7 @@ public class FunctionInfo
     return _isUsesGlobal;
   }
 
-  /*
+  /**
    * True if the global statement is used.
    */
   public void setUsesGlobal(boolean isUsesGlobal)

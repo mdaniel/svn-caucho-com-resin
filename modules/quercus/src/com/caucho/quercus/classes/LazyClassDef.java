@@ -55,14 +55,14 @@ public class LazyClassDef extends CompiledClassDef
   private static final L10N L = new L10N(LazyClassDef.class);
 
   private final String _name;
-  private final Class _pageClass;
+  private final Class<?> _pageClass;
   private final String _className;
 
   private CompiledClassDef _def;
 
   public LazyClassDef(String name,
-		      Class pageClass,
-		      String className)
+                      Class<?> pageClass,
+                      String className)
   {
     super(null, name, null, null);
 
@@ -301,12 +301,14 @@ public class LazyClassDef extends CompiledClassDef
     return getClassDef().getFieldNames();
   }
 
+  @Override
   public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
   {
     return getClassDef().fieldSet();
   }
 
-  public Set<Map.Entry<String, AbstractFunction>> functionSet()
+  @Override
+  public Set<Map.Entry<StringValue, AbstractFunction>> functionSet()
   {
     return getClassDef().functionSet();
   }

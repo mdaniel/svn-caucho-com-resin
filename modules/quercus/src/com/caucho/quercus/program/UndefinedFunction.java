@@ -37,6 +37,7 @@ import com.caucho.util.L10N;
 /**
  * Represents an undefined
  */
+@SuppressWarnings("serial")
 public class UndefinedFunction extends AbstractFunction {
   private static final L10N L = new L10N(UndefinedFunction.class);
 
@@ -64,13 +65,13 @@ public class UndefinedFunction extends AbstractFunction {
     if (_globalId > 0) {
       AbstractFunction fun = env._fun[_globalId];
       env._fun[_id] = fun;
-      
+
       return fun.call(env, args);
     }
-    
+
     return env.error(L.l("'{0}' is an unknown function.", _name));
   }
-  
+
   public String toString()
   {
     return "UndefinedFunction[" + _name + "]";

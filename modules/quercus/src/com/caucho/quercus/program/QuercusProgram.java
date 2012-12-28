@@ -72,9 +72,9 @@ public class QuercusProgram {
 
   private Exception _compileException;
 
-  private HashMap<String,Function> _functionMap;
-  private HashMap<String,Function> _functionMapLowerCase
-    = new HashMap<String,Function>();
+  private HashMap<StringValue,Function> _functionMap;
+  private HashMap<StringValue,Function> _functionMapLowerCase
+    = new HashMap<StringValue,Function>();
 
   private ArrayList<Function> _functionList;
 
@@ -103,7 +103,7 @@ public class QuercusProgram {
    */
   public QuercusProgram(QuercusContext quercus,
                         Path sourceFile,
-                        HashMap<String,Function> functionMap,
+                        HashMap<StringValue,Function> functionMap,
                         ArrayList<Function> functionList,
                         HashMap<String,InterpretedClassDef> classMap,
                         ArrayList<InterpretedClassDef> classList,
@@ -111,7 +111,7 @@ public class QuercusProgram {
                         Statement statement)
   {
     _quercus = quercus;
-    
+
     _depend = new BasicDependencyContainer();
     _depend.setCheckInterval(quercus.getDependencyCheckInterval());
 
@@ -126,7 +126,7 @@ public class QuercusProgram {
     _functionMap = functionMap;
     _functionList = functionList;
 
-    for (Map.Entry<String,Function> entry : functionMap.entrySet()) {
+    for (Map.Entry<StringValue,Function> entry : functionMap.entrySet()) {
       _functionMapLowerCase.put(entry.getKey().toLowerCase(Locale.ENGLISH),
                                 entry.getValue());
     }
@@ -154,7 +154,7 @@ public class QuercusProgram {
     _compiledPage = page;
 
     _depend = new BasicDependencyContainer();
-    
+
     _topDepend = new BasicDependencyContainer();
     _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
     _topDepend.add(new PageDependency());
@@ -329,7 +329,7 @@ public class QuercusProgram {
   /**
    * Finds a function.
    */
-  public AbstractFunction findFunction(String name)
+  public AbstractFunction findFunction(StringValue name)
   {
     AbstractFunction fun = _functionMap.get(name);
 
@@ -468,7 +468,7 @@ public class QuercusProgram {
    */
   public void importDefinitions(Env env)
   {
-    for (Map.Entry<String,Function> entry : _functionMap.entrySet()) {
+    for (Map.Entry<StringValue,Function> entry : _functionMap.entrySet()) {
       Function fun = entry.getValue();
 
       if (fun.isGlobal())

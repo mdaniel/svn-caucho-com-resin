@@ -38,28 +38,23 @@ import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.statement.*;
-import com.caucho.util.L10N;
+import com.caucho.quercus.statement.BlockStatement;
+import com.caucho.quercus.statement.Statement;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Represents sequence of statements.
  */
+@SuppressWarnings("serial")
 public class Function extends AbstractFunction {
-  private static final Logger log = Logger.getLogger(Function.class.getName());
-  private static final L10N L = new L10N(Function.class);
-
   protected final FunctionInfo _info;
   protected final boolean _isReturnsReference;
 
@@ -68,9 +63,9 @@ public class Function extends AbstractFunction {
   protected final Statement _statement;
 
   protected boolean _hasReturn;
-  
+
   protected String _comment;
-  
+
   protected Arg []_closureUseArgs;
 
   Function(Location location,
@@ -80,7 +75,7 @@ public class Function extends AbstractFunction {
            Statement []statements)
   {
     super(location);
-    
+
     _name = name.intern();
     _info = info;
     _info.setFunction(this);
@@ -90,7 +85,7 @@ public class Function extends AbstractFunction {
 
     setGlobal(info.isPageStatic());
     setClosure(info.isClosure());
-    
+
     _isStatic = true;
   }
 
@@ -102,21 +97,21 @@ public class Function extends AbstractFunction {
                   Statement []statements)
   {
     super(location);
-    
+
     _name = name.intern();
     _info = info;
     _info.setFunction(this);
     _isReturnsReference = info.isReturnsReference();
 
     _args = new Arg[args.length];
-    
+
     System.arraycopy(args, 0, _args, 0, args.length);
 
     _statement = exprFactory.createBlock(location, statements);
 
     setGlobal(info.isPageStatic());
     setClosure(info.isClosure());
-    
+
     _isStatic = true;
   }
 
@@ -127,8 +122,8 @@ public class Function extends AbstractFunction {
   {
     return _name;
   }
-  
-  /*
+
+  /**
    * Returns the declaring class
    */
   @Override
@@ -136,25 +131,25 @@ public class Function extends AbstractFunction {
   {
     return _info.getDeclaringClass();
   }
-  
+
   public FunctionInfo getInfo()
   {
     return _info;
   }
-  
+
   protected boolean isMethod()
   {
     return getDeclaringClassName() != null;
   }
-  
-  /*
-   * Returns the declaring class
+
+  /**
+   * Returns the declaring class name
    */
   @Override
   public String getDeclaringClassName()
   {
     ClassDef declaringClass = _info.getDeclaringClass();
-    
+
     if (declaringClass != null)
       return declaringClass.getName();
     else
@@ -197,7 +192,7 @@ public class Function extends AbstractFunction {
   {
     return _isReturnsReference;
   }
-  
+
   /**
    * Sets the documentation for this function.
    */
@@ -205,7 +200,7 @@ public class Function extends AbstractFunction {
   {
     _comment = comment;
   }
-  
+
   /**
    * Returns the documentation for this function.
    */
@@ -372,7 +367,7 @@ public class Function extends AbstractFunction {
         map.put(useParams[i].getName(), new EnvVarImpl(useArgs[i].toVar()));
       }
     }
-      
+
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
 
@@ -452,7 +447,7 @@ public class Function extends AbstractFunction {
       env.setThis(oldThis);
     }
   }
-  
+
   //
   // method
   //
@@ -465,10 +460,10 @@ public class Function extends AbstractFunction {
   {
     if (isStatic())
       qThis = qClass;
-    
+
     Value oldThis = env.setThis(qThis);
     QuercusClass oldClass = env.setCallingClass(qClass);
-    
+
     try {
       return callImpl(env, args, false, null, null);
     } finally {
@@ -485,7 +480,7 @@ public class Function extends AbstractFunction {
   {
     Value oldThis = env.setThis(qThis);
     QuercusClass oldClass = env.setCallingClass(qClass);
-    
+
     try {
       return callImpl(env, args, true, null, null);
     } finally {

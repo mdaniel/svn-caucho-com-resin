@@ -31,6 +31,7 @@ package com.caucho.quercus.page;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -51,7 +52,7 @@ public class InterpretedPage extends QuercusPage
   {
     _program = program;
   }
-  
+
   /**
    * Returns true if the page is modified.
    */
@@ -78,7 +79,7 @@ public class InterpretedPage extends QuercusPage
   {
     return _program.getCompiledPage();
   }
-  
+
   /**
    * Execute the program
    *
@@ -87,10 +88,10 @@ public class InterpretedPage extends QuercusPage
   public Value execute(Env env)
   {
     Value result = _program.execute(env);
-    
+
     if (result == null)
       result = LongValue.ONE;
-    
+
     return result;
   }
 
@@ -110,7 +111,7 @@ public class InterpretedPage extends QuercusPage
   {
     return _program.getSourcePath();
   }
-  
+
   /**
    * Imports the page definitions.
    */
@@ -130,7 +131,8 @@ public class InterpretedPage extends QuercusPage
   /**
    * Finds the function
    */
-  public AbstractFunction findFunction(String name)
+  @Override
+  public AbstractFunction findFunction(StringValue name)
   {
     return _program.findFunction(name);
   }
@@ -171,7 +173,7 @@ public class InterpretedPage extends QuercusPage
 
     return _program == page._program;
   }
-  
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" +  _program.getSourcePath() + "]";
