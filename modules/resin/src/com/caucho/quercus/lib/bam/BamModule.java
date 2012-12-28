@@ -348,10 +348,10 @@ public class BamModule extends AbstractQuercusModule
       AbstractFunction function = null;
 
       if (env.getGlobalValue("_quercus_bam_start_service") != null) {
-        function = env.findFunction("bam_start_service");
+        function = env.findFunction(env.createString("bam_start_service"));
       }
       else if (env.getGlobalValue("_quercus_bam_stop_service") != null) {
-        function = env.findFunction("bam_stop_service");
+        function = env.findFunction(env.createString("bam_stop_service"));
       }
 
       if (function == null) {
@@ -426,21 +426,28 @@ public class BamModule extends AbstractQuercusModule
                                                String prefix,
                                                Value value)
   {
+    StringValue prefixV = env.createString(prefix);
+
     if (value == null)
-      return env.findFunction(prefix);
+      return env.findFunction(prefixV);
 
     Object obj = value.toJavaObject();
 
     if (obj == null)
-      return env.findFunction(prefix);
+      return env.findFunction(prefixV);
 
     String typeName = obj.getClass().getSimpleName().toLowerCase(Locale.ENGLISH);
-    String functionName = prefix + '_' + typeName;
 
-    AbstractFunction function = env.findFunction(functionName);
+    StringValue sb = env.createStringBuilder();
+    sb.append(prefix);
+    sb.append("_");
+    sb.append(typeName);
 
-    if (function == null)
-      function = env.findFunction(prefix);
+    AbstractFunction function = env.findFunction(sb);
+
+    if (function == null) {
+      function = env.findFunction(prefixV);
+    }
 
     return function;
   }
