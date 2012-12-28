@@ -29,45 +29,29 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.program.Arg;
-import com.caucho.quercus.program.Function;
-
 /**
- * Represents a call to a function.
+ * Represents a closure function.
  */
-public class Closure extends Callback
+@SuppressWarnings("serial")
+abstract public class Closure extends Callback
 {
-  private Function _fun;
-  private Value []_args;
+  private final String _name;
+  private Value _qThis;
 
-  public Closure(Env env, Function fun)
+  public Closure(String name)
   {
-    _fun = fun;
+    _name = name;
+    _qThis = NullValue.NULL;
+  }
 
-    Arg []args = fun.getClosureUseArgs();
-    if (args != null && args.length > 0) {
-      _args = new Value[args.length];
-
-      for (int i = 0; i < args.length; i++) {
-        Arg arg = args[i];
-
-        if (arg.isReference())
-          _args[i] = env.getRef(arg.getName());
-        else
-          _args[i] = env.getValue(arg.getName());
-      }
-    }
+  public Closure(String name, Value qThis)
+  {
+    _name = name;
+    _qThis = qThis;
   }
 
   @Override
   public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef)
-  {
-    return isCallableStatic(env, isCheckSyntaxOnly, nameRef);
-  }
-
-  public static boolean isCallableStatic(Env env,
-                                         boolean isCheckSyntaxOnly,
-                                         Value nameRef)
   {
     if (nameRef != null) {
       StringValue sb = env.createString("Closure::__invoke");
@@ -76,6 +60,11 @@ public class Closure extends Callback
     }
 
     return true;
+  }
+
+  public final Value getThis()
+  {
+    return _qThis;
   }
 
   @Override
@@ -97,15 +86,9 @@ public class Closure extends Callback
   }
 
   @Override
-  public Value call(Env env, Value []args)
-  {
-    return _fun.callImpl(env, args, false, _fun.getClosureUseArgs(), _args);
-  }
-
-  @Override
   public String getCallbackName()
   {
-    return _fun.getName();
+    return _name;
   }
 
   @Override
@@ -137,9 +120,18 @@ public class Closure extends Callback
     }
   }
 
+  /**
+   * Evaluates the callback with variable arguments.
+   *
+   * @param env the calling environment
+   * @param args
+   */
+  abstract public Value call(Env env, Value []args);
+
+  @Override
   public String toString()
   {
-    return "Closure[" + _fun.getName() + "]";
+    return Closure.class.getSimpleName() + "[" + _name + "]";
   }
 }
 

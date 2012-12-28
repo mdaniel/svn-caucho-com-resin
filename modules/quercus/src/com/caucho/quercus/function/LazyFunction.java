@@ -92,7 +92,7 @@ public class LazyFunction extends AbstractFunction
 
       _fun = (AbstractFunction) cl.newInstance();
 
-      int id = _quercus.findFunctionId(_name);
+      int id = _quercus.findFunctionId(env.createString(_name));
 
       env._fun[id] = _fun;
 

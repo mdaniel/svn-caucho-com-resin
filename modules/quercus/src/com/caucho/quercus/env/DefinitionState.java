@@ -36,15 +36,12 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.UnsetFunction;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
 
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.logging.Logger;
 
 /**
  * Represents the state of the definitions: functions, classes and
@@ -52,20 +49,14 @@ import java.util.logging.Logger;
  */
 public final class DefinitionState {
   private static final L10N L = new L10N(DefinitionState.class);
-  private static final Logger log
-    = Logger.getLogger(DefinitionState.class.getName());
-  
-  private static final
-    LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
-    = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
 
   private final QuercusContext _quercus;
 
   private boolean _isStrict;
 
-  private HashMap<String, AbstractFunction> _funMap;
+  private HashMap<StringValue, AbstractFunction> _funMap;
 
-  private HashMap<String, AbstractFunction> _lowerFunMap;
+  private HashMap<StringValue, AbstractFunction> _lowerFunMap;
 
   private HashMap<String, ClassDef> _classDefMap;
 
@@ -82,11 +73,11 @@ public final class DefinitionState {
 
     _isStrict = quercus.isStrict();
 
-    _funMap = new HashMap<String, AbstractFunction>(256, 0.25F);
+    _funMap = new HashMap<StringValue, AbstractFunction>(256, 0.25F);
     _classDefMap = new HashMap<String, ClassDef>(256, 0.25F);
 
     if (! _isStrict) {
-      _lowerFunMap = new HashMap<String, AbstractFunction>(256, 0.25F);
+      _lowerFunMap = new HashMap<StringValue, AbstractFunction>(256, 0.25F);
 
       _lowerClassDefMap = new HashMap<String, ClassDef>(256, 0.25F);
     }
@@ -112,7 +103,7 @@ public final class DefinitionState {
   private DefinitionState(DefinitionState oldState, boolean isLazy)
   {
     _isLazy = true;
-    
+
     _quercus = oldState._quercus;
     _isStrict = oldState._isStrict;
 
@@ -121,7 +112,7 @@ public final class DefinitionState {
 
     _classDefMap = oldState._classDefMap;
     _lowerClassDefMap = oldState._lowerClassDefMap;
-    
+
     _crc = oldState._crc;
   }
 
@@ -163,10 +154,8 @@ public final class DefinitionState {
     result.put(new StringBuilderValue("internal"), internal);
     result.put(new StringBuilderValue("user"), user);
 
-    for (String name : _funMap.keySet()) {
-      StringValue key = new StringBuilderValue(name);
-
-      if (! internal.contains(key).isset())
+    for (StringValue name : _funMap.keySet()) {
+      if (! internal.contains(name).isset())
         user.put(name);
     }
 
@@ -179,7 +168,7 @@ public final class DefinitionState {
    * @param name the method name
    * @return the found method or null if no method found.
    */
-  public AbstractFunction findFunction(String name)
+  public AbstractFunction findFunction(StringValue name)
   {
     AbstractFunction fun = _funMap.get(name);
 
@@ -194,7 +183,7 @@ public final class DefinitionState {
     else {
       return fun;
     }
-    
+
     if (_lowerFunMap != null) {
       fun = _lowerFunMap.get(name.toLowerCase(Locale.ENGLISH));
 
@@ -217,7 +206,7 @@ public final class DefinitionState {
     else {
       // copyOnWrite();
       _funMap.put(name, new UnsetFunction(_crc));
-      
+
       return null;
     }
   }
@@ -228,13 +217,14 @@ public final class DefinitionState {
    * @param name the method name
    * @return the found method or null if no method found.
    */
-  private AbstractFunction findModuleFunction(String name)
+  private AbstractFunction findModuleFunction(StringValue name)
   {
     AbstractFunction fun = null;
 
     fun = _quercus.findFunction(name);
-    if (fun != null)
+    if (fun != null) {
       return fun;
+    }
 
     return fun;
   }
@@ -242,7 +232,7 @@ public final class DefinitionState {
   /**
    * Adds a function, e.g. from an include.
    */
-  public Value addFunction(String name, AbstractFunction fun)
+  public Value addFunction(StringValue name, AbstractFunction fun)
   {
     AbstractFunction oldFun = findFunction(name);
 
@@ -252,10 +242,11 @@ public final class DefinitionState {
 
     copyOnWrite();
     _funMap.put(name, fun);
-    _crc = Crc64.generate(_crc, name);
+    _crc = Crc64.generate(_crc, name.toString());
 
-    if (_lowerFunMap != null)
+    if (_lowerFunMap != null) {
       _lowerFunMap.put(name.toLowerCase(Locale.ENGLISH), fun);
+    }
 
     return BooleanValue.TRUE;
   }
@@ -266,7 +257,9 @@ public final class DefinitionState {
    * @param name the function name, must be an intern() string
    * @param lowerName the function name, must be an intern() string
    */
-  public Value addFunction(String name, String lowerName, AbstractFunction fun)
+  public Value addFunction(StringValue name,
+                           StringValue lowerName,
+                           AbstractFunction fun)
   {
     // XXX: skip the old function check since the include for compiled
     // pages is already verified.  Might have a switch here?
@@ -283,7 +276,7 @@ public final class DefinitionState {
 
     copyOnWrite();
     _funMap.put(name, fun);
-    _crc = Crc64.generate(_crc, name);
+    _crc = Crc64.generate(_crc, name.toString());
 
     if (_lowerFunMap != null)
       _lowerFunMap.put(lowerName, fun);
@@ -371,13 +364,13 @@ public final class DefinitionState {
   {
     if (! _isLazy)
       return;
-    
+
     _isLazy = false;
 
-    _funMap = new HashMap<String, AbstractFunction>(_funMap);
+    _funMap = new HashMap<StringValue, AbstractFunction>(_funMap);
 
     if (_lowerFunMap != null) {
-      _lowerFunMap = new HashMap<String, AbstractFunction>(_lowerFunMap);
+      _lowerFunMap = new HashMap<StringValue, AbstractFunction>(_lowerFunMap);
     }
 
     _classDefMap = new HashMap<String, ClassDef>(_classDefMap);
@@ -406,7 +399,7 @@ public final class DefinitionState {
       int hash = 37;
 
       ClassDef def = _defRef.get();
-      
+
       QuercusClass parent = null;
       if (_parentRef != null)
         parent = _parentRef.get();
@@ -432,7 +425,7 @@ public final class DefinitionState {
 
       if (_parentRef == key._parentRef)
         return true;
-      
+
       else if (_parentRef != null && key._parentRef != null)
         return _parentRef.get() == key._parentRef.get();
 

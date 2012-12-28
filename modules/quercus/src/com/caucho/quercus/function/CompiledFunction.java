@@ -41,7 +41,7 @@ import com.caucho.quercus.env.Value;
 abstract public class CompiledFunction extends AbstractFunction {
   private static final StringValue INVOKE
     = MethodIntern.intern("__invoke");
-  
+
   @Override
   public abstract String getName();
 
@@ -87,21 +87,21 @@ abstract public class CompiledFunction extends AbstractFunction {
   {
     return call(env, a1, a2, a3, a4, a5).copyReturn();
   }
-  
-  
+
+
   //
   // special methods
   //
-  
+
   @Override
-  public Value callMethod(Env env, 
-                          StringValue methodName, int hash, 
+  public Value callMethod(Env env,
+                          StringValue methodName, int hash,
                           Value []args)
   {
     if (methodName == INVOKE || INVOKE.equals(methodName))
       return call(env, args);
     else
       return super.callMethod(env, methodName, hash, args);
-  }  
+  }
 }
 

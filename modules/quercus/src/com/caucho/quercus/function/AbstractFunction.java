@@ -193,7 +193,7 @@ abstract public class AbstractFunction extends Callback {
     return _isStatic;
   }
 
-  /*
+  /**
    * Returns true for a final function.
    */
   public boolean isFinal()
@@ -232,7 +232,7 @@ abstract public class AbstractFunction extends Callback {
     _isConstructor = isConstructor;
   }
 
-  /*
+  /**
    * Returns true for a protected function.
    */
   public boolean isPublic()
@@ -240,7 +240,7 @@ abstract public class AbstractFunction extends Callback {
     return _visibility == Visibility.PUBLIC;
   }
 
-  /*
+  /**
    * Returns true for a protected function.
    */
   public boolean isProtected()
@@ -248,7 +248,7 @@ abstract public class AbstractFunction extends Callback {
     return _visibility == Visibility.PROTECTED;
   }
 
-  /*
+  /**
    * Returns true for a private function.
    */
   public boolean isPrivate()

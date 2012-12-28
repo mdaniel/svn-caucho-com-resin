@@ -189,7 +189,7 @@ public class QuercusClass extends NullValue {
       if (! _constructor.getName().equals("__construct")
           && ! _className.equals(_constructor.getDeclaringClassName())) {
         // php/093j, php/093n
-        addMethodIfNotExist(_className, _constructor);
+        addMethodIfNotExist(_moduleContext.createString(_className), _constructor);
       }
     }
 
@@ -311,6 +311,14 @@ public class QuercusClass extends NullValue {
   public QuercusClass getParent()
   {
     return _parent;
+  }
+
+  /**
+   * Returns the module context.
+   */
+  public ModuleContext getModuleContext()
+  {
+    return _moduleContext;
   }
 
   /*
@@ -601,20 +609,18 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a method.
    */
-  public void addMethod(String name, AbstractFunction fun)
+  public void addMethod(StringValue name, AbstractFunction fun)
   {
     if (fun == null)
       throw new NullPointerException(L.l("'{0}' is a null function", name));
 
-    StringValue nameV = _moduleContext.createString(name);
-
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
-    AbstractFunction existingFun = _methodMap.getRaw(nameV);
+    AbstractFunction existingFun = _methodMap.getRaw(name);
 
     if (existingFun == null || ! fun.isAbstract())
-      _methodMap.put(nameV, fun);
+      _methodMap.put(name, fun);
     else if (! existingFun.isAbstract() && fun.isAbstract()) {
       Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
                                   getName(), name));
@@ -624,21 +630,19 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a method if it does not exist.
    */
-  public void addMethodIfNotExist(String name, AbstractFunction fun)
+  public void addMethodIfNotExist(StringValue name, AbstractFunction fun)
   {
     if (fun == null) {
       throw new NullPointerException(L.l("'{0}' is a null function", name));
     }
 
-    StringValue nameV = _moduleContext.createString(name);
-
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
-    AbstractFunction existingFun = _methodMap.getRaw(nameV);
+    AbstractFunction existingFun = _methodMap.getRaw(name);
 
     if (existingFun == null && ! fun.isAbstract())
-      _methodMap.put(nameV, fun);
+      _methodMap.put(name, fun);
   }
 
   /**
@@ -746,13 +750,10 @@ public class QuercusClass extends NullValue {
           isAbstract = fun.isAbstract();
 
         if (isAbstract) {
-          throw env.createErrorException(
-            _classDef.getLocation(),
-            L.l(
-              "Abstract function '{0}' must be "
-              + "implemented in concrete class {1}.",
-              fun.getName(),
-              getName()));
+          throw env.createErrorException(_classDef.getLocation(),
+                                         L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
+                                             fun.getName(),
+                                             getName()));
         }
       }
     }
@@ -1025,7 +1026,8 @@ public class QuercusClass extends NullValue {
       }
 
       return objectValue;
-    } finally {
+    }
+    finally {
       env.setCallingClass(oldCallingClass);
     }
   }

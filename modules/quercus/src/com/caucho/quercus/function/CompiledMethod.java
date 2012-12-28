@@ -30,12 +30,8 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
 
 /**
  * Represents a compiled method with 0 args
@@ -49,7 +45,7 @@ abstract public class CompiledMethod extends AbstractFunction {
   }
 
   @Override
-  public Value callMethodRef(Env env, 
+  public Value callMethodRef(Env env,
                              QuercusClass qClass,
                              Value qThis,
                              Value []args)
@@ -76,7 +72,7 @@ abstract public class CompiledMethod extends AbstractFunction {
   }
 
   @Override
-  public Value callMethodRef(Env env, 
+  public Value callMethodRef(Env env,
                              QuercusClass qClass,
                              Value qThis,
                              Value a1, Value a2)
@@ -85,7 +81,7 @@ abstract public class CompiledMethod extends AbstractFunction {
   }
 
   @Override
-  public Value callMethodRef(Env env, 
+  public Value callMethodRef(Env env,
                              QuercusClass qClass,
                              Value qThis,
                              Value a1, Value a2, Value a3)
@@ -94,7 +90,7 @@ abstract public class CompiledMethod extends AbstractFunction {
   }
 
   @Override
-  public Value callMethodRef(Env env, 
+  public Value callMethodRef(Env env,
                              QuercusClass qClass,
                              Value qThis,
                              Value a1, Value a2, Value a3, Value a4)
@@ -103,7 +99,7 @@ abstract public class CompiledMethod extends AbstractFunction {
   }
 
   @Override
-  public Value callMethodRef(Env env, 
+  public Value callMethodRef(Env env,
                              QuercusClass qClass,
                              Value qThis,
                              Value a1, Value a2, Value a3, Value a4, Value a5)

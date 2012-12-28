@@ -3911,7 +3911,7 @@ public class Env
    * Compiled mode normally uses the _fun array directly, so this call
    * is rare.
    */
-  public int findFunctionId(String name)
+  public int findFunctionId(StringValue name)
   {
     return _quercus.findFunctionId(name);
   }
@@ -3922,7 +3922,7 @@ public class Env
    * Compiled mode normally uses the _fun array directly, so this call
    * is rare.
    */
-  public AbstractFunction findFunction(String name)
+  public AbstractFunction findFunction(StringValue name)
   {
     int id = _quercus.findFunctionId(name);
 
@@ -3987,7 +3987,7 @@ public class Env
     return null;
   }
 
-  public AbstractFunction getFunction(String name)
+  public AbstractFunction getFunction(StringValue name)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4046,10 +4046,11 @@ public class Env
   {
     name = name.toValue();
 
-    if (name instanceof CallbackFunction)
+    if (name instanceof CallbackFunction) {
       return ((CallbackFunction) name).getFunction(this);
+    }
 
-    return getFunction(name.toString());
+    return getFunction(name.toStringValue());
   }
 
   /*
@@ -4060,6 +4061,11 @@ public class Env
   */
 
   public Value addFunction(String name, AbstractFunction fun)
+  {
+    return addFunction(createString(name), fun);
+  }
+
+  public Value addFunction(StringValue name, AbstractFunction fun)
   {
     AbstractFunction staticFun
       = _quercus.findLowerFunctionImpl(name.toLowerCase(Locale.ENGLISH));
@@ -4276,7 +4282,7 @@ public class Env
    * @param name the function name
    * @return the function value
    */
-  public Value call(String name)
+  public Value call(StringValue name)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4297,7 +4303,7 @@ public class Env
    * @param a0 the first argument
    * @return the function value
    */
-  public Value call(String name, Value a0)
+  public Value call(StringValue name, Value a0)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4315,7 +4321,7 @@ public class Env
    * @param a1 the second argument
    * @return the function value
    */
-  public Value call(String name, Value a0, Value a1)
+  public Value call(StringValue name, Value a0, Value a1)
   {
     return getFunction(name).call(this, a0, a1);
   }
@@ -4329,7 +4335,7 @@ public class Env
    * @param a2 the third argument
    * @return the function value
    */
-  public Value call(String name, Value a0, Value a1, Value a2)
+  public Value call(StringValue name, Value a0, Value a1, Value a2)
   {
     return getFunction(name).call(this, a0, a1, a2);
   }
@@ -4344,7 +4350,7 @@ public class Env
    * @param a3 the fourth argument
    * @return the function value
    */
-  public Value call(String name, Value a0, Value a1, Value a2, Value a3)
+  public Value call(StringValue name, Value a0, Value a1, Value a2, Value a3)
   {
     return getFunction(name).call(this, a0, a1, a2, a3);
   }
@@ -4360,7 +4366,7 @@ public class Env
    * @param a4 the fifth argument
    * @return the function value
    */
-  public Value call(String name, Value a0, Value a1,
+  public Value call(StringValue name, Value a0, Value a1,
                     Value a2, Value a3, Value a4)
   {
     return getFunction(name).call(this, a0, a1, a2, a3, a4);
@@ -4373,7 +4379,7 @@ public class Env
    * @param args the arguments
    * @return the function value
    */
-  public Value call(String name, Value []args)
+  public Value call(StringValue name, Value []args)
   {
     return getFunction(name).call(this, args);
   }
@@ -4384,7 +4390,7 @@ public class Env
    * @param name the function name
    * @return the function value
    */
-  public Value callRef(String name)
+  public Value callRef(StringValue name)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4401,7 +4407,7 @@ public class Env
    * @param a0 the first argument
    * @return the function value
    */
-  public Value callRef(String name, Value a0)
+  public Value callRef(StringValue name, Value a0)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4419,7 +4425,7 @@ public class Env
    * @param a1 the second argument
    * @return the function value
    */
-  public Value callRef(String name, Value a0, Value a1)
+  public Value callRef(StringValue name, Value a0, Value a1)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4438,7 +4444,7 @@ public class Env
    * @param a2 the third argument
    * @return the function value
    */
-  public Value callRef(String name, Value a0, Value a1, Value a2)
+  public Value callRef(StringValue name, Value a0, Value a1, Value a2)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4458,7 +4464,7 @@ public class Env
    * @param a3 the fourth argument
    * @return the function value
    */
-  public Value callRef(String name, Value a0, Value a1, Value a2, Value a3)
+  public Value callRef(StringValue name, Value a0, Value a1, Value a2, Value a3)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -4479,7 +4485,7 @@ public class Env
    * @param a4 the fifth argument
    * @return the function value
    */
-  public Value callRef(String name, Value a0, Value a1,
+  public Value callRef(StringValue name, Value a0, Value a1,
                        Value a2, Value a3, Value a4)
   {
     AbstractFunction fun = findFunction(name);
@@ -4497,7 +4503,7 @@ public class Env
    * @param args the arguments
    * @return the function value
    */
-  public Value callRef(String name, Value []args)
+  public Value callRef(StringValue name, Value []args)
   {
     AbstractFunction fun = findFunction(name);
 
@@ -5163,7 +5169,7 @@ public class Env
 
           if (size == 0) {
             if (_autoload == null)
-              _autoload = findFunction("__autoload");
+              _autoload = findFunction(createString("__autoload"));
 
             if (_autoload != null) {
               _autoload.call(this, nameString);
@@ -6218,6 +6224,14 @@ public class Env
   /**
    * Returns the first value
    */
+  public static long first(long value, long a1)
+  {
+    return value;
+  }
+
+  /**
+   * Returns the first value
+   */
   public static double first(double value, double a1)
   {
     return value;
@@ -6326,6 +6340,23 @@ public class Env
         functionName,
         type));
     }
+  }
+
+  /**
+   * Error when using $this not inside an object context.
+   */
+  public Value thisError(Location location)
+  {
+    return error(location,
+                 L.l("Cannot use '$this' when not in object context."));
+  }
+
+  /**
+   * Error when using $this not inside an object context.
+   */
+  public Value thisError()
+  {
+    return thisError(getLocation());
   }
 
   /**
@@ -6551,6 +6582,16 @@ public class Env
   }
 
   /**
+   * A warning with an exception.
+   */
+  public Value notice(Throwable e)
+  {
+    log.log(Level.FINE, e.toString(), e);
+
+    return notice(e.toString());
+  }
+
+  /**
    * A notice with an exception.
    */
   public Value notice(String msg, Throwable e)
@@ -6565,8 +6606,9 @@ public class Env
    */
   public Value stub(String msg)
   {
-    if (log.isLoggable(Level.FINE))
+    if (log.isLoggable(Level.FINE)) {
       log.fine(getLocation().getMessagePrefix() + msg);
+    }
 
     return NullValue.NULL;
   }

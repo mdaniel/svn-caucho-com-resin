@@ -34,17 +34,18 @@ import com.caucho.quercus.function.AbstractFunction;
 /**
  * Represents a call to a function.
  */
+@SuppressWarnings("serial")
 public class CallbackFunction extends Callback {
   // public static final CallbackFunction INVALID_CALLBACK
   // = new CallbackFunction(null, "Invalid Callback");
 
-  private String _funName;
+  private StringValue _funName;
 
   private AbstractFunction _fun;
 
  // private boolean _isInvalid = false;
 
-  public CallbackFunction(Env env, String funName)
+  public CallbackFunction(Env env, StringValue funName)
   {
     _funName = funName;
   }
@@ -54,7 +55,7 @@ public class CallbackFunction extends Callback {
     _fun = fun;
   }
 
-  public CallbackFunction(AbstractFunction fun, String funName)
+  public CallbackFunction(AbstractFunction fun, StringValue funName)
   {
     _fun = fun;
     _funName = funName;
@@ -84,7 +85,7 @@ public class CallbackFunction extends Callback {
    */
   public void serialize(Env env, StringBuilder sb)
   {
-    String name;
+    CharSequence name;
 
     if (_fun != null)
       name = _fun.getName();
@@ -174,13 +175,14 @@ public class CallbackFunction extends Callback {
 
   public String getCallbackName()
   {
-    return _funName;
+    return _funName.toString();
   }
 
   public AbstractFunction getFunction(Env env)
   {
-    if (_fun == null)
+    if (_fun == null) {
       _fun = env.getFunction(_funName);
+    }
 
     return _fun;
   }

@@ -56,6 +56,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Represents a PHP expression value.
  */
+@SuppressWarnings("serial")
 abstract public class Value implements java.io.Serializable
 {
   protected static final L10N L = new L10N(Value.class);
@@ -551,6 +552,46 @@ abstract public class Value implements java.io.Serializable
   //
   // Conversions
   //
+
+  public static long toLong(boolean b)
+  {
+    return b ? 1 : 0;
+  }
+
+  public static long toLong(double d)
+  {
+    return (long) d;
+  }
+
+  public static long toLong(long l)
+  {
+    return l;
+  }
+
+  public static long toLong(CharSequence s)
+  {
+    return StringValue.parseLong(s);
+  }
+
+  public static double toDouble(boolean b)
+  {
+    return b ? 1.0 : 0.0;
+  }
+
+  public static double toDouble(double d)
+  {
+    return d;
+  }
+
+  public static double toDouble(long l)
+  {
+    return l;
+  }
+
+  public static double toDouble(CharSequence s)
+  {
+    return StringValue.toDouble(s.toString());
+  }
 
   /**
    * Converts to a boolean.

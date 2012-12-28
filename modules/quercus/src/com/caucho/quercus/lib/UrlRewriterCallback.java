@@ -49,13 +49,14 @@ import java.util.HashMap;
  * Implements the built-in URL rewriter for passing session ids and other
  * variables.
  */
+@SuppressWarnings("serial")
 public class UrlRewriterCallback extends CallbackFunction {
   private StringBuilder _rewriterQuery = new StringBuilder();
   private ArrayList<String[]> _rewriterVars = new ArrayList<String[]>();
 
   public UrlRewriterCallback(Env env)
   {
-    super(env, "URL-Rewriter");
+    super(env, env.createString("URL-Rewriter"));
 
     try {
       Method rewriterMethod =

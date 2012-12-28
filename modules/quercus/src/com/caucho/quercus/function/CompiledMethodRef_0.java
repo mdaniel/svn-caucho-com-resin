@@ -30,10 +30,8 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.expr.Expr;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -52,7 +50,7 @@ abstract public class CompiledMethodRef_0 extends CompiledMethodRef {
   {
     _name = name;
   }
-  
+
   /**
    * Returns this function's name.
    */

@@ -103,7 +103,7 @@ public class SplModule extends AbstractQuercusModule
                                               @Optional boolean isPrepend)
   {
     if (fun == null) {
-      fun = new CallbackFunction(env, "spl_autoload");
+      fun = new CallbackFunction(env, env.createString("spl_autoload"));
     }
 
     env.addAutoloadFunction(fun, isPrepend);

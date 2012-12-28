@@ -37,12 +37,12 @@ public interface Callable {
    * Returns the callable name, needed as special case for ob_*
    */
   public String getCallbackName();
-  
+
   /**
    * Checks for a valid callback.
    */
   public boolean isValid(Env env);
-  
+
   /**
    * Evaluates the callback with no arguments.
    *
@@ -93,12 +93,12 @@ public interface Callable {
    * @param env the calling environment
    */
   abstract public Value call(Env env, Value []args);
-  
+
   /**
    * Evaluates a callback where the first argument is from an array.
    * The callback may be modifying that array element.
    * For ArrayModule.
-   * 
+   *
    * @param env
    * @param array from which a1 came from
    * @param key index of a1 in the array
@@ -113,7 +113,7 @@ public interface Callable {
    * Evaluates a callback where the first argument is from an array.
    * The callback may be modifying that array element.
    * For ArrayModule.
-   * 
+   *
    * @param env
    * @param array from which a1 came from
    * @param key index of a1 in the array
@@ -125,12 +125,12 @@ public interface Callable {
                                   Value key,
                                   Value a1,
                                   Value a2);
-  
+
   /**
    * Evaluates a callback where the first argument is from an array.
    * The callback may be modifying that array element.
    * For ArrayModule.
-   * 
+   *
    * @param env
    * @param array from which a1 came from
    * @param key index of a1 in the array
