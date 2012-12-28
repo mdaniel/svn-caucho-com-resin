@@ -7644,27 +7644,26 @@ public class Env
   }
 
   static {
-    SPECIAL_VARS.put(MethodIntern.intern("GLOBALS"), _GLOBAL);
-    SPECIAL_VARS.put(MethodIntern.intern("_SERVER"), _SERVER);
-    SPECIAL_VARS.put(MethodIntern.intern("_GET"), _GET);
-    SPECIAL_VARS.put(MethodIntern.intern("_POST"), _POST);
-    SPECIAL_VARS.put(MethodIntern.intern("_FILES"), _FILES);
-    SPECIAL_VARS.put(MethodIntern.intern("_REQUEST"), _REQUEST);
-    SPECIAL_VARS.put(MethodIntern.intern("_COOKIE"), _COOKIE);
-    SPECIAL_VARS.put(MethodIntern.intern("_SESSION"), _SESSION);
-    SPECIAL_VARS.put(MethodIntern.intern("_ENV"), _ENV);
+    SPECIAL_VARS.put(new ConstStringValue("GLOBALS"), _GLOBAL);
+    SPECIAL_VARS.put(new ConstStringValue("_SERVER"), _SERVER);
+    SPECIAL_VARS.put(new ConstStringValue("_GET"), _GET);
+    SPECIAL_VARS.put(new ConstStringValue("_POST"), _POST);
+    SPECIAL_VARS.put(new ConstStringValue("_FILES"), _FILES);
+    SPECIAL_VARS.put(new ConstStringValue("_REQUEST"), _REQUEST);
+    SPECIAL_VARS.put(new ConstStringValue("_COOKIE"), _COOKIE);
+    SPECIAL_VARS.put(new ConstStringValue("_SESSION"), _SESSION);
+    SPECIAL_VARS.put(new ConstStringValue("_ENV"), _ENV);
 
-    SPECIAL_VARS.put(MethodIntern.intern("argc"), ARGC);
-    SPECIAL_VARS.put(MethodIntern.intern("argv"), ARGV);
+    SPECIAL_VARS.put(new ConstStringValue("argc"), ARGC);
+    SPECIAL_VARS.put(new ConstStringValue("argv"), ARGV);
 
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_GET_VARS"), HTTP_GET_VARS);
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_POST_VARS"), HTTP_POST_VARS);
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_POST_FILES"), HTTP_POST_FILES);
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_COOKIE_VARS"), HTTP_COOKIE_VARS);
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
-    SPECIAL_VARS.put(MethodIntern.intern("PHP_SELF"), PHP_SELF);
-    SPECIAL_VARS.put(MethodIntern.intern("HTTP_RAW_POST_DATA"),
-                     HTTP_RAW_POST_DATA);
+    SPECIAL_VARS.put(new ConstStringValue("HTTP_GET_VARS"), HTTP_GET_VARS);
+    SPECIAL_VARS.put(new ConstStringValue("HTTP_POST_VARS"), HTTP_POST_VARS);
+    SPECIAL_VARS.put(new ConstStringValue("HTTP_POST_FILES"), HTTP_POST_FILES);
+    SPECIAL_VARS.put(new ConstStringValue("HTTP_COOKIE_VARS"), HTTP_COOKIE_VARS);
+    SPECIAL_VARS.put(new ConstStringValue("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
+    SPECIAL_VARS.put(new ConstStringValue("PHP_SELF"), PHP_SELF);
+    SPECIAL_VARS.put(new ConstStringValue("HTTP_RAW_POST_DATA"), HTTP_RAW_POST_DATA);
 
     SPECIAL_VARS_U.put(new UnicodeBuilderValue("GLOBALS"), _GLOBAL);
     SPECIAL_VARS_U.put(new UnicodeBuilderValue("_SERVER"), _SERVER);
@@ -7685,8 +7684,7 @@ public class Env
     SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_COOKIE_VARS"), HTTP_COOKIE_VARS);
     SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
     SPECIAL_VARS_U.put(new UnicodeBuilderValue("PHP_SELF"), PHP_SELF);
-    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_RAW_POST_DATA"),
-                       HTTP_RAW_POST_DATA);
+    SPECIAL_VARS_U.put(new UnicodeBuilderValue("HTTP_RAW_POST_DATA"), HTTP_RAW_POST_DATA);
 
     DEFAULT_QUERY_SEPARATOR_MAP = new int[128];
     DEFAULT_QUERY_SEPARATOR_MAP['&'] = 1;

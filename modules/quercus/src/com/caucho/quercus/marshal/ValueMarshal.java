@@ -43,7 +43,7 @@ public class ValueMarshal extends Marshal
 
   protected ValueMarshal(boolean isPassThru)
   {
-    _isPassThru =  isPassThru;
+    _isPassThru = isPassThru;
   }
 
   public boolean isReadOnly()

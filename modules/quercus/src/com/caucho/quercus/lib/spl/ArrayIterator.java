@@ -54,9 +54,6 @@ public class ArrayIterator
   public static final int STD_PROP_LIST = 0x00000001;
   public static final int ARRAY_AS_PROPS = 0x00000002;
 
-  private static final StringValue _rewind
-    = MethodIntern.intern("rewind");
-
   private Env _env;
   private Value _qThis;
   private Value _value = NullValue.NULL;
@@ -175,10 +172,12 @@ public class ArrayIterator
 
   public void rewindJava(Env env)
   {
-    if (_qThis != null)
-      _qThis.callMethod(env, _rewind);
-    else
+    if (_qThis != null) {
+      _qThis.callMethod(env, env.createString("rewind"));
+    }
+    else {
       rewind(env);
+    }
   }
 
   @Override

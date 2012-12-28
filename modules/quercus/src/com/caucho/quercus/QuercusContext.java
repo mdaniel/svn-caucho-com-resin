@@ -61,7 +61,6 @@ import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.SessionArrayValue;
@@ -2037,7 +2036,9 @@ public class QuercusContext
 
   public StringValue createStaticName()
   {
-    return MethodIntern.intern("s" + _staticId++);
+    StringValue str = createString("s" + _staticId++);
+
+    return str;
   }
 
   public Cache getSessionCache()
