@@ -15,6 +15,17 @@
 <li>servlet: add a default='true' attribute to servlet-mapping to allow programmatic overriding of default (#5314, rep by Rick Mann)</li>
 <li>quercus: oci_execute() always returns true (#5311, rep by EricESCP)</li>
 <li>quercus: Event endlessly repeated under Drupal Commons 6.x (#5290, rep by jordi)</li>
+<li>quercus: wordpress-3.5.0 tested and runs on Quercus</li>
+<li>quercus: drupal-commons-6.x-2.11 tested and runs on Quercus</li>
+<li>quercus: mediawiki-1.20.2 tested and runs on Quercus</li>
+<li>quercus: phpBB3-3.0.11 tested and runs on Quercus</li>
+<li>quercus: support for short array syntax (PHP 5.4)</li>
+<li>quercus: support for function array dereferencing (PHP 5.4)</li>
+<li>quercus: support for $this use in closures (PHP 5.4)</li>
+<li>quercus: &lt;?= short open tag is now always on (PHP 5.4)</li>
+<li>quercus: support for class member access on instantiation (PHP 5.4)</li>
+<li>quercus: support for Class::{expr}() syntax (PHP 5.4)</li>
+<li>quercus: support for binary number format: 0b001001101 (PHP 5.4)</li>
 </ul>
 </s2>
 
