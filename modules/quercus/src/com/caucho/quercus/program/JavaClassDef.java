@@ -137,7 +137,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
   public JavaClassDef(ModuleContext moduleContext, String name, Class<?> type)
   {
-    super(null, name, null, new String[] {});
+    super(null, name, null,
+          ClassDef.NULL_STRING_ARRAY, ClassDef.NULL_STRING_ARRAY);
 
     _moduleContext = moduleContext;
     _name = name;
@@ -147,9 +148,9 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     _isInterface = type.isInterface();
     _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
 
-    if (type.isArray() && ! isArray())
-      throw new IllegalStateException(
-        L.l("'{0}' needs to be called with JavaArrayClassDef", type));
+    if (type.isArray() && ! isArray()) {
+      throw new IllegalStateException(L.l("'{0}' needs to be called with JavaArrayClassDef", type));
+    }
   }
 
   public JavaClassDef(ModuleContext moduleContext,
@@ -746,12 +747,14 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   }
 
   /**
-   * Initialize the quercus class.
+   * Initialize the quercus class methods.
    */
   @Override
-  public void initClass(QuercusClass cl)
+  public void initClassMethods(QuercusClass cl, String bindingClassName)
   {
     init();
+
+    cl.addInitializer(this);
 
     if (_cons != null) {
       cl.setConstructor(_cons);
@@ -799,9 +802,17 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       cl.setTraversableDelegate(new JavaTraversableDelegate(_iteratorMethod));
     }
 
-    if (_countDelegate != null)
+    if (_countDelegate != null) {
       cl.setCountDelegate(_countDelegate);
+    }
+  }
 
+  /**
+   * Initialize the quercus class fields.
+   */
+  @Override
+  public void initClassFields(QuercusClass cl, String bindingClassName)
+  {
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(_moduleContext.createString(entry.getKey()),
                      new LiteralExpr(entry.getValue()));
@@ -811,8 +822,6 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       cl.addJavaConstant(_moduleContext.createString(entry.getKey()),
                          entry.getValue());
     }
-
-    cl.addInitializer(this);
   }
 
   /**

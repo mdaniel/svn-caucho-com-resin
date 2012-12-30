@@ -893,18 +893,37 @@ public class StringBuilderValue
   {
     int length = _length;
 
-    StringBuilderValue string = createStringBuilder(length);
+    boolean isUpperCase = false;
 
     byte []srcBuffer = _buffer;
+
+    for (int i = 0; i < length; i++) {
+      byte ch = srcBuffer[i];
+
+      if ('a' <= ch && ch <= 'z') {
+      }
+      else if ('A' <= ch && ch <= 'Z') {
+        isUpperCase = true;
+        break;
+      }
+    }
+
+    if (! isUpperCase) {
+      return this;
+    }
+
+    StringBuilderValue string = createStringBuilder(length);
     byte []dstBuffer = string._buffer;
 
     for (int i = 0; i < length; i++) {
       byte ch = srcBuffer[i];
 
-      if ('A' <= ch && ch <= 'Z')
+      if ('A' <= ch && ch <= 'Z') {
         dstBuffer[i] = (byte) (ch + 'a' - 'A');
-      else
+      }
+      else {
         dstBuffer[i] = ch;
+      }
     }
 
     string._length = length;

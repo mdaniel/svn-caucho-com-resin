@@ -111,7 +111,8 @@ public class ModuleContext
     _marshalFactory = new MarshalFactory(this);
     _exprFactory = new ExprFactory();
 
-    _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
+    String []empty = new String[0];
+    _stdClassDef = new InterpretedClassDef("stdClass", null, empty, empty);
     _stdClass = new QuercusClass(this, _stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);

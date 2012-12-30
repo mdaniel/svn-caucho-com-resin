@@ -64,7 +64,7 @@ public class ClassScope extends Scope
    */
   public boolean isAbstract()
   {
-    return _cl.isAbstract() || _cl.isInterface();
+    return _cl.isAbstract() || _cl.isInterface() || _cl.isTrait();
   }
 
   /**

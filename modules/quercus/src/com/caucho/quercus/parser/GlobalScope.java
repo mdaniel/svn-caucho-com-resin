@@ -116,11 +116,11 @@ public class GlobalScope extends Scope {
       cl = _classMap.get(name);
 
     if (cl == null) {
-      String []ifaceArray = new String[ifaceList.size()];
-      ifaceList.toArray(ifaceArray);
+      String []ifaces = new String[ifaceList.size()];
+      ifaceList.toArray(ifaces);
 
       cl = _exprFactory.createClassDef(location,
-                                       name, parentName, ifaceArray,
+                                       name, parentName, ifaces,
                                        index);
 
       if (isTop) {
@@ -135,7 +135,8 @@ public class GlobalScope extends Scope {
 
       // dummy classdef for parsing only
       cl = _exprFactory.createClassDef(location,
-                                       name, parentName, new String[0],
+                                       name, parentName,
+                                       new String[0],
                                        index);
     }
 
@@ -144,7 +145,7 @@ public class GlobalScope extends Scope {
     return cl;
   }
 
-  /*
+  /**
    *  Adds a class
    */
   protected void addConditionalClass(InterpretedClassDef def)

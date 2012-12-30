@@ -53,6 +53,7 @@ public class InterpretedClassDef extends ClassDef
 {
   protected boolean _isAbstract;
   protected boolean _isInterface;
+  protected boolean _isTrait;
   protected boolean _isFinal;
 
   protected boolean _hasNonPublicMethods;
@@ -92,16 +93,35 @@ public class InterpretedClassDef extends ClassDef
                              String []ifaceList,
                              int index)
   {
-    super(location, name, parentName, ifaceList);
+    this(location,
+          name, parentName, ifaceList, ClassDef.NULL_STRING_ARRAY, index);
+  }
+
+  public InterpretedClassDef(Location location,
+                             String name,
+                             String parentName,
+                             String []ifaceList,
+                             String []traitList,
+                             int index)
+  {
+    super(location, name, parentName, ifaceList, traitList);
 
     _parseIndex = index;
   }
 
   public InterpretedClassDef(String name,
                              String parentName,
+                             String []ifaceList,
+                             String []traitList)
+  {
+    this(null, name, parentName, ifaceList, traitList, 0);
+  }
+
+  public InterpretedClassDef(String name,
+                             String parentName,
                              String []ifaceList)
   {
-    this(null, name, parentName, ifaceList, 0);
+    this(null, name, parentName, ifaceList, ClassDef.NULL_STRING_ARRAY, 0);
   }
 
   /**
@@ -115,6 +135,7 @@ public class InterpretedClassDef extends ClassDef
   /**
    * True for an abstract class.
    */
+  @Override
   public boolean isAbstract()
   {
     return _isAbstract;
@@ -131,9 +152,27 @@ public class InterpretedClassDef extends ClassDef
   /**
    * True for an interface class.
    */
+  @Override
   public boolean isInterface()
   {
     return _isInterface;
+  }
+
+  /**
+   * true for an trait class.
+   */
+  public void setTrait(boolean isTrait)
+  {
+    _isTrait = isTrait;
+  }
+
+  /**
+   * True for an trait class.
+   */
+  @Override
+  public boolean isTrait()
+  {
+    return _isTrait;
   }
 
   /**
@@ -176,7 +215,7 @@ public class InterpretedClassDef extends ClassDef
     _isTopScope = isTopScope;
   }
 
-  /*
+  /**
    * Unique name to use for compilation.
    */
   public String getCompilationName()
@@ -189,10 +228,13 @@ public class InterpretedClassDef extends ClassDef
   }
 
   /**
-   * Initialize the quercus class.
+   * Initialize the quercus class methods.
    */
-  public void initClass(QuercusClass cl)
+  @Override
+  public void initClassMethods(QuercusClass cl, String bindingClassName)
   {
+    cl.addInitializer(this);
+
     if (_constructor != null) {
       cl.setConstructor(_constructor);
 
@@ -230,25 +272,62 @@ public class InterpretedClassDef extends ClassDef
     if (_unset != null)
       cl.setUnset(_unset);
 
-    cl.addInitializer(this);
 
     for (Map.Entry<StringValue,AbstractFunction> entry : _functionMap.entrySet()) {
-      cl.addMethod(entry.getKey(), entry.getValue());
+      StringValue funName = entry.getKey();
+      AbstractFunction fun = entry.getValue();
+
+      if (fun.isTraitMethod()) {
+        cl.addTraitMethod(bindingClassName, funName, fun);
+      }
+      else {
+        cl.addMethod(funName, fun);
+      }
+    }
+  }
+
+  /**
+   * Initialize the quercus class fields.
+   */
+  @Override
+  public void initClassFields(QuercusClass cl, String declaringClassName)
+  {
+    if (isTrait()) {
+      for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
+        FieldEntry fieldEntry = entry.getValue();
+
+        cl.addTraitField(getName(),
+                         entry.getKey(),
+                         fieldEntry.getValue(),
+                         fieldEntry.getVisibility());
+      }
+    }
+    else {
+      for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
+        FieldEntry fieldEntry = entry.getValue();
+
+        cl.addField(getName(),
+                    entry.getKey(),
+                    fieldEntry.getValue(),
+                    fieldEntry.getVisibility());
+      }
     }
 
-    for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
-      FieldEntry fieldEntry = entry.getValue();
+    if (isTrait()) {
+      for (Map.Entry<StringValue, StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
+        StaticFieldEntry field = entry.getValue();
 
-      cl.addField(entry.getKey(),
-                  fieldEntry.getValue(),
-                  fieldEntry.getVisibility());
+        cl.addStaticTraitFieldExpr(declaringClassName,
+                                   entry.getKey(), field.getValue());
+      }
     }
+    else {
+      String className = getName();
+      for (Map.Entry<StringValue, StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
+        StaticFieldEntry field = entry.getValue();
 
-    String className = getName();
-    for (Map.Entry<StringValue, StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
-      StaticFieldEntry field = entry.getValue();
-
-      cl.addStaticFieldExpr(className, entry.getKey(), field.getValue());
+        cl.addStaticFieldExpr(className, entry.getKey(), field.getValue());
+      }
     }
 
     for (Map.Entry<StringValue, Expr> entry : _constMap.entrySet()) {

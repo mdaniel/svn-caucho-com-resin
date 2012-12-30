@@ -37,9 +37,10 @@ public class CompiledAbstractClassDef
   public CompiledAbstractClassDef(Location location,
                                   String name,
                                   String parent,
-                                  String[] ifaceList)
+                                  String[] ifaceList,
+                                  String[] traitList)
   {
-    super(location, name, parent, ifaceList);
+    super(location, name, parent, ifaceList, traitList);
   }
 
   @Override

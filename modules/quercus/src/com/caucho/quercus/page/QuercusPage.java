@@ -177,7 +177,7 @@ abstract public class QuercusPage
     }
   }
 
-  /*
+  /**
    * Throws an error for this uncaught exception.
    */
   private void uncaughtExceptionError(Env env, QuercusLanguageException e)

@@ -2738,12 +2738,15 @@ public class FileModule extends AbstractQuercusModule {
   {
     boolean doRead = false;
 
-    if (mode.toString().equalsIgnoreCase("r"))
+    if (mode.equalsStringIgnoreCase("r")) {
       doRead = true;
-    else if (mode.toString().equalsIgnoreCase("w"))
+    }
+    else if (mode.equalsStringIgnoreCase("w")) {
       doRead = false;
-    else
+    }
+    else {
       return null;
+    }
 
     String []args = new String[3];
 
@@ -2766,11 +2769,14 @@ public class FileModule extends AbstractQuercusModule {
 
       Process process = builder.start();
 
-      if (doRead)
+      if (doRead) {
         return new PopenInput(env, process);
-      else
+      }
+      else {
         return new PopenOutput(env, process);
-    } catch (Exception e) {
+      }
+    }
+    catch (Exception e) {
       env.warning(e.getMessage(), e);
 
       return null;
@@ -2784,8 +2790,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value readdir(Env env, @NotNull Directory dir)
   {
-    if (dir == null)
+    if (dir == null) {
       return BooleanValue.FALSE;
+    }
 
     return dir.read(env);
   }

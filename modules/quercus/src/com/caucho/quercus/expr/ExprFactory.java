@@ -159,6 +159,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a __CLASS__ expression (for traits).
+   */
+  public ConstClassExpr createClassExpr(Location location, StringValue funName)
+  {
+    return new ConstClassExpr(location, funName);
+  }
+
+  /**
    * Creates a const expression.
    */
   public ConstExpr createConst(String name)
@@ -1588,7 +1596,7 @@ public class ExprFactory {
   public InterpretedClassDef createClassDef(Location location,
                                             String name,
                                             String parentName,
-                                            String[] ifaceList,
+                                            String []ifaceList,
                                             int index)
   {
     return new InterpretedClassDef(location,

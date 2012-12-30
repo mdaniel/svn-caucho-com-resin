@@ -63,6 +63,7 @@ public class QuercusParser {
   private final static int M_FINAL = 0x10;
   private final static int M_ABSTRACT = 0x20;
   private final static int M_INTERFACE = 0x40;
+  private final static int M_TRAIT = 0x80;
 
   private final static int IDENTIFIER = 256;
   private final static int STRING = 257;
@@ -171,12 +172,14 @@ public class QuercusParser {
   private final static int TRY = 570;
   private final static int CATCH = 571;
   private final static int INTERFACE = 572;
-  private final static int IMPLEMENTS = 573;
+  private final static int TRAIT = 573;
+  private final static int IMPLEMENTS = 574;
 
-  private final static int IMPORT = 574;
-  private final static int TEXT_PHP = 575;
-  private final static int NAMESPACE = 576;
-  private final static int USE = 577;
+  private final static int IMPORT = 575;
+  private final static int TEXT_PHP = 576;
+  private final static int NAMESPACE = 577;
+  private final static int USE = 578;
+  private final static int INSTEADOF = 579;
 
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -696,6 +699,10 @@ public class QuercusParser {
       case INTERFACE:
         // parseClassDefinition(M_INTERFACE);
         statementList.add(parseClassDefinition(M_INTERFACE));
+        break;
+
+      case TRAIT:
+        statementList.add(parseClassDefinition(M_TRAIT));
         break;
 
       case CONST:
@@ -1672,6 +1679,8 @@ public class QuercusParser {
     boolean isAbstract = (modifiers & M_ABSTRACT) != 0;
     boolean isStatic = (modifiers & M_STATIC) != 0;
 
+    boolean isTraitMethod = _classDef != null && _classDef.isTrait();
+
     if (_classDef != null && _classDef.isInterface()) {
       isAbstract = true;
     }
@@ -1698,15 +1707,15 @@ public class QuercusParser {
       }
 
       if (isAbstract && ! _scope.isAbstract()) {
-        if (_classDef != null)
-          throw error(L.l(
-              "'{0}' may not be abstract because class {1} is not abstract.",
+        if (_classDef != null) {
+          throw error(L.l("'{0}' may not be abstract because class {1} is not abstract.",
                           name, _classDef.getName()));
-        else
-          throw error(L.l(
-              "'{0}' may not be abstract. Abstract functions are only "
-                  + "allowed in abstract classes.",
+        }
+        else {
+          throw error(L.l("'{0}' may not be abstract. Abstract functions are only "
+                          + "allowed in abstract classes.",
                           name));
+        }
       }
 
       boolean isConstructor = false;
@@ -1786,6 +1795,7 @@ public class QuercusParser {
       function.setGlobal(oldTop);
       function.setStatic((modifiers & M_STATIC) != 0);
       function.setFinal((modifiers & M_FINAL) != 0);
+      function.setTraitMethod(isTraitMethod);
 
       function.setParseIndex(_functionsParsed++);
       function.setComment(comment);
@@ -2120,7 +2130,7 @@ public class QuercusParser {
     ArrayList<String> ifaceList = new ArrayList<String>();
 
     int token = parseToken();
-    if (token == EXTENDS) {
+    if (token == EXTENDS && (modifiers & M_TRAIT) == 0) {
       if ((modifiers & M_INTERFACE) != 0) {
         do {
           ifaceList.add(parseNamespaceIdentifier());
@@ -2135,7 +2145,8 @@ public class QuercusParser {
       }
     }
 
-    if ((modifiers & M_INTERFACE) == 0 && token == IMPLEMENTS) {
+    if (token == IMPLEMENTS
+        && (modifiers & M_INTERFACE) == 0 && ((modifiers & M_TRAIT) == 0)) {
       do {
         ifaceList.add(parseNamespaceIdentifier());
 
@@ -2162,6 +2173,9 @@ public class QuercusParser {
         _classDef.setInterface(true);
       if ((modifiers & M_FINAL) != 0)
         _classDef.setFinal(true);
+      if ((modifiers & M_TRAIT) != 0) {
+        _classDef.setTrait(true);
+      }
 
       _scope = new ClassScope(_classDef);
 
@@ -2236,6 +2250,13 @@ public class QuercusParser {
           }
         }
         break;
+
+        case USE:
+        {
+          parseUseTraitDefinition();
+
+          break;
+        }
 
         case IDENTIFIER:
           if (_lexeme.equals("var")) {
@@ -2366,6 +2387,57 @@ public class QuercusParser {
 
       token = parseToken();
     } while (token == ',');
+
+    _peekToken = token;
+  }
+
+  private void parseUseTraitDefinition()
+    throws IOException
+  {
+   int token;
+
+    do {
+      _classDef.addTrait(parseNamespaceIdentifier());
+
+      token = parseToken();
+    } while (token == ',');
+
+    if (token == '{') {
+      while ((token = parseToken()) >= 0 && token != '}') {
+        _peekToken = token;
+
+        String traitName = parseNamespaceIdentifier();
+        expect(SCOPE);
+        String funName = parseIdentifier();
+        StringValue funNameV = createStringValue(funName);
+
+        token = parseToken();
+
+        if (token == INSTEADOF) {
+          String insteadofTraitName = parseNamespaceIdentifier();
+
+          _classDef.addTraitInsteadOf(funNameV, traitName, insteadofTraitName);
+        }
+        else if (token == AS) {
+          String funNameAlias = parseIdentifier();
+          StringValue funNameAliasV = createStringValue(funNameAlias);
+
+          _classDef.addTraitAlias(funNameV, funNameAliasV, traitName);
+        }
+        else {
+          throw error(L.l("expected 'insteadof' or 'as' at {0}",
+                          tokenName(token)));
+        }
+
+        token = parseToken();
+
+        if (token != ';') {
+          _peekToken = token;
+        }
+      }
+
+      expect('}');
+    }
 
     _peekToken = token;
   }
@@ -3801,8 +3873,16 @@ public class QuercusParser {
     }
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
-    else if (name.equals("__CLASS__") && _classDef != null)
-      return createString(_classDef.getName());
+    else if (name.equals("__CLASS__") && _classDef != null) {
+      if (_classDef.isTrait()) {
+        StringValue funNameV = createStringValue(_function.getName());
+
+        return _factory.createClassExpr(getLocation(), funNameV);
+      }
+      else {
+        return createString(_classDef.getName());
+      }
+    }
     else if (name.equals("__FUNCTION__")) {
       return createString(_function.getName());
     }
@@ -5861,6 +5941,9 @@ public class QuercusParser {
     case DEFAULT: return "'default'";
     case CLASS: return "'class'";
     case INTERFACE: return "'interface'";
+    case TRAIT: return "'trait'";
+    case INSTEADOF: return "'insteadof'";
+
     case EXTENDS: return "'extends'";
     case IMPLEMENTS: return "'implements'";
     case RETURN: return "'return'";
@@ -6172,6 +6255,9 @@ public class QuercusParser {
     _insensitiveReserved.put("try", TRY);
     _insensitiveReserved.put("catch", CATCH);
     _insensitiveReserved.put("interface", INTERFACE);
+    _insensitiveReserved.put("trait", TRAIT);
+    _insensitiveReserved.put("insteadof", INSTEADOF);
+
     _insensitiveReserved.put("implements", IMPLEMENTS);
 
     _insensitiveReserved.put("import", IMPORT);

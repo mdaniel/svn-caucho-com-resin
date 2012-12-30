@@ -33,56 +33,87 @@ import com.caucho.quercus.expr.Expr;
 
 public class ClassField
 {
-  private StringValue _name;
+  private final String _declaringClassName;
+  private final StringValue _name;
+
   private Expr _initValue;
   private FieldVisibility _visibility = FieldVisibility.PUBLIC;
-  
-  public ClassField(StringValue name,
+  private boolean _isTraitField;
+
+  public ClassField(String declaringClassName,
+                    StringValue name,
                     Expr initValue,
                     FieldVisibility visibility)
   {
+    _declaringClassName = declaringClassName;
     _name = name;
     _initValue = initValue;
     _visibility = visibility;
   }
-  
-  public ClassField(StringValue name, Expr initValue)
+
+  public ClassField(String declaringClassName,
+                    StringValue name,
+                    Expr initValue,
+                    FieldVisibility visibility,
+                    boolean isTraitField)
   {
-    this(name, initValue, FieldVisibility.PUBLIC);
+    _declaringClassName = declaringClassName;
+    _name = name;
+    _initValue = initValue;
+    _visibility = visibility;
+
+    _isTraitField = isTraitField;
   }
-  
+
+  public ClassField(String declaringClassName,
+                    StringValue name,
+                    Expr initValue)
+  {
+    this(declaringClassName, name, initValue, FieldVisibility.PUBLIC);
+  }
+
+  public String getDeclaringClassName()
+  {
+    return _declaringClassName;
+  }
+
   public StringValue getName()
   {
     return _name;
   }
-  
+
   public Expr getInitValue()
   {
     return _initValue;
   }
-  
+
   public void setInitValue(Expr initValue)
   {
     _initValue = initValue;
   }
-  
+
   public FieldVisibility getVisibility()
   {
     return _visibility;
   }
-  
+
   public boolean isPublic()
   {
     return _visibility == FieldVisibility.PUBLIC;
   }
-  
+
   public boolean isProtected()
   {
     return _visibility == FieldVisibility.PROTECTED;
   }
-  
+
   public boolean isPrivate()
   {
     return _visibility == FieldVisibility.PRIVATE;
+  }
+
+  public boolean isTraitField()
+  {
+    return _isTraitField;
   }
 }

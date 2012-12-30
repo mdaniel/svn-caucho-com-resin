@@ -2339,6 +2339,27 @@ abstract public class StringValue
   {
     int length = length();
 
+    boolean isUpperCase = false;
+
+    for (int i = 0; i < length; i++) {
+      char ch = charAt(i);
+
+      if ('a' <= ch && ch <= 'z') {
+      }
+      else if ('A' <= ch && ch <= 'Z') {
+        isUpperCase = true;
+        break;
+      }
+      else if (isUnicode() && Character.isUpperCase(ch)) {
+        isUpperCase = true;
+        break;
+      }
+    }
+
+    if (! isUpperCase) {
+      return this;
+    }
+
     StringValue sb = createStringBuilder(length);
 
     for (int i = 0; i < length; i++) {
@@ -2350,8 +2371,9 @@ abstract public class StringValue
       else if ('A' <= ch && ch <= 'Z') {
         sb.append((char) (ch + 'a' - 'A'));
       }
-      else if (Character.isUpperCase(ch))
+      else if (isUnicode() && Character.isUpperCase(ch)) {
         sb.append(Character.toLowerCase(ch));
+      }
     }
 
     return sb;

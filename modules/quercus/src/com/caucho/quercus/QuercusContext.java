@@ -202,7 +202,7 @@ public class QuercusContext
 
   private String _scriptEncoding;
 
-  private String _phpVersion = "5.3.2";
+  private String _phpVersion = "5.4.0";
   private String _mySqlVersion;
 
   private boolean _isStrict;

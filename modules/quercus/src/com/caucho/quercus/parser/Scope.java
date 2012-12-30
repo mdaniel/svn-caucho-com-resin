@@ -62,7 +62,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is global.
    */
   public boolean isGlobal()
@@ -70,7 +70,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is within a class.
    */
   public boolean isClass()
@@ -78,7 +78,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is local to a function.
    */
   public boolean isFunction()
@@ -86,7 +86,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is local to an IF statement.
    */
   public boolean isIf()
@@ -94,7 +94,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is local to a switch case statement.
    */
   public boolean isSwitchCase()
@@ -102,7 +102,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is local to a while statement.
    */
   public boolean isWhile()
@@ -110,7 +110,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns true if scope is local to a try statement.
    */
   public boolean isTry()
@@ -118,7 +118,7 @@ abstract public class Scope {
     return false;
   }
 
-  /*
+  /**
    * Returns the parent scope.
    */
   public Scope getParent()
@@ -167,7 +167,7 @@ abstract public class Scope {
                                                int index,
                                                boolean isTop);
 
-  /*
+  /**
    *  Adds a conditional class.
    */
   abstract protected void addConditionalClass(InterpretedClassDef def);

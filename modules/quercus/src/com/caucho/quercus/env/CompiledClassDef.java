@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -49,17 +48,27 @@ import java.util.ArrayList;
 public class CompiledClassDef extends ClassDef {
   private final ArrayList<String> _fieldNames
     = new ArrayList<String>();
-  
+
   private final IdentityIntMap _fieldMap
     = new IdentityIntMap();
-  
+
   protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
   protected boolean _isFinal;
-  
-  public CompiledClassDef(String name, String parent, String []ifaceList)
+
+  public CompiledClassDef(String name,
+                          String parent,
+                          String []ifaceList)
   {
-    this(null, name, parent, ifaceList);
+    super(null, name, parent, ifaceList, ClassDef.NULL_STRING_ARRAY);
+  }
+
+  public CompiledClassDef(String name,
+                          String parent,
+                          String []ifaceList,
+                          String []traitList)
+  {
+    super(null, name, parent, ifaceList, traitList);
   }
 
   public CompiledClassDef(Location location,
@@ -67,16 +76,35 @@ public class CompiledClassDef extends ClassDef {
                           String parent,
                           String []ifaceList)
   {
-    super(location, name, parent, ifaceList);
+    super(location, name, parent, ifaceList, ClassDef.NULL_STRING_ARRAY);
   }
-  
+
   public CompiledClassDef(Location location,
                           String name,
                           String parent,
                           String []ifaceList,
                           boolean isFinal)
   {
-    this(location, name, parent, ifaceList);
+    this(location, name, parent, ifaceList, ClassDef.NULL_STRING_ARRAY, isFinal);
+  }
+
+  public CompiledClassDef(Location location,
+                          String name,
+                          String parent,
+                          String []ifaceList,
+                          String []traitList)
+  {
+    super(location, name, parent, ifaceList, traitList);
+  }
+
+  public CompiledClassDef(Location location,
+                          String name,
+                          String parent,
+                          String []ifaceList,
+                          String []traitList,
+                          boolean isFinal)
+  {
+    super(location, name, parent, ifaceList, traitList);
 
     _isFinal = isFinal;
   }
@@ -89,14 +117,21 @@ public class CompiledClassDef extends ClassDef {
   }
 
   /**
-   * Initialize the quercus class.
+   * Initialize the quercus class methods.
    */
   @Override
-  public void initClass(QuercusClass cl)
+  public void initClassMethods(QuercusClass cl, String bindingClassName)
   {
   }
-  
-  /*
+
+  /**
+   * Initialize the quercus class fields.
+   */
+  @Override
+  public void initClassFields(QuercusClass cl, String bindingClassName)
+  {
+  }
+  /**
    * Returns true for a final class.
    */
   @Override
@@ -187,7 +222,7 @@ public class CompiledClassDef extends ClassDef {
     /*
     if (_extFields == null)
       _extFields = new ArrayValue();
-    
+
     return _extFields.getArgRef(name);
     */
   }
@@ -198,13 +233,13 @@ public class CompiledClassDef extends ClassDef {
   public Value getArray(Value name)
   {
     throw new UnsupportedOperationException();
-    
+
     /*
     Value value = get(name);
 
     if (! value.isset()) {
       value = new ArrayValue();
-      
+
       put(name, value);
     }
 
@@ -223,7 +258,7 @@ public class CompiledClassDef extends ClassDef {
 
     if (! value.isset()) {
       value = env.createObject();
-      
+
       put(name, value);
     }
 
@@ -237,7 +272,7 @@ public class CompiledClassDef extends ClassDef {
   public Value getArg(Value name)
   {
     throw new UnsupportedOperationException();
-    
+
     /*
     Value value = get(name);
 
@@ -296,7 +331,7 @@ public class CompiledClassDef extends ClassDef {
 
     /*
     // quercus/3d8i
-    
+
     if (_extFields == null)
       _extFields = new ArrayValue();
 
@@ -312,7 +347,7 @@ public class CompiledClassDef extends ClassDef {
     throw new UnsupportedOperationException();
     /*
     // quercus/3d91
-    
+
     if (_extFields != null) {
       Value value = _extFields.remove(name);
       return value;

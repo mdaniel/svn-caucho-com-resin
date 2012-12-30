@@ -30,13 +30,14 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.TraitAliasMap;
+import com.caucho.quercus.program.TraitInsteadofMap;
 import com.caucho.util.L10N;
 
 import java.lang.ref.WeakReference;
@@ -65,8 +66,6 @@ public class QuercusClass extends NullValue {
 
   private WeakReference<QuercusClass> _cacheRef;
 
-  private boolean _isAbstract;
-  private boolean _isInterface;
   private boolean _isJavaWrapper;
 
   private ClassDef []_classDefList;
@@ -97,6 +96,7 @@ public class QuercusClass extends NullValue {
   private final HashMap<StringValue,StringValue> _staticFieldNameMap;
 
   private final HashSet<String> _instanceofSet;
+  private final HashMap<StringValue,String> _traitMethodBindingClassMap;
 
   private boolean _isModified;
 
@@ -111,9 +111,6 @@ public class QuercusClass extends NullValue {
     _classDef = classDef.loadClassDef(); // force load of any lazy classes
     _className = classDef.getName();
     _parent = parent;
-
-    _isAbstract = _classDef.isAbstract();
-    _isInterface = _classDef.isInterface();
 
     _initializers = new ArrayList<InstanceInitializer>();
 
@@ -162,7 +159,7 @@ public class QuercusClass extends NullValue {
 
     _instanceofSet = new HashSet<String>();
 
-    HashSet<String> ifaces = new HashSet<String>();
+    HashSet<String> classSet = new HashSet<String>();
 
     // add interfaces
     for (int i = classDefList.length - 1; i >= 0; i--) {
@@ -175,15 +172,34 @@ public class QuercusClass extends NullValue {
 
       classDef.init();
 
-      addInstances(_instanceofSet, ifaces, classDef);
+      addInstances(_instanceofSet, classSet, classDef);
     }
 
-    // then add concrete ancestors
-    for (int i = classDefList.length - 1; i >= 0; i--) {
+    _traitMethodBindingClassMap = new HashMap<StringValue,String>();
+
+    // then add traits and concrete ancestors
+    for (int i = classDefList.length - 1; i >= 1; i--) {
       classDef = classDefList[i];
 
-      classDef.initClass(this);
+      classSet.clear();
+      addTraitMethods(classSet, classDef);
+
+      classDef.initClassMethods(this, classDef.getName());
+      classDef.initClassFields(this, classDef.getName());
+
+      classSet.clear();
+      addTraitFields(classSet, classDef);
     }
+
+    // finally add this class
+    classSet.clear();
+    addTraitMethods(classSet, classDefList[0]);
+
+    classDefList[0].initClassMethods(this, classDefList[0].getName());
+    classDefList[0].initClassFields(this, classDefList[0].getName());
+
+    classSet.clear();
+    addTraitFields(classSet, classDefList[0]);
 
     if (_constructor != null && parent != null) {
       if (! _constructor.getName().equals("__construct")
@@ -198,37 +214,83 @@ public class QuercusClass extends NullValue {
   }
 
   private void addInstances(HashSet<String> instanceofSet,
-                            HashSet<String> ifaces,
+                            HashSet<String> ifaceSet,
                             ClassDef classDef)
   {
-    // _instanceofSet.add(classDef.getName());
     classDef.addInterfaces(instanceofSet);
+
+    // XXX: 2012-12-28 nam: possibly rework this to be more like how it's done
+    // for parent classes (e.g. env.addClass(def, classId, parentId, ifaces, traits))
+
+    // _instanceofSet.add(classDef.getName());
 
     for (String iface : classDef.getInterfaces()) {
       boolean isJavaClassDef = classDef instanceof JavaClassDef;
 
-      QuercusClass cl;
+      QuercusClass cls;
 
       // XXX: php/0cn2, but this is wrong:
-      cl = Env.getInstance().findClass(iface,
-                                       ! isJavaClassDef,
-                                       true);
+      cls = Env.getInstance().findClass(iface,
+                                        ! isJavaClassDef,
+                                        true);
 
-      if (cl == null)
+      if (cls == null) {
         throw new QuercusRuntimeException(L.l("cannot find interface {0}",
                                               iface));
+      }
 
       // _instanceofSet.addAll(cl.getInstanceofSet());
 
-      ClassDef ifaceDef = cl.getClassDef();
+      ClassDef ifaceDef = cls.getClassDef();
       // ClassDef ifaceDef = moduleContext.findClass(iface);
 
       if (ifaceDef != null) {
-        if (ifaces.add(iface)) {
-          addInstances(instanceofSet, ifaces, ifaceDef);
+        if (ifaceSet.add(iface)) {
+          addInstances(instanceofSet, ifaceSet, ifaceDef);
 
-          ifaceDef.initClass(this);
+          ifaceDef.initClassMethods(this, ifaceDef.getName());
+          ifaceDef.initClassFields(this, ifaceDef.getName());
         }
+      }
+    }
+  }
+
+  private void addTraitMethods(HashSet<String> traitSet, ClassDef classDef)
+  {
+    for (String trait : classDef.getTraits()) {
+      QuercusClass cls = Env.getInstance().findClass(trait);
+
+      if (cls == null) {
+        Env.getInstance().createErrorException(L.l("cannot find trait {0}",
+                                                   trait));
+      }
+
+      ClassDef traitDef = cls.getClassDef();
+
+      if (traitSet.add(trait)) {
+        addTraitMethods(traitSet, traitDef);
+
+        traitDef.initClassMethods(this, classDef.getName());
+      }
+    }
+  }
+
+  private void addTraitFields(HashSet<String> traitSet, ClassDef classDef)
+  {
+    for (String trait : classDef.getTraits()) {
+      QuercusClass cls = Env.getInstance().findClass(trait);
+
+      if (cls == null) {
+        Env.getInstance().createErrorException(L.l("cannot find trait {0}",
+                                                   trait));
+      }
+
+      ClassDef traitDef = cls.getClassDef();
+
+      if (traitSet.add(trait)) {
+        addTraitFields(traitSet, traitDef);
+
+        traitDef.initClassFields(this, classDef.getName());
       }
     }
   }
@@ -273,6 +335,7 @@ public class QuercusClass extends NullValue {
     _staticFieldExprMap = cacheClass._staticFieldExprMap;
     _staticFieldNameMap = cacheClass._staticFieldNameMap;
     _instanceofSet = cacheClass._instanceofSet;
+    _traitMethodBindingClassMap = cacheClass._traitMethodBindingClassMap;
 
     _moduleContext = cacheClass._moduleContext;
   }
@@ -339,12 +402,17 @@ public class QuercusClass extends NullValue {
 
   public boolean isInterface()
   {
-    return _isInterface;
+    return _classDef.isInterface();
   }
 
   public boolean isAbstract()
   {
-    return _isAbstract;
+    return _classDef.isAbstract();
+  }
+
+  public boolean isTrait()
+  {
+    return _classDef.isTrait();
   }
 
   public boolean isFinal()
@@ -565,11 +633,39 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a field.
    */
-  public void addField(StringValue name,
+  public void addField(String declaringClassName,
+                       StringValue name,
                        Expr initExpr,
                        FieldVisibility visibility)
   {
-    ClassField field = new ClassField(name, initExpr, visibility);
+    ClassField field = new ClassField(declaringClassName, name,
+                                      initExpr, visibility);
+
+    _fieldMap.put(name, field);
+  }
+
+  /**
+   * Adds a trait field.
+   */
+  public void addTraitField(String declaringClassName,
+                            StringValue name,
+                            Expr initExpr,
+                            FieldVisibility visibility)
+  {
+    ClassField existingField = _fieldMap.get(name);
+
+    if (existingField != null
+        && ! existingField.getInitValue().equals(initExpr)) {
+      Env env = Env.getInstance();
+      throw env.createErrorException(L.l("trait field {0}->{1} conflicts with class field {2}->{1}.",
+                                         declaringClassName,
+                                         name,
+                                         getName()));
+    }
+
+    boolean isTraitField = true;
+    ClassField field = new ClassField(declaringClassName, name,
+                                      initExpr, visibility, isTraitField);
 
     _fieldMap.put(name, field);
   }
@@ -611,16 +707,18 @@ public class QuercusClass extends NullValue {
    */
   public void addMethod(StringValue name, AbstractFunction fun)
   {
-    if (fun == null)
+    if (fun == null) {
       throw new NullPointerException(L.l("'{0}' is a null function", name));
+    }
 
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
     AbstractFunction existingFun = _methodMap.getRaw(name);
 
-    if (existingFun == null || ! fun.isAbstract())
+    if (existingFun == null || ! fun.isAbstract()) {
       _methodMap.put(name, fun);
+    }
     else if (! existingFun.isAbstract() && fun.isAbstract()) {
       Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
                                   getName(), name));
@@ -641,8 +739,91 @@ public class QuercusClass extends NullValue {
     // to initialize all interface classes before any concrete classes
     AbstractFunction existingFun = _methodMap.getRaw(name);
 
-    if (existingFun == null && ! fun.isAbstract())
+    if (existingFun == null && ! fun.isAbstract()) {
       _methodMap.put(name, fun);
+    }
+  }
+
+  /**
+   * Adds a trait method to this class.
+   */
+  public void addTraitMethod(String bindingClassName,
+                             StringValue name,
+                             AbstractFunction fun)
+  {
+    TraitAliasMap aliasMap = _classDef.getTraitAliasMap();
+
+    StringValue alias = null;
+    if (aliasMap != null) {
+      alias = aliasMap.get(name, fun.getDeclaringClassName());
+    }
+
+    addTraitMethod(bindingClassName, name, alias, fun);
+  }
+
+  private void addTraitMethod(String bindingClassName,
+                              StringValue name,
+                              StringValue alias,
+                              AbstractFunction fun)
+  {
+    if (fun == null) {
+      throw new NullPointerException(L.l("'{0}' is a null function", name));
+    }
+
+    AbstractFunction existingFun = _methodMap.getRaw(name);
+
+    if (existingFun == null || existingFun.isAbstract()) {
+      _methodMap.put(name, fun);
+      _traitMethodBindingClassMap.put(name, bindingClassName);
+    }
+    else if (fun.isAbstract()) {
+      Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
+                                  getName(), name));
+    }
+    else if (existingFun.isTraitMethod()) {
+      TraitInsteadofMap insteadofMap = _classDef.getTraitInsteadofMap();
+
+      if (insteadofMap == null) {
+        traitCollisionError(getName(), name,
+                            fun.getDeclaringClassName(),
+                            existingFun.getDeclaringClassName());
+      }
+
+      int result = insteadofMap.get(name,
+                                    fun.getDeclaringClassName(),
+                                    existingFun.getDeclaringClassName());
+
+      if (result == TraitInsteadofMap.USE_EXISTING_TRAIT) {
+      }
+      else if (result == TraitInsteadofMap.USE_NEW_TRAIT) {
+        _methodMap.put(name, fun);
+        _traitMethodBindingClassMap.put(name, bindingClassName);
+      }
+      else {
+        traitCollisionError(getName(), name,
+                            fun.getDeclaringClassName(),
+                            existingFun.getDeclaringClassName());
+      }
+    }
+    else {
+      _methodMap.put(name, fun);
+      _traitMethodBindingClassMap.put(name, bindingClassName);
+    }
+
+    if (alias != null) {
+      addTraitMethod(bindingClassName, alias, null, fun);
+    }
+  }
+
+  private static final void traitCollisionError(String className,
+                                                StringValue funName,
+                                                String traitName,
+                                                String existingTraitName)
+  {
+    Env.getInstance().error(L.l("cannot add trait method {0}::{1}() to class {2}"
+                                + " because it collides with trait method {3}::{1}() ",
+                                traitName, funName,
+                                className, existingTraitName));
   }
 
   /**
@@ -662,6 +843,31 @@ public class QuercusClass extends NullValue {
 
     StringValue sb = createStringBuilder();
     sb.append(className);
+    sb.append("::");
+    sb.append(name);
+
+    _staticFieldNameMap.put(name, sb);
+  }
+
+  /**
+   * Adds a static class field.
+   */
+  public void addStaticTraitFieldExpr(String bindingClassName,
+                                      StringValue name,
+                                      Expr value)
+  {
+    ArrayList<StaticField> fieldList = _staticFieldExprMap.get(bindingClassName);
+
+    if (fieldList == null) {
+      fieldList = new ArrayList<StaticField>();
+
+      _staticFieldExprMap.put(bindingClassName, fieldList);
+    }
+
+    fieldList.add(new StaticField(name, value));
+
+    StringValue sb = createStringBuilder();
+    sb.append(bindingClassName);
     sb.append("::");
     sb.append(name);
 
@@ -728,9 +934,17 @@ public class QuercusClass extends NullValue {
     return _fieldMap.size();
   }
 
+  /**
+   * Returns the name of the class that included this trait.
+   */
+  public String getTraitMethodBindingClassName(StringValue traitMethodName)
+  {
+    return _traitMethodBindingClassMap.get(traitMethodName);
+  }
+
   public void validate(Env env)
   {
-    if (! _isAbstract && ! _isInterface) {
+    if (! isAbstract() && ! isInterface() && ! isTrait()) {
       for (AbstractFunction fun : _methodMap.values()) {
         /* XXX: abstract methods need to be validated
               php/393g, php/393i, php/39j2
@@ -774,10 +988,7 @@ public class QuercusClass extends NullValue {
         Expr expr = field._expr;
 
         //php/096f
-        if (expr instanceof ClassConstExpr)
-          val = ((ClassConstExpr) expr).eval(env);
-        else
-          val = expr.eval(env);
+        val = expr.eval(env);
 
         StringValue fullName = env.createStringBuilder();
         fullName.append(_className);
@@ -879,15 +1090,17 @@ public class QuercusClass extends NullValue {
    */
   public Value createObject(Env env)
   {
-    if (_isAbstract) {
-      throw env.createErrorException(L.l(
-        "abstract class '{0}' cannot be instantiated.",
-        _className));
+    if (isAbstract()) {
+      throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
+                                         _className));
     }
-    else if (_isInterface) {
-      throw env.createErrorException(L.l(
-        "interface '{0}' cannot be instantiated.",
-        _className));
+    else if (isInterface()) {
+      throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
+                                         _className));
+    }
+    else if (isTrait()) {
+      throw env.createErrorException(L.l("trait '{0}' cannot be instantiated.",
+                                         _className));
     }
 
     ObjectValue objectValue = null;
@@ -936,14 +1149,16 @@ public class QuercusClass extends NullValue {
 
     try {
       if (_classDef.isAbstract()) {
-        throw env.createErrorException(L.l(
-          "abstract class '{0}' cannot be instantiated.",
-          _className));
+        throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
+                                           _className));
       }
       else if (_classDef.isInterface()) {
-        throw env.createErrorException(L.l(
-          "interface '{0}' cannot be instantiated.",
-          _className));
+        throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
+                                           _className));
+      }
+      else if (isTrait()) {
+        throw env.createErrorException(L.l("trait '{0}' cannot be instantiated.",
+                                           _className));
       }
 
       ObjectValue objectValue
@@ -978,15 +1193,17 @@ public class QuercusClass extends NullValue {
     QuercusClass oldCallingClass = env.setCallingClass(this);
 
     try {
-      if (_classDef.isAbstract()) {
-        throw env.createErrorException(L.l(
-          "abstract class '{0}' cannot be instantiated.",
-          _className));
+      if (isAbstract()) {
+        throw env.createErrorException(L.l( "abstract class '{0}' cannot be instantiated.",
+                                            _className));
       }
-      else if (_classDef.isInterface()) {
-        throw env.createErrorException(L.l(
-          "interface '{0}' cannot be instantiated.",
-          _className));
+      else if (isInterface()) {
+        throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
+                                           _className));
+      }
+      else if (isTrait()) {
+        throw env.createErrorException(L.l("trait '{0}' cannot be instantiated.",
+                                           _className));
       }
 
       ObjectValue objectValue = null;
@@ -1062,7 +1279,7 @@ public class QuercusClass extends NullValue {
     return array;
   }
 
-  /*
+  /**
    * Puts the interfaces that this class and its parents implements
    * into the array.
    */
@@ -1093,7 +1310,7 @@ public class QuercusClass extends NullValue {
       _parent.getInterfaces(env, array, autoload, false);
   }
 
-  /*
+  /**
    * Returns true if this class or its parents implements specified interface.
    */
   public boolean implementsInterface(Env env, String name)

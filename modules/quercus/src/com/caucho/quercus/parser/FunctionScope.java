@@ -115,16 +115,17 @@ public class FunctionScope extends Scope {
   {
     InterpretedClassDef existingClass = _classMap.get(name);
 
-    String []ifaceArray = new String[ifaceList.size()];
-    ifaceList.toArray(ifaceArray);
+    String []ifaces = new String[ifaceList.size()];
+    ifaceList.toArray(ifaces);
 
     InterpretedClassDef cl
       = _exprFactory.createClassDef(location,
-                                    name, parentName, ifaceArray,
+                                    name, parentName, ifaces,
                                     index);
 
-    if (existingClass == null)
+    if (existingClass == null) {
       _classMap.put(name, cl);
+    }
 
     _parent.addConditionalClass(cl);
 

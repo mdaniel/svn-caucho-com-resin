@@ -50,10 +50,6 @@ import java.util.logging.Logger;
  */
 public class LazyClassDef extends CompiledClassDef
 {
-  private static final Logger log
-    = Logger.getLogger(LazyClassDef.class.getName());
-  private static final L10N L = new L10N(LazyClassDef.class);
-
   private final String _name;
   private final Class<?> _pageClass;
   private final String _className;
@@ -64,7 +60,7 @@ public class LazyClassDef extends CompiledClassDef
                       Class<?> pageClass,
                       String className)
   {
-    super(null, name, null, null);
+    super(name, null, null);
 
     _name = name;
     _pageClass = pageClass;
@@ -98,7 +94,7 @@ public class LazyClassDef extends CompiledClassDef
 
       String className = _pageClass.getName() + "$" + _className;
 
-      Class cl = Class.forName(className, false, loader);
+      Class<?> cl = Class.forName(className, false, loader);
 
       _def = (CompiledClassDef) cl.newInstance();
 
@@ -151,6 +147,15 @@ public class LazyClassDef extends CompiledClassDef
   }
 
   /**
+   * Returns the interfaces.
+   */
+  @Override
+  public String []getTraits()
+  {
+    return getClassDef().getTraits();
+  }
+
+  /**
    * Return true for an abstract class.
    */
   @Override
@@ -168,7 +173,7 @@ public class LazyClassDef extends CompiledClassDef
     return getClassDef().isInterface();
   }
 
-  /*
+  /**
    * Returns true for a final class.
    */
   @Override
@@ -214,12 +219,21 @@ public class LazyClassDef extends CompiledClassDef
   }
 
   /**
-   * Initialize the quercus class.
+   * Initialize the quercus class methods.
    */
   @Override
-  public void initClass(QuercusClass cl)
+  public void initClassMethods(QuercusClass cl, String bindingClassName)
   {
-    getClassDef().initClass(cl);
+    getClassDef().initClassMethods(cl, bindingClassName);
+  }
+
+  /**
+   * Initialize the quercus class fields.
+   */
+  @Override
+  public void initClassFields(QuercusClass cl, String bindingClassName)
+  {
+    getClassDef().initClassFields(cl, bindingClassName);
   }
 
   /**

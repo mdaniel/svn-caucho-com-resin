@@ -786,6 +786,25 @@ abstract public class Expr {
     eval(env).print(env);
   }
 
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    else if (! (obj instanceof Expr)) {
+      return false;
+    }
+
+    Expr expr = (Expr) obj;
+
+    if (! isLiteral() || ! expr.isLiteral()) {
+      return false;
+    }
+
+    return evalConstant().equals(expr.evalConstant());
+  }
+
   public String toString()
   {
     return "Expr[]";

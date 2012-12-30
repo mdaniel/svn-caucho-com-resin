@@ -41,6 +41,7 @@ import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.HashSet;
@@ -57,16 +58,39 @@ abstract public class ClassDef {
   private final String _parentName;
 
   private String []_ifaceList;
+  private String []_traitList;
+
+  private TraitInsteadofMap _traitInsteadofMap;
+  private TraitAliasMap _traitAliasMap;
+
+  protected static final String[] NULL_STRING_ARRAY = new String[0];
+
+  protected ClassDef(Location location,
+                     String name,
+                     String parentName)
+  {
+    this(location, name, parentName, NULL_STRING_ARRAY, NULL_STRING_ARRAY);
+  }
 
   protected ClassDef(Location location,
                      String name,
                      String parentName,
                      String []ifaceList)
   {
+    this(location, name, parentName, ifaceList, NULL_STRING_ARRAY);
+  }
+
+  protected ClassDef(Location location,
+                     String name,
+                     String parentName,
+                     String []ifaceList,
+                     String []traitList)
+  {
     _location = location;
     _name = name;
     _parentName = parentName;
     _ifaceList = ifaceList;
+    _traitList = traitList;
   }
 
   /**
@@ -94,7 +118,7 @@ abstract public class ClassDef {
     return _parentName;
   }
 
-  /*
+  /**
    * Returns the name of the extension that this class is part of.
    */
   public String getExtension()
@@ -104,9 +128,11 @@ abstract public class ClassDef {
 
   protected void addInterface(String iface)
   {
-    for (int i = 0; i < _ifaceList.length; i++)
-      if (_ifaceList[i].equals(iface))
+    for (int i = 0; i < _ifaceList.length; i++) {
+      if (_ifaceList[i].equals(iface)) {
         return;
+      }
+    }
 
     String[] ifaceList = new String[_ifaceList.length + 1];
 
@@ -114,6 +140,63 @@ abstract public class ClassDef {
     ifaceList[ifaceList.length - 1] = iface;
 
     _ifaceList = ifaceList;
+  }
+
+  /**
+   * Adds a PHP 5.4 trait.
+   */
+  public void addTrait(String trait)
+  {
+    for (int i = 0; i < _traitList.length; i++) {
+      if (_traitList[i].equals(trait)) {
+        return;
+      }
+    }
+
+    String[] traitList = new String[_traitList.length + 1];
+
+    System.arraycopy(_traitList, 0, traitList, 0, _traitList.length);
+    traitList[traitList.length - 1] = trait;
+
+    _traitList = traitList;
+  }
+
+  public final TraitInsteadofMap getTraitInsteadofMap()
+  {
+    return _traitInsteadofMap;
+  }
+
+  public final TraitAliasMap getTraitAliasMap()
+  {
+    return _traitAliasMap;
+  }
+
+  public void addTraitInsteadOf(StringValue funName,
+                                String traitName,
+                                String insteadofTraitName)
+  {
+    TraitInsteadofMap traitInsteadofMap = _traitInsteadofMap;
+
+    if (traitInsteadofMap == null) {
+      traitInsteadofMap = new TraitInsteadofMap();
+      _traitInsteadofMap = traitInsteadofMap;
+    }
+
+    traitInsteadofMap.put(funName, traitName, insteadofTraitName);
+  }
+
+  public void addTraitAlias(StringValue funName,
+                            StringValue funNameAlias,
+                            String traitName)
+  {
+    TraitAliasMap traitAliasMap = _traitAliasMap;
+
+    if (traitAliasMap == null) {
+      traitAliasMap = new TraitAliasMap();
+      _traitAliasMap = traitAliasMap;
+    }
+
+    traitAliasMap.put(funName, funNameAlias, traitName);
   }
 
   /**
@@ -146,6 +229,14 @@ abstract public class ClassDef {
   }
 
   /**
+   * Returns the interfaces.
+   */
+  public String []getTraits()
+  {
+    return _traitList;
+  }
+
+  /**
    * Adds the interfaces to the set
    */
   public void addInterfaces(HashSet<String> interfaceSet)
@@ -154,6 +245,16 @@ abstract public class ClassDef {
 
     for (String name : getInterfaces()) {
       interfaceSet.add(name.toLowerCase(Locale.ENGLISH));
+    }
+  }
+
+  /**
+   * Adds the interfaces to the set
+   */
+  public void addTraits(HashSet<String> traitSet)
+  {
+    for (String name : getTraits()) {
+      traitSet.add(name.toLowerCase(Locale.ENGLISH));
     }
   }
 
@@ -169,6 +270,14 @@ abstract public class ClassDef {
    * Return true for an interface class.
    */
   public boolean isInterface()
+  {
+    return false;
+  }
+
+  /**
+   * True for an trait class.
+   */
+  public boolean isTrait()
   {
     return false;
   }
@@ -190,9 +299,20 @@ abstract public class ClassDef {
   }
 
   /**
-   * Initialize the quercus class.
+   * Initialize the quercus class methods.
+   * @param cl add methods to this QuercusClass
+   * @param bindingClassName name of the owning class (for __CLASS__ resolution)
    */
-  public void initClass(QuercusClass cl)
+  public void initClassMethods(QuercusClass cl, String bindingClassName)
+  {
+  }
+
+  /**
+   * Initialize the quercus class fields.
+   * @param cl add fields to this QuercusClass
+   * @param bindingClassName name of the owning class (for static fields)
+   */
+  public void initClassFields(QuercusClass cl, String bindingClassName)
   {
   }
 
