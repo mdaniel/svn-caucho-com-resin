@@ -495,6 +495,9 @@ public class Post
         if (isReplaceSpacesWithUnderscores) {
           // php/080h
           currentKey = currentKey.replace(' ', '_');
+
+          // php/080k
+          isReplaceSpacesWithUnderscores = false;
         }
 
         StringValue currentKeyValue = env.createString(currentKey);
