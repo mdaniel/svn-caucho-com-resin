@@ -118,6 +118,9 @@ public class Postgres extends JdbcConnectionResource
 
       if (url == null || url.equals("")) {
         url = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
+
+        // php/1s78
+        url += "?stringtype=unspecified";
       }
 
       ConnectionEntry jConn;
@@ -125,22 +128,19 @@ public class Postgres extends JdbcConnectionResource
       jConn = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       return jConn;
-    } catch (SQLException e) {
-      env.warning(
-        "A link to the server could not be established. " + e.toString());
-      env.setSpecialValue(
-        "postgres.connectErrno", LongValue.create(e.getErrorCode()));
-      env.setSpecialValue(
-        "postgres.connectError", env.createString(e.getMessage()));
+    }
+    catch (SQLException e) {
+      env.warning("A link to the server could not be established. " + e.toString());
+      env.setSpecialValue("postgres.connectErrno", LongValue.create(e.getErrorCode()));
+      env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return null;
-    } catch (Exception e) {
-      env.warning(
-        "A link to the server could not be established. " + e.toString());
-      env.setSpecialValue(
-        "postgres.connectError", env.createString(e.getMessage()));
+    }
+    catch (Exception e) {
+      env.warning("A link to the server could not be established. " + e.toString());
+      env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return null;

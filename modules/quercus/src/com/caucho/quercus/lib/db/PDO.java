@@ -875,8 +875,6 @@ public class PDO implements EnvCleanup {
   {
     HashMap<String,String> attrMap = parseAttr(dsn, dsn.indexOf(':'));
 
-    // XXX: more robust to get attribute values as is done in getPgsqlDataSource
-
     String host = "localhost";
     int port = -1;
     String dbName = null;
@@ -932,55 +930,47 @@ public class PDO implements EnvCleanup {
                                                     String user,
                                                     String pass)
   {
-    HashMap<String,String> attr = parseAttr(dsn, dsn.indexOf(':'));
+    HashMap<String,String> attrMap = parseAttr(dsn, dsn.indexOf(':'));
 
     String host = "localhost";
-    String port = null;
-    String dbname = "test";
+    int port = -1;
+    String dbName = null;
 
-    for (Map.Entry<String,String> entry : attr.entrySet()) {
+    for (Map.Entry<String,String> entry : attrMap.entrySet()) {
       String key = entry.getKey();
+      String value = entry.getValue();
 
-      if ("host".equals(key))
-        host = entry.getValue();
-      else if ("port".equals(key))
-        port = entry.getValue();
-      else if ("dbname".equals(key))
-        dbname = entry.getValue();
-      else if ("user".equals(key))
-        user = entry.getValue();
-      else if ("password".equals(key))
-        pass = entry.getValue();
-      else
-        env.warning(L.l("unknown pgsql attribute '{0}'", key));
+      if ("host".equals(key)) {
+        host = value;
+      }
+      else if ("port".equals(key)) {
+        try {
+          port = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+          env.warning(e);
+        }
+      }
+      else if ("dbname".equals(key)) {
+        dbName = value;
+      }
+      else if ("user".equals(key)) {
+        user = value;
+      }
+      else if ("password".equals(key)) {
+        pass = value;
+      }
+      else {
+        env.warning(L.l("pdo dsn attribute not supported: {0}={1}", key, value));
+      }
     }
 
-    String driver = "org.postgresql.Driver";
+    String driver = null;
+    String url = null;
 
-    StringBuilder url = new StringBuilder();
-    url.append("jdbc:postgresql://");
-    url.append(host);
+    Postgres postgres
+      = new Postgres(env, host, user, pass, dbName, port, driver, url);
 
-    if (port != null)
-      url.append(port);
-
-    url.append('/');
-    url.append(dbname);
-    
-    // php/1s78
-    url.append('?');
-    url.append("stringtype=unspecified");
-
-    try {
-      DataSource ds = env.getDataSource(driver, url.toString());
-
-      return new DataSourceConnection(env, ds, user, pass);
-    }
-    catch (Exception e) {
-      env.warning(e);
-
-      return null;
-    }
+    return postgres;
   }
 
   /**
