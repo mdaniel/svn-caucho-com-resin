@@ -47,7 +47,10 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.i18n.Decoder;
+import com.caucho.quercus.lib.i18n.Encoder;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
@@ -332,67 +335,72 @@ public class HtmlModule extends AbstractQuercusModule {
                                    @Optional("ENT_COMPAT") int quoteStyle,
                                    @Optional String charset)
   {
-    if (charset == null || charset.length() == 0)
-      charset = "ISO-8859-1";
-
-    Reader reader;
-
-    try {
-      reader = string.toReader(charset);
-    } catch (UnsupportedEncodingException e) {
-      env.warning(e);
-
-      reader = new StringReader(string.toString());
+    if (charset == null || charset.length() == 0) {
+      // php 5.4.0
+      charset = "UTF-8";
     }
 
-    StringValue sb = string.createStringBuilder(string.length() * 5 / 4);
+    CharSequence unicodeStr;
 
-    int ch;
-    try {
-      while ((ch = reader.read()) >= 0) {
-        StringValue entity = HTML_SPECIALCHARS_MAP[ch & 0xffff];
+    if (string.isUnicode()) {
+      unicodeStr = string;
+    }
+    else {
+      try {
+        Decoder decoder = Decoder.create(charset);
+        decoder.setAllowMalformedOut(true);
 
-        if (ch == '"') {
-          if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
-            sb.append("&quot;");
-          else
-            sb.append('"');
-        }
-        else if (ch == '\'') {
-          if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
-            sb.append("&#039;");
-          else
-            sb.append('\'');
-        }
-        else if (entity != null)
-          sb.append(entity);
-        else if (env.isUnicodeSemantics() || 0x00 <= ch && ch <= 0xff) {
-          sb.append((char) ch);
-        }
-        else {
-          sb.append("&#");
-          sb.append(hexdigit(ch >> 12));
-          sb.append(hexdigit(ch >> 8));
-          sb.append(hexdigit(ch >> 4));
-          sb.append(hexdigit(ch));
-          sb.append(";");
-        }
+        unicodeStr = decoder.decode(env, string);
       }
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
+      catch (Exception e) {
+        env.warning(L.l("unsupported encoding, defaulting to utf-8"), e);
+
+        charset = "UTF-8";
+
+        Decoder decoder = Decoder.create(charset);
+        decoder.setAllowMalformedOut(true);
+
+        unicodeStr = decoder.decode(env, string);
+      }
     }
 
-    return sb;
-  }
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
-  private static char hexdigit(int ch)
-  {
-    ch = ch & 0xf;
+    int len = unicodeStr.length();
 
-    if (ch < 10)
-      return (char) (ch + '0');
-    else
-      return (char) (ch - 10 + 'a');
+    for (int i = 0; i < len; i++) {
+      char ch = unicodeStr.charAt(i);
+
+      StringValue entity = HTML_SPECIALCHARS_MAP[ch & 0xffff];
+
+      if (ch == '"') {
+        if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
+          sb.append("&quot;");
+        else
+          sb.append('"');
+      }
+      else if (ch == '\'') {
+        if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
+          sb.append("&#039;");
+        else
+          sb.append('\'');
+      }
+      else if (entity != null) {
+        sb.append(entity);
+      }
+      else {
+        sb.append((char) ch);
+      }
+    }
+
+    if (string.isUnicode()) {
+      return sb;
+    }
+    else {
+      Encoder encoder = Encoder.create(charset);
+
+      return encoder.encode(env, sb);
+    }
   }
 
   /**
