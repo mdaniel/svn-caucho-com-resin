@@ -3438,8 +3438,12 @@ public class StringModule extends AbstractQuercusModule {
 
       if (i + chunk <= strLen) {
         value = string.substring(i, i + chunk);
-      } else {
+      }
+      else if (i != 0) {
         value = string.substring(i);
+      }
+      else {
+        value = string;
       }
 
       array.put(value);
@@ -5844,7 +5848,7 @@ public class StringModule extends AbstractQuercusModule {
       }
 
       if (_isUpper) {
-        value = value.toUpperCase();
+        value = value.toUpperCase(Locale.ENGLISH);
       }
 
       if (! _isLeft) {

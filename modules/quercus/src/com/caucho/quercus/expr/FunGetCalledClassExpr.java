@@ -30,9 +30,9 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 /**
@@ -40,7 +40,7 @@ import com.caucho.util.L10N;
  */
 public class FunGetCalledClassExpr extends Expr {
   private static final L10N L = new L10N(FunGetCalledClassExpr.class);
-  
+
   public FunGetCalledClassExpr(Location location)
   {
     super(location);
@@ -57,14 +57,19 @@ public class FunGetCalledClassExpr extends Expr {
   public Value eval(Env env)
   {
     Value qThis = env.getThis();
-    
+
     if (qThis.isNull()) {
-      env.warning(L.l("get_called_class() must be called in a class context"));
-      return BooleanValue.FALSE;
+      return errorStatic(env);
     }
     else {
       return env.createString(qThis.getClassName());
     }
+  }
+
+  public static Value errorStatic(Env env)
+  {
+    env.warning(L.l("get_called_class() must be called in a class context"));
+    return BooleanValue.FALSE;
   }
 
   public String toString()

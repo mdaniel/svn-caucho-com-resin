@@ -58,7 +58,7 @@ public class CallExpr extends Expr {
   {
     // quercus/120o
     super(location);
-    _name = name.intern();
+    _name = name;
 
     int ns = _name.lastIndexOf('\\');
 
@@ -77,7 +77,7 @@ public class CallExpr extends Expr {
   {
     // quercus/120o
     super(location);
-    _name = name.intern();
+    _name = name;
 
     int ns = _name.lastIndexOf('\\');
 

@@ -64,6 +64,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.SessionArrayValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.Value;
@@ -120,8 +121,8 @@ public class QuercusContext
   private static LruCache<String, UnicodeBuilderValue> _unicodeMap
     = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
 
-  private static LruCache<String, StringValue> _stringMap
-    = new LruCache<String, StringValue>(8 * 1024);
+  private static LruCache<String, ConstStringValue> _stringMap
+    = new LruCache<String, ConstStringValue>(8 * 1024);
 
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
@@ -2010,20 +2011,30 @@ public class QuercusContext
    */
   public StringValue createString(String name)
   {
-    StringValue value = _stringMap.get(name);
+    if (isUnicodeSemantics()) {
+      UnicodeBuilderValue value = _unicodeMap.get(name);
 
-    if (value == null) {
-      if (isUnicodeSemantics()) {
-        return new UnicodeBuilderValue(name);
-      }
-      else {
-        value = new ConstStringValue(name);
+      if (value == null) {
+        if (isUnicodeSemantics()) {
+          value = new UnicodeBuilderValue(name);
+        }
+
+        _unicodeMap.put(name, value);
       }
 
-      _stringMap.put(name, value);
+      return value;
     }
+    else {
+      ConstStringValue value = _stringMap.get(name);
 
-    return value;
+      if (value == null) {
+        value = new ConstStringValue(name);
+
+        _stringMap.put(name, value);
+      }
+
+      return value;
+    }
   }
 
   /**
