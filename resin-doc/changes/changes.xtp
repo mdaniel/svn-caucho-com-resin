@@ -29,8 +29,9 @@
 <li>quercus: support for Class::{expr}() syntax (PHP 5.4)</li>
 <li>quercus: support for binary number format: 0b001001101 (PHP 5.4)</li>
 <li>quercus: $_SERVER['REQUEST_TIME_FLOAT'] is populated (PHP 5.4)</li>
-<li>quercus: can not save permission in drupal6.26 (#5278, rep by kevinw8801</li>
+<li>quercus: can not save permission in drupal6.26 (#5278, rep by kevinw8801)</li>
 <li>quercus: Not able to use PDO with postgres (#5325, rep by publicocean0)</li>
+<li>quercus: Regexp Failure - group-level recursion (#3829, rep by alexander_hristov)</li>
 </ul>
 </s2>
 
