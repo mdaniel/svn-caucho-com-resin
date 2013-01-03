@@ -64,7 +64,7 @@ public class QuercusView
     super();
   }
 
-        protected void initServletContext(ServletContext servletContext)
+  protected void initServletContext(ServletContext servletContext)
   {
     _servletContext = servletContext;
 
@@ -258,6 +258,10 @@ public class QuercusView
     synchronized (this) {
       if (_quercus == null)
         _quercus = new QuercusContext();
+      
+      _quercus.init();
+      
+      _quercus.start();
     }
 
     return _quercus;
