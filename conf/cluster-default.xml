@@ -78,6 +78,8 @@
 
       <sendfile-enable>${sendfile}</sendfile-enable>
 
+      <keepalive-select-enable>${keepalive_select_enable}</keepalive-select-enable>
+
       <!-- The http port -->
       <http address="${http_address?:'*'}" port="${http}"/>
 

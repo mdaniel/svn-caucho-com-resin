@@ -473,7 +473,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       return commitArchive();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     }
   }
@@ -486,8 +486,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    * if the war is in the process of updating.
    */
   private boolean commitArchive()
-  throws IOException
-{
+    throws IOException
+  {
     Path archivePath = getArchivePath();
 
     if (archivePath == null)

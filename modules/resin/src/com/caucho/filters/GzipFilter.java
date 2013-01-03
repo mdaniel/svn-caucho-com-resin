@@ -286,6 +286,7 @@ public class GzipFilter implements Filter {
     /**
      * Check for valid content type.
      */
+    @Override
     public void setHeader(String header, String value)
     {
       if (header.equalsIgnoreCase("Content-Type"))
@@ -301,6 +302,7 @@ public class GzipFilter implements Filter {
     /**
      * Check for valid content type.
      */
+    @Override
     public void addHeader(String header, String value)
     {
       if (header.equalsIgnoreCase("Content-Type"))
@@ -317,13 +319,24 @@ public class GzipFilter implements Filter {
      * This needs to be bypassed because the file's content
      * length has nothing to do with the returned length.
      */
+    @Override
     public void setContentLength(int length)
+    {
+    }
+
+    /**
+     * This needs to be bypassed because the file's content
+     * length has nothing to do with the returned length.
+     */
+    @Override
+    public void setContentLength(long length)
     {
     }
 
     /**
      * If the status changes, need to disable the response.
      */
+    @Override
     public void setStatus(int status, String message)
     {
       super.setStatus(status, message);
@@ -339,6 +352,7 @@ public class GzipFilter implements Filter {
     /**
      * If the status changes, need to disable the response.
      */
+    @Override
     public void setStatus(int status)
     {
       super.setStatus(status);
@@ -356,6 +370,7 @@ public class GzipFilter implements Filter {
     /**
      * Clears the output stream
      */
+    @Override
     public void reset()
     {
       super.reset();
@@ -390,6 +405,7 @@ public class GzipFilter implements Filter {
       return _gzipStream;
     }
 
+    @Override
     public void close()
       throws IOException
     {
@@ -449,6 +465,7 @@ public class GzipFilter implements Filter {
     /**
      * Returns the underlying stream
      */
+    @Override
     public OutputStream getStream() throws IOException
     {
       if (_useVary)
@@ -457,6 +474,7 @@ public class GzipFilter implements Filter {
       return _response.getOutputStream();
     }
 
+    @Override
     public void close()
       throws IOException
     {
