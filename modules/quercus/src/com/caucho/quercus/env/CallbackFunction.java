@@ -40,10 +40,7 @@ public class CallbackFunction extends Callback {
   // = new CallbackFunction(null, "Invalid Callback");
 
   private StringValue _funName;
-
   private AbstractFunction _fun;
-
- // private boolean _isInvalid = false;
 
   public CallbackFunction(Env env, StringValue funName)
   {
@@ -72,12 +69,13 @@ public class CallbackFunction extends Callback {
   @Override
   public boolean isValid(Env env)
   {
-    if (_fun != null)
+    if (_fun != null) {
       return true;
+    }
 
-    return env.findFunction(_funName) != null;
+    _fun = env.findFunction(_funName);
 
-    //return _isInvalid;
+    return _fun != null;
   }
 
   /**

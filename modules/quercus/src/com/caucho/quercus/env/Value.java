@@ -1205,12 +1205,18 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a callable
    */
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
-    env.warning(L.l("Callable: '{0}' is not a valid callable argument",
-                    toString()));
+    if (! isOptional) {
+      env.warning(L.l("Callable: '{0}' is not a valid callable argument",
+                      toString()));
 
-    return new CallbackError(toString());
+      return new CallbackError(toString());
+    }
+    else {
+      return null;
+    }
+
   }
 
   //
@@ -1414,7 +1420,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value call(Env env, Value []args)
   {
-    Callable call = toCallable(env);
+    Callable call = toCallable(env, false);
 
     if (call != null)
       return call.call(env, args);

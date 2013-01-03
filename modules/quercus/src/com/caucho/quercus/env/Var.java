@@ -874,9 +874,9 @@ public class Var extends Value
   }
 
   @Override
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
-    return _value.toCallable(env);
+    return _value.toCallable(env, isOptional);
   }
 
   //

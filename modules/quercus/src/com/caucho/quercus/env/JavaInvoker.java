@@ -217,6 +217,7 @@ abstract public class JavaInvoker
         _minArgumentLength = _maxArgumentLength;
 
         for (int i = 0; i < argLength - envOffset; i++) {
+          boolean isOptional = false;
           boolean isReference = false;
           boolean isPassThru = false;
 
@@ -231,6 +232,7 @@ abstract public class JavaInvoker
           for (Annotation ann : paramAnn[i + envOffset]) {
             if (Optional.class.isAssignableFrom(ann.annotationType())) {
               _minArgumentLength--;
+              isOptional = true;
 
               Optional opt = (Optional) ann;
 
@@ -297,13 +299,17 @@ abstract public class JavaInvoker
             _marshalArgs[i] = marshalFactory.createExpectBoolean();
           }
           else {
-            _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
+            _marshalArgs[i] = marshalFactory.create(argType,
+                                                    isNotNull,
+                                                    false,
+                                                    isOptional);
           }
         }
 
         _unmarshalReturn = marshalFactory.create(_retType,
                                                  false,
-                                                 returnNullAsFalse);
+                                                 returnNullAsFalse,
+                                                 false);
       } finally {
         _isInit = true;
       }

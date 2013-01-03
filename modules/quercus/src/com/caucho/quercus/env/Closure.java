@@ -68,7 +68,7 @@ abstract public class Closure extends Callback
   }
 
   @Override
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
     return this;
   }

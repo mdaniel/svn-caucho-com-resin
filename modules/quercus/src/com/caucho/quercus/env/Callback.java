@@ -32,10 +32,11 @@ package com.caucho.quercus.env;
 /**
  * Represents a call to a function.
  */
+@SuppressWarnings("serial")
 abstract public class Callback extends Value implements Callable {
 
   @Override
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
     return this;
   }

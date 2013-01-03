@@ -59,7 +59,7 @@ import java.util.Map;
 public class MarshalFactory {
   private static final HashMap<Class<?>,Marshal> _marshalMap
     = new HashMap<Class<?>,Marshal>();
-  
+
   protected ModuleContext _moduleContext;
 
   public MarshalFactory(ModuleContext moduleContext)
@@ -75,22 +75,22 @@ public class MarshalFactory {
   public Marshal create(Class<?> argType,
                         boolean isNotNull)
   {
-    return create(argType, isNotNull, false);
+    return create(argType, isNotNull, false, false);
   }
 
   public Marshal create(Class<?> argType,
                         boolean isNotNull,
-                        boolean isNullAsFalse)
+                        boolean isNullAsFalse,
+                        boolean isOptional)
   {
     Marshal marshal;
-    
+
     marshal = _marshalMap.get(argType);
-    
+
     // optimized cases, new types should be added to JavaMarshal
     // XXX: put the static classes in _marshalMap
 
     if (marshal != null) {
-      
     }
     else if (boolean.class.equals(argType)) {
       marshal = BooleanMarshal.MARSHAL;
@@ -224,6 +224,14 @@ public class MarshalFactory {
     else if (argType.isArray()) {
       marshal = new JavaArrayMarshal(argType);
     }
+    else if (Callable.class.equals(argType)) {
+      if (isOptional) {
+        marshal = CallableMarshal.MARSHAL_OPTIONAL;
+      }
+      else {
+        marshal = CallableMarshal.MARSHAL;
+      }
+    }
     else if (Map.class.isAssignableFrom(argType)) {
       String typeName = argType.getName();
 
@@ -288,25 +296,24 @@ public class MarshalFactory {
   {
     return ValueMarshal.MARSHAL_PASS_THRU;
   }
-  
+
   public Marshal createExpectString()
   {
     return ExpectMarshal.MARSHAL_EXPECT_STRING;
   }
-  
+
   public Marshal createExpectNumeric()
   {
     return ExpectMarshal.MARSHAL_EXPECT_NUMERIC;
   }
-  
+
   public Marshal createExpectBoolean()
   {
     return ExpectMarshal.MARSHAL_EXPECT_BOOLEAN;
   }
-  
+
   static {
     _marshalMap.put(String.class, StringMarshal.MARSHAL);
-    _marshalMap.put(Callable.class, CallableMarshal.MARSHAL);
     _marshalMap.put(Class.class, ClassMarshal.MARSHAL);
   }
 }

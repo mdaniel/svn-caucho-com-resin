@@ -174,11 +174,11 @@ public class Xml {
   {
     if (_obj == null) {
       if (! startElementHandler.isEmpty()) {
-        _startElementHandler = startElementHandler.toCallable(env);
+        _startElementHandler = startElementHandler.toCallable(env, false);
       }
 
       if (! endElementHandler.isEmpty()) {
-        _endElementHandler = endElementHandler.toCallable(env);
+        _endElementHandler = endElementHandler.toCallable(env, false);
       }
     }
     else {
@@ -209,12 +209,12 @@ public class Xml {
   public boolean xml_set_character_data_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _characterDataHandler = handler.toCallable(env);
+      _characterDataHandler = handler.toCallable(env, false);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _characterDataHandler = value.toCallable(env);
+      _characterDataHandler = value.toCallable(env, false);
     }
 
     return true;
@@ -238,13 +238,13 @@ public class Xml {
   public boolean xml_set_default_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _defaultHandler = handler.toCallable(env);
+      _defaultHandler = handler.toCallable(env, false);
     }
     else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _defaultHandler = value.toCallable(env);
+      _defaultHandler = value.toCallable(env, false);
     }
     return true;
   }
@@ -261,12 +261,12 @@ public class Xml {
   {
     if (_obj == null) {
       _processingInstructionHandler
-        = processingInstructionHandler.toCallable(env);
+        = processingInstructionHandler.toCallable(env, false);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(processingInstructionHandler);
-      _processingInstructionHandler = value.toCallable(env);
+      _processingInstructionHandler = value.toCallable(env, false);
     }
     return true;
   }
@@ -282,12 +282,12 @@ public class Xml {
       Value startNamespaceDeclHandler)
   {
     if (_obj == null) {
-      _startNamespaceDeclHandler = startNamespaceDeclHandler.toCallable(env);
+      _startNamespaceDeclHandler = startNamespaceDeclHandler.toCallable(env, false);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(startNamespaceDeclHandler);
-      _startNamespaceDeclHandler = value.toCallable(env);
+      _startNamespaceDeclHandler = value.toCallable(env, false);
     }
     return true;
   }
@@ -301,12 +301,12 @@ public class Xml {
   public boolean xml_set_unparsed_entity_decl_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _unparsedEntityDeclHandler = handler.toCallable(env);
+      _unparsedEntityDeclHandler = handler.toCallable(env, false);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _unparsedEntityDeclHandler = value.toCallable(env);
+      _unparsedEntityDeclHandler = value.toCallable(env, false);
     }
     return true;
   }
@@ -322,12 +322,12 @@ public class Xml {
       Value endNamespaceDeclHandler)
   {
     if (_obj == null) {
-      _endNamespaceDeclHandler = endNamespaceDeclHandler.toCallable(env);
+      _endNamespaceDeclHandler = endNamespaceDeclHandler.toCallable(env, false);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(endNamespaceDeclHandler);
-      _endNamespaceDeclHandler = value.toCallable(env);
+      _endNamespaceDeclHandler = value.toCallable(env, false);
     }
     return true;
   }
@@ -341,12 +341,12 @@ public class Xml {
   public boolean xml_set_notation_decl_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _notationDeclHandler = handler.toCallable(env);
+      _notationDeclHandler = handler.toCallable(env, false);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _notationDeclHandler = value.toCallable(env);
+      _notationDeclHandler = value.toCallable(env, false);
     }
     return true;
   }

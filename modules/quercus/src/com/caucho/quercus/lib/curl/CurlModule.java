@@ -1016,16 +1016,16 @@ public class CurlModule
       // callback functions
       //
       case CURLOPT_HEADERFUNCTION:
-        curl.setHeaderCallback(value.toCallable(env));
+        curl.setHeaderCallback(value.toCallable(env, false));
         break;
       case CURLOPT_PASSWDFUNCTION:
-        curl.setPasswordCallback(value.toCallable(env));
+        curl.setPasswordCallback(value.toCallable(env, false));
         break;
       case CURLOPT_READFUNCTION:
-        curl.setReadCallback(value.toCallable(env));
+        curl.setReadCallback(value.toCallable(env, false));
         break;
       case CURLOPT_WRITEFUNCTION:
-        curl.setWriteCallback(value.toCallable(env));
+        curl.setWriteCallback(value.toCallable(env, false));
         break;
 
       default:

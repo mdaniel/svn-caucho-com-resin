@@ -29,14 +29,11 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.util.L10N;
-
 /**
  * Represents a call to an object's method
  */
+@SuppressWarnings("serial")
 public class CallbackError extends Callback {
-  private static final L10N L = new L10N(CallbackError.class);
-
   private final String _errorString;
 
   public CallbackError(String errorString)

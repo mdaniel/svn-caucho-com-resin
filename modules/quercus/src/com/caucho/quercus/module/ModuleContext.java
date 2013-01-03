@@ -383,13 +383,6 @@ public class ModuleContext
     return _exprFactory;
   }
 
-  public Marshal createMarshal(Class type,
-                               boolean isNotNull,
-                               boolean isNullAsFalse)
-  {
-    return getMarshalFactory().create(type, isNotNull, isNullAsFalse);
-  }
-
   /**
    * Returns the stdClass definition.
    */

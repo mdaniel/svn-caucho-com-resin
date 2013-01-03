@@ -51,7 +51,7 @@ public class DefaultValue extends NullValue {
   {
     return DEFAULT;
   }
-  
+
   /**
    * Returns true for a DefaultValue
    */
@@ -60,7 +60,7 @@ public class DefaultValue extends NullValue {
   {
     return true;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -69,7 +69,7 @@ public class DefaultValue extends NullValue {
   {
     return false;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -78,7 +78,7 @@ public class DefaultValue extends NullValue {
   {
     return 0;
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -87,7 +87,7 @@ public class DefaultValue extends NullValue {
   {
     return 0;
   }
-  
+
   /**
    * Converts to an object.
    */
@@ -95,16 +95,16 @@ public class DefaultValue extends NullValue {
   {
     return "";
   }
-  
+
   /**
    * Converts to a callable
    */
   @Override
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
     return null;
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -113,7 +113,7 @@ public class DefaultValue extends NullValue {
   public void print(Env env)
   {
   }
-  
+
   /**
    * Converts to a string.
    * @param env
@@ -157,11 +157,11 @@ public class DefaultValue extends NullValue {
   {
     out.print("\"\"");
   }
-  
+
   //
   // Java Serialization
   //
-  
+
   private Object readResolve()
   {
     return DEFAULT;

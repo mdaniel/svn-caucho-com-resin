@@ -923,11 +923,11 @@ abstract public class StringValue
    * Converts to a callable object
    */
   @Override
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
     // php/1h0o
     if (isEmpty()) {
-      return super.toCallable(env);
+      return super.toCallable(env, isOptional);
     }
 
     int p = indexOf("::");
@@ -941,10 +941,9 @@ abstract public class StringValue
       QuercusClass cl = env.findClass(className.toString());
 
       if (cl == null) {
-        env.warning(L.l("can't find class {0}",
-                        className));
+        env.warning(L.l("can't find class {0}", className));
 
-        return super.toCallable(env);
+        return super.toCallable(env, false);
       }
 
       return new CallbackClassMethod(cl, methodName);

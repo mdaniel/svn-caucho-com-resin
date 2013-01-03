@@ -453,7 +453,7 @@ abstract public class ArrayValue extends Value {
    * Converts to a callable object.
    */
   @Override
-  public Callable toCallable(Env env)
+  public Callable toCallable(Env env, boolean isOptional)
   {
     Value obj = get(LongValue.ZERO);
     Value nameV = get(LongValue.ONE);
@@ -462,7 +462,7 @@ abstract public class ArrayValue extends Value {
       env.warning(L.l("'{0}' ({1}) is an unknown callback name",
                       nameV, nameV.getClass().getSimpleName()));
 
-      return super.toCallable(env);
+      return super.toCallable(env, false);
     }
 
     String name = nameV.toString();
@@ -480,11 +480,10 @@ abstract public class ArrayValue extends Value {
         QuercusClass cls = env.findClass(clsName);
 
         if (cls == null) {
-          env.warning(L.l(
-            "Callback: '{0}' is not a valid callback class for {1}",
-            clsName, name));
+          env.warning(L.l("Callback: '{0}' is not a valid callback class for {1}",
+                          clsName, name));
 
-          return super.toCallable(env);
+          return super.toCallable(env, false);
         }
 
         return new CallbackClassMethod(cls, env.createString(name), obj);
@@ -496,11 +495,10 @@ abstract public class ArrayValue extends Value {
       QuercusClass cl = env.findClass(obj.toString());
 
       if (cl == null) {
-        env.warning(
-          L.l("Callback: '{0}' is not a valid callback string for {1}",
-              obj.toString(), obj));
+        env.warning(L.l("Callback: '{0}' is not a valid callback string for {1}",
+                        obj.toString(), obj));
 
-        return super.toCallable(env);
+        return super.toCallable(env, isOptional);
       }
 
       return new CallbackObjectMethod(cl, env.createString(name));
