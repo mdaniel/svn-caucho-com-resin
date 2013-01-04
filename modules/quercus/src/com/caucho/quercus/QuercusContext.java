@@ -651,7 +651,7 @@ public class QuercusContext
       Value driverValue = getIniValue("quercus.jdbc_drivers");
 
       if (driverValue.isArray()) {
-        ArrayValue array = (ArrayValue) driverValue.toArray();
+        ArrayValue array = driverValue.toArray();
 
         for (Map.Entry<Value,Value> entry : array.entrySet()) {
 

@@ -426,10 +426,6 @@ public class OutputModule extends AbstractQuercusModule
                                  @Optional int chunkSize,
                                  @Optional("true") boolean erase)
   {
-    if (callback == null) {
-      return true;
-    }
-
     if (callback != null && ! callback.isValid(env)) {
       return false;
     }

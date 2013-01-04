@@ -79,10 +79,12 @@ public class FunctionModule extends AbstractQuercusModule {
 
     ArrayValue argArray;
 
-    if (arg.isArray())
-      argArray = (ArrayValue) arg.toArray();
-    else
+    if (arg.isArray()) {
+      argArray = arg.toArray();
+    }
+    else {
       argArray = new ArrayValueImpl().append(arg);
+    }
 
     Value []args;
 

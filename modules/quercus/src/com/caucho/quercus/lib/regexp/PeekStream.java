@@ -44,6 +44,8 @@ class PeekStream {
   {
     return toString();
   }
+
+  int getPosition() { return -1; }
 }
 
 

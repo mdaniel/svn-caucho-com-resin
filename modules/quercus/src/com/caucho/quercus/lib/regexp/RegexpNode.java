@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.lib.regexp;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
-import com.caucho.util.*;
-import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntSet;
 
 class RegexpNode {
   static final int RC_END = 0;
@@ -571,15 +573,24 @@ class RegexpNode {
     @Override
     int match(StringValue string, int length, int offset, RegexpState state)
     {
-      if (length <= offset)
+      if (length <= offset) {
         return -1;
+      }
 
       char ch = string.charAt(offset);
 
-      if (ch < 128 && _set[ch])
+      if (ch < 128 && _set[ch]) {
         return -1;
-      else
+      }
+      else if (Character.isHighSurrogate(ch)
+               && offset + 1 < length
+               && Character.isLowSurrogate(string.charAt(offset + 1))) {
+        // php/4ef3
+        return offset + 2;
+      }
+      else {
         return offset + 1;
+      }
     }
   }
 
@@ -946,18 +957,10 @@ class RegexpNode {
     }
   }
 
-  static class ConditionalHead extends RegexpNode {
-    private RegexpNode _first;
-    private RegexpNode _second;
-    private RegexpNode _tail;
-    private final int _group;
-
-    ConditionalHead(int group)
-    {
-      _group = group;
-
-      _tail = new ConditionalTail(this);
-    }
+  abstract static class ConditionalHead extends RegexpNode {
+    protected RegexpNode _first;
+    protected RegexpNode _second;
+    protected RegexpNode _tail = new ConditionalTail(this);
 
     void setFirst(RegexpNode first)
     {
@@ -978,19 +981,6 @@ class RegexpNode {
     RegexpNode getTail()
     {
       return _tail;
-    }
-
-    @Override
-    RegexpNode copyImpl(HashMap<RegexpNode,RegexpNode> state)
-    {
-      ConditionalHead copy = new ConditionalHead(_group);
-      state.put(this, copy);
-
-      copy._first = _first.copy(state);
-      copy._second = _second.copy(state);
-      copy._tail = _tail.copy(state);
-
-      return copy;
     }
 
     @Override
@@ -1015,6 +1005,74 @@ class RegexpNode {
     {
       return _tail.createOr(node);
     }
+  }
+
+  static class GenericConditionalHead extends ConditionalHead {
+    private final RegexpNode _conditional;
+
+    GenericConditionalHead(RegexpNode conditional)
+    {
+      _conditional = conditional;
+    }
+
+    @Override
+    RegexpNode copyImpl(HashMap<RegexpNode,RegexpNode> state)
+    {
+      RegexpNode conditional = _conditional.copy(state);
+
+      GenericConditionalHead copy = new GenericConditionalHead(conditional);
+      state.put(this, copy);
+
+      copy._first = _first.copy(state);
+      copy._second = _second.copy(state);
+      copy._tail = _tail.copy(state);
+
+      return copy;
+    }
+
+    @Override
+    int match(StringValue string, int length, int offset, RegexpState state)
+    {
+      if (_conditional.match(string, length, offset, state) >= 0) {
+        int match = _first.match(string, length, offset, state);
+        return match;
+      }
+      else if (_second != null)
+        return _second.match(string, length, offset, state);
+      else
+        return _tail.match(string, length, offset, state);
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _conditional
+                                        + "," + _first
+                                        + "," + _tail
+                                        + "]";
+    }
+  }
+
+  static class GroupConditionalHead extends ConditionalHead {
+    private final int _group;
+
+    GroupConditionalHead(int group)
+    {
+      _group = group;
+    }
+
+    @Override
+    RegexpNode copyImpl(HashMap<RegexpNode,RegexpNode> state)
+    {
+      GroupConditionalHead copy = new GroupConditionalHead(_group);
+      state.put(this, copy);
+
+      copy._first = _first.copy(state);
+      copy._second = _second.copy(state);
+      copy._tail = _tail.copy(state);
+
+      return copy;
+    }
 
     @Override
     int match(StringValue string, int length, int offset, RegexpState state)
@@ -1035,11 +1093,10 @@ class RegexpNode {
     @Override
     public String toString()
     {
-      return (getClass().getSimpleName()
-              + "[" + _group
-              + "," + _first
-              + "," + _tail
-              + "]");
+      return getClass().getSimpleName() + "[" + _group
+                                        + "," + _first
+                                        + "," + _tail
+                                        + "]";
     }
   }
 

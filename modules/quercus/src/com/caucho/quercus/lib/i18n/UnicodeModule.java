@@ -95,8 +95,9 @@ public class UnicodeModule extends AbstractQuercusModule {
     try {
       Decoder decoder = Decoder.create(encoding);
 
-      return decoder.decodeUnicode(env, str);
-    } catch (UnsupportedCharsetException e) {
+      return decoder.decodeUnicode(str);
+    }
+    catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l("unsupported charset {0}", encoding));
 
@@ -139,10 +140,10 @@ public class UnicodeModule extends AbstractQuercusModule {
     try {
       Decoder decoder = Decoder.create(charset);
 
-      StringValue haystackUnicode = decoder.decodeUnicode(env, haystack);
+      StringValue haystackUnicode = decoder.decodeUnicode(haystack);
 
       decoder.reset();
-      StringValue needleUnicode = decoder.decodeUnicode(env, needle);
+      StringValue needleUnicode = decoder.decodeUnicode(needle);
 
       int index = haystackUnicode.indexOf(needleUnicode, offset);
 
@@ -177,10 +178,10 @@ public class UnicodeModule extends AbstractQuercusModule {
     try {
       Decoder decoder = Decoder.create(charset);
 
-      StringValue haystackUnicode = decoder.decodeUnicode(env, haystack);
+      StringValue haystackUnicode = decoder.decodeUnicode(haystack);
 
       decoder.reset();
-      StringValue needleUnicode = decoder.decodeUnicode(env, needle);
+      StringValue needleUnicode = decoder.decodeUnicode(needle);
 
       int index = haystackUnicode.lastIndexOf(needleUnicode);
 

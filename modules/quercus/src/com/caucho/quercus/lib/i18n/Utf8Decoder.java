@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.i18n;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.UnicodeValue;
 
 public class Utf8Decoder
   extends Decoder
@@ -67,10 +69,8 @@ public class Utf8Decoder
   }
 
   @Override
-  protected StringBuilder decodeImpl(Env env, StringValue str)
+  public void decodeUnicode(StringValue str, UnicodeBuilderValue sb)
   {
-    StringBuilder sb = new StringBuilder();
-
     int len = str.length();
     for (int i = 0; i < len; i++) {
       int ch = str.charAt(i);
@@ -94,7 +94,7 @@ public class Utf8Decoder
         else if (_isAllowMalformedOut)
           sb.append((char) ch);
         else
-          return sb;
+          return;
       }
       else if (0xE0 <= ch && ch <= 0xEF) {
         int ch2;
@@ -127,7 +127,7 @@ public class Utf8Decoder
         else if (_isAllowMalformedOut)
           sb.append((char) ch);
         else
-          return sb;
+          return;
       }
       else if (0xF0 <= ch && ch <= 0xF4) {
         int ch2;
@@ -164,7 +164,7 @@ public class Utf8Decoder
         else if (_isAllowMalformedOut)
           sb.append((char) ch);
         else
-          return sb;
+          return;
       }
       else if (_isIgnoreErrors) {
       }
@@ -173,7 +173,7 @@ public class Utf8Decoder
       else if (_isAllowMalformedOut)
         sb.append((char) ch);
       else
-        return sb;
+        return;
     }
 
     /*
@@ -197,7 +197,7 @@ public class Utf8Decoder
     }
     */
 
-    return sb;
+    return;
   }
 
   private static void decodeCodePoint(StringBuilder sb, int code)

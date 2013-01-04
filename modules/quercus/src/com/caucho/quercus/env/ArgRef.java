@@ -111,12 +111,12 @@ public class ArgRef extends Value
   }
 
   @Override
-  public ArrayValue toArrayValue(Env env) 
+  public ArrayValue toArrayValue(Env env)
   {
     // php/3co1
     return _var.toArrayValue(env);
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -370,7 +370,7 @@ public class ArgRef extends Value
   }
 
   @Override
-  public Value toArray()
+  public ArrayValue toArray()
   {
     return _var.toArray();
   }

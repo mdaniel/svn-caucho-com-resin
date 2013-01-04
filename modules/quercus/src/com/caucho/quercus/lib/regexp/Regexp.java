@@ -36,6 +36,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.lib.i18n.Utf8Encoder;
 import com.caucho.util.*;
 
@@ -75,38 +76,45 @@ public class Regexp {
   boolean _isUtf8;
   boolean _isEval;
 
+  private IllegalRegexpException _exception;
+
   public Regexp(StringValue rawRegexp)
-    throws IllegalRegexpException
   {
     _rawRegexp = rawRegexp;
     _pattern = rawRegexp;
 
-    init();
+    try {
+      init();
 
-    Regcomp comp = new Regcomp(_flags);
-    _prog = comp.parse(new PeekString(_pattern));
+      Regcomp comp = new Regcomp(_flags);
+      PeekStream peekString = new PeekString(_pattern);
 
-    compile(_prog, comp);
+      _prog = comp.parse(peekString);
+
+      compile(_prog, comp);
+    }
+    catch (IllegalRegexpException e) {
+      _exception = e;
+    }
   }
 
   protected void init()
+    throws IllegalRegexpException
   {
     StringValue rawRegexp = _rawRegexp;
 
     if (rawRegexp.length() < 2) {
-      throw new IllegalStateException(L.l(
-          "Can't find delimiters in regexp '{0}'.",
-          rawRegexp));
+      throw new IllegalRegexpException(L.l("Can't find delimiters in regexp '{0}'.",
+                                           rawRegexp));
     }
 
     int head = 0;
 
     char delim = '/';
 
-    for (;
-     head < rawRegexp.length()
-       && Character.isWhitespace((delim = rawRegexp.charAt(head)));
-     head++) {
+    for (; head < rawRegexp.length()
+           && Character.isWhitespace((delim = rawRegexp.charAt(head)));
+        head++) {
     }
 
     if (delim == '{')
@@ -118,20 +126,17 @@ public class Regexp {
     else if (delim == '<')
       delim = '>';
     else if (delim == '\\' || Character.isLetterOrDigit(delim)) {
-      throw new QuercusException(L.l(
-          "Delimiter {0} in regexp '{1}' must "
-              + "not be backslash or alphanumeric.",
-          String.valueOf(delim),
-          rawRegexp));
+      throw new IllegalRegexpException(L.l( "Delimiter {0} in regexp '{1}' must not be backslash or alphanumeric.",
+                                            String.valueOf(delim),
+                                            rawRegexp));
     }
 
     int tail = rawRegexp.lastIndexOf(delim);
 
     if (tail <= 0)
-      throw new QuercusException(L.l(
-          "Can't find second {0} in regexp '{1}'.",
-          String.valueOf(delim),
-          rawRegexp));
+      throw new IllegalRegexpException(L.l("Can't find second {0} in regexp '{1}'.",
+                                           String.valueOf(delim),
+                                           rawRegexp));
 
     StringValue sflags = rawRegexp.substring(tail + 1);
     StringValue pattern = rawRegexp.substring(head + 1, tail);
@@ -160,8 +165,8 @@ public class Regexp {
       case ' ': case '\n': break;
 
       default:
-        throw new QuercusException(L.l("'{0}' is an unknown regexp flag in {1}",
-                                       (char) sflags.charAt(i), rawRegexp));
+        throw new IllegalRegexpException(L.l("'{0}' is an unknown regexp flag in {1}",
+                                             (char) sflags.charAt(i), rawRegexp));
       }
     }
 
@@ -172,9 +177,9 @@ public class Regexp {
     if ((flags & Regcomp.UTF8) != 0) {
       _pattern = fromUtf8(pattern);
 
-      if (pattern == null)
-        throw new QuercusException(
-            L.l("Regexp: error converting subject to utf8"));
+      if (_pattern == null) {
+        throw new IllegalRegexpException(L.l("Regexp: error converting subject to utf8"));
+      }
     }
   }
 
@@ -196,6 +201,11 @@ public class Regexp {
   public boolean isEval()
   {
     return _isEval;
+  }
+
+  public IllegalRegexpException getException()
+  {
+    return _exception;
   }
 
   public StringValue convertSubject(Env env, StringValue subject)
@@ -249,8 +259,9 @@ public class Regexp {
 
       if (_isUnicode) {
       }
-      else if (isUTF8())
+      else if (isUTF8()) {
         groupName.toBinaryValue("UTF-8");
+      }
 
       _groupNames[entry.getKey().intValue()] = groupName;
     }
@@ -264,9 +275,9 @@ public class Regexp {
   public boolean isGlobal() { return _isGlobal; }
   public boolean isIgnoreCase() { return _ignoreCase; }
 
-  static StringValue fromUtf8(StringValue source)
+  static UnicodeValue fromUtf8(StringValue source)
   {
-    StringValue target = new UnicodeBuilderValue();
+    UnicodeValue target = new UnicodeBuilderValue();
     int len = source.length();
 
     for (int i = 0; i < len; i++) {

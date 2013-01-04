@@ -38,15 +38,15 @@ public class Eregi extends Ereg
   {
     super(rawRegexp);
   }
-  
+
   @Override
   protected void init()
   {
     super.init();
-    
+
     _flags |= Regcomp.IGNORE_CASE;
   }
-  
+
   public String toString()
   {
     return "Eregi[" + _pattern + "]";

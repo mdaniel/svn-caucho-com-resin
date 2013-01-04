@@ -38,12 +38,12 @@ public class UnicodeEregi extends UnicodeEreg
   {
     super(rawRegexp);
   }
-  
+
   @Override
   protected void init()
   {
     super.init();
-    
+
     _flags |= Regcomp.IGNORE_CASE;
   }
 

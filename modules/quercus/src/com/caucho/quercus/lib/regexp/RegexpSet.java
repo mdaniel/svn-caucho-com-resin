@@ -42,7 +42,7 @@ class RegexpSet {
   static RegexpSet WORD = null;
   static RegexpSet DIGIT = null;
   static RegexpSet DOT = null;
-  
+
   // POSIX character classes
   static RegexpSet PALNUM = null;
   static RegexpSet PALPHA = null;
@@ -57,9 +57,9 @@ class RegexpSet {
   static RegexpSet PSPACE = null;
   static RegexpSet PUPPER = null;
   static RegexpSet PXDIGIT = null;
-  
+
   static HashMap<String,RegexpSet> CLASS_MAP = null;
-  
+
   boolean []_bitset = new boolean[BITSET_CHARS];
   IntSet _range;
 
@@ -80,7 +80,7 @@ class RegexpSet {
 
     _range = (IntSet) old._range.clone();
   }
-  
+
   /**
    * Ors two character sets.
    */
@@ -111,8 +111,7 @@ class RegexpSet {
     // php/4es0
     // http://bugs.caucho.com/view.php?id=3811
     if (low > high || low < 0)
-      throw new RuntimeException(
-          "Range out of range (" + low + ", " + high + ")");
+      throw new RuntimeException("Range out of range (" + low + ", " + high + ")");
 
     if (low < BITSET_CHARS) {
       for (int i = low; i < Math.min(high + 1, BITSET_CHARS); i++)
@@ -138,7 +137,7 @@ class RegexpSet {
 
     for (int i = 0; i < BITSET_CHARS; i++) {
       _bitset[i] = _bitset[i] & next._bitset[i];
-      
+
       if (_bitset[i])
         isDisjoint = false;
     }
@@ -163,7 +162,7 @@ class RegexpSet {
     _range.difference(next._range);
   }
 
-  /*
+  /**
    *   Returns true if the character is in the set.
    */
   boolean match(int ch)
@@ -192,7 +191,7 @@ class RegexpSet {
     else
       return new RegexpNode.NotSet(_bitset, _range);
   }
-  
+
   int getSize()
   {
     return _range.size();
@@ -215,18 +214,18 @@ class RegexpSet {
     WORD.setRange('A', 'Z');
     WORD.setRange('0', '9');
     WORD.setRange('_', '_');
-    
+
     PASCII = new RegexpSet();
     PASCII.setRange(0, 0x7F);
     PASCII.setRange(0x81, 0x87);
     PASCII.setRange(0x89, 0x97);
     PASCII.setRange(0x9A, 0xFF);
-    
+
     PBLANK = new RegexpSet();
     PBLANK.setRange(' ', ' ');
     PBLANK.setRange('\t', '\t');
     PBLANK.setRange(0xA0, 0xA0);
-    
+
     PCNTRL = new RegexpSet();
     PCNTRL.setRange(0, 0x1F);
     PCNTRL.setRange(0x7F, 0x7F);
@@ -239,7 +238,7 @@ class RegexpSet {
     PDIGIT.setRange('0', '9');
     PDIGIT.setRange(0xB2, 0xB3);
     PDIGIT.setRange(0xB9, 0xB9);
-    
+
     PLOWER = new RegexpSet();
     PLOWER.setRange('a', 'z');
     PLOWER.setRange(0x83, 0x83);
@@ -251,12 +250,12 @@ class RegexpSet {
     PLOWER.setRange(0xBA, 0xBA);
     PLOWER.setRange(0xDF, 0xF6);
     PLOWER.setRange(0xF8, 0xFF);
-    
+
     PSPACE = new RegexpSet();
     PSPACE.setRange(' ', ' ');
     PSPACE.setRange(0x09, 0x0D);
     PSPACE.setRange(0xA0, 0xA0);
-    
+
     PUPPER = new RegexpSet();
     PUPPER.setRange('A', 'Z');
     PUPPER.setRange(0x8A, 0x8A);
@@ -265,20 +264,20 @@ class RegexpSet {
     PUPPER.setRange(0x9F, 0x9F);
     PUPPER.setRange(0xC0, 0xD6);
     PUPPER.setRange(0xD8, 0xDE);
-    
+
     PXDIGIT = new RegexpSet();
     PXDIGIT.setRange('0', '9');
     PXDIGIT.setRange('A', 'F');
     PXDIGIT.setRange('a', 'f');
-    
+
     PALPHA = new RegexpSet();
     PALPHA.mergeOr(PLOWER);
     PALPHA.mergeOr(PUPPER);
-    
+
     PALNUM = new RegexpSet();
     PALNUM.mergeOr(PALPHA);
     PALNUM.mergeOr(PDIGIT);
-    
+
     PPUNCT = new RegexpSet();
     PPUNCT.setRange(0x21, 0x2F);
     PPUNCT.setRange(0x3A, 0x40);
@@ -293,17 +292,17 @@ class RegexpSet {
     PPUNCT.setRange(0xA1, 0xBF);
     PPUNCT.setRange(0xD7, 0xD7);
     PPUNCT.setRange(0xF7, 0xF7);
-    
+
     PGRAPH = new RegexpSet();
     PGRAPH.mergeOr(PALNUM);
     PGRAPH.mergeOr(PPUNCT);
-    
+
     PPRINT = new RegexpSet();
     PPRINT.mergeOr(PGRAPH);
     PPRINT.setRange(' ', ' ');
     PPRINT.setRange(0x09, 0x09);
     PPRINT.setRange(0xA0, 0xA0);
-    
+
     CLASS_MAP = new HashMap<String,RegexpSet>();
     CLASS_MAP.put("alnum", PALNUM); //php/4ek0
     CLASS_MAP.put("alpha", PALPHA); //php/4ek1

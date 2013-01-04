@@ -1854,7 +1854,7 @@ public class ArrayModule
     }
 
     return spliceImpl(env, arrayVar, array, startIndex, endIndex,
-                      (ArrayValue) replace.toArray());
+                      replace.toArray());
   }
 
   public static Value spliceImpl(Env env,

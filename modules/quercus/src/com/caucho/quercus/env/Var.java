@@ -490,7 +490,7 @@ public class Var extends Value
    * Converts to an array
    */
   @Override
-  public Value toArray()
+  public ArrayValue toArray()
   {
     return _value.toArray();
   }

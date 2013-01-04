@@ -105,7 +105,7 @@ abstract public class ArgValue extends Value
   }
 
   @Override
-  public Value toArray()
+  public ArrayValue toArray()
   {
     return toLocalValue().toArray();
   }

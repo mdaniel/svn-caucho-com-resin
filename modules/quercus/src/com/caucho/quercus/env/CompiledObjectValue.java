@@ -584,7 +584,7 @@ public class CompiledObjectValue extends ObjectValue
    * Converts to an array.
    */
   @Override
-  public Value toArray()
+  public ArrayValue toArray()
   {
     ArrayValue array = new ArrayValueImpl();
 

@@ -651,7 +651,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to an array.
    */
-  public Value toArray()
+  public ArrayValue toArray()
   {
     return new ArrayValueImpl().append(this);
   }

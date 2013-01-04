@@ -41,7 +41,7 @@ public interface SocketInputOutput
   extends BinaryInput, BinaryOutput, EnvCleanup
 {
   public enum Domain { AF_INET, AF_INET6, AF_UNIX };
-  
+
   public void init()
     throws IOException;
 
@@ -54,5 +54,7 @@ public interface SocketInputOutput
   public void setError(int error);
 
   public void setTimeout(long timeout);
+
+  public boolean isConnected();
 }
 

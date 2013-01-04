@@ -58,10 +58,10 @@ public class TcpInputOutput
 {
   private static final Logger log
     = Logger.getLogger(TcpInputOutput.class.getName());
-  
+
   private Socket _socket;
   private Domain _domain;
-  
+
   private int _errno;
 
   public TcpInputOutput(Env env, String host, int port,
@@ -71,7 +71,7 @@ public class TcpInputOutput
   {
     super(env);
     env.addCleanup(this);
-    
+
     if (isSecure) {
       try {
         _socket = createSSLSocket(host, port);
@@ -83,10 +83,10 @@ public class TcpInputOutput
   }
     else
       _socket = SocketFactory.getDefault().createSocket(host, port);
-    
+
     _domain = domain;
   }
-  
+
   public TcpInputOutput(Env env, Socket socket, Domain domain)
   {
     super(env);
@@ -95,7 +95,7 @@ public class TcpInputOutput
     _socket = socket;
     _domain = domain;
   }
-  
+
   private Socket createSSLSocket(String host, int port)
     throws IOException, NoSuchAlgorithmException, KeyManagementException
   {
@@ -139,15 +139,21 @@ public class TcpInputOutput
 
     init();
   }
-  
+
   public void setError(int errno)
   {
     _errno = errno;
   }
-  
+
   public int getError()
   {
     return _errno;
+  }
+
+  @Override
+  public boolean isConnected()
+  {
+    return _socket.isConnected();
   }
 
   public void init()
@@ -170,7 +176,7 @@ public class TcpInputOutput
       log.log(Level.FINER, e.toString(), e);
     }
   }
-  
+
   @Override
   public void write(int ch)
     throws IOException
@@ -197,10 +203,10 @@ public class TcpInputOutput
   {
     int writeLength = super.write(is, length);
     flush();
-    
+
     return writeLength;
   }
-  
+
   /**
    * Implements the EnvCleanup interface.
    */

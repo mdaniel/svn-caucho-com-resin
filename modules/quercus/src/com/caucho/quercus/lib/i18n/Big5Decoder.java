@@ -34,6 +34,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CoderResult;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 
 public class Big5Decoder
   extends GenericDecoder
@@ -94,7 +95,7 @@ public class Big5Decoder
   }
 
   @Override
-  protected boolean fill(StringBuilder sb, ByteBuffer in,
+  protected boolean fill(UnicodeBuilderValue sb, ByteBuffer in,
                          CharBuffer out, CoderResult coder)
   {
     int len = out.position();

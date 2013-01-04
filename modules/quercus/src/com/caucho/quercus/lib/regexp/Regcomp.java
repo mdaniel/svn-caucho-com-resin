@@ -318,82 +318,22 @@ class Regcomp {
 
           case '=':
           case '!':
-            ch = pattern.read();
-
-            boolean isPositive = (ch == '=');
-
-            groupTail = _groupTail;
-            _groupTail = null;
-
-            next = parseRec(pattern, null);
-
-            while ((ch = pattern.read()) == '|') {
-              RegexpNode nextHead = parseRec(pattern, null);
-              next = next.createOr(nextHead);
-            }
-
-            if (isPositive)
-              next = new RegexpNode.Lookahead(next);
-            else
-              next = new RegexpNode.NotLookahead(next);
-
-            if (ch != ')')
-              throw error(L.l("expected ')' at '{0}'",
-                              String.valueOf((char) ch)));
-
-            _groupTail = groupTail;
+            next = parseLookahead(pattern);
 
             return concat(tail, parseRec(pattern, next));
 
           case '<':
             pattern.read();
 
-            switch (pattern.peek()) {
-            case '=':
-              isPositive = true;
-              pattern.read();
-              break;
-            case '!':
-              isPositive = false;
-              pattern.read();
-              break;
-            default:
+            ch = pattern.peek();
+
+            if (ch != '=' && ch != '!') {
               pattern.ungetc('<');
 
               return parseNamedGroup(pattern, tail);
             }
 
-            groupTail = _groupTail;
-            _groupTail = null;
-
-            next = parseRec(pattern, null);
-
-            if (next == null) {
-            }
-            else if (isPositive)
-              next = new RegexpNode.Lookbehind(next);
-            else
-              next = new RegexpNode.NotLookbehind(next);
-
-            while ((ch = pattern.read()) == '|') {
-              RegexpNode second = parseRec(pattern, null);
-
-              if (second == null) {
-              }
-              else if (isPositive)
-                second = new RegexpNode.Lookbehind(second);
-              else
-                second = new RegexpNode.NotLookbehind(second);
-
-              if (second != null)
-                next = next.createOr(second);
-            }
-
-            if (ch != ')')
-              throw error(L.l("expected ')' at '{0}'",
-                              String.valueOf((char) ch)));
-
-            _groupTail = groupTail;
+            next = parseLookbehind(pattern);
 
             return concat(tail, parseRec(pattern, next));
 
@@ -424,26 +364,38 @@ class Regcomp {
             }
 
           case 'm': case 's': case 'i': case 'x': case 'g':
-          case 'U': case 'X':
+          case 'U': case 'X': case '-':
             {
               int flags = _flags;
+              boolean isUnset = false;
 
               while ((ch = pattern.read()) > 0 && ch != ')') {
                 switch (ch) {
-                case 'm': _flags |= MULTILINE; break;
-                case 's': _flags |= SINGLE_LINE; break;
-                case 'i': _flags |= IGNORE_CASE; break;
-                case 'x': _flags |= IGNORE_WS; break;
-                case 'g': _flags |= GLOBAL; break;
-                case 'U': _flags |= UNGREEDY; break;
-                case 'X': _flags |= STRICT; break;
-                case ':':
+                  case '-':
+                  {
+                    if (isUnset) {
+                      throw error(L.l("saw a duplicate '-' in a (? code"));
+                    }
+                    else {
+                      isUnset = true;
+                    }
+
+                    break;
+                  }
+                  case 'm': _flags = setFlag(_flags, MULTILINE, isUnset); break;
+                  case 's': _flags = setFlag(_flags, SINGLE_LINE, isUnset); break;
+                  case 'i': _flags = setFlag(_flags, IGNORE_CASE, isUnset); break;
+                  case 'x': _flags = setFlag(_flags, IGNORE_WS, isUnset); break;
+                  case 'g': _flags = setFlag(_flags, GLOBAL, isUnset); break;
+                  case 'U': _flags = setFlag(_flags, UNGREEDY, isUnset); break;
+                  case 'X': _flags = setFlag(_flags, STRICT, isUnset); break;
+                  case ':':
                   {
                     return parseGroup(pattern, tail, 0, flags);
                   }
-                default:
-                  throw error(L.l("'{0}' is an unknown (? code",
-                                  String.valueOf((char) ch)));
+                  default:
+                    throw error(L.l("'{0}' is an unknown (? code",
+                                    String.valueOf((char) ch)));
                 }
               }
 
@@ -576,6 +528,94 @@ class Regcomp {
     }
   }
 
+  private static int setFlag(int flag, int modifier, boolean isUnset)
+  {
+    if (isUnset) {
+      return flag - (flag & modifier);
+    }
+    else {
+      return flag | modifier;
+    }
+  }
+
+  private RegexpNode parseLookahead(PeekStream pattern)
+    throws IllegalRegexpException
+  {
+    int ch = pattern.read();
+    boolean isPositive = (ch == '=');
+
+    RegexpNode groupTail = _groupTail;
+    _groupTail = null;
+
+    RegexpNode next = parseRec(pattern, null);
+
+    while ((ch = pattern.read()) == '|') {
+      RegexpNode nextHead = parseRec(pattern, null);
+      next = next.createOr(nextHead);
+    }
+
+    if (isPositive) {
+      next = new RegexpNode.Lookahead(next);
+    }
+    else {
+      next = new RegexpNode.NotLookahead(next);
+    }
+
+    if (ch != ')') {
+      throw error(L.l("expected ')' at '{0}'", String.valueOf((char) ch)));
+    }
+
+    _groupTail = groupTail;
+
+    return next;
+  }
+
+  private RegexpNode parseLookbehind(PeekStream pattern)
+    throws IllegalRegexpException
+  {
+    int ch = pattern.read();
+    boolean isPositive = (ch == '=');
+
+    RegexpNode groupTail = _groupTail;
+    _groupTail = null;
+
+    RegexpNode next = parseRec(pattern, null);
+
+    if (next == null) {
+    }
+    else if (isPositive) {
+      next = new RegexpNode.Lookbehind(next);
+    }
+    else {
+      next = new RegexpNode.NotLookbehind(next);
+    }
+
+    while ((ch = pattern.read()) == '|') {
+      RegexpNode second = parseRec(pattern, null);
+
+      if (second == null) {
+      }
+      else if (isPositive) {
+        second = new RegexpNode.Lookbehind(second);
+      }
+      else {
+        second = new RegexpNode.NotLookbehind(second);
+      }
+
+      if (second != null) {
+        next = next.createOr(second);
+      }
+    }
+
+    if (ch != ')') {
+      throw error(L.l("expected ')' at '{0}'", String.valueOf((char) ch)));
+    }
+
+    _groupTail = groupTail;
+
+    return next;
+  }
+
   private void parseCommentGroup(PeekStream pattern)
   {
     int ch;
@@ -691,10 +731,12 @@ class Regcomp {
     if (ch != '(')
       throw error(L.l("expected '('"));
 
-    RegexpNode.ConditionalHead groupHead = null;;
+    RegexpNode.ConditionalHead groupHead = null;
     RegexpNode groupTail = null;
 
-    if ('1' <= (ch = pattern.peek()) && ch <= '9') {
+    ch = pattern.peek();
+
+    if ('1' <= ch && ch <= '9') {
       int value = 0;
 
       while ('0' <= (ch = pattern.read()) && ch <= '9') {
@@ -707,11 +749,40 @@ class Regcomp {
       if (_nGroup <= value)
         throw error(L.l("conditional value less than number of groups"));
 
-      groupHead = new RegexpNode.ConditionalHead(value);
+      groupHead = new RegexpNode.GroupConditionalHead(value);
       groupTail = groupHead.getTail();
     }
-    else
-      throw error(L.l("conditional requires number"));
+    else if (ch == '?') {
+      pattern.read();
+      ch = pattern.peek();
+
+      if (ch == '=' || ch == '!') {
+        RegexpNode conditional = parseLookahead(pattern);
+
+        groupHead = new RegexpNode.GenericConditionalHead(conditional);
+        groupTail = groupHead.getTail();
+      }
+      else if (ch == '<') {
+        pattern.read();
+        ch = pattern.peek();
+
+        if (ch != '=' && ch != '!') {
+          throw error(L.l("expected lookbehind assertion '=' or '!' at '{0}'",
+                          String.valueOf((char) ch)));
+        }
+
+        RegexpNode conditional = parseLookbehind(pattern);
+
+        groupHead = new RegexpNode.GenericConditionalHead(conditional);
+        groupTail = groupHead.getTail();
+      }
+      else {
+        throw error(L.l("conditional requires a number or a lookahead/lookbehind assertion"));
+      }
+    }
+    else {
+      throw error(L.l("conditional requires a number or a lookahead/lookbehind assertion"));
+    }
 
     RegexpNode oldTail = _groupTail;
 
@@ -1048,15 +1119,26 @@ class Regcomp {
           }
         }
       }
+      else if (Character.isHighSurrogate((char) ch)) {
+        // php/4fa6
+        int ch2 = pattern.peek();
+
+        if (Character.isLowSurrogate((char) ch2)) {
+          pattern.read();
+
+          ch = Character.toCodePoint((char) ch, (char) ch2);
+        }
+      }
 
       if (isDash && last != -1 && lastdash == -1) {
         lastdash = last;
       }
       // c1-c2
       else if (isChar && lastdash != -1) {
-        if (lastdash > ch)
-          throw new IllegalRegexpException("expected increasing range at "
-              + badChar(ch));
+        if (lastdash > ch) {
+          throw new IllegalRegexpException(L.l("expected increasing range at {0}",
+                                               badChar(ch)));
+        }
 
         setRange(set, lastdash, ch);
 
@@ -1077,8 +1159,9 @@ class Regcomp {
         if (isChar)
           last = ch;
       }
-      else if (isChar)
+      else if (isChar) {
         last = ch;
+      }
     }
 
     // Dash at end of set: [a-z1-]

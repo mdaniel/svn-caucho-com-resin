@@ -230,7 +230,8 @@ public class RegexpState {
       _first = length + 1;
 
       return false;
-    } catch (StackOverflowError e) {
+    }
+    catch (StackOverflowError e) {
       log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
                       _regexp, _subject));
 

@@ -212,7 +212,7 @@ abstract public class ArrayValue extends Value {
    * Converts to an object.
    */
   @Override
-  public Value toArray()
+  public ArrayValue toArray()
   {
     return this;
   }

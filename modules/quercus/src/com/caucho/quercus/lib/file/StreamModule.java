@@ -31,12 +31,14 @@ package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -537,6 +539,57 @@ public class StreamModule extends AbstractQuercusModule {
 
       return null;
     }
+  }
+
+  public static Value stream_select(Env env,
+                                    @ReadOnly Value read,
+                                    @ReadOnly Value write,
+                                    @ReadOnly Value except,
+                                    int timeoutSeconds,
+                                    @Optional int timeoutMicroseconds)
+  {
+    int count = 0;
+
+    if (read.isArray()) {
+      ArrayValue array = read.toArrayValue(env);
+
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        Object obj = entry.getValue().toJavaObject();
+
+        if (obj instanceof SocketInputOutput
+            && ((SocketInputOutput) obj).isConnected()) {
+          count++;
+        }
+      }
+    }
+
+    if (write.isArray()) {
+      ArrayValue array = write.toArrayValue(env);
+
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        Object obj = entry.getValue().toJavaObject();
+
+        if (obj instanceof SocketInputOutput
+            && ((SocketInputOutput) obj).isConnected()) {
+          count++;
+        }
+      }
+    }
+
+    if (except.isArray()) {
+      ArrayValue array = except.toArrayValue(env);
+
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        Object obj = entry.getValue().toJavaObject();
+
+        if (obj instanceof SocketInputOutput
+            && ((SocketInputOutput) obj).isConnected()) {
+          count++;
+        }
+      }
+    }
+
+    return LongValue.create(count);
   }
 
   /**

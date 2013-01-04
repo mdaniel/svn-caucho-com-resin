@@ -36,6 +36,8 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.vfs.TempCharBuffer;
 
 public class GenericDecoder
@@ -92,7 +94,7 @@ public class GenericDecoder
   }
 
   @Override
-  protected StringBuilder decodeImpl(Env env, StringValue str)
+  public void decodeUnicode(StringValue str, UnicodeBuilderValue sb)
   {
     ByteBuffer in = ByteBuffer.wrap(str.toBytes());
 
@@ -101,32 +103,31 @@ public class GenericDecoder
     try  {
       CharBuffer out = CharBuffer.wrap(tempBuf.getBuffer());
 
-      StringBuilder sb = new StringBuilder();
-
       while (in.hasRemaining()) {
         CoderResult coder = _decoder.decode(in, out, false);
         if (! fill(sb, in, out, coder))
-          return sb;
+          return;
 
         out.clear();
       }
 
       CoderResult coder = _decoder.decode(in, out, true);
       if (! fill(sb, in, out, coder))
-        return sb;
+        return;
 
       out.clear();
 
       coder = _decoder.flush(out);
       fill(sb, in, out, coder);
 
-      return sb;
-    } finally {
+      return;
+    }
+    finally {
       TempCharBuffer.free(tempBuf);
     }
   }
 
-  protected boolean fill(StringBuilder sb, ByteBuffer in,
+  protected boolean fill(UnicodeBuilderValue sb, ByteBuffer in,
                          CharBuffer out, CoderResult coder)
   {
     int len = out.position();

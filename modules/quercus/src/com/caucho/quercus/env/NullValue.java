@@ -420,7 +420,7 @@ public class NullValue extends Value
    * Converts to an array
    */
   @Override
-  public Value toArray()
+  public ArrayValue toArray()
   {
     return new ArrayValueImpl();
   }

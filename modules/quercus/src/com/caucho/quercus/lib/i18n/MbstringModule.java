@@ -1434,7 +1434,7 @@ public class MbstringModule
     val = val.toValue();
 
     if (val.isString()) {
-      return decoder.decodeUnicode(env, val.toStringValue());
+      return decoder.decodeUnicode(val.toStringValue());
     }
 
     else if (val.isArray()) {

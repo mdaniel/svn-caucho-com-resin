@@ -32,18 +32,19 @@ package com.caucho.quercus.lib.i18n;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.UnicodeValue;
 
 abstract public class Decoder
 {
   protected String _charset;
   protected CharSequence _replacement;
-  
+
   protected boolean _isIgnoreErrors = false;
   protected boolean _isReplaceUnicode = false;
   protected boolean _isAllowMalformedOut = false;
-  
+
   protected boolean _hasError;
-  
+
   protected Decoder(String charset)
   {
     _charset = charset;
@@ -60,70 +61,70 @@ abstract public class Decoder
     else
       return new GenericDecoder(charset);
   }
-  
+
   public boolean isUtf8()
   {
     return false;
   }
-  
+
   public final boolean isIgnoreErrors()
   {
     return _isIgnoreErrors;
   }
-  
+
   public final void setIgnoreErrors(boolean isIgnore)
   {
     _isIgnoreErrors = isIgnore;
   }
-  
+
   public final boolean hasError()
   {
     return _hasError;
   }
-  
+
   public final void setReplacement(CharSequence replacement)
   {
     _replacement = replacement;
   }
-  
+
   public final void setReplaceUnicode(boolean isReplaceUnicode)
   {
     _isReplaceUnicode = isReplaceUnicode;
   }
-  
+
   public final void setAllowMalformedOut(boolean isAllowMalformedOut)
   {
     _isAllowMalformedOut = isAllowMalformedOut;
   }
-  
+
   public void reset()
   {
     _hasError = false;
   }
-  
+
   public final CharSequence decode(Env env, StringValue str)
   {
-    if (str.isUnicode())
+    if (str.isUnicode()) {
       return str;
-    
-    return decodeStringBuilder(env, str);
+    }
+
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+    decodeUnicode(str, sb);
+
+    return sb;
   }
-  
-  public StringBuilder decodeStringBuilder(Env env, StringValue str)
-  {
-    return decodeImpl(env, str);
-  }
-  
-  public StringValue decodeUnicode(Env env, StringValue str)
+
+  public final StringValue decodeUnicode(StringValue str)
   {
     UnicodeBuilderValue sb = new UnicodeBuilderValue();
-    
-    StringBuilder unicodeStr = decodeImpl(env, str);
 
-    return sb.append(unicodeStr);
+    decodeUnicode(str, sb);
+
+    return sb;
   }
-  
+
+  public abstract void decodeUnicode(StringValue str, UnicodeBuilderValue sb);
+
   abstract public boolean isDecodable(Env env, StringValue str);
-  
-  abstract protected StringBuilder decodeImpl(Env env, StringValue str);
 }

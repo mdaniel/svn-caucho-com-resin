@@ -51,23 +51,23 @@ public class UdpInputOutput
 
   private DatagramSocket _socket;
   private Domain _domain;
-  
+
   private DatagramStream _stream;
   private int _error;
-  
+
   private byte _unread;
-  
+
   public UdpInputOutput(Env env, String host, int port, Domain domain)
     throws IOException
   {
     super(env);
-    
+
     _socket = new DatagramSocket();
     _socket.connect(InetAddress.getByName(host), port);
-    
+
     _domain = domain;
   }
-  
+
   public UdpInputOutput(Env env, DatagramSocket socket, Domain domain)
   {
     super(env);
@@ -86,7 +86,7 @@ public class UdpInputOutput
     throws IOException
   {
     _socket.connect(address);
-    
+
     init();
   }
 
@@ -107,12 +107,18 @@ public class UdpInputOutput
       log.log(Level.FINER, e.toString(), e);
     }
   }
-  
+
   public void setError(int error)
   {
     _error = error;
   }
-  
+
+  @Override
+  public boolean isConnected()
+  {
+    return _socket.isConnected();
+  }
+
   /**
    * Returns the current location in the file.
    */
@@ -123,7 +129,7 @@ public class UdpInputOutput
     else
       return -1;
   }
-  
+
   /**
    * Sets the current location in the file.
    */
@@ -133,13 +139,13 @@ public class UdpInputOutput
       return false;
 
     boolean result = _stream.setPosition(offset);
-    
+
     if (result)
       _isEOF = false;
-    
+
     return result;
   }
-  
+
   /**
    * Unread the last byte.
    */
@@ -151,7 +157,7 @@ public class UdpInputOutput
       _isEOF = false;
     }
   }
-    
+
   /**
    * Implements the EnvCleanup interface.
    */
