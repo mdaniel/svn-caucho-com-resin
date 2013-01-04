@@ -21,6 +21,7 @@
 <li>quercus: drupal-commons-6.x-2.11 tested and runs on Quercus</li>
 <li>quercus: mediawiki-1.20.2 tested and runs on Quercus</li>
 <li>quercus: phpBB3-3.0.11 tested and runs on Quercus</li>
+<li>quercus: dokuwiki-2012-10-13 tested and runs on Quercus</li>
 <li>quercus: complete support for PHP 5.4 core language features</li>
 <li>quercus: support for traits (PHP 5.4)</li>
 <li>quercus: support for short array syntax (PHP 5.4)</li>
@@ -34,6 +35,8 @@
 <li>quercus: can not save permission in drupal6.26 (#5278, rep by kevinw8801)</li>
 <li>quercus: Not able to use PDO with postgres (#5325, rep by publicocean0)</li>
 <li>quercus: Regexp Failure - group-level recursion (#3829, rep by alexander_hristov)</li>
+<li>quercus: dokuwiki regexp illegal syntax - utf-16 surrogate pairs (#3955, rep by M. Pezzoli)</li>
+<li>quercus: vBulletin 4.0.1 - invalid conditional regexp (#3879, rep by derickso)</li>
 </ul>
 </s2>
 
