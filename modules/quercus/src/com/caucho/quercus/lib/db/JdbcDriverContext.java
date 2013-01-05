@@ -49,6 +49,7 @@ public class JdbcDriverContext
     _defaultEncoding = "ISO8859_1";
 
     _protocolDriverMap.put("mysql", _defaultDriver);
+    _protocolDriverMap.put("sqlite", "org.sqlite.JDBC");
   }
 
   public String getDefaultDriver()

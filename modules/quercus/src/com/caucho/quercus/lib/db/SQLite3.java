@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2013 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,22 +29,75 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.env.Env;
+import java.sql.SQLException;
 
-import javax.sql.DataSource;
+import com.caucho.quercus.env.ConnectionEntry;
+import com.caucho.quercus.env.Env;
 
 /**
  * Can only be used from PDO.
  */
-public class SQLite3 extends DataSourceConnection
+public class SQLite3 extends JdbcConnectionResource
 {
-  protected SQLite3(Env env, DataSource ds)
+  public SQLite3(Env env, String jdbcUrl)
   {
-    this(env, ds, null, null);
+    super(env);
+
+    connectInternal(env, null, null, null, null, -1, null, 0,
+                    null, jdbcUrl, true);
   }
 
-  protected SQLite3(Env env, DataSource ds, String user, String pass)
+  protected ConnectionEntry connectImpl(Env env,
+                                        String host,
+                                        String userName,
+                                        String password,
+                                        String dbname,
+                                        int port,
+                                        String socket,
+                                        int flags,
+                                        String driver,
+                                        String url,
+                                        boolean isNewLink)
   {
-    super(env, ds, user, pass);
+    try {
+      if (driver == null) {
+        JdbcDriverContext driverContext = env.getQuercus().getJdbcDriverContext();
+
+        driver = driverContext.getDriver("sqlite");
+      }
+
+      if (driver == null) {
+        driver = "org.sqlite.JDBC";
+      }
+
+      _driver = driver;
+
+      ConnectionEntry jConn
+        = env.getConnection(driver, url, null, null, ! isNewLink);
+
+      return jConn;
+    }
+    catch (SQLException e) {
+      env.warning(e);
+
+      return null;
+    }
+    catch (Exception e) {
+      env.warning(e);
+
+      return null;
+    }
+  }
+
+  @Override
+  protected String getDriverName()
+  {
+    return "sqlite";
+  }
+
+  @Override
+  protected boolean isSeekable()
+  {
+    return false;
   }
 }

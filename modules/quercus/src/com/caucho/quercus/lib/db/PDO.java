@@ -1042,6 +1042,11 @@ public class PDO implements EnvCleanup {
     }
 
     String protocol = dsn.substring(i + 5, j);
+
+    if ("sqlite".equals(protocol)) {
+      return new SQLite3(env, dsn);
+    }
+
     String driver = context.getDriver(protocol);
 
     if (driver == null) {
@@ -1065,23 +1070,9 @@ public class PDO implements EnvCleanup {
    */
   private JdbcConnectionResource getSqliteDataSource(Env env, String dsn)
   {
-    DataSource ds = null;
+    String jdbcUrl = "jdbc:" + dsn;
 
-    try {
-      Context ic = new InitialContext();
-
-      ds = (DataSource) ic.lookup(dsn);
-    } catch (NamingException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    if (ds == null) {
-      env.error(L.l("'{0}' is an unknown PDO JNDI data source.", dsn));
-
-      return null;
-    }
-
-    return new SQLite3(env, ds);
+    return new SQLite3(env, jdbcUrl);
   }
 
   private HashMap<String,String> parseAttr(String dsn, int i)

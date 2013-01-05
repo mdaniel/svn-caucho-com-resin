@@ -215,6 +215,8 @@ public class Mysqli extends JdbcConnectionResource
         stmt.close();
       }
 
+      _driver = driver;
+
       return jConn;
     } catch (SQLException e) {
       env.warning(L.l("A link to the server could not be established.\n  "
