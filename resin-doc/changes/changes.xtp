@@ -37,6 +37,7 @@
 <li>quercus: Regexp Failure - group-level recursion (#3829, rep by alexander_hristov)</li>
 <li>quercus: dokuwiki regexp illegal syntax - utf-16 surrogate pairs (#3955, rep by M. Pezzoli)</li>
 <li>quercus: vBulletin 4.0.1 - invalid conditional regexp (#3879, rep by derickso)</li>
+<li>quercus: sqlite PDO support (#3997, rep by Janos)</li>
 </ul>
 </s2>
 
