@@ -23,6 +23,7 @@ global $g_start, $g_end, $g_end_unadjusted;
 global $g_canvas;
 global $g_server;
 global $majorTicks, $minorTicks;
+global $g_downtimes;
 
 $g_pdf_warnings = Array();
 
@@ -175,8 +176,6 @@ pdf_summary();
 pdf_threads();
 
 pdf_health();
-
-pdf_availability();
 
 pdf_draw_cluster_graphs();
 

@@ -585,21 +585,23 @@ function pdf_health()
       }
     }
   }
+  
+  pdf_availability();
     
   pdf_health_events($g_start, $g_end);
 }
 
 function pdf_health_events($start, $end)
 {
-  global $g_canvas, $g_mbean_server;
+  global $g_canvas, $g_mbean_server, $g_server_index;
   
   $g_canvas->newLine();
-  $g_canvas->writeSubSection("Recent Health Events");
+  $g_canvas->writeSubSection("Health Events");
   
   $health_service = $g_mbean_server->lookup("resin:type=HealthSystem");
   if ($health_service)
     $events = $health_service->findEvents($g_server_index, 
-                                          $start * 1000, $end * 1000, 50);
+                                          $start * 1000, $end * 1000, 9999);
   
   if (count($events) > 0) {
     $w1 = 95;
@@ -640,26 +642,24 @@ function pdf_health_events($start, $end)
 
 function pdf_availability()
 {
-  global $g_si, $g_start, $g_end, $g_period, $g_canvas, $g_label;
+  global $g_si, $g_start, $g_end, $g_period, $g_canvas, $g_label, $g_downtimes;
 
   $stat = get_stats_service();
   if (! $stat)
     return;
   
-  $g_canvas->writeSection("Availability");
   
-  $g_canvas->setTextFont();
+  $downtimes = $g_downtimes;
+  if (is_null($downtimes)) {
+    $downtimes = $stat->getDownTimes($g_si, $g_start * 1000, $g_end * 1000);
+    $g_downtimes = $downtimes;
+  }
   
-  $downtimes = $stat->getDownTimes($g_si, $g_start * 1000, $g_end * 1000);
   if (is_null($downtimes)) {
     $g_canvas->newLine();
     $g_canvas->writeTextLineIndent(20, "No Data");
     return;
   }
-  
-  $g_canvas->allocateGraphSpace(4,1);
-  
-  pdf_stat_graph("$g_label Uptime", array("Resin|Uptime|Up"), $g_si, "pdf_availability_label");
   
   $downtimes = array_reverse($downtimes);
   
@@ -680,7 +680,7 @@ function pdf_availability()
     $avg = $total / $count;
   $uptime = 100 - (($total / $g_period) * 100);  
   
-  $g_canvas->writeSubsection("Summary");
+  $g_canvas->writeSubsection("Availability");
   
   $col1 = 120;
   $col2 = 300;
@@ -718,8 +718,8 @@ function pdf_availability()
   
   $g_canvas->setFont("Courier-Bold", 9);
   
-  $g_canvas->writeTextColumnHeader($col1, 'l', "Start Time");
-  $g_canvas->writeTextColumnHeader($col2, 'l', "End Time");
+  $g_canvas->writeTextColumnHeader($col1, 'l', "Stop Time");
+  $g_canvas->writeTextColumnHeader($col2, 'l', "Restart Time");
   $g_canvas->writeTextColumnHeader($col3, 'l', "Elapsed Time");
   $g_canvas->writeTextColumnHeader($col3, 'l', "Notes");
   $g_canvas->newLine();
@@ -1173,8 +1173,10 @@ function pdf_stat_graph($title, $stat_names, $si, $label_func=null)
     $graph_data = pdf_create_graph_data($name, $stat_data, $color);
     array_push($data_array, $graph_data);
   }
+  
+  $blockdata_array = pdf_get_blockdata($stat);
 
-  pdf_draw_graph($title, $data_array, $label_func);
+  pdf_draw_graph($title, $data_array, $blockdata_array, $label_func);
 }
 
 function pdf_get_stat_data($stat, $full_name)
@@ -1193,7 +1195,42 @@ function pdf_get_stat_data($stat, $full_name)
   
   //debug("pdf_get_stat_data:name=$full_name,step=$step,data=" . count($data));
 
-  return $data;                                      
+  return $data;
+}
+
+function pdf_get_blockdata($stat)
+{
+  global $g_si, $g_start, $g_end, $g_downtimes;
+  
+  $bda = array();
+  
+  $downtime_blocks_array = array();
+  
+  $downtimes = $g_downtimes;
+  if (is_null($downtimes)) {
+    $downtimes = $stat->getDownTimes($g_si, $g_start * 1000, $g_end * 1000);
+    $g_downtimes = $downtimes;
+  }
+  
+  if (! is_null($downtimes)) {
+    foreach($downtimes as $downtime) {
+      $block = new GraphBlock();
+      $block->start_time = $downtime->startTime;
+      $block->end_time = $downtime->endTime;
+      array_push($downtime_blocks_array, $block);
+    }
+  }
+  
+  $downtime_data = new BlockData();
+  $downtime_data->name = "Downtime";
+  $downtime_data->blocks = $downtime_blocks_array;
+  $downtime_data->color="light_grey";
+  
+  array_push($bda, $downtime_data);
+  
+  // can add other blocks to dba
+  
+  return $bda;
 }
 
 function pdf_create_graph_data($name, $data, $color)
@@ -1232,7 +1269,7 @@ function pdf_create_graph_data($name, $data, $color)
   return $gd;
 }
 
-function pdf_draw_graph($name, $gds, $label_func=null)
+function pdf_draw_graph($name, $gds, $bds=null, $label_func=null)
 {
   global $g_start, $g_end, $g_canvas;
   
@@ -1270,11 +1307,13 @@ function pdf_draw_graph($name, $gds, $label_func=null)
     
     $graph = $g_canvas->startGraph($name, $x_range, $y_range);
     
+    pdf_draw_graph_blocks($graph, $bds);
+    
     setup_graph($graph, $name, $x_range, $y_range, $yincrement, true, $label_func);
-  
+    
     pdf_draw_graph_lines($graph, $gds);
     
-    $graph->drawLegends($gds);
+    $graph->drawLegends($gds, $bds);
   }
   
   $graph->end();
@@ -1342,11 +1381,19 @@ function pdf_draw_invalid($graph)
 
 function pdf_draw_graph_lines($graph, $gds)
 {
-  $gds = array_reverse($gds);
+  //$gds = array_reverse($gds);
 
   foreach($gds as $gd) {
     if (sizeof($gd->dataLine) > 0)
       $graph->drawLineGraph($gd->dataLine, $gd->color, 1);
+  }
+}
+
+function pdf_draw_graph_blocks($graph, $bds)
+{
+  foreach($bds as $blockdata) {
+    //debug("pdf_draw_graph_blocks:$blockdata");
+    $graph->drawGraphBlocks($blockdata, 1);
   }
 }
 
@@ -1855,7 +1902,7 @@ function pdf_write_log()
 {
   global $g_canvas, $g_end, $g_start;
   
-  $g_canvas->writeSection("Recent Logs");
+  $g_canvas->writeSection("Logs");
   
   pdf_log_messages(null,
                    null,

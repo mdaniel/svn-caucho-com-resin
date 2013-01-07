@@ -348,6 +348,16 @@ public class PDF
   }
 
   /**
+   * Removes dashing
+   */
+  public boolean setsolid()
+  {
+    _stream.setSolid();
+
+    return true;
+  }
+
+  /**
    * Sets the dashing
    */
   public boolean setdashpattern(Env env, @Optional String optlist)

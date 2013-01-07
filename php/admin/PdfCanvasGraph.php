@@ -66,7 +66,21 @@ class PdfCanvasGraph
   {
     $this->canvas->endGraph();
   }
+  
+  public function convertX($x)
+  {
+    $convertedX = round(($x  * $this->ppu->width) - $this->xOffsetPixels);
+    //debug("convertX $x to $convertedX");
+    return $convertedX;
+  }
 
+  public function convertY($y)
+  {
+    $convertedY = round(($y  * $this->ppu->height) - $this->yOffsetPixels);
+    //debug("convertY $y to $convertedY");
+    return $convertedY;
+  }
+  
   public function convertPoint($point) 
   {
     $convertedPoint = new Point();
@@ -80,14 +94,14 @@ class PdfCanvasGraph
     if ($convertedPoint->y > 1000 || $convertedPoint->y < 0)
        $this->setInvalid("Point out of range y axis: {$convertedPoint->y}");
        
-    //$this->debug("convertPoint $point to $convertedPoint");
+    //debug("convertPoint $point to $convertedPoint");
     
     return $convertedPoint;
   }
   
   public function drawTitle($color) 
   {
-    $this->debug("drawTitle:color=$color");
+    //$this->debug("drawTitle:color=$color");
     
     $this->canvas->setFontAndColor("Helvetica", 12, $color);
 
@@ -104,12 +118,12 @@ class PdfCanvasGraph
     }
   }
 
-  public function drawLegends($legends, $point=new Point(0.0, -20)) 
+  public function drawLegends($gds, $bds=null) 
   {
     if (! $this->valid)
        return;
 
-    $this->debug("drawLegends");
+    //$this->debug("drawLegends");
 
     $col2 = round($this->pixel_size->width / 2) + 5;
     $index = 0;
@@ -117,7 +131,7 @@ class PdfCanvasGraph
     $initialYLoc = -25;
     $yloc = $initialYLoc;
 
-    foreach ($legends as $legend) {
+    foreach ($gds as $gd) {
       if ($index % 2 == 0) {
 	      $xloc = 5.0;
       } else {
@@ -127,22 +141,39 @@ class PdfCanvasGraph
       $row = floor($index / 2);
       $yloc = ((($row) * $yinc) + $initialYLoc);
 
-      $this->drawLegend($legend->color, $legend->name, new Point($xloc, $yloc));
+      $this->drawLineLegend($gd->color, $gd->name, new Point($xloc, $yloc));
+      $index++;
+    }
+    
+    foreach($bds as $bd) {
+      if ($index % 2 == 0) {
+        $xloc = 5.0;
+      } else {
+        $xloc = $col2;
+      }
+      
+      $row = floor($index / 2);
+      $yloc = ((($row) * $yinc) + $initialYLoc);
+      
+      $this->drawBlockLegend($bd->color, $bd->name, new Point($xloc, $yloc));
       $index++;
     }
   }
 
-  public function drawLegend($color, $name, $point=new Point(0.0, -20)) 
+  public function drawLineLegend($color, $name, $point=new Point(0.0, -20)) 
   {
     if (! $this->valid)
        return;
  
-    $this->debug("drawLegend $name");
+    //$this->debug("drawLineLegend $name");
 
     $x = $point->x;
     $y = $point->y;
 
     $this->canvas->setColor($color);
+    
+    if ($dashed)
+      $this->canvas->setDash();
     
     $this->canvas->moveToXY($x, $y+2.5);
     $this->canvas->lineToXY($x+5, $y+5);
@@ -150,16 +181,37 @@ class PdfCanvasGraph
     $this->canvas->lineToXY($x+15, $y+2.5);
     $this->canvas->stroke();
 
+    if ($dashed)
+      $this->canvas->setSolid();
+    
     $this->canvas->setFontAndColor("Helvetica", 7, "black");
     $this->canvas->writeTextXY($x+20, $y, $name);
   }
   
+  public function drawBlockLegend($color, $name, $point=new Point(0.0, -20)) 
+  {
+    if (! $this->valid)
+       return;
+ 
+    //$this->debug("drawBlockLegend $name");
+
+    $x = $point->x;
+    $y = $point->y;
+
+    $this->canvas->setFillColor($color);
+    
+    $this->canvas->drawRectXY($x, $y-1, 15, 5);
+    
+    $this->canvas->setFontAndColor("Helvetica", 7, "black");
+    $this->canvas->writeTextXY($x+20, $y, $name);
+  }
+
   public function drawLineGraph($dataLine, $color, $lineWidth)
   {
     if (! $this->valid)
        return;
     
-    $this->debug("drawLineGraph:dataLine=$dataLine,color=$color,lineWidth=$lineWidth");
+    //$this->debug("drawLineGraph:dataLine=$dataLine,color=$color,lineWidth=$lineWidth");
     
     $this->canvas->setColor($color);
     $this->canvas->setLineWidth($lineWidth);
@@ -178,9 +230,31 @@ class PdfCanvasGraph
     $this->canvas->stroke();
   }
 
+  public function drawGraphBlocks($blockData, $lineWidth)
+  {
+    if (! $this->valid)
+      return;
+  
+    //debug("drawGraphBlocks:name=$blockData->name,color=$blockData->color,lineWidth=$lineWidth");
+  
+    $this->canvas->setFillColor($blockData->color);
+    
+    $height = (double) $this->pixel_size->height;
+    
+    foreach($blockData->blocks as $block) {
+      $x1 = $this->convertX($block->start_time);
+      $x2 = $this->convertX($block->end_time);
+      $w = $x2 - $x1;
+      if ($w == 0)
+        $w = 1;
+      $this->canvas->drawRectXY($x1, 0, $w, $height);
+      //debug("drawRectXY:${x1},0,${w},${height}");
+    }
+  }
+  
   public function drawBorder($color)
   {
-    $this->debug("drawBorder:color=$color");
+    //$this->debug("drawBorder:color=$color");
     
     $this->canvas->setLineWidth(1);
     $this->canvas->setColor($color);
@@ -207,7 +281,7 @@ class PdfCanvasGraph
     if (!$this->valid)
        return;
 
-    $this->debug("drawGridLines:xstep=$xstep,ystep=$ystep,color=$color");
+    //$this->debug("drawGridLines:xstep=$xstep,ystep=$ystep,color=$color");
 
     $width = $this->pixel_size->width;
     $height = $this->pixel_size->height;
@@ -245,7 +319,7 @@ class PdfCanvasGraph
     
     $font_size = 8;
 
-    $this->debug("drawXGridLabels:xstep=$xstep,func=$func,width=$width,xstep_width=$xstep_width");
+    //$this->debug("drawXGridLabels:xstep=$xstep,func=$func,width=$width,xstep_width=$xstep_width");
     
     $this->canvas->setFontAndColor("Helvetica", $font_size, "black");
     
@@ -282,7 +356,7 @@ class PdfCanvasGraph
 
     $step_width = $ystep * $this->ppu->height;
 
-    $this->debug("drawYGridLabels:ystep=$ystep,func=$func,height=$height,step_width=$step_width");
+    //$this->debug("drawYGridLabels:ystep=$ystep,func=$func,height=$height,step_width=$step_width");
     
     for ($index = 0; $height >= ($index*$step_width); $index++) {
       $currentYPixel = round($index*$step_width);
@@ -347,6 +421,49 @@ class GraphData
   public function __toString() 
   {
     return "GraphData(name={$this->name},dataLine={$this->dataLine},max={$this->max},color=$color)";
+  }
+}
+
+class BlockData
+{
+  private $name;
+  private $blocks;
+  private $color;
+
+  public function __set($name, $value)
+  {
+    $this->$name = $value;
+  }
+
+  public function __get($name)
+  {
+    return $this->$name;
+  }
+
+  public function __toString()
+  {
+    return "BlockData(name={$this->name},blocks={$this->blocks},color=$color)";
+  }
+}
+
+class GraphBlock
+{
+  private $start_time;
+  private $end_time;
+
+  public function __set($name, $value)
+  {
+    $this->$name = $value;
+  }
+
+  public function __get($name)
+  {
+    return $this->$name;
+  }
+
+  public function __toString()
+  {
+    return "GraphBlock(start_time={$this->start_time},end_time={$this->end_time})";
   }
 }
 

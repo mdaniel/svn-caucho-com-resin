@@ -114,10 +114,11 @@ public class DownTime implements Serializable
   @Override
   public String toString()
   {
-    return String.format("%s[%s to %s, %s ms]",
+    return String.format("%s[%s to %s, %s ms]%s",
                          this.getClass().getSimpleName(),
                          hasStartTime() ? QDate.formatLocal(_startTime) : "?",
                          QDate.formatLocal(_endTime),
-                         hasStartTime() ? getET() : "?");
+                         hasStartTime() ? getET() : "?",
+                         isEstimated() ? " est" : "");
   }
 }

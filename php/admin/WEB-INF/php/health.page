@@ -283,7 +283,7 @@ function display_health_logs()
   if ($health_service) {
   
     $events = $health_service->findEvents($g_server_index, 
-                                          $start * 1000, $end * 1000, 50);
+                                          $start * 1000, $end * 1000, 9999);
   
     echo "<h2>" . gettext('Health Events') . "</h2>\n";
     echo "<table class='data'>\n";
@@ -395,8 +395,8 @@ function display_health_availability()
   echo "<h2>" . gettext('Downtimes') . "</h2>\n";
   echo "<table class='data'>\n";
   echo "<thead>\n";
-  echo "<tr><th scope='col'>" . gettext('Start Time') . "</th>";
-  echo "    <th scope='col'>" . gettext('End Time') . "</th>";
+  echo "<tr><th scope='col'>" . gettext('Stop Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('Restart Time') . "</th>";
   echo "    <th scope='col'>" . gettext('Elapsed Time') . "</th>";
   echo "    <th scope='col'>" . gettext('Notes') . "</th></tr>";
   echo "</thead>\n";

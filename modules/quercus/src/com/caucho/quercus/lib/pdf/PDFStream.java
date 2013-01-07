@@ -275,6 +275,11 @@ public class PDFStream {
     println(String.format(Locale.US, "[%1.2f %1.2f] 0 d", b, w));
   }
 
+  public void setSolid()
+  {
+    println(String.format(Locale.US, "[] 0 d"));
+  }
+
   public boolean setlinewidth(double w)
   {
     println(String.format(Locale.US, "%1.2f w", w));

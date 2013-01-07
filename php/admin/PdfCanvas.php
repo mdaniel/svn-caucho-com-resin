@@ -21,7 +21,7 @@ class PdfCanvas
   public $cyan = new RGBColor(0.0, 0.66, 1.0);
   public $brown = new RGBColor(0.66, 0.20, 0.20);
   public $white = new RGBColor(1, 1, 1);
-      
+  
   private $pdf;
   
   private $state_stack = Array();
@@ -199,8 +199,8 @@ class PdfCanvas
   
   public function debug($text) 
   {
-    #if (preg_match("/Request Time/", $text))
-    #  System::out->println($text);
+    if (preg_match("/^WARNING/", $text))
+      System::out->println($text);
   }
   
   public function saveState($pdf_save = false)
@@ -266,11 +266,32 @@ class PdfCanvas
     $this->pdf->setlinewidth($width);
   }
   
+  public function setDash()
+  {
+    $this->setDashPattern(2, 2);
+  }
+  
+  public function setDashPattern($b, $w)
+  {
+    $this->pdf->setdash($b, $w);
+  }
+  
+  public function setSolid()
+  {
+    $this->pdf->setsolid();
+  }
+  
   public function drawLine($p1, $p2)
   {
     $this->pdf->moveto($p1->x, $this->invertY($p1->y));
     $this->pdf->lineto($p2->x, $this->invertY($p2->y));
     $this->pdf->stroke();
+  }
+  
+  public function drawRectXY($x, $y, $w, $h)
+  {
+    $this->pdf->rect($x, $this->invertY($y), $w, $h);
+    $this->pdf->fill();
   }
   
   public function writeHrule($indent = 0, $line_width = 1, $color="black")
@@ -289,6 +310,21 @@ class PdfCanvas
   }
   
   // raw graphics
+  
+  public function setFillColor($color)
+  {
+    if (is_string($color)) {
+      $this->color = $this->nameToColor($color);
+    } else {
+      $this->color = $color;
+    }
+  
+    $this->debug("setFillColor:{$this->color}");
+  
+    $this->pdf->setrgbcolor_fill($this->color->red,
+        $this->color->green,
+        $this->color->blue);
+  }
   
   public function setColor($color)
   {
@@ -311,7 +347,7 @@ class PdfCanvas
     $color = $this->$s;
     
     if (! $color) {
-      $this->debug("color not found: $name");
+      $this->debug("WARNING:color not found: $name");
       return $this->black;
     } else {
       return $color;
@@ -499,7 +535,7 @@ class PdfCanvas
     
     $font = $this->pdf->load_font($font_name, "", "");
     if (! $font) {
-      $this->debug("Font not found: $font_name");
+      $this->debug("WARNING:Font not found: $font_name");
     } else {
       $this->font = $font;
       $this->font_name = $font_name;
