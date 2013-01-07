@@ -12,6 +12,7 @@
 
 <s2 title="4.0.34 - snapshot">
 <ul>
+<li>ssl: add honor-cipher-order to match Apache's SSLHonorCipherOrder (#5282)</li>
 <li>servlet: gzip content-length was not properly filtered (#5326, rep by Keith Fetterman)</li>
 <li>load-balance: update active-wait-time for better slow-initialization (#5321, rep by Ethan Larson)</li>
 <li>servlet: add a default='true' attribute to servlet-mapping to allow programmatic overriding of default (#5314, rep by Rick Mann)</li>
