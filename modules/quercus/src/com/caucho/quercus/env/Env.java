@@ -3391,7 +3391,7 @@ public class Env
 
   public String getStackTraceAsString(Location loc)
   {
-    ArrayValue value = ErrorModule.debug_backtrace(this, 0);
+    ArrayValue value = ErrorModule.debug_backtrace(this, 0, 0);
 
     return getStackTraceAsString(value, loc);
   }
@@ -4822,7 +4822,7 @@ public class Env
 
     value.putField(this, "file", createString(location.getFileName()));
     value.putField(this, "line", LongValue.create(location.getLineNumber()));
-    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0, 0));
 
     return value;
   }
@@ -4843,7 +4843,7 @@ public class Env
 
     value.putField(this, "file", createString(location.getFileName()));
     value.putField(this, "line", LongValue.create(location.getLineNumber()));
-    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0, 0));
 
     return value;
   }
@@ -4864,7 +4864,7 @@ public class Env
 
     value.putField(this, "file", createString(elt.getFileName()));
     value.putField(this, "line", LongValue.create(elt.getLineNumber()));
-    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0, 0));
 
     if ((e instanceof QuercusException) && e.getCause() != null)
       e = e.getCause();
