@@ -133,6 +133,7 @@ typedef struct ssl_config_t {
   int verify_depth;
 
   char *cipher_suite;
+  int is_honor_cipher_order;
 
   void *crl;
   

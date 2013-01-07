@@ -287,6 +287,9 @@ r_jsse-ssl = element jsse-ssl {
   & (attribute cipher-suites-forbidden { string }
      | element cipher-suites-forbidden { r_string-Group })?
 
+  & (attribute honor-cipher-order { r_boolean-Type }
+     | element honor-cipher-order { r_boolean-Type })?
+
   & (attribute key-store-file { string }
      | element key-store-file { r_string-Group })?
 
@@ -409,6 +412,9 @@ r_openssl = element openssl {
 
   & (attribute crypto-device { string }
      | element crypto-device { r_string-Group })?
+
+  & (attribute honor-cipher-order { r_boolean-Type }
+     | element honor-cipher-order { r_boolean-Type })?
 
   & (attribute password { string }
      | element password { r_string-Group })
