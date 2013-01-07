@@ -288,12 +288,6 @@ class RegexpNode {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  int match(StringValue string, int length, int offset, RegexpState state,
-            int group, int oldGroupBegin)
-  {
-    return match(string, length, offset, state);
-  }
-
   @Override
   public String toString()
   {
@@ -931,18 +925,6 @@ class RegexpNode {
     }
 
     @Override
-    int match(StringValue string, int length, int offset, RegexpState state,
-              int group, int oldBegin)
-    {
-      offset = _head.match(string, length, offset, state, group, oldBegin);
-
-      if (offset < 0)
-        return -1;
-      else
-        return _next.match(string, length, offset, state, group, oldBegin);
-    }
-
-    @Override
     protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
       if (toStringAdd(sb, map))
@@ -1357,16 +1339,10 @@ class RegexpNode {
     @Override
     int match(StringValue string, int length, int offset, RegexpState state)
     {
-      /*
-      if (state.isFinalized(_group)) {
-        return _node.match(string, length, offset, state);
-      }
-      */
-
       int oldBegin = state.getBegin(_group);
       state.setBegin(_group, offset);
 
-      int tail = _node.match(string, length, offset, state, _group, oldBegin);
+      int tail = _node.match(string, length, offset, state);
 
       if (tail >= 0) {
         return tail;
@@ -2206,21 +2182,6 @@ class RegexpNode {
     }
 
     @Override
-    int match(StringValue string, int strlen, int offset, RegexpState state,
-              int group, int oldBegin)
-    {
-      for (Or ptr = this; ptr != null; ptr = ptr._right) {
-        int value
-          = ptr._left.match(string, strlen, offset, state, group, oldBegin);
-
-        if (value >= 0)
-          return value;
-      }
-
-      return -1;
-    }
-
-    @Override
     protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
       if (toStringAdd(sb, map))
@@ -2819,10 +2780,51 @@ class RegexpNode {
   }
 
   static class Recursive extends RegexpNode {
+    private final int _group;
     private RegexpNode _top;
 
-    Recursive()
+    Recursive(int group)
     {
+      _group = group;
+    }
+
+    void setTop(RegexpNode top)
+    {
+      _top = top;
+    }
+
+    @Override
+    int match(StringValue string, int length, int offset, RegexpState state)
+    {
+      int oldBegin = state.getBegin(_group);
+
+      int match = _top.match(string, length, offset, state);
+
+      if (match >= 0) {
+        if (oldBegin >= 0) {
+          state.setBegin(_group, oldBegin);
+        }
+        else {
+          state.setBegin(_group, offset);
+        }
+      }
+
+      return match;
+    }
+  }
+
+  static class GroupNumberRecursive extends RegexpNode {
+    private final int _group;
+    private RegexpNode _top;
+
+    GroupNumberRecursive(int group)
+    {
+      _group = group;
+    }
+
+    int getGroup()
+    {
+      return _group;
     }
 
     void setTop(RegexpNode top)
@@ -2837,47 +2839,11 @@ class RegexpNode {
 
       return match;
     }
-
-    @Override
-    int match(StringValue string, int length, int offset, RegexpState state,
-              int group, int oldBegin)
-    {
-      int match = match(string, length, offset, state);
-
-      if (match >= 0) {
-        if (! state.isFinalized(group) && oldBegin >= 0) {
-          state.setBegin(group, oldBegin);
-        }
-        else {
-          state.setFinalized(group, false);
-
-          state.setBegin(group, offset);
-        }
-      }
-      else {
-        state.setFinalized(group, true);
-      }
-
-      return match;
-    }
   }
 
-  static class GroupNumberRecursive extends Recursive {
-    private final int _group;
-
-    GroupNumberRecursive(int group)
-    {
-      _group = group;
-    }
-
-    int getGroup()
-    {
-      return _group;
-    }
-  }
-
-  static class GroupNameRecursive extends Recursive {
+  static class GroupNameRecursive extends RegexpNode {
     private final StringValue _name;
+    private RegexpNode _top;
 
     GroupNameRecursive(StringValue name)
     {
@@ -2887,6 +2853,19 @@ class RegexpNode {
     StringValue getGroup()
     {
       return _name;
+    }
+
+    void setTop(RegexpNode top)
+    {
+      _top = top;
+    }
+
+    @Override
+    int match(StringValue string, int length, int offset, RegexpState state)
+    {
+      int match = _top.match(string, length, offset, state);
+
+      return match;
     }
   }
 

@@ -352,7 +352,13 @@ class Regcomp {
           case 'R':
             {
               pattern.read();
-              RegexpNode.Recursive rec = new RegexpNode.Recursive();
+              int group = _nGroup - 1;
+
+              if (group < 0) {
+                group = 0;
+              }
+
+              RegexpNode.Recursive rec = new RegexpNode.Recursive(group);
               _recursiveList.add(rec);
 
               ch = pattern.read();

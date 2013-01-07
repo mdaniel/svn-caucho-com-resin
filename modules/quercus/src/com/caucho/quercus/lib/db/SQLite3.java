@@ -35,7 +35,7 @@ import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 
 /**
- * Can only be used from PDO.
+ * Tested with sqlite-jdbc-3.7.2.jar.
  */
 public class SQLite3 extends JdbcConnectionResource
 {

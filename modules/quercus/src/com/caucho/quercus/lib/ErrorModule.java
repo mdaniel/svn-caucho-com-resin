@@ -96,7 +96,8 @@ public class ErrorModule extends AbstractQuercusModule {
    * Produces a backtrace
    */
   public static ArrayValue debug_backtrace(Env env,
-                                           @Optional("DEBUG_BACKTRACE_PROVIDE_OBJECT") int options)
+                                           @Optional("DEBUG_BACKTRACE_PROVIDE_OBJECT") int options,
+                                           @Optional int limit)
   {
     Exception e = new Exception();
     e.fillInStackTrace();
