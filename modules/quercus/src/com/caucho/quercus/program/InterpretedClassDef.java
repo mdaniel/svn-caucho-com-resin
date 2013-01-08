@@ -64,10 +64,10 @@ public class InterpretedClassDef extends ClassDef
   protected final HashMap<StringValue,AbstractFunction> _functionMap
     = new HashMap<StringValue,AbstractFunction>();
 
-  protected final HashMap<StringValue,FieldEntry> _fieldMap
+  protected final LinkedHashMap<StringValue,FieldEntry> _fieldMap
     = new LinkedHashMap<StringValue,FieldEntry>();
 
-  protected final HashMap<StringValue,StaticFieldEntry> _staticFieldMap
+  protected final LinkedHashMap<StringValue,StaticFieldEntry> _staticFieldMap
     = new LinkedHashMap<StringValue,StaticFieldEntry>();
 
   protected final HashMap<StringValue,Expr> _constMap

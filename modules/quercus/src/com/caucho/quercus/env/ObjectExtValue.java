@@ -31,7 +31,6 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.CurrentTime;
-import com.caucho.util.Primes;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -41,9 +40,9 @@ import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Represents a PHP object value.
@@ -52,15 +51,13 @@ import java.util.TreeSet;
 public class ObjectExtValue extends ObjectValue
   implements Serializable
 {
-  private static final int DEFAULT_SIZE = 16;
-  private static final int DEFAULT_PRIME = Primes.getBiggestPrime(DEFAULT_SIZE);
-
   private MethodMap<AbstractFunction> _methodMap;
 
-  private Entry []_entries;
-  private int _prime;
+  private LinkedHashMap<StringValue,Entry> _fieldMap
+    = new LinkedHashMap<StringValue,Entry>();
 
-  private int _size;
+  private Entry _head;
+
   private boolean _isFieldInit;
 
   public ObjectExtValue(QuercusClass cl)
@@ -68,9 +65,6 @@ public class ObjectExtValue extends ObjectValue
     super(cl);
 
     _methodMap = cl.getMethodMap();
-
-    _entries = new Entry[DEFAULT_SIZE];
-    _prime = DEFAULT_PRIME;
   }
 
   public ObjectExtValue(Env env, ObjectExtValue copy, CopyRoot root)
@@ -81,27 +75,12 @@ public class ObjectExtValue extends ObjectValue
 
     _methodMap = copy._methodMap;
 
-    _size = copy._size;
     _isFieldInit = copy._isFieldInit;
 
-    Entry []copyEntries = copy._entries;
+    for (Map.Entry<StringValue,Entry> entry : copy._fieldMap.entrySet()) {
+      Entry entryCopy = entry.getValue().copyTree(env, root);
 
-    _entries = new Entry[copyEntries.length];
-    _prime = copy._prime;
-
-    int len = copyEntries.length;
-    for (int i = 0; i < len; i++) {
-      Entry entry = copyEntries[i];
-
-      for (; entry != null; entry = entry._next) {
-        Entry entryCopy = entry.copyTree(env, root);
-
-        entryCopy._next = _entries[i];
-        if (_entries[i] != null)
-          _entries[i]._prev = entryCopy;
-
-        _entries[i] = entryCopy;
-      }
+      _fieldMap.put(entry.getKey(), entryCopy);
     }
 
     _incompleteObjectName = copy._incompleteObjectName;
@@ -115,27 +94,12 @@ public class ObjectExtValue extends ObjectValue
 
     _methodMap = copy._methodMap;
 
-    _size = copy._size;
     _isFieldInit = copy._isFieldInit;
 
-    Entry []copyEntries = copy._entries;
+    for (Map.Entry<StringValue,Entry> entry : copy._fieldMap.entrySet()) {
+      Entry entryCopy = new Entry(env, copyMap, entry.getValue());
 
-    _entries = new Entry[copyEntries.length];
-    _prime = copy._prime;
-
-    int len = copyEntries.length;
-    for (int i = 0; i < len; i++) {
-      Entry entry = copyEntries[i];
-
-      for (; entry != null; entry = entry._next) {
-        Entry entryCopy = new Entry(env, copyMap, entry);
-
-        entryCopy._next = _entries[i];
-        if (_entries[i] != null)
-          _entries[i]._prev = entryCopy;
-
-        _entries[i] = entryCopy;
-      }
+      _fieldMap.put(entry.getKey(), entryCopy);
     }
 
     _incompleteObjectName = copy._incompleteObjectName;
@@ -143,9 +107,7 @@ public class ObjectExtValue extends ObjectValue
 
   private void init()
   {
-    _entries = new Entry[DEFAULT_SIZE];
-    _prime = DEFAULT_PRIME;
-    _size = 0;
+    _fieldMap.clear();
   }
 
   @Override
@@ -156,7 +118,7 @@ public class ObjectExtValue extends ObjectValue
     _methodMap = cl.getMethodMap();
   }
 
-  /*
+  /**
    * Initializes the incomplete class.
    */
   @Override
@@ -165,15 +127,12 @@ public class ObjectExtValue extends ObjectValue
     setQuercusClass(cls);
     _incompleteObjectName = null;
 
-    Entry []existingEntries = _entries;
-
-    _entries = new Entry[DEFAULT_SIZE];
-    _prime = DEFAULT_PRIME;
-    _size = 0;
+    LinkedHashMap<StringValue,Entry> existingFields = _fieldMap;
+    _fieldMap = new LinkedHashMap<StringValue,Entry>();
 
     cls.initObject(env, this);
 
-    EntryIterator iter = new EntryIterator(existingEntries);
+    Iterator<Entry> iter = existingFields.values().iterator();
 
     while (iter.hasNext()) {
       Entry newField = iter.next();
@@ -193,7 +152,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public int getSize()
   {
-    return _size;
+    return _fieldMap.size();
   }
 
   /**
@@ -204,18 +163,13 @@ public class ObjectExtValue extends ObjectValue
   {
     Value returnValue = getFieldExt(env, name);
 
-    if (returnValue == UnsetValue.UNSET)
-    {
+    if (returnValue == UnsetValue.UNSET) {
       // __get didn't work, lets look in the class itself
-      int hash = (name.hashCode() & 0x7fffffff) % _prime;
+      Entry entry = _fieldMap.get(name);
 
-      for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-        StringValue entryKey = entry._key;
-
-        if (name == entryKey || name.equals(entryKey)) {
-          // php/09ks vs php/091m
-          returnValue = entry._value.toValue();
-        }
+      if (entry != null) {
+        // php/09ks vs php/091m
+        return entry._value.toValue();
       }
     }
 
@@ -569,41 +523,16 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public void unsetField(StringValue name)
   {
-
-
     Value returnValue = _quercusClass.unsetField(Env.getCurrent(),this,name);
-    if(returnValue == UnsetValue.UNSET || returnValue == NullValue.NULL)
-    {
-        // __unset didn't work, lets look in the class itself
-        int hash = (name.hashCode() & 0x7fffffff) % _prime;
+    if(returnValue == UnsetValue.UNSET || returnValue == NullValue.NULL) {
+      // __unset didn't work, lets look in the class itself
 
-        for (Entry entry = _entries[hash];
-             entry != null;
-             entry = entry._next) {
-          if (name.equals(entry.getKey())) {
-            Entry prev = entry._prev;
-            Entry next = entry._next;
-
-            if (prev != null)
-              prev._next = next;
-            else
-              _entries[hash] = next;
-
-            if (next != null)
-              next._prev = prev;
-
-            _size--;
-
-            return;
-          }
-        }
+      _fieldMap.remove(name);
     }
 
     return;
 
   }
-
-
 
 
   /**
@@ -643,42 +572,38 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry getEntry(Env env, StringValue name)
   {
-    int hash = (name.hashCode() & 0x7fffffff) % _prime;
+    Entry entry = _fieldMap.get(name);
 
-    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      StringValue entryKey = entry._key;
+    if (entry == null) {
+      return null;
+    }
 
-      if (name == entryKey || name.equals(entryKey)) {
-        if (entry._visibility == FieldVisibility.PRIVATE) {
-          QuercusClass cls = env.getCallingClass();
+    if (entry._visibility == FieldVisibility.PRIVATE) {
+      QuercusClass cls = env.getCallingClass();
 
-          // XXX: this really only checks access from outside of class scope
-          // php/091m
-          if (cls != _quercusClass) {
-            env.notice(L.l("Can't access private field '{0}::${1}'",
+      // XXX: this really only checks access from outside of class scope
+      // php/091m
+      if (cls != _quercusClass) {
+        env.notice(L.l("Can't access private field '{0}::${1}'",
+                       _quercusClass.getName(), name));
+
+        return null;
+      }
+      /* nam: 2012-04-29 this doesn't work, commented out for drupal-7.12
+      else if (entry._visibility == FieldVisibility.PROTECTED) {
+        QuercusClass cls = env.getCallingClass();
+
+        if (cls == null || (cls != _quercusClass && ! cls.isA(_quercusClass.getName()))) {
+            env.notice(L.l("Can't access protected field '{0}::${1}'",
                            _quercusClass.getName(), name));
 
             return null;
-          }
         }
-        /* nam: 2012-04-29 this doesn't work, commented out for drupal-7.12
-        else if (entry._visibility == FieldVisibility.PROTECTED) {
-          QuercusClass cls = env.getCallingClass();
-
-          if (cls == null || (cls != _quercusClass && ! cls.isA(_quercusClass.getName()))) {
-              env.notice(L.l("Can't access protected field '{0}::${1}'",
-                             _quercusClass.getName(), name));
-
-              return null;
-          }
-        }
-        */
-
-        return entry;
       }
+      */
     }
 
-    return null;
+    return entry;
   }
 
   /**
@@ -686,16 +611,7 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry getThisEntry(StringValue name)
   {
-    int hash = (name.hashCode() & 0x7fffffff) % _prime;
-
-    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      StringValue entryKey = entry._key;
-
-      if (name == entryKey || name.equals(entryKey))
-        return entry;
-    }
-
-    return null;
+    return _fieldMap.get(name);
   }
 
   /**
@@ -703,30 +619,14 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry createEntry(StringValue name, FieldVisibility visibility)
   {
-    int hash = (name.hashCode() & 0x7fffffff) % _prime;
+    Entry entry = _fieldMap.get(name);
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._next) {
-      if (name.equals(entry._key))
-        return entry;
+    if (entry == null) {
+      entry = new Entry(name, visibility);
+      _fieldMap.put(name, entry);
     }
 
-    _size++;
-
-    Entry newEntry = new Entry(name, visibility);
-    Entry next = _entries[hash];
-
-    if (next != null) {
-      newEntry._next = next;
-      next._prev = newEntry;
-    }
-
-    _entries[hash] = newEntry;
-
-    // XXX: possibly resize
-
-    return newEntry;
+    return entry;
   }
 
   //
@@ -753,7 +653,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Iterator<Map.Entry<Value, Value>> getBaseIterator(Env env)
   {
-    return new KeyValueIterator(_entries);
+    return new KeyValueIterator(_fieldMap.values().iterator());
   }
 
   /**
@@ -767,7 +667,7 @@ public class ObjectExtValue extends ObjectValue
     if (delegate != null)
       return delegate.getKeyIterator(env, this);
 
-    return new KeyIterator(_entries);
+    return new KeyIterator(_fieldMap.keySet().iterator());
   }
 
   /**
@@ -781,7 +681,7 @@ public class ObjectExtValue extends ObjectValue
     if (delegate != null)
       return delegate.getValueIterator(env, this);
 
-    return new ValueIterator(_entries);
+    return new ValueIterator(_fieldMap.values().iterator());
   }
 
   //
@@ -1047,7 +947,7 @@ public class ObjectExtValue extends ObjectValue
   protected void clone(Env env, ObjectExtValue obj) {
     _quercusClass.initObject(env, obj);
 
-    Iterator<Entry> iter = new EntryIterator(_entries);
+    Iterator<Entry> iter = _fieldMap.values().iterator();
 
     while (iter.hasNext()) {
       Entry entry = iter.next();
@@ -1093,7 +993,7 @@ public class ObjectExtValue extends ObjectValue
     sb.append(getSize());
     sb.append(":{");
 
-    Iterator<Entry> iter = new EntryIterator(_entries);
+    Iterator<Entry> iter = _fieldMap.values().iterator();
 
     while (iter.hasNext()) {
       Entry entry = iter.next();
@@ -1255,14 +1155,6 @@ public class ObjectExtValue extends ObjectValue
     return new EntrySet();
   }
 
-  /**
-   * Returns a Set of entries, sorted by key.
-   */
-  public Set<? extends Map.Entry<Value,Value>> sortedEntrySet()
-  {
-    return new TreeSet<Map.Entry<Value, Value>>(entrySet());
-  }
-
   //
   // debugging
   //
@@ -1294,7 +1186,7 @@ public class ObjectExtValue extends ObjectValue
       out.println();
     }
 
-    for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
+    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
       entry.varDumpImpl(env, out, depth + 1, valueSet);
@@ -1318,7 +1210,7 @@ public class ObjectExtValue extends ObjectValue
     printDepth(out, 4 * depth);
     out.println("(");
 
-    for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
+    for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
       entry.printRImpl(env, out, depth + 1, valueSet);
@@ -1337,7 +1229,7 @@ public class ObjectExtValue extends ObjectValue
   {
     out.writeObject(_className);
 
-    out.writeInt(_size);
+    out.writeInt(_fieldMap.size());
 
     for (Map.Entry<Value,Value> entry : entrySet()) {
       out.writeObject(entry.getKey());
@@ -1355,7 +1247,7 @@ public class ObjectExtValue extends ObjectValue
 
     int length = 0;
 
-    Iterator<Entry> iter = new EntryIterator(_entries);
+    Iterator<Entry> iter = _fieldMap.values().iterator();
 
     while (iter.hasNext()) {
       Entry entry = iter.next();
@@ -1452,102 +1344,28 @@ public class ObjectExtValue extends ObjectValue
     @Override
     public Iterator<Map.Entry<Value,Value>> iterator()
     {
-      return new KeyValueIterator(ObjectExtValue.this._entries);
-    }
-  }
-
-  public static class EntryIterator
-    implements Iterator<Entry>
-  {
-    private final Entry []_list;
-    private int _index;
-    private Entry _entry;
-
-    EntryIterator(Entry []list)
-    {
-      _list = list;
-    }
-
-    public boolean hasNext()
-    {
-      if (_entry != null)
-        return true;
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      return _index < _list.length;
-    }
-
-    public Entry next()
-    {
-      if (_entry != null) {
-        Entry entry = _entry;
-        _entry = entry._next;
-
-        return entry;
-      }
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      if (_list.length <= _index)
-        return null;
-
-      Entry entry = _list[_index++];
-      _entry = entry._next;
-
-      return entry;
-    }
-
-    public void remove()
-    {
-      throw new UnsupportedOperationException();
+      return new KeyValueIterator(_fieldMap.values().iterator());
     }
   }
 
   public static class KeyValueIterator
     implements Iterator<Map.Entry<Value,Value>>
   {
-    private final Entry []_list;
-    private int _index;
-    private Entry _entry;
+    private final Iterator<Entry> _iter;
 
-    KeyValueIterator(Entry []list)
+    KeyValueIterator(Iterator<Entry> iter)
     {
-      _list = list;
+      _iter = iter;
     }
 
     public boolean hasNext()
     {
-      if (_entry != null)
-        return true;
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      return _index < _list.length;
+      return _iter.hasNext();
     }
 
     public Map.Entry<Value,Value> next()
     {
-      if (_entry != null) {
-        Entry entry = _entry;
-        _entry = entry._next;
-
-        return entry;
-      }
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      if (_list.length <= _index)
-        return null;
-
-      Entry entry = _list[_index++];
-      _entry = entry._next;
-
-      return entry;
+      return _iter.next();
     }
 
     public void remove()
@@ -1559,45 +1377,21 @@ public class ObjectExtValue extends ObjectValue
   public static class ValueIterator
     implements Iterator<Value>
   {
-    private final Entry []_list;
-    private int _index;
-    private Entry _entry;
+    private final Iterator<Entry> _iter;
 
-    ValueIterator(Entry []list)
+    ValueIterator(Iterator<Entry> iter)
     {
-      _list = list;
+      _iter = iter;
     }
 
     public boolean hasNext()
     {
-      if (_entry != null)
-        return true;
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      return _index < _list.length;
+      return _iter.hasNext();
     }
 
     public Value next()
     {
-      if (_entry != null) {
-        Entry entry = _entry;
-        _entry = entry._next;
-
-        return entry._value;
-      }
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      if (_list.length <= _index)
-        return null;
-
-      Entry entry = _list[_index++];
-      _entry = entry._next;
-
-      return entry._value;
+      return _iter.next().getValue();
     }
 
     public void remove()
@@ -1609,45 +1403,21 @@ public class ObjectExtValue extends ObjectValue
   public static class KeyIterator
     implements Iterator<Value>
   {
-    private final Entry []_list;
-    private int _index;
-    private Entry _entry;
+    private final Iterator<StringValue> _iter;
 
-    KeyIterator(Entry []list)
+    KeyIterator(Iterator<StringValue> iter)
     {
-      _list = list;
+      _iter = iter;
     }
 
     public boolean hasNext()
     {
-      if (_entry != null)
-        return true;
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      return _index < _list.length;
+      return _iter.hasNext();
     }
 
     public Value next()
     {
-      if (_entry != null) {
-        Entry entry = _entry;
-        _entry = entry._next;
-
-        return entry._key;
-      }
-
-      for (; _index < _list.length && _list[_index] == null; _index++) {
-      }
-
-      if (_list.length <= _index)
-        return null;
-
-      Entry entry = _list[_index++];
-      _entry = entry._next;
-
-      return entry._key;
+      return _iter.next();
     }
 
     public void remove()
@@ -1664,7 +1434,6 @@ public class ObjectExtValue extends ObjectValue
     private final FieldVisibility _visibility;
     private Value _value;
 
-    private Entry _prev;
     private Entry _next;
 
     public Entry(StringValue key)
@@ -1717,6 +1486,11 @@ public class ObjectExtValue extends ObjectValue
       return _key;
     }
 
+    public FieldVisibility getVisibility()
+    {
+      return _visibility;
+    }
+
     public Entry getNext()
     {
       return _next;
@@ -1725,11 +1499,6 @@ public class ObjectExtValue extends ObjectValue
     public void setNext(Entry next)
     {
       _next = next;
-    }
-
-    public FieldVisibility getVisibility()
-    {
-      return _visibility;
     }
 
     public boolean isPublic()
