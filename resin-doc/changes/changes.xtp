@@ -39,6 +39,8 @@
 <li>quercus: dokuwiki regexp illegal syntax - utf-16 surrogate pairs (#3955, rep by M. Pezzoli)</li>
 <li>quercus: vBulletin 4.0.1 - invalid conditional regexp (#3879, rep by derickso)</li>
 <li>quercus: sqlite PDO support (#3997, rep by Janos)</li>
+<li>quercus: Regex PCRE recursion (balancing groups) isn't working as expected in Quercus (#4974, rep by nemostein)</li>
+<li>quercus: object field foreach ordering does not match PHP (#5327, rep by K. Patel)</li>
 <li>pdf: availability report was inaccurate for quick restarts (#5220)</li>
 <li>pdf: added graph shading to highlight period of downtime</li>
 
