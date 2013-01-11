@@ -44,6 +44,7 @@
 <li>quercus: $a instanceof self/parent does not work (#5329)</li>
 <li>quercus: QuercusScriptEngine now returns Quercus Value types</li>
 <li>quercus: QuercusScriptEngine now defaults to unicode.semantics=on and utf-8 script encoding</li>
+<li>quercus: Scripting utf-8 output vietnamese incorrect (#5328, rep by ngoc)</li>
 <li>pdf: availability report was inaccurate for quick restarts (#5220)</li>
 <li>pdf: added graph shading to highlight period of downtime</li>
 
