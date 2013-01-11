@@ -550,7 +550,7 @@ public class QuercusContext
     else if (isUnicodeSemantics())
       return "utf-8";
     else
-      return "iso-8859-1";
+      return "utf-8";
   }
 
   /**

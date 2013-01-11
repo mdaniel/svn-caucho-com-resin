@@ -32,60 +32,50 @@ package com.caucho.quercus.lib.i18n;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CoderResult;
-import java.util.logging.Logger;
 
-import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.util.L10N;
 
 public class Big5Encoder
   extends GenericEncoder
 {
-  private static final Logger log
-    = Logger.getLogger(GenericEncoder.class.getName());
-
-  private static final L10N L = new L10N(Big5Encoder.class);
-  
   public Big5Encoder(String charsetName)
   {
     super(charsetName);
   }
-  
+
   @Override
-  public boolean isEncodable(Env env, StringValue str)
+  public boolean isEncodable(StringValue str, int start, int end)
   {
-    int len = str.length();
-    
-    for (int i = 0; i < len; i++) {
+    for (int i = start; i < end; i++) {
       char ch = str.charAt(i);
-      
+
       if (ch == '\u20AC') // euro
         continue;
       else if (! _encoder.canEncode(str.charAt(i))) {
         return false;
       }
     }
-    
+
     return false;
   }
-  
+
   @Override
   protected boolean fill(StringValue sb, CharBuffer in,
                          ByteBuffer out, CoderResult coder)
   {
     int len = out.position();
-    
+
     if (len > 0) {
       int offset = out.arrayOffset();
-      
+
       sb.appendBytes(out.array(), offset, offset + len);
     }
-    
+
     if (coder.isMalformed() || coder.isUnmappable()) {
       int errorIndex = in.position();
 
       in.position(errorIndex + 1);
-      
+
       if (in.get(errorIndex) == '\u20AC') {
         // euro
         sb.append('\u00a3');
@@ -100,7 +90,7 @@ public class Big5Encoder
       else
         return false;
     }
-    
+
     return true;
   }
 }

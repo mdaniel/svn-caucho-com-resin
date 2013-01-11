@@ -29,9 +29,7 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
@@ -42,28 +40,9 @@ import com.caucho.quercus.parser.QuercusParser;
 public class LiteralStringExpr extends Expr {
   protected final StringValue _value;
 
-  public LiteralStringExpr(Location location, String value)
-  {
-    super(location);
-
-    _value = new ConstStringValue(value);
-  }
-
-  public LiteralStringExpr(Location location, StringValue value)
-  {
-    super(location);
-
-    _value = value;
-  }
-
-  public LiteralStringExpr(String value)
-  {
-    this(Location.UNKNOWN, value);
-  }
-
   public LiteralStringExpr(StringValue value)
   {
-    this(Location.UNKNOWN, value);
+    _value = value;
   }
 
   /**
@@ -177,6 +156,7 @@ public class LiteralStringExpr extends Expr {
     return _value;
   }
 
+  @Override
   public String toString()
   {
     return "\"" + _value + "\"";

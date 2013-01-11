@@ -34,7 +34,6 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
-import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.vfs.TempBuffer;
 
@@ -53,11 +52,10 @@ public class GenericEncoder
     _encoder = _charset.newEncoder();
   }
 
-  public boolean isEncodable(Env env, StringValue str)
+  @Override
+  public boolean isEncodable(StringValue str, int start, int end)
   {
-    int len = str.length();
-
-    for (int i = 0; i < len; i++) {
+    for (int i = start; i < end; i++) {
       if (! _encoder.canEncode(str.charAt(i))) {
         return false;
       }
@@ -67,16 +65,15 @@ public class GenericEncoder
   }
 
   @Override
-  public StringValue encode(Env env, CharSequence str)
+  public StringValue encode(StringValue sb, CharSequence str,
+                            int start, int end)
   {
-    CharBuffer in = CharBuffer.wrap(str);
+    CharBuffer in = CharBuffer.wrap(str, start, end);
 
     TempBuffer tempBuf = TempBuffer.allocate();
 
     try {
       ByteBuffer out = ByteBuffer.wrap(tempBuf.getBuffer());
-
-      StringValue sb = env.createBinaryBuilder();
 
       while (in.hasRemaining()) {
         CoderResult coder = _encoder.encode(in, out, false);

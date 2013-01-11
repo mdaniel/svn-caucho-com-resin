@@ -399,7 +399,8 @@ public class HtmlModule extends AbstractQuercusModule {
     else {
       Encoder encoder = Encoder.create(charset);
 
-      return encoder.encode(env, sb);
+      StringValue result = env.createBinaryBuilder();
+      return encoder.encode(result, sb);
     }
   }
 

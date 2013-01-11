@@ -2034,6 +2034,14 @@ abstract public class StringValue
     return new StringBuilderValue(toString().substring(start, end));
   }
 
+  /**
+   * Sets the length.
+   */
+  public void setLength(int length)
+  {
+    throw new UnsupportedOperationException();
+  }
+
   //
   // java.lang.String methods
   //
@@ -2498,14 +2506,12 @@ abstract public class StringValue
    */
   public StringValue convertToUnicode(Env env, String charset)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
     Decoder decoder = Decoder.create(charset);
     decoder.setAllowMalformedOut(true);
 
-    sb.append(decoder.decode(env, this));
+    StringValue result = decoder.decodeUnicode(this);
 
-    return sb;
+    return result;
   }
 
   /**

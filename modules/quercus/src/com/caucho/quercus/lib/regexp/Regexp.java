@@ -340,7 +340,8 @@ public class Regexp {
   {
     Utf8Encoder encoder = new Utf8Encoder();
 
-    return encoder.encode(env, source);
+    StringValue sb = env.createBinaryBuilder();
+    return encoder.encode(sb, source);
   }
 
   public String toString()

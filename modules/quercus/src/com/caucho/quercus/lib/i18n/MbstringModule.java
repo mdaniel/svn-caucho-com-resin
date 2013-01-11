@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.i18n;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.VariableArguments;
@@ -868,7 +869,9 @@ public class MbstringModule
     CharSequence contentsUnicode = decoder.decode(env, contents);
 
     Encoder encoder = getEncoder(env, toEncoding);
-    return encoder.encode(env, contentsUnicode);
+
+    StringValue sb = env.createBinaryBuilder();
+    return encoder.encode(sb, contentsUnicode);
   }
 
   /**
@@ -1295,7 +1298,8 @@ public class MbstringModule
   {
     Encoder encoder = getEncoder(env, encoding);
 
-    return encoder.encode(env, str);
+    StringValue sb = env.createBinaryBuilder();
+    return encoder.encode(sb, str);
   }
 
   private static Encoder getEncoder(Env env, String encoding)
@@ -1334,6 +1338,7 @@ public class MbstringModule
     return encoder;
   }
 
+  @Hide
   public static String getEncoding(Env env)
   {
     Value encoding = env.getIni("mbstring.internal_encoding");
@@ -1483,7 +1488,9 @@ public class MbstringModule
     val = val.toValue();
 
     if (val.isString()) {
-      return encoder.encode(env, val.toStringValue(), true);
+      StringValue sb = env.createBinaryBuilder();
+
+      return encoder.encode(sb, val.toStringValue(), true);
     }
     else if (val.isArray()) {
       ArrayValue array = new ArrayValueImpl();

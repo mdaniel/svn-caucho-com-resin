@@ -40,8 +40,6 @@ import com.caucho.quercus.expr.Expr;
 public class EchoStatement extends Statement {
   protected final Expr _expr;
 
-  private String _genId;
-  
   /**
    * Creates the echo statement.
    */
@@ -51,7 +49,7 @@ public class EchoStatement extends Statement {
 
     _expr = expr;
   }
-  
+
   public Value execute(Env env)
   {
     Value value = _expr.eval(env);

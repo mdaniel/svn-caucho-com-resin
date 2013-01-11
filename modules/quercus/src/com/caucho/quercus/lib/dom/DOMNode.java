@@ -31,6 +31,10 @@ package com.caucho.quercus.lib.dom;
 
 import org.w3c.dom.Node;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.lib.i18n.Encoder;
+
 public class DOMNode<T extends Node>
   extends DOMWrapper<T>
 {
@@ -126,11 +130,13 @@ public class DOMNode<T extends Node>
     return _delegate.getNodeType();
   }
 
-  public String getNodeValue()
+  public CharSequence getNodeValue(Env env)
     throws DOMException
   {
     try {
-      return _delegate.getNodeValue();
+      String value = _delegate.getNodeValue();
+
+      return convertToUtf8(env, value);
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
@@ -154,17 +160,57 @@ public class DOMNode<T extends Node>
 
   public DOMNode getPreviousSibling()
   {
-    return  wrap(_delegate.getPreviousSibling());
+    return wrap(_delegate.getPreviousSibling());
   }
 
-  public String getTextContent()
+  public CharSequence getTextContent(Env env)
     throws DOMException
   {
     try {
-      return _delegate.getTextContent();
+      String value = _delegate.getTextContent();
+
+      return convertToUtf8(env, value);
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
+    }
+  }
+
+  private CharSequence convertToUtf8(Env env, String value)
+  {
+    if (env.isUnicodeSemantics()) {
+      return value;
+    }
+    else {
+      int len = value.length();
+
+      boolean isUtf16 = false;
+
+      for (int i = 0; i < len; i++) {
+        char ch = value.charAt(i);
+
+        if (0x00 <= ch && ch <= 0xff) {
+        }
+        else {
+          isUtf16 = true;
+          break;
+        }
+      }
+
+      if (isUtf16) {
+        // XXX: for mediawiki-1.20.2 install text,
+        //      not right but will have to do until we redo DOM
+        Encoder encoder = Encoder.create("utf-8");
+
+        StringValue sb = env.createBinaryBuilder();
+
+        encoder.encode(sb, value);
+
+        return sb;
+      }
+      else {
+        return value;
+      }
     }
   }
 

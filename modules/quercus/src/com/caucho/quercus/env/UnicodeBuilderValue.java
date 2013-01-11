@@ -634,8 +634,9 @@ public class UnicodeBuilderValue
   }
 
   /**
-   * Sets the offset.
+   * Sets the length.
    */
+  @Override
   public final void setLength(int length)
   {
     _length = length;

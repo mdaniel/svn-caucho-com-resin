@@ -59,11 +59,12 @@ public class DOMElement extends DOMNode<Element>
     super(impl, node);
   }
 
-  public String getNodeValue()
+  @Override
+  public CharSequence getNodeValue(Env env)
     throws DOMException
   {
     // php/1zd1
-    return getTextContent();
+    return getTextContent(env);
   }
 
   public String getAttribute(String name)
@@ -261,7 +262,7 @@ public class DOMElement extends DOMNode<Element>
 
     if (nodeValue == null)
       nodeValue = "";
-    
+
     setTextContent(nodeValue);
   }
 }

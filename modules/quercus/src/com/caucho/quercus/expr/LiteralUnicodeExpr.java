@@ -29,39 +29,19 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.UnicodeBuilderValue;
-import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 
 /**
  * Represents a PHP string literal expression.
  */
 public class LiteralUnicodeExpr extends Expr {
-  protected final StringValue _value;
+  protected final UnicodeValue _value;
 
-  public LiteralUnicodeExpr(Location location, String value)
+  public LiteralUnicodeExpr(UnicodeValue value)
   {
-    super(location);
-    
-    _value = new UnicodeBuilderValue(value);
-  }
-
-  public LiteralUnicodeExpr(Location location, StringValue value)
-  {
-    super(location);
     _value = value;
-  }
-
-  public LiteralUnicodeExpr(String value)
-  {
-    this(Location.UNKNOWN, value);
-  }
-
-  public LiteralUnicodeExpr(StringValue value)
-  {
-    this(Location.UNKNOWN, value);
   }
 
   /**

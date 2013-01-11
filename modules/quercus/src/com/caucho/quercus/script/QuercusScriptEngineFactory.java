@@ -33,9 +33,10 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.SimpleBindings;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.reflect.*;
 
 /**
  * Script engine factory
@@ -62,10 +63,11 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
       Field version = cl.getField("VERSION");
 
       return (String) version.get(null);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
     }
 
-    return "Resin/3.1.0";
+    return "Resin/4.x";
   }
 
   /**
@@ -202,7 +204,7 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
 
   public String toString()
   {
-    return "QuercusScriptEngineFactory[]";
+    return getClass().getSimpleName() + "[]";
   }
 }
 

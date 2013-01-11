@@ -30,44 +30,34 @@
 package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-
-import java.io.IOException;
 
 /**
  * Represents static text in a PHP program.
  */
 public class TextStatement extends Statement {
-  private String _value;
-  
+  private StringValue _value;
+
   /**
    * Creates the text statement with its string.
    */
-  public TextStatement(Location location, String value)
+  public TextStatement(Location location, StringValue value)
   {
     super(location);
 
     _value = value;
   }
 
-  protected String getValue()
+  protected StringValue getValue()
   {
     return _value;
   }
-  
+
   public Value execute(Env env)
   {
-    try {
-      env.getOut().print(_value);
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (IOException e) {
-      throw new QuercusException(e);
-    }
+    _value.print(env);
 
     return null;
   }

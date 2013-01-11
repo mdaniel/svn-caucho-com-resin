@@ -35,14 +35,31 @@ public class Location {
   public static final Location UNKNOWN = new Location();
 
   private final String _fileName;
+  private final String _userPath;
+
   private final int _lineNumber;
   private final String _className;
   private final String _functionName;
 
-  public Location(String fileName, int lineNumber, String className,
+  public Location(String fileName,
+                  int lineNumber, String className,
                   String functionName)
   {
     _fileName = fileName;
+    _userPath = fileName;
+
+    _lineNumber = lineNumber;
+    _className = className;
+    _functionName = functionName;
+  }
+
+  public Location(String fileName, String userPath,
+                  int lineNumber, String className,
+                  String functionName)
+  {
+    _fileName = fileName;
+    _userPath = userPath;
+
     _lineNumber = lineNumber;
     _className = className;
     _functionName = functionName;
@@ -51,6 +68,8 @@ public class Location {
   private Location()
   {
     _fileName = null;
+    _userPath = null;
+
     _lineNumber = 0;
     _className = null;
     _functionName = null;
@@ -59,6 +78,11 @@ public class Location {
   public String getFileName()
   {
     return _fileName;
+  }
+
+  public String getUserPath()
+  {
+    return _userPath;
   }
 
   public int getLineNumber()
@@ -90,7 +114,7 @@ public class Location {
 
   public boolean isUnknown()
   {
-    return _fileName == null || _lineNumber <= 0; 
+    return _fileName == null || _lineNumber <= 0;
   }
 
   public String toString()

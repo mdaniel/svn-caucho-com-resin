@@ -312,7 +312,9 @@ public class LargeStringBuilderValue
     }
   }
 
-  public final void setLength(int len) {
+  @Override
+  public final void setLength(int len)
+  {
     _length = len;
   }
 

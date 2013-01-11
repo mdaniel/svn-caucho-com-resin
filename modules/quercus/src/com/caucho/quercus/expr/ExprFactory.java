@@ -85,7 +85,7 @@ public class ExprFactory {
   /**
    * Creates a string (php5) literal expression.
    */
-  public Expr createString(String lexeme)
+  public Expr createString(StringValue lexeme)
   {
     return new LiteralStringExpr(lexeme);
   }
@@ -93,7 +93,7 @@ public class ExprFactory {
   /**
    * Creates a string literal expression.
    */
-  public Expr createUnicode(String lexeme)
+  public Expr createUnicode(UnicodeValue lexeme)
   {
     return new LiteralUnicodeExpr(lexeme);
   }
@@ -101,9 +101,9 @@ public class ExprFactory {
   /**
    * Creates a binary literal expression.
    */
-  public Expr createBinary(byte []bytes)
+  public Expr createBinary(BinaryValue value)
   {
-    return new LiteralBinaryStringExpr(bytes);
+    return new LiteralBinaryStringExpr(value);
   }
 
   /**
@@ -734,16 +734,14 @@ public class ExprFactory {
       LiteralBinaryStringExpr rightString
         = (LiteralBinaryStringExpr) tail.getValue();
 
-      try {
-        byte []bytes = (leftString.evalConstant().toString()
-            + rightString.evalConstant().toString()).getBytes("ISO-8859-1");
+      StringValue l = (StringValue) leftString.evalConstant();
+      StringValue r = (StringValue) rightString.evalConstant();
 
-        Expr value = createBinary(bytes);
+      StringValue result = l.createStringBuilder().append(l).append(r);
 
-        return createAppendImpl(value, tail.getNext());
-      } catch (java.io.UnsupportedEncodingException e) {
-        throw new RuntimeException(e);
-      }
+      Expr value = createBinary((BinaryValue) result);
+
+      return createAppendImpl(value, tail.getNext());
     }
     else if (left.getValue() instanceof LiteralBinaryStringExpr
              || tail.getValue() instanceof LiteralBinaryStringExpr) {
@@ -756,8 +754,12 @@ public class ExprFactory {
       LiteralStringExpr leftString = (LiteralStringExpr) left.getValue();
       LiteralStringExpr rightString = (LiteralStringExpr) tail.getValue();
 
-      Expr value = createString(leftString.evalConstant().toString()
-                                + rightString.evalConstant().toString());
+      StringValue l = (StringValue) leftString.evalConstant();
+      StringValue r = (StringValue) rightString.evalConstant();
+
+      StringValue sb = l.createStringBuilder().append(l).append(r);
+
+      Expr value = createString(sb);
 
       return createAppendImpl(value, tail.getNext());
     }
@@ -766,8 +768,12 @@ public class ExprFactory {
       LiteralUnicodeExpr leftString = (LiteralUnicodeExpr) left.getValue();
       LiteralUnicodeExpr rightString = (LiteralUnicodeExpr) tail.getValue();
 
-      Expr value = createUnicode(leftString.evalConstant().toString()
-                                 + rightString.evalConstant().toString());
+      UnicodeValue l = (UnicodeValue) leftString.evalConstant();
+      UnicodeValue r = (UnicodeValue) rightString.evalConstant();
+
+      UnicodeValue sb = (UnicodeValue) l.createStringBuilder().append(l).append(r);
+
+      Expr value = createUnicode(sb);
 
       return createAppendImpl(value, tail.getNext());
     }
@@ -1349,7 +1355,7 @@ public class ExprFactory {
   /**
    * Creates a text statement
    */
-  public Statement createText(Location loc, String text)
+  public Statement createText(Location loc, StringValue text)
   {
     return new TextStatement(loc, text);
   }

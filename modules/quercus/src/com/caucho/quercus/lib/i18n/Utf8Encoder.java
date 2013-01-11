@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 
 public class Utf8Encoder
@@ -46,10 +45,10 @@ public class Utf8Encoder
     return true;
   }
 
-  public boolean isEncodable(Env env, StringValue str)
+  @Override
+  public boolean isEncodable(StringValue str, int start, int end)
   {
-    int len = str.length();
-    for (int i = 0; i < len; i++) {
+    for (int i = start; i < end; i++) {
       char ch = str.charAt(i);
 
       if (ch <= 0x7F)
@@ -58,7 +57,7 @@ public class Utf8Encoder
       if (0xD800 <= ch && ch <= 0xDBFF) {
         char ch2;
 
-        if (i + 1 < len
+        if (i + 1 < end
             && 0xDC00 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xDFFF) {
           i++;
         }
@@ -71,12 +70,10 @@ public class Utf8Encoder
   }
 
   @Override
-  public StringValue encode(Env env, CharSequence str)
+  public StringValue encode(StringValue sb, CharSequence str,
+                            int start, int end)
   {
-    StringValue sb = env.createBinaryBuilder();
-
-    int len = str.length();
-    for (int i = 0; i < len; i++) {
+    for (int i = start; i < end; i++) {
       char ch = str.charAt(i);
 
       if (ch <= 0x7F) {
@@ -90,7 +87,7 @@ public class Utf8Encoder
       if (0xD800 <= ch && ch <= 0xDBFF) {
         char ch2;
 
-        if (i + 1 < len
+        if (i + 1 < end
             && 0xDC00 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xDFFF) {
           i++;
 

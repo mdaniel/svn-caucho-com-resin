@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.i18n;
 
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.StringValue;
 
 public class UnicodeUtility
 {
@@ -39,12 +40,12 @@ public class UnicodeUtility
                                       boolean isIgnore)
   {
     StringValue sb = str.createStringBuilder();
-    
+
     int len = str.length();
-    
+
     for (int i = 0; i < len; i++) {
       char ch = str.charAt(i);
-      
+
       if (ch <= 0x7F)
         sb.append(ch);
       else if (0xC2 <= ch && ch <= 0xDF) {
@@ -84,7 +85,7 @@ public class UnicodeUtility
         char ch2;
         char ch3;
         char ch4;
-        
+
         if (i + 3 < len
             && 0x80 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xBF
             && 0x80 <= (ch3 = str.charAt(i + 2)) && ch3 <= 0xBF
@@ -109,17 +110,17 @@ public class UnicodeUtility
       else
         return sb;
     }
-    
+
     return sb;
   }
-  
+
   public static CharSequence decode(Env env,
                                     StringValue str,
                                     String charset)
   {
     return decode(env, str, charset, null, false);
   }
-  
+
   public static CharSequence decode(Env env,
                                     StringValue str,
                                     String charset,
@@ -127,20 +128,20 @@ public class UnicodeUtility
                                     boolean isIgnoreErrors)
   {
     Decoder decoder = Decoder.create(charset);
-    
+
     decoder.setReplacement(replacement);
     decoder.setIgnoreErrors(isIgnoreErrors);
-    
+
     return decoder.decode(env, str);
   }
-  
+
   public static StringValue encode(Env env,
                                    CharSequence str,
                                    String charset)
   {
     return encode(env, str, charset, null, false);
   }
-  
+
   public static StringValue encode(Env env,
                                    CharSequence str,
                                    String charset,
@@ -148,13 +149,14 @@ public class UnicodeUtility
                                    boolean isIgnoreErrors)
   {
     Encoder encoder = Encoder.create(charset);
-    
+
     encoder.setReplacement(replacement);
     encoder.setIgnoreErrors(isIgnoreErrors);
-    
-    return encoder.encode(env, str);
+
+    StringValue sb = env.createBinaryBuilder();
+    return encoder.encode(sb, str);
   }
-  
+
   public static StringValue decodeEncode(Env env,
                                          StringValue str,
                                          String inCharset,
@@ -164,42 +166,43 @@ public class UnicodeUtility
   {
     boolean isStartUtf8 = false;
     boolean isEndUtf8 = false;
-    
+
     if (inCharset.equalsIgnoreCase("utf8")
         || inCharset.equalsIgnoreCase("utf-8"))
       isStartUtf8 = true;
-    
+
     if (outCharset.equalsIgnoreCase("utf8")
         || outCharset.equalsIgnoreCase("utf-8"))
       isEndUtf8 = true;
-    
+
     if (isStartUtf8 && isEndUtf8)
       return UnicodeUtility.utf8Clean(env, str, null, isIgnoreErrors);
-    
+
     // decode phase
-    
+
     CharSequence unicodeStr;
-    
+
     Decoder decoder;
     if (isStartUtf8)
       decoder = new Utf8Decoder(inCharset);
     else
       decoder = new GenericDecoder(inCharset);
-    
+
     decoder.setIgnoreErrors(isIgnoreErrors);
 
     unicodeStr = decoder.decode(env, str);
-    
+
     // encode phase
-    
+
     Encoder encoder;
     if (isEndUtf8)
       encoder = new Utf8Encoder();
     else
       encoder = Encoder.create(outCharset);
-    
+
     encoder.setIgnoreErrors(isIgnoreErrors);
-    
-    return encoder.encode(env, unicodeStr);
+
+    StringValue sb = env.createBinaryBuilder();
+    return encoder.encode(sb, unicodeStr);
   }
 }

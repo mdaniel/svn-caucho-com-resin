@@ -87,16 +87,29 @@ abstract public class Encoder
   {
   }
 
-  abstract public boolean isEncodable(Env env, StringValue str);
+  abstract public boolean isEncodable(StringValue str,
+                                      int start, int end);
 
-  abstract public StringValue encode(Env env, CharSequence str);
+  public StringValue encode(StringValue sb, CharSequence str)
+  {
+    return encode(sb, str, 0, str.length());
+  }
 
-  public final StringValue encode(Env env, CharSequence str, boolean isReset)
+  public StringValue encode(StringValue sb, CharSequence str, boolean isReset)
+  {
+    return encode(sb, str, 0, str.length(), isReset);
+  }
+
+  abstract public StringValue encode(StringValue sb, CharSequence str,
+                                     int start, int end);
+
+  public final StringValue encode(StringValue sb, CharSequence str,
+                                  int start, int end, boolean isReset)
   {
     if (isReset)
       reset();
 
-    return encode(env, str);
+    return encode(sb, str, start, end);
   }
 
 }
