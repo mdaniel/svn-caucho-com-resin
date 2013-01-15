@@ -740,6 +740,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Sets the array ref.
    */
+  @Override
   public Var putVar()
   {
     if (_isDirty)
@@ -749,6 +750,21 @@ public class ArrayValueImpl extends ArrayValue
     Value tailKey = createTailKey();
 
     return getVar(tailKey);
+  }
+
+  /**
+   * Sets the array tail, returning a reference to the tail.
+   */
+  @Override
+  public Value getArgTail(Env env, boolean isTop)
+  {
+    if (_isDirty) {
+      copyOnWrite();
+    }
+
+    Value tail = createTailKey();
+
+    return new ArgGetValue(this, tail);
   }
 
   /**

@@ -154,21 +154,14 @@ public class VarVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalArray(Env env)
   {
     StringValue varName = _var.evalStringValue(env);
 
     Value value = env.getVar(varName);
 
-    if (value != null)
-      return value.getArray();
-    else {
-      ArrayValue array = new ArrayValueImpl();
-
-      env.setRef(varName, array);
-
-      return array;
-    }
+    return value.toAutoArray();
   }
 
   public String toString()

@@ -44,7 +44,7 @@ public class BinaryAssignExpr extends Expr {
   public BinaryAssignExpr(Location location, AbstractVarExpr var, Expr value)
   {
     super(location);
-    
+
     _var = var;
     _value = value;
   }
@@ -74,7 +74,7 @@ public class BinaryAssignExpr extends Expr {
   {
     return true;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -85,9 +85,7 @@ public class BinaryAssignExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    Value value = _value.evalCopy(env);
-
-    return _var.evalAssignValue(env, value);
+    return _var.evalAssignValue(env, _value);
   }
 
   /**

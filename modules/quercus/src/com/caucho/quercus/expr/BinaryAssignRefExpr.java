@@ -61,7 +61,7 @@ public class BinaryAssignRefExpr extends Expr {
   {
     return true;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -72,14 +72,9 @@ public class BinaryAssignRefExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    // value can be a Value or Var
-    Value value = _value.evalRef(env);
-    
-    _var.evalAssignRef(env, value);
-
-    return value.toValue();
+    return _var.evalAssignRef(env, _value).toValue();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -90,14 +85,9 @@ public class BinaryAssignRefExpr extends Expr {
   @Override
   public Value evalCopy(Env env)
   {
-    // value can be a Value or Var
-    Value value = _value.evalRef(env);
-    
-    _var.evalAssignRef(env, value);
-
-    return value.toValue().copy();
+    return _var.evalAssignRef(env, _value).toValue().copy();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -110,8 +100,8 @@ public class BinaryAssignRefExpr extends Expr {
   {
     // value can be a Value or Var
     Value value = _value.evalRef(env);
-    
-    _var.evalAssignRef(env, value);
+
+    _var.evalAssignRef(env, _value);
 
     return value;
   }

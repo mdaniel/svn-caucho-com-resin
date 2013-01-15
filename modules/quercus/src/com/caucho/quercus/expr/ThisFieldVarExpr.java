@@ -161,13 +161,35 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
    * Evaluates as an array index assign ($a[index] = value).
    */
   @Override
-  public Value evalArrayAssign(Env env, Value index, Value value)
+  public Value evalArrayAssign(Env env, Expr indexExpr, Expr valueExpr)
   {
     Value obj = env.getThis();
 
     StringValue name = _nameExpr.evalStringValue(env);
 
     Value fieldVar = obj.getThisFieldArray(env, name);
+    Value index = indexExpr.eval(env);
+
+    Value value = valueExpr.evalCopy(env);
+
+    // php/03mn
+    return fieldVar.putThisFieldArray(env, obj, name, index, value);
+  }
+
+  /**
+   * Evaluates as an array index assign ($a[index] = &value).
+   */
+  @Override
+  public Value evalArrayAssignRef(Env env, Expr indexExpr, Expr valueExpr)
+  {
+    Value obj = env.getThis();
+
+    StringValue name = _nameExpr.evalStringValue(env);
+
+    Value fieldVar = obj.getThisFieldArray(env, name);
+    Value index = indexExpr.eval(env);
+
+    Value value = valueExpr.evalRef(env);
 
     // php/03mn
     return fieldVar.putThisFieldArray(env, obj, name, index, value);

@@ -2727,6 +2727,14 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Sets the array tail, returning a reference to the tail.
+   */
+  public Value getArgTail(Env env, boolean isTop)
+  {
+    return putVar();
+  }
+
+  /**
    * Appends a new object
    */
   public Value putObject(Env env)

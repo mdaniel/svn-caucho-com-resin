@@ -71,9 +71,7 @@ public class ArgGetFieldValue extends ArgValue {
   public Var toLocalVarDeclAsRef()
   {
     // php/3d2t
-    return _obj.toAutoObject(_env)
-      .getFieldVar(_env, _name)
-      .toLocalVarDeclAsRef();
+    return _obj.toAutoObject(_env).getFieldVar(_env, _name).toLocalVarDeclAsRef();
   }
 
   /**
@@ -111,17 +109,46 @@ public class ArgGetFieldValue extends ArgValue {
   {
     return _obj.getField(_env, _name);
   }
-  
+
   @Override
   public Value toAutoArray()
   {
-    return _obj.toAutoObject(_env).getFieldVar(_env, _name).toAutoArray();
+    Value parent = _obj.toAutoObject(_env);
+    Value value = parent.getField(_env, _name);
+
+    Value array = value.toAutoArray();
+
+    if (array != value) {
+      parent.putField(_env, _name, array);
+
+      value = array;
+    }
+
+    return value;
   }
-  
+
   @Override
   public Value toAutoObject(Env env)
   {
-    return _obj.toAutoObject(env).getFieldVar(env, _name).toAutoObject(env);
+    Value parent = _obj.toAutoObject(env);
+    Value value = parent.getField(env, _name);
+
+    if (value.isNull()) {
+      value = env.createObject();
+
+      parent.putField(env, _name, value);
+    }
+    else {
+      Value obj = value.toAutoObject(env);
+
+      if (obj != value) {
+        parent.putField(env, _name, obj);
+      }
+
+      value = obj;
+    }
+
+    return value;
   }
 
   /**
@@ -165,7 +192,7 @@ public class ArgGetFieldValue extends ArgValue {
   {
     return toValue().toStringValue();
   }
-  
+
   @Override
   public String toJavaString()
   {

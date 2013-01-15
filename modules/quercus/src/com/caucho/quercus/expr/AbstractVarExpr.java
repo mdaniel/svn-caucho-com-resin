@@ -44,12 +44,12 @@ abstract public class AbstractVarExpr extends Expr {
   {
     super(location);
   }
-  
+
   public AbstractVarExpr()
   {
   }
-  
-  
+
+
   /**
    * Returns true if the expression is a var/left-hand-side.
    */
@@ -58,7 +58,7 @@ abstract public class AbstractVarExpr extends Expr {
   {
     return true;
   }
-  
+
   /**
    * Marks the value as assigned
    */

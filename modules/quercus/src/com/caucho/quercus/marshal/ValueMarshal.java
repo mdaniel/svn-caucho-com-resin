@@ -67,15 +67,9 @@ public class ValueMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    if (_isPassThru) {
-      // php/0433
-      return value.toLocalRef();
-    }
-    else {
-      // php/3c81
-      // return value.toLocalValue();
-      return value.toLocalValueReadOnly(); // non-copy
-    }
+    // php/0433
+    // php/3c81
+    return value.toLocalValueReadOnly(); // non-copy
   }
 
   public Value unmarshal(Env env, Object value)

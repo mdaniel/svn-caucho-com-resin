@@ -580,11 +580,32 @@ abstract public class Expr {
   /**
    * Evaluates an assignment. The value must not be a Var.
    */
+  public Value evalAssignValue(Env env, Expr valueExpr)
+  {
+    Value value = valueExpr.evalCopy(env);
+
+    return evalAssignValue(env, value);
+  }
+
+  /**
+   * Evaluates an assignment. The value must not be a Var.
+   */
   public Value evalAssignValue(Env env, Value value)
   {
     throw new RuntimeException(L.l(
       "{0} is an invalid left-hand side of an assignment.",
       this));
+  }
+
+  /**
+   * Evaluates an assignment. If the value is a Var, it replaces the
+   * current Var.
+   */
+  public Value evalAssignRef(Env env, Expr valueExpr)
+  {
+    Value value = valueExpr.evalRef(env);
+
+    return evalAssignRef(env, value);
   }
 
   /**
@@ -602,7 +623,7 @@ abstract public class Expr {
    * Evaluates as an array index assign ($a[index] = value).
    * @return what was assigned
    */
-  public Value evalArrayAssign(Env env, Value index, Value value)
+  public Value evalArrayAssign(Env env, Expr indexExpr, Expr valueExpr)
   {
     // php/03mk, php/03mm, php/03mn, php/04b3
     // overrided in ThisFieldExpr and ThisFieldVarExpr
@@ -611,6 +632,56 @@ abstract public class Expr {
     //return var.put(index, value);
 
     Value array = evalArray(env);
+    Value index = indexExpr.eval(env);
+
+    Value value = valueExpr.evalCopy(env);
+
+    Value result = array.put(index, value);
+
+    //return array.get(index); // php/03mm php/03mn
+
+    return result;
+  }
+
+  /**
+   * Evaluates as an array index assign ($a[index] = value).
+   * @return what was assigned
+   */
+  public Value evalArrayAssignRef(Env env, Expr indexExpr, Expr valueExpr)
+  {
+    // php/03mk, php/03mm, php/03mn, php/04b3
+    // overrided in ThisFieldExpr and ThisFieldVarExpr
+    //Value var = eval(env);
+    //
+    //return var.put(index, value);
+
+    Value array = evalArray(env);
+    Value index = indexExpr.eval(env);
+
+    Value value = valueExpr.evalRef(env);
+
+    Value result = array.put(index, value);
+
+    //return array.get(index); // php/03mm php/03mn
+
+    return result;
+  }
+
+  /**
+   * Evaluates as an array index assign ($a[index] = value).
+   * @return what was assigned
+   */
+  public Value evalArrayAssignRef(Env env, Expr indexExpr, Value value)
+  {
+    // php/03mk, php/03mm, php/03mn, php/04b3
+    // overrided in ThisFieldExpr and ThisFieldVarExpr
+    //Value var = eval(env);
+    //
+    //return var.put(index, value);
+
+    Value array = evalArray(env);
+    Value index = indexExpr.eval(env);
+
     Value result = array.put(index, value);
 
     //return array.get(index); // php/03mm php/03mn

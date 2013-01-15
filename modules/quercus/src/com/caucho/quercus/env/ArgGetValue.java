@@ -88,13 +88,42 @@ public class ArgGetValue extends ArgValue
   @Override
   public Value toAutoArray()
   {
-    return _obj.toAutoArray().getVar(_index).toAutoArray();
+    Value parent = _obj.toAutoArray();
+    Value value = parent.get(_index);
+
+    Value array = value.toAutoArray();
+
+    if (array != value) {
+      parent.put(_index, array);
+
+      value = array;
+    }
+
+    return value;
   }
 
   @Override
   public Value toAutoObject(Env env)
   {
-    return _obj.toAutoArray().getVar(_index).toAutoObject(env);
+    Value array = _obj.toAutoArray();
+    Value value = array.get(_index);
+
+    if (value.isNull()) {
+      value = env.createObject();
+
+      array.put(_index, value);
+    }
+    else {
+      Value obj = value.toAutoObject(env);
+
+      if (obj != value) {
+        array.put(_index, obj);
+      }
+
+      value = obj;
+    }
+
+    return value;
   }
 
   /**

@@ -106,9 +106,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    Value obj = _objExpr.evalVar(env);
-
-    obj = obj.toAutoObject(env);
+    Value obj = _objExpr.evalObject(env);
 
     return obj.getFieldVar(env, _name);
   }
@@ -147,9 +145,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignRef(Env env, Value value)
   {
-    Value obj = _objExpr.evalVar(env);
-
-    obj = obj.toAutoObject(env);
+    Value obj = _objExpr.evalObject(env);
 
     obj.putField(env, _name, value);
 

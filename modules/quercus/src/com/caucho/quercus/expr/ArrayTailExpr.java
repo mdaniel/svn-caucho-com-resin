@@ -91,7 +91,17 @@ public class ArrayTailExpr extends AbstractVarExpr {
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    return evalVar(env);
+    if (isTop) {
+      Value obj = _expr.evalArray(env);
+
+      return obj.putVar();
+    }
+    else {
+      // php/0d4e need to do a toValue()
+      Value obj = _expr.evalArray(env).toValue();
+
+      return obj.getArgTail(env, isTop);
+    }
   }
 
   /**
@@ -119,11 +129,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   {
     Value obj = _expr.evalArray(env);
 
-    ArrayValue array = new ArrayValueImpl();
-
-    obj.put(array);
-
-    return array;
+    return obj.putArray(env);
   }
 
   /**

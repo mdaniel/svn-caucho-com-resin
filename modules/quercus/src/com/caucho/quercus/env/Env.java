@@ -3030,6 +3030,23 @@ public class Env
   /**
    * Gets a value.
    */
+  public Var getVar(StringValue name,
+                    boolean isAutoCreate,
+                    boolean isOutputNotice)
+  {
+    EnvVar envVar = getEnvVar(name, isAutoCreate, isOutputNotice);
+
+    if (envVar != null) {
+      return envVar.getVar();
+    }
+    else {
+      return null;
+    }
+  }
+
+  /**
+   * Gets a value.
+   */
   public Var getVar(StringValue name)
   {
     EnvVar envVar = getEnvVar(name, true, false);
