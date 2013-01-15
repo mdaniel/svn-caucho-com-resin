@@ -12,6 +12,11 @@
 
 <s2 title="4.0.34 - snapshot">
 <ul>
+<li>health: C SEGV possible in JNI heap_dump (#5330)</li>
+<li>websocket: websocket timeout too short (#5253, rep by hmz820)</li>
+<li>log: for pro database logging, do not throw exception when name insert fails (#5302, rep by Andrew Foong)</li>
+<li>cdi: init timing issue with xmlExtension/log-formatting (#5274, rep by R Mann)</li>
+<li>jsp: .tld lookup needs to look for WEB-INF classloader context (#5243, rep by S. Nobuaki)</li>
 <li>ssl: add honor-cipher-order to match Apache's SSLHonorCipherOrder (#5282)</li>
 <li>servlet: gzip content-length was not properly filtered (#5326, rep by Keith Fetterman)</li>
 <li>load-balance: update active-wait-time for better slow-initialization (#5321, rep by Ethan Larson)</li>

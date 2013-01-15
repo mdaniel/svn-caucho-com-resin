@@ -911,7 +911,9 @@
       <include name="${dist.name}/lib/${jsf.jar}"/>
 
       <exclude name="${dist.name}/webapps/*.war"/>
+      <!--
       <exclude name="${dist.name}/lib/**"/>
+      -->
       <exclude name="**/*.lo"/>
       <exclude name="**/*.o"/>
       <exclude name="**/*.so"/>

@@ -98,8 +98,6 @@ public class XmlStandardPlugin implements Extension {
   public XmlStandardPlugin(InjectManager manager)
   {
     _cdiManager = manager;
-
-    Thread.currentThread().getContextClassLoader();
   }
 
   public void addRoot(Path root)

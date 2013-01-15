@@ -234,6 +234,7 @@ abstract public class AbstractTaskWorker2
         }
         
         if (expires > 0 && _taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
+          thread.setName(oldName);
           Thread.interrupted();
           LockSupport.parkUntil(expires);
         }

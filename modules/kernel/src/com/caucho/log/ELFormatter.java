@@ -117,7 +117,10 @@ public class ELFormatter extends MessageFormatter {
         ret = _expr.evalString(context);
 
         _freeContextList.free(context);
-      } 
+      }
+      catch (RuntimeException ex) {
+        throw ex;
+      }
       catch (Exception ex) {
         throw new RuntimeException(ex);
       }

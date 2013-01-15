@@ -203,7 +203,7 @@ public final class InjectManager
   
   private static final ClassLoader _systemClassLoader;
 
-  private String _id;
+  private final String _id;
 
   private final InjectManager _parent;
 
@@ -339,10 +339,10 @@ public final class InjectManager
   // XXX: needs to be a local resolver
   private ELResolver _elResolver = new CandiElResolver(this);
 
-  private DependentContext _dependentContext = new DependentContext();
-  private SingletonScope _singletonScope;
-  private ApplicationContext _applicationScope;
-  private XmlStandardPlugin _xmlExtension;
+  private final DependentContext _dependentContext = new DependentContext();
+  private final SingletonScope _singletonScope;
+  private final ApplicationContext _applicationScope;
+  private final XmlStandardPlugin _xmlExtension;
 
   private RuntimeException _configException;
 
@@ -361,6 +361,10 @@ public final class InjectManager
     
     _extensionManager = new ExtensionManager(this);
     _scanManager = new InjectScanManager(this);
+    _xmlExtension = new XmlStandardPlugin(this);
+
+    _singletonScope = new SingletonScope();
+    _applicationScope = new ApplicationContext();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -398,9 +402,6 @@ public final class InjectManager
       } catch (Throwable e) {
         log.log(Level.FINEST, e.toString(), e);
       }
-
-      _singletonScope = new SingletonScope();
-      _applicationScope = new ApplicationContext();
       
       addContext(new RequestContext());
       addContext("com.caucho.server.webbeans.SessionScopeImpl");
@@ -439,7 +440,6 @@ public final class InjectManager
       // ioc/0162
       addBean(new InjectionPointStandardBean());
 
-      _xmlExtension = new XmlStandardPlugin(this);
       addExtension(_xmlExtension);
       _extensionManager.createExtension("com.caucho.server.webbeans.ResinStandardPlugin");
 

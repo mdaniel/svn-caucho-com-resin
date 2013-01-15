@@ -49,6 +49,7 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.TldPreload;
 import com.caucho.jsp.cfg.TldTaglib;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
@@ -207,11 +208,13 @@ public class TldManager {
     for (int i = 0; i < paths.size(); i++) {
       Path subPath = paths.get(i);
 
-      if (_globalPaths.contains(subPath))
+      if (_globalPaths.contains(subPath)) {
         continue;
+      }
 
-      if (subPath instanceof JarPath)
+      if (subPath instanceof JarPath) {
         loadJarTlds(taglibs, ((JarPath) subPath).getContainer(), "META-INF");
+      }
       else if (subPath.getPath().endsWith(".jar")) {
         loadJarTlds(taglibs, subPath, "META-INF");
       }
@@ -835,6 +838,8 @@ public class TldManager {
   private ArrayList<Path> getClassPath(ClassLoader loader)
   {
     String classpath = null;
+    
+    loader = Environment.getDynamicClassLoader(loader);
 
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getClassPath();
