@@ -162,10 +162,10 @@ public class ArrayGetExpr extends AbstractVarExpr {
   {
     // php/0d2t
     // php/0d1c
-    Value value = _expr.evalArg(env, false);
+    Value array = _expr.evalArg(env, false);
     Value index = _index.eval(env);
 
-    Value result = value.getArg(index, isTop);
+    Value result = array.getArg(index, isTop);
 
     return result;
   }
@@ -180,10 +180,10 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    Value value = _expr.evalArray(env);
+    Value array = _expr.evalArray(env);
     Value index = _index.eval(env);
 
-    return value.getVar(index);
+    return array.getVar(index);
   }
 
   /**
@@ -230,8 +230,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public boolean evalIsset(Env env)
   {
-    Value index = _index.evalIssetValue(env);
     Value array = _expr.evalIssetValue(env);
+    Value index = _index.evalIssetValue(env);
 
     return array.isset(index);
   }
@@ -246,8 +246,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public void evalUnset(Env env)
   {
-    Value index = _index.eval(env);
-    _expr.evalUnsetArray(env, index);
+    _expr.evalUnsetArray(env, _index);
   }
 
   @Override

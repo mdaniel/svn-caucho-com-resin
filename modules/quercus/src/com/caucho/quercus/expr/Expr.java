@@ -817,9 +817,10 @@ abstract public class Expr {
   /**
    * Evaluates the expression as an array index unset
    */
-  public void evalUnsetArray(Env env, Value index)
+  public void evalUnsetArray(Env env, Expr indexExpr)
   {
     Value array = evalDirty(env);
+    Value index = indexExpr.eval(env);
 
     array.remove(index);
   }

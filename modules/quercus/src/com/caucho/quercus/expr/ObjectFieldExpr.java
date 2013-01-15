@@ -235,9 +235,10 @@ public class ObjectFieldExpr extends AbstractVarExpr {
    * Evaluates the expression as an array index unset
    */
   @Override
-  public void evalUnsetArray(Env env, Value index)
+  public void evalUnsetArray(Env env, Expr indexExpr)
   {
     Value obj = _objExpr.eval(env);
+    Value index = indexExpr.eval(env);
 
     obj.unsetArray(env, _name, index);
   }
