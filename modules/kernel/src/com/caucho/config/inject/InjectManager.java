@@ -340,8 +340,8 @@ public final class InjectManager
   private ELResolver _elResolver = new CandiElResolver(this);
 
   private final DependentContext _dependentContext = new DependentContext();
-  private final SingletonScope _singletonScope;
-  private final ApplicationContext _applicationScope;
+  private SingletonScope _singletonScope;
+  private ApplicationContext _applicationScope;
   private final XmlStandardPlugin _xmlExtension;
 
   private RuntimeException _configException;
@@ -362,9 +362,6 @@ public final class InjectManager
     _extensionManager = new ExtensionManager(this);
     _scanManager = new InjectScanManager(this);
     _xmlExtension = new XmlStandardPlugin(this);
-
-    _singletonScope = new SingletonScope();
-    _applicationScope = new ApplicationContext();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -402,6 +399,9 @@ public final class InjectManager
       } catch (Throwable e) {
         log.log(Level.FINEST, e.toString(), e);
       }
+
+      _singletonScope = new SingletonScope();
+      _applicationScope = new ApplicationContext();
       
       addContext(new RequestContext());
       addContext("com.caucho.server.webbeans.SessionScopeImpl");
