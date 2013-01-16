@@ -221,7 +221,8 @@ public class JspText extends JspNode {
   public void generateStatic(JspJavaWriter out)
     throws Exception
   {
-    for (int i = 0; i < _children.size(); i++)
+    for (int i = 0; i < _children.size(); i++) {
       _children.get(i).generateStatic(out);
+    }
   }
 }

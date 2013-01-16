@@ -1958,11 +1958,13 @@ public class JspParser {
   }
 
   private void addText(char ch)
+      throws JspParseException
   {
     _text.append(ch);
   }
 
   private void addText(String s)
+    throws JspParseException
   {
     _text.append(s);
   }
@@ -1970,8 +1972,9 @@ public class JspParser {
   private void addText()
     throws JspParseException
   {
-    if (_text.length() > 0)
+    if (_text.length() > 0) {
       createText();
+    }
 
     _startText = _charCount;
     _lineStart = _line;
@@ -1986,8 +1989,9 @@ public class JspParser {
 
     if (_parseState.isTrimWhitespace() && isWhitespace(string)) {
     }
-    else
+    else {
       _jspBuilder.text(string, _filename, _lineStart, _line);
+    }
 
     _lineStart = _line;
     _text.clear();

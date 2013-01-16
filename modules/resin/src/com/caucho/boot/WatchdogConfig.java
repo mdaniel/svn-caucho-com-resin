@@ -60,6 +60,7 @@ class WatchdogConfig
 
   private Path _javaHome;
   private Path _javaExe;
+  private String _jvmMode;
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
   private ArrayList<String> _jvmClasspath = new ArrayList<String>();
   private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
@@ -231,6 +232,18 @@ class WatchdogConfig
   public ArrayList<String> getJvmArgs()
   {
     return _jvmArgs;
+  }
+  
+  @Configurable
+  public void setJvmMode(String mode)
+  {
+    _jvmMode = mode;
+  }
+  
+  @Configurable
+  public String getJvmMode()
+  {
+    return _jvmMode;
   }
 
   public void addJvmClasspath(String item)

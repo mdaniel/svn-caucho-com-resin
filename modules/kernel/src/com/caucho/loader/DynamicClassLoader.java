@@ -160,6 +160,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   // Lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
   
+  private Object _packageLock = new Object();
+  
   // marker for a closed classloader to help heap dumps
   @SuppressWarnings("unused")
   private ZombieClassLoaderMarker _zombieMarker;
@@ -1784,20 +1786,25 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
         ClassPackage classPackage = entry.getClassPackage();
 
-        if (pkg != null) {
-        }
-        else if (classPackage != null) {
-          definePackage(packageName,
-                        classPackage.getSpecificationTitle(),
-                        classPackage.getSpecificationVersion(),
-                        classPackage.getSpecificationVendor(),
-                        classPackage.getImplementationTitle(),
-                        classPackage.getImplementationVersion(),
-                        classPackage.getImplementationVendor(),
-                        null);
-        }
-        else {
-          definePackage(packageName,
+        if (pkg == null) {
+          synchronized (_packageLock) {
+            pkg = getPackage(packageName);
+
+            if (pkg == null) {
+              
+            }
+            else if (classPackage != null) {
+              definePackage(packageName,
+                            classPackage.getSpecificationTitle(),
+                            classPackage.getSpecificationVersion(),
+                            classPackage.getSpecificationVendor(),
+                            classPackage.getImplementationTitle(),
+                            classPackage.getImplementationVersion(),
+                            classPackage.getImplementationVendor(),
+                            null);
+            }
+            else {
+              definePackage(packageName,
                         null,
                         null,
                         null,
@@ -1805,6 +1812,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
                         null,
                         null,
                         null);
+            }
+          }
         }
       }
 

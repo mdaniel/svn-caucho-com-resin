@@ -118,9 +118,9 @@ public class JspJavaWriter extends JavaWriter {
   private void generateText(char []text, int offset, int length)
     throws IOException
   {
-    if (length > 32000) {
-      generateText(text, offset, 16 * 1024);
-      generateText(text, offset + 16 * 1024, length - 16 * 1024);
+    if (length > 8 * 1024) {
+      generateText(text, offset, 8 * 1024);
+      generateText(text, offset + 8 * 1024, length - 8 * 1024);
       return;
     }
 

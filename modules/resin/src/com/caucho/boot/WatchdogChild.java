@@ -153,6 +153,14 @@ class WatchdogChild
   }
 
   /**
+   * Returns the JVM mode
+   */
+  public String getJvmMode()
+  {
+    return _config.getJvmMode();
+  }
+
+  /**
    * Returns the JVM arguments for the instance
    */
   public ArrayList<String> getJvmArgs()

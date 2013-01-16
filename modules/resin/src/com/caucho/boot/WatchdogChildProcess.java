@@ -766,7 +766,8 @@ class WatchdogChildProcess
 
     if (! jvmArgs.contains("-server")
         && ! jvmArgs.contains("-client")
-        && ! CauchoSystem.isWindows()) {
+        && ! CauchoSystem.isWindows()
+        && "-server".equals(_watchdog.getJvmMode())) {
       // #3331, windows can't add -server automatically
       jvmArgs.add("-server");
     }

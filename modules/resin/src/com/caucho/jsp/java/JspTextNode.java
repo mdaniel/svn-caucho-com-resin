@@ -123,30 +123,4 @@ public class JspTextNode extends JspNode {
   {
     out.print(_text);
   }
-
-  /**
-   * Generates text from a string.
-   *
-   * @param out the output writer for the generated java.
-   * @param string the text to generate.
-   * @param offset the offset into the text.
-   * @param length the length of the text.
-   */
-  private void generateText(JspJavaWriter out, String text,
-                            int offset, int length)
-    throws IOException
-  {
-    
-    if (length > 32000) {
-      generateText(out, text, offset, 16 * 1024);
-      generateText(out, text, offset + 16 * 1024, length - 16 * 1024);
-      return;
-    }
-
-    text = text.substring(offset, offset + length);
-    int index = _gen.addString(text);
-    
-    out.print("out.write(_jsp_string" + index + ", 0, ");
-    out.println("_jsp_string" + index + ".length);");
-  }
 }

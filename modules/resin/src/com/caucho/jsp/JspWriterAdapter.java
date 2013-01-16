@@ -163,7 +163,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
       if (size - writeLength < sublen) {
         if (size == writeLength) {
           writeBuffer = _out.nextCharBuffer(writeLength);
-          writeLength = 0;
+          writeLength = _out.getCharOffset();
 
           if (size < sublen)
             sublen = size;

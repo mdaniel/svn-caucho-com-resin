@@ -196,8 +196,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public int getBufferOffset()
     throws IOException
   {
-    if (! _isOutputStreamOnly)
+    if (! _isOutputStreamOnly) {
       flushCharBuffer();
+    }
 
     return _tailByteLength;
   }
@@ -463,9 +464,17 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       try {
         boolean isFlush = setFlush(false);
 
-        _toByte.write(this, _charBuffer, 0, charLength);
-        _charLength = 0;
+        int writeLength = _toByte.write(this, _charBuffer, 0, charLength);
+
+        if (writeLength < charLength) {
+          System.arraycopy(_charBuffer, writeLength, _charBuffer, 0,
+                           charLength - writeLength);
+          _charLength = charLength - writeLength;
+        }
+        
         setFlush(isFlush);
+      } catch (Exception e) {
+        e.printStackTrace();
       } finally {
         _isCharFlushing = false;
       }
@@ -499,8 +508,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
-    if (offset < 0 || SIZE < offset)
+    if (offset < 0 || SIZE < offset) {
       throw new IllegalStateException(L.l("Invalid offset: " + offset));
+    }
     
     if (_bufferCapacity <= SIZE
         || _bufferCapacity <= offset + _bufferSize) {

@@ -76,7 +76,7 @@ public class UTF16Writer extends EncodingWriter {
    * @param off starting offset into the character array.
    * @param len the number of characters to write.
    */
-  public void write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
+  public int write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
     throws IOException
   {
     for (int i = 0; i < len; i++) {
@@ -85,5 +85,7 @@ public class UTF16Writer extends EncodingWriter {
       os.write(ch >> 8);
       os.write(ch);
     }
+    
+    return len;
   }
 }

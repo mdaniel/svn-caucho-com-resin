@@ -109,33 +109,39 @@ public class UTF8Writer extends EncodingWriter {
    * @param len the number of characters to write.
    */
   @Override
-  public void write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
+  public int write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
     throws IOException
   {
     byte []buffer = os.getBuffer();
     int length = os.getBufferOffset();
     int capacity = buffer.length;
     int tail = off + len;
-
+    int head = off;
+    
     while (off < tail) {
-      if (capacity - length < 4) {
+      while (capacity - length <= 4) {
         buffer = os.nextBuffer(length);
         length = os.getBufferOffset();
       }
       
       char ch = cbuf[off++];
 
-      if (ch < 0x80)
+      if (ch < 0x80) {
         buffer[length++] = (byte) ch;
+      }
       else if (ch < 0x800) {
         buffer[length++] = (byte) (0xc0 + (ch >> 6));
         buffer[length++] = (byte) (0x80 + (ch & 0x3f));
       }
-      else if (ch < 0xd800 || 0xdfff < ch || off == tail) {
+      else if (ch < 0xd800 || 0xdfff < ch) {
         // server/0815
         buffer[length++] = (byte) (0xe0 + (ch >> 12));
         buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
         buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+      }
+      else if (off == tail) {
+        off--;
+        break;
       }
       else {
         char ch2 = cbuf[off++];
@@ -149,6 +155,8 @@ public class UTF8Writer extends EncodingWriter {
     }
 
     os.setBufferOffset(length);
+    
+    return off - head;
   }
 }
 

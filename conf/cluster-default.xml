@@ -60,6 +60,7 @@
     <!-- defaults for each server, i.e. JVM -->
     <server-default>
       <jvm-arg-line>${jvm_args}</jvm-arg-line>
+      <jvm-mode>${jvm_mode}</jvm-mode>
 
       <!--
          - If starting Resin as root on Unix, specify the user name

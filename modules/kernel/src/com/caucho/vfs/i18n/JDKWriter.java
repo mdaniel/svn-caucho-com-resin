@@ -147,7 +147,7 @@ public class JDKWriter extends EncodingWriter {
     /**
      * Writes a char buffer.
      */
-    public void write(OutputStreamWithBuffer os,
+    public int write(OutputStreamWithBuffer os,
                       char []buf, int offset, int length)
       throws IOException
     {
@@ -160,6 +160,8 @@ public class JDKWriter extends EncodingWriter {
       
       _writer.write(buf, offset, length);
       _writer.flush();
+      
+      return length;
     }
 
     /**

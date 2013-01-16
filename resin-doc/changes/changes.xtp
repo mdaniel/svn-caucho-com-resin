@@ -12,6 +12,12 @@
 
 <s2 title="4.0.34 - snapshot">
 <ul>
+<li>servlet: utf-8 buffer boundary writing (#5323)</li>
+<li>jsp: static text splitting needs to be smaller for utf-8 characters (#5320)</li>
+<li>install: Makefile add space after error-suppressing '-' for BSD compatibility (#5322, rep by jigzat)</li>
+<li>cache: global-cache ping needs to by async</li>
+<li>config: added jvm-mode for -server, default none (#5331)</li>
+<li>class-loader: synchronize on package creation (#5277, rep by S. Nobuaki)</li>
 <li>health: C SEGV possible in JNI heap_dump (#5330)</li>
 <li>websocket: websocket timeout too short (#5253, rep by hmz820)</li>
 <li>log: for pro database logging, do not throw exception when name insert fails (#5302, rep by Andrew Foong)</li>

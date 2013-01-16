@@ -103,20 +103,19 @@ public final class ISO8859_1Writer extends EncodingWriter {
    * @param cLength number of characters to write
    */
   @Override
-  public void write(OutputStreamWithBuffer os,
-                    char []cBuf, int cOffset, int cLength)
+  public int write(OutputStreamWithBuffer os,
+                   char []cBuf, int cOffset, int cLength)
     throws IOException
   {
     byte []bBuf = os.getBuffer();
     int bOffset = os.getBufferOffset();
     int bEnd = bBuf.length;
 
+    int cEnd = cOffset + cLength;
     // int cEnd = cOffset + cLength;
 
-    while (cLength > 0) {
-      int sublen = bEnd - bOffset;
-      if (cLength < sublen)
-        sublen = cLength;
+    while (cOffset < cEnd) {
+      int sublen = Math.min(bEnd - bOffset, cEnd - cOffset);
 
       for (int i = sublen - 1; i >= 0; i--) {
         bBuf[bOffset + i] = (byte) cBuf[cOffset + i];
@@ -124,7 +123,6 @@ public final class ISO8859_1Writer extends EncodingWriter {
 
       bOffset += sublen;
       cOffset += sublen;
-      cLength -= sublen;
       
       if (bOffset == bEnd && cLength > 0) {
         bBuf = os.nextBuffer(bOffset);
@@ -134,5 +132,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
     }
 
     os.setBufferOffset(bOffset);
+    
+    return cLength;
   }
 }

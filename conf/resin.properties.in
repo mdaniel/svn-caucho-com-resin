@@ -80,6 +80,7 @@ setuid_group  : @SETUID_GROUP@
 
 # Arg passed directly to the JVM
 # jvm_args  : -Xmx2048m -XX:MaxPermSize=256m
+jvm_mode    : -server
 
 # Local URLs for the watchdog to check to ensure the server is up,
 # space separated

@@ -739,6 +739,9 @@ r_server-Content =
   & (attribute jvm-classpath { string }
      | element jvm-classpath { string })*
 
+  & (attribute jvm-mode { string }
+     | element jvm-mode { string })*
+
   & (attribute java-exe { string }
      | element java-exe { string })?
 

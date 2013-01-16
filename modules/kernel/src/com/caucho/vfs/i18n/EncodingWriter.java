@@ -95,11 +95,15 @@ abstract public class EncodingWriter {
    * @param cbuf character buffer receiving the data.
    * @param off starting offset into the buffer.
    * @param len number of characters to write
+   * @return 
    */
-  public void write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
+  public int write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
     throws IOException
   {
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
       write(os, cbuf[off + i]);
+    }
+    
+    return len;
   }  
 }
