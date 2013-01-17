@@ -123,6 +123,14 @@ public class FunctionInfo
   }
 
   /**
+   * Returns the actual function.
+   */
+  public Function getFunction()
+  {
+    return _fun;
+  }
+
+  /**
    * Sets the actual function.
    */
   public void setFunction(Function fun)

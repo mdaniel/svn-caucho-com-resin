@@ -680,6 +680,7 @@ public class PDO implements EnvCleanup {
         return setStringifyFetches(value.toBoolean());
 
       case ATTR_STATEMENT_CLASS:
+      {
         if (! value.isArray()) {
           env.warning(L.l("ATTR_STATEMENT_CLASS attribute must be an array"));
 
@@ -687,6 +688,11 @@ public class PDO implements EnvCleanup {
         }
 
         return setStatementClass(env, value.toArrayValue(env));
+      }
+      case ATTR_EMULATE_PREPARES:
+      {
+        return true;
+      }
     }
 
     if (isInit) {
