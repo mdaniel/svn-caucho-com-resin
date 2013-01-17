@@ -68,6 +68,7 @@ public class HostVar
 
   public String getName()
   {
+    System.out.println("HN: " + _hostController.getName());
     return _hostController.getName();
   }
 

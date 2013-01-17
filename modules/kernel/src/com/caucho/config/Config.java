@@ -782,7 +782,13 @@ public class Config {
   public static String evalString(String str)
     throws ELException
   {
-    return EL.evalString(str, getEnvironment());
+    ELContext elContext = ConfigELContext.EL_CONTEXT;
+    
+    if (elContext == null) {
+      elContext = getEnvironment();
+    }
+
+    return EL.evalString(str, elContext);
   }
 
   /**
@@ -915,6 +921,11 @@ public class Config {
     public void put(String key, Object value)
     {
       _properties.put(key, value);
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[]";
     }
   }
 }

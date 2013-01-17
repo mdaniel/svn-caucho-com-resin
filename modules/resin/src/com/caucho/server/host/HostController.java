@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 
 import com.caucho.config.Config;
 import com.caucho.config.types.PathBuilder;
+import com.caucho.config.types.StringTypeBuilder;
 import com.caucho.el.EL;
 import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.env.deploy.DeployControllerApi;
@@ -102,8 +103,9 @@ public class HostController
 
     _hostName = hostName;
 
-    if (varMap != null)
+    if (varMap != null) {
       getVariableMap().putAll(varMap);
+    }
     
     getVariableMap().put("host", _hostVar);
 
@@ -114,10 +116,7 @@ public class HostController
     
     if (config != null) {
       _regexp = config.getRegexp();
-      _entryHostAliases.addAll(config.getHostAliases());
-      _hostAliases.addAll(config.getHostAliases());
-      _entryHostAliasRegexps.addAll(config.getHostAliasRegexps());
-      _hostAliasRegexps.addAll(config.getHostAliasRegexps());
+      addConfigValues(config);
     }
     
     if (! isErrorHost()) {
@@ -143,9 +142,29 @@ public class HostController
     _container = container;
     
     if (_container != null && ! isErrorHost()) {
-      for (HostConfig defaultConfig : _container.getHostDefaultList())
+      for (HostConfig defaultConfig : _container.getHostDefaultList()) {
         addConfigDefault(defaultConfig);
+      }
     }
+  }
+  
+  @Override
+  public void addConfigDefault(HostConfig config)
+  {
+    addConfigValues(config);
+    
+    super.addConfigDefault(config);
+  }
+  
+  private void addConfigValues(HostConfig config)
+  {
+    for (String hostAlias : config.getHostAliases()) {
+      _entryHostAliases.add(hostAlias);
+      _hostAliases.add(hostAlias);
+    }
+    
+    _entryHostAliasRegexps.addAll(config.getHostAliasRegexps());
+    _hostAliasRegexps.addAll(config.getHostAliasRegexps());
   }
 
   /**
@@ -348,8 +367,9 @@ public class HostController
   @Override
   public boolean isNameMatch(String name)
   {
-    if (_hostName.equalsIgnoreCase(name))
+    if (_hostName.equalsIgnoreCase(name)) {
       return true;
+    }
 
     for (int i = _hostAliases.size() - 1; i >= 0; i--) {
       String alias = _hostAliases.get(i);
@@ -523,17 +543,24 @@ public class HostController
   protected void configureInstance(Host host)
     throws Exception
   {
-    _hostAliases.clear();
-    _hostAliases.addAll(_entryHostAliases);
-
+    Config.setProperty("name", _hostName);
     Config.setProperty("host", _hostVar);
 
     for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
       Object value = entry.getValue();
       
-      if (value != null)
+      if (value != null) {
         Config.setProperty(entry.getKey(), value);
+      }
     }
+    System.out.println("VM: " + _hostVar);
+    _hostAliases.clear();
+    
+    for (String alias : _entryHostAliases) {
+      System.out.println("PRE:" + alias);
+      _hostAliases.add(Config.evalString(alias));
+    }
+    System.out.println("ALIS: " + _hostAliases);
 
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())

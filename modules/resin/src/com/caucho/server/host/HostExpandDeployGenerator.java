@@ -186,9 +186,11 @@ public class HostExpandDeployGenerator
     String id = stage + "/host/" + key;
     
     String hostNamePattern = getHostName();
+    
+    HashMap<String,Object> varMap = null;
 
     if (hostNamePattern != null && ! key.equals("default")) {
-      HashMap<String,Object> varMap = new HashMap<String,Object>();
+      varMap = new HashMap<String,Object>();
       varMap.put("host", new HostRegexpVar(key));
       
       ELResolver resolver = new MapVariableResolver(varMap);
@@ -199,14 +201,19 @@ public class HostExpandDeployGenerator
     }
 
     HostController controller
-      = new HostController(id, rootDirectory, hostName, _container);
+      = new HostController(id, rootDirectory, hostName, null, _container, varMap);
+    
     controller.setControllerType(DeployControllerType.DYNAMIC);
+    
+    /*
+    */
+    
+    for (HostConfig hostDefault : _hostDefaults) {
+      controller.addConfigDefault(hostDefault);
+    }
 
     Path jarPath = getArchivePath(key);
     controller.setArchivePath(jarPath);
-    
-    for (int i = 0; i < _hostDefaults.size(); i++)
-      controller.addConfigDefault(_hostDefaults.get(i));
     
     /*
     if (rootDirectory.isDirectory()

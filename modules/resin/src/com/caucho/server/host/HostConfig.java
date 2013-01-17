@@ -132,8 +132,9 @@ public class HostConfig extends DeployConfig {
     setId(cleanName);
     
     // server/1f17
-    if (! _hostAliases.contains(cleanName))
+    if (! _hostAliases.contains(cleanName)) {
       _hostAliases.add(cleanName);
+    }
   }
 
   @Override
@@ -214,8 +215,9 @@ public class HostConfig extends DeployConfig {
         name = Host.calculateCanonicalIPv6(name);
     }
 
-    if (! _hostAliases.contains(name))
+    if (! _hostAliases.contains(name)) {
       _hostAliases.add(name);
+    }
   }
 
   /**

@@ -36,6 +36,7 @@ import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -94,6 +95,23 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
   public void setContainer(HostContainer container)
   {
     _container = container;
+  }
+
+  /**
+   * Returns the deployed keys.
+   */
+  @Override
+  protected void fillDeployedNames(Set<String> names)
+  {
+    Pattern regexp = _config.getRegexp();
+    
+    String pattern = regexp.pattern();
+    
+    String staticPattern = toStaticPattern(pattern);
+    
+    if (staticPattern != null) {
+      names.add(staticPattern);
+    }
   }
   
   /**
@@ -194,6 +212,43 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  private static String toStaticPattern(String pattern)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    int len = pattern.length();
+    
+    for (int i = 0; i < len; i++) {
+      char ch = pattern.charAt(i);
+      
+      switch (ch) {
+      case '\\':
+        if (i + 1 < len && pattern.charAt(i + 1) == '.') {
+          sb.append('.');
+          i++;
+        }
+        else {
+          return null;
+        }
+        
+      case '*': case '?': case '+': case '|': 
+      case '(': case ')':
+      case '[': case ']': 
+      case '{': case '}':
+        return null;
+        
+      case '^': case '$':
+        break;
+        
+      default:
+        sb.append(ch);
+        break;
+      }
+    }
+    
+    return sb.toString();
   }
 
   @Override

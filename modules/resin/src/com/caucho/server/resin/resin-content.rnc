@@ -233,6 +233,12 @@ r_host-Group = r_host-Flow
 
 r_host-default = element host-default {
   r_host-Group
+
+  & (attribute host-alias { string }
+     | element host-alias { string })*
+
+  & (attribute host-alias-regexp { string }
+     | element host-alias-regexp { string })*
 }
 
 r_host-deploy = element host-deploy {

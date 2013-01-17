@@ -141,10 +141,12 @@ public class EnvironmentELResolver extends ELResolver {
                          Object base,
                          Object property)
   {
-    if (base != null)
+    if (base != null) {
       return null;
-    else if (! (property instanceof String))
+    }
+    else if (! (property instanceof String)) {
       return null;
+    }
 
     context.setPropertyResolved(false);
     for (int i = 0; i < _resolvers.size(); i++) {
