@@ -161,7 +161,7 @@ public class EnvironmentLevelELResolver extends ELResolver {
     }
 
     Object value = EL.getLevelVar(var, _loader);
-System.out.println("LV: " + value + " " + var +  " " + _loader);
+
     if (value == null) {
       return null;
     }
