@@ -810,43 +810,36 @@ class WatchdogArgs
   {
     ArrayList<String> args = new ArrayList<String>();
 
-    try {
-      Environment.init();
-      MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-      ObjectName name = new ObjectName("java.lang:type=Runtime");
+    Environment.init();
 
-      String []jvmArgs
-        = (String []) mbeanServer.getAttribute(name, "InputArguments");
+    String []jvmArgs = getJvmArgs();
 
-      if (jvmArgs != null) {
-        for (int i = 0; i < jvmArgs.length; i++) {
-          String arg = jvmArgs[i];
+    if (jvmArgs != null) {
+      for (int i = 0; i < jvmArgs.length; i++) {
+        String arg = jvmArgs[i];
 
-          if (args.contains(arg)) {
-            continue;
-          }
+        if (args.contains(arg)) {
+          continue;
+        }
 
-          if (arg.startsWith("-Djava.class.path=")) {
-            // IBM JDK
-          }
-          else if (arg.startsWith("-D")) {
-            int eqlSignIdx = arg.indexOf('=');
-            if (eqlSignIdx == -1) {
-              args.add("-J" + arg);
-            } else {
-              String key = arg.substring(2, eqlSignIdx);
-              String value = System.getProperty(key);
+        if (arg.startsWith("-Djava.class.path=")) {
+          // IBM JDK
+        }
+        else if (arg.startsWith("-D")) {
+          int eqlSignIdx = arg.indexOf('=');
+          if (eqlSignIdx == -1) {
+            args.add("-J" + arg);
+          } else {
+            String key = arg.substring(2, eqlSignIdx);
+            String value = System.getProperty(key);
 
-              if (value == null)
-                value = "";
+            if (value == null)
+              value = "";
 
-              args.add("-J-D" + key + "=" + value);
-            }
+            args.add("-J-D" + key + "=" + value);
           }
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
 
     for (int i = 0; i < argv.length; i++) {
@@ -858,6 +851,21 @@ class WatchdogArgs
     args.toArray(argv);
 
     return argv;
+  }
+  
+  private String []getJvmArgs()
+  {
+    try {
+      MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+      ObjectName name = new ObjectName("java.lang:type=Runtime");
+      
+      return (String []) mbeanServer.getAttribute(name, "InputArguments");
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return null;
+    }
+    
   }
 
   private static L10N L()

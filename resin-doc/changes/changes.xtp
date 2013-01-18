@@ -12,6 +12,7 @@
 
 <s2 title="4.0.34 - snapshot">
 <ul>
+<li>watchdog: hangle missing java.lang:type=Runtime arguments on startup (#5299)</li>
 <li>servlet: content-type encoding updates for .gif files (#5271, rep by Mathias Lagerwell)</li>
 <li>watchdog: watchdog must read system-property (#5294, rep by chinaliwee)</li>
 <li>jsp: validate ResponseStream on PageContextImpl (#5273, rep by B. Loy)</li>
