@@ -834,15 +834,22 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    */
   public String getContentType()
   {
-    if (_contentType == null)
+    if (_contentType == null) {
       return null;
+    }
 
+    if (_setCharEncoding != null) {
+      return _contentType + "; charset=" + _setCharEncoding;
+    }
+    
     String charEncoding = getCharacterEncoding();
-
-    if (charEncoding != null)
+    
+    if (charEncoding != null && _contentType.startsWith("text/")) {
       return _contentType + "; charset=" + charEncoding;
-    else
+    }
+    else {
       return _contentType;
+    }
   }
 
   /**

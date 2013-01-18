@@ -308,8 +308,9 @@ abstract public class AbstractHttpResponse {
         return true;
     }
 
-    if (name.equalsIgnoreCase("content-type"))
+    if (name.equalsIgnoreCase("content-type")) {
       return _request.getResponseFacade().getContentType() != null;
+    }
 
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0;

@@ -113,8 +113,8 @@ public class PageContextImpl extends PageContext
 
   private WebApp _webApp;
 
-  private JspWriterAdapter _jspAdapter = new JspWriterAdapter();
-  private JspServletOutputStream _jspOutputStream
+  private final JspWriterAdapter _jspAdapter = new JspWriterAdapter();
+  private final JspServletOutputStream _jspOutputStream
     = new JspServletOutputStream(this);
 
   private Map<String,Object> _attributes;
@@ -253,7 +253,11 @@ public class PageContextImpl extends PageContext
     }
 
     _responseStream = _response.getResponseStream();
-
+    
+    if (_responseStream == null) {
+      throw new NullPointerException(String.valueOf(_response));
+    }
+    
     _topOut = _jspAdapter;
     _responseStream.setAutoFlush(autoFlush);
     _jspAdapter.init(null, _response, _responseStream);

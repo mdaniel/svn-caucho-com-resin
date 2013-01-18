@@ -553,14 +553,12 @@ public class HostController
         Config.setProperty(entry.getKey(), value);
       }
     }
-    System.out.println("VM: " + _hostVar);
+
     _hostAliases.clear();
     
     for (String alias : _entryHostAliases) {
-      System.out.println("PRE:" + alias);
       _hostAliases.add(Config.evalString(alias));
     }
-    System.out.println("ALIS: " + _hostAliases);
 
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())

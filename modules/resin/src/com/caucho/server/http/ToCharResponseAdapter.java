@@ -52,8 +52,9 @@ public class ToCharResponseAdapter extends ResponseAdapter {
   {
     ToCharResponseAdapter resAdapt = _freeList.allocate();
 
-    if (resAdapt == null)
+    if (resAdapt == null) {
       resAdapt = new ToCharResponseAdapter();
+    }
     
     resAdapt.init(response);
 
@@ -63,8 +64,9 @@ public class ToCharResponseAdapter extends ResponseAdapter {
   @Override
   protected AbstractResponseStream createWrapperResponseStream()
   {
-    if (_responseStream == null)
+    if (_responseStream == null) {
       _responseStream = new ToCharResponseStreamWrapper();
+    }
 
     return _responseStream;
   }

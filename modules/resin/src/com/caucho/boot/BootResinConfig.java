@@ -46,6 +46,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.loader.SystemProperty;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.util.HostUtil;
 import com.caucho.util.L10N;
@@ -843,6 +844,11 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     return null;
+  }
+  
+  public void addSystemProperty(SystemProperty property)
+  {
+    // server/6e51
   }
   
   /**

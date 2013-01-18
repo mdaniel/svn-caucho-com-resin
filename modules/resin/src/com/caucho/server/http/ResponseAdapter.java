@@ -62,6 +62,7 @@ public class ResponseAdapter extends ResponseWrapper
   protected ResponseAdapter()
   {
     _originalResponseStream = createWrapperResponseStream();
+    _responseStream = _originalResponseStream;
 
     _os = new ServletOutputStreamImpl();
     _writer = new ResponseWriter();
@@ -74,8 +75,9 @@ public class ResponseAdapter extends ResponseWrapper
   {
     ResponseAdapter resAdapt = _freeList.allocate();
 
-    if (resAdapt == null)
+    if (resAdapt == null) {
       resAdapt = new ResponseAdapter();
+    }
     
     resAdapt.init(response);
 
@@ -354,8 +356,9 @@ public class ResponseAdapter extends ResponseWrapper
   public void finish()
     throws IOException
   {
-    if (_responseStream != null)
+    if (_responseStream != null) {
       _responseStream.flushBuffer();
+    }
 
     _responseStream = _originalResponseStream;
   }
