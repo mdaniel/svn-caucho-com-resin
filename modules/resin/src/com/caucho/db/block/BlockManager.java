@@ -130,12 +130,20 @@ public final class BlockManager
   {
     try {
       MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-      MemoryUsage heap = memoryBean.getHeapMemoryUsage();
-
-      if (heap.getCommitted() < heap.getMax())
-        return heap.getMax();
-      else
-        return heap.getCommitted();
+      MemoryUsage heap = null;
+      
+      if (memoryBean != null) {
+        heap = memoryBean.getHeapMemoryUsage();
+      }
+      
+      if (heap != null) {
+        return Math.max(heap.getMax(), heap.getCommitted());
+      }
+      else {
+        Runtime runtime = Runtime.getRuntime();
+        
+        return Math.max(runtime.maxMemory(), runtime.totalMemory());
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }

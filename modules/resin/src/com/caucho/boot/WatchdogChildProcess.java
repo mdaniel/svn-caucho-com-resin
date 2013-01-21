@@ -764,12 +764,19 @@ class WatchdogChildProcess
       jvmArgs.add("-d64");
     }
 
+    String jvmMode = _watchdog.getJvmMode();
+    
+    if ((jvmMode == null || "".equals(jvmMode))
+        && ! CauchoSystem.isWindows()) {
+      jvmMode = "-server";
+    }
+    
     if (! jvmArgs.contains("-server")
         && ! jvmArgs.contains("-client")
         && ! CauchoSystem.isWindows()
-        && "-server".equals(_watchdog.getJvmMode())) {
+        && jvmMode != null && ! "".equals(jvmMode)) {
       // #3331, windows can't add -server automatically
-      jvmArgs.add("-server");
+      jvmArgs.add(jvmMode);
     }
     
     return jvmArgs;
