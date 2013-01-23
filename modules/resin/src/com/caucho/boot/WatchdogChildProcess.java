@@ -766,8 +766,7 @@ class WatchdogChildProcess
 
     String jvmMode = _watchdog.getJvmMode();
     
-    if ((jvmMode == null || "".equals(jvmMode))
-        && ! CauchoSystem.isWindows()) {
+    if (jvmMode == null && ! CauchoSystem.isWindows()) {
       jvmMode = "-server";
     }
     
