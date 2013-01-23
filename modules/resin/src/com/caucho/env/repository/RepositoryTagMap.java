@@ -147,9 +147,10 @@ public class RepositoryTagMap
         _tree.addBlob(root, 0644, root);
       else if (type == GitType.TREE)
         _tree.addDir(root, root);
-      else
-        throw new IllegalStateException(L.l("'{0}' has an unknown type {1}",
-                                            root, type));
+      else {
+        log.warning(L.l("'{0}' has an unknown type {1}",
+                        root, type));
+      }
     }
 
     String treeHash = repository.addTree(_tree);

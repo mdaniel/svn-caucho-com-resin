@@ -340,8 +340,26 @@ public class ReflectionAnnotatedType<T>
       return true;
     }
     
-    String parentPkg = parentMethod.getDeclaringClass().getPackage().getName();
-    String childPkg = childMethod.getJavaMember().getDeclaringClass().getPackage().getName();
+    Class<?> parentClass = parentMethod.getDeclaringClass();
+    Class<?> childClass = childMethod.getJavaMember().getDeclaringClass();
+    
+    String parentPkg;
+    
+    if (parentClass.getPackage() != null) {
+      parentPkg = parentClass.getPackage().getName();
+    }
+    else {
+      parentPkg = "";
+    }
+    
+    String childPkg;
+    
+    if (childClass.getPackage() != null) {
+      childPkg = childClass.getPackage().getName();
+    }
+    else {
+      childPkg = "";
+    }
 
       // ioc/011b
     return parentPkg.equals(childPkg);

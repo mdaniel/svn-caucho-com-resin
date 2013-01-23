@@ -23,7 +23,8 @@ dev_mode      : true
 # dependency_check_interval : 5m
 
 # Enable /resin-doc Resin documentation
-resin_doc     : true
+resin_doc      : true
+resin_doc_host :
 
 # List Triad server ip-addresses:hmux-port for each tier, space separated
 # App tier Triad servers must be listed to enable web-tier to 
@@ -141,6 +142,7 @@ session_store : true
 
 # Enable /resin-admin web administration console
 web_admin_enable : true
+web_admin_host   :
 
 # Permit access to /resin-admin from non-local network ip-addresses
 # web_admin_external : true

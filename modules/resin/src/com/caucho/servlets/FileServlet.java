@@ -214,8 +214,9 @@ public class FileServlet extends GenericServlet {
 
       cache = _pathCache.get(cacheUrl);
 
-      if (cache != null)
+      if (cache != null) {
         _localCache.put(uri, cache);
+      }
     }
 
     if (cache == null) {
@@ -310,7 +311,6 @@ public class FileServlet extends GenericServlet {
       }
 
       cache = new Cache(path, jarPath, relPath, mimeType);
-
       _localCache.put(uri, cache);
 
       _pathCache.put(cacheUrl, cache);

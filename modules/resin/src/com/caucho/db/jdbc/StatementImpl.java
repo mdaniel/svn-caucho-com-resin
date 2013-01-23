@@ -342,9 +342,11 @@ public class StatementImpl implements java.sql.Statement {
     throw new UnsupportedOperationException();
   }
 
-  public boolean execute(String query, int foo)
+  @Override
+  public boolean execute(String query, int resultType)
+    throws SQLException
   {
-    throw new UnsupportedOperationException();
+    return execute(query);
   }
 
   public boolean execute(String query, int []foo)

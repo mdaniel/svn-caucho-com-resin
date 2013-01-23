@@ -42,15 +42,25 @@
   <servlet servlet-name="resin-xtp"
            servlet-class="com.caucho.jsp.XtpServlet"/>
 
-  <servlet-mapping url-pattern="*.jsp" servlet-name="resin-jsp"/>
-  <servlet-mapping url-pattern="*.jspf" servlet-name="resin-jsp"/>
-  <servlet-mapping url-pattern="*.jspx" servlet-name="resin-jspx"/>
+  <servlet-mapping url-pattern="*.jsp"
+                   servlet-name="resin-jsp"
+                   default="true"/>
+  <servlet-mapping url-pattern="*.jspf" 
+                   servlet-name="resin-jsp"
+                   default="true"/>
+  <servlet-mapping url-pattern="*.jspx" 
+                   servlet-name="resin-jspx"
+                   default="true"/>
 
   <resin:if test="${! disable_quercus}">
-    <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
+    <servlet-mapping url-pattern="*.php" 
+                     servlet-name="resin-php"
+                     default="true"/>
   </resin:if>
 
-  <servlet-mapping url-pattern="/" servlet-name="resin-file"/>
+  <servlet-mapping url-pattern="/" 
+                   servlet-name="resin-file"
+                   default="true"/>
 
   <servlet servlet-name="j_security_check"
            servlet-class="com.caucho.server.security.FormLoginServlet"/>

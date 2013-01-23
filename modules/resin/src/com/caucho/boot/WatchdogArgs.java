@@ -499,6 +499,7 @@ class WatchdogArgs
         _clusterId = argv[i + 1];
         i++;
       }
+      /* XXX: conflicts with log-level
       else if ("--fine".equals(resinArg)) {
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.FINE);
@@ -507,6 +508,7 @@ class WatchdogArgs
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.FINER);
       }
+      */
       else if ("--data-directory".equals(resinArg)) {
         _dataDirectory = Vfs.lookup(argv[i + 1]);
         argv[i + 1] = _dataDirectory.getFullPath();

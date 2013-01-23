@@ -148,6 +148,9 @@
           <enable-url-rewriting>false</enable-url-rewriting>
         </session-config>
       </web-app-default>
+    </host-default>
+
+    <host id="${web_admin_host}">
       
       <!--
          - Administration application /resin-admin
@@ -183,7 +186,7 @@
         </web-app>
       </resin:if>
 
-    </host-default>
+    </host>
   </cluster-default>
 </resin>
 

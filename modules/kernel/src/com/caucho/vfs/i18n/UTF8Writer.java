@@ -117,7 +117,7 @@ public class UTF8Writer extends EncodingWriter {
     int capacity = buffer.length;
     int tail = off + len;
     int head = off;
-    
+
     while (off < tail) {
       while (capacity - length <= 4) {
         buffer = os.nextBuffer(length);
@@ -145,6 +145,7 @@ public class UTF8Writer extends EncodingWriter {
       }
       else {
         char ch2 = cbuf[off++];
+        
         int v = 0x10000 + (ch & 0x3ff) * 0x400 + (ch2 & 0x3ff);
           
         buffer[length++] = (byte) (0xf0 + (v >> 18));
