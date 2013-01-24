@@ -1434,10 +1434,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     name = name.replace('/', '.');
     name = name.replace('\\', '.');
 
-    if (name.endsWith("."))
+    if (name.endsWith(".")) {
       name = name.substring(0, name.length() - 1);
-
-    return super.definePackage(name, a1, a2, a3, b1, b2, b3, url);
+    }
+    
+    Package pkg = super.definePackage(name, a1, a2, a3, b1, b2, b3, url);
+    
+    return pkg;
   }
 
   /**
@@ -1790,8 +1793,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
           synchronized (_packageLock) {
             pkg = getPackage(packageName);
 
-            if (pkg == null) {
-              
+            if (pkg != null) {
             }
             else if (classPackage != null) {
               definePackage(packageName,
