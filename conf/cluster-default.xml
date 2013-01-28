@@ -150,7 +150,7 @@
       </web-app-default>
     </host-default>
 
-    <host id="${web_admin_host}">
+    <host id="${web_admin_host}" root-directory="${web_admin_host}">
       
       <!--
          - Administration application /resin-admin

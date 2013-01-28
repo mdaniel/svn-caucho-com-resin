@@ -106,13 +106,14 @@
          - webapps can be overridden/extended in the resin.xml
         -->
       <web-app id="/" root-directory="webapps/ROOT"/>
+
     </host>
       
-    <host id="${resin_doc_host}" root-directory="${resin.root}/doc">
-      <resin:if test="${resin_doc}">
-        <web-app id="/resin-doc" root-directory="resin-doc"/>
-      </resin:if>
-    </host>
+    <resin:if test="${resin_doc}">
+      <host id="${resin_doc_host}" root-directory="${resin_doc_host}">
+        <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
+      </host>
+    </resin:if>
   </cluster>
 
   <cluster id="web">
