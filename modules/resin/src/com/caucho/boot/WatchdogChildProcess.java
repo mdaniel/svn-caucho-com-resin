@@ -767,13 +767,13 @@ class WatchdogChildProcess
     String jvmMode = _watchdog.getJvmMode();
     
     if ((jvmMode == null || "".equals(jvmMode))
-      && ! CauchoSystem.isWindows()) {
+      && ! CauchoSystem.isWindows() && ! "none".equals(jvmMode)) {
       jvmMode = "-server";
     }
     
     if (! jvmArgs.contains("-server")
         && ! jvmArgs.contains("-client")
-        && ! CauchoSystem.isWindows()
+        && ! CauchoSystem.isWindows() && ! "none".equals(jvmMode)
         && jvmMode != null && ! "".equals(jvmMode)) {
       // #3331, windows can't add -server automatically
       jvmArgs.add(jvmMode);
