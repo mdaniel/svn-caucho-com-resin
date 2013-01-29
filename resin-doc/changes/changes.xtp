@@ -12,6 +12,7 @@
 
 <s2 title="4.0.34 - snapshot">
 <ul>
+<li>health: named predicates don't match HttpStatusHealthCheck properly(#5283)</li>
 <li>db: NPE in BlockManager on Raspberry Pi (#5338)</li>
 <li>watchdog: hangle missing java.lang:type=Runtime arguments on startup (#5299)</li>
 <li>servlet: content-type encoding updates for .gif files (#5271, rep by Mathias Lagerwell)</li>
