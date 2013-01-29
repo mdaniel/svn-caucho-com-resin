@@ -25,6 +25,28 @@ page loading.  Users utilizing GZipFilter should upgrade to 4.0.34.</p>
 
 </s1>
 
+<s1 title="OpenSSL honor-cipher-order">
+
+<p>The new SSL configuration &lt;honor-cipher-order> matches the
+Apache HTTPD configuration. It enforces the cipher order specified
+by the server, overriding the client's preferences.</p>
+
+<example title="honor-cipher-order">
+...
+    &lt;http host='localhost' port='8443'>
+      &lt;openssl>
+        &lt;certificate-file>keys/mycert.crt&lt;/certificate-file>
+        &lt;certificate-key-file>keys/mycert.key&lt;/certificate-key-file>
+        &lt;password>mypassword&lt;/password>
+        &lt;cipher-suite>ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP&lt;/cipher-suite>
+        &lt;honor-cipher-order>true&lt;/honor-cipher-order>
+      &lt;/openssl>
+    &lt;/http>
+...
+</example>
+
+</s1>
+
 <s1 title="&lt;jvm-mode> and Early Raspberry Pi Support">
 
 <p>&lt;jmv-mode> parameter was introduced to change the JVM mode, to allow 
@@ -36,7 +58,18 @@ on a Raspberry Pi</a>.</p>
 
 </s1>
 
-</body>
+<s1 title="ServletRegistration and servlet-mapping default">
 
+<p>Added a "default" attribute to Resin's default servlet-mapping
+and changed the ServletRegistration behavior to override servlet-mapping
+defaults.</p>
+
+<p>The standard behavior of <code>ServletContext.addServlet</code> is
+to ignore overrides of servlet mappings. The new "default" attribute
+lets applications override the Resin defaults.</p>
+
+</s1>
+
+</body>
 
 </document>
