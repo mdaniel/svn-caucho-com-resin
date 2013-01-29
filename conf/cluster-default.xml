@@ -150,7 +150,10 @@
       </web-app-default>
     </host-default>
 
+    <!--
     <host id="${web_admin_host}" root-directory="${web_admin_host}">
+      -->
+    <host-default>
       
       <!--
          - Administration application /resin-admin
@@ -186,7 +189,7 @@
         </web-app>
       </resin:if>
 
-    </host>
+    </host-default>
   </cluster-default>
 </resin>
 
