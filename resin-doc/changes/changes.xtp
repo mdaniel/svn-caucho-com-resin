@@ -10,7 +10,13 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.34 - snapshot">
+<s2 title="4.0.35 - snapshot">
+<ul>
+<li>quercus: OutOfMemory with UserCake Captcha (#5354)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.34 - Jan 30, 2013">
 <ul>
 <li>health: named predicates don't match HttpStatusHealthCheck properly(#5283)</li>
 <li>db: NPE in BlockManager on Raspberry Pi (#5338)</li>
