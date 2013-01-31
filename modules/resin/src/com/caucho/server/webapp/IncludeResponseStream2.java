@@ -100,7 +100,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     try {
       setEncoding(next.getCharacterEncoding());
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 

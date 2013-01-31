@@ -108,6 +108,21 @@ public class BootServerMultiConfig
     _port = port;
   }
   
+  @Configurable
+  public void setClusterPort(ConfigProgram program)
+  {
+    _serverProgram.addProgram(program);
+    
+    ClusterPortConfig cfg = new ClusterPortConfig();
+    
+    program.configure(cfg);
+
+    if (cfg.getPort() >= 0) {
+      setPort(cfg.getPort());
+    }
+    
+  }
+  
   public boolean isSecure()
   {
     return _isSecure;
@@ -175,5 +190,28 @@ public class BootServerMultiConfig
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _idPrefix + "]";
+  }
+  
+  static class ClusterPortConfig {
+    private int _port = -1;
+    
+    public int getPort()
+    {
+      return _port;
+    }
+    
+    public void setPort(int port)
+    {
+      _port = port;
+    }
+    
+    public ClusterPortConfig createClusterPort()
+    {
+      return this;
+    }
+    
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
   }
 }

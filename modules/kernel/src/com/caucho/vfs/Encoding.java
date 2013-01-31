@@ -446,12 +446,14 @@ public class Encoding {
     _mimeName.put("ISO8859-9", "ISO-8859-9");
     _javaName.put("ISO-8859-9", "ISO8859_9");
 
+    /* unsupported by java
     _mimeName.put("ISO_8859-10:1992", "ISO-8859-10");
     _mimeName.put("iso-ir-157", "ISO-8859-10");
     _mimeName.put("I6", "ISO-8859-10");
     _mimeName.put("cslSOLatin6", "ISO-8859-10");
     _mimeName.put("latin6", "ISO-8859-10");
     _javaName.put("ISO-8859-10", "ISO8859_10");
+    */
 
     _mimeName.put("UTF-7", "UTF-7");
     _mimeName.put("UTF7", "UTF-7");
@@ -554,7 +556,7 @@ public class Encoding {
     _localeName.put("nl", "ISO-8859-1");
     _localeName.put("en", "ISO-8859-1");
     _localeName.put("eo", "ISO-8859-3");
-    _localeName.put("et", "ISO-8859-10");
+    _localeName.put("et", "ISO-8859-2");
     _localeName.put("fo", "ISO-8859-1");
     _localeName.put("fi", "ISO-8859-1");
     _localeName.put("fr", "ISO-8859-1");
@@ -567,8 +569,8 @@ public class Encoding {
     _localeName.put("ga", "ISO-8859-1");
     _localeName.put("it", "ISO-8859-1");
     _localeName.put("ja", "Shift_JIS");
-    _localeName.put("lv", "ISO-8859-10");
-    _localeName.put("lt", "ISO-8859-10");
+    _localeName.put("lv", "ISO-8859-2");
+    _localeName.put("lt", "ISO-8859-2");
     _localeName.put("mk", "ISO-8859-5");
     _localeName.put("mt", "ISO-8859-3");
     _localeName.put("no", "ISO-8859-1");

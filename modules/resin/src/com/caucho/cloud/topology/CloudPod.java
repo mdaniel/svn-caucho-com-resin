@@ -226,7 +226,7 @@ public class CloudPod
   {
     CloudServer []servers = _servers;
     
-    if (0 <= index && index <= servers.length)
+    if (0 <= index && index < servers.length)
       return servers[index];
     else
       return null;

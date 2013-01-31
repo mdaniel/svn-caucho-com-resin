@@ -1797,8 +1797,10 @@ function pdf_thread_stack(&$thread_entry, $max)
     $string .= $stack_entry["class"] . "." . $stack_entry["method"];
 
     if ($stack_entry["file"]) {
-      $string .= " (" . $stack_entry["file"] . ":" . $stack_entry["line"] . ")\n";
+      $string .= " (" . $stack_entry["file"] . ":" . $stack_entry["line"] . ")";
     }
+
+    $string .= "\n";
 
     $string .= stack_find_monitor($monitors, $i);
   }

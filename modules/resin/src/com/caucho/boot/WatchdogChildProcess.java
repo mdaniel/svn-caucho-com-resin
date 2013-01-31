@@ -40,6 +40,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -78,6 +79,9 @@ class WatchdogChildProcess
   private static final L10N L = new L10N(WatchdogChildProcess.class);
   private static final Logger log
     = Logger.getLogger(WatchdogChildProcess.class.getName());
+  
+  private static HashSet<String> _resinProperties
+    = new HashSet<String>();
 
   private static Boot _jniBoot;
 
@@ -664,11 +668,13 @@ class WatchdogChildProcess
 
     // user args are first so they're displayed by ps
     for (String arg : _watchdog.getJvmArgs()) {
-      if (! arg.startsWith("-Djava.class.path"))
+      if (! isResinProperty(arg)) {
         jvmArgs.add(arg);
+      }
       
-      if (arg.startsWith("-Djava.endorsed.dirs"))
+      if (arg.startsWith("-Djava.endorsed.dirs")) {
         isEndorsed = true;
+      }
     }
     
     jvmArgs.add("-Dresin.server=" + _id);
@@ -736,7 +742,9 @@ class WatchdogChildProcess
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
 
-      if (arg.startsWith("-D") || arg.startsWith("-X")) {
+      if (isResinProperty(arg)) {
+      }
+      else if (arg.startsWith("-D") || arg.startsWith("-X")) {
         jvmArgs.add(arg);
       }
       else if (arg.startsWith("-J")) {
@@ -840,6 +848,9 @@ class WatchdogChildProcess
         // resin conf handled below
         i++;
       }
+      else if (isResinProperty(argv[i])) {
+        
+      }
       else if (argv[i].startsWith("-Djava.class.path=")) {
         // IBM JDK startup issues
       }
@@ -855,9 +866,27 @@ class WatchdogChildProcess
       else if (CauchoSystem.isWindows() && "".equals(argv[i])) {
         resinArgs.add("\"\"");
       }
-      else
+      else {
         resinArgs.add(argv[i]);
+      }
     }
+  }
+  
+  private boolean isResinProperty(String arg)
+  {
+    int p;
+    if (arg.startsWith("-D") && (p = arg.indexOf('=')) >= 0) {
+      String key = arg.substring(0, p);
+
+      return _resinProperties.contains(key);
+    }
+    else if (arg.startsWith("-J-D") && (p = arg.indexOf('=')) >= 0) {
+      String key = arg.substring(2, p);
+
+      return _resinProperties.contains(key);
+    }
+    
+    return false;
   }
 
   private void logVerboseArguments(WriteStream out, ArrayList<String> list)
@@ -1033,5 +1062,15 @@ class WatchdogChildProcess
         kill();
       }
     }
+  }
+  
+  static {
+    _resinProperties.add("-Djava.awt.headless");
+    _resinProperties.add("-Djava.class.path");
+    _resinProperties.add("-Dresin.home");
+    _resinProperties.add("-Dresin.root");
+    _resinProperties.add("-Dresin.watchdog");
+    _resinProperties.add("-Djavax.management.builder.initial");
+    _resinProperties.add("-Djava.util.logging.manager");
   }
 }

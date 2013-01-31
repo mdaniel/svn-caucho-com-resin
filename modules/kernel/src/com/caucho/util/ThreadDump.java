@@ -96,7 +96,7 @@ public class ThreadDump
    */
   public String getThreadDump()
   {
-    return getThreadDump(false);
+    return getThreadDump(32, false);
   }
 
   /**
@@ -104,21 +104,21 @@ public class ThreadDump
    * uses cached dump.
    * @param onlyActive if true only running threads are logged
    */
-  public void dumpThreads(boolean onlyActive)
+  public void dumpThreads(int depth, boolean onlyActive)
   {
-    log.info(getThreadDump(onlyActive));
+    log.info(getThreadDump(depth, onlyActive));
   }
 
   /**
    * Returns dump of threads.  Optionally uses cached dump.
    * @param onlyActive if true only running threads are logged
    */
-  public String getThreadDump(boolean onlyActive)
+  public String getThreadDump(int depth, boolean onlyActive)
   {
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
     long []ids = threadBean.getAllThreadIds();
-    ThreadInfo []info = threadBean.getThreadInfo(ids, 32);
+    ThreadInfo []info = threadBean.getThreadInfo(ids, depth);
 
     StringBuilder sb = new StringBuilder();
     sb.append("Thread Dump generated " + new Date(CurrentTime.getCurrentTime()));

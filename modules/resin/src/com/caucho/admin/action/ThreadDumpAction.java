@@ -28,18 +28,10 @@
 
 package com.caucho.admin.action;
 
-import java.util.logging.Logger;
-
-import com.caucho.env.log.LogSystem;
-import com.caucho.util.*;
+import com.caucho.util.ThreadDump;
 
 public class ThreadDumpAction implements AdminAction
 {
-  private static final Logger log
-    = Logger.getLogger(ThreadDumpAction.class.getName());
-
-  private static final L10N L = new L10N(ThreadDumpAction.class);
-  
   private ThreadDump _threadDump;
   
   public ThreadDumpAction()
@@ -47,9 +39,9 @@ public class ThreadDumpAction implements AdminAction
     _threadDump = ThreadDump.create();
   }
   
-  public String execute(boolean onlyActive)
+  public String execute(int depth, boolean onlyActive)
   {
-    return _threadDump.getThreadDump(onlyActive);
+    return _threadDump.getThreadDump(depth, onlyActive);
   }
 
   public String executeJson()

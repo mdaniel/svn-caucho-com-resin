@@ -825,7 +825,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
       _responseStream.setEncoding(encoding);
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -955,7 +955,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     try {
       _responseStream.setEncoding(encoding);
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.INFO, e.toString(), e);
     }
   }
 

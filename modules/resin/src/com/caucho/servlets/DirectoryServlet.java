@@ -177,8 +177,10 @@ public class DirectoryServlet extends HttpServlet {
       String name = (String) i.next();
 
       if (name.equalsIgnoreCase("web-inf") ||
-          name.equalsIgnoreCase("meta-inf"))
+          name.equalsIgnoreCase("meta-inf") ||
+          name.equalsIgnoreCase(".ds_store")) {
         continue;
+      }
 
       String enc = URLUtil.encodeURL(tail + name);
 

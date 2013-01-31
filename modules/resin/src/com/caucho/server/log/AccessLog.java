@@ -794,8 +794,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
       _string = string;
       if (string != null) {
-        if (code == 'o' && string.equalsIgnoreCase("Set-Cookie"))
+        if (code == 'o' && string.equalsIgnoreCase("Set-Cookie")) {
           _code = SET_COOKIE;
+        }
 
         _data = _string.getBytes();
         if (code == TEXT && _string.length() == 1) {

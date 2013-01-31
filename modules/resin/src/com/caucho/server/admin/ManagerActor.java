@@ -198,7 +198,7 @@ public class ManagerActor extends SimpleActor
     if (query.isJson()) {
       reply = new JsonQueryReply(new ThreadDumpAction().executeJson());
     } else {
-      reply = new StringQueryReply(new ThreadDumpAction().execute(false));
+      reply = new StringQueryReply(new ThreadDumpAction().execute(32, false));
     }
 
     getBroker().queryResult(id, from, to, reply);

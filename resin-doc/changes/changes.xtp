@@ -12,6 +12,14 @@
 
 <s2 title="4.0.35 - snapshot">
 <ul>
+<li>servlet: .DS_store hidden from directory servlet (#5341, rep by Jason Walsh)</li>
+<li>watchdog: removed repeated CLI properties (#5342)</li>
+<li>cloud: server-multi needs to support cluster-port (#5345)</li>
+<li>health: if health-system is disabled and an event occurs, log at a lower level (#5344)</li>
+<li>servlet: changed default encoding for et, lv, lt locales to iso-8859-2</li>
+<li>health: pdf-report thread-dump printing when missing file info (#5347)</li>
+<li>health: add DumpThreads.setDepth to control the max thread depth (#5348)</li>
+<li>cloud: CloudPod.findServer array bounds issue (#5346, rep by Jason Barr)</li>
 <li>quercus: OutOfMemory with UserCake Captcha (#5354)</li>
 </ul>
 </s2>
