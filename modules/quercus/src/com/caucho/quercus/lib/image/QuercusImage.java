@@ -438,7 +438,8 @@ public class QuercusImage extends ResourceValue
       int p = (getPixel(x, y) & 0x00ffffff);
 
       if (isUseBorder && (p == border || p == color)
-          || (! isUseBorder) && p != startColor) {
+          || (! isUseBorder) && p != startColor
+          || p == color) {
         continue;
       }
 
