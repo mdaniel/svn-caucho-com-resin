@@ -1005,7 +1005,7 @@ abstract public class AbstractHttpResponse {
     // How to deal with quoted values?  Old browsers can't deal with
     // the quotes.
 
-    cb.clear();
+    // cb.clear();
     cb.append(cookie.getName());
     if (isCookie2) {
       cb.append("=\"");

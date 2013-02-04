@@ -85,7 +85,7 @@ function scoreboard_count()
       continue;
     }
 
-    $state = $conn->getDisplayState();
+    $state = $conn->DisplayState;
 
     if ($state == 'accept') {
       $scoreboard_count['_'] += 1;

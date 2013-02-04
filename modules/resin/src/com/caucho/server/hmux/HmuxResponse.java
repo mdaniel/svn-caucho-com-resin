@@ -153,6 +153,7 @@ public class HmuxResponse extends AbstractHttpResponse {
         Cookie cookie = cookiesOut.get(i);
         int cookieVersion = cookie.getVersion();
 
+        cb.clear();
         fillCookie(cb, cookie, now, cookieVersion, false);
         _req.writeHeader("Set-Cookie", cb);
         if (cookieVersion > 0) {

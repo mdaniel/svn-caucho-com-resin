@@ -556,7 +556,7 @@ public class Encoding {
     _localeName.put("nl", "ISO-8859-1");
     _localeName.put("en", "ISO-8859-1");
     _localeName.put("eo", "ISO-8859-3");
-    _localeName.put("et", "ISO-8859-2");
+    _localeName.put("et", "ISO-8859-4");
     _localeName.put("fo", "ISO-8859-1");
     _localeName.put("fi", "ISO-8859-1");
     _localeName.put("fr", "ISO-8859-1");
@@ -569,8 +569,8 @@ public class Encoding {
     _localeName.put("ga", "ISO-8859-1");
     _localeName.put("it", "ISO-8859-1");
     _localeName.put("ja", "Shift_JIS");
-    _localeName.put("lv", "ISO-8859-2");
-    _localeName.put("lt", "ISO-8859-2");
+    _localeName.put("lv", "ISO-8859-4");
+    _localeName.put("lt", "ISO-8859-4");
     _localeName.put("mk", "ISO-8859-5");
     _localeName.put("mt", "ISO-8859-3");
     _localeName.put("no", "ISO-8859-1");

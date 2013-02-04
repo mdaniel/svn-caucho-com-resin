@@ -143,6 +143,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
         Cookie cookie = cookiesOut.get(i);
         int cookieVersion = cookie.getVersion();
 
+        cb.clear();
         fillCookie(cb, cookie, now, 0, false);
 
         os.print("Set-Cookie: ");

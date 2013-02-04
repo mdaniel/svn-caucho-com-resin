@@ -12,6 +12,12 @@
 
 <s2 title="4.0.35 - snapshot">
 <ul>
+<li>access-log: %{Set-Cookie}o should also print addHeader values (#5352, rep by A. Foong)</li>
+<li>access-log: %{Set-Cookie}o should print all cookies (#5353, rep by A. Foong)</li>
+<li>health: add min-threshold and max-threshold to AnomalyAnalyzer</li>
+<li>health: add min-value and max-value to AnomalyAnalyzer</li>
+<li>admin: fixed rest.php?q=mod_status support (#5351)</li>
+<li>servlet: encoding for et, lt, lv should be ISO-8859-4 (#5355)</li>
 <li>servlet: .DS_store hidden from directory servlet (#5341, rep by Jason Walsh)</li>
 <li>watchdog: removed repeated CLI properties (#5342)</li>
 <li>cloud: server-multi needs to support cluster-port (#5345)</li>

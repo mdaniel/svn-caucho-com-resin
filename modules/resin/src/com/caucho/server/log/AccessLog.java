@@ -413,6 +413,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     throws IOException
   {
     final AbstractHttpRequest absRequest = request.getAbstractHttpRequest();
+    CharBuffer cb = _cb;
 
     int len = _segments.length;
     for (int i = 0; i < len; i++) {
@@ -424,8 +425,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case Segment.TEXT:
         int sublen = segment._data.length;
         byte []data = segment._data;
-        for (int j = 0; j < sublen; j++)
+        for (int j = 0; j < sublen; j++) {
           buffer[offset++] = data[j];
+        }
         break;
 
       case Segment.CHAR:
@@ -453,17 +455,36 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         // set cookie
       case Segment.SET_COOKIE:
         ArrayList<Cookie> cookies = responseFacade.getCookies();
-        if (cookies == null || cookies.size() == 0)
-          buffer[offset++] = (byte) '-';
-        else {
-          _cb.clear();
-          response.fillCookie(_cb,
-                              cookies.get(0),
-                              CurrentTime.getCurrentTime(),
-                              0,
-                              false);
+        int cookiesSize = cookies.size();
+        
+        value = response.getHeader(segment._string);
+        
+        if (cookies != null && cookiesSize > 0) {
+          cb.clear();
+          
+          if (value != null) {
+            cb.append(value);
+          }
 
-          offset = print(buffer, offset, _cb.getBuffer(), 0, _cb.getLength());
+          for (int j = 0; j < cookiesSize; j++) {
+            cookie = cookies.get(j);
+            
+            if (cb.getLength() > 0) {
+              cb.append(",");
+            }
+
+            cb.append(cookie.getName());
+            cb.append('=');
+            cb.append(cookie.getValue());
+          }
+
+          offset = print(buffer, offset, cb.getBuffer(), 0, cb.getLength());
+        }
+        else if (value != null) {
+          offset = print(buffer, offset, value);
+        }
+        else {
+          buffer[offset++] = (byte) '-';
         }
         break;
 

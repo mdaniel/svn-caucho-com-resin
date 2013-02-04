@@ -262,8 +262,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    */
   void reset(boolean force)
   {
-    if (! force && isCommitted())
+    if (! force && isCommitted()) {
       throw new IllegalStateException(L.l("response cannot be reset() after committed"));
+    }
 
     _responseStream.clearBuffer();
 

@@ -199,7 +199,7 @@ a destination for logs, sets a minimum logging level for the handler,
 and attaches the handler to a logging name.</p>
 
 <p>In addition to configuring custom handlers, &lt;log-handler> has the
-most common configuration build-in: logging to a rotating file.  Most of the
+most common configuration built-in: logging to a rotating file.  Most of the
 configuration attributes are used for the rotating file and are shared
 with the other logging configuration.</p>
 
@@ -1091,8 +1091,45 @@ of your filesystem path:</p>
        path="log/debug-${server.id}.log"
        rollover-period="1h" rollover-count="1"/&gt;
 </example>
+</s1>
+
+<s1 title="Custom Access Logs">
+
+<p>If you need to create a custom access log, you can create your
+own implementation extending com.caucho.http.log.AccessLog and
+configuring it.</p>
+
+<example title="Custom Configuration">
+...
+&lt;host-default>
+
+  &lt;access-log>
+    &lt;mypkg:MyCustomLog xmlns:mypkg="urn:java:com.mypkg"/>
+  &lt;/access-log>
+
+&lt;/host-default>
+</example>
+
+<example title="Custom Log">
+package com.mypkg;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import com.caucho.http.log.*;
+
+public class MyLog extends AccessLog {
+  public void log(HttpServletRequest req,
+                  HttpServletResponse res,
+                  ServletContext application)
+  {
+    System.out.println.add(req.getRequestURI());
+  }
+}
+</example>
 
 </s1>
+
 
 </body>
 </document>
