@@ -40,7 +40,7 @@ if (! $stat) {
   return;
 }
 
-$log_mbean = $g_mbean_server->getLogService();
+$g_log_mbean = $g_mbean_server->getLogService();
 
 function  my_error_handler($error_type, $error_msg, $errfile, $errline) 
 {
@@ -424,9 +424,9 @@ function getMeterGraphPage($pdfName)
 
 function pdf_load_json_dump($name, $start=0, $end=0)
 {
-  global $g_si, $log_mbean, $g_start, $g_end;
+  global $g_si, $g_log_mbean, $g_start, $g_end;
 
-  if (! $log_mbean) {
+  if (! $g_log_mbean) {
     return;
   }
   
@@ -434,29 +434,32 @@ function pdf_load_json_dump($name, $start=0, $end=0)
    $end = $g_end;
   }
  
-  if (! $start)
+  if (! $start) {
     $start = $end - (2 * WEEK);
+  }
     
   $key = "$g_si|$name";
   
-  $times = $log_mbean->findMessageTimesByType($key,
+  $times = $g_log_mbean->findMessageTimesByType($key,
                                               "info",
                                               $start * 1000,
                                               $end * 1000);
                                               
   //debug("pdf_load_json_dump found " . count($times). " logs for $key (" . date('Y-m-d H:i', $start) . " - " . date('Y-m-d H:i', $end) . ")");
   
-  if (! $times || sizeof($times) == 0)
+  if (! $times || sizeof($times) == 0) {
     return;
+  }
 
   $time = $times[sizeof($times) - 1];
 
-  if (! $time)
+  if (! $time) {
     return;
+  }
   
   //debug("pdf_load_json_dump using time " . date('Y-m-d H:i:s', $time/1000));
     
-  $msgs = $log_mbean->findMessagesByType("$g_si|$name",
+  $msgs = $g_log_mbean->findMessagesByType("$g_si|$name",
                                          "info", $time, $time);
 
   $msg = $msgs[0];
@@ -754,9 +757,9 @@ function pdf_log_messages($title,
                           $end,
                           $max=-1)
 {
-  global $log_mbean, $g_canvas;
+  global $g_log_mbean, $g_canvas;
 
-  if (! $log_mbean) {
+  if (! $g_log_mbean) {
     return;
   }
   
@@ -764,9 +767,9 @@ function pdf_log_messages($title,
     $g_canvas->writeSubsection($title);
   }
   
-  $messages = $log_mbean->findMessages("warning",
-                                       $start * 1000,
-                                       $end * 1000);
+  $messages = $g_log_mbean->findMessages("warning",
+                                         $start * 1000,
+                                         $end * 1000);
                                        
                                        
   //debug("pdf_log_messages:$title,start=$start,end=$end,max=$max,count=" . count($messages));

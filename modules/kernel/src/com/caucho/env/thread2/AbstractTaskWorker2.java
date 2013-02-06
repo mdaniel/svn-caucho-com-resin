@@ -31,9 +31,8 @@ package com.caucho.env.thread2;
 
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +40,6 @@ import java.util.logging.Logger;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.warning.WarningService;
 import com.caucho.loader.Environment;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 
 /**
@@ -52,16 +50,12 @@ abstract public class AbstractTaskWorker2
 {
   private static Logger _log;
   
-  private static final int TASK_PARK = 0;
-  private static final int TASK_SLEEP = 1;
-  private static final int TASK_READY = 2;
-  
   private static final long PERMANENT_TIMEOUT = 30000L;
   
   private static final AtomicLong _idGen = new AtomicLong();
   
-  private final AtomicInteger _taskState = new AtomicInteger();
-  private final AtomicBoolean _isActive = new AtomicBoolean();
+  private final AtomicReference<State> _state
+    = new AtomicReference<State>(State.IDLE);
 
   private final WeakReference<ClassLoader> _classLoaderRef;
   
@@ -69,7 +63,6 @@ abstract public class AbstractTaskWorker2
   
   // private long _workerIdleTimeout = 30000L;
   private long _workerIdleTimeout = 500;
-  private boolean _isClosed;
   
   private volatile Thread _thread;
 
@@ -95,12 +88,12 @@ abstract public class AbstractTaskWorker2
   
   public final boolean isTaskActive()
   {
-    return _isActive.get();
+    return _state.get().isActive();
   }
   
   public boolean isClosed()
   {
-    return _isClosed;
+    return _state.get() == State.CLOSED;
   }
   
   protected ClassLoader getClassLoader()
@@ -113,9 +106,7 @@ abstract public class AbstractTaskWorker2
   @Override
   public void close()
   {
-    _isClosed = true;
-
-    wake();
+    _state.getAndSet(State.CLOSED);
     
     Thread thread = _thread;
 
@@ -131,13 +122,19 @@ abstract public class AbstractTaskWorker2
       return;
     }
     */
-    int oldState = _taskState.getAndSet(TASK_READY);
+    
+    State oldState;
+    State newState;
+    
+    do {
+      oldState = _state.get();
+      newState = oldState.toWake();
+    } while (! _state.compareAndSet(oldState, newState));
 
-    if (_isActive.compareAndSet(false, true)) {
+    if (oldState.isIdle()) {
       startWorkerThread();
     }
-
-    if (oldState == TASK_PARK) {
+    else if (oldState.isPark()) {
       Thread thread = _thread;
 
       if (thread != null) {
@@ -206,8 +203,7 @@ abstract public class AbstractTaskWorker2
       do {
         isExpireRetry = false;
         
-        while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY
-               && ! isClosed()) {
+        while (_state.compareAndSet(State.ACTIVE_WAKE, State.ACTIVE)) {
           thread.setContextClassLoader(getClassLoader());
           
           isExpireRetry = false;
@@ -233,20 +229,22 @@ abstract public class AbstractTaskWorker2
           return;
         }
         
-        if (expires > 0 && _taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
+        if (expires > 0
+            && _state.compareAndSet(State.ACTIVE, State.PARK)) {
           thread.setName(oldName);
           Thread.interrupted();
           LockSupport.parkUntil(expires);
+          
+          _state.compareAndSet(State.PARK, State.ACTIVE);
         }
         
         if (isPermanent() || isExpireRetry) {
           expires = getCurrentTimeActual() + idleTimeout;
-          _taskState.set(TASK_READY);
         }
-      } while (_taskState.get() == TASK_READY
-               || isPermanent()
+      } while (isPermanent()
                || isExpireRetry
-               || getCurrentTimeActual() < expires);
+               || getCurrentTimeActual() < expires
+               || _state.get() == State.ACTIVE_WAKE);
     } catch (Throwable e) {
       System.out.println("EXN: " + e);
       WarningService.sendCurrentWarning(this, e);
@@ -254,12 +252,18 @@ abstract public class AbstractTaskWorker2
     } finally {
       _thread = null;
 
-      _isActive.set(false);
-
       onThreadComplete();
       
-      if (_taskState.get() == TASK_READY) {
-        wake();
+      State oldState;
+      State newState;
+      
+      do {
+        oldState = _state.get();
+        newState = oldState.toIdle();
+      } while (! _state.compareAndSet(oldState, newState));
+
+      if (newState.isWake()) {
+        startWorkerThread();
       }
       
       thread.setName(oldName);
@@ -284,5 +288,67 @@ abstract public class AbstractTaskWorker2
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+  
+  enum State {
+    IDLE {
+      @Override
+      boolean isIdle() { return true; }
+    },
+    
+    ACTIVE {
+      @Override
+      State toWake() { return ACTIVE_WAKE; }
+      
+      @Override
+      boolean isActive() { return true; }
+      
+      @Override
+      State toIdle() { return IDLE; }
+    },
+    
+    ACTIVE_WAKE {
+      @Override
+      State toWake() { return ACTIVE_WAKE; }
+      
+      @Override
+      boolean isActive() { return true; }
+      
+      @Override
+      boolean isWake() { return true; }
+      
+      @Override
+      State toIdle() { return this; }
+    },
+    
+    PARK {
+      @Override
+      State toWake() { return ACTIVE_WAKE; }
+      
+      @Override
+      State toIdle() { return IDLE; }
+      
+      @Override
+      boolean isPark () { return true; }
+    },
+    
+    CLOSED {
+      @Override
+      State toWake() { return CLOSED; }
+      
+      @Override
+      State toIdle() { return CLOSED; }
+      
+      @Override
+      boolean isPark () { return true; }
+    };
+    
+    boolean isIdle() { return false; }
+    boolean isActive() { return false; }
+    boolean isWake() { return false; }
+    boolean isPark() { return false; }
+    
+    State toWake() { return ACTIVE_WAKE; }
+    State toIdle() { throw new UnsupportedOperationException(toString()); }
   }
 }
