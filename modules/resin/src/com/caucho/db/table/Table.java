@@ -155,6 +155,12 @@ public class Table extends BlockStore {
     //new Lock("table-alloc:" + name);
     _rowAllocator = new TableRowAllocator(this);
   }
+  
+  @Override
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
+  }
 
   Row getRow()
   {
