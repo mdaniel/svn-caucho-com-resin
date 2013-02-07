@@ -96,6 +96,11 @@ abstract public class AbstractTaskWorker2
     return _state.get() == State.CLOSED;
   }
   
+  public String getState()
+  {
+    return String.valueOf(_state.get());
+  }
+  
   protected ClassLoader getClassLoader()
   {
     return _classLoaderRef.get();

@@ -106,7 +106,12 @@ public class ValueActorQueue<T> implements ActorQueueApi<T>
     
     return true;
   }
-  
+
+  public String getWorkerState()
+  {
+    return _actorQueue.getWorkerState();
+  }
+
   public void wake()
   {
     _actorQueue.wake();
