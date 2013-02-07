@@ -208,7 +208,17 @@ abstract public class AbstractTaskWorker2
       do {
         isExpireRetry = false;
         
-        while (_state.compareAndSet(State.ACTIVE_WAKE, State.ACTIVE)) {
+        State oldState;
+
+        do {
+          oldState = _state.get();
+          
+          if (oldState == State.CLOSED) {
+            return;
+          }
+        } while (! _state.compareAndSet(oldState, State.ACTIVE));
+        
+        do {
           thread.setContextClassLoader(getClassLoader());
           
           isExpireRetry = false;
@@ -228,7 +238,7 @@ abstract public class AbstractTaskWorker2
           else {
             expires = 0;
           }
-        }
+        } while (_state.compareAndSet(State.ACTIVE_WAKE, State.ACTIVE));
 
         if (isClosed()) {
           return;
@@ -236,19 +246,21 @@ abstract public class AbstractTaskWorker2
         
         if (expires > 0
             && _state.compareAndSet(State.ACTIVE, State.PARK)) {
-          thread.setName(oldName);
+          thread.setName(getThreadName());
           Thread.interrupted();
           LockSupport.parkUntil(expires);
           
           _state.compareAndSet(State.PARK, State.ACTIVE);
         }
         
+        now = getCurrentTimeActual();
+        
         if (isPermanent() || isExpireRetry) {
-          expires = getCurrentTimeActual() + idleTimeout;
+          expires = now + idleTimeout;
         }
       } while (isPermanent()
                || isExpireRetry
-               || getCurrentTimeActual() < expires
+               || now < expires
                || _state.get() == State.ACTIVE_WAKE);
     } catch (Throwable e) {
       System.out.println("EXN: " + e);
@@ -270,14 +282,16 @@ abstract public class AbstractTaskWorker2
       if (newState.isWake()) {
         startWorkerThread();
       }
-      
+
       thread.setName(oldName);
     }
   }
   
   protected long getCurrentTimeActual()
   {
-    return CurrentTime.getCurrentTimeActual();
+    // return CurrentTime.getCurrentTimeActual();
+    
+    return System.currentTimeMillis();
   }
   
   private Logger log()

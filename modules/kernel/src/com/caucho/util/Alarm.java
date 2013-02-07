@@ -32,12 +32,10 @@ package com.caucho.util;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.AbstractTaskWorker;
-import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
 
@@ -699,7 +697,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           return 120000L;
         }
         else if (now < next) {
-          return next - now;
+          return Math.min(next - now, 120000L);
         }
       }
     }
@@ -754,6 +752,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       coordinator = new CoordinatorThread();
       coordinator.wake();
     } catch (Throwable e) {
+      e.printStackTrace();
       // should display for security manager issues
       log.fine("Alarm not started: " + e);
     }
