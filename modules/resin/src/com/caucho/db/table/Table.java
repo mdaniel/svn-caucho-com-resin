@@ -48,6 +48,7 @@ import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.BitsUtil;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -116,11 +117,15 @@ public class Table extends BlockStore {
   private final AtomicLong _rowDeleteCount = new AtomicLong();
 
   private long _autoIncrementValue = -1;
+  
+  private final Lifecycle _lifecycle;
 
   Table(Database database, String name, Row row, Constraint constraints[])
   {
     super(database, name, null);
 
+    _lifecycle = new Lifecycle(log, name);
+    
     _row = row;
     _constraints = constraints;
 
@@ -410,6 +415,8 @@ public class Table extends BlockStore {
     int offset = STARTUP_TIMESTAMP_OFFSET;
     
     writeTimestamp(offset, _startupTimestamp);
+    
+    _lifecycle.toActive();
   }
   
   private void writeShutdownTimestamp()

@@ -1925,7 +1925,9 @@ public final class BTree {
   {
     IllegalStateException e = new IllegalStateException(_store + ": " + msg);
     
-    _store.fatalCorrupted(msg);
+    if (_store.isActive()) {
+      _store.fatalCorrupted(msg);
+    }
     
     throw e;
   }

@@ -1867,6 +1867,14 @@ public class BlockStore {
   }
 
   /**
+   * True if active
+   */
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
+  }
+
+  /**
    * Closes the store.
    */
   public void close()
