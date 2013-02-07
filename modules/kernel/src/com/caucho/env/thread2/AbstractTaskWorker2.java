@@ -186,7 +186,13 @@ abstract public class AbstractTaskWorker2
     String oldName = thread.getName();
     
     try {
+      Thread oldThread = _thread;
       _thread = thread;
+      
+      if (oldThread != null) {
+        System.out.println("DOUBLE_THREAD: " + oldThread);
+      }
+      
       thread.setContextClassLoader(getClassLoader());
       thread.setName(getThreadName());
       
@@ -213,12 +219,16 @@ abstract public class AbstractTaskWorker2
         do {
           oldState = _state.get();
           
-          if (oldState == State.CLOSED) {
+          if (oldState.isClosed()) {
             return;
           }
         } while (! _state.compareAndSet(oldState, State.ACTIVE));
         
         do {
+          if (_state.get().isClosed()) {
+            return;
+          }
+          
           thread.setContextClassLoader(getClassLoader());
           
           isExpireRetry = false;
@@ -239,10 +249,6 @@ abstract public class AbstractTaskWorker2
             expires = 0;
           }
         } while (_state.compareAndSet(State.ACTIVE_WAKE, State.ACTIVE));
-
-        if (isClosed()) {
-          return;
-        }
         
         if (expires > 0
             && _state.compareAndSet(State.ACTIVE, State.PARK)) {
@@ -279,11 +285,11 @@ abstract public class AbstractTaskWorker2
         newState = oldState.toIdle();
       } while (! _state.compareAndSet(oldState, newState));
 
+      thread.setName(oldName);
+
       if (newState.isWake()) {
         startWorkerThread();
       }
-
-      thread.setName(oldName);
     }
   }
   
@@ -328,7 +334,7 @@ abstract public class AbstractTaskWorker2
     
     ACTIVE_WAKE {
       @Override
-      State toWake() { return ACTIVE_WAKE; }
+      State toWake() { return this; }
       
       @Override
       boolean isActive() { return true; }
@@ -353,19 +359,20 @@ abstract public class AbstractTaskWorker2
     
     CLOSED {
       @Override
+      boolean isClosed() { return true; }
+      
+      @Override
       State toWake() { return CLOSED; }
       
       @Override
       State toIdle() { return CLOSED; }
-      
-      @Override
-      boolean isPark () { return true; }
     };
     
     boolean isIdle() { return false; }
     boolean isActive() { return false; }
     boolean isWake() { return false; }
     boolean isPark() { return false; }
+    boolean isClosed() { return false; }
     
     State toWake() { return ACTIVE_WAKE; }
     State toIdle() { throw new UnsupportedOperationException(toString()); }

@@ -185,10 +185,10 @@ public class BlockWriter extends AbstractTaskWorker {
 
     while (! _blockWriteRing.isEmpty()
            && CurrentTime.getCurrentTimeActual() < expire) {
+      wake();
       try {
         Thread.sleep(10);
       } catch (Exception e) {
-
       }
     }
 
