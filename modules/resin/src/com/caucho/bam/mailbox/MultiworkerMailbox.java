@@ -303,7 +303,6 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     }
     
     if (! workerQueue.offer(packet, false)) {
-      System.out.println("WORKER_STATE: " + workerQueue.getWorkerState());
       workerQueue.wake();
       
       if (! workerQueue.offer(packet, true)) {
