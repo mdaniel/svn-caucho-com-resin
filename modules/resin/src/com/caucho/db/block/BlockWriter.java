@@ -183,7 +183,8 @@ public class BlockWriter extends AbstractTaskWorker {
 
     long expire = CurrentTime.getCurrentTimeActual() + timeout;
 
-    while (! _blockWriteRing.isEmpty()
+    while (! isClosed()
+           && ! _blockWriteRing.isEmpty()
            && CurrentTime.getCurrentTimeActual() < expire) {
       wake();
       try {
