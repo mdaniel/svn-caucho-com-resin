@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.warning.WarningService;
 import com.caucho.loader.Environment;
-import com.caucho.util.CurrentTime;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
@@ -93,7 +92,7 @@ abstract public class AbstractTaskWorker2
   
   public boolean isClosed()
   {
-    return _state.get() == State.CLOSED;
+    return _state.get().isClosed();
   }
   
   public String getState()

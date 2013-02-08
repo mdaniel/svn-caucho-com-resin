@@ -29,7 +29,6 @@
 
 package com.caucho.db.block;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -159,6 +158,7 @@ public class BlockWriter extends AbstractTaskWorker {
     //return null;
   }
 
+  /*
   @Override
   public boolean isClosed()
   {
@@ -166,7 +166,8 @@ public class BlockWriter extends AbstractTaskWorker {
     
     return super.isClosed() && _blockWriteRing.isEmpty();
   }
-  
+  */
+
 
   boolean XX_waitForComplete(long timeout)
   {
