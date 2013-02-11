@@ -87,7 +87,7 @@ abstract public class AbstractTaskWorker2
   
   public final boolean isTaskActive()
   {
-    return _state.get().isActive();
+    return _state.get().isActive() || _state.get().isPark();
   }
   
   public boolean isClosed()
@@ -248,7 +248,7 @@ abstract public class AbstractTaskWorker2
             expires = 0;
           }
         } while (_state.compareAndSet(State.ACTIVE_WAKE, State.ACTIVE));
-        
+
         if (expires > 0
             && _state.compareAndSet(State.ACTIVE, State.PARK)) {
           thread.setName(getThreadName());
