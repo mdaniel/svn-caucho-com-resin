@@ -481,7 +481,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
           offset = print(buffer, offset, cb.getBuffer(), 0, cb.getLength());
         }
         else if (value != null) {
-          offset = print(buffer, offset, value);
+          int p = value.indexOf(';');
+          
+          if (p > 0) {
+            offset = print(buffer, offset, value, 0, p);
+          }
+          else {
+            offset = print(buffer, offset, value);
+          }
         }
         else {
           buffer[offset++] = (byte) '-';
@@ -684,6 +691,20 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       buffer[offset + i] = (byte) cBuf[i];
 
     return offset + length;
+  }
+  
+  private int print(byte []buffer, int offset, String s, int sOff, int sLen)
+  {
+    _cb.ensureCapacity(sLen);
+    char []cBuf = _cb.getBuffer();
+
+    s.getChars(sOff, sLen, cBuf, 0);
+
+    for (int i = sLen - 1; i >= 0; i--) {
+      buffer[offset + i] = (byte) cBuf[i];
+    }
+
+    return offset + sLen;
   }
 
   /**
