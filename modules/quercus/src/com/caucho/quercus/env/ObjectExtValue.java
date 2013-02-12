@@ -584,9 +584,6 @@ public class ObjectExtValue extends ObjectValue
       // XXX: this really only checks access from outside of class scope
       // php/091m
       if (cls != _quercusClass) {
-        env.notice(L.l("Can't access private field '{0}::${1}'",
-                       _quercusClass.getName(), name));
-
         return null;
       }
       /* nam: 2012-04-29 this doesn't work, commented out for drupal-7.12

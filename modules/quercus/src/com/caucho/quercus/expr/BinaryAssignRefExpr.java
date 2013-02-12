@@ -99,11 +99,7 @@ public class BinaryAssignRefExpr extends Expr {
   public Value evalRef(Env env)
   {
     // value can be a Value or Var
-    Value value = _value.evalRef(env);
-
-    _var.evalAssignRef(env, _value);
-
-    return value;
+    return _var.evalAssignRef(env, _value);
   }
 
   public String toString()
