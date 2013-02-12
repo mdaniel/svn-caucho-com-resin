@@ -806,6 +806,15 @@ if test -z "${jni_ld_shlib}"; then
         plugin_cflags="$jni_cflags -m32"
         plugin_ldflags_shlib="$jni_ldflags_shlib -m32"
       fi
+      
+      if test "$target_cpu" = "armv6l"; then
+        jni_cflags_shlib="-fPIC"
+        plugin_cflags_shlib=$jni_cflags_shlib
+        jni_ldflags_shlib="-shared -fPIC"
+        plugin_ldflags_shlib=$jni_ldflags_shlib
+        jni_cflags="-fPIC"
+        plugin_cflags=$jni_cflags
+      fi
       ;;
 
     *solaris*)

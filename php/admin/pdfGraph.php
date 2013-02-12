@@ -189,7 +189,7 @@ function pdf_summary()
   }
 }
 
-function pdf_threads($summary)
+function pdf_threads()
 {
   global $g_canvas, $g_jmx_dump;
   
