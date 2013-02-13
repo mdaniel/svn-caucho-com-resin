@@ -10,6 +10,13 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.36 - Snapshot">
+<ul>
+<li>apache: mod_caucho fix for failover issue(#5266, rep by Shinomiya Nobuaki)</li>
+<li>iis: isapi_srun.dll fix for failover issue(#5360, rep by Jason Barr)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.35 - Feb 13, 2013">
 <ul>
 <li>install: ./configure fix don't set -m32 on Raspberry Pi</li>
