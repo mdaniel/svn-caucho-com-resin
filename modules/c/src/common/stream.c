@@ -1528,10 +1528,13 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
     cluster_srun_t *cluster_srun = cluster->srun_list + index;
     srun_t *srun = cluster_srun->srun;
 
+    /*
     if (index == host && size > 1) {
       continue;
     }
-    else if (! srun) {
+    else
+    */
+    if (! srun) {
       continue;
     }
     else if (cse_alloc_idle_socket(s, cluster, cluster_srun, now, web_pool)) {
