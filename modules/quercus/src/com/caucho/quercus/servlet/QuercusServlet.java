@@ -48,7 +48,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -58,6 +60,7 @@ import java.util.Map;
 /**
  * Servlet to call PHP through javax.script.
  */
+@SuppressWarnings("serial")
 public class QuercusServlet
   extends HttpServlet
 {
@@ -85,6 +88,8 @@ public class QuercusServlet
   private String _scriptEncoding;
   private String _mysqlVersion;
   private String _phpVersion;
+
+  private File _licenseDirectory;
 
   private Long _dependencyCheckInterval;
 
@@ -115,8 +120,9 @@ public class QuercusServlet
     if (isResin) {
       try {
         Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProResinQuercusServlet");
+        Constructor<?> cons = cls.getConstructor(File.class);
 
-        impl = (QuercusServletImpl) cls.newInstance();
+        impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
       }
       catch (Exception e) {
         log.finest(e.getMessage());
@@ -126,8 +132,9 @@ public class QuercusServlet
     if (impl == null) {
       try {
         Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
+        Constructor<?> cons = cls.getConstructor(File.class);
 
-        impl = (QuercusServletImpl) cls.newInstance();
+        impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
       }
       catch (Exception e) {
         log.finest(e.getMessage());
@@ -364,6 +371,14 @@ public class QuercusServlet
   }
 
   /**
+   * Sets the directory for Resin/Quercus licenses.
+   */
+  public void setLicenseDirectory(String relPath)
+  {
+    _licenseDirectory = new File(getServletContext().getRealPath(relPath));
+  }
+
+  /**
    * Initializes the servlet.
    */
   @Override
@@ -431,6 +446,9 @@ public class QuercusServlet
     }
     else if ("dependency-check-interval".equals(paramName)) {
       setDependencyCheckInterval(Long.parseLong(paramValue));
+    }
+    else if ("license-directory".equals(paramName)) {
+      setLicenseDirectory(paramValue);
     }
     else
       throw new ServletException(
