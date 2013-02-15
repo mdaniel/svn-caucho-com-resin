@@ -2122,8 +2122,10 @@ public class StringModule extends AbstractQuercusModule {
           case '+':
             isShowSign = true;
             break;
-          case ' ': case ',': case '(':
+          case ',': case '(':
             flags.append(ch);
+            break;
+          case ' ':
             break;
           default:
             break loop;
@@ -2246,8 +2248,7 @@ public class StringModule extends AbstractQuercusModule {
 
             index++;
 
-            segments.add(
-                LongPrintfSegment.create(env, sb.toString(), argIndex));
+            segments.add(LongPrintfSegment.create(env, sb.toString(), argIndex));
             sb.setLength(0);
             i = j;
             break loop;
@@ -2256,10 +2257,14 @@ public class StringModule extends AbstractQuercusModule {
           case 'F':
             QuercusLocale locale = null;
 
-            if (ch == 'F')
+            if (ch == 'F') {
               ch = 'f';
-            else
+
+              locale = QuercusLocale.getDefault();
+            }
+            else if (ch == 'f') {
               locale = env.getLocaleInfo().getNumeric();
+            }
 
             sb.setLength(sb.length() - 1);
             if (sb.length() > 0)
