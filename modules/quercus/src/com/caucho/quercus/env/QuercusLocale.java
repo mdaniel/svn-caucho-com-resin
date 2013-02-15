@@ -34,6 +34,9 @@ import java.util.Locale;
 
 public class QuercusLocale
 {
+  private final static QuercusLocale DEFAULT_US
+    = new QuercusLocale(Locale.US, "utf-8");
+
   private final Locale _locale;
   private final String _charset;
 
@@ -62,6 +65,11 @@ public class QuercusLocale
     }
 
     return _format.getDecimalSeparator();
+  }
+
+  public static QuercusLocale getDefault()
+  {
+    return DEFAULT_US;
   }
 
   public String toString()
