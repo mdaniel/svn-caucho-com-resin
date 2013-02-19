@@ -31,5 +31,5 @@ package javax.cache.event;
 
 public interface CacheEntryCreatedListener<K,V> extends CacheEntryListener<K,V>
 {
-  public void entryCreated(CacheEntryEvent<? extends K,? extends V> entry);
+  public void onCreated(Iterable<CacheEntryEvent<? extends K,? extends V>> entry);
 }

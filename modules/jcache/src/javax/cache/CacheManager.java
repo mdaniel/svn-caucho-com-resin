@@ -33,23 +33,26 @@ import javax.transaction.UserTransaction;
 
 public interface CacheManager
 {
-  public String getName();
+  String getName();
   
-  public Status getStatus();
+  Status getStatus();
   
-  public <K,V> CacheBuilder<K,V> createCacheBuilder(String cacheName);
+  <K,V> Cache<K,V> configureCache(String cacheName,
+                                  Configuration<K,V> configuration);
   
-  public <K,V> Cache<K,V> getCache(String name);
+  <K,V> Cache<K,V> getCache(String name);
   
-  public Iterable<Cache<?,?>> getCaches();
+  Iterable<Cache<?,?>> getCaches();
   
-  public boolean removeCache(String cacheName);
+  boolean removeCache(String cacheName);
   
-  public UserTransaction getUserTransaction();
+  UserTransaction getUserTransaction();
   
-  public boolean isSupported(OptionalFeature optionalFeature);
+  boolean isSupported(OptionalFeature optionalFeature);
   
-  public void shutdown();
+  void enableStatistics(String cacheName, boolean enabled);
   
-  public <T> T unwrap(Class<T> cl);
+  void shutdown();
+  
+  <T> T unwrap(Class<T> cl);
 }

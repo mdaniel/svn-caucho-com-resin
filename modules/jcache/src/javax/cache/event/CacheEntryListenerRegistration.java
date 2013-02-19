@@ -29,9 +29,14 @@
 
 package javax.cache.event;
 
-
-public interface CacheEntryReadListener<K,V> extends CacheEntryListener<K,V>
+public interface CacheEntryListenerRegistration<K,V>
 {
-  void onRead(Iterable<CacheEntryEvent<? extends K,? extends V>> events)
-    throws CacheEntryListenerException;
+  CacheEntryListener<? super K, ? super V> getCacheEntryListener();
+  
+  
+  boolean isOldValueRequired();
+  
+  CacheEntryEventFilter<? super K, ? super V> getCacheEntryFilter();
+  
+  boolean isSynchronous();
 }

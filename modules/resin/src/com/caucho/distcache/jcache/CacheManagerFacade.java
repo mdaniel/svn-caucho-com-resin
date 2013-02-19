@@ -34,12 +34,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.cache.Cache;
-import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
+import javax.cache.Configuration;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.transaction.UserTransaction;
 
+import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.CacheImpl;
 import com.caucho.server.distcache.CacheManagerImpl;
 import com.caucho.transaction.UserTransactionProxy;
 
@@ -72,17 +74,6 @@ public class CacheManagerFacade implements CacheManager
   }
 
   @Override
-  public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName)
-  {
-    return new CacheBuilderImpl<K,V>(cacheName, this);
-  }
-  
-  void addCache(String name, Cache<?,?> cache)
-  {
-    _cacheMap.putIfAbsent(name, cache);
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
   public <K, V> Cache<K, V> getCache(String name)
   {
@@ -94,6 +85,30 @@ public class CacheManagerFacade implements CacheManager
   public Set<Cache<?, ?>> getCaches()
   {
     return new HashSet(_cacheMap.values());
+  }
+  
+  void addCache(String name, Cache<?,?> cache)
+  {
+    _cacheMap.putIfAbsent(name, cache);
+  }
+
+  @Override
+  public <K, V> Cache<K, V> configureCache(String cacheName,
+                                           Configuration<K, V> configuration)
+  {
+    CacheConfig config = new CacheConfig();
+    
+    CacheImpl<K,V> cache = _manager.createIfAbsent(cacheName, config);
+    
+    _cacheMap.put(cacheName, cache);
+    
+    return cache;
+  }
+
+  @Override
+  public void enableStatistics(String cacheName, boolean enabled)
+  {
+
   }
 
   @Override

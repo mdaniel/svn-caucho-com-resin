@@ -41,13 +41,14 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
+import javax.cache.Configuration;
 import javax.cache.CacheException;
+import javax.cache.CacheMXBean;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
 import com.caucho.cloud.loadbalance.LoadBalanceManager;
@@ -849,7 +850,7 @@ public class MemcachedClient implements Cache
    * @see javax.cache.Cache#getConfiguration()
    */
   @Override
-  public CacheConfiguration getConfiguration()
+  public Configuration getConfiguration()
   {
     // TODO Auto-generated method stub
     return null;
@@ -917,16 +918,6 @@ public class MemcachedClient implements Cache
    */
   @Override
   public boolean putIfAbsent(Object key, Object value) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#registerCacheEntryListener(javax.cache.event.CacheEntryListener, javax.cache.event.NotificationScope, boolean)
-   */
-  @Override
-  public boolean registerCacheEntryListener(CacheEntryListener listener)
   {
     // TODO Auto-generated method stub
     return false;
@@ -1136,5 +1127,18 @@ public class MemcachedClient implements Cache
   {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#registerCacheEntryListener(javax.cache.event.CacheEntryListener, boolean, javax.cache.event.CacheEntryEventFilter, boolean)
+   */
+  @Override
+  public boolean registerCacheEntryListener(CacheEntryListener listener,
+                                            boolean requireOldValue,
+                                            CacheEntryEventFilter filter,
+                                            boolean synchronous)
+  {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

@@ -42,14 +42,15 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
+import javax.cache.Configuration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
+import javax.cache.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.Status;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -899,15 +900,6 @@ public class AbstractCache
   */
 
   /**
-   * Adds a listener to the cache.
-   */
-  @Override
-  public boolean registerCacheEntryListener(CacheEntryListener listener)
-  {
-    return _delegate.registerCacheEntryListener(listener);
-  }
-
-  /**
    * Removes a listener from the cache.
    */
   @Override
@@ -1142,7 +1134,7 @@ public class AbstractCache
   }
 
   @Override
-  public CacheConfiguration getConfiguration()
+  public Configuration getConfiguration()
   {
     return _delegate.getConfiguration();
   }
@@ -1186,5 +1178,18 @@ public class AbstractCache
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _guid + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#registerCacheEntryListener(javax.cache.event.CacheEntryListener, boolean, javax.cache.event.CacheEntryEventFilter, boolean)
+   */
+  @Override
+  public boolean registerCacheEntryListener(CacheEntryListener listener,
+                                            boolean requireOldValue,
+                                            CacheEntryEventFilter filter,
+                                            boolean synchronous)
+  {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

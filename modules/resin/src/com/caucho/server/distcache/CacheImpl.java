@@ -33,7 +33,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -47,20 +47,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
+import javax.cache.CacheMXBean;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
+import javax.cache.Configuration;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryEvent;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
-import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.distcache.ByteStreamCache;
@@ -722,7 +723,10 @@ public class CacheImpl<K,V>
    * Adds a listener to the cache.
    */
   @Override
-  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener)
+  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener,
+                                            boolean requireOldValue,
+                                            CacheEntryEventFilter<? super K, ? super V> filter,
+                                            boolean synchronous)
   {
     if (listener instanceof CacheEntryReadListener<?,?>) {
       synchronized (this) {
@@ -802,7 +806,8 @@ public class CacheImpl<K,V>
   @Override
   public CacheStatistics getStatistics()
   {
-    return getMBean();
+    throw new UnsupportedOperationException(getClass().getName());
+    // return getMBean();
   }
 
   /**
@@ -972,7 +977,7 @@ public class CacheImpl<K,V>
   }
 
   @Override
-  public CacheConfiguration getConfiguration()
+  public Configuration<K,V> getConfiguration()
   {
     return _config;
   }
@@ -1075,8 +1080,12 @@ public class CacheImpl<K,V>
     CacheEntryEvent<K,V> event
       = new CacheEntryEventImpl<K,V>(this, (K) key, value);
     
+    ArrayList<CacheEntryEvent<? extends K,? extends V>> events
+      = new ArrayList<CacheEntryEvent<? extends K,? extends V>>();
+    events.add(event);
+    
     for (ReadListener<K,V> listener : readListeners) {
-      listener.entryRead(event);
+      listener.onRead(events);
     }
   }
   
@@ -1118,8 +1127,13 @@ public class CacheImpl<K,V>
     CacheEntryEvent<K,V> event
       = new CacheEntryEventImpl<K,V>(this, (K) key, value);
     
+    ArrayList<CacheEntryEvent<? extends K,? extends V>> events
+      = new ArrayList<CacheEntryEvent<? extends K,? extends V>>();
+    events.add(event);
+  
+    
     for (UpdatedListener<K,V> listener : updatedListeners) {
-      listener.entryUpdated(event);
+      listener.onUpdated(events);
     }
   }
   
@@ -1132,9 +1146,13 @@ public class CacheImpl<K,V>
     
     CacheEntryEvent<K,V> event
       = new CacheEntryEventImpl<K,V>(this, (K) key, null);
-    
+
+    ArrayList<CacheEntryEvent<? extends K,? extends V>> events
+    = new ArrayList<CacheEntryEvent<? extends K,? extends V>>();
+  events.add(event);
+  
     for (RemovedListener<K,V> listener : removedListeners) {
-      listener.entryRemoved(event);
+      listener.onRemoved(events);
     }
   }
 
@@ -1294,10 +1312,10 @@ public class CacheImpl<K,V>
     }
 
     @Override
-    public void entryRead(CacheEntryEvent<? extends K,? extends V> event)
+    public void onRead(Iterable<CacheEntryEvent<? extends K,? extends V>> events)
         throws CacheEntryListenerException
     {
-      _listener.entryRead(event);
+      _listener.onRead(events);
     }
   }
   
@@ -1317,10 +1335,10 @@ public class CacheImpl<K,V>
     }
 
     @Override
-    public void entryUpdated(CacheEntryEvent<? extends K,? extends V> event)
+    public void onUpdated(Iterable<CacheEntryEvent<? extends K,? extends V>> events)
         throws CacheEntryListenerException
     {
-      _listener.entryUpdated(event);
+      _listener.onUpdated(events);
     }
   }
   
@@ -1340,10 +1358,10 @@ public class CacheImpl<K,V>
     }
 
     @Override
-    public void entryRemoved(CacheEntryEvent<? extends K,? extends V> event)
+    public void onRemoved(Iterable<CacheEntryEvent<? extends K,? extends V>> events)
         throws CacheEntryListenerException
     {
-      _listener.entryRemoved(event);
+      _listener.onRemoved(events);
     }
   }
 
@@ -1522,89 +1540,6 @@ public class CacheImpl<K,V>
     public Status getStatus()
     {
       return CacheImpl.this.getStatus();
-    }
-
-    @Override
-    public Date getStartAccumulationDate()
-    {
-      return null;
-    }
-
-    @Override
-    public long getCacheHits()
-    {
-      return _hitCount.get();
-    }
-
-    @Override
-    public long getCacheMisses()
-    {
-      return _missCount.get();
-    }
-
-    @Override
-    public float getCacheHitPercentage()
-    {
-      return 100 - getCacheMissPercentage();
-    }
-
-    @Override
-    public float getCacheMissPercentage()
-    {
-      long hits = getCacheHits();
-      long misses = getCacheMisses();
-      
-      if (hits == 0)
-        hits = 1;
-      
-      return (float) (100.0 * misses / (hits + misses));
-    }
-
-    @Override
-    public long getCacheGets()
-    {
-      return _getCount.get();
-    }
-
-    @Override
-    public long getCachePuts()
-    {
-      return _putCount.get();
-    }
-
-    @Override
-    public long getCacheRemovals()
-    {
-      return _removeCount.get();
-    }
-
-    @Override
-    public float getAverageGetMillis()
-    {
-      return 0;
-    }
-
-    @Override
-    public float getAveragePutMillis()
-    {
-      return 0;
-    }
-
-    @Override
-    public float getAverageRemoveMillis()
-    {
-      return 0;
-    }
-
-    @Override
-    public long getCacheEvictions()
-    {
-      return 0;
-    }
-
-    @Override
-    public void clearStatistics()
-    {
     }
   }
   

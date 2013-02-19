@@ -48,4 +48,14 @@ public abstract class CacheEntryEvent<K,V> extends EventObject
   public abstract K getKey();
   
   public abstract V getValue();
+  
+  public V getOldValue()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public boolean isOldValueAvailable()
+  {
+    return false;
+  }
 }

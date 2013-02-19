@@ -60,6 +60,6 @@ public interface CacheBuilder<K,V> {
   
   public CacheBuilder<K,V> setWriteThrough(boolean writeThrough);
   
-  public CacheBuilder<K,V> setExpiry(CacheConfiguration.ExpiryType type,
-                                     CacheConfiguration.Duration timeToLive);
+  public CacheBuilder<K,V> setExpiry(Configuration.ExpiryType type,
+                                     Configuration.Duration timeToLive);
 }

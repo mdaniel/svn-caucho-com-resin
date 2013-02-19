@@ -44,6 +44,7 @@ import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.cache.MutableConfiguration;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -516,9 +517,11 @@ public class ResinModule
   {
     CacheManager manager = Caching.getCacheManager();
 
-    CacheBuilder builder = manager.createCacheBuilder(name);
+    MutableConfiguration cfg = new MutableConfiguration();
+    
+    Cache cache = manager.configureCache(name, cfg);
 
-    return new QuercusDistcache(builder.build());
+    return new QuercusDistcache(cache);
   }
 
   public static class QuercusDistcache {

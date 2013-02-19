@@ -27,11 +27,38 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.event;
+package javax.cache;
 
+import java.util.Date;
 
-public interface CacheEntryReadListener<K,V> extends CacheEntryListener<K,V>
+import javax.management.MXBean;
+
+@MXBean
+public interface CacheStatisticsMXBean
 {
-  void onRead(Iterable<CacheEntryEvent<? extends K,? extends V>> events)
-    throws CacheEntryListenerException;
+  void clear();
+  
+  Date getStartAccumulationDate();
+  
+  long getCacheHits();
+  
+  float getCacheHitPercentage();
+  
+  long getCacheMisses();
+  
+  float getCacheMissPercentage();
+  
+  long getCacheGets();
+  
+  long getCachePuts();
+  
+  long getCacheRemovals();
+  
+  long getCacheEvictions();
+  
+  float getAverageGetMillis();
+  
+  float getAveragePutMillis();
+  
+  float getAverageRemoveMillis();
 }

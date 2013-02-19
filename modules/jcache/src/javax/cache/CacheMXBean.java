@@ -27,12 +27,14 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.mbeans;
+package javax.cache;
 
-import javax.cache.CacheStatistics;
 import javax.management.MXBean;
 
 @MXBean
-public interface CacheStatisticsMXBean extends CacheStatistics
+public interface CacheMXBean
 {
+  public String getName();
+  
+  public Status getStatus();
 }

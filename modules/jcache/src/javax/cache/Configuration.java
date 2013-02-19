@@ -31,44 +31,52 @@ package javax.cache;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
 /**
  * Configuration for a new Cache.
  */
-public interface CacheConfiguration<K,V>
+public interface Configuration<K,V>
 {
-  public boolean isReadThrough();
+  boolean isReadThrough();
   
-  public boolean isWriteThrough();
+  boolean isWriteThrough();
   
-  public boolean isStoreByValue();
+  boolean isStoreByValue();
   
-  public boolean isStatisticsEnabled();
+  boolean isStatisticsEnabled();
   
-  public void setStatisticsEnabled(boolean isEnabled);
+  boolean isTransactionsEnabled();
   
-  public boolean isTransactionEnabled();
+  IsolationLevel getTransactionIsolationLevel();
   
-  public IsolationLevel getTransactionIsolationLevel();
+  Mode getTransactionMode();
   
-  public Mode getTransactionMode();
+  Iterable<CacheEntryListenerRegistration<? super K, ? super V>>
+  getCacheEntryListenerRegistrations();
   
-  public CacheLoader<K, ? extends V> getCacheLoader();
+  CacheLoader<K, ? extends V> getCacheLoader();
   
-  public CacheWriter<? super K, ? super V> getCacheWriter();
+  CacheWriter<? super K, ? super V> getCacheWriter();
   
-  public Duration getExpiry(ExpiryType type);
+  ExpiryPolicy<? super K, ? super V> getExpiryPolicy();
   
   public static class Duration {
-    public static final Duration ETERNAL = new Duration(TimeUnit.SECONDS, 0);
+    public static final Duration ETERNAL = new Duration();
+    public static final Duration ZERO = new Duration(TimeUnit.SECONDS, 0);
     
     private final TimeUnit timeUnit;
+    private final long durationAmount;
     
-    private final long timeToLive;
+    private Duration()
+    {
+      this.timeUnit = null;
+      this.durationAmount = 0;
+    }
     
-    public Duration(TimeUnit timeUnit, long timeToLive)
+    public Duration(TimeUnit timeUnit, long durationAmount)
     {
       if (timeUnit == null)
         throw new NullPointerException();
@@ -82,10 +90,10 @@ public interface CacheConfiguration<K,V>
         break;
       }
       
-      if (timeToLive < 0)
+      if (durationAmount < 0)
         throw new IllegalArgumentException();
       
-      this.timeToLive = timeToLive;
+      this.durationAmount = durationAmount;
     }
     
     public TimeUnit getTimeUnit()
@@ -95,7 +103,22 @@ public interface CacheConfiguration<K,V>
     
     public long getDurationAmount()
     {
-      return this.timeToLive;
+      return this.durationAmount;
+    }
+    
+    public boolean isEternal()
+    {
+      return this.timeUnit == null && this.durationAmount == 0;
+    }
+    
+    public long getAdjustedTime(long time)
+    {
+      if (isEternal()) {
+        return Long.MAX_VALUE;
+      }
+      else {
+        return time + this.timeUnit.toMillis(this.durationAmount);
+      }
     }
     
     @Override

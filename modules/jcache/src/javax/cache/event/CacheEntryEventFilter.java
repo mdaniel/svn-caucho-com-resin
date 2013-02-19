@@ -27,15 +27,9 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.mbeans;
+package javax.cache.event;
 
-import javax.cache.Status;
-import javax.management.MXBean;
-
-@MXBean
-public interface CacheMXBean extends CacheStatisticsMXBean
+public interface CacheEntryEventFilter<K,V>
 {
-  public String getName();
-  
-  public Status getStatus();
+  boolean evaluate(CacheEntryEvent<? extends K, ? extends V> event);
 }

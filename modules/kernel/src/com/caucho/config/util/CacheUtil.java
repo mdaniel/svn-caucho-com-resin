@@ -36,6 +36,7 @@ import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.cache.MutableConfiguration;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKeyInvocationContext;
 
@@ -43,18 +44,18 @@ import javax.cache.annotation.CacheKeyInvocationContext;
  * Utilities to manage caching.
  */
 public class CacheUtil {
-  public static Cache<?,?> getCache(String name)
+  public static <K,V> Cache<K,V> getCache(String name)
   {
     CacheManager manager = Caching.getCacheManager();
     
     Cache<?,?> cache = manager.getCache(name);
     
     if (cache == null) {
-      CacheBuilder<?, ?> builder = Caching.getCacheManager().createCacheBuilder(name);
+      MutableConfiguration<K,V> cfg = new MutableConfiguration<K,V>();
     
-      cache = builder.build();
+      cache = manager.configureCache(name,  cfg);
     }
     
-    return cache;
+    return (Cache) cache;
   }
 }
