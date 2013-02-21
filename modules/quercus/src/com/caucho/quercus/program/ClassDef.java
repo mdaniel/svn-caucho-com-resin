@@ -212,6 +212,11 @@ abstract public class ClassDef {
     return null;
   }
 
+  public AbstractFunction getCallStatic()
+  {
+    return null;
+  }
+
   public void init()
   {
   }

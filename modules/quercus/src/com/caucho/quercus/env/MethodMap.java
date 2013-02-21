@@ -105,6 +105,16 @@ public final class MethodMap<V>
 
   public final V get(final StringValue key, int hash)
   {
+    return get(key, hash, false);
+  }
+
+  public final V getStatic(final StringValue key, int hash)
+  {
+    return get(key, hash, true);
+  }
+
+  public final V get(final StringValue key, int hash, boolean isStatic)
+  {
     final int bucket = (hash & 0x7fffffff) % _prime;
 
     for (Entry<V> entry = _entries[bucket];
@@ -118,14 +128,26 @@ public final class MethodMap<V>
 
     AbstractFunction call = null;
 
-    if (_quercusClass != null)
-      call = _quercusClass.getCall();
-    else if (_classDef != null) {
-      call = _classDef.getCall();
+    if (isStatic) {
+      if (_quercusClass != null) {
+        call = _quercusClass.getCallStatic();
+      }
+      else if (_classDef != null) {
+        call = _classDef.getCallStatic();
+      }
+    }
+    else {
+      if (_quercusClass != null) {
+        call = _quercusClass.getCall();
+      }
+      else if (_classDef != null) {
+        call = _classDef.getCall();
+      }
     }
 
-    if (call != null)
+    if (call != null) {
       return (V) new FunSpecialCall(call, key);
+    }
 
     Env env = Env.getCurrent();
 

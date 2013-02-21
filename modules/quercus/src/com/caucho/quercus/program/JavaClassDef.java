@@ -119,6 +119,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private ArrayDelegate _arrayDelegate;
 
   private JavaMethod __call;
+  private JavaMethod __callStatic;
+
   private JavaMethod __toString;
 
   private Method _printRImpl;
@@ -628,18 +630,16 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       return NullValue.NULL;
   }
 
-  /**
-   * Returns the __call.
-   */
-  public AbstractFunction getCallMethod()
+  @Override
+  public AbstractFunction getCall()
   {
     return __call;
   }
 
   @Override
-  public AbstractFunction getCall()
+  public AbstractFunction getCallStatic()
   {
-    return __call;
+    return __callStatic;
   }
 
   /**
@@ -783,6 +783,10 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
     if (__call != null)
       cl.setCall(__call);
+
+    if (__callStatic != null) {
+      cl.setCallStatic(__callStatic);
+    }
 
     if (__toString != null) {
       cl.addMethod(_moduleContext.createString("__toString"), __toString);
@@ -1336,6 +1340,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         _entrySet = method;
       } else if ("__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, this, method);
+      } else if ("__callStatic".equals(method.getName())) {
+        __callStatic = new JavaMethod(moduleContext, this, method);
       } else if ("__toString".equals(method.getName())) {
         __toString = new JavaMethod(moduleContext, this, method);
         _functionMap.put(_moduleContext.createString(method.getName()), __toString);
@@ -1630,7 +1636,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         else {
           Value k = _env.wrapJava(key);
 
-          return new JavaEntry(k, (Value) value);
+          return new JavaEntry(k, _env.wrapJava(value));
         }
       }
       else {

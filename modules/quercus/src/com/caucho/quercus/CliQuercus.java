@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class CliQuercus extends Quercus
-{ 
+{
   @Override
   public Env createEnv(QuercusPage page,
                        WriteStream out,
@@ -49,16 +49,17 @@ public class CliQuercus extends Quercus
   {
     return new CliEnv(this, page, out, getArgv());
   }
-  
+
   public static void main(String []args)
     throws IOException
   {
     CliQuercus quercus = new CliQuercus();
-    
+
     quercus.parseArgs(args);
-  
+
+    quercus.init();
     quercus.start();
-    
+
     if (quercus.getFileName() != null) {
       quercus.execute();
     }
@@ -66,7 +67,7 @@ public class CliQuercus extends Quercus
       throw new RuntimeException("input file not specified");
     }
   }
-  
+
   /**
    * Hard-coded to true for CLI according to php.net.
    */

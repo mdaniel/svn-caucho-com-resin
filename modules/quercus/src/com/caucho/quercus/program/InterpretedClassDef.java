@@ -31,6 +31,7 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.FieldVisibility;
+import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
@@ -39,6 +40,8 @@ import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
+import com.caucho.util.L10N;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -51,6 +54,8 @@ import java.util.Set;
 public class InterpretedClassDef extends ClassDef
   implements InstanceInitializer
 {
+  private static final L10N L = new L10N(InterpretedClassDef.class);
+
   protected boolean _isAbstract;
   protected boolean _isInterface;
   protected boolean _isTrait;
@@ -80,6 +85,8 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _isset;
   protected AbstractFunction _unset;
   protected AbstractFunction _call;
+  protected AbstractFunction _callStatic;
+
   protected AbstractFunction _invoke;
   protected AbstractFunction _toString;
 
@@ -257,8 +264,13 @@ public class InterpretedClassDef extends ClassDef
     if (_setField != null)
       cl.setFieldSet(_setField);
 
-    if (_call != null)
+    if (_call != null) {
       cl.setCall(_call);
+    }
+
+    if (_callStatic != null) {
+      cl.setCallStatic(_callStatic);
+    }
 
     if (_invoke != null)
       cl.setInvoke(_invoke);
@@ -343,6 +355,18 @@ public class InterpretedClassDef extends ClassDef
     _constructor = fun;
   }
 
+  @Override
+  public AbstractFunction getCall()
+  {
+    return _call;
+  }
+
+  @Override
+  public AbstractFunction getCallStatic()
+  {
+    return _callStatic;
+  }
+
   /**
    * Adds a function.
    */
@@ -364,6 +388,9 @@ public class InterpretedClassDef extends ClassDef
       _setField = fun;
     else if (name.equalsString("__call"))
       _call = fun;
+    else if (name.equalsString("__callStatic")) {
+      _callStatic = fun;
+    }
     else if (name.equalsString("__invoke"))
       _invoke = fun;
     else if (name.equalsString("__toString"))

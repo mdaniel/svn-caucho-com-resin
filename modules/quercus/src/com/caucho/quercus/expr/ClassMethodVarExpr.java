@@ -139,7 +139,7 @@ public class ClassMethodVarExpr extends AbstractMethodExpr
     Value []args = evalArgs(env, _args);
     int hash = methodName.hashCodeCaseInsensitive();
 
-    return cl.callMethod(env, qThis, methodName, hash, args);
+    return cl.callStaticMethod(env, qThis, methodName, hash, args);
   }
 
   public String toString()

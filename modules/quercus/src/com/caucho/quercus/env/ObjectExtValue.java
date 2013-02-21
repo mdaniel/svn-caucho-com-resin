@@ -107,7 +107,7 @@ public class ObjectExtValue extends ObjectValue
 
   private void init()
   {
-    _fieldMap.clear();
+    _fieldMap = new LinkedHashMap<StringValue,Entry>();
   }
 
   @Override

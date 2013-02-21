@@ -53,6 +53,7 @@ import java.util.logging.Logger;
 /**
  * Represents a Quercus runtime class.
  */
+@SuppressWarnings("serial")
 public class QuercusClass extends NullValue {
   private static final L10N L = new L10N(QuercusClass.class);
   private static final Logger log
@@ -77,6 +78,8 @@ public class QuercusClass extends NullValue {
   private AbstractFunction _fieldSet;
 
   private AbstractFunction _call;
+  private AbstractFunction _callStatic;
+
   private AbstractFunction _invoke;
   private AbstractFunction _toString;
   private AbstractFunction _isset;
@@ -318,6 +321,7 @@ public class QuercusClass extends NullValue {
     _fieldSet = cacheClass._fieldSet;
 
     _call = cacheClass._call;
+    _callStatic = cacheClass._callStatic;
     _invoke = cacheClass._invoke;
     _toString = cacheClass._toString;
 
@@ -588,6 +592,22 @@ public class QuercusClass extends NullValue {
   public AbstractFunction getCall()
   {
     return _call;
+  }
+
+  /**
+   * Sets the _callStatic
+   */
+  public void setCallStatic(AbstractFunction fun)
+  {
+    _callStatic = fun;
+  }
+
+  /**
+   * Gets the _callStatic
+   */
+  public AbstractFunction getCallStatic()
+  {
+    return _callStatic;
   }
 
   /**
@@ -1866,22 +1886,422 @@ public class QuercusClass extends NullValue {
   //
 
   /**
-   * calls the function.
+   * calls the function statically.
    */
-  /*
-  private Value callStaticMethod(Env env,
-                                Value thisValue,
+  public Value callStaticMethod(Env env,
+                                Value qThis,
                                 StringValue methodName,
-                                Expr []args)
+                                Value []args)
   {
-    QuercusClass oldClass = env.setCallingClass(this);
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive(),
+                            args);
+  }
 
-    try {
-      return callMethod(env, thisValue, methodName, args);
-    } finally {
-      env.setCallingClass(oldClass);
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName)
+  {
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive());
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName,
+                                Value a1)
+  {
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive(),
+                            a1);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName,
+                                Value a1, Value a2)
+  {
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive(),
+                            a1, a2);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName,
+                                Value a1, Value a2, Value a3)
+  {
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive(),
+                            a1, a2, a3);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName,
+                                Value a1, Value a2, Value a3, Value a4)
+  {
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive(),
+                            a1, a2, a3, a4);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName,
+                                Value a1, Value a2, Value a3, Value a4,
+                                Value a5)
+  {
+    return callStaticMethod(env, qThis,
+                            methodName, methodName.hashCodeCaseInsensitive(),
+                            a1, a2, a3, a4, a5);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash,
+                                Value []args)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
     }
-  }*/
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis, args);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash,
+                                Value a1)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis, a1);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash,
+                                Value a1, Value a2)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis, a1, a2);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash,
+                                Value a1, Value a2, Value a3)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis, a1, a2, a3);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash,
+                                Value a1, Value a2, Value a3, Value a4)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis, a1, a2, a3, a4);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethod(Env env,
+                                Value qThis,
+                                StringValue methodName, int hash,
+                                Value a1, Value a2, Value a3, Value a4,
+                                Value a5)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethod(env, this, qThis, a1, a2, a3, a4, a5);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName,
+                                   Value []args)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive(),
+                               args);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive());
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName,
+                                   Value a1)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive(),
+                               a1);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName,
+                                   Value a1, Value a2)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive(),
+                               a1, a2);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName,
+                                   Value a1, Value a2, Value a3)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive(),
+                               a1, a2, a3);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName,
+                                   Value a1, Value a2, Value a3, Value a4)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive(),
+                               a1, a2, a3, a4);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName,
+                                   Value a1, Value a2, Value a3, Value a4,
+                                   Value a5)
+  {
+    return callStaticMethodRef(env, qThis,
+                               methodName, methodName.hashCodeCaseInsensitive(),
+                               a1, a2, a3, a4, a5);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash,
+                                   Value []args)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis, args);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash,
+                                   Value a1)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis, a1);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash,
+                                   Value a1, Value a2)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis, a1, a2);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash,
+                                   Value a1, Value a2, Value a3)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis, a1, a2, a3);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash,
+                                   Value a1, Value a2, Value a3, Value a4)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis, a1, a2, a3, a4);
+  }
+
+  /**
+   * calls the function statically.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value qThis,
+                                   StringValue methodName, int hash,
+                                   Value a1, Value a2, Value a3, Value a4,
+                                   Value a5)
+  {
+    if (qThis.isNull()) {
+      qThis = this;
+    }
+
+    AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+
+    return fun.callMethodRef(env, this, qThis, a1, a2, a3, a4, a5);
+  }
 
   /**
    * calls the function.

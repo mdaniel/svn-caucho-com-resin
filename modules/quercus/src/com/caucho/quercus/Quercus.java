@@ -52,8 +52,6 @@ public class Quercus
   public Quercus()
   {
     super();
-
-    init();
   }
 
   //

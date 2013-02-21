@@ -119,7 +119,7 @@ public class ClassMethodExpr extends AbstractMethodExpr {
     try {
       env.checkTimeout();
 
-      return cl.callMethod(env, qThis, _methodName, _hash, values);
+      return cl.callStaticMethod(env, qThis, _methodName, _hash, values);
     } finally {
       env.popCall();
       env.setThis(oldThis);

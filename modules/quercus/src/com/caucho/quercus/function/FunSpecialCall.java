@@ -76,6 +76,20 @@ public class FunSpecialCall extends AbstractFunction {
                             _name, arrayArgs);
   }
 
+  /**
+   * Evaluates the function.
+   */
+  @Override
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value []args)
+  {
+    ArrayValueImpl arrayArgs = new ArrayValueImpl(args);
+
+    return _call.callMethodRef(env, qClass, qThis,
+                               _name, arrayArgs);
+  }
 
   @Override
   public String toString()
