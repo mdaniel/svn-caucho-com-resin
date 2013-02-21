@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,6 +77,8 @@ public class MnodeStore {
   private String _updateAccessTimeQuery;
 
   private String _selectExpireQuery;
+  
+  private String _selectCacheKeysQuery;
 
   private String _countQuery;
   private String _updatesSinceQuery;
@@ -211,6 +214,10 @@ public class MnodeStore {
                           + " AND (access_time + 1.25 * access_timeout < ?"
                           + "      OR modified_time + modified_timeout < ?)"
                           + " LIMIT 4096");
+
+    _selectCacheKeysQuery = ("SELECT resin_oid,id FROM " + _tableName
+                             + " WHERE cache_id=? AND ? < resin_oid"
+                             + " LIMIT 4096");
 
     _deleteQuery = ("DELETE FROM " + _tableName
                     + " WHERE id=?");
@@ -586,6 +593,52 @@ public class MnodeStore {
   }
 
   /**
+   * Returns the maximum update time on startup
+   */
+  private boolean selectCacheKeys(KeysIterator iter,
+                                  HashKey cacheKey,
+                                  long oid)
+  {
+    Connection conn = null;
+    ResultSet rs = null;
+
+    try {
+      conn = _dataSource.getConnection();
+
+      String sql;
+
+      sql = _selectCacheKeysQuery;
+
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setBytes(1, cacheKey.getHash());
+      pstmt.setLong(2, oid);
+
+      rs = pstmt.executeQuery();
+      
+      boolean isValue = false;
+
+      while (rs.next()) {
+        long newOid = rs.getLong(1);
+        byte []keyHash = rs.getBytes(2);
+
+        iter.addKey(newOid, keyHash);
+        
+        isValue = true;
+      }
+
+      return isValue;
+    } catch (SQLException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      JdbcUtil.close(rs);
+      JdbcUtil.close(conn);
+    }
+
+    return false;
+  }
+
+  /**
    * Stores the data, returning true on success
    *
    * @param id the key hash
@@ -799,6 +852,11 @@ public class MnodeStore {
     }
 
     return false;
+  }
+
+  public Iterator<HashKey> getKeys(HashKey cacheKey)
+  {
+    return new KeysIterator(cacheKey);
   }
 
   /**
@@ -1044,6 +1102,64 @@ public class MnodeStore {
       return (getClass().getSimpleName()
           + "[" + Hex.toHex(_key, 0, 4)
           + "," + Long.toHexString(_dataId) + "]");
+    }
+  }
+  
+  class KeysIterator implements Iterator<HashKey> {
+    private HashKey _cacheKey;
+    
+    private long _startOid;
+    private ArrayList<HashKey> _keys = new ArrayList<HashKey>();
+    private boolean _isClosed;
+    
+    KeysIterator(HashKey cacheKey)
+    {
+      _cacheKey = cacheKey;
+    }
+
+    @Override
+    public boolean hasNext()
+    {
+      if (_keys.size() == 0) {
+        loadKeys();
+      }
+      
+      return _keys.size() > 0;
+    }
+
+    @Override
+    public HashKey next()
+    {
+      if (_keys.size() == 0) {
+        loadKeys();
+      }
+      
+      if (_keys.size() == 0) {
+        return null;
+      }
+      
+      return _keys.remove(0);
+    }
+
+    void addKey(long newOid, byte[] keyHash)
+    {
+      _startOid = Math.max(_startOid, newOid);
+      _keys.add(HashKey.create(keyHash));
+    }
+    
+    private void loadKeys()
+    {
+      if (! _isClosed) {
+        if (! selectCacheKeys(this, _cacheKey, _startOid)) {
+          _isClosed = true;
+        }
+      }
+    }
+
+    @Override
+    public void remove()
+    {
+      throw new UnsupportedOperationException(getClass().getName());
     }
   }
 }

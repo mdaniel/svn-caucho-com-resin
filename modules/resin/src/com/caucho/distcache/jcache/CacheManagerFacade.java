@@ -40,9 +40,11 @@ import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.transaction.UserTransaction;
 
+import com.caucho.config.ConfigException;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheImpl;
 import com.caucho.server.distcache.CacheManagerImpl;
+import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.transaction.UserTransactionProxy;
 
 /**
@@ -96,7 +98,13 @@ public class CacheManagerFacade implements CacheManager
   public <K, V> Cache<K, V> configureCache(String cacheName,
                                            Configuration<K, V> configuration)
   {
-    CacheConfig config = new CacheConfig();
+    CacheConfig config = new CacheConfig(configuration);
+    
+    DistCacheSystem cacheService = DistCacheSystem.getCurrent();
+
+    if (cacheService != null) {
+      config.setEngine(cacheService.getDistCacheManager().getCacheEngine());
+    }
     
     CacheImpl<K,V> cache = _manager.createIfAbsent(cacheName, config);
     

@@ -81,6 +81,42 @@ public interface ExpiryPolicy<K,V>
       return getClass().getName() + "[]";
     }
   }
+  
+  public static final class Modified<K,V> implements ExpiryPolicy<K,V>
+  {
+    private final Duration _expiryDuration;
+    
+    public Modified(Duration expiryDuration)
+    {
+      _expiryDuration = expiryDuration;
+    }
+
+    @Override
+    public Duration getTTLForCreatedEntry(Entry<? extends K, ? extends V> entry)
+    {
+      return _expiryDuration;
+    }
+
+    @Override
+    public Duration getTTLForAccessedEntry(Entry<? extends K, ? extends V> entry,
+                                           Duration duration)
+    {
+      return _expiryDuration;
+    }
+
+    @Override
+    public Duration getTTLForModifiedEntry(Entry<? extends K, ? extends V> entry,
+                                           Duration duration)
+    {
+      return duration;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getName() + "[" + _expiryDuration + "]";
+    }
+  }
 
   /**
    * Default expiry is to not expire.

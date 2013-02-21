@@ -10,8 +10,11 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.36 - Snapshot">
+<s2 title="4.0.36 - snapshot">
 <ul>
+<li>jCache: removeAll support</li>
+<li>jCache: isStoreValue=true (#5343)</li>
+<li>jCache: spec changed to use Configuration instead of builders</li>
 <li>apache: mod_caucho fix for failover issue(#5266, rep by Shinomiya Nobuaki)</li>
 <li>iis: isapi_srun.dll fix for failover issue(#5360, rep by Jason Barr)</li>
 </ul>

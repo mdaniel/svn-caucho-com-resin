@@ -915,9 +915,16 @@ public class DistCacheEntry {
       remove();
     }
 
-    mnodeEntry.setObjectValue(value);
+    if (! config.isStoreByValue() || isImmutable(value)) {
+      mnodeEntry.setObjectValue(value);
+    }
 
     return value;
+  }
+  
+  private boolean isImmutable(Object value)
+  {
+    return value instanceof String;
   }
   
   private Object loadValue(CacheConfig config)
@@ -953,7 +960,9 @@ public class DistCacheEntry {
       remove();
     }
 
-    mnodeEntry.setObjectValue(value);
+    if (! config.isStoreByValue() || isImmutable(value)) {
+      mnodeEntry.setObjectValue(value);
+    }
 
     return value;
   }
@@ -1360,10 +1369,16 @@ public class DistCacheEntry {
       else
         leaseOwner = oldLeaseOwner;
         */
+      
+      Object saveValue = null;
+      if (! getConfig().isStoreByValue() || isImmutable(value)) {
+        saveValue = value;
+      }
+
 
       mnodeValue = new MnodeEntry(mnodeUpdate,
                                   valueDataId,
-                                  value,
+                                  saveValue,
                                   accessTime,
                                   updateTime,
                                   true,

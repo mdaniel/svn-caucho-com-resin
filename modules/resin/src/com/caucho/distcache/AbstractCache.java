@@ -95,7 +95,6 @@ public class AbstractCache
 
   public AbstractCache()
   {
-    
     DistCacheSystem cacheService = DistCacheSystem.getCurrent();
 
     if (cacheService == null)

@@ -348,6 +348,13 @@ public final class CacheStoreManager implements CacheEntryFactory
   {
   }
   
+  public Iterator<HashKey> getEntries(HashKey cacheKey)
+  {
+    return _dataBacking.getEntries(cacheKey);
+    
+    // return _cacheEntryManager.getEntries();
+  }
+  
   public Iterator<DistCacheEntry> getEntries()
   {
     return _cacheEntryManager.getEntries();
@@ -355,11 +362,13 @@ public final class CacheStoreManager implements CacheEntryFactory
   
   public void start()
   {
-    if (_dataBacking == null)
+    if (_dataBacking == null) {
       _dataBacking = new CacheDataBackingImpl(this);
+    }
     
-    if (getDataBacking() == null)
+    if (getDataBacking() == null) {
       throw new NullPointerException();
+    }
     
     _dataBacking.start();
     
@@ -381,7 +390,7 @@ public final class CacheStoreManager implements CacheEntryFactory
   /**
    * Called when a cache initializes.
    */
-  public void initCache(CacheImpl cache)
+  public void initCache(CacheImpl<?,?> cache)
   {
     CacheConfig config = cache.getConfig();
     
@@ -395,7 +404,7 @@ public final class CacheStoreManager implements CacheEntryFactory
   /**
    * Called when a cache is removed.
    */
-  public void destroyCache(CacheImpl cache)
+  public void destroyCache(CacheImpl<?,?> cache)
   {
     // clear config?
   }

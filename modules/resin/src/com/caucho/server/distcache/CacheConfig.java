@@ -96,10 +96,25 @@ public class CacheConfig implements Configuration
   private CacheSerializer _valueSerializer;
 
   private CacheEngine _engine = new AbstractCacheEngine();
-  private ExpiryPolicy _expiryPolicy = new ExpiryPolicy.Default();
+  private ExpiryPolicy _expiryPolicy;
   
   public CacheConfig()
   {
+    _expiryPolicy = new ExpiryPolicy.Default();
+  }
+  
+  public CacheConfig(Configuration cfg)
+  {
+    setStoreByValue(cfg.isStoreByValue());
+    _expiryPolicy = cfg.getExpiryPolicy();
+    
+    setWriteThrough(cfg.isWriteThrough());
+    setCacheWriter(cfg.getCacheWriter());
+    
+    setReadThrough(cfg.isReadThrough());
+    setCacheLoader(cfg.getCacheLoader());
+    
+    setStatisticsEnabled(cfg.isStatisticsEnabled());
   }
 
   /**

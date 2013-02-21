@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -106,6 +107,8 @@ public class CacheImpl<K,V>
   private ConcurrentArrayList<RemovedListener<K,V>> _removedListeners;
   
   private LoadQueueWorker<K,V> _loadQueue;
+  
+  private CacheStatisticsImpl _stats;
 
   // private LruCache<Object,DistCacheEntry> _entryCache;
   
@@ -133,6 +136,8 @@ public class CacheImpl<K,V>
     _config = config;
     
     _manager = getManager();
+    
+    _stats = new CacheStatisticsImpl(this);
     
     init(true);
   }
@@ -704,12 +709,12 @@ public class CacheImpl<K,V>
    * @note If a cacheLoader is configured if an item is not found in the cache.
    */
   @Override
-  public Map getAll(Set keys)
+  public Map<K,V> getAll(Set<? extends K> keys)
   {
-    Map result = new HashMap();
+    Map<K,V> result = new TreeMap<K,V>();
 
-    for (Object key : keys) {
-      Object value = get(key);
+    for (K key : keys) {
+      V value = get(key);
 
       if (value != null) {
         result.put(key, value);
@@ -806,23 +811,21 @@ public class CacheImpl<K,V>
   @Override
   public CacheStatistics getStatistics()
   {
-    throw new UnsupportedOperationException(getClass().getName());
-    // return getMBean();
+    return _stats;
   }
 
   /**
    * Puts each item in the map into the cache.
    */
   @Override
-  public void putAll(Map map)
+  public void putAll(Map<? extends K,? extends V> map)
   {
-    if (map == null || map.size() == 0)
+    if (map == null || map.size() == 0) {
       return;
-    Set entries = map.entrySet();
-
-    for (Object item : entries) {
-      Map.Entry entry = (Map.Entry) item;
-      put((K) entry.getKey(), (V) entry.getValue());
+    }
+    
+    for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      put(entry.getKey(), entry.getValue());
     }
   }
 
@@ -931,13 +934,11 @@ public class CacheImpl<K,V>
     return _manager.calculateValueHash(value, _config);
   }
   
-  @SuppressWarnings("unchecked")
   public MnodeStore getMnodeStore()
   {
     return ((CacheStoreManager) _manager).getMnodeStore();
   }
   
-  @SuppressWarnings("unchecked")
   public DataStore getDataStore()
   {
     return ((CacheStoreManager) _manager).getDataStore();
@@ -988,8 +989,9 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    if (entry == null || entry.getMnodeEntry().isValueNull())
+    if (entry == null || entry.getMnodeEntry().isValueNull()) {
       return null;
+    }
     
     return entryProcessor.process(new MutableEntry(entry));
   }
@@ -1041,9 +1043,9 @@ public class CacheImpl<K,V>
   }
 
   @Override
-  public void removeAll(Set keys)
+  public void removeAll(Set<? extends K> keys)
   {
-    for (Object key : keys) {
+    for (K key : keys) {
       remove(key);
     }
   }
@@ -1051,17 +1053,20 @@ public class CacheImpl<K,V>
   @Override
   public void removeAll() throws CacheException
   {
-    for (Object entryObj : this) {
-      Cache.Entry entry = (Cache.Entry) entryObj;
-      
-      remove(entry.getKey());
-    }    
+    Iterator<HashKey> iter = _manager.getEntries(getCacheKey());
+    
+    while (iter.hasNext()) {
+      HashKey key = iter.next();
+
+      DistCacheEntry entry = getDistCacheEntry(key);
+      entry.remove();
+    }
   }
 
   @Override
   public Iterator<Cache.Entry<K, V>> iterator()
   {
-    return new EntryIterator<K,V>(_manager.getEntries(), getCacheKey());
+    return new DistEntryIterator(_manager.getEntries());
   }
 
   @Override
@@ -1167,7 +1172,7 @@ public class CacheImpl<K,V>
   }
 
   @Override
-  public Object unwrap(Class cl)
+  public <T> T unwrap(Class<T> cl)
   {
     return null;
   }
@@ -1202,7 +1207,7 @@ public class CacheImpl<K,V>
     }
   }
   
-  class MutableEntry implements Cache.MutableEntry {
+  class MutableEntry implements Cache.MutableEntry<K,V> {
     private DistCacheEntry _entry;
     
     MutableEntry(DistCacheEntry entry)
@@ -1229,31 +1234,60 @@ public class CacheImpl<K,V>
     }
 
     @Override
-    public Object getKey()
+    public K getKey()
     {
-      return _entry.getKey();
+      return (K) _entry.getKey();
     }
 
     @Override
-    public Object getValue()
+    public V getValue()
     {
-      return _entry.getMnodeEntry().getValue();
+      return (V) _entry.getMnodeEntry().getValue();
     }
   }
   
-  static class EntryIterator<K,V> implements Iterator<Cache.Entry<K,V>> {
-    private Iterator<DistCacheEntry> _storeIterator;
-    private HashKey _cacheKey;
+  class EntryIterator implements Iterator<Cache.Entry<K,V>> {
+    private Iterator<HashKey> _storeIterator;
     
-    private DistCacheEntry _next;
-    
-    EntryIterator(Iterator<DistCacheEntry> storeIterator,
-                  HashKey cacheKey)
+    EntryIterator(Iterator<HashKey> storeIterator)
     {
       _storeIterator = storeIterator;
-      _cacheKey = cacheKey;
+    }
+
+    @Override
+    public boolean hasNext()
+    {
+      return _storeIterator.hasNext();
+    }
+
+    @Override
+    public Entry<K, V> next()
+    {
+      HashKey key = _storeIterator.next();
       
-      findNext();
+      if (key != null) {
+        return new MutableEntry(getDistCacheEntry(key));
+      }
+      else {
+        return null; 
+      }
+    }
+
+    @Override
+    public void remove()
+    {
+    }
+  }
+  
+  class DistEntryIterator implements Iterator<Cache.Entry<K,V>> {
+    private Iterator<DistCacheEntry> _storeIterator;
+    private DistCacheEntry _next;
+    
+    DistEntryIterator(Iterator<DistCacheEntry> storeIterator)
+    {
+      _storeIterator = storeIterator;
+      
+      loadNext();
     }
 
     @Override
@@ -1266,29 +1300,33 @@ public class CacheImpl<K,V>
     public Entry<K, V> next()
     {
       DistCacheEntry entry = _next;
-      
       _next = null;
       
-      findNext();
+      loadNext();
       
-      return new ExtCacheEntryFacade(entry);
+      if (entry != null) {
+        return new MutableEntry(entry);
+      }
+      else {
+        return null; 
+      }
+    }
+    
+    private void loadNext()
+    {
+      while (_storeIterator.hasNext()) {
+        DistCacheEntry entry = _storeIterator.next();
+        
+        if (getCacheKey().equals(entry.getCacheKey())) {
+          _next = entry;
+          return;
+        }
+      }
     }
 
     @Override
     public void remove()
     {
-    }
-    
-    private void findNext()
-    {
-      while (_storeIterator.hasNext()) {
-        DistCacheEntry entry = _storeIterator.next();
-
-        if (_cacheKey.equals(entry.getCacheKey())) {
-          _next = entry;
-          return;
-        }
-      }
     }
   }
   

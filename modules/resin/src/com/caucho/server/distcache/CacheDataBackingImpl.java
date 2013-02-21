@@ -32,6 +32,7 @@ package com.caucho.server.distcache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -341,6 +342,12 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     return _mnodeStore.getUpdates(cacheKey, accessTime, offset);
   }
 
+  public Iterator<HashKey> getEntries(HashKey cacheKey)
+  {
+    return _mnodeStore.getKeys(cacheKey);
+  }
+
+  @Override
   public void start()
   {
     try {

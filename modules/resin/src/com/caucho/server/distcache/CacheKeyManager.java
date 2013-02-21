@@ -208,8 +208,9 @@ public final class CacheKeyManager
     {
       CacheKey key = (CacheKey) o;
       
-      if (! key._key.equals(_key))
+      if (! key._key.equals(_key)) {
         return false;
+      }
       
       return key._guid.equals(_guid);
     }
