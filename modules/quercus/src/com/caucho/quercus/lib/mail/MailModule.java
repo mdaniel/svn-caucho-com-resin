@@ -77,15 +77,15 @@ public class MailModule extends AbstractQuercusModule {
 
       if (to == null || to.equals(""))
         to = headers.get("to");
-      
+
       Properties props = new Properties();
-      
+
       StringValue host = env.getIni("SMTP");
       if (host != null && ! host.toString().equals(""))
         props.put("mail.smtp.host", host.toString());
       else if (System.getProperty("mail.smtp.host") != null)
         props.put("mail.smtp.host", System.getProperty("mail.smtp.host"));
-      
+
       StringValue port = env.getIni("smtp_port");
       if (port != null && ! port.toString().equals(""))
         props.put("mail.smtp.port", port.toString());
@@ -102,7 +102,7 @@ public class MailModule extends AbstractQuercusModule {
 
       if (user == null)
         user = env.getIni("sendmail_from");
-      
+
       if (user != null && ! user.toString().equals("")) {
         String userString = user.toString();
 
@@ -113,13 +113,13 @@ public class MailModule extends AbstractQuercusModule {
       else {
         try {
           InetAddress addr = InetAddress.getLocalHost();
-          
+
           String email = (System.getProperty("user.name")
                          + "@" + addr.getHostName());
-          
-          
+
+
           int index = email.indexOf('@');
-          
+
           // for certain windows smtp servers
           if (email.indexOf('.', index) < 0)
             email += ".com";
@@ -140,15 +140,15 @@ public class MailModule extends AbstractQuercusModule {
       smtp = mailSession.getTransport("smtp");
 
       QuercusMimeMessage msg = new QuercusMimeMessage(mailSession);
-      
+
       if (subject == null)
         subject = "";
-      
+
       msg.setSubject(subject);
       msg.setContent(message.toString(), "text/plain");
 
       ArrayList<Address> addrList = new ArrayList<Address>();
-      
+
       if (to != null && to.length() > 0)
         addRecipients(msg, Message.RecipientType.TO, to, addrList);
 
@@ -173,25 +173,19 @@ public class MailModule extends AbstractQuercusModule {
         smtp.connect();
 
       Address[] addr;
-      
+
       addr = new Address[addrList.size()];
       addrList.toArray(addr);
-      
+
       smtp.sendMessage(msg, addr);
 
       log.fine("quercus-mail: sent mail to " + to);
 
       return true;
-    } catch (RuntimeException e) {
-      log.log(Level.FINER, e.toString(), e);
-
-      throw e;
     } catch (AuthenticationFailedException e) {
-      log.warning(L.l(
-        "Quercus[] mail could not send mail to '{0}' "
-        + "because authentication failed\n{1}",
-        to,
-        e.getMessage()));
+      log.warning(L.l("Quercus[] mail could not send mail to '{0}' because authentication failed\n{1}",
+                      to,
+                      e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
@@ -206,13 +200,13 @@ public class MailModule extends AbstractQuercusModule {
                       cause.getMessage()));
 
       log.log(Level.FINE, cause.toString(), cause);
-      
+
       env.warning(cause.getMessage());
 
       return false;
     } catch (Exception e) {
       Throwable cause = e;
-      
+
       log.warning(L.l("Quercus[] mail could not send mail to '{0}'\n{1}",
                       to,
                       e));
@@ -242,31 +236,31 @@ public class MailModule extends AbstractQuercusModule {
 
     for (int i = 0; i < split.length; i++) {
       String addrStr = split[i];
-      
+
       if (addrStr.length() > 0) {
         int openBracket = addrStr.indexOf('<');
-        
+
         // XXX: javamail may be too strict, so we quote spaces in brackets
         if (openBracket >= 0 && ! addrStr.contains("\"")) {
           int closeBracket = addrStr.indexOf('>', openBracket + 1);
-        
+
           if (closeBracket > openBracket) {
             int space = addrStr.indexOf(' ', openBracket + 1);
-            
+
             if (openBracket < space && space < closeBracket) {
               StringBuilder sb = new StringBuilder();
-              
+
               sb.append(addrStr, 0, openBracket + 1);
               sb.append("\"");
               sb.append(addrStr, openBracket + 1, closeBracket);
               sb.append("\"");
               sb.append(addrStr, closeBracket, addrStr.length());
-              
+
               addrStr = sb.toString();
             }
           }
         }
-        
+
         Address addr = new InternetAddress(addrStr);
 
         addrList.add(addr);
@@ -312,7 +306,7 @@ public class MailModule extends AbstractQuercusModule {
 
     if (headers == null)
       return headerMap;
-    
+
     int i = 0;
     int len = headers.length();
 
@@ -361,13 +355,13 @@ public class MailModule extends AbstractQuercusModule {
       //
 
       for (;
-           i < len 
+           i < len
            && ((ch = headers.charAt(i)) == '\r' || ch == '\n');
            i++) {
         buffer.append((char) ch);
       }
 
-      while (i < len 
+      while (i < len
              && ((ch = headers.charAt(i)) == '\t' || ch == ' ')) {
         for (;
              i < len
@@ -377,7 +371,7 @@ public class MailModule extends AbstractQuercusModule {
         }
 
         for (;
-             i < len 
+             i < len
              && ((ch = headers.charAt(i)) == '\r' || ch == '\n');
              i++) {
           buffer.append((char) ch);
