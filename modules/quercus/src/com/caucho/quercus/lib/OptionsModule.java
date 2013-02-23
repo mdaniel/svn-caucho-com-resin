@@ -29,9 +29,11 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.*;
@@ -107,27 +109,101 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   @UsesSymbolTable(replace = false)
   @Name("assert")
-  public static Value q_assert(Env env, StringValue code)
+  public static Value q_assert(Env env,
+                               @ReadOnly Value value,
+                               @Optional Value message)
   {
-    try {
-      QuercusContext quercus = env.getQuercus();
+    if (! isAssertActive(env)) {
+      return BooleanValue.TRUE;
+    }
 
-      QuercusProgram program = quercus.parseCode(code);
+    boolean result;
 
-      program = program.createExprReturn();
+    if (value.isString()) {
+      long errorReporting = 0;
 
-      Value value = program.execute(env);
-
-      if (value == null || ! value.toBoolean()) {
-        env.warning(L.l("Assertion \"{0}\" failed", code));
-        return NullValue.NULL;
+      if (isAssertQuietEval(env)) {
+        errorReporting = ErrorModule.error_reporting(env, LongValue.ZERO);
       }
 
-      return BooleanValue.TRUE;
+      try {
+        QuercusContext quercus = env.getQuercus();
+        QuercusProgram program = quercus.parseCode(value.toStringValue(env));
 
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
+        program = program.createExprReturn();
+        Value v = program.execute(env);
+
+        result = v != null && v.toBoolean();
+      }
+      catch (IOException e) {
+        env.warning(e);
+
+        result = false;
+      }
+      finally {
+        if (isAssertQuietEval(env)) {
+          ErrorModule.error_reporting(env, LongValue.create(errorReporting));
+        }
+      }
     }
+    else {
+      result = value.toBoolean();
+    }
+
+    if (result) {
+      return BooleanValue.TRUE;
+    }
+    else {
+      if (message.isDefault()) {
+        message = value.toStringValue(env);
+      }
+
+      Value callback = getAssertCallback(env);
+
+      if (! callback.isNull()) {
+        Location location = env.getLocation();
+
+        StringValue fileName = env.createString(location.getFileName());
+        LongValue lineNumber = LongValue.create(location.getLineNumber());
+
+        callback.call(env, fileName, lineNumber, message);
+      }
+
+      if (isAssertWarn(env)) {
+        env.warning(L.l("Assertion '{0}' failed", message));
+      }
+
+      if (isAssertBail(env)) {
+        env.die();
+      }
+
+      return NullValue.NULL;
+    }
+  }
+
+  private static boolean isAssertActive(Env env)
+  {
+    return INI_ASSERT_ACTIVE.getAsBoolean(env);
+  }
+
+  private static boolean isAssertWarn(Env env)
+  {
+    return INI_ASSERT_WARNING.getAsBoolean(env);
+  }
+
+  private static boolean isAssertBail(Env env)
+  {
+    return INI_ASSERT_BAIL.getAsBoolean(env);
+  }
+
+  private static boolean isAssertQuietEval(Env env)
+  {
+    return INI_ASSERT_QUIET_EVAL.getAsBoolean(env);
+  }
+
+  private static Value getAssertCallback(Env env)
+  {
+    return INI_ASSERT_CALLBACK.getValue(env);
   }
 
   /**
