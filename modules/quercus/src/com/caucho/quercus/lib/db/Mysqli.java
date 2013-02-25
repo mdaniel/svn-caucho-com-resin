@@ -33,15 +33,19 @@ import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -54,6 +58,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,6 +71,9 @@ public class Mysqli extends JdbcConnectionResource
   private static final L10N L = new L10N(Mysqli.class);
 
   private static MysqlMetaDataMethod _lastMetaDataMethod;
+
+  private StringValue _charset;
+  private StringValue _collation;
 
   /**
    * mysqli_multi_query populates _resultValues
@@ -205,16 +213,6 @@ public class Mysqli extends JdbcConnectionResource
 
       Connection conn = jConn.getConnection();
 
-      // nam: calling SET NAMES blows up google (2012-03-20)
-      if (! (conn instanceof QuercusConnection)
-          && ! (conn.getClass().getName().startsWith("com.google.cloud.sql"))) {
-        Statement stmt = conn.createStatement();
-
-        // php/1465
-        stmt.executeUpdate("SET NAMES 'latin1'");
-        stmt.close();
-      }
-
       _driver = driver;
 
       return jConn;
@@ -291,15 +289,20 @@ public class Mysqli extends JdbcConnectionResource
       urlBuilder.append("jdbcCompliantTruncation=false");
     }
 
-    // Explicitly indicate that we want iso-8859-1 encoding so
-    // we would know what encoding to use to convert StringValues
-    // to Strings
-    // php/140b
-    if (encoding != null) {
-      char sep = urlBuilder.indexOf("?") < 0 ? '?' : '&';
+    {
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+      // this sends a "SET character_set_results = latin1" query, thereby
+      // telling the server to do all the result set encoding on the server-side
+      // (e.g. the raw wire bytes will be in the character_set_client encoding)
       urlBuilder.append(sep);
-      urlBuilder.append("characterEncoding=");
-      urlBuilder.append(encoding);
+      urlBuilder.append("characterSetResults=ISO8859_1");
+
+      // this sets the encoding that the jdbc driver uses to encode the queries,
+      // ISO8859_1 matches PHP's behavior, whereas the JDBC driver maps latin1
+      // to cp1252 and cp1252 doesn't translate to utf-8 properly in Java
+      urlBuilder.append('&');
+      urlBuilder.append("characterEncoding=ISO8859_1");
     }
 
 /*
@@ -794,10 +797,144 @@ public class Mysqli extends JdbcConnectionResource
                      StringValue sqlV,
                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    String sql = sqlV.toString();
+    String sql = toBinarySafeString(sqlV);
 
     return realQuery(env, sql);
   }
+
+  private static final String toBinarySafeString(StringValue str)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < str.length(); i++) {
+      char ch = str.charAt(i);
+
+      if (ch > 0x7f) {
+        // hack to prevent the JDBC driver from doing any decoding/encoding on this char
+        sb.append('\\');
+      }
+
+      sb.append(ch);
+    }
+
+    return sb.toString();
+  }
+
+  /*
+  private static final String toBinarySafeString2(StringValue str)
+  {
+    int len = str.length();
+    boolean isBinary = false;
+
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
+
+      if (ch > 0x7f) {
+        isBinary = true;
+        break;
+      }
+    }
+
+    if (! isBinary) {
+      return str.toString();
+    }
+
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
+
+      if (ch == '\'' || ch == '"' || ch == '`') {
+        i = appendString(sb, str, len, i + 1, ch);
+      }
+      else {
+        sb.append(ch);
+      }
+    }
+
+    return sb.toString();
+  }
+
+  private static final int appendString(StringBuilder sb, StringValue str,
+                                        int length, int index, char quoteChar)
+  {
+    int start = index;
+    boolean isBinary = false;
+
+    for (; index < length; index++) {
+      char ch = str.charAt(index);
+
+      if (ch > 0x7f) {
+        isBinary = true;
+      }
+      else if (ch == '\\' && index + 1 < length) {
+        char ch2 = str.charAt(index + 1);
+        index++;
+
+        if (ch2 > 0x7f) {
+          isBinary = true;
+        }
+      }
+      else if (ch == quoteChar) {
+        break;
+      }
+    }
+
+    int end = index;
+
+    if (! isBinary) {
+      sb.append(quoteChar);
+      sb.append(str, start, end);
+      sb.append(quoteChar);
+    }
+    else {
+      sb.append("0x");
+
+      for (int i = start; i < end; i++) {
+        char ch = str.charAt(i);
+
+        if (ch == '\\' && i + 1 < end) {
+          char ch2 = str.charAt(i + 1);
+          i++;
+
+          switch (ch2) {
+            case '0':
+              sb.append('0');
+              sb.append('0');
+              break;
+            case 'r':
+              Hex.appendHex(sb, (byte) '\r');
+              break;
+            case 'n':
+              Hex.appendHex(sb, (byte) '\n');
+              break;
+            case '\\':
+              Hex.appendHex(sb, (byte) '\\');
+              break;
+            case 'a':
+              sb.append('1');
+              sb.append('a');
+              break;
+            case '"':
+              Hex.appendHex(sb, (byte) '"');
+              break;
+            case '\'':
+              Hex.appendHex(sb, (byte) '\'');
+              break;
+            default:
+              Hex.appendHex(sb, (byte) '\\');
+              Hex.appendHex(sb, (byte) ch2);
+          }
+        }
+        else {
+          Hex.appendHex(sb, (byte) ch);
+        }
+      }
+    }
+
+    return end;
+  }
+  */
 
   /**
    * Intercept Mysql specific query before sending to JDBC driver
@@ -867,7 +1004,7 @@ public class Mysqli extends JdbcConnectionResource
           break;
 
         case 's': case 'S':
-          if (tok.matchesToken("SET")) {
+          if (false && tok.matchesToken("SET")) {
             // SQL SET statement
 
             String lower = sql.toLowerCase(Locale.ENGLISH);
@@ -1045,6 +1182,105 @@ public class Mysqli extends JdbcConnectionResource
   protected String getDriverName()
   {
     return "mysql";
+  }
+
+  public Value get_charset(Env env)
+  {
+    String collation;
+    String charset;
+
+    if (_charset != null) {
+      charset = _charset.toString();
+    }
+    else {
+      charset = "latin1";
+      _charset = env.createString(charset);
+    }
+
+    if (_collation != null) {
+      collation = _collation.toString();
+    }
+    else {
+      collation = MysqlCharset.getDefaultCollation(charset);
+      _collation = env.createString(collation);
+    }
+
+    int charsetIndex = MysqlCharset.getCollationIndex(collation);
+    int maxBytes = MysqlCharset.getMaxBytes(charset);
+
+    String description = MysqlCharset.getDescription(charset);
+
+    ObjectValue obj = env.createObject();
+
+    obj.putField(env, env.createString("charset"), _charset);
+    obj.putField(env, env.createString("collation"), _collation);
+    obj.putField(env, env.createString("dir"), env.getEmptyString());
+
+    obj.putField(env, env.createString("min_length"), LongValue.ONE);
+    obj.putField(env, env.createString("max_length"), LongValue.create(maxBytes));
+    obj.putField(env, env.createString("number"), LongValue.create(charsetIndex));
+
+    obj.putField(env, env.createString("state"), LongValue.ONE);
+    obj.putField(env, env.createString("comment"), env.createString(description));
+
+    return obj;
+  }
+
+  public boolean set_charset(Env env, StringValue charset)
+  {
+    Connection conn = getConnection(env);
+
+    if (conn == null) {
+      return false;
+    }
+
+    Statement stmt = null;
+
+    try {
+      stmt = conn.createStatement();
+
+      StringBuilder sb = new StringBuilder();
+      sb.append("SET NAMES ");
+      sb.append(charset);
+
+      stmt.executeUpdate(sb.toString());
+      stmt.close();
+
+      _charset = charset;
+
+      stmt = conn.createStatement();
+      stmt.execute("SELECT * FROM information_schema.SESSION_VARIABLES "
+                   + "WHERE VARIABLE_NAME = 'collation_connection'");
+
+      ResultSet rs = stmt.getResultSet();
+
+      if (rs.next()) {
+        String str = rs.getString(2);
+
+        _collation = env.createString(str);
+      }
+      else {
+        _collation = env.getEmptyString();
+
+        env.warning(L.l("unable to retrieve collation_connection variable"));
+      }
+
+      return true;
+    }
+    catch (SQLException e) {
+      env.warning(e);
+
+      return false;
+    }
+    finally {
+      if (stmt != null) {
+        try {
+          stmt.close();
+        }
+        catch (Exception e) {
+        }
+      }
+    }
   }
 
   @Override

@@ -428,6 +428,10 @@ public class Env
 
   private CharBuffer _cb = new CharBuffer();
 
+  private int _lastErrorType = -1;
+  private String _lastErrorMessage = null;
+  private Location _lastErrorLocation = null;
+
   public Env(QuercusContext quercus,
              QuercusPage page,
              WriteStream out,
@@ -6779,10 +6783,18 @@ public class Env
    */
   public Value error(int code, Location location, String loc, String msg)
   {
+    if (location == null || location.isUnknown()) {
+      location = getLocation();
+    }
+
     //System.err.println("Env->error0: " + code + " . " + getErrorMask() + " . " + getLocation() + " . " + location + " . " + loc + " . " + msg);
     //Thread.dumpStack();
 
     int mask = 1 << code;
+
+    _lastErrorType = mask;
+    _lastErrorMessage = msg;
+    _lastErrorLocation = location;
 
     int errorMask = getErrorMask();
 
@@ -6806,9 +6818,6 @@ public class Env
         _errorHandlers[code] = null;
 
         Value fileNameV = NullValue.NULL;
-
-        if (location == null || location.isUnknown())
-          location = getLocation();
 
         String fileName = location.getFileName();
 
@@ -6902,6 +6911,30 @@ public class Env
     }
 
     return NullValue.NULL;
+  }
+
+  public Value getLastError()
+  {
+    if (_lastErrorType < 0) {
+      return NullValue.NULL;
+    }
+
+    ArrayValueImpl array = new ArrayValueImpl();
+
+    array.put(createString("type"), LongValue.create(_lastErrorType));
+    array.put(createString("message"), createString(_lastErrorMessage));
+
+    String file = "";
+    int line = -1;
+    if (_lastErrorLocation != null) {
+      file = _lastErrorLocation.getFileName();
+      line = _lastErrorLocation.getLineNumber();
+    }
+
+    array.put(createString("file"), createString(file));
+    array.put(createString("line"), LongValue.create(line));
+
+    return array;
   }
 
   /**

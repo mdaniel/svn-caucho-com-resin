@@ -104,7 +104,7 @@ public class JdbcStatementResource
     int numColumns = getColumnCount(env);
 
     if (numColumns < 0) {
-      return false;
+      numColumns = size;
     }
 
     for (int i = 0; i < size; i++) {

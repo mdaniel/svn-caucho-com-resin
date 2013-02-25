@@ -490,6 +490,14 @@ public class ErrorModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the last error.
+   */
+  public static Value error_get_last(Env env)
+  {
+    return env.getLastError();
+  }
+
+  /**
    * Send a message to the log.
    */
   public static boolean error_log(Env env,

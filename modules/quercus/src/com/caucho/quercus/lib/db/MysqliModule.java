@@ -1446,6 +1446,26 @@ public class MysqliModule extends AbstractQuercusModule {
     return false;
   }
 
+  public static Value mysqli_get_charset(Env env, @NotNull Mysqli conn)
+  {
+    if (conn == null) {
+      return BooleanValue.FALSE;
+    }
+
+    return conn.get_charset(env);
+  }
+
+  public static boolean mysqli_set_charset(Env env,
+                                           @NotNull Mysqli conn,
+                                           StringValue charset)
+  {
+    if (conn == null) {
+      return false;
+    }
+
+    return conn.set_charset(env, charset);
+  }
+
   // Undocumented
   //
   // mysqli_enable_reads_from_master
@@ -1457,7 +1477,6 @@ public class MysqliModule extends AbstractQuercusModule {
   // mysqli_rpl_query_type
   // mysqli_embedded_server_start
   // mysqli_embedded_server_end
-  // mysqli_get_charset
   // mysqli_master_query
   // mysqli_send_query
   // mysqli_server_end

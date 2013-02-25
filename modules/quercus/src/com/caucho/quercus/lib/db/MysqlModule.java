@@ -1269,7 +1269,26 @@ public class MysqlModule extends AbstractQuercusModule {
   }
 
   //@todo mysql_list_processes()
-  //@todo mysql_set_charset()
+
+  public static Value mysql_get_charset(Env env, @Optional Mysqli conn)
+  {
+    if (conn == null) {
+      conn = getConnection(env);
+    }
+
+    return conn.get_charset(env);
+  }
+
+  public static boolean mysql_set_charset(Env env,
+                                          StringValue charset,
+                                          @Optional Mysqli conn)
+  {
+    if (conn == null) {
+      conn = getConnection(env);
+    }
+
+    return conn.set_charset(env, charset);
+  }
 
   private static Mysqli getConnection(Env env)
   {
