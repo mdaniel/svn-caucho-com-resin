@@ -60,20 +60,6 @@ public class WriteStreamOutput extends OutputStream implements BinaryOutput {
     return _os;
   }
 
-  public void close()
-  {
-    OutputStream os = _os;
-    _os = null;
-
-    if (os != null) {
-      try {
-        os.close();
-      } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-    }
-  }
-
   public Object toJavaObject()
   {
     return this;
@@ -108,9 +94,6 @@ public class WriteStreamOutput extends OutputStream implements BinaryOutput {
     _os.write(ch);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.quercus.lib.file.BinaryOutput#print(java.lang.String)
-   */
   @Override
   public void print(String s) throws IOException
   {
@@ -177,6 +160,36 @@ public class WriteStreamOutput extends OutputStream implements BinaryOutput {
   public Value stat()
   {
     return null;
+  }
+
+  @Override
+  public void flush()
+  {
+    OutputStream os = _os;
+    _os = null;
+
+    if (os != null) {
+      try {
+        os.flush();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+  }
+
+  @Override
+  public void close()
+  {
+    OutputStream os = _os;
+    _os = null;
+
+    if (os != null) {
+      try {
+        os.close();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
   }
   
 

@@ -155,6 +155,12 @@ public class AbstractCache
     _config.setReadThrough(isReadThrough);
   }
   
+  @Configurable
+  public void setReadThroughExpireTimeout(Period timeout)
+  {
+    _config.setReadThroughExpireTimeout(timeout.getPeriod());
+  }
+  
   /**
    * Sets the CacheWrite that the Cache can then use to save
    * cache misses from a reference store (database).

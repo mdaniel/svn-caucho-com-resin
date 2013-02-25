@@ -87,5 +87,10 @@ public class JdbcCacheBacking extends AbstractCacheBacking<Object,Object> {
   {
     _delegate.delete(entry);
   }
-  
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _delegate + "]";
+  }
 }

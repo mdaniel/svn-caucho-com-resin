@@ -28,19 +28,17 @@
 
 package com.caucho.vfs;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
-import com.caucho.vfs.net.NetworkSystem;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+
+import com.caucho.vfs.net.NetworkSystem;
 
 /**
  * Implementation of a TCP stream.  Mostly this just forwards the

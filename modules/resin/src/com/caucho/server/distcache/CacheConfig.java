@@ -84,6 +84,7 @@ public class CacheConfig implements Configuration
 
   private boolean _isReadThrough;
   private CacheLoaderExt _cacheLoader;
+  private long _readThroughExpireTimeout = TIME_INFINITY;
   
   private boolean _isWriteThrough;
   private CacheWriterExt _cacheWriter;
@@ -160,6 +161,16 @@ public class CacheConfig implements Configuration
   public void setReadThrough(boolean isReadThrough)
   {
     _isReadThrough = isReadThrough;
+  }
+
+  public long getReadThroughExpireTimeout()
+  {
+    return _readThroughExpireTimeout;
+  }
+
+  public void setReadThroughExpireTimeout(long timeout)
+  {
+    _readThroughExpireTimeout = timeout;
   }
 
   @Override
