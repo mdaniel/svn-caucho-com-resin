@@ -54,6 +54,12 @@ typedef struct mem_pool_t mem_pool_t;
   
 typedef struct stream_t stream_t;
 
+typedef struct srun_status_t {
+  volatile int is_fail;               /* true if the connect() failed         */
+  volatile time_t last_fail;          /* when the last connect() failed       */
+  volatile time_t last_unavail;       /* when the last 503 was received       */
+} srun_status_t;
+
 typedef struct srun_t {
   int is_valid;
   
@@ -68,9 +74,8 @@ typedef struct srun_t {
   int send_buffer_size;      /* how big the send buffer is           */
   
   void *lock;                /* lock specific to the srun            */
-  
-  int is_fail;               /* true if the connect() failed         */
-  time_t fail_time;          /* when the last connect() failed       */
+
+  srun_status_t *status;
 
   void *ssl;                 /* ssl context                          */
   int (*open) (stream_t *);
@@ -365,6 +370,20 @@ void cse_add_config_server(mem_pool_t *pool, config_t *config,
 
 void cse_log(char *fmt, ...);
 
+int cse_is_srun_failed(srun_t *srun);
+
+int cse_is_srun_recent_fail(srun_t *srun, time_t now);
+
+void cse_fail_srun(srun_t *srun, time_t now);
+
+time_t cse_srun_fail_time(srun_t *srun);
+
+void cse_ok_srun(srun_t *srun);
+
+void cse_srun_unavail(srun_t *srun, time_t now);
+
+int cse_is_srun_unavail(srun_t *srun, time_t now);
+
 int cse_session_from_string(char *source, char *cookie, int *backup_index);
 
 int cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
@@ -402,6 +421,10 @@ void *cse_create_lock(config_t *config);
 void cse_free_lock(config_t *config, void *lock);
 int cse_lock(void *lock);
 void cse_unlock(void *lock);
+
+void cse_proc_lock();
+
+void cse_proc_unlock();
 
 void cse_close_all();
 

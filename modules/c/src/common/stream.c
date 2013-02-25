@@ -35,6 +35,7 @@
 
 #ifdef WIN32
 #include <winsock2.h>
+#define snprintf _snprintf
 #else
 #include <sys/types.h>
 #include <sys/time.h>
@@ -42,6 +43,10 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#ifdef SHM
+#include <sys/mman.h>
+#include <sys/stat.h>
+#endif
 #endif
 
 #ifdef OPENSSL
@@ -65,6 +70,8 @@
 #ifndef ECONNRESET
 #define ECONNRESET EPIPE
 #endif
+
+#define MOD_CAUCHO "/mod_caucho" //shm_open file prefix
 
 /**
  * Opening method for non-ssl.
@@ -463,27 +470,11 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
     return 0;
   }
 
-  srun->fail_time = 0;
+  cse_ok_srun(srun);
 
   if (srun->send_buffer_size == 0) {
     int size;
-    unsigned int len = sizeof(size);
 
-    /*
-#ifdef SO_SNDBUF
-    if (getsockopt(s->socket, SOL_SOCKET, SO_SNDBUF, (char *) &size, &len) >= 0) {
-      size -= 1024;
-
-      if (size < 8192)
-	size = 8192;
-
-      srun->send_buffer_size = size;
-    }
-#else
-    srun->send_buffer_size = 16 * 1024;
-#endif
-    */
-    
     srun->send_buffer_size = 8 * 1024;
     
     LOG(("%s:%d:cse_open(): send buffer size %d\n",
@@ -986,11 +977,28 @@ cse_add_config_srun(config_t *config, srun_t *srun)
   config->srun_capacity = size + 1;
 }
 
+static char *srun_to_a(srun_t *srun)
+{
+  char *s = malloc(snprintf(NULL, 0, "%s_%s_%d", MOD_CAUCHO, srun->hostname, srun->port) + 1);
+  sprintf(s, "%s_%s_%d", MOD_CAUCHO, srun->hostname, srun->port);
+
+  return s;
+}
+
+#ifdef SHM
+static void cse_cleanup_(char *s) {
+  LOG(("%s:%d:cse_cleanup_() %s\n", __FILE__, __LINE__, s));
+
+  shm_unlink(s);
+}
+#endif
+
 static srun_t *
 cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
 {
   struct hostent *hostent;
   srun_t *srun;
+  int srun_status_t_size;
   
   hostent = gethostbyname(hostname);
   if (! hostent || ! hostent->h_addr)
@@ -1011,6 +1019,76 @@ cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
   srun->idle_timeout = IDLE_TIMEOUT;
   srun->fail_recover_timeout = FAIL_RECOVER_TIMEOUT;
   srun->read_timeout = WINDOWS_READ_TIMEOUT;
+
+  srun_status_t_size = sizeof(struct srun_status_t);
+
+#ifdef SHM
+  //
+  char *s = malloc(snprintf(NULL, 0, "%s_%s_%d", MOD_CAUCHO, hostname, port) + 1);
+  sprintf(s, "%s_%s_%d", MOD_CAUCHO, hostname, port);
+
+  cse_proc_lock();
+
+  LOG(("%s:%d:cse_create_srun() %s\n", __FILE__, __LINE__, s));
+
+  int shmfd = shm_open(s, O_RDWR, S_IRWXU | S_IRWXG);
+  if (shmfd > 0) {
+    srun->status = (struct srun_status_t *)
+                   mmap(
+                        NULL,
+                        srun_status_t_size,
+                        PROT_READ | PROT_WRITE, MAP_SHARED,
+                        shmfd,
+                        0
+                       );
+    LOG(("%s:%d:cse_create_srun: mmaped existing shared memory %s %d\n",
+         __FILE__,
+         __LINE__,
+         srun_to_a(srun),
+         errno));
+  } else {
+    shmfd = shm_open(s, O_CREAT | O_RDWR, S_IRWXU | S_IRWXG);
+    LOG(("%s:%d:cse_create_srun: opened new shared memory %s %d\n",
+          __FILE__,
+          __LINE__,
+          srun_to_a(srun),
+          errno));
+
+    srun->status = (struct srun_status_t *)
+                    mmap(
+                         NULL,
+                         srun_status_t_size,
+                         PROT_READ | PROT_WRITE,
+                         MAP_SHARED,
+                         shmfd,
+                         0
+                        );
+    LOG(("%s:%d:cse_create_srun: mmaped new shared memory %s %d\n",
+          __FILE__,
+          __LINE__,
+          srun_to_a(srun),
+          errno));
+    ftruncate(shmfd, srun_status_t_size);
+    LOG(("%s:%d:cse_create_srun: truncated new shared memory %s %d\n",
+         __FILE__,
+         __LINE__,
+         srun_to_a(srun),
+         errno));
+    srun->status->is_fail = 0;
+    srun->status->last_fail = 0;
+    srun->status->last_unavail = 0;
+  }
+
+  apr_pool_cleanup_register(config->web_pool, s, cse_cleanup_, NULL);
+
+  cse_proc_unlock();
+#else
+  srun->status = (struct srun_status_t *) malloc(srun_status_t_size);
+
+  srun->status->is_fail = 0;
+  srun->status->last_fail = 0;
+  srun->status->last_unavail = 0;
+#endif
 
   srun->open = std_open;
   srun->read = std_read;
@@ -1151,6 +1229,93 @@ cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
   return srun;
 }
 
+int cse_is_srun_failed(srun_t *srun)
+{
+  int is_fail = 0;
+
+  is_fail = srun->status->is_fail;
+
+  LOG(("%s:%d:cse_is_srun_failed() %s %s\n",
+       __FILE__,
+       __LINE__,
+       srun_to_a(srun),
+       is_fail?"true":"false"));
+
+  return is_fail;
+}
+
+int cse_is_srun_recent_fail(srun_t *srun, time_t now) {
+  int is_fail = srun->status->is_fail;
+
+  if (is_fail && now < srun->status->last_fail + srun->fail_recover_timeout)
+     is_fail = 1;
+  else
+    is_fail = 0;
+
+  LOG(("%s:%d:cse_is_srun_recent_fail() %s %s\n",
+       __FILE__,
+       __LINE__,
+       srun_to_a(srun),
+       is_fail?"true":"false"));
+
+  return is_fail;
+}
+
+void cse_fail_srun(srun_t *srun, time_t time)
+{
+  srun->status->is_fail = 1;
+  srun->status->last_fail = time;
+
+  LOG(("%s:%d:cse_fail_srun() %s %s\n",
+       __FILE__,
+       __LINE__,
+       srun_to_a(srun),
+       srun->status->is_fail?"true":"false"));
+}
+
+void cse_ok_srun(srun_t *srun)
+{
+  srun->status->last_fail = 0;
+  srun->status->is_fail = 0;
+
+  LOG(("%s:%d:cse_ok_srun() %s+\n", __FILE__, __LINE__, srun_to_a(srun)));
+}
+
+time_t cse_srun_fail_time(srun_t *srun)
+{
+  time_t fail_time = srun->status->last_fail;
+
+  LOG(("%s:%d:cse_srun_fail_time() %s %d\n",
+       __FILE__,
+       __LINE__,
+       srun_to_a(srun),
+       fail_time));
+
+  return 0;
+}
+
+void cse_srun_unavail(srun_t *srun, time_t time) {
+	
+  LOG(("%s:%d:cse_srun_unavail() %s %d\n",
+      __FILE__,
+      __LINE__,
+      srun_to_a(srun),
+      srun->status->last_unavail));
+
+  srun->status->last_unavail = time;
+}
+
+int cse_is_srun_unavail(srun_t *srun, time_t now) {
+  int is_unavail = 0;
+
+  if (now < srun->status->last_unavail + srun->fail_recover_timeout)
+    is_unavail = 1;
+
+  LOG(("%s:%d:cse_is_srun_unavail() %s %s\n", __FILE__, __LINE__, srun_to_a(srun), is_unavail?"true":"false"));
+
+  return is_unavail;
+}
+
 /**
  * initialize the stream from an idle socket
  */
@@ -1175,8 +1340,8 @@ cse_init_from_idle(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
   s->cluster_srun = srun;
   s->sent_data = 0;
   
-  srun->srun->is_fail = 0;
-  
+  cse_ok_srun(srun->srun);
+
   LOG(("%s:%d:cse_init_from_idle(): reopen %d\n",
        __FILE__, __LINE__, s->socket));
 }
@@ -1243,6 +1408,9 @@ cse_alloc_idle_socket(stream_t *s, cluster_t *cluster,
 {
   srun_t *srun = cluster_srun->srun;
   int is_alloc = 0;
+
+  if (cse_is_srun_unavail(srun, now))
+    return 0;
   
   if (! srun)
     return 0;
@@ -1416,19 +1584,6 @@ select_host(cluster_t *cluster, time_t now)
   /* #5116 */
   round_robin = rand();
 
-  /*
-  round_robin = (cluster->round_robin_index + 1) % size;
-
-  for (i = 0; i < size; i++) {
-    cluster_srun_t *cluster_srun = &cluster->srun_list[round_robin];
-
-    if (! cluster_srun->is_backup)
-      break;
-
-    round_robin = (round_robin + 1) % size;
-  }
-  */
-  
   cluster->round_robin_index = round_robin;
 
   /* if round-robin server is failing, choose one randomly */
@@ -1438,7 +1593,7 @@ select_host(cluster_t *cluster, time_t now)
     cluster_srun = &cluster->srun_list[round_robin];
     srun = cluster_srun->srun;
 
-    if (! cluster_srun->is_backup && ! srun->is_fail) {
+    if (! cluster_srun->is_backup && ! cse_is_srun_failed(srun)) {
       break;
     }
   }
@@ -1459,8 +1614,10 @@ select_host(cluster_t *cluster, time_t now)
     
     if (cluster_srun->is_backup)
       cost += 10000;
-    
-    if (srun->is_fail && now < srun->fail_time + srun->fail_recover_timeout)
+
+    if (cse_is_srun_unavail(srun, now))
+      continue;
+    else if (cse_is_srun_recent_fail(srun, now))
       continue;
     else if (cost < best_cost) {
       best_srun = index;
@@ -1483,6 +1640,8 @@ open_connection_group(stream_t *s, cluster_t *cluster,
   cluster_srun_t *cluster_srun = 0;
   srun_t *srun;
 
+  int result = 0;
+
   if (offset < 0)
     cluster_srun = owner_item;
   else
@@ -1490,25 +1649,24 @@ open_connection_group(stream_t *s, cluster_t *cluster,
   
   srun = cluster_srun->srun;
 
-  if (! srun)
-    return 0;
-
-  if (cse_alloc_idle_socket(s, cluster, cluster_srun, now, web_pool)) {
-    return 1;
+  if (! srun) {
+  } else if (cse_is_srun_unavail(srun, now)) {
   }
-  else if (ignore_dead &&
-           srun->is_fail && now < srun->fail_time + srun->fail_recover_timeout) {
+  else if (cse_alloc_idle_socket(s, cluster, cluster_srun, now, web_pool)) {
+    result = 1;
+  }
+  else if (ignore_dead && cse_is_srun_recent_fail(srun, now)) {
   }
   else if (cse_open(s, cluster, cluster_srun, web_pool, 0)) {
-    srun->is_fail = 0;
-    return 1;
+    //srun->is_fail = 0;
+    cse_ok_srun(srun);
+    result = 1;
   }
   else {
-    srun->is_fail = 1;
-    srun->fail_time = now;
+    cse_fail_srun(srun, now);
   }
 
-  return 0;
+  return result;
 }
 
 static int
@@ -1520,6 +1678,7 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
   int size = cluster->srun_size;
   int backup = rand() & 0x0fffffff;
 
+  int result = 0;
   /*
    * Okay, the primaries failed.  So try the secondaries.
    */
@@ -1528,38 +1687,36 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
     cluster_srun_t *cluster_srun = cluster->srun_list + index;
     srun_t *srun = cluster_srun->srun;
 
-    /*
-    if (index == host && size > 1) {
-      continue;
-    }
-    else
-    */
     if (! srun) {
+      continue;
+    } else if (cse_is_srun_unavail(srun, now) && size > 1) {
       continue;
     }
     else if (cse_alloc_idle_socket(s, cluster, cluster_srun, now, web_pool)) {
-      srun->is_fail = 0;
-      return 1;
+      cse_ok_srun(srun);
+      result = 1;
     }
     else if (ignore_dead && cluster_srun->is_backup) {
       continue;
     }
-    else if (ignore_dead && srun->is_fail
-	     && now < srun->fail_time + srun->fail_recover_timeout) {
+    else if (ignore_dead && cse_is_srun_recent_fail(srun, now)) {
       continue;
     }
     else if (cse_open(s, cluster, cluster_srun, web_pool, 0)) {
-      srun->is_fail = 0;
-      return 1;
+      cse_ok_srun(srun);
+      result = 1;
     }
     else {
-      srun->is_fail = 1;
-      srun->fail_time = now;
+      cse_fail_srun(srun, now);
+
       continue;
     }
+
+    if (result > 0)
+      break;
   }
 
-  return 0;
+  return result;
 }
 
 static int
@@ -1571,6 +1728,7 @@ open_session_host(stream_t *s, cluster_t *cluster,
   int size = cluster->srun_size;
   cluster_srun_t *owner = 0;
   cluster_srun_t *backup = 0;
+  int result = 0;
 
   if (size > 0) {
     session_index = session_index % size;
@@ -1591,16 +1749,16 @@ open_session_host(stream_t *s, cluster_t *cluster,
   /* try to open a connection to the session owner */
   if (owner
       && open_connection_group(s, cluster, owner, -1, now, web_pool, 1)) {
-        return 1;
+        result = 1;
   }
   /* or the backup */
   else if (backup
 	   && open_connection_group(s, cluster, backup, -1,
 				    now, web_pool, 1)) {
-    return 1;
+    result = 1;
   }
-  else
-    return 0;
+
+  return result;
 }
 
 static int

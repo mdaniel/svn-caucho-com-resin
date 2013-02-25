@@ -1188,7 +1188,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
 void
 cse_init_config(config_t *config)
 {
-  LOG(("%s:%d:cse_init_config(): initializing\n", __FILE__, __LINE__));
+  LOG(("%s:%d:cse_init_config(): initializing %p\n", __FILE__, __LINE__, config));
 
   if (! config->p)
     config->p = cse_create_pool(config);

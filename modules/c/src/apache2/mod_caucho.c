@@ -62,6 +62,7 @@ static APR_OPTIONAL_FN_TYPE(ssl_var_lookup) *g_ssl_lookup = NULL;
 
 /* lock for allocating the lock itself */
 static apr_thread_mutex_t *g_lock_lock;
+static apr_proc_mutex_t *g_proc_lock;
 
 /*
  * Apache magic module declaration.
@@ -164,6 +165,14 @@ cse_unlock(void *vlock)
 
   if (lock)
     apr_thread_mutex_unlock(lock);
+}
+
+cse_proc_lock() {
+  apr_proc_mutex_lock(g_proc_lock);
+}
+
+cse_proc_unlock() {
+  apr_proc_mutex_unlock(g_proc_lock);
 }
 
 void
@@ -978,6 +987,9 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
     return HTTP_SERVICE_UNAVAILABLE;
   }
   else if (r->status == HTTP_SERVICE_UNAVAILABLE) {
+    cse_close(&s, "close from 503");
+    cse_srun_unavail(srun, now);
+
     return HTTP_SERVICE_UNAVAILABLE;
   }
   else {
@@ -1370,6 +1382,17 @@ static command_rec caucho_commands[] = {
 };
 
 static int
+prefork_pre_config(apr_pool_t *p, apr_pool_t *plog,
+		    apr_pool_t *dummy, server_rec *ptemp)
+{
+  apr_proc_mutex_create(&g_proc_lock, "/mod_caucho", APR_LOCK_DEFAULT, p);
+
+  LOG(("%s:%d:prefork_pre_config() %p\n", __FILE__, __LINE__, g_proc_lock));
+
+  return OK;
+}
+
+static int
 prefork_post_config(apr_pool_t *p, apr_pool_t *plog,
 		    apr_pool_t *dummy, server_rec *ptemp)
 {
@@ -1386,8 +1409,9 @@ prefork_post_config(apr_pool_t *p, apr_pool_t *plog,
 
 static void caucho_register_hooks(apr_pool_t *p)
 {
+  ap_hook_pre_config(prefork_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
   ap_hook_post_config(prefork_post_config, NULL, NULL, APR_HOOK_MIDDLE);
-  
+
   ap_hook_handler(cse_dispatch, NULL, NULL, APR_HOOK_FIRST);
 }
 
