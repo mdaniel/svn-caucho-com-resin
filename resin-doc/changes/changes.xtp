@@ -12,6 +12,7 @@
 
 <s2 title="4.0.36 - snapshot">
 <ul>
+<li>session: jdbc session support for isolated server instances (#5374, rep by Keith Paulson)</li>
 <li>jCache: removeAll support</li>
 <li>jCache: isStoreValue=true (#5343)</li>
 <li>jCache: spec changed to use Configuration instead of builders</li>
