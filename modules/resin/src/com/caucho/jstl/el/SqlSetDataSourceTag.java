@@ -220,5 +220,10 @@ public class SqlSetDataSourceTag extends TagSupport {
         public boolean isWrapperFor(Class<?> iface) throws SQLException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+        
+        public Logger getParentLogger()
+        {
+          return null;
+        }
   }
 }

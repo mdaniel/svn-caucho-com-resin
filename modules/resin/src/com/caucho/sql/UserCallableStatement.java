@@ -2254,4 +2254,14 @@ public class UserCallableStatement extends UserPreparedStatement
     else
       return _cstmt.isWrapperFor(iface);
   }
+  
+  public <T> T getObject(int arg0, Class<T> arg1) throws SQLException
+  {
+    return null;
+  }
+
+  public <T> T getObject(String arg0, Class<T> arg1)
+  {
+    return null;
+  }
 }

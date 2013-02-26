@@ -33,6 +33,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public final class ConnectionPoolDataSourceWrapper
   implements ConnectionPoolDataSource
@@ -86,6 +87,11 @@ public final class ConnectionPoolDataSourceWrapper
     throws SQLException
   {
     return _dataSource.getLoginTimeout();
+  }
+  
+  public Logger getParentLogger()
+  {
+    return null;
   }
 
   public String toString()

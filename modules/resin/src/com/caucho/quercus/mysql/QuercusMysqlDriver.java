@@ -31,6 +31,7 @@ package com.caucho.quercus.mysql;
 
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 import com.caucho.util.*;
 
@@ -97,6 +98,11 @@ public class QuercusMysqlDriver implements Driver
   public boolean jdbcCompliant()
   {
     return false;
+  }
+  
+  public Logger getParentLogger()
+  {
+    return null;
   }
 
   private void parseUrl(String url)

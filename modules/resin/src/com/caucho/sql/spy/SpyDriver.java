@@ -188,6 +188,11 @@ public class SpyDriver implements java.sql.Driver {
 
     return result;
   }
+  
+  public Logger getParentLogger()
+  {
+    return null;
+  }
 
   @Override
   public String toString()

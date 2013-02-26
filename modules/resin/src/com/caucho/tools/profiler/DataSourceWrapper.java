@@ -35,6 +35,7 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public final class DataSourceWrapper
   implements DataSource
@@ -130,5 +131,10 @@ public final class DataSourceWrapper
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public Logger getParentLogger()
+    {
+      return null;
     }
 }

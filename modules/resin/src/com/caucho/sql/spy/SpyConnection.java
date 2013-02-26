@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.logging.*;
 
 /**
@@ -1029,6 +1030,28 @@ public class SpyConnection implements java.sql.Connection {
 
       throw e;
     }
+  }
+
+  public void abort(Executor arg0) throws SQLException
+  {
+  }
+
+  public int getNetworkTimeout() throws SQLException
+  {
+    return 0;
+  }
+
+  public String getSchema() throws SQLException
+  {
+    return null;
+  }
+
+  public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException
+  {
+  }
+
+  public void setSchema(String arg0) throws SQLException
+  {
   }
   
   protected long start()

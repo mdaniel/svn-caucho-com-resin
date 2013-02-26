@@ -36,6 +36,7 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -150,6 +151,11 @@ public class SpyXADataSource implements XADataSource {
     _dataSource.setLogWriter(log);
   }
   
+  public Logger getParentLogger() throws SQLFeatureNotSupportedException
+  {
+    return null;
+  }
+
   protected long start()
   {
     return CurrentTime.getExactTime();

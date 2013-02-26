@@ -151,6 +151,11 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
     _dataSource.setLogWriter(log);
   }
   
+  public Logger getParentLogger()
+  {
+    return null;
+  }
+
   protected long start()
   {
     return CurrentTime.getExactTime();

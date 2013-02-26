@@ -30,15 +30,16 @@
  package com.caucho.quercus.mysql;
 
 import com.caucho.quercus.lib.db.QuercusConnection;
- import com.caucho.util.*;
- import com.caucho.vfs.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
  import java.io.*;
- import java.net.*;
- import java.sql.*;
- import java.util.*;
- import java.util.logging.*;
- import javax.sql.*;
+import java.net.*;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.logging.*;
+import javax.sql.*;
 
  /**
   * Special Quercus Mysql connection.
@@ -836,6 +837,28 @@ public class MysqlConnectionImpl implements QuercusConnection {
     throws SQLException
   {
     return false;
+  }
+
+  public void abort(Executor arg0) throws SQLException
+  {
+  }
+
+  public int getNetworkTimeout() throws SQLException
+  {
+    return 0;
+  }
+
+  public String getSchema() throws SQLException
+  {
+    return null;
+  }
+
+  public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException
+  {
+  }
+
+  public void setSchema(String arg0) throws SQLException
+  {
   }
 
   public String toString()

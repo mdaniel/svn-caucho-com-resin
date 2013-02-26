@@ -342,7 +342,7 @@ public class XmlStandardPlugin implements Extension {
   private boolean isStarted(ArrayList<Bean<?>> runningBeans, DependsOn depends)
   {
     for (String dep : depends.value()) {
-      if (!isStarted(runningBeans, dep))
+      if (! isStarted(runningBeans, dep))
         return false;
     }
 

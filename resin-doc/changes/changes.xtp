@@ -12,6 +12,8 @@
 
 <s2 title="4.0.36 - snapshot">
 <ul>
+<li>jdbc: added jdbc 7 stub methods for compilation (#5370)</li>
+<li>cdi: add NoClassDefError catches for optional classes (#5371)</li>
 <li>session: jdbc session support for isolated server instances (#5374, rep by Keith Paulson)</li>
 <li>jCache: removeAll support</li>
 <li>jCache: isStoreValue=true (#5343)</li>

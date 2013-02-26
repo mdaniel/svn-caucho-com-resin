@@ -48,6 +48,7 @@ import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -509,6 +510,28 @@ public class ConnectionImpl implements java.sql.Connection {
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void abort(Executor arg0) throws SQLException
+    {
+    }
+
+    public int getNetworkTimeout() throws SQLException
+    {
+      return 0;
+    }
+
+    public String getSchema() throws SQLException
+    {
+      return null;
+    }
+
+    public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException
+    {
+    }
+
+    public void setSchema(String arg0) throws SQLException
+    {
     }
 
   @Override

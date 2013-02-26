@@ -36,6 +36,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1203,6 +1204,28 @@ public class UserConnection implements java.sql.Connection {
       
       throw e;
     }
+  }
+
+  public void abort(Executor arg0) throws SQLException
+  {
+  }
+
+  public int getNetworkTimeout() throws SQLException
+  {
+    return 0;
+  }
+
+  public String getSchema() throws SQLException
+  {
+    return null;
+  }
+
+  public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException
+  {
+  }
+
+  public void setSchema(String arg0) throws SQLException
+  {
   }
 
   /**

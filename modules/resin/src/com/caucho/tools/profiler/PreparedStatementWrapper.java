@@ -1112,4 +1112,13 @@ public class PreparedStatementWrapper
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void closeOnCompletion() throws SQLException
+    {
+    }
+
+    public boolean isCloseOnCompletion() throws SQLException
+    {
+      return false;
+    }
 }

@@ -174,6 +174,11 @@ public class UserDataSource implements DataSource {
     else
       return false;
   }
+  
+  public Logger getParentLogger()
+  {
+    return null;
+  }
 
   @Override
   public String toString()

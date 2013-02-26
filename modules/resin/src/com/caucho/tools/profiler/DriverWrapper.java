@@ -34,6 +34,7 @@ import java.sql.Driver;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class DriverWrapper
   implements Driver
@@ -83,6 +84,11 @@ public class DriverWrapper
   public boolean jdbcCompliant()
   {
     return _driver.jdbcCompliant();
+  }
+  
+  public Logger getParentLogger()
+  {
+    return null;
   }
 
   public String toString()

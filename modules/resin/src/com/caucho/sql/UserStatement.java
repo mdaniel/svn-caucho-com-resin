@@ -931,7 +931,16 @@ public class UserStatement implements Statement {
     else
       return _stmt.isWrapperFor(iface);
   }
-  
+
+  public void closeOnCompletion() throws SQLException
+  {
+  }
+
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    return false;
+  }
+
   protected void onSqlException(SQLException e)
   {
     setPoolable(false);

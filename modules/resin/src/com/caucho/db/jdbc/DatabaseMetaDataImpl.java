@@ -1264,4 +1264,15 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    public boolean generatedKeyAlwaysReturned() throws SQLException
+    {
+      return false;
+    }
+
+    public ResultSet getPseudoColumns(String arg0, String arg1, String arg2,
+                                      String arg3) throws SQLException
+    {
+      return null;
+    }
 }

@@ -409,6 +409,15 @@ public class StatementImpl implements java.sql.Statement {
   {
     throw new UnsupportedOperationException("Not supported yet.");
   }
+
+  public void closeOnCompletion() throws SQLException
+  {
+  }
+
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    return false;
+  }
   
   @Override
   public String toString()

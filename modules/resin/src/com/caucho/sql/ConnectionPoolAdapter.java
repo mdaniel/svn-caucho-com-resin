@@ -32,6 +32,7 @@ package com.caucho.sql;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
@@ -94,6 +95,11 @@ public class ConnectionPoolAdapter implements ConnectionPoolDataSource {
     
     return new PooledConnectionAdapter(conn);
   }
+  
+  public Logger getParentLogger()
+  {
+    return null;
+  }
 
   static class PooledConnectionAdapter implements PooledConnection {
     private Connection _conn;
@@ -138,6 +144,11 @@ public class ConnectionPoolAdapter implements ConnectionPoolDataSource {
         conn.close();
     }
     
+    public Logger getParentLogger()
+    {
+      return null;
+    }
+
     @Override
     public String toString()
     {

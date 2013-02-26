@@ -931,6 +931,11 @@ public class DBPool
       return false;
     else return _dataSource.isWrapperFor(iface);
   }
+  
+  public Logger getParentLogger()
+  {
+    return null;
+  }
 
   /**
    * For serialization, return the handle

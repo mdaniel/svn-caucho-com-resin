@@ -412,6 +412,15 @@ public class MysqlStatementImpl implements java.sql.Statement {
   {
   }
 
+  public void closeOnCompletion() throws SQLException
+  {
+  }
+
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    return false;
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _conn + "]";

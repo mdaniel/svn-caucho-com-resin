@@ -159,6 +159,11 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
       
     return new PooledConnectionImpl(_database);
   }
+  
+  public Logger getParentLogger()
+  {
+    return null;
+  }
 
   public String toString()
   {

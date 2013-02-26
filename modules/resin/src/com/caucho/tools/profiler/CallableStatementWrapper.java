@@ -2274,4 +2274,23 @@ public class CallableStatementWrapper
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    public <T> T getObject(int arg0, Class<T> arg1) throws SQLException
+    {
+      return null;
+    }
+
+    public <T> T getObject(String arg0, Class<T> arg1)
+    {
+      return null;
+    }
+
+    public void closeOnCompletion() throws SQLException
+    {
+    }
+
+    public boolean isCloseOnCompletion() throws SQLException
+    {
+      return false;
+    }
 }

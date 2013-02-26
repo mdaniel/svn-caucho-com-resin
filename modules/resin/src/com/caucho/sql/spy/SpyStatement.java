@@ -961,6 +961,15 @@ public class SpyStatement implements java.sql.Statement {
     }
   }
 
+  public void closeOnCompletion() throws SQLException
+  {
+  }
+
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    return false;
+  }
+
   @Override
   public String toString()
   {

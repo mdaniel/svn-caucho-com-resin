@@ -234,6 +234,17 @@ public class MysqlResultImpl extends AbstractResultSet
     _resultData.readAll(columnOffset, buffer, offset, columnLength);
   }
 
+  public <T> T getObject(int columnIndex, Class<T> type) throws SQLException
+  {
+    return null;
+  }
+
+  public <T> T getObject(String columnLabel, Class<T> type)
+      throws SQLException
+  {
+    return null;
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[]";

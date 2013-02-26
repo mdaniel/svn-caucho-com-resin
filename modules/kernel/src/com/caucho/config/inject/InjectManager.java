@@ -493,6 +493,8 @@ public final class InjectManager
       addContext(context);
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
+    } catch (NoClassDefFoundError e) {
+      log.log(Level.FINER, e.toString(), e);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -3309,6 +3311,8 @@ public final class InjectManager
 
       return createAnnotatedType(cl);
     } catch (ClassNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (NoClassDefFoundError e) {
       log.log(Level.FINER, e.toString(), e);
     }
     

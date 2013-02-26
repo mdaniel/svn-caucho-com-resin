@@ -33,6 +33,8 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 public final class XADataSourceWrapper
   implements XADataSource
@@ -87,6 +89,11 @@ public final class XADataSourceWrapper
   {
     return _dataSource.getLoginTimeout();
 
+  }
+  
+  public Logger getParentLogger() throws SQLFeatureNotSupportedException
+  {
+    return null;
   }
 
   public String toString()

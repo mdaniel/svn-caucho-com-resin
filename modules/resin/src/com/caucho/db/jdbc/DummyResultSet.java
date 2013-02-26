@@ -410,4 +410,14 @@ class DummyResultSet extends AbstractResultSet {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException
+    {
+      return null;
+    }
+
+    public <T> T getObject(String columnLabel, Class<T> type)
+        throws SQLException
+    {
+      return null;
+    }
 }
