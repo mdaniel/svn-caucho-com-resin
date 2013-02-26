@@ -608,13 +608,14 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 		case HMUX_STATUS:
 			read_len = hmux_read_len(s);
             cse_read_limit(s, status, sizeof(status), read_len);
-
+            
 			if (status[0] != '2') {
 				http11 = 0;
 				*p_http11 = 0;
 			}
 
 			status_ptr = status + read_len;
+
 			break;
 
 		case HMUX_META_HEADER:
@@ -670,7 +671,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 			{
 				HSE_SEND_HEADER_EX_INFO info;
 				unsigned long info_size = sizeof(info);
-				int statusCode = atoi(status_ptr);
+				int statusCode = atoi(status);
 
 				memset(&info, 0, sizeof(info));
 				info.cchStatus = status_ptr - status;
@@ -867,6 +868,11 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 	cse_lock(srun->lock);
 	srun->active_sockets--;
 	cse_unlock(srun->lock);
+
+	if (r->dwHttpStatusCode == 503) {
+		cse_srun_unavail(srun, now);
+		cse_close(s, "close from 503");
+	}
 
 	return code == HMUX_QUIT || code == HMUX_EXIT;
 }

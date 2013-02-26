@@ -41,7 +41,6 @@
 #include <httpfilt.h>
 #include <tchar.h>
 #include "isapi_srun.h"
-#include "../httpd/common.h"
 #include "iis.h"
 extern "C" {
 #include "../common/cse.h"
