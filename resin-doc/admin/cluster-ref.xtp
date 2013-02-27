@@ -40,8 +40,10 @@ and reliability.</p>
 <include-defun name="server"/> 
 <include-defun name="server-default"/> 
 <include-defun name="server-header"/> 
-<include-defun name="session-cookie"/> 
-<include-defun name="session-sticky-disable"/> 
+<include-defun name="session-cookie"/>
+<!--
+<include-defun name="session-sticky-disable"/>
+-->
 <include-defun name="session-url-prefix"/> 
 <include-defun name="ssl-session-cookie"/> 
 <include-defun name="url-character-encoding"/> 

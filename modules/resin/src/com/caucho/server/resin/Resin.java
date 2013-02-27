@@ -213,8 +213,9 @@ public class Resin
 
     String displayServerId = args.getServerId();
     
-    if (displayServerId == null || displayServerId.equals(""))
+    if (displayServerId == null || displayServerId.equals("")) {
       displayServerId = "default";
+    }
     
     String serverId;
 

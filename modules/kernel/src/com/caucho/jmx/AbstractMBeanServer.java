@@ -450,15 +450,6 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     for (; cl != null; cl = cl.getSuperclass()) {
       Class<?> []interfaces = cl.getInterfaces();
 
-      String mbeanName = cl.getName() + "MBean";
-      String mxbeanName = cl.getName() + "MXBean";
-
-      int p = mbeanName.lastIndexOf('.');
-      mbeanName = mbeanName.substring(p);
-
-      p = mxbeanName.lastIndexOf('.');
-      mxbeanName = mxbeanName.substring(p);
-
       for (int i = 0; i < interfaces.length; i++) {
         Class<?> ifc = interfaces[i];
 
@@ -473,8 +464,8 @@ abstract public class AbstractMBeanServer implements MBeanServer {
           }
         }
         
-        if (ifc.getName().endsWith(mbeanName)
-            || ifc.getName().endsWith(mxbeanName)) {
+        if (ifc.getName().endsWith("MBean")
+            || ifc.getName().endsWith("MXBean")) {
           return ifc;
         }
         

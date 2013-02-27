@@ -1005,11 +1005,13 @@ matching the -server on the command line.</p>
   <td>Configures the servlet cookie name</td>
   <td>JSESSIONID</td>
 </tr>
+<!--
 <tr>
   <td>session-sticky-disable</td>
   <td>Disables sticky-sessions on the load balancer</td>
   <td>false</td>
 </tr>
+-->
 <tr>
   <td>url-character-encoding</td>
   <td>Configures the character encoding for URLs</td>
@@ -1054,7 +1056,6 @@ element cluster {
   &amp; server-default*
   &amp; server-header?
   &amp; session-cookie?
-  &amp; session-sticky-disable?
   &amp; url-character-encoding?
   &amp; url-length-max?
   &amp; web-app-default*
@@ -10427,6 +10428,16 @@ The following example shows the usage of the <code>jndi-env</code> configuration
   <td>required</td>
 </tr>
 <tr>
+  <td>session-cookie</td>
+  <td>change the session cookie to examine for sticky sessions</td>
+  <td>JSESSIONID</td>
+</tr>
+<tr>
+  <td>sticky-sessions</td>
+  <td>sessions are sticky to the original backend app server</td>
+  <td>true</td>
+</tr>
+<tr>
   <td>strategy</td>
   <td>round-robin or adaptive</td>
   <td>adaptive</td>
@@ -12248,6 +12259,7 @@ id amongst different web-apps.</p>
 </defun>
 
 
+<!--
 <defun title="&lt;session-sticky-disable>" version="Resin 3.1" name="session-sticky-disable">
 <parents>cluster</parents>
 <default>false</default>
@@ -12263,7 +12275,7 @@ element session-sticky-disable {
 </schema>
 
 </defun>
-
+-->
 <defun title="&lt;session-url-prefix>" version="Resin 3.1" name="session-url-prefix">
 <parents>cluster</parents>
 <default>;jsessionid=</default>

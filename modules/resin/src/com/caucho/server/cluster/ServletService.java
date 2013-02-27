@@ -218,8 +218,9 @@ public class ServletService
 
     String id = _selfServer.getId();
     
-    if ("".equals(id))
+    if ("".equals(id)) {
       throw new IllegalStateException();
+    }
     
     // cannot set the based on server-id because of distributed cache
     // _classLoader.setId("server:" + id);

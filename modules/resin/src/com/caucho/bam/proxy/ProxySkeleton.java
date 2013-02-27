@@ -142,13 +142,16 @@ public class ProxySkeleton<S>
       Object []args = call.getArgs();
       Class<?> []paramTypes = handler.getParameterTypes();
       if (args != null && args.length != paramTypes.length) {
-        System.out.println("BAD-METHOD:" + handler);
-        throw new IllegalArgumentException(L.l("'{0}.{1}' has an incorrect number of arguments (received {2} but expected {3})\n  {4}",
-                                               actor.getClass().getSimpleName(),
-                                               handler.getName(),
-                                               args != null ? args.length : 0,
-                                               paramTypes.length,
-                                               handler));
+        String msg = (L.l("'{0}.{1}' has an incorrect number of arguments (received {2} but expected {3})\n  {4}",
+                          actor.getClass().getSimpleName(),
+                          handler.getName(),
+                          args != null ? args.length : 0,
+                          paramTypes.length,
+                          handler));
+        
+        log.warning(msg);
+        
+        throw new IllegalArgumentException(msg);
       }
 
       try {

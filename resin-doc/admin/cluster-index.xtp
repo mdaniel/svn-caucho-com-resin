@@ -991,11 +991,13 @@ matching the -server on the command line.</p>
   <td>Configures the servlet cookie name</td>
   <td>JSESSIONID</td>
 </tr>
+<!--
 <tr>
   <td>session-sticky-disable</td>
   <td>Disables sticky-sessions on the load balancer</td>
   <td>false</td>
 </tr>
+-->
 <tr>
   <td>url-character-encoding</td>
   <td>Configures the character encoding for URLs</td>

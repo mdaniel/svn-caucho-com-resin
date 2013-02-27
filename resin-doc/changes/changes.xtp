@@ -12,6 +12,8 @@
 
 <s2 title="4.0.36 - snapshot">
 <ul>
+<li>embed: add ResinEmbed.setServerId (#5350, rep by D. Shearer)</li>
+<li>jmx: MBean/MXBean interface scanning was assuming class implementation matching (#5357, rep by Steve Francis)</li>
 <li>jdbc: added jdbc 7 stub methods for compilation (#5370)</li>
 <li>cdi: add NoClassDefError catches for optional classes (#5371)</li>
 <li>session: jdbc session support for isolated server instances (#5374, rep by Keith Paulson)</li>

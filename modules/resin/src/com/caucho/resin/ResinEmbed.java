@@ -41,10 +41,6 @@ import java.util.logging.LogManager;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.cloud.topology.CloudCluster;
-import com.caucho.cloud.topology.CloudServer;
-import com.caucho.cloud.topology.CloudSystem;
-import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.RawString;
@@ -58,7 +54,10 @@ import com.caucho.server.http.HttpRequest;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.resin.ResinArgs;
 import com.caucho.server.resin.ResinEmbedded;
-import com.caucho.server.webapp.*;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.webapp.WebAppContainer;
+import com.caucho.server.webapp.WebAppSingleDeployGenerator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.VfsStream;
@@ -91,10 +90,9 @@ public class ResinEmbed
 
   private final ResinArgs _args;
   private Resin _resin;
+  
   private String _configFile = EMBED_CONF;
 
-  private CloudCluster _cluster;
-  
   private Host _host;
   private ServletService _server;
 
@@ -147,6 +145,14 @@ public class ResinEmbed
   public void setRootDirectory(String rootUrl)
   {
     _args.setRootDirectory(Vfs.lookup(rootUrl));
+  }
+  
+  /**
+   * Sets the root directory
+   */
+  public void setServerId(String id)
+  {
+    _args.setServerId(id);
   }
 
   /**
@@ -303,8 +309,9 @@ public class ResinEmbed
    */
   public void start()
   {
-    if (! _lifecycle.toActive())
+    if (! _lifecycle.toActive()) {
       return;
+    }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -325,8 +332,6 @@ public class ResinEmbed
 
       _server = _resin.createServer();
       
-      _cluster = _server.getCluster();
-
       thread.setContextClassLoader(_server.getClassLoader());
 
       if (_serverHeader != null)
