@@ -58,6 +58,14 @@ APR_DECLARE_OPTIONAL_FN(char *, ssl_var_lookup,
 #define apr_thread_mutex_unlock(a)
 #endif
 
+#ifdef APACHE_24
+#define REMOTE_IP client_ip
+#define REMOTE_ADDR client_addr
+#else
+#define REMOTE_IP remote_ip
+#define REMOTE_ADDR remote_addr
+#endif
+
 static APR_OPTIONAL_FN_TYPE(ssl_var_lookup) *g_ssl_lookup = NULL;
 
 /* lock for allocating the lock itself */
@@ -619,10 +627,10 @@ write_env(stream_t *s, request_rec *r)
   if (c->remote_host)
     cse_write_string(s, CSE_REMOTE_HOST, c->remote_host);
   else
-    cse_write_string(s, CSE_REMOTE_HOST, c->remote_ip);
+    cse_write_string(s, CSE_REMOTE_HOST, c->REMOTE_IP);
 
-  cse_write_string(s, CSE_REMOTE_ADDR, c->remote_ip);
-  sprintf(buf, "%u", ntohs(c->remote_addr->port));
+  cse_write_string(s, CSE_REMOTE_ADDR, c->REMOTE_IP);
+  sprintf(buf, "%u", ntohs(c->REMOTE_ADDR->port));
   cse_write_string(s, CSE_REMOTE_PORT, buf);
 
   if (r->user)
@@ -930,7 +938,7 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
     return retval;
 
   session_index = get_session_index(config, r, &backup_index);
-  ip = r->connection->remote_ip;
+  ip = r->connection->REMOTE_IP;
 
   if (host) {
   }

@@ -594,6 +594,87 @@ if test -z "$apache_dir" -a -x "${apxs}"; then
    apache_dir=`${apxs} -q PREFIX`
 fi
 
+#
+# test posix shared memory
+#
+
+if test -n "${apache_dir}"; then
+
+cat >conftest.$ac_ext <<_ACEOF
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#define SHM_PATH "/mod_caucho_127.1:8080"
+int main(int argc, char **argv)
+{
+  shm_open(SHM_PATH, O_CREAT | O_RDWR, S_IRWXU | S_IRWXG);
+
+  shm_unlink(SHM_PATH);
+
+  return errno;
+}
+_ACEOF
+
+apache_shm=""
+
+CC_conftest="${CC} -o conftest ${apache_cflags} -lrt conftest.$ac_ext"
+$CC_conftest 1>/dev/null 2>/dev/null
+if test "$?" != 0; then
+  $CC_conftest
+  AC_MSG_WARN(Can't compile posix shared memory test.  Check compilation flags: $CC_conftest)
+elif ./conftest; then
+  apache_shm="-DSHM"
+  apache_cflags="$apache_cflags -lrt"
+  AC_MSG_RESULT(mod_caucho will use shared between processes srun status)
+else
+  AC_MSG_WARN(mod_caucho will not use shared between processes srun status)
+fi
+rm -f conftest conftest.$ac_ext
+fi
+
+#
+# test apache 2.4
+# request_rec->remote_ip became client_ip
+# request_rec->remote_addr became client_addr
+#
+
+if test -n "${apache_dir}"; then
+
+cat >conftest.$ac_ext <<_ACEOF
+#include "httpd.h"
+
+int main(int argc, char *argv[]) {
+  conn_rec *c;
+  c = malloc(sizeof(request_rec));
+  &c->client_ip;
+  &c->client_addr;
+
+  return 0;
+}
+_ACEOF
+
+apache_24=""
+
+echo $ECHO_N "checking if apache is 2.4 or later... "
+
+CC_conftest="${CC} -o conftest -I${APACHE_INC} ${apache_cflags} conftest.$ac_ext"
+$CC_conftest 1>/dev/null 2>/dev/null
+if test "$?" == 0; then
+  apache_24=-DAPACHE_24
+  echo "yes";
+else
+  echo "no";
+  $CC_conftest
+  AC_MSG_WARN(Can't compile apache 2.4 test. Check compilation flags if apache is 2.4: $CC_conftest)
+  AC_MSG_WARN(Assuming lower apache version)
+fi
+rm -f conftest conftest.$ac_ext
+fi
+
 AC_SUBST(APACHE_INC)
 AC_SUBST(apache_libexec)
 AC_SUBST(apache_conf)
@@ -603,6 +684,8 @@ AC_SUBST(apache_cflags_shlib)
 AC_SUBST(apache_ld_shlib)
 AC_SUBST(apache_ldflags_shlib)
 AC_SUBST(apache_libs_shlib)
+AC_SUBST(apache_shm)
+AC_SUBST(apache_24)
 
 #
 # --with-setuid
@@ -1566,6 +1649,9 @@ if test -n "${apache}"; then
   echo "    ld_shlib      : ${apache_ld_shlib}"
   echo "    ldflags_shlib : ${apache_ldflags_shlib}"
   echo "    libs_shlib    : ${apache_libs_shlib}"
+  echo "    apache_shm    : ${apache_shm}"
+  echo "    apache_24     : ${apache_24}"
+
   echo ""
 fi
 

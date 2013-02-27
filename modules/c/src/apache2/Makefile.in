@@ -2,7 +2,7 @@
 
 CC=@CC@
 CP=/bin/cp
-CFLAGS=@CFLAGS@ @apache_cflags@ @apache_cflags_shlib@
+CFLAGS=@CFLAGS@ @apache_cflags@ @apache_cflags_shlib@ @apache_24@
 EGREP=@EGREP@
 LD=@LD@
 LIBTOOL=EGREP="@EGREP@" @LIBTOOL@
