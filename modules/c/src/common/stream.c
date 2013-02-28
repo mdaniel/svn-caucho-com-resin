@@ -999,6 +999,7 @@ cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
   struct hostent *hostent;
   srun_t *srun;
   int srun_status_t_size;
+  int shmfd = -1;
   
   hostent = gethostbyname(hostname);
   if (! hostent || ! hostent->h_addr)
@@ -1031,7 +1032,7 @@ cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
 
   LOG(("%s:%d:cse_create_srun() %s\n", __FILE__, __LINE__, s));
 
-  int shmfd = shm_open(s, O_RDWR, S_IRWXU | S_IRWXG);
+  shmfd = shm_open(s, O_RDWR, S_IRWXU | S_IRWXG);
   if (shmfd > 0) {
     srun->status = (struct srun_status_t *)
                    mmap(
@@ -1082,13 +1083,15 @@ cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
   apr_pool_cleanup_register(config->web_pool, s, cse_cleanup_, NULL);
 
   cse_proc_unlock();
-#else
-  srun->status = (struct srun_status_t *) malloc(srun_status_t_size);
-
-  srun->status->is_fail = 0;
-  srun->status->last_fail = 0;
-  srun->status->last_unavail = 0;
 #endif
+
+  if (shmfd == -1) {
+    srun->status = (struct srun_status_t *) malloc(srun_status_t_size);
+
+    srun->status->is_fail = 0;
+    srun->status->last_fail = 0;
+    srun->status->last_unavail = 0;
+  }
 
   srun->open = std_open;
   srun->read = std_read;
