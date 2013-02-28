@@ -170,7 +170,7 @@ public class ZipModule extends AbstractQuercusModule {
       return entry.zip_entry_close();
 
     } catch (IOException e) {
-        env.warning(L.l(e.toString()));
+        env.warning(e.toString());
         log.log(Level.FINE, e.toString(), e);
         return false;
     }

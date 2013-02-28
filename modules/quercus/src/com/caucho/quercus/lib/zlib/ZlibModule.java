@@ -119,7 +119,7 @@ public class ZlibModule extends AbstractQuercusModule {
     }
     catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
+      env.warning(e.getMessage());
     }
 
     return null;

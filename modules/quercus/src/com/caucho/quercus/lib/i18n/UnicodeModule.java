@@ -516,7 +516,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     }
     catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
+      env.warning(e.getMessage());
 
       return BooleanValue.FALSE;
     }
@@ -546,7 +546,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     }
     catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
+      env.warning(e.getMessage());
     }
     catch (NoClassDefFoundError e) {
       throw new QuercusException(L.l("mime_decode requires javamail.jar"));

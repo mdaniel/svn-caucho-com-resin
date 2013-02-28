@@ -270,7 +270,7 @@ public class CurlHttpRequest
     log.log(Level.FINE, error);
 
     if (_curl.getIsVerbose())
-      env.warning(L.l(error));
+      env.warning(error);
 
     _curl.setError(error);
     _curl.setErrorCode(code);
@@ -281,7 +281,7 @@ public class CurlHttpRequest
     log.log(Level.FINE, error, e);
 
     if (_curl.getIsVerbose())
-      env.warning(L.l(error));
+      env.warning(error);
 
     _curl.setError(error);
     _curl.setErrorCode(code);

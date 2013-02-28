@@ -862,7 +862,7 @@ abstract public class Value implements java.io.Serializable
       return new URL(toString());
     }
     catch (MalformedURLException e) {
-      env.warning(L.l(e.getMessage()));
+      env.warning(e.getMessage());
       return null;
     }
   }

@@ -92,7 +92,7 @@ public class QuercusZipEntry {
       return true;
 
     } catch (IOException e) {
-      env.warning(L.l(e.toString()));
+      env.warning(e.toString());
 
       return false;
     }

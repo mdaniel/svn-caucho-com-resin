@@ -70,8 +70,11 @@ abstract public class CompiledFunctionRef_1 extends CompiledFunctionRef {
    */
   public Expr []bindArguments(Env env, Expr fun, Expr []args)
   {
-    if (args.length > 1)
-      log.fine(L.l(env.getLocation().getMessagePrefix() + "incorrect number of arguments" + env.getFunctionLocation()));
+    if (args.length > 1) {
+      log.fine(L.l("{0}incorrect number of arguments{1}",
+                   env.getLocation().getMessagePrefix(),
+                   env.getFunctionLocation()));
+    }
 
     return args;
   }

@@ -191,7 +191,7 @@ public class ImageModule extends AbstractQuercusModule {
       if (! parseImageSize(is, info))
         return BooleanValue.FALSE;
     } catch (Exception e) {
-      env.warning(L.l(e.getMessage()));
+      env.warning(e.getMessage());
 
       return BooleanValue.FALSE;
     } finally {

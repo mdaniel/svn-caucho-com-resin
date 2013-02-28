@@ -156,7 +156,7 @@ public class Zlib {
     }
     catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
+      env.warning(e.getMessage());
     }
 
     TempBuffer.free(tb);
