@@ -1,7 +1,7 @@
 .SUFFIXES: .o .lo
 
 CC=@CC@
-CFLAGS=@apache_cflags@ @apache_cflags_shlib@ @apache_shm@
+CFLAGS=@CFLAGS@ @apache_cflags@ @apache_cflags_shlib@ @apache_shm@
 LIBTOOL=@LIBTOOL@
 EGREP=@EGREP@
 LD=@LD@
