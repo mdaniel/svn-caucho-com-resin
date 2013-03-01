@@ -12,6 +12,7 @@
 
 <s2 title="4.0.36 - snapshot">
 <ul>
+<li>access-log: added buffer-size to access log at cluster level (#5378, rep by Andrew Foong)</li>
 <li>apache: added apache 2.4 support(#5241)</li>
 <li>apache, iis: added support for disabled servers(#5364)</li>
 <li>embed: add ResinEmbed.setServerId (#5350, rep by D. Shearer)</li>
