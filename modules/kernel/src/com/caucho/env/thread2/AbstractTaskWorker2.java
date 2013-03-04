@@ -258,7 +258,10 @@ abstract public class AbstractTaskWorker2
             && _state.compareAndSet(State.ACTIVE, State.PARK)) {
           thread.setName(getThreadName());
           Thread.interrupted();
-          LockSupport.parkUntil(expires);
+          
+          if (! isRetry()) {
+            LockSupport.parkUntil(expires);
+          }
           
           _state.compareAndSet(State.PARK, State.ACTIVE);
         }
