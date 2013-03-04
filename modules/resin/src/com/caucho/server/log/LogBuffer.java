@@ -93,6 +93,8 @@ public final class LogBuffer
       return false;
     }
     
+    logWriter.wake();
+    
     _thread = Thread.currentThread();
     try {
       if (_length != 0) {

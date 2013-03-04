@@ -390,6 +390,11 @@ public final class ActorQueue<T extends RingItem>
       _nextWorker = nextWorker;
     }
     
+    boolean isEmpty()
+    {
+      return _headAllocRef.get() == _tailRef.get();
+    }
+    
     private final void consumeAll()
     {
       final AtomicLong headAllocRef = _headAllocRef;
@@ -536,6 +541,12 @@ public final class ActorQueue<T extends RingItem>
     protected String getThreadName()
     {
       return _consumer._processor.getThreadName();
+    }
+    
+    @Override
+    protected boolean isRetry()
+    {
+      return ! _consumer.isEmpty();
     }
     
     @Override

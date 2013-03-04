@@ -162,6 +162,11 @@ abstract public class AbstractTaskWorker2
     return _threadName;
   }
   
+  protected boolean isRetry()
+  {
+    return false;
+  }
+  
   protected void onThreadStart()
   {
   }
@@ -266,7 +271,8 @@ abstract public class AbstractTaskWorker2
       } while (isPermanent()
                || isExpireRetry
                || now < expires
-               || _state.get() == State.ACTIVE_WAKE);
+               || _state.get() == State.ACTIVE_WAKE
+               || isRetry());
     } catch (Throwable e) {
       System.out.println("EXN: " + e);
       WarningService.sendCurrentWarning(this, e);
@@ -318,6 +324,9 @@ abstract public class AbstractTaskWorker2
     IDLE {
       @Override
       boolean isIdle() { return true; }
+      
+      @Override
+      State toWake() { return ACTIVE_WAKE; }
     },
     
     ACTIVE {

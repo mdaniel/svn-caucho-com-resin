@@ -244,16 +244,16 @@ public class AccessLogWriter extends AbstractRolloverLog
     @Override
     public void process(LogBuffer value)
     {
+      if (value == null) {
+        return;
+        
+      }
       try {
-        if (value != null) {
-          write(value.getBuffer(), 0, value.getLength());
-        }
+        write(value.getBuffer(), 0, value.getLength());
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
-        if (value != null) {
-          freeBuffer(value);
-        }
+        freeBuffer(value);
       }
     }
 
