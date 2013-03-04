@@ -447,7 +447,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
           return resultCmp;
       }
       catch (IllegalAccessException e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        log.log(Level.FINE,  e.getMessage(), e);
         return 0;
       }
     }
@@ -471,7 +471,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       try {
         return get.callMethod(env, getQuercusClass(), qThis);
       } catch (Exception e) {
-        log.log(Level.FINE, L.l(e.getMessage()), e);
+        log.log(Level.FINE, e.getMessage(), e);
 
         return null;
       }
@@ -483,7 +483,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         Object result = fieldPair._field.get(qThis.toJavaObject());
         return fieldPair._marshal.unmarshal(env, result);
       } catch (Exception e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        log.log(Level.FINE,  e.getMessage(), e);
 
         return null;
       }
@@ -499,7 +499,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       try {
         return __fieldGet.callMethod(env, getQuercusClass(), qThis, nameV);
       } catch (Exception e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        log.log(Level.FINE,  e.getMessage(), e);
 
         return null;
       }
@@ -520,7 +520,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       try {
         return setter.callMethod(env, getQuercusClass(), qThis, value);
       } catch (Exception e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        log.log(Level.FINE, e.getMessage(), e);
 
         return NullValue.NULL;
       }
@@ -537,7 +537,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         return value;
 
       } catch (Exception e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        log.log(Level.FINE, e.getMessage(), e);
         return NullValue.NULL;
       }
     }
@@ -566,7 +566,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
                                      nameV,
                                      value);
       } catch (Exception e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        log.log(Level.FINE, e.getMessage(), e);
 
         return NullValue.NULL;
       }

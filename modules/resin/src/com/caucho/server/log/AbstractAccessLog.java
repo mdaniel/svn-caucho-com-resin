@@ -122,6 +122,11 @@ abstract public class AbstractAccessLog {
     _isHostnameDnsLookup = enable;
   }
 
+  public int getBufferSize()
+  {
+    return 1024;
+  }
+
   public void addInit(ContainerProgram init)
   {
     init.configure(this);

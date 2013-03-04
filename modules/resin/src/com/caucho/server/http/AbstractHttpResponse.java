@@ -45,6 +45,7 @@ import javax.servlet.http.HttpSession;
 import com.caucho.env.meter.CountSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.LogBuffer;
 import com.caucho.server.session.CookieImpl;
 import com.caucho.server.session.SessionImpl;
@@ -130,7 +131,7 @@ abstract public class AbstractHttpResponse {
   private final ResponseWriter _responsePrintWriter
     = new ResponseWriter();
 
-  private final LogBuffer _logBuffer = new LogBuffer(true); 
+  private final LogBuffer _logBuffer;
   private final QDate _calendar = new QDate(false);
   private final QDate _localCalendar = new QDate(true);
 
@@ -163,8 +164,19 @@ abstract public class AbstractHttpResponse {
     _request = request;
 
     _responseStream = createResponseStream();
+    
+    AbstractAccessLog accessLog = request.getServer().getAccessLog();
+    
+    int logSize = 1024;
+    
+    if (accessLog != null) {
+      logSize = accessLog.getBufferSize();
+      
+    }
+    
+    _logBuffer = new LogBuffer(logSize, true);
   }
-
+  
   /*
   TempBuffer getBuffer()
   {

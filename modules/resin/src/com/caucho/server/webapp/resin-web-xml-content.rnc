@@ -29,6 +29,9 @@ r_access-log = element access-log {
      & (attribute auto-flush-time { r_period-Type }
         | element auto-flush-time { r_period-Type })?
 
+     & (attribute buffer-size { string }
+        | element buffer-size { string })?
+
      & (attribute exclude { string }
         | element exclude { string })*
 

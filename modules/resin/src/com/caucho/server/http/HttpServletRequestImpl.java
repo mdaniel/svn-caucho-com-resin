@@ -446,6 +446,11 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return null;
   }
+  
+  private boolean isAttributesEmpty()
+  {
+    return _attributes == null;
+  }
 
   /**
    * Returns an enumeration of the request attribute names.
@@ -1197,6 +1202,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     if (getSession(false) == null)
       return null;
     */
+    
+    if (isAttributesEmpty() && ! create) {
+      return null;
+    }
 
     Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_USER);
 

@@ -88,6 +88,7 @@ import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.httpcache.AbstractProxyCache;
+import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
@@ -190,6 +191,7 @@ public class ServletService
   private long _startTime;
 
   private final Lifecycle _lifecycle;
+  private AccessLog _accessLog;
 
   /**
    * Creates a new servlet server.
@@ -839,7 +841,17 @@ public class ServletService
    */
   public void setAccessLog(AccessLog log)
   {
+    _accessLog = log;
+    
     Environment.setAttribute("caucho.server.access-log", log);
+  }
+
+  /**
+   * @return
+   */
+  public AbstractAccessLog getAccessLog()
+  {
+    return _accessLog;
   }
 
   /**

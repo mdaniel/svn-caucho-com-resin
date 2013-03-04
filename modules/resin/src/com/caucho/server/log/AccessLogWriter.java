@@ -30,16 +30,13 @@
 package com.caucho.server.log;
 
 import java.io.IOException;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.config.types.Bytes;
 import com.caucho.env.actor.AbstractWorkerQueue;
-import com.caucho.env.meter.SemaphoreMeter;
-import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.server.httpcache.TempFileService;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
@@ -59,6 +56,8 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   private boolean _isAutoFlush;
   private final Object _bufferLock = new Object();
+  
+  private int _logBufferSize = 1024;
 
   private final FreeRing<LogBuffer> _freeList
     = new FreeRing<LogBuffer>(512);
@@ -84,10 +83,16 @@ public class AccessLogWriter extends AbstractRolloverLog
     if (_tempService == null)
       throw new IllegalStateException(L.l("'{0}' is required for AccessLog",
                                           TempFileService.class.getSimpleName()));
-    
-    for (int i = 0; i < 64; i++) {
-      _freeList.free(new LogBuffer());
-    }
+  }
+
+  void setBufferSize(Bytes bytes)
+  {
+    _logBufferSize = (int) bytes.getBytes();
+  }
+
+  int getBufferSize()
+  {
+    return _logBufferSize;
   }
 
   @Override
@@ -97,6 +102,10 @@ public class AccessLogWriter extends AbstractRolloverLog
     super.init();
 
     _isAutoFlush = _log.isAutoFlush();
+    
+    for (int i = 0; i < 64; i++) {
+      _freeList.free(new LogBuffer(_logBufferSize));
+    }
   }
   
   boolean isBufferAvailable()
@@ -176,7 +185,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     LogBuffer buffer = _freeList.allocate();
 
     if (buffer == null) {
-      buffer = new LogBuffer();
+      buffer = new LogBuffer(_logBufferSize);
     }
 
     return buffer;
@@ -184,6 +193,8 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   void freeBuffer(LogBuffer logBuffer)
   {
+    logBuffer.clear();
+    
     if (! logBuffer.isPrivate()) {
       _freeList.free(logBuffer);
     }
@@ -240,8 +251,9 @@ public class AccessLogWriter extends AbstractRolloverLog
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
-        if (value != null)
+        if (value != null) {
           freeBuffer(value);
+        }
       }
     }
 

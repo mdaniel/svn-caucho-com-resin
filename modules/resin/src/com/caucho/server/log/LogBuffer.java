@@ -29,7 +29,6 @@
 
 package com.caucho.server.log;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
 import com.caucho.env.thread.ThreadPool;
@@ -43,18 +42,19 @@ import com.caucho.env.thread.ThreadPool;
 public final class LogBuffer
 {
   private final boolean _isPrivate;
-  private final byte []_logBuffer = new byte[1024];
+  private final byte []_logBuffer;
   private volatile int _length;
   
   private volatile Thread _thread;
 
-  public LogBuffer()
+  public LogBuffer(int size)
   {
-    this(false);
+    this(size, false);
   }
 
-  public LogBuffer(boolean isPrivate)
+  public LogBuffer(int size, boolean isPrivate)
   {
+    _logBuffer = new byte[size];
     _isPrivate = isPrivate;
   }
 

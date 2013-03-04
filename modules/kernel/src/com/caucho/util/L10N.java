@@ -57,8 +57,6 @@ public class L10N {
   public String l(String msg)
   {
     msg = getTranslated(msg);
-    
-    msg = getTranslated(msg);
 
     StringBuilder cb = new StringBuilder();
 

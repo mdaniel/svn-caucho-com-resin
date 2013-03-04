@@ -100,6 +100,23 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   }
 
   /**
+   * Sets the log buffer size.
+   *
+   * @param bytes buffer
+   */
+  @Configurable
+  public void setBufferSize(Bytes bytes)
+  {
+    _logWriter.setBufferSize(bytes);
+  }
+  
+  @Override
+  public int getBufferSize()
+  {
+    return _logWriter.getBufferSize();
+  }
+
+  /**
    * Sets the access log format.
    */
   public void setFormat(String format)
@@ -264,7 +281,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     if (_timeFormat == null || _timeFormat.equals("")) {
       _timeFormat = "[%d/%b/%Y:%H:%M:%S %z]";
     }
-
+    
     _logWriter.init();
     // _sharedBufferLock = _logWriter.getBufferLock();
 
@@ -455,6 +472,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         // set cookie
       case Segment.SET_COOKIE:
         ArrayList<Cookie> cookies = responseFacade.getCookies();
+        
+        if (cookies == null) {
+          break;
+        }
+        
         int cookiesSize = cookies.size();
         
         value = response.getHeader(segment._string);

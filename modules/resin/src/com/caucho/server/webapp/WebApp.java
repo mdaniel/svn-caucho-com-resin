@@ -4339,12 +4339,20 @@ public class WebApp extends ServletContextImpl
    * Access logging for high-level errors
    */
   public void accessLog(HttpServletRequest req, HttpServletResponse res)
-    throws IOException
   {
-    AbstractAccessLog log = getAccessLog();
+    AbstractAccessLog accessLog = getAccessLog();
 
-    if (log != null)
-      log.log(req, res, this);
+    if (accessLog != null) {
+      try {
+        accessLog.log(req, res, this);
+      } catch (Exception e) {
+        log.warning("AccessLog: " + e);
+        
+        if (log.isLoggable(Level.FINER)) {
+          log.log(Level.FINER, "AccessLog: " + e.toString(), e);
+        }
+      }
+    }
   }
 
   private LruCache<String,RequestDispatcherImpl> getDispatcherCache()
