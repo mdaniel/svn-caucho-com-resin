@@ -984,11 +984,11 @@ public class PDOStatement
   {
     JdbcResultResource rs = getResultSet();
 
-    if (rs == null) {
-      return 0;
+    if (rs != null) {
+      return rs.getNumRows();
     }
-
-    return rs.getNumRows();
+    
+    return getConnection().getAffectedRows();
   }
 
   public boolean setAttribute(Env env, int attribute, Value value)
