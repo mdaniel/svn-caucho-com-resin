@@ -10,7 +10,7 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.13 snapshot">
+<s2 title="3.1.13 Nov 12, 2012">
 <ul>
 <li>xa: change timeout message to include EXTRA_TIMEOUT (#4927, rep by Shinomiya Nobuaki)</li>
 <li>i18n: utf8 parser should replace errors with an error character (#4957, rep by S. Nobuaki)</li>

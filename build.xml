@@ -18,6 +18,7 @@
   <property name="clientlib" location="${install}/clientlib"/>
   <property name="dist" location="${install}/dist"/>
 
+  <property name="javac" value="javac"/>
   <property name="javac.verbose" value="off"/>
   <property name="javac.debug" value="on"/>
   <property name="javac.optimize" value="off"/>
