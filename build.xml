@@ -431,6 +431,7 @@
 
     <javac srcdir="${module.src}" destdir="${module.build}"
            fork="true" 
+           executable="${javac}"
            verbose="${javac.verbose}" 
            debug="${javac.debug}" optimize="${javac.optimize}"
            deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"

@@ -1028,7 +1028,7 @@ elif test -r /usr/lib/libssl.a; then
   OPENSSL_LIB=/usr/lib
 fi
 
-if test -z "${OPENSSL_LIB}"; then	
+if test -z "${OPENSSL_INCLUDE}"; then	
   foo=bar
 elif test -r "${OPENSSL_LIB}/libssl.so"; then	
   SSL_LIBS="${SSL_LIBS} -lssl"
@@ -1047,7 +1047,7 @@ else
   SSL_LIBS="${SSL_LIBS} -lssl"
 fi
 
-if test -z "${OPENSSL_LIB}"; then	
+if test -z "${OPENSSL_INCLUDE}"; then	
   foo=bar
 elif test -r "${OPENSSL_LIB}/libcrypto.so"; then	
   SSL_LIBS="${SSL_LIBS} -lcrypto"
@@ -1064,12 +1064,12 @@ SSL_OBJ=ssl_stub.o
 
 if test "${ENABLE_SSL}" = false; then	
   echo "Openssl is not enabled"
-elif test -z "${OPENSSL_LIB}"; then
+elif test -z "${OPENSSL_INCLUDE}"; then
   echo "Openssl library was not found"
-elif test ! -r "${OPENSSL_LIB}/libcrypto.so" -a \
-          ! -r "${OPENSSL_LIB}/libcrypto.dylib" -a \
-          ! -r "${OPENSSL_LIB}/libcrypto.a" ; then
-  AC_MSG_ERROR([Can't find valid OpenSSL library in ${OPENSSL_LIB}])
+#elif test ! -r "${OPENSSL_LIB}/libcrypto.so" -a \
+#          ! -r "${OPENSSL_LIB}/libcrypto.dylib" -a \
+#          ! -r "${OPENSSL_LIB}/libcrypto.a" ; then
+#  AC_MSG_ERROR([Can't find valid OpenSSL library in ${OPENSSL_LIB}])
 elif test ! -r "${OPENSSL_INCLUDE}/openssl/ssl23.h"; then
   AC_MSG_ERROR([Can't find valid OpenSSL include in ${OPENSSL_INCLUDE}])
 else
@@ -1099,7 +1099,9 @@ else
     INCLUDES="$INCLUDES -I${OPENSSL_INCLUDE}"
   fi
   SSL_OBJ=ssl.o
-  LDFLAGS_SHLIB="${LDFLAGS_SHLIB} -L${OPENSSL_LIB}"
+  if test -n "${OPENSSL_LIB}"; then
+    LDFLAGS_SHLIB="${LDFLAGS_SHLIB} -L${OPENSSL_LIB}"
+  fi
   # PROXY_LIBS="$PROXY_LIBS ${OPENSSL_LIB}/libssl.a ${OPENSSL_LIB}/libcrypto.a"
 fi
 
