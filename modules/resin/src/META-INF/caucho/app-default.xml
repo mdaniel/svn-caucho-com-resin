@@ -52,7 +52,7 @@
                    servlet-name="resin-jspx"
                    default="true"/>
 
-  <resin:if test="${! disable_quercus}">
+  <resin:if test="${! quercus_disable}">
     <servlet-mapping url-pattern="*.php" 
                      servlet-name="resin-php"
                      default="true"/>
