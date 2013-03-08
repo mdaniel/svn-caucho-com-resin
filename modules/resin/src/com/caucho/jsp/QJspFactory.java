@@ -107,7 +107,7 @@ public class QJspFactory extends JspFactory {
   static class EngineInfo extends JspEngineInfo {
     public String getSpecificationVersion()
     {
-      return "2.1";
+      return "2.2";
     }
   }
 }
