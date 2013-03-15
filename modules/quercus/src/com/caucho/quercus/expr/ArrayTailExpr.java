@@ -30,8 +30,6 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
@@ -78,7 +76,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.error(getLocation(), "Cannot use [] as a read-value.");
+    return env.error("Cannot use [] as a read-value.", getLocation());
   }
 
   /**

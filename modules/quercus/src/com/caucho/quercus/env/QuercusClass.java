@@ -2574,6 +2574,12 @@ public class QuercusClass extends NullValue {
     return this;
   }
 
+  @Override
+  public QuercusClass findQuercusClass(Env env)
+  {
+    return this;
+  }
+
   public int hashCode()
   {
     return _className.hashCode();

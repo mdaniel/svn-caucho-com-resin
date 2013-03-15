@@ -49,7 +49,7 @@ import java.util.ArrayList;
 public class ClassVirtualMethodVarExpr extends Expr {
   private static final L10N L
     = new L10N(ClassVirtualMethodVarExpr.class);
-  
+
   protected final Expr _methodName;
   protected final Expr []_args;
 
@@ -111,7 +111,7 @@ public class ClassVirtualMethodVarExpr extends Expr {
   {
     return factory.createCopy(this);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -123,18 +123,18 @@ public class ClassVirtualMethodVarExpr extends Expr {
   public Value eval(Env env)
   {
     Value qThis = env.getThis();
-    
+
     QuercusClass cls = qThis.getQuercusClass();
 
     if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
+      env.error(L.l("no calling class found"), getLocation());
+
       return NullValue.NULL;
     }
-    
+
     StringValue methodName = _methodName.evalStringValue(env);
     int hash = methodName.hashCodeCaseInsensitive();
-    
+
     Value []values = evalArgs(env, _args);
 
     env.pushCall(this, cls, values);
@@ -147,7 +147,7 @@ public class ClassVirtualMethodVarExpr extends Expr {
       env.popCall();
     }
   }
-  
+
   public String toString()
   {
     return _methodName + "()";

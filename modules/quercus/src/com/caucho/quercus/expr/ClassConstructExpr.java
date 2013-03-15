@@ -82,7 +82,7 @@ public class ClassConstructExpr extends AbstractMethodExpr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
+      env.error(L.l("no matching class {0}", _className), getLocation());
     }
 
     Value []values = evalArgs(env, _args);

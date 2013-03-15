@@ -830,9 +830,9 @@ abstract public class Expr {
    */
   public QuercusClass evalQuercusClass(Env env)
   {
-    String className = evalString(env);
+    Value obj = eval(env);
 
-    return env.getClass(className);
+    return obj.findQuercusClass(env);
   }
 
   /**

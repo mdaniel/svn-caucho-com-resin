@@ -56,7 +56,7 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
 
     _varName = varName;
   }
-  
+
   //
   // function call creation
   //
@@ -71,7 +71,7 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassMethodCall(location, _className, _varName, args);
   }
 
@@ -86,11 +86,11 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
   public Value eval(Env env)
   {
     String className = _className.evalString(env);
-    
+
     QuercusClass qClass = env.getClass(className);
-    
+
     StringValue varName = _varName.evalStringValue(env);
-    
+
     return qClass.getStaticFieldValue(env, varName);
   }
 
@@ -105,11 +105,11 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
   public Var evalVar(Env env)
   {
     String className = _className.evalString(env);
-    
+
     QuercusClass qClass = env.getClass(className);
-    
+
     StringValue varName = _varName.evalStringValue(env);
-    
+
     return qClass.getStaticFieldVar(env, varName);
   }
 
@@ -124,11 +124,11 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
   public Value evalAssignRef(Env env, Value value)
   {
     String className = _className.evalString(env);
-    
+
     QuercusClass qClass = env.getClass(className);
-    
+
     StringValue varName = _varName.evalStringValue(env);
-    
+
     return qClass.setStaticFieldRef(env, varName, value);
   }
 
@@ -141,9 +141,8 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    env.error(getLocation(),
-              L.l("{0}::${1}: Cannot unset class variables.",
-                  _className, _varName));
+    env.error(L.l("{0}::${1}: Cannot unset class variables.", _className, _varName),
+              getLocation());
   }
 
   public String toString()

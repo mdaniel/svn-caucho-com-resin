@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusModuleException;
 /**
  * Represents a PHP variable value.
  */
+@SuppressWarnings("serial")
 public class SessionVar extends Var
 {
   /**
@@ -43,7 +44,7 @@ public class SessionVar extends Var
   {
     if (value instanceof SessionArrayValue) {
       super.set(value);
-      
+
       return value;
     }
     else if (value instanceof ArrayValue) {
@@ -58,7 +59,7 @@ public class SessionVar extends Var
     }
     else if (! value.isset()) {
       super.set(value);
-      
+
       return value;
     }
     else

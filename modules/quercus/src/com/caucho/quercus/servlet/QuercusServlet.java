@@ -51,6 +51,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -125,7 +126,7 @@ public class QuercusServlet
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
       }
       catch (Exception e) {
-        log.finest(e.getMessage());
+        log.log(Level.FINEST, e.getMessage(), e);
       }
     }
 
@@ -137,7 +138,7 @@ public class QuercusServlet
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
       }
       catch (Exception e) {
-        log.finest(e.getMessage());
+        log.log(Level.FINEST, e.getMessage(), e);
       }
     }
 
@@ -450,9 +451,9 @@ public class QuercusServlet
     else if ("license-directory".equals(paramName)) {
       setLicenseDirectory(paramValue);
     }
-    else
-      throw new ServletException(
-          L.l("'{0}' is not a recognized init-param", paramName));
+    else {
+      throw new ServletException(L.l("'{0}' is not a recognized init-param", paramName));
+    }
   }
 
   private void setJndiDatabase(String value)

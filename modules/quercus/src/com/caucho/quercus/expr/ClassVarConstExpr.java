@@ -38,14 +38,12 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.util.L10N;
 
 /**
  * Represents a PHP parent::FOO constant call expression.
  */
-public class ClassVarConstExpr extends Expr {
-  private static final L10N L = new L10N(ClassVarConstExpr.class);
-
+public class ClassVarConstExpr extends Expr
+{
   protected final Expr _className;
   protected final StringValue _name;
 

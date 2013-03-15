@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 
 /**
@@ -128,9 +129,18 @@ public class LiteralExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     return _value;
+  }
+
+  @Override
+  public QuercusClass evalQuercusClass(Env env)
+  {
+    String className = evalString(env);
+
+    return env.getClass(className);
   }
 
   public String toString()

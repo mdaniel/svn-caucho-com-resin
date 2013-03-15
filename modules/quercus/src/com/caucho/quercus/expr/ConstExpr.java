@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -218,6 +219,14 @@ public class ConstExpr extends Expr {
   public Value eval(Env env)
   {
     return env.getConstant(_var);
+  }
+
+  @Override
+  public QuercusClass evalQuercusClass(Env env)
+  {
+    String className = evalString(env);
+
+    return env.getClass(className);
   }
 
   public String toString()

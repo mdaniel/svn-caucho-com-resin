@@ -90,16 +90,6 @@ public class CallExpr extends Expr {
     _args = args;
   }
 
-  public CallExpr(StringValue name, ArrayList<Expr> args)
-  {
-    this(Location.UNKNOWN, name, args);
-  }
-
-  public CallExpr(StringValue name, Expr []args)
-  {
-    this(Location.UNKNOWN, name, args);
-  }
-
   /**
    * Returns the name.
    */
@@ -195,8 +185,7 @@ public class CallExpr extends Expr {
           _funId = env.findFunctionId(_nsName);
 
         if (_funId <= 0) {
-          env.error(getLocationLine(),
-                    L.l("'{0}' is an unknown function.", _name));
+          env.error(L.l("'{0}' is an unknown function.", _name), getLocation());
 
           return NullValue.NULL;
         }
@@ -206,7 +195,7 @@ public class CallExpr extends Expr {
     AbstractFunction fun = env.findFunction(_funId);
 
     if (fun == null) {
-      env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
+      env.error(L.l("'{0}' is an unknown function.", _name), getLocation());
 
       return NullValue.NULL;
     }

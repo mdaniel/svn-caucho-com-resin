@@ -125,9 +125,9 @@ public class ClassFieldExpr extends AbstractVarExpr {
   @Override
   public void evalUnset(Env env)
   {
-    env.error(getLocation(),
-              L.l("{0}::${1}: Cannot unset static variables.",
-                  _className, _varName));
+    env.error(L.l("{0}::${1}: Cannot unset static variables.",
+                  _className, _varName),
+              getLocation());
   }
 
   public String toString()

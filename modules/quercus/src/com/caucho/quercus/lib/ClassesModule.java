@@ -41,17 +41,12 @@ import com.caucho.util.L10N;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.Logger;
 
 /**
  * Quercus class information
  */
 public class ClassesModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(ClassesModule.class);
-  private static final Logger log
-    = Logger.getLogger(ClassesModule.class.getName());
 
   /**
    * Calls an object method.
@@ -65,10 +60,12 @@ public class ClassesModule extends AbstractQuercusModule {
       return obj.callMethod(env, name, args);
     }
     else {
-      QuercusClass cls = env.findClass(obj.toString());
+      QuercusClass cls = env.getClass(obj.toString());
 
-      return cls.callMethod(
-          env, env.getThis(), name, name.hashCode(), args).copyReturn();
+      Value result
+        = cls.callMethod(env, env.getThis(), name, name.hashCode(), args);
+
+      return result.copyReturn();
     }
   }
 

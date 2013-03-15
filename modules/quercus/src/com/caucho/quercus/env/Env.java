@@ -109,8 +109,7 @@ import com.caucho.vfs.i18n.EncodingReader;
 public class Env
 {
   private static final L10N L = new L10N(Env.class);
-  private static final Logger log
-    = Logger.getLogger(Env.class.getName());
+  private static final Logger log = Logger.getLogger(Env.class.getName());
 
   public static final int B_ERROR = 0;
   public static final int B_WARNING = 1;
@@ -125,6 +124,8 @@ public class Env
   public static final int B_USER_NOTICE = 10;
   public static final int B_STRICT = 11;
   public static final int B_RECOVERABLE_ERROR = 12;
+  public static final int B_DEPRECATED = 13;
+  public static final int B_USER_DEPRECATED = 14;
 
   public static final int B_LAST = B_RECOVERABLE_ERROR;
 
@@ -139,9 +140,11 @@ public class Env
   public static final int E_USER_ERROR = 1 << B_USER_ERROR;
   public static final int E_USER_WARNING = 1 << B_USER_WARNING;
   public static final int E_USER_NOTICE = 1 << B_USER_NOTICE;
-  public static final int E_ALL = 6143; //(4096 + 2048 - 1)
+  public static final int E_ALL = 32767; //(0x1111 1111 1111 11)
   public static final int E_STRICT = 1 << B_STRICT;
   public static final int E_RECOVERABLE_ERROR = 1 << B_RECOVERABLE_ERROR;
+  public static final int E_DEPRECATED = 1 << B_DEPRECATED;
+  public static final int E_USER_DEPRECATED = 1 << B_USER_DEPRECATED;
 
   public static final int E_DEFAULT = E_ALL & ~E_NOTICE;
 
@@ -255,7 +258,7 @@ public class Env
   public AbstractFunction []_fun;
 
   // anonymous functions created by create_function()
-  public HashMap<String, AbstractFunction> _anonymousFunMap;
+  public HashMap<StringValue, AbstractFunction> _anonymousFunMap;
 
   // Class map
   public ClassDef []_classDef;
@@ -4012,10 +4015,12 @@ public class Env
   {
     AbstractFunction fun = findFunction(name);
 
-    if (fun != null)
+    if (fun != null) {
       return fun;
-    else
+    }
+    else {
       throw createErrorException(L.l("'{0}' is an unknown function.", name));
+    }
   }
 
   public void updateFunction(int id, AbstractFunction fun)
@@ -4115,19 +4120,28 @@ public class Env
   public AbstractFunction createAnonymousFunction(String args, String code)
     throws IOException
   {
-    if (_anonymousFunMap == null)
-      _anonymousFunMap = new HashMap<String, AbstractFunction>();
+    if (_anonymousFunMap == null) {
+      _anonymousFunMap = new HashMap<StringValue, AbstractFunction>();
+    }
+
+    StringValue sb = createStringBuilder();
 
     // PHP naming style for anonymous functions
-    String name = "\u0000lambda_" + (_anonymousFunMap.size() + 1);
+    sb.append("\u0000lambda_");
+    sb.append(_anonymousFunMap.size() + 1);
 
-    if (args == null)
+    StringValue name = sb;
+
+    if (args == null) {
       args = "";
+    }
 
-    if (code == null)
+    if (code == null) {
       code = "";
+    }
 
-    AbstractFunction fun = getQuercus().parseFunction(name, args, code);
+    AbstractFunction fun
+      = getQuercus().parseFunction(name.toString(), args, code);
 
     _anonymousFunMap.put(name, fun);
     return fun;
@@ -4266,10 +4280,8 @@ public class Env
     String type = e.getValue().getClassName();
     String message = e.getMessage(this);
 
-    error(location,
-          L.l("Uncaught exception of type '{0}' with message '{1}'",
-              type,
-              message));
+    error(L.l("Uncaught exception of type '{0}' with message '{1}'", type, message),
+          location);
   }
 
   /**
@@ -6368,8 +6380,8 @@ public class Env
    */
   public Value thisError(Location location)
   {
-    return error(location,
-                 L.l("Cannot use '$this' when not in object context."));
+    return error(L.l("Cannot use '$this' when not in object context."),
+                 location);
   }
 
   /**
@@ -6385,23 +6397,15 @@ public class Env
    */
   public Value error(String msg)
   {
-    return error(B_ERROR, "", msg + getFunctionLocation());
+    return error(B_ERROR, msg, getLocation());
   }
 
   /**
    * A fatal runtime error.
    */
-  public Value error(Location location, String msg)
+  public Value error(String msg, Location location)
   {
-    return error(B_ERROR, location, msg + getFunctionLocation());
-  }
-
-  /**
-   * A fatal runtime error.
-   */
-  public Value error(String loc, String msg)
-  {
-    return error(B_ERROR, loc, msg + getFunctionLocation());
+    return error(B_ERROR, msg, location);
   }
 
   /**
@@ -6447,7 +6451,7 @@ public class Env
 
     String fullMsg = msg + getFunctionLocation();
 
-    error(B_ERROR, location, fullMsg);
+    error(B_ERROR, fullMsg, location);
 
     //String exMsg = prefix + fullMsg;
 
@@ -6466,7 +6470,7 @@ public class Env
 
     String fullMsg = e.toString() + getFunctionLocation();
 
-    error(B_ERROR, location, fullMsg);
+    error(B_ERROR, fullMsg, location);
 
     String exMsg = prefix + fullMsg + getStackTraceAsString(e, null);
 
@@ -6488,7 +6492,7 @@ public class Env
       }
     }
 
-    return error(B_WARNING, "", msg + getFunctionLocation());
+    return error(B_WARNING, msg, getLocation());
   }
 
   private String getExceptionLocation(String msg)
@@ -6513,7 +6517,7 @@ public class Env
   /**
    * A runtime warning.
    */
-  public Value warning(Location location, String msg)
+  public Value warning(String msg, Location location)
   {
     int mask = 1 << B_WARNING;
 
@@ -6525,7 +6529,7 @@ public class Env
       }
     }
 
-    return error(B_WARNING, location, "", msg + getFunctionLocation());
+    return error(B_WARNING, msg, location);
   }
 
   /**
@@ -6541,11 +6545,11 @@ public class Env
   /**
    * A warning with an exception.
    */
-  public Value warning(Location location, String msg, Throwable e)
+  public Value warning(String msg, Location location, Throwable e)
   {
     log.log(Level.FINE, e.toString(), e);
 
-    return warning(location, msg);
+    return warning(msg, location);
   }
 
   /**
@@ -6559,9 +6563,9 @@ public class Env
   /**
    * A warning with an exception.
    */
-  public Value warning(Location location, Throwable e)
+  public Value warning(Throwable e, Location location)
   {
-    return warning(location, e.toString(), e);
+    return warning(e.toString(), location, e);
   }
 
   /**
@@ -6575,7 +6579,7 @@ public class Env
       log.log(Level.FINER, e.toString(), e);
     }
 
-    return error(B_STRICT, "", msg + getFunctionLocation());
+    return error(B_STRICT, msg, getLocation());
   }
 
   /**
@@ -6599,7 +6603,7 @@ public class Env
    */
   public Value notice(String msg)
   {
-    return error(B_NOTICE, "", msg + getFunctionLocation());
+    return error(B_NOTICE, msg, getLocation());
   }
 
   /**
@@ -6645,7 +6649,7 @@ public class Env
   public Value parse(String msg)
     throws Exception
   {
-    return error(B_PARSE, "", msg);
+    return error(B_PARSE, msg);
   }
 
   /**
@@ -6653,7 +6657,7 @@ public class Env
    */
   public Value compileError(String msg)
   {
-    return error(B_COMPILE_ERROR, "", msg);
+    return error(B_COMPILE_ERROR, msg);
   }
 
   /**
@@ -6661,7 +6665,7 @@ public class Env
    */
   public Value compileWarning(String msg)
   {
-    return error(B_COMPILE_WARNING, "", msg);
+    return error(B_COMPILE_WARNING, msg);
   }
 
   /**
@@ -6765,29 +6769,21 @@ public class Env
   /**
    * Writes an error.
    */
-  public Value error(int code, String locString, String msg)
+  public Value error(int code, String msg)
   {
-    return error(code, null, locString, msg);
+    return error(code, msg, getLocation());
   }
 
   /**
    * Writes an error.
    */
-  public Value error(int code, Location location, String msg)
-  {
-    return error(code, location, "", msg);
-  }
-
-  /**
-   * Writes an error.
-   */
-  public Value error(int code, Location location, String loc, String msg)
+  public Value error(int code, String msg, Location location)
   {
     if (location == null || location.isUnknown()) {
       location = getLocation();
     }
 
-    //System.err.println("Env->error0: " + code + " . " + getErrorMask() + " . " + getLocation() + " . " + location + " . " + loc + " . " + msg);
+    //System.err.println("Env->error0: " + code + " . " + getErrorMask() + " . " + getLocation() + " . " + location + " . " + msg);
     //Thread.dumpStack();
 
     int mask = 1 << code;
@@ -6799,14 +6795,14 @@ public class Env
     int errorMask = getErrorMask();
 
     if (log.isLoggable(Level.FINEST)) {
-      QuercusException e = new QuercusException(loc + msg);
+      QuercusException e = new QuercusException(location.getMessagePrefix() + msg);
 
       log.log(Level.FINEST, e.toString(), e);
     }
 
     if ((errorMask & mask) != 0) {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(this + " " + loc + getExceptionLocation(msg));
+        log.fine(this + " " + location.getMessagePrefix() + getExceptionLocation(msg));
       }
     }
 
@@ -6852,18 +6848,19 @@ public class Env
         String fullMsg;
 
         if (log.isLoggable(Level.FINE)) {
-          fullMsg = (getLocationPrefix(location, loc)
+          fullMsg = location.getMessagePrefix()
               + getCodeName(mask)
-              + getExceptionLocation(msg));
+              + getExceptionLocation(msg);
         }
         else {
-          fullMsg = (getLocationPrefix(location, loc)
+          fullMsg = location.getMessagePrefix()
               + getCodeName(mask)
-              + msg);
+              + msg;
         }
 
-        if (getIniBoolean("track_errors"))
+        if (getIniBoolean("track_errors")) {
           setGlobalValue("php_errormsg", createString(fullMsg));
+        }
 
         if ("stderr".equals(getIniString("display_errors"))) {
           // initial newline to match PHP
@@ -6882,24 +6879,8 @@ public class Env
       }
     }
 
-    if ((mask & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) != 0)
-    {
-      String locPrefix = getLocationPrefix(location, loc);
-      QuercusErrorException exn;
-
-      if (! "".equals(locPrefix)) {
-        /*
-        throw new QuercusLineExitException(getLocation() +
-                                              getCodeName(mask) +
-                                              msg);
-        */
-        exn = new QuercusErrorException(locPrefix
-                                        + getCodeName(mask)
-                                        + getExceptionLocation(msg, location));
-      }
-      else {
-        exn = new QuercusErrorException(getExceptionLocation(msg, location));
-      }
+    if ((mask & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) != 0) {
+      QuercusErrorException exn = new QuercusErrorException(msg);
 
       exn.fillInStackTrace();
 
@@ -6935,21 +6916,6 @@ public class Env
     array.put(createString("line"), LongValue.create(line));
 
     return array;
-  }
-
-  /**
-   * Returns the displayable location prefix.  This may be slow
-   * for compiled-mode because of the need to match line numbers.
-   */
-  private String getLocationPrefix(Location location, String loc)
-  {
-    if (loc != null && ! "".equals(loc))
-      return loc;
-
-    if (location == null || location.isUnknown())
-      location = getLocation();
-
-    return location.getMessagePrefix();
   }
 
   /**

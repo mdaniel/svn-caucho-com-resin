@@ -2586,6 +2586,8 @@ public class QuercusParser {
 
     if (token == ';') {
       _namespaceUseMap.put(tail, name);
+      _namespaceUseMap.put(tail.toLowerCase(), name);
+
       return;
     }
     else if (token == AS) {
@@ -2593,6 +2595,8 @@ public class QuercusParser {
         tail = parseIdentifier();
 
         _namespaceUseMap.put(tail, name);
+        _namespaceUseMap.put(tail.toLowerCase(), name);
+
       } while ((token = parseToken()) == ',');
     }
 
@@ -4743,31 +4747,54 @@ public class QuercusParser {
   }
   private StringValue resolveIdentifier(StringValue id)
   {
-    if (id.startsWith("\\"))
+    if (id.startsWith("\\")) {
       return id.substring(1);
+    }
 
     int ns = id.indexOf('\\');
 
     if (ns > 0) {
       StringValue prefix = id.substring(0, ns);
-      StringValue use = _namespaceUseMap.get(prefix);
+      StringValue use = null;
 
-      if (use != null)
+      if (_namespaceUseMap.size() > 0) {
+        use = _namespaceUseMap.get(prefix);
+
+        if (use == null) {
+          use = _namespaceUseMap.get(prefix.toLowerCase());
+        }
+      }
+
+      if (use != null) {
         return createStringBuilder().append(use).append(id.substring(ns));
-      else if (_namespace.length() == 0)
+      }
+      else if (_namespace.length() == 0) {
         return id;
-      else
+      }
+      else {
         return createStringBuilder().append(_namespace).append("\\").append(id);
+      }
     }
     else {
-      StringValue use = _namespaceUseMap.get(id);
+      StringValue use = null;
 
-      if (use != null)
+      if (_namespaceUseMap.size() > 0) {
+        use = _namespaceUseMap.get(id);
+
+        if (use == null) {
+          use = _namespaceUseMap.get(id.toLowerCase());
+        }
+      }
+
+      if (use != null) {
         return use;
-      else if (_namespace.length() == 0)
+      }
+      else if (_namespace.length() == 0) {
         return id;
-      else
+      }
+      else {
         return createStringBuilder().append(_namespace).append('\\').append(id);
+      }
     }
   }
 

@@ -87,6 +87,22 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Returns the Quercus class for this obj/name.
+   */
+  public QuercusClass findQuercusClass(Env env)
+  {
+    QuercusClass cls = getQuercusClass();
+
+    if (cls != null) {
+      return cls;
+    }
+
+    String name = toString();
+
+    return env.getClass(name);
+  }
+
+  /**
    * Returns the called class
    */
   public Value getCalledClass(Env env)

@@ -32,11 +32,9 @@ package com.caucho.quercus;
 /**
  * Exception thrown by Env.error().
  */
-public class QuercusErrorException extends QuercusRuntimeException {
-  public QuercusErrorException()
-  {
-  }
-
+@SuppressWarnings("serial")
+public class QuercusErrorException extends QuercusRuntimeException
+{
   public QuercusErrorException(String msg)
   {
     super(msg);

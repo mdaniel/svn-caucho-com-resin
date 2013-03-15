@@ -72,6 +72,12 @@ abstract public class ObjectValue extends Value {
     return _quercusClass;
   }
 
+  @Override
+  public QuercusClass findQuercusClass(Env env)
+  {
+    return _quercusClass;
+  }
+
   public boolean isIncompleteObject()
   {
     return _incompleteObjectName != null;

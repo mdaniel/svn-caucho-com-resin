@@ -113,7 +113,7 @@ public class ClassVarMethodVarExpr extends Expr
     QuercusClass cl = env.findClass(className);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", className));
+      env.error(L.l("no matching class {0}", className), getLocation());
     }
 
     StringValue methodName = _methodName.evalStringValue(env);

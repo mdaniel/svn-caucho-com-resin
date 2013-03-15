@@ -1478,16 +1478,19 @@ public class QuercusContext
   {
     int id = _classNameMap.get(className);
 
-    if (id >= 0)
+    if (id >= 0) {
       return id;
+    }
 
-    if (className.startsWith("\\"))
+    if (className.startsWith("\\")) {
       className = className.substring(1);
+    }
 
     id = _classNameMap.get(className);
 
-    if (id >= 0)
+    if (id >= 0) {
       return id;
+    }
 
     synchronized (_classNameMap) {
       String name = className.toLowerCase(Locale.ENGLISH);

@@ -43,7 +43,7 @@ import java.util.ArrayList;
  */
 public class ListHeadExpr extends Expr {
   private static final L10N L = new L10N(ListHeadExpr.class);
-  
+
   protected final Expr []_varList;
   protected final Value []_keyList;
 
@@ -92,40 +92,40 @@ public class ListHeadExpr extends Expr {
       if (_varList[i] != null)
         _varList[i].evalAssignValue(env, value.get(_keyList[i]).copy());
     }
-    
+
     return value;
   }
-  
+
   public Value evalAssignEachValue(Env env, Value value)
   {
     if (! (value instanceof ArrayValue)) {
-      env.error(L.l("variable passed to each must reference an array"));
+      env.warning(L.l("variable passed to each must reference an array"));
       return NullValue.NULL;
     }
 
     ArrayValue array = (ArrayValue) value;
-    
+
     if (_varList.length > 0 && _varList[0] != null)
       _varList[0].evalAssignValue(env, array.key());
 
     if (_varList.length > 1 && _varList[1] != null)
       _varList[1].evalAssignValue(env, array.current().copy());
-      
+
     return array.each();
   }
-  
+
   public boolean evalEachBoolean(Env env, Value value)
   {
     if (! (value instanceof ArrayValue)) {
-      env.error(L.l("variable passed to each must reference an array"));
+      env.warning(L.l("variable passed to each must reference an array"));
       return false;
     }
 
     ArrayValue array = (ArrayValue) value;
-    
+
     if (! array.hasCurrent())
       return false;
-    
+
     if (_varList.length > 0 && _varList[0] != null)
       _varList[0].evalAssignValue(env, array.key());
 

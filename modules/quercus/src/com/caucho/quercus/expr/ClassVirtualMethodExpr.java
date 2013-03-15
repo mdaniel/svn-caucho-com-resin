@@ -92,7 +92,7 @@ public class ClassVirtualMethodExpr extends Expr {
     QuercusClass cls = qThis.getQuercusClass();
 
     if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
+      env.error(L.l("no calling class found"), getLocation());
 
       return NullValue.NULL;
     }

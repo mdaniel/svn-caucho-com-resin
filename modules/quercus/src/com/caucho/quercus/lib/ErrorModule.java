@@ -69,6 +69,8 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final int E_ALL = Env.E_ALL;
   public static final int E_STRICT = Env.E_STRICT;
   public static final int E_RECOVERABLE_ERROR = Env.E_RECOVERABLE_ERROR;
+  public static final int E_DEPRECATED = Env.E_DEPRECATED;
+  public static final int E_USER_DEPRECATED = Env.E_USER_DEPRECATED;
 
   public static final int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
   public static final int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
@@ -619,15 +621,15 @@ public class ErrorModule extends AbstractQuercusModule {
   {
     switch (code) {
     case Env.E_USER_NOTICE:
-      env.error(Env.B_USER_NOTICE, "", msg);
+      env.error(Env.B_USER_NOTICE, msg);
       return BooleanValue.TRUE;
 
     case Env.E_USER_WARNING:
-      env.error(Env.B_USER_WARNING, "", msg);
+      env.error(Env.B_USER_WARNING, msg);
       return BooleanValue.TRUE;
 
     case Env.E_USER_ERROR:
-      env.error(Env.B_USER_ERROR, "", msg);
+      env.error(Env.B_USER_ERROR, msg);
       return BooleanValue.TRUE;
 
     default:

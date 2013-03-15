@@ -107,12 +107,10 @@ public class ClassVarMethodExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    String className = _className.evalString(env);
-
-    QuercusClass cl = env.findClass(className);
+    QuercusClass cl = _className.evalQuercusClass(env);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
+      env.error(L.l("no matching class {0}", _className), getLocation());
     }
 
     StringValue nameV = _methodName;

@@ -186,11 +186,8 @@ abstract public class QuercusPage
     String type = e.getValue().getClassName();
     String message = e.getMessage(env);
 
-    env.error(location,
-              L.l(
-                "Uncaught exception of type '{0}' with message '{1}'",
-                type,
-                message));
+    env.error(L.l("Uncaught exception of type '{0}' with message '{1}'", type, message),
+              location);
   }
 
   /**

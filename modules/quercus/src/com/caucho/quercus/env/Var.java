@@ -41,6 +41,8 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.vfs.WriteStream;
 
@@ -50,6 +52,8 @@ import com.caucho.vfs.WriteStream;
 public class Var extends Value
   implements Serializable
 {
+  private static final Logger log = Logger.getLogger(Var.class.getName());
+
   private Value _value;
 
   public Var()
@@ -60,6 +64,8 @@ public class Var extends Value
   public Var(Value value)
   {
     _value = value;
+
+    checkVar(value);
   }
 
   /**
@@ -71,8 +77,24 @@ public class Var extends Value
     // assert(! value.isVar());
     _value = value;
 
+    checkVar(value);
+
     // php/151m
     return this;
+  }
+
+  private void checkVar(Value value)
+  {
+    if (value instanceof Var) {
+      //Exception e = new Exception();
+      //e.fillInStackTrace();
+
+      //log.log(Level.FINEST, "nested vars error", e);
+
+      //Thread.dumpStack();
+    }
+
+    assert(! (value instanceof Var));
   }
 
   public boolean isVar()
@@ -96,6 +118,8 @@ public class Var extends Value
 
       _value = value;
 
+      checkVar(value);
+
       return this;
     }
   }
@@ -107,6 +131,8 @@ public class Var extends Value
   {
     // quercus/0431
     _value = value;
+
+    checkVar(value);
 
     return this;
   }
@@ -145,6 +171,18 @@ public class Var extends Value
   public String getClassName()
   {
     return _value.getClassName();
+  }
+
+  @Override
+  public QuercusClass getQuercusClass()
+  {
+    return _value.getQuercusClass();
+  }
+
+  @Override
+  public QuercusClass findQuercusClass(Env env)
+  {
+    return _value.findQuercusClass(env);
   }
 
   /**
@@ -317,7 +355,19 @@ public class Var extends Value
   @Override
   public String toString()
   {
-    return _value.toString();
+    try {
+      return _value.toString();
+    }
+    catch (StackOverflowError e) {
+      Env env = Env.getInstance();
+
+      RuntimeException myException
+        = new RuntimeException(L.l("StackOverflowError in Var.toString()) at {0}", env.getLocation()));
+
+      myException.setStackTrace(new StackTraceElement[0]);
+
+      throw myException;
+    }
   }
 
   /**
@@ -511,6 +561,8 @@ public class Var extends Value
   public Value toAutoArray()
   {
     _value = _value.toAutoArray();
+
+    checkVar(_value);
 
     // php/03mg
 
@@ -983,6 +1035,8 @@ public class Var extends Value
   {
     _value = _value.increment(incr);
 
+    checkVar(_value);
+
     return _value;
   }
 
@@ -995,6 +1049,8 @@ public class Var extends Value
     Value value = _value;
 
     _value = value.increment(incr);
+
+    checkVar(_value);
 
     return value;
   }
@@ -1025,6 +1081,8 @@ public class Var extends Value
   {
     _value = _value.preincr();
 
+    checkVar(_value);
+
     return _value;
   }
 
@@ -1035,6 +1093,8 @@ public class Var extends Value
   public Value predecr()
   {
     _value = _value.predecr();
+
+    checkVar(_value);
 
     return _value;
   }
@@ -1049,6 +1109,8 @@ public class Var extends Value
 
     _value = value.postincr();
 
+    checkVar(_value);
+
     return value;
   }
 
@@ -1061,6 +1123,8 @@ public class Var extends Value
     Value value = _value;
 
     _value = value.postdecr();
+
+    checkVar(_value);
 
     return value;
   }
@@ -1295,8 +1359,11 @@ public class Var extends Value
   @Override
   public Value getArray()
   {
-    if (! _value.isset())
+    if (! _value.isset()) {
       _value = new ArrayValueImpl();
+    }
+
+    checkVar(_value);
 
     return _value;
   }
@@ -1307,8 +1374,11 @@ public class Var extends Value
   @Override
   public Value getObject(Env env)
   {
-    if (! _value.isset())
+    if (! _value.isset()) {
       _value = env.createObject();
+    }
+
+    checkVar(_value);
 
     return _value;
   }
@@ -1340,8 +1410,11 @@ public class Var extends Value
   {
     // php/3d1a
     // php/34ab
-    if (! _value.toBoolean())
+    if (! _value.toBoolean()) {
       _value = new ArrayValueImpl();
+    }
+
+    checkVar(_value);
 
     return _value.getVar(index);
   }
@@ -1369,6 +1442,8 @@ public class Var extends Value
     // php/3d11
     _value = _value.toAutoArray();
 
+    checkVar(_value);
+
     return _value.getArray(index);
   }
 
@@ -1390,6 +1465,8 @@ public class Var extends Value
     // php/3d2p
     _value = _value.toAutoArray();
 
+    checkVar(_value);
+
     return _value.getObject(env, index);
   }
 
@@ -1402,6 +1479,8 @@ public class Var extends Value
     // php/33m{g,h}
     // _value = _value.toAutoArray().append(index, value);
     _value = _value.append(index, value);
+
+    checkVar(_value);
 
     // this is slow, but ok because put() is only used for slow ops
     if (_value.isArray() || _value.isObject()) {
@@ -1423,6 +1502,8 @@ public class Var extends Value
     // php/323g
     _value = _value.append(index, value);
 
+    checkVar(_value);
+
     return _value;
   }
 
@@ -1434,6 +1515,8 @@ public class Var extends Value
   {
     _value = _value.toAutoArray();
 
+    checkVar(_value);
+
     return _value.put(value);
   }
 
@@ -1444,6 +1527,8 @@ public class Var extends Value
   public Var putVar()
   {
     _value = _value.toAutoArray();
+
+    checkVar(_value);
 
     return _value.putVar();
   }
@@ -1488,6 +1573,8 @@ public class Var extends Value
     // php/3a0r
     _value = _value.toAutoObject(env);
 
+    checkVar(_value);
+
     return _value.getFieldVar(env, name);
   }
 
@@ -1514,6 +1601,8 @@ public class Var extends Value
     // php/3d1q
     _value = _value.toAutoObject(env);
 
+    checkVar(_value);
+
     return _value.getFieldArray(env, name);
   }
 
@@ -1524,6 +1613,8 @@ public class Var extends Value
   public Value getFieldObject(Env env, StringValue name)
   {
     _value = _value.toAutoObject(env);
+
+    checkVar(_value);
 
     return _value.getFieldObject(env, name);
   }
@@ -1536,6 +1627,8 @@ public class Var extends Value
   {
     // php/3a0s
     _value = _value.toAutoObject(env);
+
+    checkVar(_value);
 
     return _value.putField(env, name, value);
   }
@@ -1680,6 +1773,8 @@ public class Var extends Value
     // php/03mg
 
     _value = _value.setCharValueAt(index, value);
+
+    checkVar(_value);
 
     return _value;
   }

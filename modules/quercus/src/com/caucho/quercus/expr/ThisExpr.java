@@ -36,11 +36,14 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.util.L10N;
 
 /**
  * Represents the 'this' expression.
  */
 public class ThisExpr extends AbstractVarExpr {
+  private static final L10N L = new L10N(Expr.class);
+
   protected final InterpretedClassDef _quercusClass;
 
   public ThisExpr(InterpretedClassDef quercusClass)
@@ -125,7 +128,7 @@ public class ThisExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignValue(Env env, Value value)
   {
-    env.error(getLocation(), "can't assign $this");
+    env.error(L.l("can't assign $this"), getLocation());
 
     return value;
   }
@@ -140,7 +143,7 @@ public class ThisExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignRef(Env env, Value value)
   {
-    env.error(getLocation(), "can't assign $this");
+    env.error(L.l("can't assign $this"), getLocation());
 
     return value;
   }
@@ -154,7 +157,7 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    env.error(getLocation(), "can't unset $this");
+    env.error(L.l("can't unset $this"), getLocation());
   }
 
   /**
