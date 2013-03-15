@@ -98,12 +98,12 @@ public class ListHeadExpr extends Expr {
 
   public Value evalAssignEachValue(Env env, Value value)
   {
-    if (! (value instanceof ArrayValue)) {
-      env.warning(L.l("variable passed to each must reference an array"));
+    if (! value.isArray()) {
+      env.warning(L.l("variable passed to each must reference an array, saw {0}", value.getType()));
       return NullValue.NULL;
     }
 
-    ArrayValue array = (ArrayValue) value;
+    ArrayValue array = value.toArrayValue(env);
 
     if (_varList.length > 0 && _varList[0] != null)
       _varList[0].evalAssignValue(env, array.key());
@@ -116,12 +116,12 @@ public class ListHeadExpr extends Expr {
 
   public boolean evalEachBoolean(Env env, Value value)
   {
-    if (! (value instanceof ArrayValue)) {
-      env.warning(L.l("variable passed to each must reference an array"));
+    if (! value.isArray()) {
+      env.warning(L.l("variable passed to each must reference an array, saw {0}", value.getType()));
       return false;
     }
 
-    ArrayValue array = (ArrayValue) value;
+    ArrayValue array = value.toArrayValue(env);
 
     if (! array.hasCurrent())
       return false;
