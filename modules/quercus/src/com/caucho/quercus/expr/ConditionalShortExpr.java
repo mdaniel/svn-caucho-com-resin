@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -59,9 +58,9 @@ public class ConditionalShortExpr extends Expr {
     Value value = _test.eval(env);
 
     if (value.toBoolean())
-      return value;
+      return value.copy(); // php/03cj, php/03ck
     else
-      return _falseExpr.eval(env);
+      return _falseExpr.evalCopy(env); // php/03cl
   }
 
   public String toString()
