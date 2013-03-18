@@ -376,7 +376,13 @@ public class QuercusServlet
    */
   public void setLicenseDirectory(String relPath)
   {
-    _licenseDirectory = new File(getServletContext().getRealPath(relPath));
+    if (relPath.startsWith("/") || relPath.contains(":")) {
+    }
+    else {
+      relPath = getServletContext().getRealPath(relPath);
+    }
+
+    _licenseDirectory = new File(relPath);
   }
 
   /**
