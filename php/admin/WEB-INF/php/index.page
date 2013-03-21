@@ -69,15 +69,6 @@ print_title("index", "Resin Administration");
       <p><?= gettext('Overview of the web-apps running in the Resin instance.')?></p>
     </td>
     <td width='50%' valign="top">
-      <h2><a href="rest.php"><?= gettext('REST')?></a></h2>
-      <p><?= gettext('REST pages for programmatic access')?></p>
-<?php
-      foreach (load_pages("rest") as $key
-        => $value) {
-			  echo"<a href='rest.php?q=" . $key . "'>" . $key
-                              . "</a><br/>\n";
-			}
-      ?>
     </td>
   </tr>
 </table>

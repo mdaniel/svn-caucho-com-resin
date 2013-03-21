@@ -1,26 +1,38 @@
 <?php
 
-mbean_init();
+require_once "WEB-INF/php/inc.php";
+require_once "WEB-INF/php/graph_flot.php";
+
+if (!admin_init("",false,true)) {
+  return;
+}
 
 #
 # load graph
 # 
-$hash = htmlspecialchars($_REQUEST['hash']);
-$graph = $_REQUEST['graph'];
 $checks = $_REQUEST['checks'];
 $servers = $_REQUEST['servers'];
 
 if (isset($_REQUEST["width"])) {
   $width = htmlspecialchars($_REQUEST["width"]);
-}
+} else {
+  $width = "640"
+} 
 
 if (isset($_REQUEST["height"])) {
   $height = htmlspecialchars($_REQUEST["height"]);
+} else {
+  $height = "480";
 }
 
-if (! $hash && ! $graph && ! $checks) {
+if (! isset($servers)) {
+  $servers = "00";
+}
+
+if (! isset($checks)) {
   $style .= "text-align: center;";
   $style .= "border: 1px solid black;";
+  
   if ($width)
     $style .= "width: {$width}px;";
 
@@ -30,40 +42,14 @@ if (! $hash && ! $graph && ! $checks) {
   echo "<div style='$style'><strong>No meters specified</strong></div>";
   return;
 }
-else {
-  if (! $checks) {
-    $cache = resin_create_distcache("resin:admin:graph");
 
-    if (! $hash) {
-      $user = quercus_servlet_request()->getRemoteUser();
-      $user_item = $cache->get($user);
+$checks_array = explode(",", $checks);
+$servers_array = explode(",", $servers);
+$names = array(); 
 
-      $hash = $user_item['user-graphs'][$graph];
-    }
-
-    $item = $cache->get($hash);
-
-    if (! $item) {
-    ?>
-    <b>Graph unavailable (Hash: <?= $hash ?></b>
-    <?php
-      return;
-    }
-
-    $name = $item['name'];
-    $checks = $item['checks'];
-    $servers = $item['servers'];
-  }
-
-  if ($servers == null) {
-    $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
-    $servers = array($self_index);
-  }
-
-  foreach ($checks as $check) {
-    foreach ($servers as $server) {
-      $names[] = htmlspecialchars("$server|$check");
-    }
+foreach ($checks_array as $check) {
+  foreach ($servers_array as $server) {
+    array_push($names, htmlspecialchars("$server|$check"));
   }
 }
 
@@ -71,7 +57,7 @@ else {
 # formatting parameters
 # 
 
-$canvas = "graph-{$hash}";
+$canvas = "graph-rest";
 $period = 60;
 
 if (isset($_REQUEST["canvas"])) {
@@ -91,21 +77,35 @@ $end = time();
 # 
 # output graph
 # 
+?>
 
-require_once "WEB-INF/php/graph_flot.php";
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title><?= $graph ?></title>
+  <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
+  <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" media="screen" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
 
+<?php
 $params = new GraphParams($canvas, $width, $height);
 $params->period = $period;
 $params->title = "Interactive Graph";
 $params->alt = "A interactive line graph representing the selected meters.";
 
-stat_graph_div($params);
+stat_graph($params, $names);
+?>
 
-$stat = get_stats_service();
-if (! $stat) {
-  return;
-}
+<script type="text/javascript" src="jquery-ui.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.selection.js"></script>
 
-stat_graph_script($stat, $canvas, $names, null, 0, $period);
+</body>
+</html>
 
+<?php
+display_tail();
 ?>
