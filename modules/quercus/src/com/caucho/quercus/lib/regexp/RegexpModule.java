@@ -501,14 +501,17 @@ public class RegexpModule
 
     ArrayValue regs;
 
-    if (matchRef.isDefault())
+    if (matchRef.isDefault()) {
       regs = null;
-    else
+    }
+    else {
       regs = new ArrayValueImpl();
+    }
 
     if (regexpState == null || regexpState.exec(env, subject, offset) < 0) {
-      if (regs != null)
+      if (regs != null) {
         matchRef.set(regs);
+      }
 
       env.freeRegexpState(regexpState);
 
@@ -530,8 +533,9 @@ public class RegexpModule
 
       int count = regexpState.groupCount();
       for (int i = 1; i < count; i++) {
-        if (! regexpState.isMatchedGroup(i))
+        if (! regexpState.isMatchedGroup(i)) {
           continue;
+        }
 
         StringValue group = regexpState.group(env, i);
 
@@ -552,8 +556,9 @@ public class RegexpModule
           part.append(LongValue.create(regexpState.start(i)));
 
           StringValue name = regexpState.getGroupName(i);
-          if (name != null)
+          if (name != null) {
             regs.put(name, part);
+          }
 
           regs.put(LongValue.create(i), part);
         }
@@ -565,8 +570,9 @@ public class RegexpModule
           }
 
           StringValue name = regexp.getGroupName(i);
-          if (name != null)
+          if (name != null) {
             regs.put(name, group);
+          }
 
           regs.put(LongValue.create(i), group);
         }
@@ -1132,18 +1138,21 @@ public class RegexpModule
 
       int lastGroup = 0;
       for (int i = 0; i < regexpState.groupCount(); i++) {
-        StringValue group = regexpState.group(env, i);
-
-        if (group != null && ! group.isEmpty()) {
-          /* PHP's preg_replace_callback does not return empty groups */
-          // php/154b, c
-
-          for (int j = lastGroup + 1; j < i; j++) {
-            regs.put(empty);
-          }
-
-          regs.put(group);
+        if (! regexpState.isMatchedGroup(i)) {
+          continue;
         }
+
+        // PHP's preg_replace_callback does not return empty groups unless it's
+        // followed by a matching group
+        // php/154b, php/154c
+        for (int j = lastGroup + 1; j < i; j++) {
+          regs.put(empty);
+        }
+
+        lastGroup = i;
+
+        StringValue group = regexpState.group(env, i);
+        regs.put(group);
       }
 
       Value replacement = fun.call(env, regs);
