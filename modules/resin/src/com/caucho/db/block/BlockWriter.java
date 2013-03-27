@@ -97,7 +97,7 @@ public class BlockWriter extends AbstractTaskWorker {
     }
 
     // if (findBlock(block.getBlockId()) != block) {
-    _blockWriteRing.put(block);
+    _blockWriteRing.offer(block);
     // }
     
     /*
@@ -135,12 +135,12 @@ public class BlockWriter extends AbstractTaskWorker {
 
   private Block findBlock(long blockId)
   {
-    int head = _blockWriteRing.getHead();
-    int size = _blockWriteRing.getSize();
+    long head = _blockWriteRing.getHead();
+    int size = _blockWriteRing.size();
     
      Block matchBlock = null;
 
-    int ptr = head;
+    long ptr = head;
     for (int i = size + 4; i >= 0; i--) {
       Block testBlock = _blockWriteRing.getValue(ptr);
 
@@ -151,7 +151,7 @@ public class BlockWriter extends AbstractTaskWorker {
         return testBlock;
       }
       
-      ptr = _blockWriteRing.prevIndex(ptr);
+      ptr--;
     }
     
      return matchBlock;

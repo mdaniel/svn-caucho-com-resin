@@ -259,7 +259,7 @@ abstract public class AbstractTaskWorker2
           thread.setName(getThreadName());
           Thread.interrupted();
           
-          if (! isRetry()) {
+          if (! isRetry() && _state.get() == State.PARK) {
             LockSupport.parkUntil(expires);
           }
           

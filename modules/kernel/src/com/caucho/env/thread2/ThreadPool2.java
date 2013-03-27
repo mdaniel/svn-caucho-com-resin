@@ -652,7 +652,7 @@ public class ThreadPool2 implements Executor {
       return true;
     }
     
-    if (! _idleThreadRing.put(thread)) {
+    if (! _idleThreadRing.offer(thread)) {
       System.out.println("NOFREE: " + thread);
     }
     
@@ -839,7 +839,7 @@ public class ThreadPool2 implements Executor {
         return true;
       }
 
-      _idleThreadRing.put(thread);
+      _idleThreadRing.offer(thread);
        
       return false;
     }
@@ -867,7 +867,7 @@ public class ThreadPool2 implements Executor {
         return true;
       }
 
-      _idleThreadRing.put(thread);
+      _idleThreadRing.offer(thread);
        
       return false;
     }

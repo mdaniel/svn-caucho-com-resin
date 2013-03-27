@@ -709,9 +709,13 @@
         <include name="modules/**/src/**"/>
         <include name="modules/ext/activation.jar"/>
         <include name="modules/ext/javamail-141.jar"/>
+        <!--
         <include name="modules/ext/jsr88.jar"/>
         <include name="modules/ext/jsr173_1.0_api.jar"/>
+        -->
+        <!--
         <include name="modules/ext/webservices-api.jar"/>
+        -->
         <include name="modules/ext/webservices-extra-api.jar"/>
         <include name="maven-lib"/>
         <include name="win32/**"/>
@@ -740,7 +744,9 @@
           -->
         <include name="lib/validation-api-1.0.0.GA.jar"/>
         <include name="lib/webutil.jar"/>
+        <!--
         <include name="lib/webservices-api.jar"/>
+        -->
         <include name="lib/webservices-extra-api.jar"/>
         <include name="lib/webservices.LICENSE"/>
 

@@ -50,7 +50,7 @@ public final class FreeRingSoft<T> {
 
   public int getSize()
   {
-    return _ringQueue.getSize();
+    return _ringQueue.size();
   }
   
   public long getHead()

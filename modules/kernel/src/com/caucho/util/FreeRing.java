@@ -52,7 +52,7 @@ public final class FreeRing<T> {
 
   public int getSize()
   {
-    return _ringQueue.getSize();
+    return _ringQueue.size();
   }
   
   public long getHead()

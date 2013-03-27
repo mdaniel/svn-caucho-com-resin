@@ -29,356 +29,460 @@
 
 package com.caucho.util;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class RingValueQueue<T> {
-  private static final Logger log
-    = Logger.getLogger(RingValueQueue.class.getName());
-  
-  private final Item<T> [] _ring;
-  
-  private final AtomicInteger _headAlloc = new AtomicInteger();
-  private final AtomicInteger _head = new AtomicInteger();
-  
-  private final AtomicInteger _tailAlloc = new AtomicInteger();
-  private final AtomicInteger _tail = new AtomicInteger();
-  
-  private final int _size;
-  private final int _mask;
-  
-  private final AtomicBoolean _isOfferWait = new AtomicBoolean();
-  
+import com.caucho.env.thread.TaskWorker;
+import com.caucho.util.L10N;
+
+/**
+ * Value queue with atomic reference.
+ */
+public final class RingValueQueue<M>
+  extends AbstractActorQueue<M>
+{
+  private static final L10N L = new L10N(RingValueQueue.class);
+
+  private final RingValueArray<M> _ring;
+  private final RingTailGetter<M> _tailGetter;
+  private final RingNonTailGetter<M> _nonTailGetter;
+
+  // private final RingUnsafeArray<T> _ring;
+  private final int _capacity;
+
+  private final AtomicLong _head;
+
+  private final AtomicLong _tailAlloc = new AtomicLong();
+  private final AtomicLong _tail;
+
+  private final RingBlocker _blocker;
+
+  private volatile boolean _isWriteClosed;
+
   public RingValueQueue(int capacity)
   {
-    int size = 8;
-    
-    while (size < capacity) {
-      size *= 2;
+    this(capacity, new RingBlockerBasic());
+  }
+
+  public RingValueQueue(int capacity,
+                        RingBlocker blocker)
+  {
+    if (Integer.bitCount(capacity) != 1 || capacity < 2) {
+      throw new IllegalArgumentException(L.l("Invalid ring capacity {0}",
+                                             Long.toHexString(capacity)));
     }
-    
-    _size = size;
-    _ring = new Item[size];
-    _mask = size - 1;
-    
-    for (int i = 0; i < _ring.length; i++) {
-      _ring[i] = new Item<T>();
+
+    if (blocker == null) {
+      throw new NullPointerException(L.l("RingBlocker is required"));
     }
+
+    _capacity = capacity;
+
+    _ring = new RingValueArray<M>(capacity);
+    // _ring = new RingUnsafeArray<T>(capacity);
+
+    _tailGetter = new RingTailGetter<M>(_ring);
+    _nonTailGetter = new RingNonTailGetter<M>(_ring);
+
+    _head = new AtomicLong();
+    _tail = new AtomicLong();
+
+    _blocker = blocker;
+  }
+
+  public int getCapacity()
+  {
+    return _capacity;
+  }
+
+  @Override
+  public int getOfferReserve()
+  {
+    return _capacity / 2;
   }
   
+  public int remainingCapacity()
+  {
+    return _capacity - size() - 1;
+  }
+
+  @Override
   public final boolean isEmpty()
   {
     return _head.get() == _tail.get();
   }
-  
-  public final int getSize()
+
+  @Override
+  public final int size()
   {
-    int head = _head.get();
-    int tail = _tail.get();
-    
-    return (head - tail + _size) & _mask;
+    long head = _head.get();
+    long tail = _tail.get();
+
+    return (int) (head - tail);
   }
-  
-  public final int getCapacity()
-  {
-    return _size;
-  }
-  
-  public final int getHead()
+
+  public final long getHead()
   {
     return _head.get();
   }
-  
-  public final int getHeadAlloc()
+
+  public final long getHeadAlloc()
   {
-    return _headAlloc.get();
+    return _head.get();
   }
-  
-  public final int getTail()
+
+  public final long getTail()
   {
     return _tail.get();
   }
-  
-  public final int getTailAlloc()
+
+  public final long getTailAlloc()
   {
     return _tailAlloc.get();
   }
-  
-  public final boolean offer(T value)
+
+  @Override
+  public TaskWorker getOfferTask()
   {
-    return offer(value, 0);
+    return _blocker;
   }
-  
-  public final boolean put(T value)
+
+  public final M getValue(long ptr)
   {
-    return offer(value, CurrentTime.getCurrentTime() + Integer.MAX_VALUE);
+    return get(ptr);
   }
-  
-  public final boolean offer(T value, long expireTime)
+
+  private final M get(long ptr)
   {
-    if (value == null)
+    return _ring.get(ptr);
+  }
+
+  private final M getAndClear(long ptr)
+  {
+    RingValueArray<M> ring = _ring;
+
+    M item;
+
+    while ((item = ring.getAndSet(ptr, null)) == null) {
+    }
+
+    return item;
+  }
+
+  private final boolean isSet(long ptr)
+  {
+    return _ring.get(ptr) != null;
+  }
+
+  @Override
+  public final boolean offer(final M value,
+                             final long timeout,
+                             final TimeUnit unit)
+  {
+    return offer(value, timeout, unit, 0);
+  }
+
+  @Override
+  public final boolean offer(final M value,
+                             final long timeout,
+                             final TimeUnit unit,
+                             final int reservedSpace)
+  {
+    if (value == null) {
       throw new NullPointerException();
-    
-    final AtomicInteger headRef = _head;
-    final AtomicInteger headAllocRef = _headAlloc;
-    final AtomicInteger tailRef = _tail;
-    final int mask = _mask;
-    
+    }
+
+    // completePoll();
+
+    final AtomicLong headRef = _head;
+    final AtomicLong tailRef = _tail;
+    final int capacity = _capacity;
+
     while (true) {
-      int headAlloc = headAllocRef.get();
-      int tail = tailRef.get();
-          
-      int nextHeadAlloc = (headAlloc + 1) & mask;
-      
-      if (nextHeadAlloc == tail) {
-        if (finishPoll()) {
-        }
-        else if (expireTime <= 0) {
+      // final AtomicReferenceArray<T> ring = _ring;
+      final long tail = tailRef.get();
+      final long head = headRef.get();
+      final long nextHead = head + 1;
+
+      if (capacity <= nextHead - tail + reservedSpace) {
+        if (! _blocker.offerWait(tail, tailRef, reservedSpace, timeout, unit)) {
           return false;
         }
-        else {
-          waitForAvailable(headAlloc, tail);
-        }
       }
-      else if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
-        Item<T> item = get(headAlloc);
-        item.set(value);
-        
-        if (! headRef.compareAndSet(headAlloc, nextHeadAlloc)) {
-          finishOffer(headAlloc);
-        }
-        
-        wakeAvailable();
-        
+      else if (headRef.compareAndSet(head, nextHead)) {
+        _ring.set(head, value);
+
         return true;
       }
     }
   }
-  
-  private final boolean finishOffer()
+
+  @Override
+  public final M peek()
   {
-    final int head = _head.get();
-    final int headAlloc = _headAlloc.get();
-    
-    if (head != headAlloc && get(head).isSet()) {
-      finishOffer(head);
-      return true;
+    long head = _head.get();
+    long tailAlloc = _tailAlloc.get();
+
+    if (tailAlloc < head) {
+      return get(tailAlloc);
     }
-    else {
-      return false;
-    }
+
+    return null;
   }
 
-  private void finishOffer(final int index)
+  @Override
+  public final M poll(long timeout, TimeUnit unit)
   {
-    final AtomicInteger headRef = _head;
-    final AtomicInteger headAllocRef = _headAlloc;
-    final int mask = _mask;
+    final AtomicLong tailAllocRef = _tailAlloc;
+    final AtomicLong headRef = _head;
 
-    // limit retry in high-contention situation, since we've acked the entry
-    final int retryMax = ((index & 0xf) + 1) << 4;
-    int retryCount = retryMax;
-    int count = 4;
-    
-    while (retryCount-- >= 0) {
-      int head = headRef.get();
-      int headAlloc = headAllocRef.get();
+    final RingBlocker blocker = _blocker;
 
-      if (head == headAlloc) {
-        return;
-      }
-      
-      if (get(head).isSet()) {
-        int nextHead = (head + 1) & mask;
-        
-        if (headRef.compareAndSet(head, nextHead) && count-- <= 0) {
-          return;
-        }
-        
-        retryCount = retryMax;
-      }
-    }
-  }
-  
-  public final T peek()
-  {
-    int tail = _tailAlloc.get();
-    int head = _head.get();
-    
-    if (head != tail)
-      return getValue(tail);
-    else
-      return null;
-  }
- 
-  public final T poll()
-  {
-    // long nextTail;
-    // long tailAlloc;
-    
-    final AtomicInteger tailAllocRef = _tailAlloc;
-    final AtomicInteger tailRef = _tail;
-    final AtomicInteger headRef = _head;
-    
     while (true) {
-      int tailAlloc = tailAllocRef.get();
-      int head = headRef.get();
-      
-      if (head == tailAlloc) {
-        if (! finishOffer()) {
+      final long tailAlloc = tailAllocRef.get();
+      final long head = headRef.get();
+
+      if (tailAlloc == head) {
+        // completeOffer();
+        blocker.offerWake();
+
+        if (timeout <= 0 || ! blocker.pollWait(timeout, unit)) {
           return null;
         }
       }
-      
-      final int nextTail = (tailAlloc + 1) & _mask;
-      if (tailAllocRef.compareAndSet(tailAlloc, nextTail)) {
-        final Item<T> item = get(tailAlloc);
-        
-        final T value = item.getAndClear();
-        
-        if (! tailRef.compareAndSet(tailAlloc, nextTail)) {
-          completePoll(tailAlloc);
+      else if (tailAllocRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
+        M value;
+
+        do {
+          value = getAndClear(tailAlloc);
+        } while (value == null);
+
+        if (! _tail.compareAndSet(tailAlloc, tailAlloc + 1)) {
+          completePoll();
+          // blocker.wake();
         }
+
+        /*
+        if (_capacity <= head - tailAlloc + 4) {
+          blocker.wake();
+        }
+        */
         
+        blocker.offerWake();
+
         return value;
       }
     }
   }
-  
-  private final boolean finishPoll()
-  {
-    final int tail = _tail.get();
-    final int headAlloc = _tailAlloc.get();
-    
-    if (tail != headAlloc && ! get(tail).isSet()) {
-      completePoll(tail);
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
 
-  private void completePoll(final int index)
+  private void completePoll()
   {
-    final AtomicInteger tailRef = _tail;
-    final AtomicInteger tailAllocRef = _tailAlloc;
-    
-    // int ringLength = ring.length;
-    // int halfSize = _halfSize;
-    
-    // limit retry in high-contention situation
-    final int retryMax = ((index & 0xf) + 1) << 4;
-    int retryCount = retryMax;
-    int count = 4;
+    final AtomicLong tailRef = _tail;
+    final AtomicLong tailAllocRef = _tailAlloc;
 
-    while (retryCount-- >= 0) {
-      final int tail = tailRef.get();
-      final int tailAlloc = tailAllocRef.get();
-      
+    while (true) {
+      final long tail = tailRef.get();
+      final long tailAlloc = tailAllocRef.get();
+
       if (tail == tailAlloc) {
-        wakeAvailable();
         return;
       }
-      
-      if (! get(tail).isSet()) {
-        final int nextTail = (tail + 1) & _mask;
-        
-        if (tailRef.compareAndSet(tail, nextTail) && count-- <= 0) {
-          wakeAvailable();
-          return;
+
+      if (isSet(tail)) {
+        return;
+      }
+
+      tailRef.compareAndSet(tail, tail + 1);
+    }
+  }
+
+  /*
+  @Override
+  public void deliver(final Actor<M> actor,
+                      final MessageContext<M> actorContext,
+                      M chainItem)
+    throws Exception
+  {
+    final ActorCounter headCounter = _head;
+    final ActorCounter tailCounter = _tail;
+
+    long initialTail = tailCounter.get();
+    long tail = initialTail;
+    long head = headCounter.get();
+
+    try {
+      do {
+        tail = deliver(head, tail, actor, actorContext);
+
+        if (chainItem != null) {
+          M item = chainItem;
+          chainItem = null;
+
+          // actorContext.setContextMessage(item);
+          actor.deliver(item, actorContext);
         }
-        
-        retryCount = retryMax;
+
+        head = headCounter.get();
+      } while (tail < head);
+    } finally {
+      _blocker.offerWake();
+
+      if (chainItem != null) {
+        offer(chainItem);
+        wake();
       }
     }
-    
-    wakeAvailable();
   }
-  
-  private void waitForAvailable(int headAlloc, int tail)
+  */
+
+  public void wake()
   {
-    if (_headAlloc.get() == headAlloc && _tail.get() == tail) {
-      synchronized (_isOfferWait) {
-        _isOfferWait.set(true);
-        if (_headAlloc.get() == headAlloc
-            && _tail.get() == tail) {
-          try {
-            _isOfferWait.wait(10);
-          } catch (Exception e) {
-            log.log(Level.FINER, e.toString(), e);
+  }
+
+  /*
+  private long deliver(long head,
+                       long tail,
+                       final Actor<M> actor,
+                       final MessageContext<M> actorContext)
+    throws Exception
+  {
+    final int tailChunk = 32;
+    final RingValueArray<M> ring = _ring;
+    final ActorCounter tailCounter = _tail;
+
+    long lastTail = tail;
+
+    try {
+      while (tail < head) {
+        long tailChunkEnd = Math.min(head, tail + tailChunk);
+
+        while (tail < tailChunkEnd) {
+          M item = ring.getAndSet(tail, null);
+
+          if (item != null) {
+            tail++;
+
+            // actorContext.setContextMessage(item);
+            actor.deliver(item, actorContext);
           }
         }
+
+        tailCounter.set(tail);
+        lastTail = tail;
+      }
+    } finally {
+      if (tail != lastTail) {
+        tailCounter.set(tail);
       }
     }
+
+    return lastTail;
   }
-  
-  private Item<T> get(int index)
+
+  @Override
+  public void process(final Actor<M> processor,
+                      final MessageContext<M> threadContext,
+                      final ActorCounter headCounter,
+                      final ActorCounter tailCounter,
+                      final TaskWorker nextWorker,
+                      boolean isTail)
+    throws Exception
   {
-    return _ring[index];
-  }
-  
-  public T getValue(int index)
-  {
-    return _ring[index & _mask].get();
-  }
-  
-  public int nextIndex(int index)
-  {
-    return (index + 1) & _mask;
-  }
-  
-  public int prevIndex(int index)
-  {
-    return (index + _mask) & _mask;
-  }
-  
-  private void wakeAvailable()
-  {
-    int size = getSize();
-    
-    if (_isOfferWait.get()
-        && (2 * size <= _size || _size - size > 64)) {
-      if (_isOfferWait.compareAndSet(true, false)) {
-        synchronized (_isOfferWait) {
-          _isOfferWait.notifyAll();
+    final RingGetter<M> ringGetter = isTail ? _tailGetter : _nonTailGetter;
+
+    int tailChunk = 2;
+    long initialTail = tailCounter.get();
+    long tail = initialTail;
+    long head = headCounter.get();
+
+    try {
+      do {
+        long tailChunkEnd = Math.min(head, tail + tailChunk);
+
+        while (tail < tailChunkEnd) {
+          M item = ringGetter.get(tail);
+
+          if (item != null) {
+            tail++;
+
+            processor.deliver(item, threadContext);
+          }
         }
+
+        tailCounter.set(tail);
+        initialTail = tail;
+        tailChunk = Math.min(256, 2 * tailChunk);
+        nextWorker.wake();
+
+        head = headCounter.get();
+      } while (head != tail);
+    } finally {
+      if (tail != initialTail) {
+        tailCounter.set(tail);
       }
+
+      nextWorker.wake();
     }
   }
-  
-  private static final class Item<T> {
-    private volatile T _value;
-    
-    final boolean isSet()
+  */
+
+  public final boolean isWriteClosed()
+  {
+    return _isWriteClosed;
+  }
+
+  public final void closeWrite()
+  {
+    _isWriteClosed = true;
+
+    _blocker.offerWake();
+    _blocker.pollWake();
+  }
+
+  public final void close()
+  {
+    closeWrite();
+
+    _blocker.close();
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getCapacity() + "]";
+  }
+
+  abstract private static class RingGetter<T> {
+    abstract public T get(long index);
+  }
+
+  private final static class RingTailGetter<T> extends RingGetter<T> {
+    private final RingValueArray<T> _ring;
+
+    RingTailGetter(RingValueArray<T> ring)
     {
-      return _value != null;
+      _ring = ring;
     }
-    
-    final T get()
+
+    @Override
+    public final T get(long index)
     {
-      return _value;
+      return _ring.getAndSet(index, null);
     }
-    
-    final T getAndClear()
+  }
+
+  private final static class RingNonTailGetter<T> extends RingGetter<T> {
+    private final RingValueArray<T> _ring;
+
+    RingNonTailGetter(RingValueArray<T> ring)
     {
-      T value = _value;
-      _value = null;
-      
-      return value;
+      _ring = ring;
     }
-    
-    final void set(final T value)
+
+    @Override
+    public final T get(long index)
     {
-      _value = value;
-      
-    }
-    
-    final void clear()
-    {
-      _value = null;
+      return _ring.get(index);
     }
   }
 }

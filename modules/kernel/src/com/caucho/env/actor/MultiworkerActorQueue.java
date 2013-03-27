@@ -29,12 +29,11 @@
 
 package com.caucho.env.actor;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.AbstractTaskWorker;
-import com.caucho.util.RingItem;
-import com.caucho.util.RingItemFactory;
 import com.caucho.util.RingValueQueue;
 
 
@@ -76,7 +75,7 @@ public class MultiworkerActorQueue<T> implements ActorQueueApi<T>
   @Override
   public int getAvailable()
   {
-    return _ringQueue.getCapacity() - _ringQueue.getSize();
+    return _ringQueue.getCapacity() - _ringQueue.size();
   }
   
   @Override
@@ -88,7 +87,7 @@ public class MultiworkerActorQueue<T> implements ActorQueueApi<T>
   @Override
   public int getSize()
   {
-    return _ringQueue.getSize();
+    return _ringQueue.size();
   }
   
   @Override
@@ -99,7 +98,8 @@ public class MultiworkerActorQueue<T> implements ActorQueueApi<T>
   
   public final boolean offer(T value, boolean isWait)
   {
-    boolean result =  _ringQueue.offer(value, isWait ? 600 * 1000L : 0);
+    boolean result =  _ringQueue.offer(value, isWait ? 600 * 1000L : 0, 
+                                       TimeUnit.MILLISECONDS);
     
     wake();
     

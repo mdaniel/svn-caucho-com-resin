@@ -306,6 +306,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       workerQueue.wake();
 
       if (! workerQueue.offer(packet, true)) {
+        workerQueue.wake();
+        
         throw new QueueFullException("BAM queue is full size=" + workerQueue.getSize() + "\n  " + this + " " + packet);
       }
     }

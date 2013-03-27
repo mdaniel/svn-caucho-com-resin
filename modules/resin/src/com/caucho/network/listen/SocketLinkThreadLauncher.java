@@ -76,7 +76,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   boolean offerResumeTask(ConnectionTask task)
   {
-    if (! _resumeTaskQueue.put(task)) {
+    if (! _resumeTaskQueue.offer(task)) {
       System.out.println("FAILED_SUBMIT:");
     }
     
@@ -93,7 +93,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   boolean submitResumeTask(ConnectionTask task)
   {
-    if (! _resumeTaskQueue.put(task)) {
+    if (! _resumeTaskQueue.offer(task)) {
       System.out.println("FAILED_SUBMIT:");
     }
     
@@ -184,7 +184,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
         return;
       }
     
-      int size = _resumeTaskQueue.getSize();
+      int size = _resumeTaskQueue.size();
       if (size < min) {
         min = size;
       }
@@ -221,7 +221,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
 
       AcceptTask acceptTask = startConn.requestAccept();
       
-      if (acceptTask != null && _acceptTaskQueue.put(acceptTask)) {
+      if (acceptTask != null && _acceptTaskQueue.offer(acceptTask)) {
         startConn = null;
         
         _threadPool.schedule(new TcpSocketAcceptThread(this));
