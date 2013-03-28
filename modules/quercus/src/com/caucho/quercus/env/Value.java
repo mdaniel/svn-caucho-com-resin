@@ -2549,6 +2549,36 @@ abstract public class Value implements java.io.Serializable
     unsetField(name);
   }
 
+  /**
+   * Returns the static field.
+   */
+  public Value getStaticFieldValue(Env env, StringValue name)
+  {
+    env.error(L.l("No calling class found for '{0}'", this));
+
+    return NullValue.NULL;
+  }
+
+  /**
+  * Returns the static field reference.
+  */
+  public Var getStaticFieldVar(Env env, StringValue name)
+  {
+    env.error(L.l("No calling class found for '{0}'", this));
+
+    throw new IllegalStateException();
+  }
+
+  /**
+   * Sets the static field.
+   */
+  public Value setStaticFieldRef(Env env, StringValue name, Value value)
+  {
+    env.error(L.l("No calling class found for '{0}'", this));
+
+    throw new IllegalStateException();
+  }
+
   //
   // field convenience
   //

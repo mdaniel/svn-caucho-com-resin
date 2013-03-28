@@ -1741,6 +1741,33 @@ public class Var extends Value
     _value.unsetThisField(name);
   }
 
+  /**
+   * Returns the static field.
+   */
+  @Override
+  public Value getStaticFieldValue(Env env, StringValue name)
+  {
+    return _value.getStaticFieldValue(env, name);
+  }
+
+  /**
+  * Returns the static field reference.
+  */
+  @Override
+  public Var getStaticFieldVar(Env env, StringValue name)
+  {
+    return _value.getStaticFieldVar(env, name);
+  }
+
+  /**
+   * Sets the static field.
+   */
+  @Override
+  public Value setStaticFieldRef(Env env, StringValue name, Value value)
+  {
+    return _value.setStaticFieldRef(env, name, value);
+  }
+
   //
   // array routines
   //

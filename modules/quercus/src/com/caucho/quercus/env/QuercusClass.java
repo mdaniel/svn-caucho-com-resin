@@ -1022,6 +1022,7 @@ public class QuercusClass extends NullValue {
     }
   }
 
+  @Override
   public Value getStaticFieldValue(Env env, StringValue name)
   {
     StringValue staticName = _staticFieldNameMap.get(name);
@@ -1036,6 +1037,7 @@ public class QuercusClass extends NullValue {
     return env.getStaticValue(staticName);
   }
 
+  @Override
   public Var getStaticFieldVar(Env env, StringValue name)
   {
     StringValue staticName = _staticFieldNameMap.get(name);
@@ -1050,6 +1052,7 @@ public class QuercusClass extends NullValue {
     return env.getStaticVar(staticName);
   }
 
+  @Override
   public Value setStaticFieldRef(Env env, StringValue name, Value value)
   {
     StringValue staticName = _staticFieldNameMap.get(name);
@@ -1067,7 +1070,7 @@ public class QuercusClass extends NullValue {
   /**
    * For Reflection.
    */
-  public Value getStaticField(Env env, StringValue name)
+  public Value getStaticFieldInternal(Env env, StringValue name)
   {
     StringValue staticName = _staticFieldNameMap.get(name);
 

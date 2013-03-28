@@ -529,6 +529,33 @@ abstract public class ObjectValue extends Value {
   }
 
   /**
+   * Returns the static field.
+   */
+  @Override
+  public Value getStaticFieldValue(Env env, StringValue name)
+  {
+    return getQuercusClass().getStaticFieldValue(env, name);
+  }
+
+  /**
+  * Returns the static field reference.
+  */
+  @Override
+  public Var getStaticFieldVar(Env env, StringValue name)
+  {
+    return getQuercusClass().getStaticFieldVar(env, name);
+  }
+
+  /**
+   * Sets the static field.
+   */
+  @Override
+  public Value setStaticFieldRef(Env env, StringValue name, Value value)
+  {
+    return getQuercusClass().setStaticFieldRef(env, name, value);
+  }
+
+  /**
    * Returns true for equality
    */
   @Override

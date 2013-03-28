@@ -299,7 +299,7 @@ public class ReflectionProperty
 
       if (refClass != null)
         return refClass;
-      else if (cls.getStaticField(env, _name) != null)
+      else if (cls.getStaticFieldInternal(env, _name) != null)
         return cls;
 
       return null;
