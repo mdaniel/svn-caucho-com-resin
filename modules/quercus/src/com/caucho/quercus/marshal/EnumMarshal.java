@@ -65,24 +65,7 @@ public class EnumMarshal extends Marshal {
 
   public Object marshal(Env env, Value value, Class argClass)
   {
-    if (value.isNull()) {
-      return null;
-    }
-
-    String name = value.toString();
-
-    if (name == null) {
-      return null;
-    }
-
-    try {
-      return Enum.valueOf(_enumClass, name);
-    }
-    catch (IllegalArgumentException e) {
-      env.warning(e);
-
-      return null;
-    }
+    return value.toJavaEnum(env, argClass);
   }
 
   public Value unmarshal(Env env, Object value)
@@ -90,7 +73,7 @@ public class EnumMarshal extends Marshal {
     if (value == null)
       return NullValue.NULL;
     else
-      return env.createString(value.toString());
+      return env.wrapJava(value);
   }
 
   @Override

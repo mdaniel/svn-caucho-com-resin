@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.quercus.program.JavaClassDef;
 
 import java.util.*;
@@ -45,7 +43,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   public JavaCollectionAdapter(Collection<Object> coll, JavaClassDef def)
   {
     super(coll, def);
-    
+
     _collection = coll;
   }
 
@@ -106,7 +104,7 @@ public class JavaCollectionAdapter extends JavaAdapter
         "random assignment into Collection");
 
     _collection.add(value.toJavaObject());
-    
+
     return value;
   }
 
@@ -117,44 +115,44 @@ public class JavaCollectionAdapter extends JavaAdapter
   public Value get(Value key)
   {
     int pos = key.toInt();
-    
+
     if (pos < 0)
       return UnsetValue.UNSET;
-    
+
     for (Object obj : _collection) {
       if (pos-- > 0)
         continue;
-      
+
       return wrapJava(obj);
     }
-    
+
     return UnsetValue.UNSET;
   }
-  
+
   /**
    * Removes a value.
    */
   @Override
   public Value remove(Value key)
-  { 
+  {
     int pos = key.toInt();
-    
+
     if (pos < 0)
       return UnsetValue.UNSET;
-    
+
     for (Object obj : _collection) {
       if (pos-- > 0)
         continue;
-      
+
       Value val = wrapJava(obj);
-      
+
       _collection.remove(obj);
       return val;
     }
 
     return UnsetValue.UNSET;
   }
-  
+
   /**
    * Returns a set of all the of the entries.
    */
@@ -172,7 +170,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   {
     return new CollectionSet();
   }
-  
+
   /**
    * Returns a collection of the values.
    */
@@ -219,7 +217,7 @@ public class JavaCollectionAdapter extends JavaAdapter
       return new CollectionIterator();
     }
   }
-  
+
   public class CollectionIterator
     implements Iterator<Map.Entry<Object,Object>>
   {
@@ -329,7 +327,7 @@ public class JavaCollectionAdapter extends JavaAdapter
       throw new UnsupportedOperationException();
     }
   }
-  
+
   public class ValueCollection
     extends AbstractCollection<Value>
   {

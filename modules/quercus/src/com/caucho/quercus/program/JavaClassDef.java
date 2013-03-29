@@ -919,6 +919,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private void introspect()
   {
     introspectConstants(_type);
+    introspectEnums(_type);
+
     introspectMethods(_moduleContext, _type);
     introspectFields(_moduleContext, _type);
 
@@ -1251,9 +1253,6 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     }
   }
 
-  /**
-   * Introspects the Java class.
-   */
   private void introspectConstants(Class<?> type)
   {
     if (type == null)
@@ -1261,14 +1260,6 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
     if (! Modifier.isPublic(type.getModifiers()))
       return;
-
-    /* not needed because Class.getFields() is recursive
-    Class []ifcs = type.getInterfaces();
-
-    for (Class ifc : ifcs) {
-      introspectConstants(ifc);
-    }
-    */
 
     Field []fields = type.getFields();
 
@@ -1299,8 +1290,56 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         log.log(Level.FINEST, e.toString(), e);
       }
     }
+  }
 
-    //introspectConstants(type.getSuperclass());
+  private void introspectEnums(Class<?> type)
+  {
+    if (type == null) {
+      return;
+    }
+
+    if (! Modifier.isPublic(type.getModifiers())) {
+      return;
+    }
+
+    Class<?>[] classes = type.getClasses();
+
+    for (Class<?> cls : classes) {
+      if (! cls.isEnum()) {
+        continue;
+      }
+
+      String name = cls.getSimpleName();
+
+      if (_constMap.get(name) != null)
+        continue;
+      else if (_constJavaMap.get(name) != null)
+        continue;
+      else if (cls.isAnnotationPresent(Hide.class))
+        continue;
+
+
+      Object[] constants = cls.getEnumConstants();
+      if (constants.length == 0) {
+        continue;
+      }
+
+      // php/0cs3
+      // use one of the enums as a handle for other enum siblings
+      Object obj = constants[0];
+
+      try {
+        Value value = QuercusContext.objectToValue(obj);
+
+        if (value != null)
+          _constMap.put(name.intern(), value);
+        else
+          _constJavaMap.put(name.intern(), obj);
+      }
+      catch (Throwable e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+    }
   }
 
   /**

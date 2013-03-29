@@ -230,6 +230,22 @@ abstract public class ObjectValue extends Value {
     return toLong();
   }
 
+  /**
+   * Converts to a Java Enum.
+   */
+  @Override
+  public Enum toJavaEnum(Env env, Class cls)
+  {
+    Object obj = toJavaObject();
+
+    if (cls.isAssignableFrom(obj.getClass())) {
+      return (Enum) obj;
+    }
+    else {
+      return super.toJavaEnum(env, cls);
+    }
+  }
+
   //
   // array delegate methods
   //

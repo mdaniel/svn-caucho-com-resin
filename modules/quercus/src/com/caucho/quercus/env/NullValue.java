@@ -380,6 +380,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Converts to a Java Enum.
+   */
+  @Override
+  public Enum toJavaEnum(Env env, Class cls)
+  {
+    return null;
+  }
+
+  /**
    * Converts to a Java BigDecimal.
    */
   @Override

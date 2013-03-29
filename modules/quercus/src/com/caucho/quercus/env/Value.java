@@ -884,6 +884,27 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Converts to a Java Enum.
+   */
+  public Enum toJavaEnum(Env env, Class cls)
+  {
+    String s = toString();
+
+    if (s == null) {
+      return null;
+    }
+
+    try {
+      return Enum.valueOf(cls, s);
+    }
+    catch (IllegalArgumentException e) {
+      env.warning(e);
+
+      return null;
+    }
+  }
+
+  /**
    * Converts to a Java BigDecimal.
    */
   public BigDecimal toBigDecimal()
