@@ -642,7 +642,7 @@ public class JdbcResultResource
         if (env.isUnicodeSemantics()) {
           return getUnicodeColumnString(env, rs, getMetaData(), column);
         }
-        else {
+        else if (this instanceof MysqliResult) {
           // for mysql, need to read raw bytes from the wire, assuming that we
           // already called "SET character_set_results latin1", thereby
           // requesting the server do all the encoding work for the client
@@ -664,6 +664,16 @@ public class JdbcResultResource
           }
 
           return bb;
+        }
+        else {
+          String strValue = rs.getString(column);
+
+          if (strValue == null) {
+            return NullValue.NULL;
+          }
+          else {
+            return env.createString(strValue);
+          }
         }
 
       case Types.TIME:
