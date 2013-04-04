@@ -426,6 +426,76 @@ public class Var extends Value
   }
 
   /**
+   * Converts to a java boolean object.
+   */
+  @Override
+  public Boolean toJavaBoolean()
+  {
+    return _value.toJavaBoolean();
+  }
+
+  /**
+   * Converts to a java byte object.
+   */
+  @Override
+  public Byte toJavaByte()
+  {
+    return _value.toJavaByte();
+  }
+
+  /**
+   * Converts to a java short object.
+   */
+  @Override
+  public Short toJavaShort()
+  {
+    return _value.toJavaShort();
+  }
+
+  /**
+   * Converts to a java Integer object.
+   */
+  @Override
+  public Integer toJavaInteger()
+  {
+    return _value.toJavaInteger();
+  }
+
+  /**
+   * Converts to a java Long object.
+   */
+  @Override
+  public Long toJavaLong()
+  {
+    return _value.toJavaLong();
+  }
+
+  /**
+   * Converts to a java Float object.
+   */
+  @Override
+  public Float toJavaFloat()
+  {
+    return _value.toJavaFloat();
+  }
+
+  /**
+   * Converts to a java Double object.
+   */
+  public Double toJavaDouble()
+  {
+    return _value.toJavaDouble();
+  }
+
+  /**
+   * Converts to a java Character object.
+   */
+  public Character toJavaCharacter()
+  {
+    return _value.toJavaCharacter();
+  }
+
+  /**
    * Converts to a java String object.
    */
   @Override
