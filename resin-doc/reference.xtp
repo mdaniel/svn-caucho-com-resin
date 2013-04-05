@@ -592,7 +592,7 @@ cache to save large amounts of data with little overhead.</p>
 </tr>
 <tr><td>path</td>
     <td>Path to the persistent cache files.</td>
-    <td>cache/</td></tr>
+    <td>resin-data/</td></tr>
 <tr><td>disk-size</td>
     <td>Maximum size of the cache saved on disk.</td>
     <td>1024M</td></tr>
@@ -610,7 +610,7 @@ cache to save large amounts of data with little overhead.</p>
     <td>1M</td></tr>
 <tr><td>memory-size</td>
     <td>Maximum heap memory used to cache blocks.</td>
-    <td>8M</td></tr>
+    <td>16M</td></tr>
 <tr><td>rewrite-vary-as-private</td>
     <td>Rewrite Vary headers as Cache-Control: private to avoid browser
 and proxy-cache bugs (particularly IE).</td>
@@ -9441,7 +9441,6 @@ to the client.
 <javadoc class="com.caucho.rewrite.HttpProxy"/>
 <description>
 <p>
-
   Proxies the request to a backend server using HTTP as a proxy protocol.
 </p>
 </description>
@@ -9450,29 +9449,115 @@ to the client.
 <tr>
   <th>Attribute</th>
   <th>Description</th>
+  <th>Default Value</th>
 </tr>
 <tr>
   <td>regexp</td>
   <td>The regular expression of the URL to match.</td>
+  <td>none</td>
 </tr>
 <tr>
   <td>address</td>
-  <td>An address of an HTTP server (multiple allowed).</td>
+  <td>address:port of an HTTP server</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>addresses</td>
+  <td>address:port of HTTP servers (space separated)</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>backend</td>
+  <td>a &lt;backend> with address and optional timeouts (see below)</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>strategy</td>
+  <td>round-robin or adaptive</td>
+  <td>adaptive</td>
+</tr>
+<tr>
+  <td>connect-timeout</td>
+  <td>the maximum time a proxy connection to a backend should take</td>
+  <td>5s</td>
+</tr>
+<tr>
+  <td>socket-timeout</td>
+  <td>the maximum time a the proxy will wait for a read or write to a backend</td>
+  <td>30s</td>
+</tr>
+<tr>
+  <td>idle-time</td>
+  <td>the maximum time the proxy will leave an idle socket before closing it (must be less than the keepalive value of the target backend)</td>
+  <td>10s</td>
+</tr>
+<tr>
+  <td>warmup-time</td>
+  <td>time the proxy uses to throttle connections to a backend server that's just starting up</td>
+  <td>60s</td>
+</tr>
+<tr>
+  <td>recover-time</td>
+  <td>the maximum time the proxy will consider the backend dead after a failure before retrying</td>
+  <td>15s</td>
 </tr>
 </attributes>
+
+<deftable title="&lt;backend> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default Value</th>
+</tr>
+<tr>
+  <td>address</td>
+  <td>address:port of an HTTP server</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>connect-timeout</td>
+  <td>the maximum time a proxy connection to the backend should take</td>
+  <td>5s</td>
+</tr>
+<tr>
+  <td>socket-timeout</td>
+  <td>the maximum time a the proxy will wait for a read or write to the backend</td>
+  <td>30s</td>
+</tr>
+<tr>
+  <td>idle-time</td>
+  <td>the maximum time the proxy will leave an idle socket before closing it (must be less than the keepalive value of the target backend)</td>
+  <td>10s</td>
+</tr>
+<tr>
+  <td>warmup-time</td>
+  <td>time the proxy uses to throttle connections to the backend server that's just starting up</td>
+  <td>60s</td>
+</tr>
+<tr>
+  <td>recover-time</td>
+  <td>the maximum time the proxy will consider the backend dead after a failure before retrying</td>
+  <td>15s</td>
+</tr>
+<tr>
+  <td>weight</td>
+  <td>assigns a load-balance weight to a backend server. Servers with higher values get more requests. Servers with lower values get fewer requests</td>
+  <td>100</td>
+</tr>
+</deftable>
 
 <example title="Proxying requests to local HTTP servers">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
          xmlns:resin="urn:java:com.caucho.resin">
 
    &lt;resin:HttpProxy regexp="\.cgi$">
-     &lt;address>127.0.0.1:12345&lt;/address>
-     &lt;address>127.0.0.1:67890&lt;/address>
+     &lt;strategy>adaptive&lt;/strategy>
+     &lt;backend address="127.0.0.1:12345" weight="100">
+     &lt;backend address="127.0.0.1:65432" weight="200">
    &lt;/resin:HttpProxy>
 
 &lt;/web-app>
 </example>
-
 
 </defun>
 

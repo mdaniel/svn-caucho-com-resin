@@ -121,7 +121,7 @@ public class MemcachedClient implements Cache
     
     _loadBalanceBuilder.setStickyRequestHashGenerator(new StickyGenerator());
     _loadBalanceBuilder.setMeterCategory("Resin|WebSocket");
-    _loadBalanceBuilder.setIdleTimeout(120 * 1000);
+    _loadBalanceBuilder.setIdleTime(120 * 1000);
     // _loadBalancer = builquerder.create();
   }
   

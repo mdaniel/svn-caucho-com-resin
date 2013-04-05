@@ -138,4 +138,18 @@
     </server-multi>
   </cluster>
   
+  <cluster id="proxycache">
+    <!-- define the servers in the cluster -->
+    <server-multi id-prefix="proxycache-" address-list="${proxycache_servers}" port="6830"/>
+
+    <host id="" root-directory="proxycache">
+      <web-app id="">
+        <resin:HttpProxy regexp=".*">
+          <!-- backend HTTP servers to proxy to -->
+          <addresses>${backend_servers}</addresses>
+        </resin:HttpProxy>
+      </web-app>
+    </host>
+  </cluster>
+
 </resin>

@@ -29,10 +29,10 @@
 
 package com.caucho.cloud.loadbalance;
 
-import java.util.ArrayList;
+import java.util.*;
 
 import com.caucho.cloud.topology.CloudPod;
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
@@ -47,13 +47,10 @@ public class LoadBalanceBuilder
   private LoadBalanceStrategy _strategy = LoadBalanceStrategy.ADAPTIVE;
   private String _meterCategory = null;
   
-  private long _idleTimeout;
+  private LoadBalanceBackend _defaults = new LoadBalanceBackend();
   
   private ArrayList<ClientSocketFactory> _clientList 
     = new ArrayList<ClientSocketFactory>();
-  
-  private String _cluster;
-  private int _port;
   
   /**
    * Sets the load balance strategy.
@@ -82,15 +79,57 @@ public class LoadBalanceBuilder
     
   }
   
-  
-  public void setIdleTimeout(long timeout)
+  public void setTargetCluster(String clusterId)
   {
-    _idleTimeout = timeout;
+    throw new IllegalStateException(L.l("{0}: setCluster requires Resin Professional.",
+                                        this));
+  }
+
+  public void setTargetCluster(CloudPod pod)
+  {
+    throw new IllegalStateException(L.l("{0}: setCluster requires Resin Professional.",
+                                        this));
   }
   
-  public long getIdleTimeout()
+  public void setTargetPort(int port)
   {
-    return _idleTimeout;
+    throw new IllegalStateException(L.l("{0}: setPort requires Resin Professional.",
+                                        this));
+  }
+  
+  public void setConnectTimeout(long connectTimeout)
+  {
+    _defaults.setConnectTimeoutMs(connectTimeout);
+  }
+  
+  public void setConnectionMin(int connectionMin)
+  {
+    _defaults.setConnectionMin(connectionMin);
+  }
+
+  public void setSocketTimeout(long socketTimeout)
+  {
+    _defaults.setSocketTimeoutMs(socketTimeout);
+  }
+
+  public void setIdleTime(long idleTime)
+  {
+    _defaults.setIdleTimeMs(idleTime);
+  }
+
+  public void setRecoverTime(long recoverTime)
+  {
+    _defaults.setRecoverTimeMs(recoverTime);
+  }
+  
+  public void setWarmupTime(long warmupTime)
+  {
+    _defaults.setWarmupTimeMs(warmupTime);
+  }
+  
+  public LoadBalanceBackend getDefaults()
+  {
+    return _defaults;
   }
   
   /**
@@ -111,9 +150,12 @@ public class LoadBalanceBuilder
   
   public void addAddress(String address)
   {
-    ClientSocketFactory client = createClientSocketFactory(address);
-    
-    addClient(client);
+    addBackend(new LoadBalanceBackend(address));
+  }
+  
+  public void addBackend(LoadBalanceBackend backend)
+  {
+    addClient(createClientSocketFactory(backend));
   }
   
   /**
@@ -133,32 +175,6 @@ public class LoadBalanceBuilder
   }
   
   /**
-   * Sets the target cluster by id.
-   */
-  public void setTargetCluster(String clusterId)
-  {
-    throw new IllegalStateException(L.l("{0}: setTargetCluster requires Resin Professional.",
-                                        this));
-  }
-  /**
-   * Sets the target cluster by id.
-   */
-  public void setTargetPort(int port)
-  {
-    throw new IllegalStateException(L.l("{0}: setTargetPort requires Resin Professional.",
-                                        this));
-  }
-  
-  /**
-   * Sets the target cluster by CloudPod id.
-   */
-  public void setTargetCluster(CloudPod pod)
-  {
-    throw new IllegalStateException(L.l("{0}: setTargetCluster requires Resin Professional.",
-                                        this));
-  }
-  
-  /**
    * Returns the load balance manager.
    */
   public LoadBalanceManager create()
@@ -169,13 +185,13 @@ public class LoadBalanceBuilder
 
     return new SingleLoadBalanceManager(socketFactory, getMeterCategory());
   }
-
+  
   protected ClientSocketFactory createClientSocketFactory(String address)
   {
     int p = address.lastIndexOf(':');
     int q = address.lastIndexOf(']');
 
-    if (p < 0 && q < p)
+    if (p < 0 && q <= p)
       throw new ConfigException(L.l("'{0}' is an invalid address because it does not specify the port.",
                                     address));
 
@@ -195,12 +211,48 @@ public class LoadBalanceBuilder
                                 port,
                                 isSecure);
     
-    if (_idleTimeout > 0)
-      factory.setLoadBalanceIdleTime(_idleTimeout);
+    applyDefaults(factory);
     
     return factory;
   }
   
+  protected ClientSocketFactory createClientSocketFactory(LoadBalanceBackend backend)
+  {
+    ClientSocketFactory factory = createClientSocketFactory(backend.getAddress());
+    applyBackendConfig(factory, backend);
+    
+    return factory;
+  }
+  
+  protected void applyDefaults(ClientSocketFactory factory)
+  {
+    applyBackendConfig(factory, _defaults);
+  }
+  
+  protected void applyBackendConfig(ClientSocketFactory factory, LoadBalanceBackend backend)
+  {
+    if (backend.hasConnectionMin())
+      factory.setLoadBalanceConnectionMin(backend.getConnectionMin());
+    
+    if (backend.hasConnectTimeout())
+      factory.setLoadBalanceConnectTimeout(backend.getConnectTimeout());
+    
+    if (backend.hasIdleTime())
+      factory.setLoadBalanceIdleTime(backend.getIdleTime());
+    
+    if (backend.hasRecoverTime())
+      factory.setLoadBalanceRecoverTime(backend.getRecoverTime());
+    
+    if (backend.hasSocketTimeout())
+      factory.setLoadBalanceSocketTimeout(backend.getSocketTimeout());
+    
+    if (backend.hasWarmupTime())
+      factory.setLoadBalanceWarmupTime(backend.getWarmupTime());
+    
+    if (backend.hasWeight())
+      factory.setLoadBalanceWeight(backend.getWeight());    
+  }
+
   @Override
   public String toString()
   {

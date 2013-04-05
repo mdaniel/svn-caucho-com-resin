@@ -29,51 +29,31 @@
 
 package com.caucho.servlets;
 
-import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
-import com.caucho.cloud.loadbalance.LoadBalanceManager;
-import com.caucho.cloud.loadbalance.LoadBalanceService;
-import com.caucho.config.types.Period;
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
-
-import javax.servlet.GenericServlet;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.logging.Level;
+import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * HTTP proxy
- *
- * <pre>
- * &lt;servlet>
- *   &lt;servlet-name>http-proxy&lt;/servlet-name>
- *   &lt;servlet-class>com.caucho.servlets.HttpProxyServlet&lt;/servlet-class>
- *   &lt;init host='localhost:8081'/>
- * &lt;/servlet>
- * </pre>
- */
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+import com.caucho.cloud.loadbalance.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
+import com.caucho.network.proxy.*;
+import com.caucho.util.L10N;
+
 @SuppressWarnings("serial")
-public class HttpProxyServlet extends GenericServlet {
+public class HttpProxyServlet extends GenericServlet 
+{
   private static final Logger log =
     Logger.getLogger(HttpProxyServlet.class.getName());
   private static final L10N L = new L10N(HttpProxyServlet.class);
+  
+  private List<LoadBalanceBackend> _backends 
+    = new ArrayList<LoadBalanceBackend>();
 
   private LoadBalanceBuilder _loadBalanceBuilder;
-  private LoadBalanceManager _loadBalancer;
+  private HttpProxyClient _proxyClient;
 
   public HttpProxyServlet()
   {
@@ -87,31 +67,71 @@ public class HttpProxyServlet extends GenericServlet {
     
     _loadBalanceBuilder = loadBalanceService.createBuilder();
   }
-
-  /**
-   * Adds an address
-   */
-  public void addAddress(String address)
-  {
-    _loadBalanceBuilder.addAddress(address);
-  }
-
-  /**
-   * Adds a host
-   */
+  
   public void addHost(String host)
   {
     addAddress(host);
   }
 
-  /**
-   * Sets the fail recover time.
-   */
-  public void setFailRecoverTime(Period period)
+  public void addAddress(String address)
   {
-    // _tcpPool.setFailRecoverTime(period);
+    addBackend(new LoadBalanceBackend(address));
+  }
+  
+  public void addBackend(LoadBalanceBackend backend)
+  {
+    _backends.add(backend);
+  }
+  
+  public void setConnectTimeout(Period connectTimeout)
+  {
+    _loadBalanceBuilder.setConnectTimeout(connectTimeout.getPeriod());
+  }
+  
+  public void setConnectionMin(int connectionMin)
+  {
+    _loadBalanceBuilder.setConnectionMin(connectionMin);
   }
 
+  public void setSocketTimeout(Period socketTimeout)
+  {
+    _loadBalanceBuilder.setSocketTimeout(socketTimeout.getPeriod());
+  }
+
+  public void setIdleTime(Period idleTime)
+  {
+    _loadBalanceBuilder.setIdleTime(idleTime.getPeriod());
+  }
+
+  public void setRecoverTime(Period recoverTime)
+  {
+    _loadBalanceBuilder.setRecoverTime(recoverTime.getPeriod());
+  }
+  
+  public void setWarmupTime(Period warmupTime)
+  {
+    _loadBalanceBuilder.setWarmupTime(warmupTime.getPeriod());
+  }
+  
+  public void setStrategy(String strategy)
+  {
+    if ("round-robin".equalsIgnoreCase(strategy))
+      _loadBalanceBuilder.setStrategy(LoadBalanceStrategy.ROUND_ROBIN);
+    else if ("least-connection".equalsIgnoreCase(strategy))
+      _loadBalanceBuilder.setStrategy(LoadBalanceStrategy.ADAPTIVE);
+    else if ("adaptive".equalsIgnoreCase(strategy))
+      _loadBalanceBuilder.setStrategy(LoadBalanceStrategy.ADAPTIVE);
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown load-balance strategy.  'round-robin' and 'least-connection' are the known values.",
+                                    strategy));
+  }
+  
+  // for QA
+  public LoadBalanceBuilder getLoadBalanceBuilder()
+  {
+    return _loadBalanceBuilder;
+  }
+  
   /**
    * Initialize the servlet with the server's sruns.
    */
@@ -119,9 +139,17 @@ public class HttpProxyServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    _loadBalancer = _loadBalanceBuilder.create();
+    if (_proxyClient != null)
+      return;
+    
+    for(LoadBalanceBackend backend : _backends) {
+      _loadBalanceBuilder.addBackend(backend);
+    }
+    
+    HttpProxyClientFactory factory = new HttpProxyClientFactory();
+    _proxyClient = factory.create(_loadBalanceBuilder.create());
   }
-
+  
   /**
    * Handle the request.
    */
@@ -131,342 +159,7 @@ public class HttpProxyServlet extends GenericServlet {
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
-    CauchoRequest cReq = null;
-
-    if (req instanceof CauchoRequest)
-      cReq = (CauchoRequest) req;
-
-    String sessionId = req.getRequestedSessionId();
-
-    String uri;
-    if (req.isRequestedSessionIdFromURL()) {
-      uri =  (req.getRequestURI() + ";jsessionid=" +
-              req.getRequestedSessionId());
-    }
-    else
-      uri = req.getRequestURI();
-
-    String queryString = null;
-
-    if (cReq != null)
-      queryString = cReq.getPageQueryString();
-    else {
-      queryString
-        = (String) req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
-
-      if (queryString == null)
-        queryString = req.getQueryString();
-    }
-
-    if (queryString != null)
-      uri += '?' + queryString;
-
-    ClientSocket stream = _loadBalancer.openSticky(sessionId, request, null);
-
-    try {
-      long startRequestTime = CurrentTime.getCurrentTime();
-      
-      if (stream == null) {
-        log.warning(L.l("{0}: no backend servers available to process {1}",
-                        this, req.getRequestURI()));
-
-        res.sendError(503); // send a busy
-      }
-      else if (handleRequest(req, res, uri, stream)) {
-        stream.free(startRequestTime);
-        stream = null;
-        return;
-      }
-    } finally {
-      if (stream != null)
-        stream.close();
-    }
-  }
-
-  private boolean handleRequest(HttpServletRequest req,
-                                HttpServletResponse res,
-                                String uri,
-                                ClientSocket stream)
-    throws ServletException, IOException
-  {
-    ReadStream rs = stream.getInputStream();
-    WriteStream out = stream.getOutputStream();
-
-    try {
-      out.print(req.getMethod());
-      out.print(' ');
-      out.print(uri);
-      out.print(" HTTP/1.1\r\n");
-
-      out.print("Host: ");
-      String host = req.getHeader("Host");
-      if (host == null)
-        host = req.getServerName() + ":" + req.getServerPort();
-
-      out.print(host);
-      out.print("\r\n");
-
-      out.print("X-Forwarded-For: ");
-      out.print(req.getRemoteAddr());
-      out.print("\r\n");
-
-      Enumeration<String> e = req.getHeaderNames();
-      while (e.hasMoreElements()) {
-        String name = e.nextElement();
-
-        if (name.equalsIgnoreCase("Connection"))
-          continue;
-        else if (name.equalsIgnoreCase("Host"))
-          continue;
-
-        Enumeration<String> e1 = req.getHeaders(name);
-        while (e1.hasMoreElements()) {
-          String value = e1.nextElement();
-
-          out.print(name);
-          out.print(": ");
-          out.print(value);
-          out.print("\r\n");
-        }
-      }
-
-      final int contentLength = req.getContentLength();
-
-      InputStream is = req.getInputStream();
-
-      TempBuffer tempBuffer = TempBuffer.allocate();
-      byte []buffer = tempBuffer.getBuffer();
-
-      boolean isFirst = true;
-
-      if (contentLength >= 0) {
-        isFirst = false;
-        out.print("\r\n");
-      }
-
-      int len;
-      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-        if (isFirst) {
-          out.print("Transfer-Encoding: chunked\r\n");
-        }
-
-        if (contentLength < 0) {
-          out.print("\r\n");
-          out.print(Integer.toHexString(len));
-          out.print("\r\n");
-        }
-
-        out.write(buffer, 0, len);
-
-        isFirst = false;
-      }
-
-      if (isFirst) {
-        out.print("Content-Length: 0\r\n\r\n");
-      }
-      else if (contentLength < 0) {
-        out.print("\r\n0\r\n");
-      }
-
-      TempBuffer.free(tempBuffer);
-
-      out.flush();
-      
-      return parseResults(rs, req, res);
-    } catch (IOException e1) {
-      log.log(Level.FINE, e1.toString(), e1);
-
-      return false;
-    }
-  }
-
-  private boolean parseResults(ReadStream is,
-                               HttpServletRequest req,
-                               HttpServletResponse res)
-    throws IOException
-  {
-    String line = parseStatus(is);
-
-    boolean isKeepalive = true;
-
-    if (! line.startsWith("HTTP/1.1"))
-      isKeepalive = false;
-
-    int statusCode = parseStatusCode(line);
-
-    String location = null;
-
-    boolean isChunked = false;
-    int contentLength = -1;
-
-    while (true) {
-      line = is.readLine();
-
-      if (line == null)
-        break;
-
-      int p = line.indexOf(':');
-
-      if (p < 0)
-        break;
-
-      String name = line.substring(0, p);
-      String value = line.substring(p + 1).trim();
-
-      if (name.equalsIgnoreCase("transfer-encoding")) {
-        isChunked = true;
-      }
-      else if (name.equalsIgnoreCase("content-length")) {
-        contentLength = Integer.parseInt(value);
-      }
-      else if (name.equalsIgnoreCase("location"))
-        location = value;
-      else if (name.equalsIgnoreCase("connection")) {
-        if ("close".equalsIgnoreCase(value))
-          isKeepalive = false;
-      }
-      else {
-        // XXX: split header
-        res.addHeader(name, value);
-      }
-    }
-
-    if (location == null) {
-    }
-    /* server/1965
-    else if (location.startsWith(hostURL)) {
-      location = location.substring(hostURL.length());
-
-      String prefix;
-      if (req.isSecure()) {
-        if (req.getServerPort() != 443)
-          prefix = ("https://" + req.getServerName() +
-                    ":" + req.getServerPort());
-        else
-          prefix = ("https://" + req.getServerName());
-      }
-      else {
-        if (req.getServerPort() != 80)
-          prefix = ("http://" + req.getServerName() +
-                    ":" + req.getServerPort());
-        else
-          prefix = ("http://" + req.getServerName());
-      }
-
-      if (! location.startsWith("/"))
-        location = prefix + "/" + location;
-      else
-        location = prefix + location;
-    }
-    */
-
-    if (location != null)
-      res.setHeader("Location", location);
-
-    if (statusCode == 302 && location != null)
-      res.sendRedirect(location);
-    else if (statusCode != 200)
-      res.setStatus(statusCode);
-
-    OutputStream os = res.getOutputStream();
-
-    if (isChunked)
-      writeChunkedData(os, is);
-    else if (contentLength > 0) {
-      res.setContentLength(contentLength);
-
-      writeContentLength(os, is, contentLength);
-    }
-
-    return isKeepalive;
-  }
-
-  private String parseStatus(ReadStream is)
-    throws IOException
-  {
-    int ch;
-
-    for (ch = is.read(); Character.isWhitespace(ch); ch = is.read()) {
-    }
-
-    StringBuilder sb = new StringBuilder();
-    for (; ch >= 0 && ch != '\n'; ch = is.read()) {
-      if (ch != '\r')
-        sb.append((char) ch);
-    }
-
-    return sb.toString();
-  }
-
-  private int parseStatusCode(String line)
-  {
-    int len = line.length();
-
-    int i = 0;
-    int ch;
-
-    for (; i < len && (ch = line.charAt(i)) != ' '; i++) {
-    }
-
-    for (; i < len && (ch = line.charAt(i)) == ' '; i++) {
-    }
-
-    int statusCode = 0;
-
-    for (; i < len && '0' <= (ch = line.charAt(i)) && ch <= '9'; i++) {
-      statusCode = 10 * statusCode + ch - '0';
-    }
-
-    if (statusCode == 0)
-      return 400;
-    else
-      return statusCode;
-  }
-
-  private void writeChunkedData(OutputStream os, ReadStream is)
-    throws IOException
-  {
-    int ch;
-
-    while (true) {
-      for (ch = is.read(); Character.isWhitespace(ch); ch = is.read()) {
-      }
-
-      int len = 0;
-      for (; ch >= 0; ch = is.read()) {
-        if ('0' <= ch && ch <= '9')
-          len = 16 * len + ch - '0';
-        else if ('a' <= ch && ch <= 'f')
-          len = 16 * len + ch - 'a' + 10;
-        else if ('A' <= ch && ch <= 'F')
-          len = 16 * len + ch - 'A' + 10;
-        else
-          break;
-      }
-
-      if (ch == '\r')
-        ch = is.read();
-
-      if (ch != '\n')
-        throw new IllegalStateException(L.l("unexpected chunking at '{0}'",
-                                            (char) ch));
-
-      if (len == 0)
-        break;
-
-      is.writeToStream(os, len);
-    }
-
-    ch = is.read();
-    if (ch == '\r')
-      ch = is.read();
-
-    // XXX: footer
-  }
-
-  private void writeContentLength(OutputStream os, ReadStream is, int length)
-    throws IOException
-  {
-    is.writeToStream(os, length);
+    
+    _proxyClient.handleRequest(req, res);
   }
 }

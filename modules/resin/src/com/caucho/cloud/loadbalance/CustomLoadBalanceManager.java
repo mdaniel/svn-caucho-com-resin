@@ -60,7 +60,7 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
     int p = address.lastIndexOf(':');
     int q = address.lastIndexOf(']');
 
-    if (p < 0 && q < p)
+    if (p < 0 && q <= p)
       throw new ConfigException(L.l("'{0}' is an invalid address because it does not specify the port.",
                                     address));
 

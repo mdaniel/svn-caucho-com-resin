@@ -409,7 +409,7 @@ cache to save large amounts of data with little overhead.</p>
 </tr>
 <tr><td>path</td>
     <td>Path to the persistent cache files.</td>
-    <td>cache/</td></tr>
+    <td>resin-data/</td></tr>
 <tr><td>disk-size</td>
     <td>Maximum size of the cache saved on disk.</td>
     <td>1024M</td></tr>
@@ -427,7 +427,7 @@ cache to save large amounts of data with little overhead.</p>
     <td>1M</td></tr>
 <tr><td>memory-size</td>
     <td>Maximum heap memory used to cache blocks.</td>
-    <td>8M</td></tr>
+    <td>16M</td></tr>
 <tr><td>rewrite-vary-as-private</td>
     <td>Rewrite Vary headers as Cache-Control: private to avoid browser
 and proxy-cache bugs (particularly IE).</td>
@@ -524,7 +524,7 @@ add the following to your resin.xml:</p>
 <example title="Example: adding caching log">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 
-  &lt;logger name="com.caucho.server.cache" level="fine"/>
+  &lt;logger name="com.caucho.server.httpcache" level="fine"/>
 
   ...
 

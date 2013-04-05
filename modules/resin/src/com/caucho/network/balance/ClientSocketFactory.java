@@ -319,6 +319,11 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   {
     _loadBalanceWarmupTime = timeout;
   }
+  
+  public long getLoadBalanceWarmupTime()
+  {
+    return _loadBalanceWarmupTime;
+  }
 
   /**
    * The load balance weight.

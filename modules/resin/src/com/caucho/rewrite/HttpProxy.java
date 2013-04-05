@@ -40,6 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import com.caucho.cloud.loadbalance.LoadBalanceBackend;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
@@ -80,23 +81,86 @@ public class HttpProxy extends AbstractTargetDispatchRule
   /**
    * Adds a backend HTTP server address like "127.0.0.1:8081"
    *
-   * @param address the backend address likst "127.0.0.1:8081"
+   * @param address the backend address like "127.0.0.1:8081"
    */
   @Configurable
   public void addAddress(String address)
   {
     _proxyServlet.addAddress(address);
   }
+  
+  @Configurable
+  public void setAddresses(String addresses)
+  {
+    for (String item : addresses.split("[\\s;]+")) {
+      if ("".equals(item))
+        continue;
+      
+      addAddress(item);
+    }
+  }
+
+  @Configurable
+  public void addHost(String host)
+  {
+    addAddress(host);
+  }
+  
+  @Configurable
+  public LoadBalanceBackend createBackend()
+  {
+    return new LoadBalanceBackend();
+  }
+  
+  @Configurable
+  public void addBackend(LoadBalanceBackend backend)
+  {
+    _proxyServlet.addBackend(backend);
+  }
 
   /**
-   * Sets the timeout to recover from a failed connection to the backend.
-   *
-   * @param period the recover timeout
+   * Sets the strategy for the load balancer
    */
   @Configurable
-  public void setFailRecoverTime(Period period)
+  public void setStrategy(String strategy)
   {
-    _proxyServlet.setFailRecoverTime(period);
+    _proxyServlet.setStrategy(strategy);
+  }
+  
+  @Configurable
+  public void setConnectTimeout(Period connectTimeout)
+  {
+    _proxyServlet.setConnectTimeout(connectTimeout);
+  }
+  
+  @Configurable
+  public void setConnectionMin(int connectionMin)
+  {
+    _proxyServlet.setConnectionMin(connectionMin);
+  }
+
+  @Configurable
+  public void setSocketTimeout(Period socketTimeout)
+  {
+    _proxyServlet.setSocketTimeout(socketTimeout);
+  }
+
+  @Configurable
+  public void setIdleTime(Period idleTime)
+  {
+    _proxyServlet.setIdleTime(idleTime);
+  }
+
+  @Configurable
+  public void setRecoverTime(Period recoverTime)
+  {
+    _proxyServlet.setRecoverTime(recoverTime);
+  }
+  
+  @Configurable
+  public void setWarmupTime(Period warmupTime)
+  {
+    _proxyServlet.setWarmupTime(warmupTime);
   }
 
   @PostConstruct
@@ -107,7 +171,6 @@ public class HttpProxy extends AbstractTargetDispatchRule
       _proxyServlet.init();
 
       WebApp webApp = WebApp.getCurrent();
-
       if (webApp != null)
         webApp.addServlet(_servlet);
     }
