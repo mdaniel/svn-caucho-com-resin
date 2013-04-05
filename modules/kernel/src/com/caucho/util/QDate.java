@@ -1010,8 +1010,8 @@ public class QDate {
    * <table>
    * <tr><td>%a<td>day of week (short)
    * <tr><td>%A<td>day of week (verbose)
-   * <tr><td>%b<td>day of month (short)
-   * <tr><td>%B<td>day of month (verbose)
+   * <tr><td>%b<td>month name (short)
+   * <tr><td>%B<td>month name (verbose)
    * <tr><td>%c<td>Java locale date
    * <tr><td>%d<td>day of month (two-digit)
    * <tr><td>%F<td>%Y-%m-%d

@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -1717,6 +1718,42 @@ public class FileModule extends AbstractQuercusModule {
 
       return null;
     }
+  }
+
+  @Hide
+  public static BinaryStream openForAppend(Env env, StringValue filename,
+                                           boolean isUseIncludePath)
+    throws IOException
+  {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      long options = 0;
+
+      if (isUseIncludePath) {
+        options = StreamModule.STREAM_USE_PATH;
+      }
+
+      return wrapper.fopen(env, filename,
+                                env.createString("r"),
+                                LongValue.create(options));
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (isUseIncludePath && path == null) {
+      path = env.lookupInclude(filename);
+    }
+
+    if (path == null) {
+      return null;
+    }
+
+    if (! env.isAllowUrlFopen() && isUrl(path)) {
+      throw new IOException("remote urls not allowed");
+    }
+
+    return new FileOutput(env, path, true);
   }
 
   private static boolean isUrl(Path path)

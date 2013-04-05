@@ -39,10 +39,15 @@ import com.caucho.quercus.expr.ObjectMethodExpr;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.lib.file.BinaryOutput;
+import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileModule;
 
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
+import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -504,39 +509,72 @@ public class ErrorModule extends AbstractQuercusModule {
    */
   public static boolean error_log(Env env,
                                   StringValue message,
-                                  @Optional("0") int type,
+                                  @Optional int type,
                                   @Optional StringValue destination,
                                   @Optional StringValue extraHeaders)
   {
     if (type == 3) {
-      // message is appended to the file destination, no newline added
+      if (destination.length() == 0) {
+        destination = ErrorModule.INI_ERROR_LOG.getAsStringValue(env);
+      }
 
-      Value numBytes = FileModule.file_put_contents(env,
-        destination, message, FileModule.FILE_APPEND, null);
+      BinaryStream stream = null;
 
-      if (numBytes == BooleanValue.FALSE)
-        return false;
-      if (numBytes.toLong() == message.length())
+      try {
+        if (destination.length() != 0) {
+          stream = FileModule.openForAppend(env, destination, false);
+        }
+      }
+      catch (IOException e) {
+        e.printStackTrace();
+
+        env.warning(e);
+
+        log.log(Level.FINE, e.getMessage(), e);
+      }
+
+      if (stream == null) {
+        System.err.println(message);
+
         return true;
-      else
-        return false;
-    } else if (type == 2) {
-      // XXX : message sent via remote debugging connection
+      }
 
-      return false;
-    } else if (type == 1) {
+      try {
+        BinaryOutput os = (BinaryOutput) stream;
+
+        String format = "[%d-%b-%Y %H:%M:%S %Z] ";
+        String date = QDate.formatGMT(env.getCurrentTime(), format);
+
+        os.print(date);
+        os.print(message.toString());
+        os.print('\n');
+
+        return true;
+      }
+      catch (IOException e) {
+        env.warning(e);
+
+        return false;
+      }
+      finally {
+        stream.close();
+      }
+    }
+    else if (type == 1) {
       // XXX : message sent by email to the address in destination
 
       return false;
-    } else {
+    }
+    else {
       // message sent to PHP's system logger
-      String dest = ErrorModule.INI_ERROR_LOG.getAsString(env);
-      if("syslog".equals(dest)) {
+      StringValue dest = ErrorModule.INI_ERROR_LOG.getAsStringValue(env);
+      if(dest.equalsString("syslog")) {
         log.warning(message.toString());
+
         return true;
-      } else {
-        return ErrorModule.error_log(env, message, 3,
-                                     env.createString(dest), extraHeaders);
+      }
+      else {
+        return ErrorModule.error_log(env, message, 3, dest, extraHeaders);
       }
     }
   }
