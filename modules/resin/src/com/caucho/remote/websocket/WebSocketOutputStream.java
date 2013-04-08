@@ -117,10 +117,7 @@ public class WebSocketOutputStream extends OutputStream
       complete(false);
       
       while (length > 0) {
-        int sublen = length;
-        
-        if (sublen >= 0x10000)
-          sublen = 0x10000;
+        int sublen = Math.min(0xffff, length);
         
         int writeOffset = fillHeader(false, sublen + 4);
         
