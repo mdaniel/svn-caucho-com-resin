@@ -44,16 +44,14 @@ public final class RingValueQueue<M>
   private static final L10N L = new L10N(RingValueQueue.class);
 
   private final RingValueArray<M> _ring;
-  private final RingTailGetter<M> _tailGetter;
-  private final RingNonTailGetter<M> _nonTailGetter;
 
   // private final RingUnsafeArray<T> _ring;
   private final int _capacity;
 
-  private final AtomicLong _head;
+  private final AtomicLong _headAlloc = new AtomicLong();
 
   private final AtomicLong _tailAlloc = new AtomicLong();
-  private final AtomicLong _tail;
+  private final AtomicLong _tail = new AtomicLong();
 
   private final RingBlocker _blocker;
 
@@ -81,12 +79,6 @@ public final class RingValueQueue<M>
     _ring = new RingValueArray<M>(capacity);
     // _ring = new RingUnsafeArray<T>(capacity);
 
-    _tailGetter = new RingTailGetter<M>(_ring);
-    _nonTailGetter = new RingNonTailGetter<M>(_ring);
-
-    _head = new AtomicLong();
-    _tail = new AtomicLong();
-
     _blocker = blocker;
   }
 
@@ -109,13 +101,13 @@ public final class RingValueQueue<M>
   @Override
   public final boolean isEmpty()
   {
-    return _head.get() == _tail.get();
+    return _headAlloc.get() == _tail.get();
   }
 
   @Override
   public final int size()
   {
-    long head = _head.get();
+    long head = _headAlloc.get();
     long tail = _tail.get();
 
     return (int) (head - tail);
@@ -123,12 +115,12 @@ public final class RingValueQueue<M>
 
   public final long getHead()
   {
-    return _head.get();
+    return _headAlloc.get();
   }
 
   public final long getHeadAlloc()
   {
-    return _head.get();
+    return _headAlloc.get();
   }
 
   public final long getTail()
@@ -157,18 +149,6 @@ public final class RingValueQueue<M>
     return _ring.get(ptr);
   }
 
-  private final M getAndClear(long ptr)
-  {
-    RingValueArray<M> ring = _ring;
-
-    M item;
-
-    while ((item = ring.getAndSet(ptr, null)) == null) {
-    }
-
-    return item;
-  }
-
   private final boolean isSet(long ptr)
   {
     return _ring.get(ptr) != null;
@@ -192,14 +172,11 @@ public final class RingValueQueue<M>
       throw new NullPointerException();
     }
 
-    // completePoll();
-
-    final AtomicLong headRef = _head;
+    final AtomicLong headRef = _headAlloc;
     final AtomicLong tailRef = _tail;
     final int capacity = _capacity;
 
     while (true) {
-      // final AtomicReferenceArray<T> ring = _ring;
       final long tail = tailRef.get();
       final long head = headRef.get();
       final long nextHead = head + 1;
@@ -220,7 +197,7 @@ public final class RingValueQueue<M>
   @Override
   public final M peek()
   {
-    long head = _head.get();
+    long head = _headAlloc.get();
     long tailAlloc = _tailAlloc.get();
 
     if (tailAlloc < head) {
@@ -234,16 +211,16 @@ public final class RingValueQueue<M>
   public final M poll(long timeout, TimeUnit unit)
   {
     final AtomicLong tailAllocRef = _tailAlloc;
-    final AtomicLong headRef = _head;
+    final AtomicLong tailRef = _tail;
+    final AtomicLong headAllocRef = _headAlloc;
 
     final RingBlocker blocker = _blocker;
 
     while (true) {
       final long tailAlloc = tailAllocRef.get();
-      final long head = headRef.get();
+      final long head = headAllocRef.get();
 
       if (tailAlloc == head) {
-        // completeOffer();
         blocker.offerWake();
 
         if (timeout <= 0 || ! blocker.pollWait(timeout, unit)) {
@@ -251,22 +228,10 @@ public final class RingValueQueue<M>
         }
       }
       else if (tailAllocRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
-        M value;
+        M value = _ring.takeAndClear(tailAlloc);
 
-        do {
-          value = getAndClear(tailAlloc);
-        } while (value == null);
-
-        if (! _tail.compareAndSet(tailAlloc, tailAlloc + 1)) {
-          completePoll();
-          // blocker.wake();
+        while (! tailRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
         }
-
-        /*
-        if (_capacity <= head - tailAlloc + 4) {
-          blocker.wake();
-        }
-        */
         
         blocker.offerWake();
 
@@ -275,156 +240,9 @@ public final class RingValueQueue<M>
     }
   }
 
-  private void completePoll()
-  {
-    final AtomicLong tailRef = _tail;
-    final AtomicLong tailAllocRef = _tailAlloc;
-
-    while (true) {
-      final long tail = tailRef.get();
-      final long tailAlloc = tailAllocRef.get();
-
-      if (tail == tailAlloc) {
-        return;
-      }
-
-      if (isSet(tail)) {
-        return;
-      }
-
-      tailRef.compareAndSet(tail, tail + 1);
-    }
-  }
-
-  /*
-  @Override
-  public void deliver(final Actor<M> actor,
-                      final MessageContext<M> actorContext,
-                      M chainItem)
-    throws Exception
-  {
-    final ActorCounter headCounter = _head;
-    final ActorCounter tailCounter = _tail;
-
-    long initialTail = tailCounter.get();
-    long tail = initialTail;
-    long head = headCounter.get();
-
-    try {
-      do {
-        tail = deliver(head, tail, actor, actorContext);
-
-        if (chainItem != null) {
-          M item = chainItem;
-          chainItem = null;
-
-          // actorContext.setContextMessage(item);
-          actor.deliver(item, actorContext);
-        }
-
-        head = headCounter.get();
-      } while (tail < head);
-    } finally {
-      _blocker.offerWake();
-
-      if (chainItem != null) {
-        offer(chainItem);
-        wake();
-      }
-    }
-  }
-  */
-
   public void wake()
   {
   }
-
-  /*
-  private long deliver(long head,
-                       long tail,
-                       final Actor<M> actor,
-                       final MessageContext<M> actorContext)
-    throws Exception
-  {
-    final int tailChunk = 32;
-    final RingValueArray<M> ring = _ring;
-    final ActorCounter tailCounter = _tail;
-
-    long lastTail = tail;
-
-    try {
-      while (tail < head) {
-        long tailChunkEnd = Math.min(head, tail + tailChunk);
-
-        while (tail < tailChunkEnd) {
-          M item = ring.getAndSet(tail, null);
-
-          if (item != null) {
-            tail++;
-
-            // actorContext.setContextMessage(item);
-            actor.deliver(item, actorContext);
-          }
-        }
-
-        tailCounter.set(tail);
-        lastTail = tail;
-      }
-    } finally {
-      if (tail != lastTail) {
-        tailCounter.set(tail);
-      }
-    }
-
-    return lastTail;
-  }
-
-  @Override
-  public void process(final Actor<M> processor,
-                      final MessageContext<M> threadContext,
-                      final ActorCounter headCounter,
-                      final ActorCounter tailCounter,
-                      final TaskWorker nextWorker,
-                      boolean isTail)
-    throws Exception
-  {
-    final RingGetter<M> ringGetter = isTail ? _tailGetter : _nonTailGetter;
-
-    int tailChunk = 2;
-    long initialTail = tailCounter.get();
-    long tail = initialTail;
-    long head = headCounter.get();
-
-    try {
-      do {
-        long tailChunkEnd = Math.min(head, tail + tailChunk);
-
-        while (tail < tailChunkEnd) {
-          M item = ringGetter.get(tail);
-
-          if (item != null) {
-            tail++;
-
-            processor.deliver(item, threadContext);
-          }
-        }
-
-        tailCounter.set(tail);
-        initialTail = tail;
-        tailChunk = Math.min(256, 2 * tailChunk);
-        nextWorker.wake();
-
-        head = headCounter.get();
-      } while (head != tail);
-    } finally {
-      if (tail != initialTail) {
-        tailCounter.set(tail);
-      }
-
-      nextWorker.wake();
-    }
-  }
-  */
 
   public final boolean isWriteClosed()
   {
@@ -450,39 +268,5 @@ public final class RingValueQueue<M>
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getCapacity() + "]";
-  }
-
-  abstract private static class RingGetter<T> {
-    abstract public T get(long index);
-  }
-
-  private final static class RingTailGetter<T> extends RingGetter<T> {
-    private final RingValueArray<T> _ring;
-
-    RingTailGetter(RingValueArray<T> ring)
-    {
-      _ring = ring;
-    }
-
-    @Override
-    public final T get(long index)
-    {
-      return _ring.getAndSet(index, null);
-    }
-  }
-
-  private final static class RingNonTailGetter<T> extends RingGetter<T> {
-    private final RingValueArray<T> _ring;
-
-    RingNonTailGetter(RingValueArray<T> ring)
-    {
-      _ring = ring;
-    }
-
-    @Override
-    public final T get(long index)
-    {
-      return _ring.get(index);
-    }
   }
 }

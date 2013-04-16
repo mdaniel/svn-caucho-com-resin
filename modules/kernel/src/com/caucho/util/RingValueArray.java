@@ -32,7 +32,8 @@ package com.caucho.util;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 
-final class RingValueArray<T> {
+final class RingValueArray<T>
+{
   private static final L10N L = new L10N(RingValueArray.class);
 
   private final AtomicReferenceArray<T> _ring;
@@ -57,19 +58,27 @@ final class RingValueArray<T> {
     return _length;
   }
 
-  public final T get(long index)
+  public final T get(long ptr)
   {
-    return _ring.get(getIndex(index));
+    return _ring.get(getIndex(ptr));
   }
 
-  public final void set(long index, T value)
+  public final void set(long ptr, T value)
   {
-    _ring.set(getIndex(index), value);
+    _ring.set(getIndex(ptr), value);
   }
 
-  public final T getAndSet(long index, T value)
+  public final T takeAndClear(long ptr)
   {
-    return _ring.getAndSet(getIndex(index), value);
+    final int index = getIndex(ptr);
+    final AtomicReferenceArray<T> ring = _ring;
+    
+    T value;
+    
+    while ((value = ring.getAndSet(index, null)) == null) {
+    }
+    
+    return value;
   }
 
   private final int getIndex(long ptr)
