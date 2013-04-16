@@ -218,9 +218,11 @@ public class BootClusterConfig implements SchemaBean
   /**
    * Managed by watchdog.
    */
+  /*
   public void addStdoutLog(ConfigProgram config)
   {
   }
+  */
   
   public void addContentProgram(ConfigProgram program)
   {

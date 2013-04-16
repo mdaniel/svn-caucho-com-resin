@@ -36,6 +36,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.log.LogConfig;
 import com.caucho.log.LogHandlerConfig;
 import com.caucho.log.LoggerConfig;
+import com.caucho.log.StdoutLog;
 import com.caucho.util.CurrentTime;
 
 /**
@@ -89,8 +90,9 @@ abstract public class AbstractResinConfig implements EnvironmentBean
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      if (! CurrentTime.isTest())
+      if (! CurrentTime.isTest()) {
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      }
 
       log.initImpl();
       
@@ -130,4 +132,34 @@ abstract public class AbstractResinConfig implements EnvironmentBean
       thread.setContextClassLoader(loader);
     }
   }
+
+  @Configurable
+  public StdoutLog createStdoutLog()
+  {
+    return new StdoutLog(true);
+  }
+
+  /**
+   * Overrides standard <stdout-log> configuration to change to 
+   * system-class-loader.
+   */
+  @Configurable
+  public void addStdoutLog(StdoutLog log)
+      throws IOException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    try {
+      if (! CurrentTime.isTest()) {
+        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      }
+
+      log.initImpl();
+
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+  }
 }
+

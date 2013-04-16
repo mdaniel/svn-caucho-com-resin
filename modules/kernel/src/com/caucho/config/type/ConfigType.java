@@ -237,8 +237,9 @@ abstract public class ConfigType<T>
   {
     Attribute attrStrategy = getProgramAttribute();
 
-    if (attrStrategy != null)
+    if (attrStrategy != null) {
       return attrStrategy;
+    }
 
     // ioc/2252 - flow attributes are not captured by ContentProgram
 
@@ -249,10 +250,12 @@ abstract public class ConfigType<T>
     Attribute envStrategy = factory.getEnvironmentAttribute(qName);
 
     if (envStrategy instanceof FlowAttribute
-        || envStrategy != null && attrStrategy == null)
+        || envStrategy != null && attrStrategy == null) {
       return envStrategy;
-    else if (attrStrategy != null)
+    }
+    else if (attrStrategy != null) {
       return attrStrategy;
+    }
 
     if (qName.getNamespaceURI() != null
         && qName.getNamespaceURI().startsWith("urn:java:"))

@@ -29,16 +29,19 @@
 
 package com.caucho.log;
 
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Configuration for the standard output log
  */
 public class StdoutLog extends RotateLog {
+  private boolean _isSkipInit;
+  
   private String _timestamp;
   
   /**
@@ -46,7 +49,13 @@ public class StdoutLog extends RotateLog {
    */
   public StdoutLog()
   {
+    this(false);
     // setTimestamp("[%Y/%m/%d %H:%M:%S.%s] ");
+  }
+  
+  public StdoutLog(boolean isSkipInit)
+  {
+    _isSkipInit = isSkipInit;
   }
 
   /**
@@ -70,10 +79,18 @@ public class StdoutLog extends RotateLog {
    */
   @PostConstruct
   public void init()
-    throws ConfigException, IOException
+      throws ConfigException, IOException
   {
     super.init();
-
+    
+    if (! _isSkipInit) {
+      initImpl();
+    }
+  }
+  
+  public void initImpl()
+    throws ConfigException, IOException
+  {
     WriteStream out = getRotateStream().getStream();
 
     if (_timestamp != null) {
