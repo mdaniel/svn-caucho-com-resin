@@ -42,6 +42,7 @@ public class LoadBalanceBackend
   private long _socketTimeout = -1;
   private long _idleTime = -1;
   private long _recoverTime = -1;
+  private long _busyRecoverTime = -1;
   private long _warmupTime = -1;
   private int _weight = -1;
   
@@ -168,6 +169,28 @@ public class LoadBalanceBackend
   public boolean hasRecoverTime()
   {
     return _recoverTime >= 0;
+  }
+
+  @Configurable
+  public void setBusyRecoverTime(Period recoverTime)
+  {
+    setBusyRecoverTimeMs(recoverTime.getPeriod());
+  }
+
+  @Configurable
+  public void setBusyRecoverTimeMs(long recoverTime)
+  {
+    _busyRecoverTime = recoverTime;
+  }
+
+  public boolean hasBusyRecoverTime()
+  {
+    return _busyRecoverTime >= 0;
+  }
+
+  public long getBusyRecoverTime()
+  {
+    return _busyRecoverTime;
   }
   
   public long getWarmupTime()

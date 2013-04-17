@@ -777,6 +777,9 @@ r_server-Content =
   & (attribute load-balance-recover-time { r_period-Type }
      | element load-balance-recover-time { r_period-Type })?
 
+  & (attribute load-balance-busy-recover-time { r_period-Type }
+     | element load-balance-busy-recover-time { r_period-Type })?
+
   & (attribute load-balance-socket-timeout { r_period-Type }
      | element load-balance-socket-timeout { r_period-Type })?
 

@@ -87,6 +87,7 @@ public final class ClusterServer {
 
   private int _loadBalanceConnectionMin = 0;
   private long _loadBalanceIdleTime = 60000L;
+  private long _loadBalanceBusyRecoverTime = 15000L;
   private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceSocketTimeout = 600000L;
   private long _loadBalanceWarmupTime = 60000L;
@@ -424,6 +425,22 @@ public final class ClusterServer {
   public long getLoadBalanceRecoverTime()
   {
     return _loadBalanceRecoverTime;
+  }
+
+  /**
+   * Sets the loadBalance busy-recover-time.
+   */
+  public void setLoadBalanceBusyRecoverTime(Period period)
+  {
+    _loadBalanceBusyRecoverTime = period.getPeriod();
+  }
+
+  /**
+   * Gets the loadBalance fail-recover-time.
+   */
+  public long getLoadBalanceBusyRecoverTime()
+  {
+    return _loadBalanceBusyRecoverTime;
   }
 
   /**
@@ -992,6 +1009,7 @@ public final class ClusterServer {
     pool.setLoadBalanceSocketTimeout(getLoadBalanceSocketTimeout());
     pool.setLoadBalanceIdleTime(getLoadBalanceIdleTime());
     pool.setLoadBalanceRecoverTime(getLoadBalanceRecoverTime());
+    pool.setLoadBalanceBusyRecoverTime(getLoadBalanceBusyRecoverTime());
     pool.setLoadBalanceWarmupTime(getLoadBalanceWarmupTime());
     pool.setLoadBalanceWeight(getLoadBalanceWeight());
     

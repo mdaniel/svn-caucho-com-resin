@@ -243,6 +243,9 @@ public class LoadBalanceBuilder
     if (backend.hasRecoverTime())
       factory.setLoadBalanceRecoverTime(backend.getRecoverTime());
     
+    if (backend.hasBusyRecoverTime())
+      factory.setLoadBalanceBusyRecoverTime(backend.getBusyRecoverTime());
+    
     if (backend.hasSocketTimeout())
       factory.setLoadBalanceSocketTimeout(backend.getSocketTimeout());
     
