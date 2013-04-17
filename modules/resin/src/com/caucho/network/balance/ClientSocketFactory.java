@@ -93,7 +93,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   private long _loadBalanceConnectionMin = 0;
   private long _loadBalanceSocketTimeout = 30000;
   private long _loadBalanceIdleTime = 10000;
-  private long _loadBalanceRecoverTime = 15000;
+  private long _loadBalanceFailRecoverTime = 15000;
+  private long _loadBalanceBusyRecoverTime = 15000;
   private long _loadBalanceWarmupTime = 60000;
   private int _loadBalanceWeight = 100;
 
@@ -130,10 +131,10 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   private volatile long _lastFailConnectTime;
   private volatile long _dynamicFailRecoverTime = 1000L;
 
-  private volatile long _lastFailTime;
-  private volatile long _lastBusyTime;
+  private long _lastFailTime;
+  private long _lastBusyTime;
 
-  private volatile long _failTime;
+  private long _failTime;
   private volatile long _firstSuccessTime;
   private volatile long _lastSuccessTime;
   private volatile long _prevSuccessTime;
@@ -304,12 +305,25 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public void setLoadBalanceRecoverTime(long timeout)
   {
-    _loadBalanceRecoverTime = timeout;
+    _loadBalanceFailRecoverTime = timeout;
   }
   
   public long getLoadBalanceRecoverTime()
   {
-    return _loadBalanceRecoverTime;
+    return _loadBalanceFailRecoverTime;
+  }
+
+  /**
+   * Returns how long the connection will be treated as dead.
+   */
+  public void setLoadBalanceBusyRecoverTime(long timeout)
+  {
+    _loadBalanceBusyRecoverTime = timeout;
+  }
+  
+  public long getLoadBalanceBusyRecoverTime()
+  {
+    return _loadBalanceBusyRecoverTime;
   }
 
   /**
@@ -355,13 +369,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public void init()
   {
-    _warmupChunkTime = _loadBalanceWarmupTime / WARMUP_MAX;
-    if (_warmupChunkTime <= 0)
-      _warmupChunkTime = 1;
-
-    _failChunkTime = _loadBalanceRecoverTime / WARMUP_MAX;
-    if (_failChunkTime <= 0)
-      _failChunkTime = 1;
+    _warmupChunkTime = Math.min(1, _loadBalanceWarmupTime / WARMUP_MAX);
+    _failChunkTime = Math.min(1, _loadBalanceFailRecoverTime / WARMUP_MAX);
 
     String address = getAddress();
 
@@ -373,10 +382,12 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     attr.put("socket-timeout", _loadBalanceSocketTimeout);
     attr.put("no-delay", true);
 
-    if (_isSecure)
+    if (_isSecure) {
       _tcpPath = Vfs.lookup("tcps://" + address + ":" + _port, attr);
-    else
+    }
+    else {
       _tcpPath = Vfs.lookup("tcp://" + address + ":" + _port, attr);
+    }
 
     _state = State.STARTING;
   }
@@ -593,7 +604,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
   public boolean isBusy(long now)
   {
-    return (now < _lastBusyTime + _dynamicFailRecoverTime);
+    return (now < _lastBusyTime + _loadBalanceBusyRecoverTime);
   }
   
   /**
@@ -654,8 +665,15 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   /**
    * Returns true if the server can open a connection.
    */
+  @Override
   public boolean canOpenWarmOrRecycle()
   {
+    long now = CurrentTime.getCurrentTime();
+    
+    if (isFailed(now)) {
+      return false;
+    }
+    
     return getIdleCount() > 0 || canOpenWarm();
   }
 
@@ -667,8 +685,9 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   {
     State state = _state;
 
-    if (state == State.ACTIVE)
+    if (state == State.ACTIVE) {
       return true;
+    }
     else if (state.isEnabled()) {
       long now = CurrentTime.getCurrentTime();
 
@@ -679,16 +698,18 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       long firstSuccessTime = _firstSuccessTime;
       int warmupState = 0;
 
-      if (firstSuccessTime > 0)
+      if (firstSuccessTime > 0) {
         warmupState = (int) ((now - firstSuccessTime) / _warmupChunkTime);
+      }
 
       warmupState -= _currentFailCount;
 
       if (warmupState < 0) {
         return (_failTime - warmupState * _failChunkTime < now);
       }
-      else if (WARMUP_MAX <= warmupState)
+      else if (WARMUP_MAX <= warmupState) {
         return true;
+      }
 
       int connectionMax = WARMUP_CONNECTION_MAX[warmupState];
 
@@ -715,7 +736,9 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   @Override
   public void toBusy()
   {
-    _lastBusyTime = CurrentTime.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
+    _lastBusyTime = now;
+    _lastFailTime = now;
     _firstSuccessTime = 0;
 
     _requestBusyProbe.start();
@@ -757,16 +780,15 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
                   time, _failTime));
     
     synchronized (this) {
-      if (time > _failTime) {
+      if (_failTime < time) {
         degrade(time);
         
         _firstSuccessTime = 0;
         _failTime = time;
         _lastFailTime = _failTime;
 
-        _dynamicFailRecoverTime *= 2;
-        if (_loadBalanceRecoverTime < _dynamicFailRecoverTime)
-          _dynamicFailRecoverTime = _loadBalanceRecoverTime;
+        _dynamicFailRecoverTime = Math.min(2 * _dynamicFailRecoverTime,
+                                           _loadBalanceFailRecoverTime);
   
         _state = _state.toFail();
       }
@@ -787,7 +809,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
                   time, _failTime));
 
     synchronized (this) {
-      if (time > _failTime) {
+      if (_failTime < time) {
         degrade(time);
         
         _firstSuccessTime = 0;
@@ -796,8 +818,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
         _lastFailConnectTime = time;
         
         _dynamicFailRecoverTime *= 2;
-        if (_loadBalanceRecoverTime < _dynamicFailRecoverTime)
-          _dynamicFailRecoverTime = _loadBalanceRecoverTime;
+        if (_loadBalanceFailRecoverTime < _dynamicFailRecoverTime)
+          _dynamicFailRecoverTime = _loadBalanceFailRecoverTime;
   
         _state = _state.toFail();
       }
@@ -833,8 +855,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       _currentFailCount++;
       _warmupState--;
 
-      if (_warmupState < WARMUP_MIN)
-        _warmupState = WARMUP_MIN;
+      _warmupState = Math.min(WARMUP_MIN, _warmupState);
     }
   }
 
@@ -908,11 +929,20 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     if (! state.isEnabled()) {
       return null;
     }
+    
+    /*
+    long now = CurrentTime.getCurrentTime();
+    
+    if (isFailed(now)) {
+      return null;
+    }
+    */
 
     ClientSocket stream = openRecycle();
 
-    if (stream != null)
+    if (stream != null) {
       return stream;
+    }
 
     if (canOpenWarm()) {
       return connect();
