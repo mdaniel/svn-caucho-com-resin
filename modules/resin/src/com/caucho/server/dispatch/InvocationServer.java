@@ -44,7 +44,8 @@ import com.caucho.vfs.Dependency;
  * The dispatch server is responsible for building Invocations,
  * specifically for creating the FilterChain for the invocation.
  */
-public class InvocationServer implements Dependency {
+public class InvocationServer implements Dependency
+{
   private String _serverId = "";
 
   private InvocationBuilder _invocationBuilder;
@@ -111,10 +112,12 @@ public class InvocationServer implements Dependency {
    */
   public void setInvocationCacheSize(int size)
   {
-    _invocationCacheSize = size;
-
-    if (_invocationCacheSize <= 16)
-      _invocationCacheSize = 16;
+    _invocationCacheSize = Math.max(size, 16);
+  }
+  
+  public int getInvocationCacheSize()
+  {
+    return _invocationCacheSize;
   }
 
   /**

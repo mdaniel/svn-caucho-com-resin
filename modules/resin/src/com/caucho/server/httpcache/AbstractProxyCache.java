@@ -40,6 +40,8 @@ import javax.servlet.FilterChain;
  */
 public class AbstractProxyCache
 {
+  private int _entries = -1;
+
   /**
    * Sets the path to the cache directory.
    */
@@ -88,8 +90,14 @@ public class AbstractProxyCache
   /**
    * Sets the max number of entries.
    */
-  public void setEntries(int entries)
+  public final void setEntries(int entries)
   {
+    _entries = entries;
+  }
+  
+  public final int getEntries()
+  {
+    return _entries;
   }
   
   public void setEnableMmap(boolean isEnable)

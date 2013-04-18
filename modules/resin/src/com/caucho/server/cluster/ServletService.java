@@ -1252,6 +1252,10 @@ public class ServletService
     
     // _classLoader.init();
     
+    if (_invocationServer.getInvocationCacheSize() < _proxyCache.getEntries()) {
+      _invocationServer.setInvocationCacheSize(_proxyCache.getEntries());
+    }
+    
     _invocationServer.init();
 
     _admin = createAdmin();
