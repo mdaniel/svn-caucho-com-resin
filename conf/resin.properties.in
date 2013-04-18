@@ -102,6 +102,7 @@ accept_thread_min : 4
 # Enable JNI TCP speed optimizations
 tcp_cork : true
 sendfile : true
+keepalive_select_enable : true
 
 # OpenSSL certificate configuration
 # Keys are typically stored in the resin configuration directory.
