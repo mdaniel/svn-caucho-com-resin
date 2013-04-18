@@ -228,9 +228,20 @@ public final class RingValueQueue<M>
         }
       }
       else if (tailAllocRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
-        M value = _ring.takeAndClear(tailAlloc);
+        RingValueArray<M> ring = _ring;
+        
+        M value = ring.takeAndClear(tailAlloc);
 
         while (! tailRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
+          long tail = tailRef.get();
+          
+          if (tailAlloc < tail) {
+            break;
+          }
+          
+          if (ring.get(tail) == null) {
+            tailRef.compareAndSet(tail, tail + 1);
+          }
         }
         
         blocker.offerWake();

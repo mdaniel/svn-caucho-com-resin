@@ -63,10 +63,9 @@ public class RingBlockerBasic implements RingBlocker {
     long now = CurrentTime.getCurrentTimeActual();
     long expires = now + unit.toMillis(timeout);
 
-    pollWake();
+    long sequence = _offerWaitSequence.incrementAndGet();
 
-    long sequence;
-    sequence = _offerWaitSequence.incrementAndGet();
+    pollWake();
 
     synchronized (_offerWaitSequence) {
       // sequence = _offerWaitSequence.incrementAndGet();
@@ -79,10 +78,10 @@ public class RingBlockerBasic implements RingBlocker {
           long millis = Math.max(0, expires - now);
           // nanos = nanos % 1000000L;
 
-          Thread.interrupted();
-
           _offerWaitSequence.wait(millis);
         } catch (Exception e) {
+          Thread.interrupted();
+
           log.log(Level.FINER, e.toString(), e);
         }
       }
@@ -100,25 +99,25 @@ public class RingBlockerBasic implements RingBlocker {
   @Override
   public final void offerWake()
   {
-    if (isOfferWait()) {
-      offerWakeImpl();
+    long wakeSequence = _offerWakeSequence.get();
+    long waitSequence = _offerWaitSequence.get();
+    
+    while (wakeSequence < waitSequence) {
+      if (_offerWakeSequence.compareAndSet(wakeSequence, waitSequence)) {
+        synchronized (_offerWaitSequence) {
+          _offerWaitSequence.notifyAll();
+        }
+        break;
+      }
+      
+      wakeSequence = _offerWakeSequence.get();
     }
   }
 
   @Override
   public final void wake()
   {
-    if (isOfferWait()) {
-      offerWakeImpl();
-    }
-  }
-
-  private void offerWakeImpl()
-  {
-    synchronized (_offerWaitSequence) {
-      _offerWakeSequence.set(_offerWaitSequence.get());
-      _offerWaitSequence.notifyAll();
-    }
+    offerWake();
   }
 
   @Override
@@ -147,10 +146,11 @@ public class RingBlockerBasic implements RingBlocker {
           long millis = Math.max(0, expires - now);
           // nanos = nanos % 1000000L;
 
-          Thread.interrupted();
+          // Thread.interrupted();
 
           _pollWaitSequence.wait(millis);
         } catch (Exception e) {
+          Thread.interrupted();
           log.log(Level.FINER, e.toString(), e);
         }
       }
