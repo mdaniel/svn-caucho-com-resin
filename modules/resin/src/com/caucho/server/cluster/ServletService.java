@@ -1252,7 +1252,8 @@ public class ServletService
     
     // _classLoader.init();
     
-    if (_invocationServer.getInvocationCacheSize() < _proxyCache.getEntries()) {
+    if (_proxyCache != null
+        && _invocationServer.getInvocationCacheSize() < _proxyCache.getEntries()) {
       _invocationServer.setInvocationCacheSize(_proxyCache.getEntries());
     }
     
@@ -1568,8 +1569,9 @@ public class ServletService
     // soon-to-be-invalid entries
     getInvocationServer().clearCache();
 
-    if (_proxyCache != null)
+    if (_proxyCache != null) {
       _proxyCache.clear();
+    }
   }
 
   /**
