@@ -1239,8 +1239,10 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
       _lastSuccessTime = now;
       
-      logFinest(L.l("free: _lastSuccessTime={0}, _failTime={1}",
-                    now, _failTime));
+      if (log.isLoggable(Level.FINEST)) { 
+        logFinest(L.l("free: _lastSuccessTime={0}, _failTime={1}",
+                      now, _failTime));
+      }
     }
 
     updateWarmup();

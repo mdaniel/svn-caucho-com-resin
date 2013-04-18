@@ -66,7 +66,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   private final Broker _broker;
   private final MessageStream _actorStream;
   
-  private final int _queueSize = 1024;
+  private final int _queueSize = 16 * 1024;
 
   private final MailboxQueue2 []_queues;
   
