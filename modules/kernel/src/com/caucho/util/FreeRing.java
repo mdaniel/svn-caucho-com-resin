@@ -72,7 +72,7 @@ public final class FreeRing<T> {
   
   public long getTailAlloc()
   {
-    return _ringQueue.getTailAlloc();
+    return _ringQueue.getTail();
   }
   
   /**

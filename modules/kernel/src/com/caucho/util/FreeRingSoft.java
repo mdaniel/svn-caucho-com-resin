@@ -70,7 +70,7 @@ public final class FreeRingSoft<T> {
   
   public long getTailAlloc()
   {
-    return _ringQueue.getTailAlloc();
+    return _ringQueue.getTail();
   }
   
   /**

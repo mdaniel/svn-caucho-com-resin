@@ -50,7 +50,6 @@ public final class RingValueQueue<M>
 
   private final AtomicLong _headAlloc = new AtomicLong();
 
-  private final AtomicLong _tailAlloc = new AtomicLong();
   private final AtomicLong _tail = new AtomicLong();
 
   private final RingBlocker _blocker;
@@ -126,11 +125,6 @@ public final class RingValueQueue<M>
   public final long getTail()
   {
     return _tail.get();
-  }
-
-  public final long getTailAlloc()
-  {
-    return _tailAlloc.get();
   }
 
   @Override
@@ -238,10 +232,10 @@ public final class RingValueQueue<M>
   public final M peek()
   {
     long head = _headAlloc.get();
-    long tailAlloc = _tailAlloc.get();
+    long tail = _tail.get();
 
-    if (tailAlloc < head) {
-      return get(tailAlloc);
+    if (tail < head) {
+      return get(tail);
     }
 
     return null;
