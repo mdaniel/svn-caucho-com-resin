@@ -195,6 +195,46 @@ public final class RingValueQueue<M>
   }
 
   @Override
+  public final M poll(long timeout, TimeUnit unit)
+  {
+    // final AtomicLong tailAllocRef = _tailAlloc;                              
+    final AtomicLong headRef = _headAlloc;
+    final AtomicLong tailRef = _tail;
+
+    final RingValueArray<M> ring = _ring;
+
+    final RingBlocker blocker = _blocker;
+
+    while (true) {
+      long tail = tailRef.get();
+      final long head = headRef.get();
+
+      M value;
+
+      if (tail == head) {
+        blocker.offerWake();
+
+        if (timeout <= 0 || ! blocker.pollWait(timeout, unit)) {
+          return null;
+        }
+      }
+      else if ((value = ring.pollAndClear(tail)) != null) {
+        while (! tailRef.compareAndSet(tail, tail + 1)) {
+          long nextTail = tailRef.get();
+
+          if (ring.getIndex(tail) == ring.getIndex(nextTail)) {
+            tail = nextTail;
+          }
+        }
+
+        blocker.offerWake();
+
+        return value;
+      }
+    }
+  }
+
+  @Override
   public final M peek()
   {
     long head = _headAlloc.get();
@@ -205,50 +245,6 @@ public final class RingValueQueue<M>
     }
 
     return null;
-  }
-
-  @Override
-  public final M poll(long timeout, TimeUnit unit)
-  {
-    final AtomicLong tailAllocRef = _tailAlloc;
-    final AtomicLong tailRef = _tail;
-    final AtomicLong headAllocRef = _headAlloc;
-
-    final RingBlocker blocker = _blocker;
-
-    while (true) {
-      final long tailAlloc = tailAllocRef.get();
-      final long head = headAllocRef.get();
-
-      if (tailAlloc == head) {
-        blocker.offerWake();
-
-        if (timeout <= 0 || ! blocker.pollWait(timeout, unit)) {
-          return null;
-        }
-      }
-      else if (tailAllocRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
-        RingValueArray<M> ring = _ring;
-        
-        M value = ring.takeAndClear(tailAlloc);
-
-        while (! tailRef.compareAndSet(tailAlloc, tailAlloc + 1)) {
-          long tail = tailRef.get();
-          
-          if (tailAlloc < tail) {
-            break;
-          }
-          
-          if (ring.get(tail) == null) {
-            tailRef.compareAndSet(tail, tail + 1);
-          }
-        }
-        
-        blocker.offerWake();
-
-        return value;
-      }
-    }
   }
 
   public void wake()

@@ -81,7 +81,22 @@ final class RingValueArray<T>
     return value;
   }
 
-  private final int getIndex(long ptr)
+  public final T pollAndClear(long ptr)
+  {
+    final int index = getIndex(ptr);
+    final AtomicReferenceArray<T> ring = _ring;
+    
+    T value = ring.get(index);
+    
+    if (value != null && ring.compareAndSet(index, value, null)) {
+      return value;
+    }
+    else {
+      return null;
+    }
+  }
+
+  public final int getIndex(long ptr)
   {
     return (int) (ptr & _mask);
   }
