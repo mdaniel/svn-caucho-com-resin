@@ -213,17 +213,15 @@ public final class RingValueQueue<M>
         }
       }
       else if ((value = ring.pollAndClear(tail)) != null) {
-        while (! tailRef.compareAndSet(tail, tail + 1)) {
-          long nextTail = tailRef.get();
+        if (tailRef.compareAndSet(tail, tail + 1)) {
+          blocker.offerWake();
 
-          if (ring.getIndex(tail) == ring.getIndex(nextTail)) {
-            tail = nextTail;
-          }
+          return value;
         }
-
-        blocker.offerWake();
-
-        return value;
+        else {
+          // otherwise backout the value
+          ring.set(tail, value);
+        }
       }
     }
   }
