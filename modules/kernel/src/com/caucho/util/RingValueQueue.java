@@ -200,7 +200,7 @@ public final class RingValueQueue<M>
     final RingBlocker blocker = _blocker;
 
     while (true) {
-      long tail = tailRef.get();
+      final long tail = tailRef.get();
       final long head = headRef.get();
 
       M value;
