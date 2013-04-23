@@ -105,9 +105,9 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
   private int _streamCount;
 
-  private long _warmupChunkTime;
+  private long _warmupChunkTime = 1;
 
-  private long _failChunkTime;
+  private long _failChunkTime = 1;
 
   private volatile State _state = State.NEW;
 
@@ -369,8 +369,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public void init()
   {
-    _warmupChunkTime = Math.min(1, _loadBalanceWarmupTime / WARMUP_MAX);
-    _failChunkTime = Math.min(1, _loadBalanceFailRecoverTime / WARMUP_MAX);
+    _warmupChunkTime = Math.max(1, _loadBalanceWarmupTime / WARMUP_MAX);
+    _failChunkTime = Math.max(1, _loadBalanceFailRecoverTime / WARMUP_MAX);
 
     String address = getAddress();
 

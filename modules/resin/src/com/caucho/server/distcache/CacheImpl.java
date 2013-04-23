@@ -1244,6 +1244,11 @@ public class CacheImpl<K,V>
     {
       return (V) _entry.getMnodeEntry().getValue();
     }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _entry + "]";
+    }
   }
   
   class EntryIterator implements Iterator<Cache.Entry<K,V>> {
