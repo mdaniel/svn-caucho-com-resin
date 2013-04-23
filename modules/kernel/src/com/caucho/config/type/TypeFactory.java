@@ -57,6 +57,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.el.MethodExpression;
+import javax.enterprise.inject.spi.Bean;
 
 import org.w3c.dom.Node;
 

@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import org.w3c.dom.Node;
@@ -826,7 +827,9 @@ public class InlineBeanType<T> extends ConfigType<T>
 
         _addMethodMap.put(paramTypes[0], addAttr);
 
-        // _addBean = addAttr;
+        if (paramTypes[0].equals(Bean.class)) { 
+          _addBean = addAttr;
+        }
       }
       else if ((name.startsWith("set") || name.startsWith("add"))
           && paramTypes.length == 1

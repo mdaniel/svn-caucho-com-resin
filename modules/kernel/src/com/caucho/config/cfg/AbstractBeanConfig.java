@@ -177,6 +177,11 @@ abstract public class AbstractBeanConfig {
     if (binding.annotationType().isAnnotationPresent(Qualifier.class))
       _qualifiers.add(binding);
   }
+  
+  public void add(Bean bean)
+  {
+    System.out.println("Bean: " + bean);
+  }
 
   /**
    * Sets the scope attribute.

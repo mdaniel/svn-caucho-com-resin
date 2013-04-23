@@ -258,10 +258,12 @@ abstract public class ConfigType<T>
     }
 
     if (qName.getNamespaceURI() != null
-        && qName.getNamespaceURI().startsWith("urn:java:"))
+        && qName.getNamespaceURI().startsWith("urn:java:")) {
       return getAddBeanAttribute(qName);
-    else
+    }
+    else {
       return null;
+    }
   }
 
   public Attribute getAddBeanAttribute(QName qName)
