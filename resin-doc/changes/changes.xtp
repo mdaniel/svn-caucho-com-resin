@@ -10,8 +10,10 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.36 - snapshot">
+<s2 title="4.0.36 - Apr 25, 2013">
 <ul>
+<li>websocket: IllegalStateException when data size exceeds a single message (#5394, rep by S Zachariadis)</li>
+<li>quercus: quercus_disable was misnamed (#5389, rep by  J Craan)</li>
 <li>access-log: added buffer-size to access log at cluster level (#5378, rep by Andrew Foong)</li>
 <li>apache: added apache 2.4 support(#5241)</li>
 <li>apache, iis: added support for disabled servers(#5364)</li>

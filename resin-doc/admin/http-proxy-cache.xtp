@@ -387,10 +387,10 @@ in the request, whether they're used or not.</p>
 
 <s1 title="Configuration">
 
-<defun title="cache">
+<defun title="proxy-cache">
 <parents>cluster</parents>
 
-<p>&lt;cache> configures the proxy cache (requires Resin Professional).  The
+<p>&lt;proxy-cache> configures the proxy cache (requires Resin Professional).  The
 proxy cache improves performance by caching the output of servlets,
 jsp and php pages.  For database-heavy pages, this caching can improve
 performance and reduce database load by several orders of magnitude.</p>
@@ -401,7 +401,7 @@ cache to save large amounts of data with little overhead.</p>
 <p>Management of the proxy cache uses the
 <a javadoc="com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
 
-<deftable title="&lt;cache> Attributes">
+<deftable title="&lt;proxy-cache> Attributes">
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -434,7 +434,7 @@ and proxy-cache bugs (particularly IE).</td>
     <td>false</td></tr>
 </deftable>
 
-<def title="&lt;cache> schema">
+<def title="&lt;proxy-cache> schema">
 element cache {
   disk-size?
   &amp; enable?
@@ -450,7 +450,7 @@ element cache {
 <example title="Example: enabling proxy cache">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
-        &lt;cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
+        &lt;proxy-cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
 
         &lt;server id="a" address="192.168.0.10"/&gt;
 
@@ -549,6 +549,53 @@ add the following to your resin.xml:</p>
 
 </s1>
 
+<s1 title="Caching Proxy">
+
+<p>It's important to realize that Resin's &lt;proxy-cache> can be applied to 
+any Resin layer and will operate on that layer locally.  For example, 
+consider a typical 3-tier architecture where a Resin "web-tier" serves static 
+requests and load-balances dynamic requests to a resin "app-tier" which executes 
+business logic and connects to the database.  In this architecture, 
+&lt;proxy-cache> is typically only enabled on the web-tier, where you may choose 
+to cache not only static content but dynamic responses from the app-tier also.
+What you cache is always configurable via &lt;cache-mapping>.  However the 
+cache is still a "local" cache, in that it's caching responses that generated 
+by the local server or have flowed through the local server.</p>
+
+<p>Based on the example architecture above, some may consider Resin's 
+&lt;proxy-cache> a misnomer, as it's not actually proxying to another server,
+in the traditional sense of the term.  More technically, it's a proxy 
+in the servlet filter chain; it intercepts requests, responds with 
+cached data, and halts the execution of the servlet filter chain before the 
+ actually business logic is executed.</p>
+
+<s2 title="HTTP Proxy">
+
+<p>Resin includes an HTTP Proxy that acts as an intermediary for client requests 
+to one or more backend HTTP servers.  However using the HTTP Proxy does not 
+imply caching.</p>
+
+<p>It's critical to understand that <b>&lt;proxy-cache> and &lt;resin:HttpProxy> 
+are two separate distict components which can be enabled and disabled separately
+ and used independently!</b></p>
+
+<p>resin.xml comes packaged with a proxycache tier, which includes a 
+preconfigured &lt;resin:HttpProxy regexp=".*"> element, set to proxy all 
+requests to backend HTTP servers.  If &lt;proxy-cache> is also enabled on this
+tier, then it will act as a caching proxy server.  It is up to you to configure 
+HttpProxy and proxy-cache as appropriate for HTTP proxying and caching 
+independently.</p>
+
+<p>Note: backend server do not have to be Resin instances; the requests are 
+sent using standard HTTP protocol with no Resin specific attributes.</p>
+
+</s2>
+
+<include-defun name="resin:HttpProxy"/>
+
+</s1>
+
+
 <s1 title="Administration">
 
 <s2 title="/resin-admin">
@@ -561,7 +608,7 @@ add the following to your resin.xml:</p>
 disk to read a cache entry.  Most cache requests should come from memory
 to improve performance, but cache entries are paged out to disk when the
 cache gets larger.  It's very important to keep the &lt;memory-size> tag
-of the &lt;cache> large enough so the block cache miss ratio is small.</p>
+of the &lt;proxy-cache> large enough so the block cache miss ratio is small.</p>
 
 </s3>
 
@@ -580,7 +627,7 @@ misses.  The invocation cache is used for both cacheable and non-cacheable
 pages to save the servlet and filter chain construction.  A miss of the
 invocation cache is expensive, since it will not only execute the servlet,
 but also force the servlet and filter chain to be rebuilt.  The &lt;entries>
-field of the &lt;cache> controlls the invocation miss ratio.</p>
+field of the &lt;proxy-cache> controls the invocation miss ratio.</p>
 
 </s3>
 
