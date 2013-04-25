@@ -12,6 +12,8 @@
 
 <s2 title="4.0.36 - Apr 25, 2013">
 <ul>
+<li>bam: updated bam queue size to handle heavy load better</li>
+<li>actor-queue: updated non-locking synchronization on ring queue</li>
 <li>websocket: IllegalStateException when data size exceeds a single message (#5394, rep by S Zachariadis)</li>
 <li>quercus: quercus_disable was misnamed (#5389, rep by  J Craan)</li>
 <li>access-log: added buffer-size to access log at cluster level (#5378, rep by Andrew Foong)</li>
