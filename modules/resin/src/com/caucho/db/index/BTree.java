@@ -139,8 +139,10 @@ public final class BTree {
     _keyCompare = keyCompare;
 
     byte []rootBuffer = _rootBlock.getBuffer();
-    if (getInt(rootBuffer, FLAGS_OFFSET) == 0)
+    
+    if (getInt(rootBuffer, FLAGS_OFFSET) == 0) {
       setLeaf(rootBuffer, true);
+    }
   }
 
   /**
@@ -595,6 +597,7 @@ public final class BTree {
                        pivotSize);
 
       setInt(leftBuffer, FLAGS_OFFSET, getInt(buffer, FLAGS_OFFSET));
+      // setLeaf(leftBuffer, true);
       setLength(leftBuffer, pivot);
       // XXX: NEXT_OFFSET needs to work with getRightIndex
       setPointer(leftBuffer, NEXT_OFFSET, 0);
@@ -711,6 +714,7 @@ public final class BTree {
                        leftBuffer, HEADER_SIZE,
                        pivotOffset + _tupleSize - HEADER_SIZE);
       setInt(leftBuffer, FLAGS_OFFSET, parentFlags);
+      // setLeaf(leftBuffer, true);
       setLength(leftBuffer, pivot + 1);
       setPointer(leftBuffer, PARENT_OFFSET, parentId);
       setPointer(leftBuffer, NEXT_OFFSET, 0); // rightBlockId);
@@ -725,6 +729,7 @@ public final class BTree {
                        (length - pivot - 1) * _tupleSize);
 
       setInt(rightBuffer, FLAGS_OFFSET, parentFlags);
+      // setLeaf(rightBuffer, true);
       setLength(rightBuffer, length - pivot - 1);
       setPointer(rightBuffer, PARENT_OFFSET, parentId);
       setPointer(rightBuffer, NEXT_OFFSET,
@@ -1710,7 +1715,7 @@ public final class BTree {
 
       if (! block.isValid())
         throw corrupted(L.l("block {0} is not valid", block));
-
+      
       throw corrupted(L.l("leaf value is invalid: {0} for {1} isValid={2} isDirty={3}.",
                           flags, block, block.isValid(), block.isDirty()));
     }
@@ -1930,12 +1935,6 @@ public final class BTree {
     if (_store.isActive()) {
       _store.fatalCorrupted(msg);
     }
-
-    e.fillInStackTrace();
-    e.printStackTrace();
-
-    System.exit(1);
-
 
     throw e;
   }
