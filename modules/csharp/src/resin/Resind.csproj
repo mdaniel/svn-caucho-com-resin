@@ -18,7 +18,7 @@
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <NoStdLib>False</NoStdLib>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <ApplicationIcon>..\..\..\c\src\httpd\resin.ico</ApplicationIcon>
+    <ApplicationIcon>resin.ico</ApplicationIcon>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
