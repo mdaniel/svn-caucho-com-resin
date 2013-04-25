@@ -126,14 +126,14 @@ public class BlockStore {
     = (int) ((BLOCK_SIZE - 64) / MINI_FRAG_SIZE);
   public final static int MINI_FRAG_ALLOC_OFFSET
     = MINI_FRAG_PER_BLOCK * MINI_FRAG_SIZE;
-  
+
   private final static int MINI_FRAG_FREE_STRIDE = 4;
   private final static int MINI_FRAG_STRIDE_MASK = MINI_FRAG_FREE_STRIDE - 1;
 
   public final static long METADATA_START = BLOCK_SIZE;
 
   public final static int STORE_CREATE_END = 1024;
-  
+
   public static final String DATABASE_CORRUPT_EVENT
     = "caucho.database.corrupt";
 
@@ -162,7 +162,7 @@ public class BlockStore {
 
   private int _freeMiniAllocIndex; // index for finding a free mini
   private int _freeMiniAllocCount;
-  
+
   private final AtomicLong _freeMiniOffset = new AtomicLong();
 
   private final Object _allocationWriteLock = new Object();
@@ -177,18 +177,18 @@ public class BlockStore {
   private long _miniFragmentUseCount;
 
   private Lock _rowWriteLock;
-  
+
   private long _blockLockTimeout = 120000;
 
   private final Lifecycle _lifecycle = new Lifecycle();
-  
-  public BlockStore(Database database, 
-                    String name, 
+
+  public BlockStore(Database database,
+                    String name,
                     ReadWriteLock tableLock)
   {
     this(database,
-         name, 
-         tableLock, 
+         name,
+         tableLock,
          database.getPath().lookup(name + ".db"));
   }
 
@@ -200,7 +200,7 @@ public class BlockStore {
    * @param lock the table lock
    * @param path the path to the files
    */
-  public BlockStore(Database database, 
+  public BlockStore(Database database,
                     String name,
                     ReadWriteLock rowLock,
                     Path path)
@@ -217,7 +217,7 @@ public class BlockStore {
    * @param lock the table lock
    * @param path the path to the files
    */
-  public BlockStore(Database database, 
+  public BlockStore(Database database,
                     String name,
                     ReadWriteLock rowLock,
                     Path path,
@@ -232,14 +232,14 @@ public class BlockStore {
 
     if (path == null)
       throw new NullPointerException();
-    
+
     _path = path;
-    
+
     String exitMessage = HealthSystemFacade.getExitMessage();
-    
+
     if (exitMessage.indexOf(path.getFullPath()) >= 0) {
       log.warning("removing " + _path.getFullPath() + " due to restart corruption");
-      
+
       try {
         _path.remove();
       } catch (Exception e) {
@@ -355,17 +355,17 @@ public class BlockStore {
   {
     return _blockManager;
   }
-  
+
   protected BlockReadWrite getReadWrite()
   {
     return _readWrite;
   }
-  
+
   BlockWriter getWriter()
   {
     return _writer;
   }
-  
+
   public RandomAccessStream getMmap()
   {
     return _readWrite.getMmap();
@@ -522,7 +522,7 @@ public class BlockStore {
     throws SQLException
   {
     _readWrite.remove();
-    
+
     close();
   }
 
@@ -706,11 +706,12 @@ public class BlockStore {
 
     byte []buffer = block.getBuffer();
 
-    for (int i = BLOCK_SIZE - 1; i >= 0; i--)
+    for (int i = BLOCK_SIZE - 1; i >= 0; i--) {
       buffer[i] = 0;
+    }
 
-    block.toValid();
     block.setDirty(0, BLOCK_SIZE);
+    block.toValid();
 
     synchronized (_allocationLock) {
       setAllocation(blockIndex, code);
@@ -770,10 +771,10 @@ public class BlockStore {
         newBlockCount = _blockCount + 1;
       else
         newBlockCount = _blockCount + 256;
-      
+
       if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize())
         newBlockCount = _readWrite.getFileSize() / BLOCK_SIZE;
-      
+
       while (_allocationTable.length / ALLOC_BYTES_PER_BLOCK
              < newBlockCount) {
         // expand the allocation table
@@ -916,7 +917,7 @@ public class BlockStore {
   {
     return getAllocation(blockAddress / BLOCK_SIZE);
   }
-  
+
   /**
    * Sets the allocation for a block.
    */
@@ -1252,7 +1253,7 @@ public class BlockStore {
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
-        
+
         return block;
       } finally {
         lock.unlock();
@@ -1304,7 +1305,7 @@ public class BlockStore {
         }
 
         block.setDirty(blockOffset, blockTail);
-        
+
         return block;
       } finally {
         lock.unlock();
@@ -1337,7 +1338,7 @@ public class BlockStore {
         writeLong(blockBuffer, offset, value);
 
         block.setDirty(offset, offset + 8);
-        
+
         return block;
       } finally {
         lock.unlock();
@@ -1594,10 +1595,10 @@ public class BlockStore {
     int offsetStride =  MINI_FRAG_FREE_STRIDE;
     int offsetMask = MINI_FRAG_STRIDE_MASK;
     int allocStride = ALLOC_BYTES_PER_BLOCK * offsetStride;
-    
+
     while (true) {
       byte []allocationTable = _allocationTable;
-      
+
       int offset = (int) (_freeMiniOffset.getAndIncrement() & offsetMask);
 
       for (int i = _freeMiniAllocIndex + offset * ALLOC_BYTES_PER_BLOCK;
@@ -1649,33 +1650,33 @@ public class BlockStore {
       _freeMiniAllocIndex = 0;
     }
   }
-  
+
   private void updateFreeMiniAllocIndex(int i)
   {
     byte []allocationTable = _allocationTable;
-    
+
     int offset = _freeMiniAllocIndex;
-    
+
     if (offset == (i & ~MINI_FRAG_STRIDE_MASK)) {
       return;
     }
-    
+
     // if current stride has a free mini-frag, use it
     for (int j = 0; j < MINI_FRAG_FREE_STRIDE; j++) {
       int code = allocationTable[offset];
       int fragMask = allocationTable[offset + 1] & 0xff;
-      
+
       if (code == ALLOC_MINI_FRAG && fragMask != 0xff) {
         return;
       }
-      
+
       offset += ALLOC_BYTES_PER_BLOCK;
     }
-    
+
     _freeMiniAllocIndex = i & ~MINI_FRAG_STRIDE_MASK;
-    
+
   }
-  
+
   /**
    * Deletes a miniFragment.
    */
@@ -1760,7 +1761,7 @@ public class BlockStore {
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
-        
+
         return block;
       } finally {
         lock.unlock();
@@ -1814,7 +1815,7 @@ public class BlockStore {
         }
 
         block.setDirty(blockOffset, blockTail);
-        
+
         return block;
       } finally {
         lock.unlock();
@@ -1835,7 +1836,7 @@ public class BlockStore {
 
     return (int) (MINI_FRAG_SIZE * id);
   }
- 
+
   /**
    * Flush the store.
    */
@@ -1845,17 +1846,17 @@ public class BlockStore {
       if (_blockManager != null) {
         _blockManager.flush(this);
       }
-      
+
       long timeout = 100;
       getWriter().waitForComplete(timeout);
     }
   }
-  
+
   public void fatalCorrupted(String msg)
   {
     String fullMsg = DATABASE_CORRUPT_EVENT + "[" + _path.getFullPath() + "] " + msg;
-    
-    HealthSystemFacade.fireFatalEvent(DATABASE_CORRUPT_EVENT, fullMsg); 
+
+    HealthSystemFacade.fireFatalEvent(DATABASE_CORRUPT_EVENT, fullMsg);
   }
 
   /**
@@ -1884,7 +1885,7 @@ public class BlockStore {
 
     log.finer(this + " closing");
     BlockManager blockManager = _blockManager;
-    
+
     if (blockManager != null) {
       blockManager.freeStore(this);
     }
@@ -1895,7 +1896,7 @@ public class BlockStore {
     } finally {
       _writer.close();
     }
-    
+
     int id = _id;
     _id = 0;
 
@@ -1913,15 +1914,15 @@ public class BlockStore {
     throws IOException
   {
     log.finer(this + " fsync");
-    
+
     flush();
-    
+
     _writer.wake();
-    
+
     boolean isValid = _writer.waitForComplete(60000);
 
     _readWrite.fsync();
-    
+
     return isValid;
   }
 
@@ -1931,7 +1932,7 @@ public class BlockStore {
     throws Throwable
   {
     super.finalize();
-    
+
     close();
   }
   */

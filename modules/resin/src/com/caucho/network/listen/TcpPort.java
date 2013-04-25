@@ -83,24 +83,24 @@ public class TcpPort
 
   private static final Logger log
     = Logger.getLogger(TcpPort.class.getName());
-  
+
   private static final int ACCEPT_IDLE_MIN = 4;
   private static final int ACCEPT_IDLE_MAX = 64;
-  
+
   private static final int ACCEPT_THROTTLE_LIMIT = 1024;
   private static final long ACCEPT_THROTTLE_SLEEP_TIME = 0;
-  
+
   private static final int KEEPALIVE_MAX = 65536;
-  
+
   private static final CountMeter _throttleDisconnectMeter
     = MeterService.createCountMeter("Resin|Port|Throttle Disconnect Count");
-  
+
   private static final CountMeter _keepaliveMeter
     = MeterService.createCountMeter("Resin|Port|Keepalive Count");
-  
+
   private static final ActiveMeter _keepaliveThreadMeter
     = MeterService.createActiveMeter("Resin|Port|Keepalive Thread");
-  
+
   private static final ActiveMeter _suspendMeter
     = MeterService.createActiveMeter("Resin|Port|Request Suspend");
 
@@ -110,12 +110,12 @@ public class TcpPort
   // themselves are buffering the free connections
   private FreeRingDual<TcpSocketLink> _idleConn
     = new FreeRingDual<TcpSocketLink>(256, 2 * 1024);
-  
+
   // The owning server
   // private ProtocolDispatchServer _server;
 
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
-  
+
   private SocketLinkThreadLauncher _launcher;
 
   private ClassLoader _classLoader
@@ -151,10 +151,10 @@ public class TcpPort
 
   private long _keepaliveTimeMax = 10 * 60 * 1000L;
   private long _keepaliveTimeout = 120 * 1000L;
-  
+
   private boolean _isKeepaliveAsyncEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
-  
+
   // default timeout
   private long _socketTimeout = 120 * 1000L;
 
@@ -162,13 +162,13 @@ public class TcpPort
   private long _suspendTimeMax = 600 * 1000L;
   // after for 120s start checking for EOF on comet requests
   private long _suspendCloseTimeMax = 120 * 1000L;
-  
+
   private long _requestTimeout = -1;
 
   private boolean _isTcpNoDelay = true;
   private boolean _isTcpKeepalive;
   private boolean _isTcpCork;
-  
+
   private boolean _isEnableJni = true;
 
   // The virtual host name
@@ -198,7 +198,7 @@ public class TcpPort
   // active requests that are closing after the request like an access-log
   // but should not trigger a new thread launch.
   private final AtomicInteger _shutdownRequestCount = new AtomicInteger();
-  
+
   // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
 
@@ -230,9 +230,9 @@ public class TcpPort
       // on 64-bit machines we can use more threads before parking in nio
       _keepaliveSelectThreadTimeout = 60000;
     }
-    
+
     _launcher = new SocketLinkThreadLauncher(this);
-    
+
     if (CurrentTime.isTest()) {
       _launcher.setIdleMin(2);
       _launcher.setIdleMax(ACCEPT_IDLE_MAX);
@@ -241,7 +241,7 @@ public class TcpPort
       _launcher.setIdleMin(ACCEPT_IDLE_MIN);
       _launcher.setIdleMax(ACCEPT_IDLE_MAX);
     }
-    
+
     _launcher.setThrottleLimit(ACCEPT_THROTTLE_LIMIT);
     _launcher.setThrottleSleepTime(ACCEPT_THROTTLE_SLEEP_TIME);
   }
@@ -348,7 +348,7 @@ public class TcpPort
   {
     return _port;
   }
-  
+
   /**
    * Gets the local port (for ephemeral ports)
    */
@@ -485,7 +485,7 @@ public class TcpPort
       */
     if (minSpare < 1)
       return;
-    
+
     _launcher.setIdleMin(minSpare);
   }
 
@@ -526,20 +526,20 @@ public class TcpPort
   public void setPortThreadMax(int max)
   {
     int threadMax = ThreadPool.getThreadPool().getThreadMax();
-    
+
     if (threadMax < max) {
       log.warning(L.l("<port-thread-max> value '{0}' should be less than <thread-max> value '{1}'",
                       max, threadMax));
     }
-    
+
     _launcher.setThreadMax(max);
   }
-  
+
   public int getPortThreadMax()
   {
     return _launcher.getThreadMax();
   }
-  
+
     /**
    * Sets the minimum spare idle timeout.
    */
@@ -558,13 +558,13 @@ public class TcpPort
   {
     return _launcher.getIdleTimeout();
   }
-  
+
 
   //
   // launcher throttle configuration
   //
-  
-  
+
+
   /**
    * Sets the throttle period.
    */
@@ -572,7 +572,7 @@ public class TcpPort
   {
     _launcher.setThrottlePeriod(period);
   }
-  
+
   /**
    * Sets the throttle limit.
    */
@@ -580,7 +580,7 @@ public class TcpPort
   {
     _launcher.setThrottleLimit(limit);
   }
-  
+
   /**
    * Sets the throttle sleep time.
    */
@@ -652,12 +652,12 @@ public class TcpPort
   {
     return _socketTimeout;
   }
-  
+
   public void setRequestTimeout(Period period)
   {
     _requestTimeout = period.getPeriod();
   }
-  
+
   /**
    * Returns the max time for a request.
    */
@@ -691,7 +691,7 @@ public class TcpPort
   {
     _isTcpKeepalive = tcpKeepalive;
   }
-  
+
   public boolean isTcpKeepalive()
   {
     return _isTcpKeepalive;
@@ -736,12 +736,12 @@ public class TcpPort
     else
       return -1;
   }
-  
+
   public void setEnableJni(boolean isEnableJni)
   {
     _isEnableJni = isEnableJni;
   }
-  
+
   public boolean isJniEnabled()
   {
     if (_serverSocket != null) {
@@ -801,7 +801,7 @@ public class TcpPort
   {
     return _keepaliveTimeMax;
   }
-  
+
   public void setKeepaliveConnectionTimeMaxMillis(long timeout)
   {
     _keepaliveTimeMax = timeout;
@@ -834,7 +834,7 @@ public class TcpPort
   {
     return _keepaliveTimeout;
   }
-  
+
   public void setKeepaliveTimeoutMillis(long timeout)
   {
     _keepaliveTimeout = timeout;
@@ -854,7 +854,7 @@ public class TcpPort
   {
     setKeepaliveSelectEnabled(isKeepaliveSelect);
   }
-  
+
   public void setKeepaliveSelectMax(int max)
   {
   }
@@ -903,10 +903,10 @@ public class TcpPort
     else
       return -1;
   }
-  
+
   /**
    * Ignore unknown tags.
-   * 
+   *
    * server/0940
    * network/02b0
    */
@@ -914,7 +914,7 @@ public class TcpPort
   public void addContentProgram(ConfigProgram program)
   {
   }
-  
+
   /**
    * Returns the thread launcher for the link.
    */
@@ -922,7 +922,7 @@ public class TcpPort
   {
     return _launcher;
   }
-  
+
   ThreadPool getThreadPool()
   {
     return _threadPool;
@@ -1023,14 +1023,14 @@ public class TcpPort
     else
       return -1;
   }
-  
+
   /**
    * Returns the server socket class name for debugging.
    */
   public String getServerSocketClassName()
   {
     QServerSocket ss = _serverSocket;
-    
+
     if (ss != null)
       return ss.getClass().getName();
     else
@@ -1046,10 +1046,10 @@ public class TcpPort
   {
     if (! _lifecycle.toInit())
       return;
-    
+
     _launcher.init();
   }
-  
+
   public String getUrl()
   {
     if (_url == null) {
@@ -1076,7 +1076,7 @@ public class TcpPort
 
       _url = url.toString();
     }
-    
+
     return _url;
   }
 
@@ -1095,7 +1095,7 @@ public class TcpPort
     // server 1e07
     if (_port < 0)
       return;
-    
+
     NetworkSystem system = NetworkSystem.getCurrent();
 
     if (_throttle == null)
@@ -1139,7 +1139,7 @@ public class TcpPort
       log.info(_protocol.getProtocolName() + " listening to *:"
                + _serverSocket.getLocalPort());
     }
-    
+
     assert(_serverSocket != null);
 
     postBind();
@@ -1220,12 +1220,12 @@ public class TcpPort
       return null;
     else
     */
-    
+
     if (_sslFactory instanceof JsseSSLFactory) {
       if (_port < 1024) {
         log.warning(this + " cannot bind jsse in watchdog");
       }
-      
+
       return null;
     }
 
@@ -1296,7 +1296,7 @@ public class TcpPort
   {
     return _lifecycle.isActive();
   }
-  
+
   /**
    * Starts the port listening for new connections.
    */
@@ -1334,7 +1334,7 @@ public class TcpPort
   TcpConnectionInfo []getActiveConnections()
   {
     List<TcpConnectionInfo> infoList = new ArrayList<TcpConnectionInfo>();
-    
+
     TcpSocketLink[] connections = new TcpSocketLink[_activeConnectionSet.size()];
     _activeConnectionSet.keySet().toArray(connections);
 
@@ -1343,7 +1343,7 @@ public class TcpPort
       if (connInfo != null)
         infoList.add(connInfo);
     }
-    
+
     TcpConnectionInfo []infoArray = new TcpConnectionInfo[infoList.size()];
     infoList.toArray(infoArray);
 
@@ -1366,7 +1366,7 @@ public class TcpPort
   {
     try {
       SocketLinkThreadLauncher launcher = getLauncher();
-      
+
       while (! isClosed()) {
         Thread.interrupted();
 
@@ -1471,7 +1471,7 @@ public class TcpPort
   void keepaliveFree()
   {
     int value = _keepaliveAllocateCount.decrementAndGet();
-    
+
     if (value < 0 && isActive()) {
       System.out.println("FAILED keep-alive; " + value);
       Thread.dumpStack();
@@ -1489,7 +1489,7 @@ public class TcpPort
     }
 
     int available = is.getBufferAvailable();
-    
+
     if (available > 0) {
       return available;
     }
@@ -1498,7 +1498,7 @@ public class TcpPort
 
     if (getSocketTimeout() < timeout)
       timeout = getSocketTimeout();
-    
+
     // server/2l02
     int keepaliveThreadCount = _keepaliveThreadCount.incrementAndGet();
 
@@ -1509,11 +1509,11 @@ public class TcpPort
 
       if (isKeepaliveAsyncEnabled() && _selectManager != null) {
         long selectTimeout = getBlockingTimeoutForSelect();
-        
+
         if (selectTimeout < timeout) {
           timeout = selectTimeout;
         }
-        
+
         if (keepaliveThreadCount > 32) {
           // throttle the thread keepalive when heavily loaded to save threads
           if (isAsyncThrottle()) {
@@ -1531,13 +1531,13 @@ public class TcpPort
       if (timeout < 0)
         timeout = 0;
         */
-      
+
       if (timeout <= 0) {
         return 0;
       }
-      
+
       _keepaliveThreadMeter.start();
-      
+
       try {
         if (false && _keepaliveThreadCount.get() < 32) {
           // benchmark perf with memcache
@@ -1549,11 +1549,11 @@ public class TcpPort
       } finally {
         _keepaliveThreadMeter.end();
       }
-      
+
       if (isClosed()) {
         return -1;
       }
-      
+
       return result;
     } catch (IOException e) {
       if (isClosed()) {
@@ -1577,7 +1577,7 @@ public class TcpPort
   void cometSuspend(TcpSocketLink conn)
   {
     _suspendMeter.start();
-    
+
     _suspendConnectionSet.add(conn);
   }
 
@@ -1588,7 +1588,7 @@ public class TcpPort
   boolean cometDetach(TcpSocketLink conn)
   {
     _suspendMeter.end();
-    
+
     return _suspendConnectionSet.remove(conn);
   }
 
@@ -1706,7 +1706,7 @@ public class TcpPort
   {
     return _lifetimeWriteBytes.get();
   }
-  
+
   long getLifetimeThrottleDisconnectCount()
   {
     return _lifetimeThrottleDisconnectCount.get();
@@ -1732,17 +1732,17 @@ public class TcpPort
     throws IOException
   {
     TcpSocketLink startConn = _idleConn.allocate();
-    
+
     if (startConn == null) {
       int connId = _connectionCount.incrementAndGet();
       QSocket socket = _serverSocket.createSocket();
 
       startConn = new TcpSocketLink(connId, this, socket);
     }
-    
+
     _activeConnectionSet.put(startConn,startConn);
     _activeConnectionCount.incrementAndGet();
-    
+
     return startConn;
   }
 
@@ -1856,7 +1856,7 @@ public class TcpPort
 
       for (int i = 0; i < idleCount + 10; i++) {
         InetSocketAddress addr;
-        
+
         if (getIdleThreadCount() == 0)
           break;
 
@@ -1864,7 +1864,7 @@ public class TcpPort
             localAddress.getHostAddress().startsWith("0.")) {
           addr = new InetSocketAddress("127.0.0.1", localPort);
           connectAndClose(addr);
-          
+
           addr = new InetSocketAddress("[::1]", localPort);
           connectAndClose(addr);
         }
@@ -1872,7 +1872,7 @@ public class TcpPort
           addr = new InetSocketAddress(localAddress, localPort);
           connectAndClose(addr);
         }
-        
+
         try {
           Thread.sleep(10);
         } catch (Exception e) {
@@ -1894,7 +1894,7 @@ public class TcpPort
 
     log.finest(this + " closed");
   }
-  
+
   private void connectAndClose(InetSocketAddress addr)
   {
     try {
@@ -1951,14 +1951,14 @@ public class TcpPort
         _completeSet.clear();
 
         long now = CurrentTime.getCurrentTime();
-        
+
         // wake the launcher in case of freeze
         _launcher.wake();
 
         _suspendSet.addAll(_suspendConnectionSet);
         for (int i = _suspendSet.size() - 1; i >= 0; i--) {
           TcpSocketLink conn = _suspendSet.get(i);
-          
+
           if (conn.getIdleExpireTime() < now) {
             _timeoutSet.add(conn);
             continue;

@@ -52,10 +52,8 @@ public class BlockReadWrite {
   private final static Logger log
     = Logger.getLogger(BlockReadWrite.class.getName());
   private final static L10N L = new L10N(BlockReadWrite.class);
-  
-  private final static long FILE_SIZE_INCREMENT = 8L * 1024 * 1024; 
-  // private final static long FILE_SIZE_INCREMENT = 32L * 1024 * 1024; 
-  // private final static long FILE_SIZE_INCREMENT = 64 * 1024; 
+
+  private final static long FILE_SIZE_INCREMENT = 8L * 1024 * 1024;
 
   private final BlockStore _store;
   private final BlockManager _blockManager;
@@ -68,10 +66,10 @@ public class BlockReadWrite {
 
   private AtomicReference<RandomAccessStream> _mmapFile
     = new AtomicReference<RandomAccessStream>();
-  
+
   private boolean _isEnableMmap = true;
   private boolean _isMmap = false;
-  
+
   private FreeRing<RandomAccessWrapper> _cachedRowFile
     = new FreeRing<RandomAccessWrapper>(4);
 
@@ -85,7 +83,7 @@ public class BlockReadWrite {
    * @param lock the table lock
    * @param path the path to the files
    */
-  public BlockReadWrite(BlockStore store, 
+  public BlockReadWrite(BlockStore store,
                         Path path,
                         boolean isEnableMmap)
   {
@@ -120,7 +118,7 @@ public class BlockReadWrite {
       throw new SQLException(L.l("CREATE for path '{0}' failed, because the file already exists.  CREATE can not override an existing table.",
                                  _path.getNativePath()));
     }
-    
+
     WriteStream os = _path.openWrite();
     os.close();
   }
@@ -134,14 +132,14 @@ public class BlockReadWrite {
     throws IOException
   {
     boolean isPriority = true;
-    
+
     RandomAccessWrapper wrapper = openRowFile(true, FILE_SIZE_INCREMENT);
 
     try {
       RandomAccessStream file = wrapper.getFile();
 
       _fileSize = file.getLength();
-      
+
       freeRowFile(wrapper, isPriority);
       wrapper = null;
     } finally {
@@ -172,26 +170,26 @@ public class BlockReadWrite {
     throws IOException
   {
     int retry = 10;
-    
+
     while (retry-- >= 0) {
       if (readBlockImpl(blockId, buffer, offset, length))
         return;
     }
-    
+
     throw new IllegalStateException("Error reading for block " + Long.toHexString(blockId));
   }
 
   /**
    * Reads a block into the buffer.
    */
-  private boolean readBlockImpl(long blockId, 
+  private boolean readBlockImpl(long blockId,
                                 byte []buffer, int offset, int length)
       throws IOException
   {
     long blockAddress = blockId & BlockStore.BLOCK_MASK;
-    
+
     boolean isPriority = false;
-    RandomAccessWrapper wrapper = openRowFile(isPriority, 
+    RandomAccessWrapper wrapper = openRowFile(isPriority,
                                               blockAddress + length);
 
     try {
@@ -214,19 +212,19 @@ public class BlockReadWrite {
       }
 
       if (readLen < length) {
-        System.out.println("BAD-READ: " + Long.toHexString(blockAddress));
+        System.err.println("BAD-READ: " + Long.toHexString(blockAddress));
         if (readLen < 0)
           readLen = 0;
 
         for (int i = readLen; i < BlockStore.BLOCK_SIZE; i++)
           buffer[i] = 0;
       }
-      
+
       _blockManager.addBlockRead();
 
       freeRowFile(wrapper, isPriority);
       wrapper = null;
-      
+
       return true;
     } finally {
       closeRowFile(wrapper, isPriority);
@@ -242,7 +240,7 @@ public class BlockReadWrite {
     throws IOException
   {
     RandomAccessWrapper wrapper;
-    
+
     wrapper = openRowFile(isPriority, blockAddress + length);
 
     try {
@@ -255,7 +253,7 @@ public class BlockReadWrite {
       */
       if (buffer == null || offset < 0 || length < 0
           || buffer.length < offset + length) {
-        System.out.println("BUFFER: " + buffer + " " + offset + " " + length);
+        System.err.println("BUFFER: " + buffer + " " + offset + " " + length);
       }
 
       os.write(blockAddress, buffer, offset, length);
@@ -267,7 +265,7 @@ public class BlockReadWrite {
       closeRowFile(wrapper, isPriority);
     }
   }
-  
+
   RandomAccessStream getMmap()
   {
     return _mmapFile.get();
@@ -280,7 +278,7 @@ public class BlockReadWrite {
       throws IOException
   {
     boolean isPriority = true;
-    
+
     RandomAccessWrapper wrapper = openRowFile(isPriority, 0);
 
     try {
@@ -300,7 +298,7 @@ public class BlockReadWrite {
     throws IOException
   {
     long fileSize = extendFile(addressMax);
-    
+
     // limit number of active row files
 
     if (! isPriority && ! _isMmap) {
@@ -330,46 +328,46 @@ public class BlockReadWrite {
         _rowFileSemaphore.release();
     }
   }
-  
+
   private long extendFile(long addressMax)
     throws IOException
   {
     long fileSize = _fileSize;
-    
+
     if (addressMax <= fileSize)
       return fileSize;
-  
+
     long newFileSize = fileSize;
-    
+
     while (newFileSize < addressMax) {
       newFileSize += FILE_SIZE_INCREMENT;
     }
-    
+
     synchronized (_fileLock) {
       if (_fileSize < newFileSize) {
         RandomAccessStream stream = null;
-        
+
         RandomAccessWrapper wrapper = openRowFileImpl(newFileSize);
-        
+
         try {
           if (wrapper != null)
             stream = wrapper.getFile();
-          
+
           if (stream == null)
             throw new IllegalStateException(this + " cannot open");
-          
+
           long fileLength = stream.getLength();
-            
+
           if (fileLength < newFileSize) {
             stream.write(newFileSize - 1, new byte[1], 0, 1);
           }
-          
+
           fileLength = stream.getLength();
 
           if (newFileSize < fileLength) {
             newFileSize = fileLength;
           }
-          
+
           freeRowFile(wrapper, false);
           wrapper = null;
         } finally {
@@ -380,10 +378,10 @@ public class BlockReadWrite {
         if (stream.getLength() < newFileSize)
           throw new IllegalStateException("bad file length: " + stream + " " + stream.getLength());
           */
-        
+
         _fileSize = newFileSize;
       }
-      
+
       return _fileSize;
     }
   }
@@ -397,7 +395,7 @@ public class BlockReadWrite {
     RandomAccessStream file = _mmapFile.get();
 
     if (file != null) {
-      if (file.getLength() != fileSize) {
+      if (file.getLength() < fileSize) {
         file = null;
       }
     }
@@ -411,66 +409,52 @@ public class BlockReadWrite {
 
     while (file == null || ! file.allocate()) {
       Path path = _path;
-      
+
       file = null;
 
       if (path != null) {
         file = streamOpen(fileSize);
       }
-      
+
       if (file == null)
         throw new IllegalStateException("Cannot open file");
     }
-    
+
     return new RandomAccessWrapper(file);
   }
-  
+
   private RandomAccessStream streamOpen(long fileSize)
     throws IOException
   {
     int retry = 8;
-    
+
     if (! _isEnableMmap) {
       RandomAccessStream file = _path.openRandomAccess();
-      
+
       return file;
     }
-    
+
     while (retry-- >= 0) {
       RandomAccessStream mmapFile = _mmapFile.get();
-      
+
       if (mmapFile != null
           && mmapFile.isOpen()
           && mmapFile.getLength() == fileSize) {
         return mmapFile;
       }
-      
+
       synchronized (_mmapFile) {
         mmapFile = _mmapFile.get();
 
         if (mmapFile != null && fileSize <= mmapFile.getLength()) {
           return mmapFile;
         }
-        
+
         if (! _mmapFile.compareAndSet(mmapFile, null)) {
-          System.out.println("INVALID-MMAP-FILE");
+          System.err.println("INVALID-MMAP-FILE");
         }
-       
-        try {
-          if (mmapFile != null) {
-            mmapFile.close();
-            
-            long timeout = 15000L;
-            long expires = CurrentTime.getCurrentTimeActual() + timeout;
-            
-            while (mmapFile.isOpen()
-                   && CurrentTime.getCurrentTimeActual() < expires) {
-              // wait for close
-            }
-          }
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+
+        closeMmapFile(mmapFile);
 
         RandomAccessStream file = null;
 
@@ -479,31 +463,54 @@ public class BlockReadWrite {
 
           if (file != null) {
             _isMmap = true;
-            
+
+            // System.err.println("OPEN: " + file + " " + Long.toHexString(file.getLength()));
+
             // System.out.println("REZIE: " + Long.toHexString(fileSize));
             // mmap has extra allocation because it's not automatically closed
             // XXX: file.allocate();
-            
+
             if (_mmapFile.compareAndSet(null, file)) {
               return file;
             }
             else {
-              System.out.println("CANNOT SET");
+              System.err.println("CANNOT SET");
               file.close();
               file = null;
             }
           }
-          
+
           _isEnableMmap = false;
         }
-        
+
         if (! _isEnableMmap) {
           return _path.openRandomAccess();
         }
       }
     }
-    
+
     return null;
+  }
+
+  private void closeMmapFile(RandomAccessStream mmapFile)
+  {
+    try {
+      if (mmapFile != null) {
+        _mmapFile.compareAndSet(mmapFile, null);
+
+        mmapFile.close();
+
+        long timeout = 15000L;
+        long expires = CurrentTime.getCurrentTimeActual() + timeout;
+
+        while (mmapFile.isOpen()
+               && CurrentTime.getCurrentTimeActual() < expires) {
+          // wait for close
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private void freeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
@@ -511,17 +518,17 @@ public class BlockReadWrite {
   {
     if (wrapper == null)
       return;
-    
+
     if (! isPriority && ! _isMmap) {
       _rowFileSemaphore.release();
     }
 
     wrapper.free();
-    
+
     if (wrapper.getFile() == _mmapFile.get()) {
       return;
     }
-    
+
     if (_store.isClosed() || ! _cachedRowFile.free(wrapper)) {
       wrapper.close();
     }
@@ -536,7 +543,7 @@ public class BlockReadWrite {
     if (! isPriority && ! _isMmap) {
       _rowFileSemaphore.release();
     }
-    
+
     wrapper.closeFromException();
   }
 
@@ -548,7 +555,7 @@ public class BlockReadWrite {
     _path = null;
 
     RandomAccessStream mmap = _mmapFile.getAndSet(null);
-    
+
     if (mmap != null) {
       try {
         mmap.close();
@@ -584,7 +591,7 @@ public class BlockReadWrite {
     {
       return _file;
     }
-    
+
     void free()
     {
       RandomAccessStream file = _file;
@@ -616,7 +623,7 @@ public class BlockReadWrite {
         file.close();
       }
     }
-    
+
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _file + "]";
