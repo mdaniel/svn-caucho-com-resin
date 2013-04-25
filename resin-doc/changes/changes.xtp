@@ -29,6 +29,22 @@
 <li>jCache: spec changed to use Configuration instead of builders</li>
 <li>apache: mod_caucho fix for failover issue(#5266, rep by Shinomiya Nobuaki)</li>
 <li>iis: isapi_srun.dll fix for failover issue(#5360, rep by Jason Barr)</li>
+<li>quercus: Overloading: __callStatic not implemented (#4247, rep by domdorn)</li>
+<li>quercus: mysqli_get_charset, mysqli_set_charset not implemented (#5379)</li>
+<li>quercus: error_get_last() not implemented (#5380, rep by kenfoo)</li>
+<li>quercus: drupal utf-8 issue (#3772, rep by bago)</li>
+<li>quercus: mysql utf-8 inserts are viewable in MySQL GUI browsers (#3849, Ocean)</li>
+<li>quercus: mysql Character Encoding incompatibility with standard PHP (#3618, rep by tlandmann)</li>
+<li>quercus: cannot find license in non-WEB-INF directories (#5397, rep by adam)</li>
+<li>quercus: $_SERVER['HTTP_X_SSL_REQUEST'] is not set for SSL connections (#5402, rep by V. Spivak)</li>
+<li>quercus: gethostname() not implemented (#5403, rep by V. Spivak)</li>
+<li>quercus: wordpress plugin Contact Forms 7 does not work (#5407)</li>
+<li>quercus: static::$foo needs to return child's field when inside parent:: methods (#5409, rep by V. Spivak)</li>
+<li>quercus: Quercus PHP does not understand Java enums (#3898, rep by syndetic)</li>
+<li>quercus: java Enum returned from method should be of Enum type (#5411, rep by zalmolksis)</li>
+<li>quercus: NULL values is handled different in method arguments - java interface (#5413, rep by zalmolksis)</li>
+<li>quercus: error_log not working correctly with files (#4178, rep by kmoore4now)</li>
+<li>quercus: error_log() needs to print a newline after each log message (#5289, rep by chubbsondubs)</li>
 </ul>
 </s2>
 
