@@ -38,6 +38,10 @@ to better handle high load spikes.</p>
 
 </s1>
 
+<s1 title="Quercus">
+
+<p>Quercus encoding issues with MySQL databases have been resolved.</p>
+
 </s1>
 
 </body>
