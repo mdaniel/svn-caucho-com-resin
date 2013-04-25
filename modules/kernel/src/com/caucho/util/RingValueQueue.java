@@ -143,11 +143,6 @@ public final class RingValueQueue<M>
     return _ring.get(ptr);
   }
 
-  private final boolean isSet(long ptr)
-  {
-    return _ring.get(ptr) != null;
-  }
-
   @Override
   public final boolean offer(final M value,
                              final long timeout,
@@ -229,14 +224,20 @@ public final class RingValueQueue<M>
   @Override
   public final M peek()
   {
-    long head = _headAlloc.get();
-    long tail = _tail.get();
-
-    if (tail < head) {
-      return get(tail);
+    while (true) {
+      long head = _headAlloc.get();
+      long tail = _tail.get();
+      
+      if (head <= tail) {
+        return null;
+      }
+      
+      M value = get(tail);
+      
+      if (value != null) {
+        return value;
+      }
     }
-
-    return null;
   }
 
   public void wake()
