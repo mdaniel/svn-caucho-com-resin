@@ -7,7 +7,7 @@ Group: Application/Web
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Provides: resin-pro
-Requires: java-1.6.0-openjdk-devel, openssl, libssl.so.6, libpthread.so.0, shadow-utils
+Requires: openssl-devel, glibc-devel, shadow-utils
 AutoReqProv: no
 
 %description
