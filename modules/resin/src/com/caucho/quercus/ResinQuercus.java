@@ -210,12 +210,17 @@ public class ResinQuercus extends QuercusContext
   public DataSource findDatabase(String driver, String url)
   {
     try {
-      if (getDatabase() != null)
+      if (getDatabase() != null) {
         return getDatabase();
-      else if (isConnectionPool())
-        return DatabaseManager.findDatabase(url, driver);
-      else
+      }
+      else if (isConnectionPool()) {
+        String id = url.replace(".", "_");
+
+        return DatabaseManager.findDatabase(id, url, driver);
+      }
+      else {
         return super.findDatabase(driver, url);
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -93,8 +93,8 @@ public class DatabaseManager {
     throws SQLException
   {
     String driver = findDriverByUrl(url);
-    
-    return getLocalManager().findDatabaseImpl(url, driver);
+
+    return getLocalManager().findDatabaseImpl(url, url, driver);
   }
 
   /**
@@ -103,9 +103,18 @@ public class DatabaseManager {
   public static DataSource findDatabase(String url, String driver)
     throws SQLException
   {
-    return getLocalManager().findDatabaseImpl(url, driver);
+    return getLocalManager().findDatabaseImpl(url, url, driver);
   }
-  
+
+  /**
+   * Returns a matching dbpool.
+   */
+  public static DataSource findDatabase(String id, String url, String driver)
+    throws SQLException
+  {
+    return getLocalManager().findDatabaseImpl(id, url, driver);
+  }
+
   public static void closeDatabase(DataSource ds)
   {
     getLocalManager().closeImpl(ds);
@@ -114,7 +123,8 @@ public class DatabaseManager {
   /**
    * Looks up the local database, creating if necessary.
    */
-  private DataSource findDatabaseImpl(String url,
+  private DataSource findDatabaseImpl(String id,
+                                      String url,
                                       String driverName)
     throws SQLException
   {
@@ -125,7 +135,7 @@ public class DatabaseManager {
         if (db == null) {
           db = new DBPool();
 
-          db.setVar(url + "-" + _gId++);
+          db.setVar(id + "-" + _gId++);
 
           DriverConfig driver = db.createDriver();
 
@@ -158,10 +168,10 @@ public class DatabaseManager {
   private void closeImpl(DataSource dataSource)
   {
     DBPool db = (DBPool) dataSource;
-    
+
     if (db == null)
       return;
-    
+
     try {
       String key = null;
 
@@ -171,13 +181,13 @@ public class DatabaseManager {
             key = entry.getKey();
           }
         }
-        
+
         if (key == null)
           return;
-        
+
         _databaseMap.remove(key);
       }
-      
+
       db.close();
     } catch (RuntimeException e) {
       throw e;
@@ -190,7 +200,7 @@ public class DatabaseManager {
   {
     return getLocalManager().findDriverByUrlImpl(url);
   }
-  
+
   private String findDriverByUrlImpl(String url)
   {
     for (int i = 0; i < _driverList.size(); i++) {
@@ -212,7 +222,7 @@ public class DatabaseManager {
     try {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
-      
+
       Enumeration<URL> iter
         = loader.getResources("META-INF/services/java.sql.Driver");
       while (iter.hasMoreElements()) {
