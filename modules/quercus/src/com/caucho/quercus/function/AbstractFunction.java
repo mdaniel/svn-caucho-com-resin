@@ -121,7 +121,7 @@ abstract public class AbstractFunction extends Callback {
     return compName;
   }
 
-  /*
+  /**
    * Returns the name of class lexically declaring the method
    */
   public String getDeclaringClassName()
@@ -134,7 +134,7 @@ abstract public class AbstractFunction extends Callback {
     _declaringClassName = name;
   }
 
-  /*
+  /**
    * Returns the name of class lexically binding the method
    */
   public String getBindingClassName()

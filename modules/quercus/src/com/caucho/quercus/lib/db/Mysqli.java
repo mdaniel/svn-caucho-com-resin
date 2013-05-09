@@ -112,7 +112,7 @@ public class Mysqli extends JdbcConnectionResource
                 @Optional StringValue user,
                 @Optional StringValue password,
                 @Optional String db,
-                @Optional("3306") int port,
+                @Optional("-1") int port,
                 @Optional StringValue socket)
   {
     super(env);
@@ -255,8 +255,9 @@ public class Mysqli extends JdbcConnectionResource
       urlBuilder.append(port);
     }
 
+    urlBuilder.append("/");
+
     if (dbname.length() > 0) {
-      urlBuilder.append("/");
       urlBuilder.append(dbname);
     }
 
@@ -305,7 +306,6 @@ public class Mysqli extends JdbcConnectionResource
       urlBuilder.append("characterEncoding=ISO8859_1");
     }
 
-/*
     //urlBuilder.append("&useInformationSchema=true");
 
     // required to get the result table name alias,
@@ -313,8 +313,7 @@ public class Mysqli extends JdbcConnectionResource
     // the mysql guys fix it
     //
     // php/141p
-    urlBuilder.append("&useOldAliasMetadataBehavior=true");
-*/
+    //urlBuilder.append("&useOldAliasMetadataBehavior=true");
 
     return urlBuilder.toString();
   }

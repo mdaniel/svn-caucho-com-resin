@@ -2448,7 +2448,6 @@ abstract public class StringValue
   }
 
   public Reader toSimpleReader()
-    throws UnsupportedEncodingException
   {
     return new SimpleStringValueReader(this);
   }

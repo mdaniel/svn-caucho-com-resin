@@ -45,6 +45,8 @@ import com.caucho.quercus.env.Value;
  */
 public class DateTimeZone implements Cloneable
 {
+  private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+
   private TimeZone _timeZone;
 
   protected DateTimeZone(Env env)
@@ -65,6 +67,11 @@ public class DateTimeZone implements Cloneable
   public static DateTimeZone __construct(String id)
   {
     return new DateTimeZone(id);
+  }
+
+  public boolean isGmt()
+  {
+    return _timeZone == GMT_TIME_ZONE;
   }
 
   public static ArrayValue listAbbreviations()

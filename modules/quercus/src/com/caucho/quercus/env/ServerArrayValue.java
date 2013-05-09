@@ -167,6 +167,11 @@ public class ServerArrayValue extends ArrayValueImpl
   private static final StringValue HTTPS_VU
     = new UnicodeBuilderValue("HTTPS");
 
+  private static final StringValue HTTP_X_SSL_REQUEST_V
+    = new ConstStringValue("HTTP_X_SSL_REQUEST");
+  private static final StringValue HTTP_X_SSL_REQUEST_VU
+    = new UnicodeBuilderValue("HTTP_X_SSL_REQUEST");
+
   private static final StringValue HTTP_HOST_V
     = new ConstStringValue("HTTP_HOST");
   private static final StringValue HTTP_HOST_VU
@@ -438,9 +443,14 @@ public class ServerArrayValue extends ArrayValueImpl
                   _env.createString(request.getRealPath(pathInfo)));
       }
 
-      if (request.isSecure())
+      if (request.isSecure()) {
         super.put(isUnicode ? HTTPS_VU : HTTPS_V,
                   _env.createString("on"));
+
+        // #5402
+        super.put(isUnicode ? HTTP_X_SSL_REQUEST_VU : HTTP_X_SSL_REQUEST_V,
+                  _env.createString("on"));
+      }
 
       if (pathInfo == null)
         super.put(isUnicode ? PHP_SELF_VU : PHP_SELF_V,

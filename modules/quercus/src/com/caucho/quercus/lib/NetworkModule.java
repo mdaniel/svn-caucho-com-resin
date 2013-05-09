@@ -134,7 +134,7 @@ public class NetworkModule extends AbstractQuercusModule {
     try {
       if (host == null)
         return null;
-      
+
       String protocol = null;
       int p = host.indexOf("://");
       if (p > 0) {
@@ -144,7 +144,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
       p = host.lastIndexOf(':');
       int q = host.lastIndexOf(']');
-      
+
       if (p > 0 && q < p) {
         String portStr = host.substring(p + 1);
         host = host.substring(0, p);
@@ -155,17 +155,17 @@ public class NetworkModule extends AbstractQuercusModule {
 
       if (port == 0)
         port = 80;
-      
+
       SocketInputOutput stream;
-      
+
       if ("udp".equals(protocol))
         stream = new UdpInputOutput(env, host, port, Domain.AF_INET);
       else {
         boolean isSecure = "ssl".equals(protocol);
-        
+
         stream = new TcpInputOutput(env, host, port, isSecure, Domain.AF_INET);
       }
-      
+
       if (timeout > 0)
         stream.setTimeout((int) (timeout * 1000));
       else
@@ -190,10 +190,10 @@ public class NetworkModule extends AbstractQuercusModule {
   public static Value ip2long(String ip)
   {
     // php/1m00
-    
+
     if (ip == null)
       return LongValue.MINUS_ONE;
-    
+
     long v = 0;
 
     int p = 0;
@@ -218,7 +218,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
     return new LongValue(v);
   }
-  
+
   /*
    * Converts internet address in integer format to dotted format.
    */
@@ -226,20 +226,20 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     if (address < 0L || address >= 0xFFFFFFFFL)
       return env.createString("255.255.255.255");
-    
+
     StringValue sb = env.createStringBuilder();
-    
+
     sb.append((address & 0xFF000000L) >> 24);
     sb.append('.');
-    
+
     sb.append((address & 0xFF0000L) >> 16);
     sb.append('.');
-    
+
     sb.append((address & 0xFF00L) >> 8);
     sb.append('.');
-    
+
     sb.append(address & 0xFFL);
-    
+
     return sb;
   }
 
@@ -258,7 +258,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
     if (hostname == null)
       return "";
-    
+
     InetAddress ip = null;
 
     try {
@@ -321,9 +321,9 @@ public class NetworkModule extends AbstractQuercusModule {
   public static String gethostbyaddr(Env env, String ip)
   {
     // php/1m03
-    
+
     if (ip == null) {
-      env.warning("Address must not be null.");      
+      env.warning(L.l("address must not be null"));
 
       return null;
     }
@@ -336,7 +336,7 @@ public class NetworkModule extends AbstractQuercusModule {
     CharSequence ipToCS = ip.subSequence(0, ip.length());
 
     if (! (Pattern.matches(formIPv4, ipToCS))) {
-      env.warning("Address is not in a.b.c.d form");
+      env.warning(L.l("address is not in a.b.c.d form"));
 
       return null;
     }
@@ -349,7 +349,7 @@ public class NetworkModule extends AbstractQuercusModule {
     catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
-      env.warning("Regex expression invalid");
+      env.warning(L.l("regex expression invalid"));
 
       return ip;
     }
@@ -374,6 +374,20 @@ public class NetworkModule extends AbstractQuercusModule {
     }
 
     return host.getHostName();
+  }
+
+  public static Value gethostname(Env env)
+  {
+    try {
+      String name = InetAddress.getLocalHost().getHostName();
+
+      return env.createString(name);
+    }
+    catch (Exception e) {
+      env.warning(e);
+
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -518,7 +532,7 @@ public class NetworkModule extends AbstractQuercusModule {
               String hostPart = target.substring(space + 1);
 
               target = hostPart;
-              
+
               try {
                 weight = Integer.valueOf(priorityPart);
               }

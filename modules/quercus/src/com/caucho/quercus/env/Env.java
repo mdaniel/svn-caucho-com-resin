@@ -6783,9 +6783,6 @@ public class Env
       location = getLocation();
     }
 
-    //System.err.println("Env->error0: " + code + " . " + getErrorMask() + " . " + getLocation() + " . " + location + " . " + msg);
-    //Thread.dumpStack();
-
     int mask = 1 << code;
 
     _lastErrorType = mask;

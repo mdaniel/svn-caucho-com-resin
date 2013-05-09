@@ -234,6 +234,12 @@ public class QuercusServletImpl extends HttpServlet
 
         //  return;
       }
+      catch (StackOverflowError e) {
+        RuntimeException myException
+          = new RuntimeException(L.l("StackOverflowError at {0}", env.getLocation()), e);
+
+        throw myException;
+      }
       catch (Throwable e) {
         if (response.isCommitted())
           e.printStackTrace(ws.getPrintWriter());

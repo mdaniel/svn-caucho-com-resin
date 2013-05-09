@@ -41,19 +41,16 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP variable value.
  */
+@SuppressWarnings("serial")
 public class Var extends Value
   implements Serializable
 {
-  private static final Logger log = Logger.getLogger(Var.class.getName());
-
   private Value _value;
 
   public Var()
@@ -85,16 +82,7 @@ public class Var extends Value
 
   private void checkVar(Value value)
   {
-    if (value instanceof Var) {
-      //Exception e = new Exception();
-      //e.fillInStackTrace();
-
-      //log.log(Level.FINEST, "nested vars error", e);
-
-      //Thread.dumpStack();
-    }
-
-    assert(! (value instanceof Var));
+    //assert(! (value instanceof Var));
   }
 
   public boolean isVar()
@@ -355,19 +343,7 @@ public class Var extends Value
   @Override
   public String toString()
   {
-    try {
-      return _value.toString();
-    }
-    catch (StackOverflowError e) {
-      Env env = Env.getInstance();
-
-      RuntimeException myException
-        = new RuntimeException(L.l("StackOverflowError in Var.toString()) at {0}", env.getLocation()));
-
-      myException.setStackTrace(new StackTraceElement[0]);
-
-      throw myException;
-    }
+    return _value.toString();
   }
 
   /**
