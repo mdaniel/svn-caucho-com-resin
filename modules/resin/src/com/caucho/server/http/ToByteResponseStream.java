@@ -418,8 +418,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
       if (charLength == SIZE && length > 0) {
         _charLength = charLength;
-        charLength = 0;
         flushCharBuffer();
+        charLength = _charLength;
       }
     }
 
@@ -470,7 +470,6 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
           System.arraycopy(_charBuffer, writeLength, _charBuffer, 0,
                            charLength - writeLength);
           _charLength = charLength - writeLength;
-          System.out.println("COPY: " + _charLength + " " + Integer.toHexString(_charBuffer[0]));        
         }
         
         setFlush(isFlush);

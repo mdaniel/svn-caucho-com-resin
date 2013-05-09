@@ -10,6 +10,14 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0 snapshot">
+<ul>
+<li>jsp: array index exception from utf-8 encoding buffer issues (#5436)</li>
+<li>jsp: utf-8 encoding buffer issues with surrogate pairs (#5437)</li>
+<li>network: issue with socket-timeout an non-jni (#5426, rep by HS Im)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.36 - Apr 25, 2013">
 <ul>
 <li>bam: updated bam queue size to handle heavy load better</li>

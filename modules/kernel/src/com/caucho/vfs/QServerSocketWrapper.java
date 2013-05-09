@@ -123,6 +123,10 @@ public class QServerSocketWrapper extends QServerSocket {
     s.init(socket);
     */
 
+    if (_connectionSocketTimeout > 0) {
+      socket.setSoTimeout(_connectionSocketTimeout);
+    }
+    
     return true;
   }
 
