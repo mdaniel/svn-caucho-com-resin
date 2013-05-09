@@ -111,10 +111,19 @@ public class SimpleXMLText extends SimpleXMLElement
   protected void jsonEncodeImpl(Env env,
                                 JsonEncodeContext context,
                                 StringValue sb,
-                                boolean isTop)
+                                boolean isTop,
+                                boolean isPrintBraces)
   {
     sb.append('"');
-    sb.append(_text);
+
+    jsonEncodeText(env, context, sb, _text);
+
     sb.append('"');
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _text + "]";
   }
 }

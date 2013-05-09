@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1238,7 +1240,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   {
     sb.append('{');
 
-    jsonEncodeImpl(env, context, sb, true);
+    jsonEncodeImpl(env, context, sb, true, false);
 
     sb.append('}');
   }
@@ -1246,7 +1248,8 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   protected void jsonEncodeImpl(Env env,
                                 JsonEncodeContext context,
                                 StringValue sb,
-                                boolean isTop)
+                                boolean isTop,
+                                boolean isPrintBraces)
   {
     if (! isTop) {
       sb.append('"');
@@ -1259,46 +1262,124 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     if (_attributes == null
         && _children != null
         && _children.size() == 1
-        && ! _children.get(0).isElement())
-    {
-      _children.get(0).jsonEncodeImpl(env, context, sb, false);
+        && ! _children.get(0).isElement()) {
+
+      /*
+      if (isTop) {
+        sb.append('"');
+        sb.append('0');
+        sb.append('"');
+        sb.append(':');
+      }
+      */
+
+      _children.get(0).jsonEncodeImpl(env, context, sb, false, true);
     }
     else {
-      int length = 0;
+      boolean hasChildren = _attributes != null || _children != null;
 
-      boolean hasChildren = _attributes != null && _children != null;
-
-      if (hasChildren)
+      if (hasChildren && isPrintBraces) {
         sb.append('{');
+      }
 
       if (_attributes != null) {
-        length++;
-
         sb.append("\"@attributes\"");
         sb.append(':');
         sb.append('{');
 
         for (SimpleXMLElement attribute : _attributes) {
-          attribute.jsonEncodeImpl(env, context, sb, false);
+          attribute.jsonEncodeImpl(env, context, sb, false, true);
         }
 
         sb.append('}');
       }
 
       if (_children != null) {
-        for (SimpleXMLElement child : _children) {
-          if (! child.isElement())
+        HashSet<String> visitedMap = new HashSet<String>();
+        ArrayList<SimpleXMLElement> siblingList
+          = new ArrayList<SimpleXMLElement>();
+
+        int size = _children.size();
+        for (int i = 0; i < size; i++) {
+          SimpleXMLElement child = _children.get(i);
+
+          if (! child.isElement()) {
             continue;
+          }
 
-          if (length++ > 0)
+          String name = child.getName();
+
+          if (visitedMap.contains(name)) {
+            continue;
+          }
+
+          if (visitedMap.size() > 0) {
             sb.append(',');
+          }
 
-          child.jsonEncodeImpl(env, context, sb, false);
+          visitedMap.add(name);
+
+          siblingList.clear();
+
+          for (int j = i + 1; j < size; j++) {
+            SimpleXMLElement sibling = _children.get(j);
+
+            if (sibling.getName().equals(name)) {
+              siblingList.add(sibling);
+            }
+          }
+
+          if (siblingList.size() == 0) {
+            child.jsonEncodeImpl(env, context, sb, false, true);
+          }
+          else {
+            sb.append('"');
+            sb.append(child.getName());
+            sb.append('"');
+            sb.append(':');
+
+            sb.append('[');
+
+            child.jsonEncodeImpl(env, context, sb, true, true);
+
+            for (int j = 0; j < siblingList.size(); j++) {
+              sb.append(',');
+
+              siblingList.get(j).jsonEncodeImpl(env, context, sb, true, true);
+            }
+
+            sb.append(']');
+          }
         }
       }
 
-      if (hasChildren)
+      if (hasChildren && isPrintBraces) {
         sb.append('}');
+      }
+    }
+  }
+
+  protected static void jsonEncodeText(Env env,
+                                       JsonEncodeContext context,
+                                       StringValue sb,
+                                       StringValue text)
+  {
+    int size = text.length();
+
+    for (int i = 0; i < size; i++) {
+      char ch = text.charAt(i);
+
+      if (ch == '\\') {
+        sb.append('\\');
+      }
+      else if (ch == '/') {
+        sb.append('\\');
+      }
+      else if (ch == '"') {
+        sb.append('\\');
+      }
+
+      sb.append(ch);
     }
   }
 
@@ -1330,6 +1411,12 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   private static boolean isWhitespace(int ch)
   {
     return ch <= 0x20 && (ch == 0x20 || ch == 0x9 || ch == 0xa || ch == 0xd);
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getName()  + "]";
   }
 
   class ElementIterator implements Iterator {

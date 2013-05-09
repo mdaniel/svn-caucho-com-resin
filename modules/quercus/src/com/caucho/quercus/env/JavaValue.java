@@ -164,6 +164,21 @@ public class JavaValue extends ObjectValue
     return value;
   }
 
+  /**
+   * Converts to an array.
+   */
+  @Override
+  public ArrayValue toArray()
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      array.put(entry.getKey(), entry.getValue());
+    }
+
+    return array;
+  }
+
   @Override
   protected void printRImpl(Env env,
                             WriteStream out,

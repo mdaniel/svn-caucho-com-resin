@@ -150,7 +150,8 @@ public class SimpleXMLAttribute extends SimpleXMLElement
   protected void jsonEncodeImpl(Env env,
                                 JsonEncodeContext context,
                                 StringValue sb,
-                                boolean isTop)
+                                boolean isTop,
+                                boolean isPrintBraces)
   {
     sb.append('"');
 
@@ -165,8 +166,11 @@ public class SimpleXMLAttribute extends SimpleXMLElement
     sb.append(':');
 
     sb.append('"');
-    if (_text != null)
-      sb.append(_text);
+
+    if (_text != null) {
+      jsonEncodeText(env, context, sb, _text);
+    }
+
     sb.append('"');
   }
 }
