@@ -561,14 +561,18 @@ public class HostController
     }
 
     if (_container != null) {
-      for (EarConfig config : _container.getEarDefaultList())
+      for (EarConfig config : _container.getEarDefaultList()) {
         host.getWebAppContainer().addEarDefault(config);
-
-      for (WebAppConfig config : _container.getWebAppDefaultList())
-        host.getWebAppContainer().addWebAppDefault(config);
+      }
     }
-
+    
     super.configureInstance(host);
+
+    if (_container != null) {
+      for (WebAppConfig config : _container.getWebAppDefaultList()) {
+        host.getWebAppContainer().addWebAppDefault(config);
+      }
+    }
   }
 
   @Override
