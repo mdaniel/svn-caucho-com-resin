@@ -1317,6 +1317,31 @@ public class ServletConfigImpl
   private Object createServletImpl()
     throws Exception
   {
+    Object servlet = createServletInstance();
+
+    configureServlet(servlet);
+
+    try {
+      if (servlet instanceof Page) {
+        // server/102i
+        // page already configured
+      }
+      else if (servlet instanceof Servlet) {
+        Servlet servletObj = (Servlet) servlet;
+
+        servletObj.init(this);
+      }
+    } catch (UnavailableException e) {
+      setInitException(e);
+      throw e;
+    }
+
+    return servlet;
+  }
+
+  private Object createServletInstance()
+    throws Exception
+  {
     if (_bean != null) {
       // XXX: need to ask manager?
       CreationalContextImpl<?> env = new OwnerCreationalContext(_bean);
@@ -1380,24 +1405,7 @@ public class ServletConfigImpl
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",
                                      _servletName));
-
-    configureServlet(servlet);
-
-    try {
-      if (servlet instanceof Page) {
-        // server/102i
-        // page already configured
-      }
-      else if (servlet instanceof Servlet) {
-        Servlet servletObj = (Servlet) servlet;
-
-        servletObj.init(this);
-      }
-    } catch (UnavailableException e) {
-      setInitException(e);
-      throw e;
-    }
-
+    
     return servlet;
   }
   

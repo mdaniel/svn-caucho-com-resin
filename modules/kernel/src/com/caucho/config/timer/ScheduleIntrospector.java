@@ -101,7 +101,7 @@ public class ScheduleIntrospector {
 
     TimeZone timezone = null;
 
-    if (!schedule.timezone().trim().equals("")) {
+    if (! schedule.timezone().trim().equals("")) {
       timezone = TimeZone.getTimeZone(schedule.timezone());
     }
 

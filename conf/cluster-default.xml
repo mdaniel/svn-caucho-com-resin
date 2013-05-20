@@ -20,14 +20,6 @@
       <tree-loader path="cloud:/${cluster.id}-inf"/>
     </class-loader>
 
-    <!-- include resources config files in resources/ -->
-    <resin:import fileset="${resin.root}/${cluster.id}-inf/**/*.xml"/>
-    <resin:import fileset="cloud:/${cluster.id}-inf/**/*.xml"
-                  recover="true"/>
-
-    <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
-    <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
-
     <!-- enables development error pages -->
     <resin:if test="${dev_mode}">
       <development-mode-error-page/>
@@ -190,6 +182,14 @@
       </resin:if>
 
     </host-default>
+
+    <!-- include resources config files in resources/ -->
+    <resin:import fileset="${resin.root}/${cluster.id}-inf/**/*.xml"/>
+    <resin:import fileset="cloud:/${cluster.id}-inf/**/*.xml"
+                  recover="true"/>
+
+    <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
+    <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
   </cluster-default>
 </resin>
 

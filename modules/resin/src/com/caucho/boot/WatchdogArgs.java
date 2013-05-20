@@ -471,7 +471,7 @@ class WatchdogArgs
       
       String resinArg = arg;
       
-      if (! resinArg.startsWith("--") && resinArg.startsWith("-")) {
+      if (resinArg.startsWith("-") && ! resinArg.startsWith("--")) {
         resinArg = "-" + resinArg;
       }
       
@@ -582,8 +582,7 @@ class WatchdogArgs
                || "--help".equals(resinArg)) {
         _isHelp = true;
       }
-      else if ("version".equals(resinArg)
-               || "--version".equals(resinArg)) {
+      else if ("version".equals(resinArg)) {
         System.out.println(VersionFactory.getFullVersion());
         System.exit(0);
       }

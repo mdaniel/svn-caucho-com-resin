@@ -28,6 +28,7 @@
  */
 package com.caucho.config.timer;
 
+import java.io.Closeable;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,6 +37,7 @@ import javax.ejb.Timer;
 
 import com.caucho.config.types.Trigger;
 import com.caucho.env.thread.ThreadPool;
+import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
@@ -43,7 +45,7 @@ import com.caucho.util.CurrentTime;
 /**
  * Scheduled task.
  */
-public class TimerTask implements AlarmListener {
+public class TimerTask implements AlarmListener, Closeable {
   private static AtomicLong _currentTaskId = new AtomicLong();
 
   private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
@@ -55,7 +57,7 @@ public class TimerTask implements AlarmListener {
   private Trigger _trigger;
   private Alarm _alarm;
   private Serializable _data;
-  private AtomicBoolean _cancelled = new AtomicBoolean();
+  private AtomicBoolean _isCancelled = new AtomicBoolean();
 
   /**
    * Constructs a new scheduled task.
@@ -94,6 +96,8 @@ public class TimerTask implements AlarmListener {
 
     if (invoker == null)
       throw new NullPointerException();
+    
+    Environment.addCloseListener(this);
   }
 
   public void start()
@@ -156,7 +160,7 @@ public class TimerTask implements AlarmListener {
     // TODO This should probably be a proper lookup/injection of the scheduler
     // via CDI.
     Scheduler.removeTimerTask(this);
-    _cancelled.set(true);
+    _isCancelled.set(true);
     _alarm.dequeue();
   }
 
@@ -167,7 +171,7 @@ public class TimerTask implements AlarmListener {
    */
   public ScheduledTaskStatus getStatus()
   {
-    if (_cancelled.get()) {
+    if (_isCancelled.get()) {
       return ScheduledTaskStatus.CANCELLED;
     }
 
@@ -206,11 +210,18 @@ public class TimerTask implements AlarmListener {
       long now = CurrentTime.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);
 
-      if (nextTime > 0)
+      if (nextTime > 0) {
         alarm.queue(nextTime - now);
+      }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  @Override
+  public void close()
+  {
+    cancel();
   }
 
   /**

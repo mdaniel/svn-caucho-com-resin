@@ -12,6 +12,10 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>servlet: servlets with @Inject were not calling servlet init() (#5427, rep by Bill Digman)</li>
+<li>classloader: classload errors in system classloader should not be at warning (#5416)</li>
+<li>ejb: @Schedule must be removed when context closes (#5434)</li>
+<li>cli: --version option was treated as version command (#5415, rep by Tamas Perlaky)</li>
 <li>jsp: array index exception from utf-8 encoding buffer issues (#5436)</li>
 <li>jsp: utf-8 encoding buffer issues with surrogate pairs (#5437)</li>
 <li>network: issue with socket-timeout an non-jni (#5426, rep by HS Im)</li>

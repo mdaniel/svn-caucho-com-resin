@@ -1597,7 +1597,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       } catch (ClassNotFoundException e) {
       } catch (Error e) {
         if (! (parent instanceof DynamicClassLoader)) {
-          log().warning(e + "\n  while loading " + name + " (in " + this + ")");
+          log().finer(e + "\n  while loading " + name + " (in " + this + ")");
         }
         throw e;
       }
@@ -1734,7 +1734,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     } catch (ClassNotFoundException e) {
       throw e;
     } catch (Exception e) {
-      log().log(Level.FINE, e.toString(), e);
+      log().log(Level.FINEST, e.toString(), e);
 
       throw new ClassNotFoundException(name + " [" + e + "]", e);
     }
@@ -1862,10 +1862,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
                throw e;
             */
           } catch (EnhancerRuntimeException e) {
-            e.printStackTrace();
             throw e;
           } catch (Throwable e) {
-            e.printStackTrace();
             log().log(Level.WARNING, e.toString(), e);
           }
         }
@@ -1892,11 +1890,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       entry.setEntryClass(cl);
     } catch (RuntimeException e) {
-      log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
+      log().log(Level.FINER, entry.getName() + " [" + e.toString() + "]", e);
 
       throw e;
     } catch (Exception e) {
-      log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
+      log().log(Level.FINER, entry.getName() + " [" + e.toString() + "]", e);
 
       ClassNotFoundException exn;
       exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);

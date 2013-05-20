@@ -2862,7 +2862,7 @@ public class WebApp extends ServletContextImpl
                                                      "META-INF/services/com.sun.faces.spi.injectionprovider.in");
       }
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
     }
   }
 
