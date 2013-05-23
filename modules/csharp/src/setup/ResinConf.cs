@@ -282,10 +282,12 @@ namespace Caucho
           if (sepIdx == -1)
             continue;
 
-          String key = line.Substring(0, sepIdx);
-          String value = line.Substring(sepIdx + 1, line.Length - sepIdx - 1);
+          String key = line.Substring(0, sepIdx).Trim();
+          String value = line.Substring(sepIdx + 1, line.Length - sepIdx - 1).Trim();
 
-          properties.Add(key.Trim(), value.Trim());
+          properties.Remove(key);
+
+          properties.Add(key, value);
         }
       } finally {
         if (file != null)
