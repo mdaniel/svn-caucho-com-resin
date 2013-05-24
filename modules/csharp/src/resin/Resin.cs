@@ -54,6 +54,8 @@ namespace Caucho
     private Process _process;
     private ResinArgs ResinArgs;
 
+    private static Mutex mutex = new Mutex(false, @"Global\com.caucho.Resin");
+
     private Resin(ResinArgs args)
     {
       ResinArgs = args;
@@ -155,6 +157,19 @@ namespace Caucho
     }
 
     private void ExecuteJava(String command)
+    {
+      mutex.WaitOne();
+      try
+      {
+        ExecuteJavaImpl(command);
+      }
+      finally
+      {
+        mutex.ReleaseMutex();
+      }
+    }
+
+    private void ExecuteJavaImpl(String command)
     {
       if (ResinArgs.IsVerbose)
       {
