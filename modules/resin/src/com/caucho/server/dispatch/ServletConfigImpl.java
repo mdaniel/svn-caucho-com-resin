@@ -505,11 +505,13 @@ public class ServletConfigImpl
    */
   public Class getServletClass()
   {
-    if (_bean != null)
+    if (_bean != null) {
       return _bean.getBeanClass();
+    }
 
-    if (_servletClassName == null)
+    if (_servletClassName == null) {
       return null;
+    }
 
     if (_servletClass == null) {
       try {
@@ -950,8 +952,7 @@ public class ServletConfigImpl
       Object servlet = createServlet(false);
 
       BeanBuilder factory = cdiManager.createBeanFactory(servlet.getClass());
-      if (_var != null)
-        factory.name(_var);
+      factory.name(_var);
 
       cdiManager.addBeanDiscover(factory.singleton(servlet));
     }
@@ -1194,25 +1195,44 @@ public class ServletConfigImpl
    *
    * @return the initialized servlet.
    */
-  Object createServlet(boolean isNew)
+  Object createServlet()
+      throws ServletException
+  {
+    return createServlet(false);
+  }
+  
+  Object createServletMulti()
+      throws ServletException
+  {
+    return createServlet(true);
+  }
+      
+  private Object createServlet(boolean isNew)
     throws ServletException
   {
     // server/102e
-    if (_servlet != null && ! isNew)
+    if (_servlet != null && ! isNew) {
       return _servlet;
+    }
     else if (_singletonServlet != null) {
       // server/1p19
-      _servlet = _singletonServlet;
+      
+      synchronized (this) {
+        if (_servlet == null) {
+          _servlet = _singletonServlet;
 
-      _singletonServlet.init(this);
+          _singletonServlet.init(this);
+        }
+      }
 
       return _singletonServlet;
     }
 
     Object servlet = null;
 
-    if (CurrentTime.getCurrentTime() < _nextInitTime)
+    if (CurrentTime.getCurrentTime() < _nextInitTime) {
       throw _initException;
+    }
 
     /*
     if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
@@ -1222,14 +1242,16 @@ public class ServletConfigImpl
 
     try {
       synchronized (this) {
-        if (! isNew && _servlet != null)
+        if (! isNew && _servlet != null) {
           return _servlet;
+        }
 
         // XXX: this was outside of the sync block
         servlet = createServletImpl();
 
-        if (! isNew)
+        if (! isNew) {
           _servlet = servlet;
+        }
       }
 
       if (log.isLoggable(Level.FINE))
@@ -1342,11 +1364,11 @@ public class ServletConfigImpl
   private Object createServletInstance()
     throws Exception
   {
+    InjectManager cdiManager = InjectManager.create();
+
     if (_bean != null) {
       // XXX: need to ask manager?
       CreationalContextImpl<?> env = new OwnerCreationalContext(_bean);
-      
-      InjectManager cdiManager = InjectManager.create();
       
       // server/5130
       Object value = cdiManager.findReference(_bean);
@@ -1385,6 +1407,7 @@ public class ServletConfigImpl
 
         if (_comp == null) {
           _comp = inject.createInjectionTarget(servletClass);
+
         }
       }
 
@@ -1396,8 +1419,13 @@ public class ServletConfigImpl
           servlet = _comp.produce(env);
           _comp.inject(servlet, env);
         }
-        else
+        else {
           servlet = servletClass.newInstance();
+        }
+
+        // server/47b1
+        BeanBuilder factory = cdiManager.createBeanFactory(servlet.getClass());
+        cdiManager.addBeanDiscover(factory.singleton(servlet));
       } catch (InjectionException e) {
         throw ConfigException.createConfig(e);
       }

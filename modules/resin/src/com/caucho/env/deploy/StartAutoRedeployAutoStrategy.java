@@ -74,7 +74,12 @@ public class StartAutoRedeployAutoStrategy
   public<I extends DeployInstance>
   void startOnInit(DeployController<I> controller)
   {
-    controller.startImpl();
+    LifecycleState state = controller.getState();
+
+    if (state.isIdle()) {
+      // #5406
+      controller.startImpl();
+    }
   }
 
   /**

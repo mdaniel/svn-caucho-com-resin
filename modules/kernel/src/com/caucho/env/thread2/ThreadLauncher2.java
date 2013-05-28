@@ -98,6 +98,11 @@ class ThreadLauncher2 extends AbstractThreadLauncher2 {
       e.printStackTrace();
 
       String msg = "Resin exiting because of failed thread";
+      
+      try {
+        msg = msg + ": " + e;
+      } catch (Throwable e1) {
+      }
 
       ShutdownSystem.shutdownActive(ExitCode.THREAD, msg);
     }

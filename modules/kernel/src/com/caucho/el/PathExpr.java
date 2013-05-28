@@ -141,8 +141,9 @@ public class PathExpr extends Expr {
   {
     Object value = _expr.getValue(env);
 
-    if (value != null)
+    if (value != null) {
       return value;
+    }
 
     env.setPropertyResolved(false);
     return env.getELResolver().getValue(env, null, _path);

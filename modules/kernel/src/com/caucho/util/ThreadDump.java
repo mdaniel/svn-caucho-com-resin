@@ -127,6 +127,7 @@ public class ThreadDump
     
     buildThreads(sb, info, Thread.State.RUNNABLE, false);
     buildThreads(sb, info, Thread.State.RUNNABLE, true);
+    
     if (! onlyActive) {
       buildThreads(sb, info, Thread.State.BLOCKED, false);
       buildThreads(sb, info, Thread.State.WAITING, false);
@@ -176,7 +177,6 @@ public class ThreadDump
   {
     sb.append("\n\"");
     sb.append(info.getThreadName());
-    sb.append("\" id=" + info.getThreadId());
     sb.append(" " + info.getThreadState());
 
     if (info.isInNative())

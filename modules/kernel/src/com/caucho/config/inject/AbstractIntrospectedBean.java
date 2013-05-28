@@ -53,6 +53,7 @@ import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Typed;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
@@ -63,6 +64,7 @@ import javax.inject.Scope;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.bytecode.ScopeAdapter;
+import com.caucho.config.event.EventManager;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -451,6 +453,40 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     if (_scope == null)
       _scope = scope;
+  }
+  
+  /**
+   * Introspects the methods for any @Observes
+   */
+  void introspectObservers()
+  {
+    EventManager eventManager = getBeanManager().getEventManager();
+    
+    AnnotatedType<T> annType = getAnnotatedType();
+
+    // ioc/0b25
+    /*
+    if (! getBeanManager().isIntrospectObservers(annType))
+      return;
+      */
+    for (AnnotatedMethod<? super T> beanMethod : annType.getMethods()) {
+      int param = EventManager.findObserverAnnotation(beanMethod);
+      
+      if (param < 0)
+        continue;
+      
+      // ioc/0b25
+      /*
+      Class<?> declClass = beanMethod.getJavaMember().getDeclaringClass();
+      if (declClass != annType.getJavaClass() 
+          && declClass.isAssignableFrom(annType.getJavaClass())
+          && ! annType.isAnnotationPresent(Specializes.class)) {
+        continue;
+      }
+      */
+      
+      eventManager.addObserver(this, beanMethod);
+    }
   }
 
   /**

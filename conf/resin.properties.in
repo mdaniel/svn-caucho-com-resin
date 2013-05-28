@@ -98,6 +98,7 @@ setuid_group  : @SETUID_GROUP@
 port_thread_max   : 256
 accept_thread_max : 32
 accept_thread_min : 4
+# keepalive_max   : 512
 
 # Enable JNI TCP speed optimizations
 tcp_cork : true

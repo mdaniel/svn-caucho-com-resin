@@ -36,8 +36,11 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.PassivationCapable;
+
+import com.caucho.config.event.EventManager;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -151,6 +154,24 @@ abstract public class AbstractSingletonBean<T> extends BeanWrapper<T>
     ProducesBuilder builder = new ManagedProducesBuilder(getBeanManager());
     
     builder.introspectProduces(this, getAnnotatedType());
+  }
+
+  public void introspectObservers()
+  {
+    EventManager eventManager = getBeanManager().getEventManager();
+    
+    AnnotatedType<T> annType = getAnnotatedType();
+
+    // ioc/0b25
+    for (AnnotatedMethod<? super T> beanMethod : annType.getMethods()) {
+      int param = EventManager.findObserverAnnotation(beanMethod);
+      
+      if (param < 0)
+        continue;
+      
+      // ioc/0b25
+      eventManager.addObserver(this, beanMethod);
+    }
   }
 
   /**

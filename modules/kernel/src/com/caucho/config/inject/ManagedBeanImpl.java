@@ -376,6 +376,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * Introspects the methods for any @Observes
    */
+  /*
   void introspectObservers()
   {
     EventManager eventManager = getBeanManager().getEventManager();
@@ -383,10 +384,6 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     AnnotatedType<X> annType = getAnnotatedType();
 
     // ioc/0b25
-    /*
-    if (! getBeanManager().isIntrospectObservers(annType))
-      return;
-      */
     for (AnnotatedMethod<? super X> beanMethod : annType.getMethods()) {
       int param = EventManager.findObserverAnnotation(beanMethod);
       
@@ -394,18 +391,11 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
         continue;
       
       // ioc/0b25
-      /*
-      Class<?> declClass = beanMethod.getJavaMember().getDeclaringClass();
-      if (declClass != annType.getJavaClass() 
-          && declClass.isAssignableFrom(annType.getJavaClass())
-          && ! annType.isAnnotationPresent(Specializes.class)) {
-        continue;
-      }
-      */
       
       eventManager.addObserver(this, beanMethod);
     }
   }
+  */
 
   /**
    * 

@@ -3584,6 +3584,10 @@ public class WebApp extends ServletContextImpl
     if (! _lifecycle.isAfterInit()) {
       throw new IllegalStateException(L.l("webApp must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
     }
+    
+    if (! _lifecycle.toStarting()) {
+      return;
+    }
 
     StartupTask task = new StartupTask();
     
@@ -3593,7 +3597,7 @@ public class WebApp extends ServletContextImpl
     // asdf: wait
   }
   
-  public void startImpl(StartupTask ask)
+  private void startImpl(StartupTask task)
   {
     if (! _lifecycle.isAfterInit()) {
       throw new IllegalStateException(L.l("webApp must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
@@ -3606,19 +3610,18 @@ public class WebApp extends ServletContextImpl
     try {
       thread.setContextClassLoader(_classLoader);
 
-      if (! _lifecycle.toStarting())
-        return;
-
       isOkay = false;
       
-      if (_accessLog == null)
+      if (_accessLog == null) {
         _accessLog = _accessLogLocal.get();
+      }
 
       long interval = _classLoader.getDependencyCheckInterval();
       _invocationDependency.setCheckInterval(interval);
 
-      if (_parent != null)
+      if (_parent != null) {
         _invocationDependency.add(_parent.getWebAppGenerator());
+      }
 
       // Sets the last modified time so the app won't immediately restart
       _invocationDependency.clearModified();

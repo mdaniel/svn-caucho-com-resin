@@ -168,14 +168,16 @@ public class BeanELResolver extends ELResolver {
                          Object base,
                          Object property)
   {
-    if (base == null || property == null)
+    if (base == null || property == null) {
       return null;
+    }
 
     String fieldName = String.valueOf(property);
 
-    if (fieldName.length() == 0)
+    if (fieldName.length() == 0) {
       return null;
-
+    }
+    
     Class<?> cl = base.getClass();
     BeanProperties props = getProps(cl);
 
@@ -192,10 +194,13 @@ public class BeanELResolver extends ELResolver {
 
     BeanProperty prop = props.getBeanProperty(fieldName);
 
+    System.out.println("BEANGETV: " + prop + " " + base + " " + fieldName);
+
     context.setPropertyResolved(true);
 
-    if (prop == null || prop.getReadMethod() == null)
+    if (prop == null || prop.getReadMethod() == null) {
       throw new PropertyNotFoundException("'" + property + "' is an unknown bean property of '" + base.getClass().getName() + "'");
+    }
 
     try {
       return prop.getReadMethod().invoke(base);
@@ -268,7 +273,9 @@ public class BeanELResolver extends ELResolver {
     else if (_isReadOnly || prop.getWriteMethod() == null)
       throw new PropertyNotWritableException(fieldName);
     
-    Class<?> type = prop.getWriteMethod().getParameterTypes()[0];
+    Method writeMethod = prop.getWriteMethod();
+    
+    Class<?> type = writeMethod.getParameterTypes()[0];
     
     if (value != null
         && type.isEnum()
@@ -277,7 +284,7 @@ public class BeanELResolver extends ELResolver {
     }
 
     try {
-      prop.getWriteMethod().invoke(base, value);
+      writeMethod.invoke(base, value);
     } catch (IllegalAccessException e) {
       throw new ELException(e);
     } catch (InvocationTargetException e) {
@@ -472,10 +479,15 @@ public class BeanELResolver extends ELResolver {
       } catch (NoSuchMethodException e) {
       }
 
-      if (_readMethod != null)
+      if (_readMethod != null) {
         _readMethod.setAccessible(true);
+      }
       
       _writeMethod = descriptor.getWriteMethod();
+
+      if (_writeMethod != null) {
+        _writeMethod.setAccessible(true);
+      }
 
       initDescriptor();
     }

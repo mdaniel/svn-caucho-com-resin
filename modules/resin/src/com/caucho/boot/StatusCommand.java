@@ -48,6 +48,8 @@ public class StatusCommand extends AbstractBootCommand
   {
     addValueOption("server", "id", "select a configured server");
     addFlagOption("elastic-server", "use an elastic server in the cluster");
+    addIntValueOption("watchdog-port", 
+                      "port", "set watchdog port to listen to");
     
     super.initBootOptions();
   }

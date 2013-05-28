@@ -95,7 +95,7 @@ public class ServletFilterChain implements FilterChain {
   {
     if (_servlet == null) {
       try {
-        _servlet = (Servlet) _config.createServlet(false);
+        _servlet = (Servlet) _config.createServlet();
       } catch (RuntimeException e) {
         throw e;
       } catch (ServletException e) {

@@ -203,14 +203,21 @@ public class BeanBuilder<T>
   @SuppressWarnings("unchecked")
   public Bean<T> singleton(Object value)
   {
-    return new SingletonBean<T>(_managedBean,
-                               _types,
-                               _annotated,
-                               _qualifiers,
-                               _stereotypes,
-                               _scopeType,
-                               _name,
-                               (T) value);
+    SingletonBean<T> bean;
+    
+    bean = new SingletonBean<T>(_managedBean,
+                                _types,
+                                _annotated,
+                                _qualifiers,
+                                _stereotypes,
+                                _scopeType,
+                                _name,
+                                (T) value);
+    
+    // server/47b1
+    bean.introspectObservers();
+    
+    return bean;
   }
 
   public Bean<T> injection(InjectionTarget<T> injection)

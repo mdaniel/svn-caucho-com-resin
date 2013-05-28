@@ -65,6 +65,7 @@
         <port-thread-max>${port_thread_max}</port-thread-max>
         <accept-thread-min>${accept_thread_min}</accept-thread-min>
         <accept-thread-max>${accept_thread_max}</accept-thread-max>
+        <keepalive-max>${keepalive_max?:-1}</keepalive-max>
 
         <tcp-cork>${tcp_cork}</tcp-cork>
       </port-default>

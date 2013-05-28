@@ -103,7 +103,7 @@ public class CometServletFilterChain implements FilterChain {
   {
     if (_servlet == null) {
       try {
-        _servlet = (CometServlet) _config.createServlet(false);
+        _servlet = (CometServlet) _config.createServlet();
       } catch (ServletException e) {
         throw e;
       } catch (Exception e) {

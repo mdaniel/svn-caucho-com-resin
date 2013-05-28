@@ -90,7 +90,7 @@ public class StringValueExpression extends AbstractValueExpression
     if (_expr.isConstant())
       return String.class;
 
-    Class type = _expr.getType(context);
+    Class<?> type = _expr.getType(context);
 
     if (! context.isPropertyResolved())
       throw new PropertyNotFoundException(L.l(

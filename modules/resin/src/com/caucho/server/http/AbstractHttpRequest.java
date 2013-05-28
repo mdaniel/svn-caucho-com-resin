@@ -528,14 +528,19 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     }
 
     int p1 = host.lastIndexOf('/');
-    if (p1 < 0)
+    if (p1 < 0) {
       p1 = 0;
+    }
+
+    int ipv6 = host.lastIndexOf(']');
 
     int p = host.lastIndexOf(':');
-    if (p >= 0 && p1 < p)
+    if (p >= 0 && p1 < p && ! (ipv6 > 0 && p < ipv6)) {
       return host.substring(p1, p);
-    else
+    }
+    else {
       return host;
+    }
   }
 
   protected CharSequence getHost()

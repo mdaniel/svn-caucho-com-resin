@@ -229,7 +229,7 @@ public class ServletManager {
       ServletConfigImpl config = loadOnStartup.get(i);
 
       try {
-        config.createServlet(false);
+        config.createServlet();
       } catch (ServletException e) {
         // XXX: should JSP failure also cause a system failure?
         if (config.getJspFile() == null)
@@ -286,7 +286,7 @@ public class ServletManager {
       throw new ServletException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
     }
 
-    return (Servlet) config.createServlet(false);
+    return (Servlet) config.createServlet();
   }
 
   /**

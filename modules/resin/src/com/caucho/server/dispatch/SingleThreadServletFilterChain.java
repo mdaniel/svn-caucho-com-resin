@@ -79,7 +79,7 @@ public class SingleThreadServletFilterChain implements FilterChain {
     
     if (servlet == null) {
       try {
-        servlet = (Servlet) _config.createServlet(true);
+        servlet = (Servlet) _config.createServletMulti();
       } catch (ServletException e) {
         throw e;
       } catch (Exception e) {
