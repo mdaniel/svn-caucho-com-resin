@@ -180,7 +180,8 @@ public class Host
   /**
    * Sets the canonical host name.
    */
-  private void setHostName(String name)
+  @Configurable
+  public void setHostName(String name)
     throws ConfigException
   {
     _hostName = name;
