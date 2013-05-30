@@ -291,13 +291,6 @@ public class AsyncContextImpl
     if (! isSuspend) {
       onComplete();
     }
-
-    /*
-    try {
-    } finally {
-      _cometController = null;
-    }
-    */
   }
   
   //

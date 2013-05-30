@@ -373,16 +373,19 @@ public class HmuxRequest extends AbstractHttpRequest
 
       return handleInvocation();
     } finally {
-      if (! _hasRequest)
+      if (! _hasRequest) {
         getResponse().setHeaderWritten(true);
+      }
 
       if (_subProtocol == null) {
         finishInvocation();
       }
 
       try {
-        // server/0190
-        finishRequest();
+        // server/0190, server/1ld7
+        if (! isSuspend()) {
+          finishRequest();
+        }
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Exception e) {
@@ -1327,6 +1330,17 @@ public class HmuxRequest extends AbstractHttpRequest
   protected void handleConnectionClose()
   {
     // ignore for hmux
+  }
+  
+  @Override
+  public void finishRequest()
+      throws IOException
+  {
+    try {
+      super.finishRequest();
+    } finally {
+      _filter.close();
+    }
   }
 
   // Response data

@@ -37,7 +37,6 @@ import javax.servlet.http.Cookie;
 import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.WriteStream;

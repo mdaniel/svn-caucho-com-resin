@@ -48,7 +48,7 @@ public class ClassDependency implements PersistentDependency {
   private final static Logger log
     = Logger.getLogger(ClassDependency.class.getName());
   
-  private Class _cl;
+  private Class<?> _cl;
   private String _className;
 
   private boolean _checkFields = true;
@@ -62,7 +62,7 @@ public class ClassDependency implements PersistentDependency {
   /**
    * Creates the class dependency.
    */
-  public ClassDependency(Class cl)
+  public ClassDependency(Class<?> cl)
   {
     _cl = cl;
     _className = cl.getName();
@@ -85,7 +85,7 @@ public class ClassDependency implements PersistentDependency {
     } catch (ClassNotFoundException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
+    
     long newDigest = getDigest();
 
     if (newDigest != digest) {
@@ -146,7 +146,7 @@ public class ClassDependency implements PersistentDependency {
   /**
    * Calculates a MD5 digest of the class.
    */
-  private long addDigest(long digest, Class cl)
+  private long addDigest(long digest, Class<?> cl)
     throws Exception
   {
     if (_cl == null)
@@ -156,14 +156,14 @@ public class ClassDependency implements PersistentDependency {
 
     digest = addDigest(digest, cl.getModifiers());
 
-    Class superClass = cl.getSuperclass();
+    Class<?> superClass = cl.getSuperclass();
     if (superClass != null
         && superClass.getName().startsWith("java.")
         && ! superClass.getName().startsWith("javax.")) {
       digest = addDigest(digest, superClass);
     }
 
-    Class []interfaces = cl.getInterfaces();
+    Class<?> []interfaces = cl.getInterfaces();
     Arrays.sort(interfaces, ClassComparator.CMP);
     for (int i = 0; i < interfaces.length; i++)
       digest = addDigest(digest, interfaces[i].getName());
@@ -210,13 +210,13 @@ public class ClassDependency implements PersistentDependency {
       digest = addDigest(digest, method.getModifiers());
       digest = addDigest(digest, method.getName());
 
-      Class []param = method.getParameterTypes();
+      Class<?> []param = method.getParameterTypes();
       for (int j = 0; j < param.length; j++)
         digest = addDigest(digest, param[j].getName());
 
       digest = addDigest(digest, method.getReturnType().getName());
 
-      Class []exn = method.getExceptionTypes();
+      Class<?> []exn = method.getExceptionTypes();
       Arrays.sort(exn, ClassComparator.CMP);
       for (int j = 0; j < exn.length; j++)
         digest = addDigest(digest, exn[j].getName());
@@ -228,11 +228,18 @@ public class ClassDependency implements PersistentDependency {
   /**
    * Returns a string which will recreate the dependency.
    */
+  @Override
   public String getJavaCreateString()
   {
+    // server/18p3, #5408 - class loader wants the $ for inner classes
+    return ("new com.caucho.make.ClassDependency("
+        + "\"" + _className + "\""
+        + ", " + getDigest() + "L)");
+    /*
     return ("new com.caucho.make.ClassDependency("
             + "\"" + _className.replace('$', '.') + "\""
             + ", " + getDigest() + "L)");
+            */
   }
   
   /**

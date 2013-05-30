@@ -1623,16 +1623,18 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
         return false;
         */
 
-      if (request == null)
+      if (request == null) {
         return false;
+      }
 
       AsyncContextImpl asyncContext = request.getAsyncContext();
 
       ServletContext webApp = asyncContext.getDispatchContext();
       String url = asyncContext.getDispatchPath();
       
-      if (_tcpConn != null && _tcpConn.isAsyncComplete())
+      if (_tcpConn != null && _tcpConn.isAsyncComplete()) {
         return false;
+      }
 
       if (url != null) {
         if (webApp == null)
@@ -1670,7 +1672,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       if (! isSuspend()) {
         finishRequest();
       }
-   }
+    }
 
     if (log.isLoggable(Level.FINE)) {
       log.fine(dbgId() +
@@ -1862,38 +1864,8 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       _requestFacade = null;
 
       _responseFacade = null;
-
-      /*
-      if (_tcpConn != null) {
-        _tcpConn.finishRequest();
-      }
-      */
-
-      /*
-      if (httpBuffer != null)
-        getServer().freeHttpBuffer(httpBuffer);
-        */
     }
   }
-  /*
-  public void beginThreadIdle()
-  {
-    TcpSocketLink tcpConn = _tcpConn;
-    
-    if (tcpConn != null) {
-      tcpConn.beginThreadIdle();
-    }
-  }
-  
-  public void endThreadIdle()
-  {
-    TcpSocketLink tcpConn = _tcpConn;
-    
-    if (tcpConn != null) {
-      tcpConn.endThreadIdle();
-    }
-  }
-  */
 
   @Override
   public void onCloseConnection()

@@ -135,6 +135,8 @@ typedef struct ssl_config_t {
   char *cipher_suite;
   int is_honor_cipher_order;
 
+  int is_compression;
+
   void *crl;
   
   pthread_mutex_t ssl_lock;

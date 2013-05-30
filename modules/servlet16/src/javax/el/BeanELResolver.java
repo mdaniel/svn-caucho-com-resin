@@ -194,8 +194,6 @@ public class BeanELResolver extends ELResolver {
 
     BeanProperty prop = props.getBeanProperty(fieldName);
 
-    System.out.println("BEANGETV: " + prop + " " + base + " " + fieldName);
-
     context.setPropertyResolved(true);
 
     if (prop == null || prop.getReadMethod() == null) {

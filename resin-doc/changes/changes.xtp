@@ -12,6 +12,8 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>jsp: dependency detection issues with inner classes causing recompilation (#5408, rep by stefan_bieler2)</li>
+<li>servlet/async: async support with hmux (#5420, rep by bhauer1)</li>
 <li>el: issue with permissions on inner classes (#5447, rep by mate)</li>
 <li>webapp: check state on controller init (#5406, rep by gattu)</li>
 <li>servlet: allow @Observes on servlet (#5444)</li>
