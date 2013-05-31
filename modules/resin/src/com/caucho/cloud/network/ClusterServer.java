@@ -772,8 +772,13 @@ public final class ClusterServer {
       }
     }
     
-    if (address == null)
-      throw new ConfigException(L.l("Cannot find an internal local IP address within 120s"));
+    if (address == null) {
+      throw new ConfigException(L.l("Cannot find an internal local IP address for server {0}, external IP {1} within 120s."
+                                    + " 'external-address=true' is used for cloud networks where the internal address is allocated dynamically."
+                                    + " Check that the persistent address has been assigned in the cloud configuration or DNS.",
+                                    _cloudServer.getId(),
+                                    _cloudServer.getAddress()));
+    }
     
     return address;
   }

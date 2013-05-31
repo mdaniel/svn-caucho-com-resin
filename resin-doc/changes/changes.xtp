@@ -12,6 +12,8 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>socket: client-disconnect exception needs to construct exception before socket close (#5392)</li>
+<li>openssl: added "compression" flag with a default false (#5435)</li>
 <li>jsp: dependency detection issues with inner classes causing recompilation (#5408, rep by stefan_bieler2)</li>
 <li>servlet/async: async support with hmux (#5420, rep by bhauer1)</li>
 <li>el: issue with permissions on inner classes (#5447, rep by mate)</li>

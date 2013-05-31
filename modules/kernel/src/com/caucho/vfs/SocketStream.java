@@ -292,12 +292,14 @@ public class SocketStream extends StreamImpl {
       _os.write(buf, offset, length);
       _totalWriteBytes += length;
     } catch (IOException e) {
+      IOException exn = ClientDisconnectException.create(this + ":" + e, e);
+      
       try {
         close();
       } catch (IOException e1) {
       }
 
-      throw ClientDisconnectException.create(this + ":" + e, e);
+      throw exn;
     }
   }
 
