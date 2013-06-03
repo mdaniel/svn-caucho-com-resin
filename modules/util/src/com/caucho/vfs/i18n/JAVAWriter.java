@@ -38,7 +38,7 @@ import java.io.IOException;
  */
 public class JAVAWriter extends EncodingWriter {
   private static JAVAWriter _writer = new JAVAWriter();
-  
+
   /**
    * Null-arg constructor for instantiation by com.caucho.vfs.Encoding only.
    */
@@ -99,7 +99,7 @@ public class JAVAWriter extends EncodingWriter {
    * @param off starting offset into the character array.
    * @param len the number of characters to write.
    */
-  public void write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
+  public int write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
     throws IOException
   {
     for (int i = 0; i < len; i++) {
@@ -121,5 +121,7 @@ public class JAVAWriter extends EncodingWriter {
         os.write(b < 10 ? b + '0' : b + 'a' - 10);
       }
     }
+
+    return len;
   }
 }

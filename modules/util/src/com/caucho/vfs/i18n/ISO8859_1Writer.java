@@ -45,7 +45,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
   public ISO8859_1Writer()
   {
   }
-  
+
   /**
    * Returns the Java encoding for the writer.
    */
@@ -81,7 +81,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
   {
     return _writer;
   }
-  
+
   /**
    * Writes a character to the output stream with the correct encoding.
    *
@@ -101,36 +101,39 @@ public final class ISO8859_1Writer extends EncodingWriter {
    * @param len number of characters to write
    */
   @Override
-  public void write(OutputStreamWithBuffer os,
-		    char []cBuf, int cOffset, int cLength)
+  public int write(OutputStreamWithBuffer os,
+                    char []cBuf, int cOffset, int cLength)
     throws IOException
   {
     byte []bBuf = os.getBuffer();
     int bOffset = os.getBufferOffset();
     int bEnd = bBuf.length;
+    int length = cLength;
 
     // int cEnd = cOffset + cLength;
 
     while (cLength > 0) {
       int sublen = bEnd - bOffset;
       if (cLength < sublen)
-	sublen = cLength;
+        sublen = cLength;
 
       for (int i = 0; i < sublen; i++) {
-	bBuf[bOffset + i] = (byte) cBuf[cOffset + i];
+        bBuf[bOffset + i] = (byte) cBuf[cOffset + i];
       }
 
       bOffset += sublen;
       cOffset += sublen;
       cLength -= sublen;
-      
+
       if (bOffset == bEnd) {
-	bBuf = os.nextBuffer(bOffset);
-	bOffset = os.getBufferOffset();
-	bEnd = bBuf.length;
+        bBuf = os.nextBuffer(bOffset);
+        bOffset = os.getBufferOffset();
+        bEnd = bBuf.length;
       }
     }
 
     os.setBufferOffset(bOffset);
+
+    return length;
   }
 }

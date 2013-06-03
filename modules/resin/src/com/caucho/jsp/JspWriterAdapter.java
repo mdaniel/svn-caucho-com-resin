@@ -43,13 +43,13 @@ public class JspWriterAdapter extends AbstractBodyContent {
   private static final Logger log
     = Logger.getLogger(JspWriterAdapter.class.getName());
   private static final L10N L = new L10N(JspWriterAdapter.class);
-  
+
   // the parent writer
   private JspWriter _parent;
-  
+
   // the underlying writer
   private AbstractResponseStream _out;
-  
+
   // the page context
   private PageContextImpl _pageContext;
 
@@ -99,14 +99,14 @@ public class JspWriterAdapter extends AbstractBodyContent {
     if (_isClosed) {
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }
 
     _out.print(buf, offset, length);
   }
-  
+
   /**
    * Writes a character to the output.
    *
@@ -116,11 +116,11 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     if (_isClosed) {
       if (Character.isWhitespace(ch))
-	return;
-      
+        return;
+
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }
@@ -136,7 +136,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     if (_isClosed) {
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }
@@ -153,7 +153,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     if (_isClosed) {
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }
@@ -167,15 +167,14 @@ public class JspWriterAdapter extends AbstractBodyContent {
       int sublen = end - off;
 
       if (size - writeLength < sublen) {
-	if (size == writeLength) {
-	  writeBuffer = _out.nextCharBuffer(writeLength);
-	  writeLength = 0;
-	  
-	  if (size < sublen)
-	    sublen = size;
-	}
-	else
-	  sublen = size - writeLength;
+        if (size == writeLength) {
+          writeBuffer = _out.nextCharBuffer(writeLength);
+          writeLength = _out.getCharOffset();
+
+          sublen = Math.min(size - writeLength, sublen);
+        }
+        else
+          sublen = size - writeLength;
       }
 
       int tail = off + sublen;
@@ -209,7 +208,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     if (_isClosed) {
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }
@@ -239,7 +238,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     if (_isClosed) {
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }
@@ -255,7 +254,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     if (_isClosed) {
       // jsp/15m7
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " write() forbidden after writer is closed");
+        log.fine(this + " write() forbidden after writer is closed");
 
       return;
     }

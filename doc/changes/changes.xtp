@@ -10,6 +10,12 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
+<s2 title="3.1.snapshot">
+<ul>
+<li>jsp: static text chunk generation limited to 8k characters (#5368)</li>
+</ul>
+</s2>
+
 <s2 title="3.1.13 Nov 12, 2012">
 <ul>
 <li>xa: change timeout message to include EXTRA_TIMEOUT (#4927, rep by Shinomiya Nobuaki)</li>

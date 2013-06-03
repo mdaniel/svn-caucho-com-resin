@@ -44,7 +44,7 @@ public class JspJavaWriter extends JavaWriter {
 
   private String _filename;
   private int _line = -1;
-  
+
   // Current text node.
   private CharBuffer _cb = CharBuffer.allocate();
 
@@ -64,7 +64,7 @@ public class JspJavaWriter extends JavaWriter {
     if (_filename != null && _cb.length() == 0) {
       super.setLocation(_filename, _line);
     }
-    
+
     _cb.append(text);
   }
 
@@ -96,7 +96,7 @@ public class JspJavaWriter extends JavaWriter {
     String filename = _filename;
     int line = _line;
     _filename = null;
-    
+
     if (_cb.length() > 0) {
       int length = _cb.length();
       _cb.clear();
@@ -118,39 +118,39 @@ public class JspJavaWriter extends JavaWriter {
   private void generateText(char []text, int offset, int length)
     throws IOException
   {
-    if (length > 32000) {
-      generateText(text, offset, 16 * 1024);
-      generateText(text, offset + 16 * 1024, length - 16 * 1024);
+    if (length > 8 * 1024) {
+      generateText(text, offset, 8 * 1024);
+      generateText(text, offset + 8 * 1024, length - 8 * 1024);
       return;
     }
 
     if (length == 1) {
       int ch = text[offset];
-      
+
       print("out.write('");
       switch (ch) {
       case '\\':
         print("\\\\");
-	break;
+        break;
       case '\'':
         print("\\'");
-	break;
+        break;
       case '\n':
         print("\\n");
-	break;
+        break;
       case '\r':
         print("\\r");
-	break;
+        break;
       default:
-	print((char) ch);
-	break;
+        print((char) ch);
+        break;
       }
 
       println("');");
     }
     else {
       int index = _gen.addString(new String(text, offset, length));
-    
+
       print("out.write(_jsp_string" + index + ", 0, ");
       println("_jsp_string" + index + ".length);");
     }

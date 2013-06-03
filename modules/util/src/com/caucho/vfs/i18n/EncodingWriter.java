@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 abstract public class EncodingWriter {
   protected static final Logger log
     = Logger.getLogger(EncodingWriter.class.getName());
-  
+
   /**
    * Returns the Java encoding for the writer.
    */
@@ -53,14 +53,14 @@ abstract public class EncodingWriter {
   {
     return "unknown";
   }
-  
+
   /**
    * Sets the Java encoding for the writer.
    */
   public void setJavaEncoding(String encoding)
   {
   }
-  
+
   /**
    * Returns a new encoding writer for the given stream and javaEncoding.
    *
@@ -69,7 +69,7 @@ abstract public class EncodingWriter {
    * @return the encoding writer
    */
   public abstract EncodingWriter create(String javaEncoding);
-  
+
   /**
    * Returns a new encoding writer using the saved writer.
    *
@@ -95,10 +95,13 @@ abstract public class EncodingWriter {
    * @param off starting offset into the buffer.
    * @param len number of characters to write
    */
-  public void write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
+  public int write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
     throws IOException
   {
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
       write(os, cbuf[off + i]);
+    }
+
+    return len;
   }
 }

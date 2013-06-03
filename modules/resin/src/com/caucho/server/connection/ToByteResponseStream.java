@@ -55,15 +55,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   // head of the expandable buffer
   private TempBuffer _head = TempBuffer.allocate();
   private TempBuffer _tail;
-  
+
   private byte []_byteBuffer;
   private int _byteLength;
-  
+
   private int _bufferCapacity;
   private int _bufferSize;
 
   private boolean _isOutputStreamOnly;
-  
+
   private boolean _isHead;
   private boolean _isClosed;
   protected boolean _isFinished;
@@ -73,7 +73,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   protected ToByteResponseStream()
   {
   }
-  
+
   /**
    * Initializes the Buffered Response stream at the beginning of a request.
    */
@@ -81,16 +81,16 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void start()
   {
     _bufferCapacity = SIZE;
-    
+
     _charLength = 0;
-    
+
     _head.clear();
     _tail = _head;
     _byteBuffer = _tail.getBuffer();
     _byteLength = 0;
-    
+
     _bufferSize = 0;
-    
+
     _isHead = false;
     _isClosed = false;
     _isFinished = false;
@@ -130,7 +130,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     throws UnsupportedEncodingException
   {
     EncodingWriter toByte;
-    
+
     if (encoding == null)
       toByte = Encoding.getLatin1Writer();
     else
@@ -140,7 +140,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       _toByte = toByte;
     else {
       _toByte = Encoding.getLatin1Writer();
-	
+
       throw new UnsupportedEncodingException(encoding);
     }
   }
@@ -209,7 +209,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     if (_charLength > 0)
       flushCharBuffer();
-    
+
     _byteLength = offset;
   }
 
@@ -272,7 +272,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _tail = _head;
     _byteBuffer = _tail.getBuffer();
     _byteLength = 0;
-    
+
     _charLength = 0;
 
     _bufferSize = 0;
@@ -299,7 +299,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     else if (_byteLength == SIZE) {
       _tail.setLength(_byteLength);
       _bufferSize += _byteLength;
-	
+
       TempBuffer tempBuf = TempBuffer.allocate();
       _tail.setNext(tempBuf);
       _tail = tempBuf;
@@ -329,33 +329,33 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
     if (_bufferCapacity <= _bufferSize + _byteLength + length) {
       if (_bufferSize + _byteLength > 0)
-	flushByteBuffer();
+        flushByteBuffer();
 
       if (_bufferCapacity <= length) {
-	_bufferSize = length;
-	writeNext(buffer, offset, length, isFinished);
-	_bufferSize = 0;
-	return;
+        _bufferSize = length;
+        writeNext(buffer, offset, length, isFinished);
+        _bufferSize = 0;
+        return;
       }
     }
 
     int byteLength = _byteLength;
     while (length > 0) {
       if (SIZE <= byteLength) {
-	_tail.setLength(byteLength);
-	_bufferSize += byteLength;
-	
-	TempBuffer tempBuf = TempBuffer.allocate();
-	_tail.setNext(tempBuf);
-	_tail = tempBuf;
+        _tail.setLength(byteLength);
+        _bufferSize += byteLength;
 
-	_byteBuffer = _tail.getBuffer();
-	byteLength = 0;
+        TempBuffer tempBuf = TempBuffer.allocate();
+        _tail.setNext(tempBuf);
+        _tail = tempBuf;
+
+        _byteBuffer = _tail.getBuffer();
+        byteLength = 0;
       }
 
       int sublen = length;
       if (SIZE - byteLength < sublen)
-	sublen = SIZE - byteLength;
+        sublen = SIZE - byteLength;
 
       System.arraycopy(buffer, offset, _byteBuffer, byteLength, sublen);
 
@@ -377,11 +377,12 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       return;
     else if (_isHead)
       return;
-    
-    _charBuffer[_charLength++] = (char) ch;
-    
-    if (_charLength == SIZE)
+
+    if (SIZE <= _charLength) {
       flushCharBuffer();
+    }
+
+    _charBuffer[_charLength++] = (char) ch;
   }
 
   /**
@@ -394,25 +395,25 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       return;
     else if (_isHead)
       return;
-    
+
     int charLength = _charLength;
 
     while (length > 0) {
       int sublen = SIZE - charLength;
 
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       System.arraycopy(buffer, offset, _charBuffer, charLength, sublen);
 
       offset += sublen;
       length -= sublen;
       charLength += sublen;
-      
+
       if (charLength == SIZE) {
-	_charLength = charLength;
-	charLength = 0;
-	flushCharBuffer();
+        _charLength = charLength;
+        flushCharBuffer();
+        charLength = _charLength;
       }
     }
 
@@ -473,10 +474,17 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _charLength = 0;
 
     if (charLength > 0 && ! _isOutputStreamOnly) {
-      _toByte.write(this, _charBuffer, 0, charLength);
+      int writeLength = _toByte.write(this, _charBuffer, 0, charLength);
 
-      if (_bufferCapacity <= _byteLength + _bufferSize)
-	flushByteBuffer();
+      if (writeLength < charLength) {
+        System.arraycopy(_charBuffer, writeLength, _charBuffer, 0,
+                         charLength - writeLength);
+        _charLength = charLength - writeLength;
+      }
+
+      if (_bufferCapacity <= _byteLength + _bufferSize) {
+        flushByteBuffer();
+      }
     }
   }
 
@@ -489,7 +497,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (_byteLength + _bufferSize < _bufferCapacity) {
       _tail.setLength(offset);
       _bufferSize += offset;
-	
+
       TempBuffer tempBuf = TempBuffer.allocate();
       _tail.setNext(tempBuf);
       _tail = tempBuf;
@@ -518,14 +526,14 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     TempBuffer ptr = _head;
     do {
       _head = ptr;
-      
+
       TempBuffer next = ptr.getNext();
       ptr.setNext(null);
 
       writeNext(ptr.getBuffer(), 0, ptr.getLength(), _isFinished);
 
       if (next != null) {
-	TempBuffer.free(ptr);
+        TempBuffer.free(ptr);
         ptr = null;
       }
 
@@ -541,7 +549,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
    * Writes the chunk to the downward stream.
    */
   abstract protected void writeNext(byte []buffer, int offset,
-				    int length, boolean isEnd)
+                                    int length, boolean isEnd)
     throws IOException;
 
   /**
