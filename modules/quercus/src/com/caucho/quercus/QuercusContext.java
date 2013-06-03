@@ -1830,6 +1830,8 @@ public class QuercusContext
    */
   public void init()
   {
+    initLocal();
+
     if (_iniFile != null) {
       Env env = new Env(this);
 
@@ -1867,8 +1869,6 @@ public class QuercusContext
 
     _includeCache = new TimedCache<IncludeKey, Path>(getIncludeCacheMax(),
                                                      getIncludeCacheTimeout());
-
-    initLocal();
   }
 
   public void addInitModule(QuercusModule module)
