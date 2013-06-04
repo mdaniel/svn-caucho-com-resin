@@ -11120,7 +11120,7 @@ element set {
     &lt;resin:IfNetwork>
       &lt;resin:value>192.168.1.0/24&lt;/resin:value>
     &lt;/resin:IfNetwork>
-  &lt;/resin:SetHeader>
+  &lt;/resin:SetRequestSecure>
 
 &lt;/web-app>
 </example>
