@@ -484,13 +484,17 @@ public class OptionsModule extends AbstractQuercusModule {
    * @param extension assumes ini values are prefixed by extension names.
    */
   public static Value ini_get_all(Env env,
-                                  @Optional() String extension)
+                                  @Optional String extension)
   {
-    if (extension.length() > 0) {
+    if (extension == null) {
+      extension = "";
+    }
+    else if (extension.length() > 0) {
       if (! env.isExtensionLoaded(extension)) {
         env.warning(L.l("extension '" + extension + "' not loaded."));
         return BooleanValue.FALSE;
       }
+      
       extension += ".";
     }
 
