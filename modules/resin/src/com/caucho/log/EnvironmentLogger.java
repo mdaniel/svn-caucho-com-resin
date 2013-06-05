@@ -81,6 +81,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   public EnvironmentLogger(String name, String resourceBundleName)
   {
     super(name, resourceBundleName);
+    _localHandlers.setGlobal(new Handler[0]);
 
     doSetLevel(Level.OFF);
   }
