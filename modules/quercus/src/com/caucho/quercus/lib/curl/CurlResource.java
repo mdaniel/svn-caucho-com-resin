@@ -618,7 +618,12 @@ public class CurlResource extends ResourceValue
    */
   public void setRequestProperty(String key, String value)
   {
-    _requestProperties.put(key, value);
+    // php/5034
+    // php/5035
+
+    if (value.length() > 0) {
+      _requestProperties.put(key, value);
+    }
   }
 
   /**
