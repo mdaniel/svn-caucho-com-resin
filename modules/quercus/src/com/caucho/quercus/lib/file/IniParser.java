@@ -23,7 +23,7 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- *   
+ *
  *   @author Nam Nguyen
  */
 
@@ -48,10 +48,10 @@ public class IniParser {
   {
     ArrayValue top = new ArrayValueImpl();
     ArrayValue section = top;
-    
+
     while (true) {
       int ch = skipWhitespaces(is);
-      
+
       if (ch < 0) {
         break;
       }
@@ -60,10 +60,10 @@ public class IniParser {
       }
       else if (ch == '[') {
         StringValue key = parseBracketKey(env, is);
-        
+
         if (isProcessSections) {
           section = new ArrayValueImpl();
-          
+
           top.put(key, section);
         }
       }
@@ -75,20 +75,20 @@ public class IniParser {
 
     return top;
   }
-  
+
   private static StringValue parseBracketKey(Env env, ReadStream is)
     throws IOException
   {
     StringValue sb = env.createStringBuilder();
-    
+
     int ch = skipSpacesAndTabs(is);
-    
+
     int quoteChar = -1;
     if (ch == '"' || ch == '\'') {
       quoteChar = ch;
       ch = is.read();
     }
-    
+
     while (true) {
       if (ch < 0
           || ch == quoteChar
@@ -98,49 +98,49 @@ public class IniParser {
       else if (ch == '\r' || ch == '\n') {
         throw new IOException("expected ']' but saw end of line");
       }
-      
+
       sb.append((char) ch);
       ch = is.read();
     }
-    
+
     if (ch == quoteChar) {
       for (ch = is.read(); ch >= 0 && ch != ']'; ch = is.read()) {
       }
     }
-    
+
     return sb;
   }
-  
+
   private static void parseIniLine(Env env, ReadStream is, ArrayValue section)
     throws IOException
   {
     StringValue name = parseIniName(env, is);
     StringValue key = null;
     Value value;
-    
+
     int ch = skipSpacesAndTabs(is);
-    
+
     if (ch == '[') {
       key = parseBracketKey(env, is);
-      
+
       ch = skipSpacesAndTabs(is);
     }
 
     if (ch != '=') {
       throw new IOException("expected '=', but saw '" + ((char) ch) + "' (" + ch + ")");
     }
-    
+
     value = parseIniValue(env, is);
-    
+
     if (key != null) {
       Value array = section.get(name);
-      
+
       if (array == UnsetValue.UNSET) {
         array = new ArrayValueImpl();
-        
+
         section.put(name, array);
       }
-      
+
       array.put(key, value);
     }
     else {
@@ -148,20 +148,20 @@ public class IniParser {
 
     }
   }
-  
+
   private static StringValue parseIniName(Env env, ReadStream is)
     throws IOException
   {
     StringValue sb = env.createStringBuilder();
-    
+
     int ch = skipSpacesAndTabs(is);
-    
+
     int quoteChar = -1;
     if (ch == '"' || ch == '\'') {
       quoteChar = ch;
       ch = is.read();
     }
-    
+
     while (true) {
       if (ch < 0
           || ch == quoteChar
@@ -169,27 +169,27 @@ public class IniParser {
           || quoteChar < 0 && ! isValidIniKeyChar(ch)) {
         break;
       }
-      
+
       sb.append((char) ch);
       ch = is.read();
     }
-    
+
     if (ch == quoteChar) {
       for (ch = is.read(); ch >= 0 && ch != ']'; ch = is.read()) {
       }
     }
-    
+
     is.unread();
-    
+
     int len = sb.length();
     for (; len > 0; len--) {
       ch = sb.charAt(len - 1);
-      
+
       if (! Character.isWhitespace(ch)) {
         break;
       }
     }
-    
+
     if (len != sb.length()) {
       if (sb instanceof StringBuilderValue) {
         ((StringBuilderValue) sb).setLength(len);
@@ -198,21 +198,21 @@ public class IniParser {
         ((UnicodeBuilderValue) sb).setLength(len);
       }
     }
-    
+
     return sb;
   }
-  
+
   private static Value parseIniValue(Env env, ReadStream is)
     throws IOException
   {
     int ch = skipSpacesAndTabs(is);
-    
+
     if (ch == '\r' || ch == '\n')
       return NullValue.NULL;
 
     if (ch == '"' || ch == '\'') {
       int quoteChar = ch;
-      
+
       StringValue sb = env.createStringBuilder();
 
       for (ch = is.read(); ch >= 0 && ch != quoteChar; ch = is.read()) {
@@ -270,32 +270,38 @@ public class IniParser {
 
           return result;
         }
-        else
+        else {
           sb.append((char) ch);
+        }
       }
 
       String value = sb.toString().trim();
 
-      return env.createString(getIniConstant(env, value));
+      return getIniConstant(env, value);
     }
   }
-    
-  private static String getIniConstant(Env env, String value)
+
+  private static Value getIniConstant(Env env, String value)
   {
-    if (value.equalsIgnoreCase("null"))
-      return "";
+    if (value.equalsIgnoreCase("null")) {
+      return env.getEmptyString();
+    }
     else if (value.equalsIgnoreCase("true")
-             || value.equalsIgnoreCase("yes"))
-      return "1";
+             || value.equalsIgnoreCase("yes")) {
+      return env.createString("1");
+    }
     else if (value.equalsIgnoreCase("false")
-             || value.equalsIgnoreCase("no"))
-      return "";
-    else if (env.isDefined(value))
-      return env.getConstant(value).toString();
-    else
-      return value;
+             || value.equalsIgnoreCase("no")) {
+      return env.getEmptyString();
+    }
+    else if (env.isDefined(value)) {
+      return env.getConstant(value);
+    }
+    else {
+      return env.createString(value);
+    }
   }
-  
+
   private static boolean isValidIniKeyChar(int ch)
   {
     if (ch <= 0
@@ -315,47 +321,47 @@ public class IniParser {
     else
       return true;
   }
-  
+
   private static int skipWhitespaces(ReadStream is)
     throws IOException
   {
     int ch;
-    
+
     for (ch = is.read(); Character.isWhitespace(ch); ch = is.read()) {
     }
-    
+
     return ch;
   }
-  
+
   private static int skipSpacesAndTabs(ReadStream is)
     throws IOException
   {
     int ch;
-    
+
     while (true) {
       ch = is.read();
-      
+
       if (ch != ' ' && ch != '\t') {
         break;
       }
     }
-    
+
     return ch;
   }
-  
+
   private static int skipToNewline(ReadStream is)
     throws IOException
   {
     int ch;
-    
+
     while (true) {
       ch = is.read();
-      
+
       if (ch < 0 || ch == '\r' || ch == '\n') {
         break;
       }
     }
-    
+
     return ch;
   }
 }

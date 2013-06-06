@@ -2670,13 +2670,16 @@ public class FileModule extends AbstractQuercusModule {
       is.setEncoding(env.getScriptEncoding());
 
       return parseIni(env, is, processSections);
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       env.warning(e);
 
       return BooleanValue.FALSE;
-    } finally {
-      if (is != null)
+    }
+    finally {
+      if (is != null) {
         is.close();
+      }
     }
   }
 

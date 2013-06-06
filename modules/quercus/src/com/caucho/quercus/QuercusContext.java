@@ -1832,6 +1832,9 @@ public class QuercusContext
   {
     initLocal();
 
+    initModules();
+    initClasses();
+
     if (_iniFile != null) {
       Env env = new Env(this);
 
@@ -1859,9 +1862,6 @@ public class QuercusContext
       _serverEnvMap.put(createString(entry.getKey()),
                         createString(entry.getValue()));
     }
-
-    initModules();
-    initClasses();
 
     _workDir = getWorkDir();
 
