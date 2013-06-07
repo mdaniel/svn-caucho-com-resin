@@ -393,7 +393,7 @@ class WatchdogArgs
   public boolean hasOption(String option)
   {
     for (String arg : _argv) {
-      if (option.equals(arg))
+      if (arg.equals(option) || arg.equals('-' + option))
         return true;
     }
 

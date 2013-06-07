@@ -403,7 +403,7 @@ public abstract class AbstractBootCommand implements BootCommand {
   @Override
   public boolean isRemote(WatchdogArgs args)
   {
-    return args.getArg("address") != null;
+    return args.getArg("-address") != null;
   }
   
   @Override

@@ -65,8 +65,8 @@ public class PasswordEncryptCommand extends AbstractBootCommand
   {
     // validateArgs(args.getArgv());
     
-    String salt = args.getArg("salt");
-    String password = args.getArg("password");
+    String salt = args.getArg("-salt");
+    String password = args.getArg("-password");
     
     List<String> tailArgs = args.getTailArgs();
     
