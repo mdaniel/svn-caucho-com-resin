@@ -178,25 +178,10 @@ namespace Caucho.IIS
       }
 
       HmuxConnection connection = null;
-
-      Object connectLock = new Object();
-      Monitor.Enter(connectLock);
       try {
         Socket socket = new Socket(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-        AsyncCallback connectListener = delegate(IAsyncResult result)
-        {
-          Monitor.Enter(connectLock);
-          try {
-            Monitor.Pulse(connectLock);
-          } catch (Exception) {
-          } finally {
-            Monitor.Exit(connectLock);
-          }
-        };
-
-        socket.BeginConnect(_address, _port, connectListener, socket);
-        Monitor.Wait(connectLock, _loadBalanceConnectTimeout);
+        IAsyncResult asyncResult = socket.BeginConnect(_address, _port, null, socket);
+        asyncResult.AsyncWaitHandle.WaitOne(_loadBalanceConnectTimeout);
 
         if (!socket.Connected) {
           throw new SocketException(10053);
@@ -226,9 +211,12 @@ namespace Caucho.IIS
 
         return connection;
       } catch (SocketException e) {
-        String message = String.Format("Socket connection to {0}:{1} timed out on load-balance-connect-timeout {2}", _address, _port, _loadBalanceConnectTimeout);
+        String message = String.Format("Socket connection to {0}:{1} timed out on load-balance-connect-timeout {2} due to: {3}({4})", _address, _port, _loadBalanceConnectTimeout, e.Message, e.ErrorCode);
         if (_log.IsLoggable(EventLogEntryType.Information))
+        {
           _log.Info(message);
+        }
+        
 
         Trace.TraceInformation(message);
       } catch (Exception e) {
@@ -244,8 +232,6 @@ namespace Caucho.IIS
 
         if (connection == null)
           FailConnect();
-
-        Monitor.Exit(connectLock);
       }
 
       return null;
