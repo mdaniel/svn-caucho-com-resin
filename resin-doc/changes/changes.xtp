@@ -12,6 +12,7 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>servlet: ServletResponse.reset() should reset cookies (#5464)</li>
 <li>iis.net: fixed Resin.IIS.handler.dll intermittent slow connection to resin issue (#5455, rep by Shinomiya Nobuaki)</li>
 <li>cli: heap-dump double-dash isn't recognized with -raw option(#5454)</li>
 <li>socket: client-disconnect exception needs to construct exception before socket close (#5392)</li>
