@@ -284,7 +284,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     } catch (Exception e) {
     }
 
-    _cookiesOut.clear();
+    if (_cookiesOut != null)
+      _cookiesOut.clear();
 
     _response.reset();
   }
