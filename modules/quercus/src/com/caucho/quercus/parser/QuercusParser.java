@@ -461,6 +461,11 @@ public class QuercusParser {
     return _quercus != null && _quercus.isUnicodeSemantics();
   }
 
+  public boolean isShortOpenTag()
+  {
+    return _quercus != null && _quercus.getIniBoolean("short_open_tag");
+  }
+
   public static Expr parse(QuercusContext quercus, String str)
     throws IOException
   {
@@ -4954,6 +4959,14 @@ public class QuercusParser {
           _lexeme = sb;
 
           return TEXT_ECHO;
+        }
+        else if (ch != 'p' && ch != 'P' && ! isShortOpenTag()) {
+          sb.append('<');
+          sb.append('?');
+
+          sb.append((char) ch);
+
+          ch = read();
         }
         else {
           _lexeme = sb;

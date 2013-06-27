@@ -494,7 +494,7 @@ public class OptionsModule extends AbstractQuercusModule {
         env.warning(L.l("extension '" + extension + "' not loaded."));
         return BooleanValue.FALSE;
       }
-      
+
       extension += ".";
     }
 
@@ -1157,6 +1157,9 @@ public class OptionsModule extends AbstractQuercusModule {
     = _iniDefinitions.add("allow_webdav_methods", false, PHP_INI_ALL);
   static final IniDefinition INI_MEMORY_LIMIT
     = _iniDefinitions.add("memory_limit", "512M", PHP_INI_ALL);
+
+  static final IniDefinition INI_SHORT_OPEN_TAG
+    = _iniDefinitions.add("short_open_tag", true, PHP_INI_ALL);
 
   // unsupported
   static final IniDefinition MAGIC_QUOTES_RUNTIME
