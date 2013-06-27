@@ -190,10 +190,10 @@ namespace Caucho.IIS
             socket.Close();
           }
           catch (Exception e)
-          {
-            String message = String.Format("Closing of Socket {0}:{1} failed due to: {2}", _address, _port, e.Message);
+          {            
             if (_log.IsLoggable(EventLogEntryType.Error))
             {
+              String message = String.Format("Closing of Socket {0}:{1} failed due to: {2}", _address, _port, e.Message);
               _log.Error(message);
             }
           }
