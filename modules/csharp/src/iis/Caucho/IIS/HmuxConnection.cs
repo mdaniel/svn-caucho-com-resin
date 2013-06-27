@@ -98,7 +98,7 @@ namespace Caucho.IIS
     public HmuxConnection(Socket socket, Server pool, char serverInternalId, String traceId)
     {
       _socket = socket;
-      _stream = new BufferedStream(new NetworkStream(_socket));
+      _stream = new BufferedStream(new NetworkStream(_socket, true));
       _pool = pool;
       _serverInternalId = serverInternalId;
       
