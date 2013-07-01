@@ -322,7 +322,7 @@ namespace Caucho.IIS
           return;
         } catch (IOException e) {
           client.FailSocket();
-          _log.Warning("IOException '{0}': '{1}' {2}", channel.GetTraceId(), e.Message, e.StackTrace);
+          _log.Error("IOException '{0}': '{1}' {2}", channel.GetTraceId(), e.Message, e.StackTrace);
         } finally {
           if ((result & EXIT_MASK) == QUIT)
             channel.Free(requestStartTime);

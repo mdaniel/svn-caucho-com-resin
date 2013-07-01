@@ -174,7 +174,7 @@ namespace Caucho.IIS
 
     public HmuxConnection OpenServer(String sessionId, Server xServer)
     {
-      Trace.TraceInformation("{0}:{1}", _servers.Length, _servers[0]);
+      Trace.TraceInformation("OpenServer: {0}:{1}", _servers.Length, _servers[0]);
 
       HmuxConnection connection = null;
       if (sessionId != null)
@@ -227,14 +227,14 @@ namespace Caucho.IIS
           id = (i + _roundRobinIdx) % serverCount;
           
           server = _servers[id];
-          if (xChannelFactory != server)
+          if (xChannelFactory != server || serverCount == 1)
             connection = server.OpenConnection();
 
           _roundRobinIdx = id;
 
           if (connection != null)
             break;
-        }
+        }        
       }
 
       return connection;

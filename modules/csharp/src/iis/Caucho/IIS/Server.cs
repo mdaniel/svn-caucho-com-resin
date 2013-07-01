@@ -165,6 +165,7 @@ namespace Caucho.IIS
       }
 
       Trace.TraceInformation("OpenRecyle return 'null'");
+
       return null;
     }
 
@@ -386,7 +387,7 @@ namespace Caucho.IIS
 
     internal string GetDebugId()
     {
-      return _address + _port.ToString();
+      return _address + ":" +_port.ToString();
     }
 
     public String GetName()
