@@ -709,6 +709,7 @@ class WatchdogChildProcess
     // #2567
     jvmArgs.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     jvmArgs.add("-Djava.awt.headless=true");
+    jvmArgs.add("-Djava.awt.headlesslib=true");
 
     jvmArgs.add("-Dresin.home=" + resinHome.getFullPath());
     
@@ -1066,6 +1067,7 @@ class WatchdogChildProcess
   
   static {
     _resinProperties.add("-Djava.awt.headless");
+    _resinProperties.add("-Djava.awt.headlesslib");
     _resinProperties.add("-Djava.class.path");
     _resinProperties.add("-Dresin.home");
     _resinProperties.add("-Dresin.root");

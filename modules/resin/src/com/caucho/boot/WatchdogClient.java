@@ -590,6 +590,7 @@ class WatchdogClient
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
+    list.add("-Djava.awt.headlesslib=true");
     list.add("-Dresin.home=" + resinHome.getFullPath());
     list.add("-Dresin.root=" + resinRoot.getFullPath());
     

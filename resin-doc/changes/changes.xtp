@@ -12,6 +12,9 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>session: add table-name to JDBC sessions (#5488, rep by B. Garber)</li>
+<li>watchdog: add -Djava.web.headlesslib=true (# 5474, rep by Riccardo Cohen)</li>
+<li>el: descriptor in BeanELResolver should be initialized lazily to work around JSF memory leak (rep by Mattias Jiderhamn)</li>
 <li>servlet: ServletResponse.reset() should reset cookies (#5464)</li>
 <li>iis.net: fixed Resin.IIS.handler.dll intermittent slow connection to resin issue (#5455, rep by Shinomiya Nobuaki)</li>
 <li>cli: heap-dump double-dash isn't recognized with -raw option(#5454)</li>

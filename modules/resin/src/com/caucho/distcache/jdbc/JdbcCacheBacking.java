@@ -64,6 +64,11 @@ public class JdbcCacheBacking extends AbstractCacheBacking<Object,Object> {
     _delegate.setDatabase(database);
   }
   
+  public void setTableName(String tableName)
+  {
+    _delegate.setTableName(tableName);
+  }
+  
   @PostConstruct
   public void init()
   {

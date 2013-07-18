@@ -181,6 +181,10 @@ public class PersistentStoreConfig
       
       backing.setDatabase(_dataSource);
       
+      if (_tableName != null) {
+        backing.setTableName(_tableName);
+      }
+      
       backing.init();
     }
     
