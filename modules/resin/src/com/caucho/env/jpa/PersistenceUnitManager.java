@@ -763,5 +763,10 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
                                     domain,
                                     classFileBuffer);
     }
+
+    @Override
+    public String toString() {
+      return TransformerAdapter.class.getSimpleName() + "[" + _transformer + ']';
+    }
   }
 }
