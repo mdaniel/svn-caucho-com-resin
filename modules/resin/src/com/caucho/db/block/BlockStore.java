@@ -924,6 +924,10 @@ public class BlockStore {
   public final int getAllocation(long blockIndex)
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
+    
+    if (_allocationTable.length <= allocOffset) {
+      return -1;
+    }
 
     return _allocationTable[allocOffset] & ALLOC_MASK;
   }

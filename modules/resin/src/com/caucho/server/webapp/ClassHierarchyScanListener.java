@@ -111,7 +111,7 @@ class ClassHierarchyScanListener implements ScanListener {
     for (int i = 0; i < classList.size(); i++) {
       classSet.add(classList.get(i));
     }
-        
+    
     return classSet;
   }
   

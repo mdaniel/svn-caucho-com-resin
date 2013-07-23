@@ -340,8 +340,9 @@ public class WebAppExpandDeployGenerator
       controller.setStartupMode(getStartupMode());
       // controller.setRedeployMode(getRedeployMode());
 
-      for (int i = 0; i < _webAppDefaults.size(); i++)
+      for (int i = 0; i < _webAppDefaults.size(); i++) {
         controller.addConfigDefault(_webAppDefaults.get(i));
+      }
 
       WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
 

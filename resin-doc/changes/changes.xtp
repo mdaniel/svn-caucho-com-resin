@@ -12,6 +12,9 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>shutdown: avoid spurious warnings on connection close during shutdown (#5463, rep by Stefanos Zachariadis)</li>
+<li>cdi: multiple initializer classes in separate jars need to be unique (#5481, rep by Rick Mann)</li>
+<li>bytecode: add constant-pool scanning for JDK 7 MethodHandle (#5466, rep by wxiaoguang)</li>
 <li>session: add table-name to JDBC sessions (#5488, rep by B. Garber)</li>
 <li>watchdog: add -Djava.web.headlesslib=true (# 5474, rep by Riccardo Cohen)</li>
 <li>el: descriptor in BeanELResolver should be initialized lazily to work around JSF memory leak (rep by Mattias Jiderhamn)</li>

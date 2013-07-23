@@ -44,9 +44,7 @@ import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositoryTagListener;
-import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.Environment;
-import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
@@ -134,8 +132,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     _checkInterval = Environment.getDependencyCheckInterval();
     
     _cronInterval = Environment.getDependencyCheckInterval();
-    if (_cronInterval < MIN_CRON_INTERVAL)
-      _cronInterval = MIN_CRON_INTERVAL;
+    _cronInterval = Math.max(_cronInterval, MIN_CRON_INTERVAL);
 
     _loader = Thread.currentThread().getContextClassLoader();
     

@@ -3627,10 +3627,14 @@ public final class InjectManager
       
       Enumeration<URL> e;
       
-      if (isLocal)
+      if (isLocal) {
         e = loader.findResources(serviceName);
-      else
+      }
+      else {
         e = loader.getResources(serviceName);
+      }
+      
+      HashSet<Class<T>> classSet = new HashSet<Class<T>>();
 
       while (e.hasMoreElements()) {
         URL url = e.nextElement();
@@ -3656,8 +3660,9 @@ public final class InjectManager
             if (line.length() > 0) {
               Class<T> cl = loadServiceClass(serviceApiClass, line);
 
-              if (cl != null)
-                services.add(createTransientObject(cl));
+              if (cl != null) {
+                classSet.add(cl);
+              }
             }
           }
 
@@ -3667,6 +3672,10 @@ public final class InjectManager
         } finally {
           IoUtil.close(is);
         }
+      }
+      
+      for (Class<T> cl : classSet) {
+        services.add(createTransientObject(cl));
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

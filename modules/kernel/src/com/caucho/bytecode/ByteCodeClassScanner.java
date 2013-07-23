@@ -278,6 +278,19 @@ public class ByteCodeClassScanner {
 
           break;
         }
+        
+      case ByteCodeParser.CP_METHOD_HANDLE:
+        is.skip(3);
+        break;
+        
+      case ByteCodeParser.CP_METHOD_TYPE:
+        is.skip(2);
+        break;
+        
+      case ByteCodeParser.CP_INVOKE_DYNAMIC:
+        is.skip(4);
+        break;
+        
 
       default:
         throw error(L.l("'{0}' is an unknown constant pool type.", code));

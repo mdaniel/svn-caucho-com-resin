@@ -799,10 +799,11 @@ public class TcpSocketLink extends AbstractSocketLink
     } catch (Throwable e) {
       
     }
-
-    closeConnection();
-
+    
+    SocketLinkState state = _state;
     _state = _state.toDestroy(this);
+
+    closeConnection(state);
   }
 
   @Override
@@ -1705,7 +1706,12 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     SocketLinkState state = _state;
     _state = state.toClosed(this);
+    
+    closeConnection(state);
+  }
 
+  private void closeConnection(SocketLinkState state)
+  {
     AbstractSelectManager selectManager = _port.getSelectManager();
     
     if (selectManager != null && state.isKeepalive()) {
