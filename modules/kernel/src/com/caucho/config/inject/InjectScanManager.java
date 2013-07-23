@@ -362,7 +362,7 @@ class InjectScanManager implements ScanListener {
       _buffer = buffer;
       _offset = 0;
 
-      return this;
+      return new NameKey(buffer, 0, _length);
     }
 
     public int hashCode()
@@ -403,6 +403,14 @@ class InjectScanManager implements ScanListener {
       }
 
       return true;
+    }
+
+    @Override
+    public String toString()
+    {
+      return this.getClass().getSimpleName() + "[" + new String(_buffer,
+                                                                _offset,
+                                                                _length);
     }
   }
 
