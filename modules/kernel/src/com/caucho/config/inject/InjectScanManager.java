@@ -359,8 +359,8 @@ class InjectScanManager implements ScanListener {
 
       System.arraycopy(_buffer, _offset, buffer, 0, _length);
 
-      _buffer = buffer;
-      _offset = 0;
+      //_buffer = buffer;
+      //_offset = 0;
 
       return new NameKey(buffer, 0, _length);
     }
