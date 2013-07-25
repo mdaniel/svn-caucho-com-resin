@@ -248,7 +248,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private final HmuxDispatchRequest _dispatchRequest;
 
   private HmtpRequest _hmtpRequest;
-  
+
   private ProtocolConnection _subProtocol;
 
   private HmuxProtocol _hmuxProtocol;
@@ -294,7 +294,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _cb2 = new CharBuffer();
 
     _filter = new ServletFilter();
-    
+
     BamSystem bamService = BamSystem.getCurrent();
 
     _hmtpRequest = new HmtpRequest(conn, bamService);
@@ -333,7 +333,7 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     try {
       ProtocolConnection subProtocol = _subProtocol;
-      
+
       if (subProtocol != null) {
         return subProtocol.handleRequest();
       }
@@ -390,12 +390,12 @@ public class HmuxRequest extends AbstractHttpRequest
         throw e;
       } catch (Exception e) {
         killKeepalive("hmux finishRequest exception " + e);
-        
+
         log.log(Level.FINE, dbgId() + e, e);
       }
 
       // cluster/6610 - hmtp mode doesn't close the stream.
-      if (_subProtocol == null) {
+      if (_subProtocol == null && ! isSuspend()) {
         try {
           ReadStream is = getReadStream();
 
@@ -419,7 +419,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _hasRequest = false;
 
         killKeepalive("hmux scanHeaders failure");
-        
+
         return false;
       }
       else if (! _hasRequest) {
@@ -427,7 +427,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
     } catch (InterruptedIOException e) {
       killKeepalive("hmux parse header exception: "+ e);
-      
+
       log.fine(dbgId() + "interrupted keepalive");
       return false;
     }
@@ -548,11 +548,11 @@ public class HmuxRequest extends AbstractHttpRequest
   public void onStartConnection()
   {
     super.onStartConnection();
-    
+
     _hmtpRequest.onStartConnection();
     _subProtocol = null;
   }
-  
+
   /**
    * Clears variables at the start of a new request.
    */
@@ -887,9 +887,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
         if (isLoggable)
           log.fine(dbgId() + (char) code + "-r switch-to-hmtp");
-        
+
         _subProtocol = _hmtpRequest;
-        
+
         boolean result = _hmtpRequest.handleRequest();
 
         return result;
@@ -950,7 +950,7 @@ public class HmuxRequest extends AbstractHttpRequest
         if (log.isLoggable(Level.FINE))
           log.fine(dbgId() + (char) code + "-r: extension " + ext);
         _filter.setClientClosed(true);
-        
+
         _subProtocol = ext.createConnection(getTcpSocketLink());
 
         _subProtocol.handleRequest();
@@ -979,7 +979,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
       else {
         killKeepalive("hmux failed result: " + (char) result);
-        
+
         _rawWrite.write(HMUX_EXIT);
         _rawWrite.close();
       }
@@ -1331,7 +1331,7 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     // ignore for hmux
   }
-  
+
   @Override
   public void finishRequest()
       throws IOException
@@ -1533,7 +1533,7 @@ public class HmuxRequest extends AbstractHttpRequest
       if (log.isLoggable(Level.FINE))
         log.fine(dbgId() + (char) HmuxRequest.HMUX_DATA + "-w(" + length + ")");
     }
-    
+
     _bufferStartOffset = 0;
 
     return offset;
@@ -1580,7 +1580,7 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     _subProtocol = null;
     _hmtpRequest.onCloseConnection();
-    
+
     super.onCloseConnection();
   }
 
@@ -1863,7 +1863,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _os.flush();
       else
         _os.close();
-      
+
       //nextRead.close();
     }
   }
