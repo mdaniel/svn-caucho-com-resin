@@ -57,8 +57,6 @@ abstract public class AbstractJavaCompiler implements Runnable {
   private String []_path;
   private LineMap _lineMap;
 
-  private Thread _compileThread;
-  private AtomicReference<Thread> _waitThreadRef = new AtomicReference<Thread>();
   private Throwable _exception;
   
   public AbstractJavaCompiler(JavaCompilerUtil compiler)
@@ -107,32 +105,23 @@ abstract public class AbstractJavaCompiler implements Runnable {
   public void run()
   {
     Thread thread = Thread.currentThread();
-    _compileThread = thread;
     
     try {
       thread.setContextClassLoader(_loader);
 
       compileInt(_path, _lineMap);
     } catch (final Throwable e) {
-      new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
-        public void run()
-        {
-          /*
-          // env/0203 vs env/0206
-          if (e instanceof DisplayableException)
-            log.warning(e.getMessage());
-          else
-            log.warning(e.toString());
-            */
-        }
-      };
+      // env/0203 vs env/0206
+      if (e instanceof DisplayableException)
+        log.warning(e.getMessage());
+      else
+        log.warning(e.toString());
+      
       _exception = e;
     } finally {
       thread.setContextClassLoader(null);
 
       notifyComplete();
-
-      _compileThread = null;
     }
   }
 

@@ -32,6 +32,7 @@ package com.caucho.jsp;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +57,6 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
@@ -304,72 +304,97 @@ abstract public class PageManager {
         cache.put(uri, entry);
       }
     }
-
-    synchronized (entry) {
-      Page page = entry.getPage();
-
-      if (page != null && ! page._caucho_isModified())
-        return page;
-      else if (page != null && ! page.isDead()) {
-        try {
-          page.destroy();
-        } catch (Exception e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
-      }
-
-      if (log.isLoggable(Level.FINE)) {
-        log.fine("Jsp[] uri:" + uri +
-                 "(cp:" + getWebApp().getContextPath() + 
-                 ",app:" + getWebApp().getRootDirectory() +
-                 ") -> " + path);
-      }
-     
-      Path rootDir = getWebApp().getRootDirectory();
-
-      String rawClassName = pageURI;
-
-      if (path.getPath().startsWith(rootDir.getPath()))
-        rawClassName = path.getPath().substring(rootDir.getPath().length());
-
-      String className = JavaCompilerUtil.mangleName("jsp/" + rawClassName);
-
-      page = createPage(path, pageURI, className, config, dependList);
-
-      if (page == null) {
-        log.fine("Jsp[] cannot create page " + path.getURL());
-        
-        throw new FileNotFoundException(getWebApp().getContextPath() + pageURI);
-      }
-
-      if (_autoCompile == false)
-        page._caucho_setNeverModified(true);
-
-      page._caucho_setUpdateInterval(_updateInterval);
-      page._caucho_isModified();
-
-      try {
-        InjectManager beanManager = InjectManager.create();
-        
-        InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
-
-        CreationalContext<?> env = new OwnerCreationalContext(null);
-
-        inject.inject(page, env);
-        
-        inject.postConstruct(page);
-      } catch (InjectionException e) {
-        throw ConfigException.createConfig(e);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-
-      entry.setPage(page);
-
+    
+    Page page = entry.getPage();
+    
+    if (page != null && ! page._caucho_isModified()) {
       return page;
     }
+    
+    if (entry.startCompile()) {
+      try {
+        synchronized (entry) {
+          page = getPageEntry(entry, uri, pageURI, path, config, dependList);
+      
+          entry.setPage(page);
+        }
+      } finally {
+        entry.endCompile();
+      }
+    }
+    
+    return entry.getPage();
+  }
+  
+  private Page getPageEntry(Entry entry,
+                            String uri,
+                            String pageURI,
+                            Path path,
+                            ServletConfig config,
+                            ArrayList<PersistentDependency> dependList)
+     throws Exception
+  {
+    Page page = entry.getPage();
+
+    if (page != null && ! page._caucho_isModified())
+      return page;
+    else if (page != null && ! page.isDead()) {
+      try {
+        page.destroy();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Jsp[] uri:" + uri +
+               "(cp:" + getWebApp().getContextPath() + 
+               ",app:" + getWebApp().getRootDirectory() +
+               ") -> " + path);
+    }
+
+    Path rootDir = getWebApp().getRootDirectory();
+
+    String rawClassName = pageURI;
+
+    if (path.getPath().startsWith(rootDir.getPath()))
+      rawClassName = path.getPath().substring(rootDir.getPath().length());
+
+    String className = JavaCompilerUtil.mangleName("jsp/" + rawClassName);
+
+    page = createPage(path, pageURI, className, config, dependList);
+
+    if (page == null) {
+      log.fine("Jsp[] cannot create page " + path.getURL());
+
+      throw new FileNotFoundException(getWebApp().getContextPath() + pageURI);
+    }
+
+    if (_autoCompile == false)
+      page._caucho_setNeverModified(true);
+
+    page._caucho_setUpdateInterval(_updateInterval);
+    page._caucho_isModified();
+
+    try {
+      InjectManager beanManager = InjectManager.create();
+
+      InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
+
+      CreationalContext<?> env = new OwnerCreationalContext(null);
+
+      inject.inject(page, env);
+
+      inject.postConstruct(page);
+    } catch (InjectionException e) {
+      throw ConfigException.createConfig(e);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return page;
   }
 
   protected void initPageManager()
@@ -423,13 +448,34 @@ abstract public class PageManager {
   
   public class Entry implements CacheListener {
     private String _key;
-    Page _page;
+    private Page _page;
+    private AtomicInteger _compileCount = new AtomicInteger();
     
     private long _lastAccessTime;
  
     Entry(String key)
     {
       _key = key;
+    }
+
+    public boolean startCompile()
+    {
+      Page page = _page;
+      
+      if (page == null) {
+        _compileCount.incrementAndGet();
+        
+        return true;
+      }
+      else {
+        return _compileCount.compareAndSet(0, 1);
+      }
+    }
+
+    public void endCompile()
+    {
+      _compileCount.decrementAndGet();
+      
     }
 
     void setPage(Page page)

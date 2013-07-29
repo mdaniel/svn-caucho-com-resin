@@ -89,7 +89,7 @@ public class WriteStream extends OutputStreamWithBuffer
   private boolean _isFlushOnNewline;
   private boolean _disableClose;
   private boolean _isDisableCloseSource;
-  private boolean _disableFlush;
+  private boolean _isDisableFlush;
   private boolean _isReuseBuffer;
 
   private StreamPrintWriter _printWriter;
@@ -389,8 +389,9 @@ public class WriteStream extends OutputStreamWithBuffer
   public void flush()
     throws IOException
   {
-    if (_disableFlush || _source == null)
+    if (_isDisableFlush || _source == null) {
       return;
+    }
 
     int len = _writeLength;
     if (len > 0) {
@@ -415,7 +416,7 @@ public class WriteStream extends OutputStreamWithBuffer
   {
     StreamImpl source = _source;
 
-    if (_disableFlush || source == null) {
+    if (_isDisableFlush || source == null) {
       return;
     }
 
@@ -432,7 +433,7 @@ public class WriteStream extends OutputStreamWithBuffer
   {
     final StreamImpl source = _source;
 
-    if (_disableFlush || _source == null)
+    if (_isDisableFlush || _source == null)
       return;
 
     final int len = _writeLength;
@@ -586,9 +587,9 @@ public class WriteStream extends OutputStreamWithBuffer
       return;
 
     if (_writeEncoding != null) {
-      _disableFlush = true;
+      _isDisableFlush = true;
       _writeEncoding.write(this, buffer, offset, length);
-      _disableFlush = false;
+      _isDisableFlush = false;
       return;
     }
 
@@ -605,8 +606,9 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void printLatin1(char []buffer, int offset, int length)
     throws IOException
   {
-    if (_source == null)
+    if (_source == null) {
       return;
+    }
 
     byte []writeBuffer = _writeBuffer;
     int writeLength = _writeLength;
@@ -666,9 +668,9 @@ public class WriteStream extends OutputStreamWithBuffer
     throws IOException
   {
     if (_writeEncoding != null) {
-      _disableFlush = true;
+      _isDisableFlush = true;
       _writeEncoding.write(this, ch);
-      _disableFlush = false;
+      _isDisableFlush = false;
       return;
     }
 

@@ -211,7 +211,9 @@ public class ErrorPageManager {
     LineMap lineMap = null;
 
     try {
-      response.reset();
+      if (response != null) {
+        response.reset();
+      }
     } catch (IllegalStateException e1) {
     }
 

@@ -874,8 +874,9 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + (char) code + " post-data: " + len);
 
-        if (len > 0)
+        if (len > 0) {
           return true;
+        }
         break;
 
       case HMUX_TO_UNIDIR_HMTP:
@@ -1464,18 +1465,24 @@ public class HmuxRequest extends AbstractHttpRequest
   protected void flushNext()
     throws IOException
   {
-    flushNextBuffer();
+    if (flushNextBuffer()) {
+      // server/26u2
+      _rawWrite.write(HMUX_FLUSH);
+      _rawWrite.write(0);
+      _rawWrite.write(0);
+
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(dbgId() + "flush-w()");
+      }
+    }
 
     _rawWrite.flush();
   }
 
-  protected void flushNextBuffer()
+  protected boolean flushNextBuffer()
     throws IOException
   {
     WriteStream next = _rawWrite;
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "flush()");
 
     int startOffset = _bufferStartOffset;
 
@@ -1488,6 +1495,11 @@ public class HmuxRequest extends AbstractHttpRequest
         // illegal state because the data isn't filled
         throw new IllegalStateException();
       }
+      
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
@@ -1793,7 +1805,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
 
       byte []tempBuf = _buffer;
-
+Thread.dumpStack();
       while (length > 0) {
         int sublen = length;
 
@@ -1817,11 +1829,14 @@ public class HmuxRequest extends AbstractHttpRequest
     public void flush()
       throws IOException
     {
-      if (! _request._hasRequest)
+      if (! _request._hasRequest) {
         return;
+      }
 
-      if (log.isLoggable(Level.FINE))
+      System.out.println("HMUX_FLUSH:");
+      if (log.isLoggable(Level.FINE)) {
         log.fine(_request.dbgId() + (char) HMUX_FLUSH + "-w:flush");
+      }
 
       _os.write(HMUX_FLUSH);
       _os.write(0);
@@ -1843,14 +1858,20 @@ public class HmuxRequest extends AbstractHttpRequest
         _pendingData = 0;
       }
 
-      boolean keepalive = _request.isKeepalive();
+      HmuxRequest request = _request;
+      
+      if (request == null) {
+        return;
+      }
+      
+      boolean keepalive = request.isKeepalive();
 
       if (! _isClientClosed) {
         if (log.isLoggable(Level.FINE)) {
           if (keepalive)
-            log.fine(_request.dbgId() + (char) HMUX_QUIT + "-w: quit channel");
+            log.fine(request.dbgId() + (char) HMUX_QUIT + "-w: quit channel");
           else
-            log.fine(_request.dbgId() + (char) HMUX_EXIT + "-w: exit socket");
+            log.fine(request.dbgId() + (char) HMUX_EXIT + "-w: exit socket");
         }
 
         if (keepalive)

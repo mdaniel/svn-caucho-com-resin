@@ -579,8 +579,9 @@ public class JavaCompilerUtil {
   {
     if (_compileParent) {
       try {
-        if (_loader instanceof Make)
+        if (_loader instanceof Make) {
           ((Make) _loader).make();
+        }
       } catch (RuntimeException e) {
         throw e;
       } catch (ClassNotFoundException e) {

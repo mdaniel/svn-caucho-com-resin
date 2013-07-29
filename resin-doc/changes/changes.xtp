@@ -12,6 +12,9 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>jsp: updated JSP page compile locking (#5460, rep by Nikolay Fedorov)</li>
+<li>jsf: updated javax.faces to 2.1.24 (#5485, rep by cyttesen)</li>
+<li>load-balance: cookie with max-age(0) not properly propagated (#5456, rep by H. Cleland)</li>
 <li>shutdown: avoid spurious warnings on connection close during shutdown (#5463, rep by Stefanos Zachariadis)</li>
 <li>cdi: multiple initializer classes in separate jars need to be unique (#5481, rep by Rick Mann)</li>
 <li>bytecode: add constant-pool scanning for JDK 7 MethodHandle (#5466, rep by wxiaoguang)</li>
