@@ -31,13 +31,13 @@ package com.caucho.bam.mailbox;
 
 import java.io.Closeable;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamException;
-import com.caucho.bam.QueueFullException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
@@ -47,6 +47,7 @@ import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.QueryResult;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.cloud.bam.BamQueueFullHandler;
 import com.caucho.env.actor.AbstractActorProcessor;
 import com.caucho.env.actor.ActorProcessor;
 import com.caucho.lifecycle.Lifecycle;
@@ -308,7 +309,11 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       if (! workerQueue.offer(packet, true)) {
         workerQueue.wake();
         
-        throw new QueueFullException("BAM queue is full size=" + workerQueue.getSize() + "\n  " + this + " " + packet);
+        BamQueueFullHandler handler = _broker.getQueueFullHandler();
+
+        handler.onQueueFull(this, workerQueue.getSize(), 
+                            100, TimeUnit.MILLISECONDS, 
+                            packet);
       }
     }
     

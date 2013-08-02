@@ -226,7 +226,7 @@ public final class ActorQueue<T extends RingItem>
           return null;
         }
 
-        long timeoutMillis = 10;
+        long timeoutMillis = 1000;
         int timeoutNanos = 0;
         waitForQueue(headAlloc, tail, timeoutMillis, timeoutNanos);
         isWait = false;

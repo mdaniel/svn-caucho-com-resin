@@ -30,6 +30,7 @@
 package com.caucho.bam.broker;
 
 import com.caucho.bam.mailbox.Mailbox;
+import com.caucho.cloud.bam.BamQueueFullHandler;
 
 
 /**
@@ -39,6 +40,8 @@ abstract public class AbstractBroker
   extends AbstractBrokerStream
   implements Broker
 {
+  private BamQueueFullHandler _queueFullHandler = BamQueueFullHandler.DEFAULT;
+  
   /**
    * Returns the broker's address, i.e. the virtual host domain name.
    */
@@ -55,6 +58,20 @@ abstract public class AbstractBroker
   public Broker getBroker()
   {
     return this;
+  }
+  
+  public BamQueueFullHandler getQueueFullHandler()
+  {
+    return _queueFullHandler;
+  }
+  
+  public void setQueueFullHandler(BamQueueFullHandler handler)
+  {
+    if (handler == null) {
+      throw new NullPointerException();
+    }
+    
+    _queueFullHandler = handler;;
   }
   
   /**

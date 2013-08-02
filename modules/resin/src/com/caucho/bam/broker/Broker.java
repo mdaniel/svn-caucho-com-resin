@@ -31,6 +31,7 @@ package com.caucho.bam.broker;
 
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.cloud.bam.BamQueueFullHandler;
 
 
 /**
@@ -42,6 +43,8 @@ public interface Broker extends MessageStream
    * Returns the mailbox to the broker itself.
    */
   public Mailbox getBrokerMailbox();
+  
+  public BamQueueFullHandler getQueueFullHandler();
   
   /**
    * Returns a mailbox for the given address, or null if the mailbox does not exist.
@@ -66,4 +69,5 @@ public interface Broker extends MessageStream
    * Close the Broker
    */
   public void close();
+
 }
