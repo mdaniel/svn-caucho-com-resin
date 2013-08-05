@@ -598,6 +598,15 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Sets the access log.
+   */
+  @Configurable
+  public void setAccessLogBufferSize(Bytes bufferSize)
+  {
+    _servletContainer.setAccessLogBufferSize(bufferSize);
+  }
+
+  /**
    * Sets the session cookie
    */
   @Configurable

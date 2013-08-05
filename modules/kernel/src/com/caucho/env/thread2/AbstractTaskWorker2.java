@@ -282,22 +282,40 @@ abstract public class AbstractTaskWorker2
       log().log(Level.WARNING, e.toString(), e);
     } finally {
       _thread = null;
-
-      onThreadComplete();
       
+      completeThread(thread, oldName);
+    }
+  }
+  
+  private void completeThread(Thread thread, String oldName)
+  {
+    try {
+      onThreadComplete();
+    } finally {
       State oldState;
       State newState;
-      
+  
       do {
         oldState = _state.get();
         newState = oldState.toIdle();
       } while (! _state.compareAndSet(oldState, newState));
 
-      thread.setName(oldName);
-
       if (newState.isWake()) {
-        startWorkerThread();
+        boolean isValid = false;
+        
+        try {
+          startWorkerThread();
+          isValid = true;
+        } finally {
+          if (! isValid) {
+            System.err.println("Warning: resetting actor." + this);
+            
+            _state.set(State.IDLE);
+          }
+        }
       }
+
+      thread.setName(oldName);
     }
   }
   

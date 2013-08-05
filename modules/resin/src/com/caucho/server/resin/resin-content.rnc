@@ -55,6 +55,8 @@ r_cluster-Content =
   r_env-Basis
 
   & r_access-log?
+  
+  & r_access-log-buffer-size?
 
   & (attribute connection-error-page { string }
      | element connection-error-page { string })?

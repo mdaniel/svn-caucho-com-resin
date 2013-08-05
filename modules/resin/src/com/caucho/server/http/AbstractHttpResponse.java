@@ -165,14 +165,7 @@ abstract public class AbstractHttpResponse {
 
     _responseStream = createResponseStream();
     
-    AbstractAccessLog accessLog = request.getServer().getAccessLog();
-    
-    int logSize = 1024;
-    
-    if (accessLog != null) {
-      logSize = accessLog.getBufferSize();
-      
-    }
+    int logSize = request.getServer().getAccessLogBufferSize();
     
     _logBuffer = new LogBuffer(logSize, true);
   }

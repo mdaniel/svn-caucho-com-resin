@@ -50,6 +50,10 @@ r_access-log = element access-log {
     & r_init?)
 }
 
+r_access-log-buffer-size =
+  attribute access-log-buffer-size { string }
+  | element access-log-buffer-size { string }
+
 r_alias-url-regexp =
   attribute alias-url-regexp { string }
   | element alias-url-regexp { string }

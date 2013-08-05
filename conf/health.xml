@@ -451,11 +451,13 @@
     -->
   <health:AnomalyAnalyzer>
     <meter>OS|Process|File Descriptor Count</meter>
+    <min-deviation>4</min-deviation>
   </health:AnomalyAnalyzer>
 
   <health:AnomalyAnalyzer>
     <meter>JVM|Thread|JVM Thread Count</meter>
     <health-event>caucho.thread.anomaly.jvm-thread</health-event>
+    <min-deviation>4</min-deviation>
   </health:AnomalyAnalyzer>
 
   <health:AnomalyAnalyzer>
@@ -467,11 +469,13 @@
   <health:AnomalyAnalyzer>
     <meter>JVM|Thread|JVM Waiting Count</meter>
     <health-event>caucho.thread.anomaly.jvm-waiting</health-event>
+    <min-deviation>4</min-deviation>
   </health:AnomalyAnalyzer>
   
   <health:AnomalyAnalyzer>
     <meter>JVM|Thread|JVM Blocked Count</meter>
     <health-event>caucho.thread.anomaly.jvm-blocked</health-event>
+    <min-deviation>4</min-deviation>
   </health:AnomalyAnalyzer>
   
   <health:AnomalyAnalyzer>

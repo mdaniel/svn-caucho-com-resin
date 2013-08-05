@@ -85,11 +85,19 @@ public class PasswordGenerateCommand extends AbstractBootCommand
     if (user == null)
       throw new ConfigException(L().l("generate-password requires a --user argument"));
     
-    if (password == null)
-      password = readPasswordFromConsole();
+    if (password == null) {
+      password = readPasswordFromConsole("Enter");
       
-    if (password == null)
+      String password2 = readPasswordFromConsole("Verify");
+      
+      if (! password.equals(password2)) {
+        throw new ConfigException(L().l("password must match"));
+      }
+    }
+      
+    if (password == null) {
       throw new ConfigException(L().l("generate-password requires a -password argument"));
+    }
     
     
     byte []salt = new byte[] { (byte) RandomUtil.getRandomLong(),
@@ -115,7 +123,7 @@ public class PasswordGenerateCommand extends AbstractBootCommand
     return 0;
   }
   
-  private static String readPasswordFromConsole()
+  private static String readPasswordFromConsole(String msg)
   {
     try {
       
@@ -125,7 +133,7 @@ public class PasswordGenerateCommand extends AbstractBootCommand
         return null;
       }
       
-      char[] passwordChars = console.readPassword("Enter password: ");
+      char[] passwordChars = console.readPassword(msg + " password: ");
       
       if (passwordChars == null || passwordChars.length == 0)
         return null;

@@ -12,6 +12,10 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>health: AnomalyAnalyzer now has min-deviation to avoid spurious messages (#5365)</li>
+<li>cli: add password verification to password-generate (#5384)</li>
+<li>access-log: add &lt;access-log-buffer-size> in &lt;cluster> (#5393, rep by A. Foong)</li>
+<li>bam: force restart if BAM overflow continues (#5479, rep by J. Barr)</li>
 <li>vfs: stat vs _stati64 issues on win64 (#5494, rep by Matias Lagerwall)</li>
 <li>jsp: updated JSP page compile locking (#5460, rep by Nikolay Fedorov)</li>
 <li>jsf: updated javax.faces to 2.1.24 (#5485, rep by cyttesen)</li>
