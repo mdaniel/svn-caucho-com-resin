@@ -264,6 +264,9 @@ public class RegexpModule
 
   public static Regexp []createRegexpArray(Value pattern)
   {
+    // php/154g
+    pattern = pattern.toValue();
+
     if (pattern.isArray()) {
       ArrayValue array = pattern.toArray();
 
