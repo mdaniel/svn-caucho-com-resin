@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.reflection;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.ClassField;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
@@ -108,17 +109,17 @@ public class ReflectionProperty
 
   public boolean isPublic()
   {
-    return false;
+    return _prop.isPublic();
   }
 
   public boolean isPrivate()
   {
-    return false;
+    return _prop.isPrivate();
   }
 
   public boolean isProtected()
   {
-    return false;
+    return _prop.isProtected();
   }
 
   public boolean isStatic()
@@ -192,6 +193,27 @@ public class ReflectionProperty
     public boolean isStatic()
     {
       return false;
+    }
+
+    public boolean isPublic()
+    {
+      ClassField field = _cls.getClassField(_nameV);
+
+      return field.isPublic();
+    }
+
+    public boolean isProtected()
+    {
+      ClassField field = _cls.getClassField(_nameV);
+
+      return field.isProtected();
+    }
+
+    public boolean isPrivate()
+    {
+      ClassField field = _cls.getClassField(_nameV);
+
+      return field.isPrivate();
     }
 
     public final StringValue getName()
@@ -275,6 +297,27 @@ public class ReflectionProperty
     public boolean isStatic()
     {
       return true;
+    }
+
+    @Override
+    public boolean isPublic()
+    {
+      /// XXX: return actual visibility
+      return true;
+    }
+
+    @Override
+    public boolean isProtected()
+    {
+      /// XXX: return actual visibility
+      return false;
+    }
+
+    @Override
+    public boolean isPrivate()
+    {
+      /// XXX: return actual visibility
+      return false;
     }
 
     @Override
