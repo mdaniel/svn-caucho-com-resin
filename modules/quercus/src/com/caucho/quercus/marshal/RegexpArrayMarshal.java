@@ -44,12 +44,15 @@ public class RegexpArrayMarshal extends StringMarshal {
   @Override
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return RegexpModule.createRegexpArray(expr.eval(env));
+    return marshal(env, expr.eval(env), expectedClass);
   }
 
   @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
+    // php/154g
+    value = value.toValue();
+
     return RegexpModule.createRegexpArray(value);
   }
 
