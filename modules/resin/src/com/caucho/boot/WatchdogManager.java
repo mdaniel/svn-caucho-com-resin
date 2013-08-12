@@ -863,8 +863,6 @@ class WatchdogManager implements AlarmListener {
       throw new ConfigException(L().l("--elastic-server with --server '{0}' and multiple elastic servers is not allowed.",
                                       serverId));
     }
-    
-    System.out.println("WATHCOD: " + serverId + " " + port);
 
     WatchdogConfigHandle configHandle = cluster.createServer();
     // String serverId = args.getElasticServerId();

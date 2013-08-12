@@ -39,7 +39,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
@@ -232,8 +231,9 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public void mergeRedeployCheckInterval(long interval)
   {
-    if (interval != REDEPLOY_CHECK_INTERVAL)
+    if (interval != REDEPLOY_CHECK_INTERVAL) {
       _redeployCheckInterval = interval;
+    }
   }
 
   /**
@@ -243,11 +243,13 @@ abstract public class DeployController<I extends DeployInstance>
   {
     _redeployCheckInterval = period.getPeriod();
 
-    if (_redeployCheckInterval < 0)
+    if (_redeployCheckInterval < 0) {
       _redeployCheckInterval = Period.INFINITE;
+    }
 
-    if (_redeployCheckInterval < 5000)
+    if (_redeployCheckInterval < 5000) {
       _redeployCheckInterval = 5000;
+    }
   }
 
   /**

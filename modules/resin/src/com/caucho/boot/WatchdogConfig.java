@@ -116,8 +116,9 @@ class WatchdogConfig
     _id = id;
     _cluster = cluster;
     
-    if (cluster != null)
+    if (cluster != null) {
       _elasticServerCluster = cluster.getId();
+    }
 
     _index = index;
     
@@ -388,12 +389,15 @@ class WatchdogConfig
   
   public int getWatchdogPort()
   {
-    if (_args.getWatchdogPort() > 0)
+    if (_args.getWatchdogPort() > 0) {
       return _args.getWatchdogPort();
-    else if (_watchdogPort > 0)
+    }
+    else if (_watchdogPort > 0) {
       return _watchdogPort;
-    else
+    }
+    else {
       return WATCHDOG_PORT_DEFAULT;
+    }
   }
   
   public void setWatchdogPort(int port)

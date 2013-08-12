@@ -55,7 +55,7 @@ public class BootServerMultiConfig
   
   private String _addresses;
   private int _port = -1;
-  private ArrayList<String> _addressList;
+  private ArrayList<String> _addressList = new ArrayList<String>();
   private boolean _isSecure;
   private boolean _isAllowNonReservedIp;
 

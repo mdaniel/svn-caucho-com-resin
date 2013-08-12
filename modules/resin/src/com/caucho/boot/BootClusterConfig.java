@@ -54,6 +54,9 @@ public class BootClusterConfig {
   private ArrayList<ContainerProgram> _serverDefaultList
     = new ArrayList<ContainerProgram>();
   
+  private ArrayList<ConfigProgram> _elasticServerDefaultList
+    = new ArrayList<ConfigProgram>();
+  
   private ArrayList<WatchdogClient> _serverList
     = new ArrayList<WatchdogClient>();
 
@@ -113,6 +116,14 @@ public class BootClusterConfig {
     for (int i = 0; i < _serverDefaultList.size(); i++) {
       _serverDefaultList.get(i).configure(config);
     }
+    
+    /*
+    if (_resin.isElasticServer()) {
+      for (int i = 0; i < _elasticServerDefaultList.size(); i++) {
+        _elasticServerDefaultList.get(i).configure(config);
+      }
+    }
+    */
 
     return config;
   }
@@ -121,6 +132,11 @@ public class BootClusterConfig {
     throws ConfigException
   {
     WatchdogConfig config = configHandle.configure();
+    
+    // #5412, server/6e1c
+    for (int i = 0; i < _elasticServerDefaultList.size(); i++) {
+      _elasticServerDefaultList.get(i).configure(config);
+    }
     
     addServerImpl(config);
     
@@ -166,6 +182,8 @@ public class BootClusterConfig {
   public void addServerMulti(BootServerMultiConfig multiServer)
   {
     int index = 0;
+    
+    _elasticServerDefaultList.add(multiServer.getServerProgram());
 
     for (String address : multiServer.getAddressList()) {
       WatchdogConfigHandle serverHandle = createServer();
@@ -199,10 +217,13 @@ public class BootClusterConfig {
       }
       */
       
-      multiServer.getServerProgram().configure(serverHandle);
+      //multiServer.getServerProgram().configure(serverHandle);
       
       WatchdogConfig server = addServer(serverHandle);
+      
+      multiServer.getServerProgram().configure(server);
 
+      
       // server.setExternalAddress(isExternal);
       /*
       if (isAllowNonReservedIp) {

@@ -16,7 +16,8 @@ import com.caucho.util.L10N;
  * Stream using with JNI.
  */
 @Module
-public class JniStream extends StreamImpl {
+public class JniStream extends StreamImpl
+{
   private static final L10N L = new L10N(JniStream.class);
   
   private final static int INTERRUPT_EXN = -2;
@@ -38,8 +39,11 @@ public class JniStream extends StreamImpl {
   public JniStream(JniSocketImpl socket)
   {
     _socket = socket;
-    if (NULL_PATH == null)
+    
+    if (NULL_PATH == null) {
       NULL_PATH = new NullPath("jni-stream");
+    }
+    
     setPath(NULL_PATH);
   }
 

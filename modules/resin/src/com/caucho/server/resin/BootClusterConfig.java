@@ -30,7 +30,6 @@
 package com.caucho.server.resin;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
@@ -62,6 +61,9 @@ public class BootClusterConfig implements SchemaBean
     = new ContainerProgram();
 
   private ContainerProgram _serverDefaultProgram
+    = new ContainerProgram();
+
+  private ContainerProgram _elasticServerDefaultProgram
     = new ContainerProgram();
 
   private ArrayList<BootPodConfig> _pods
@@ -121,6 +123,11 @@ public class BootClusterConfig implements SchemaBean
   {
     return _serverDefaultProgram;
   }
+  
+  public ContainerProgram getServerMultiDefault()
+  {
+    return _elasticServerDefaultProgram;
+  }
 
   @Configurable
   public BootPodConfig createPod()
@@ -167,7 +174,9 @@ public class BootClusterConfig implements SchemaBean
   public void addServerMulti(BootServerMultiConfig multiServer)
   {
     int index = 0;
-
+    
+    _elasticServerDefaultProgram.addProgram(multiServer.getServerProgram());
+    
     for (String address : multiServer.getAddressList()) {
       boolean isExt = false;
       

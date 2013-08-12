@@ -851,8 +851,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       if (container != null) {
         DeployControllerApi<?> controller = container.findControllerById(_tag);
         
-        if (controller != null)
+        if (controller != null) {
           controller.start();
+        }
       }
     }
 

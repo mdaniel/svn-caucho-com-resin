@@ -12,6 +12,10 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>cdi: cdi vs jpa load order (#5493)</li>
+<li>elastic: elastic servers use server-multi defaults (#5412)</li>
+<li>jni: added check on nativeRead for buffer length (#5428, rep by Daniel Shearer)</li>
+<li>deploy: start/fail must notify waiting threads (Hrushi Agrawal)</li>
 <li>health: AnomalyAnalyzer now has min-deviation to avoid spurious messages (#5365)</li>
 <li>cli: add password verification to password-generate (#5384)</li>
 <li>access-log: add &lt;access-log-buffer-size> in &lt;cluster> (#5393, rep by A. Foong)</li>

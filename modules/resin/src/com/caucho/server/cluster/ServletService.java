@@ -1369,8 +1369,9 @@ public class ServletService
       _lifecycle.toStarting();
 
       // initialize the system distributed store
-      if (isResinServer())
+      if (isResinServer()) {
         getSystemStore();
+      }
       
       _hostContainer.start();
 

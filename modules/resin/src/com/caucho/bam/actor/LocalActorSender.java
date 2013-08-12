@@ -30,7 +30,6 @@
 package com.caucho.bam.actor;
 
 import com.caucho.bam.broker.ManagedBroker;
-import com.caucho.bam.stream.MessageStream;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,

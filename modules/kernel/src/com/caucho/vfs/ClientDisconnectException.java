@@ -37,6 +37,9 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 public class ClientDisconnectException extends IOException {
+  public static final ClientDisconnectException EXN
+    = new ClientDisconnectException();
+  
   public ClientDisconnectException()
   {
   }

@@ -223,8 +223,12 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
   sublen = conn->ops->read(conn, buffer, sublen, (int) timeout_ms);
 
   /* Should probably have a different response for EINTR */
-  if (sublen < 0) {
+  if (sublen <= 0) {
     return sublen;
+  }
+
+  if (length < sublen) {
+    sublen = length;
   }
 
   resin_set_byte_array_region(env, buf, offset, sublen, buffer);

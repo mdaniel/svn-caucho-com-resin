@@ -150,8 +150,9 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   {
     init();
 
-    if (! _lifecycle.toActive())
+    if (! _lifecycle.toActive()) {
       return;
+    }
 
     _deployListGenerator.start();
 

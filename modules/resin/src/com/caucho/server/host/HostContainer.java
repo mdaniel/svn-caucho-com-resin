@@ -534,8 +534,9 @@ public class HostContainer implements InvocationBuilder {
    */
   public void start()
   {
-    if (! _lifecycle.toActive())
+    if (! _lifecycle.toActive()) {
       return;
+    }
 
     _lifecycle.toActive();
 

@@ -85,10 +85,12 @@ public final class JniSocketImpl extends QSocket {
 
   public static String getInitMessage()
   {
-    if (! _jniTroubleshoot.isEnabled())
+    if (! _jniTroubleshoot.isEnabled()) {
       return _jniTroubleshoot.getMessage();
-    else
+    }
+    else {
       return null;
+    }
   }
   
   public static JniSocketImpl connect(String host, int port)
@@ -419,8 +421,12 @@ public final class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
-    if (length == 0)
+    if (length == 0) {
       throw new IllegalArgumentException();
+    }
+    else if (buffer.length < length) {
+      throw new ArrayIndexOutOfBoundsException();
+    }
     
     long requestExpireTime = _requestExpireTime;
 
@@ -825,6 +831,9 @@ public final class JniSocketImpl extends QSocket {
     }
 
     _jniTroubleshoot = jniTroubleshoot;
+    
+    // force instantiation of client disconnect
+    new ClientDisconnectException();
   }
 }
 
