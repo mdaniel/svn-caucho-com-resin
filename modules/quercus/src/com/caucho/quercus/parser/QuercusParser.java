@@ -1164,15 +1164,18 @@ public class QuercusParser {
 
       // var.getVarInfo().setReference();
 
+      StringValue sb = createStringBuilder();
+
       if (_classDef != null) {
-        statementList.add(_factory.createClassStatic(location,
-                                                     _classDef.getName(),
-                                                     var,
-                                                     init));
+        sb.append(_classDef.getName());
+        sb.append("::");
       }
-      else {
-        statementList.add(_factory.createStatic(location, var, init));
-      }
+
+      sb.append(_function.getName());
+      sb.append("::");
+      sb.append(name);
+
+      statementList.add(_factory.createStatic(location, sb, var, init));
 
       if (token != ',') {
         _peekToken = token;

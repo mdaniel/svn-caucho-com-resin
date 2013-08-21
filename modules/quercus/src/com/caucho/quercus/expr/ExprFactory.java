@@ -1488,10 +1488,11 @@ public class ExprFactory {
    * Creates a static statement
    */
   public Statement createStatic(Location loc,
+                                StringValue uniqueStaticName,
                                 VarExpr var,
                                 Expr value)
   {
-    return new StaticStatement(loc, var, value);
+    return new StaticStatement(loc, uniqueStaticName, var, value);
   }
 
   /**

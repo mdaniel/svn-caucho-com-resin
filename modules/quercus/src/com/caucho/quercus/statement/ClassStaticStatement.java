@@ -48,7 +48,7 @@ public class ClassStaticStatement
   protected final VarExpr _var;
   protected final Expr _initValue;
   protected StringValue _staticName;
-  
+
   /**
    * Creates the echo statement.
    */
@@ -63,7 +63,7 @@ public class ClassStaticStatement
     _var = var;
     _initValue = initValue;
   }
-  
+
   public Value execute(Env env)
   {
     try {
@@ -75,15 +75,15 @@ public class ClassStaticStatement
       StringValue staticName = _staticName;
 
       Value qThis = env.getThis();
-      
+
       QuercusClass qClass = qThis.getQuercusClass();
       String className = qClass.getName();
-      
+
       // Var var = qClass.getStaticFieldVar(env, env.createString(staticName));
       // Var var = qClass.getStaticFieldVar(env, staticName);
-      Var var = env.getStaticVar(env.createString(className 
+      Var var = env.getStaticVar(env.createString(className
                                                   + "::" + staticName));
-      
+
       env.setVar(_var.getName(), var);
 
       if (! var.isset() && _initValue != null)

@@ -335,7 +335,14 @@ public class ClassesModule extends AbstractQuercusModule {
                                       Value obj,
                                       StringValue methodName)
   {
+    if (obj instanceof Closure && methodName.equalsString("__invoke")) {
+      // XXX: Closure needs to be a proper PHP object
+
+      return true;
+    }
+
     QuercusClass qClass = obj.getQuercusClass();
+
 
     if (qClass == null) {
       qClass = env.findClass(obj.toString());

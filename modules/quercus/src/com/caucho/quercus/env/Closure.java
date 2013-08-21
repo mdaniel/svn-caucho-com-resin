@@ -112,7 +112,7 @@ abstract public class Closure extends Callback
                           StringValue methodName, int hash,
                           Value []args)
   {
-    if ("__invoke".equals(methodName.toString())) {
+    if (methodName.equalsString("__invoke")) {
       return call(env, args);
     }
     else {
@@ -131,7 +131,7 @@ abstract public class Closure extends Callback
   @Override
   public String toString()
   {
-    return Closure.class.getSimpleName() + "[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }
 
