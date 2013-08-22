@@ -69,11 +69,13 @@ public class InterpretedClosure extends Closure
   public Value call(Env env, Value []args)
   {
     Value oldThis = env.setThis(getThis());
+    Closure oldClosure = env.setClosure(this);
 
     try {
       return _fun.callImpl(env, args, false, _fun.getClosureUseArgs(), _args);
     }
     finally {
+      env.setClosure(oldClosure);
       env.setThis(oldThis);
     }
   }

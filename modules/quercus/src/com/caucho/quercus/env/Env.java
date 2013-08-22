@@ -308,6 +308,8 @@ public class Env
 
   private Value _this = NullThisValue.NULL;
 
+  private Closure _closure;
+
   private final boolean _isUnicodeSemantics;
   private boolean _isAllowUrlInclude;
   private boolean _isAllowUrlFopen;
@@ -1999,6 +2001,26 @@ public class Env
     _this = value.toValue();
 
     return oldThis;
+  }
+
+  /**
+   * Returns the current closure scope.
+   */
+  public Closure getClosure()
+  {
+    return _closure;
+  }
+
+  /**
+   * Sets the current closure scope and returns the old one.
+   */
+  public Closure setClosure(Closure closure)
+  {
+    Closure old = _closure;
+
+    _closure = closure;
+
+    return old;
   }
 
   /**

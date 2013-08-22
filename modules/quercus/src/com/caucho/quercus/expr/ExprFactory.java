@@ -1474,17 +1474,6 @@ public class ExprFactory {
   }
 
   /**
-   * Creates a static statement inside a class
-   */
-  public Statement createClassStatic(Location loc,
-                                     String className,
-                                     VarExpr var,
-                                     Expr value)
-  {
-    return new ClassStaticStatement(loc, className, var, value);
-  }
-
-  /**
    * Creates a static statement
    */
   public Statement createStatic(Location loc,
@@ -1493,6 +1482,16 @@ public class ExprFactory {
                                 Expr value)
   {
     return new StaticStatement(loc, uniqueStaticName, var, value);
+  }
+
+  /**
+   * Creates a static statement that is within a closure scope
+   */
+  public Statement createClosureStatic(Location loc,
+                                       VarExpr var,
+                                       Expr value)
+  {
+    return new ClosureStaticStatement(loc, var, value);
   }
 
   /**

@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.HashMap;
+
 /**
  * Represents a closure function.
  */
@@ -38,10 +40,11 @@ abstract public class Closure extends Callback
   private final String _name;
   private Value _qThis;
 
+  private HashMap<StringValue,Var> _staticVarMap;
+
   public Closure(String name)
   {
-    _name = name;
-    _qThis = NullValue.NULL;
+    this(name, NullValue.NULL);
   }
 
   public Closure(String name, Value qThis)
@@ -101,6 +104,30 @@ abstract public class Closure extends Callback
   public boolean isValid(Env env)
   {
     return true;
+  }
+
+  public Var getStaticVar(StringValue name)
+  {
+    HashMap<StringValue,Var> varMap = _staticVarMap;
+
+    Var var = null;
+
+    if (varMap == null) {
+      varMap = new HashMap<StringValue,Var>();
+
+      _staticVarMap = varMap;
+    }
+    else {
+      var = varMap.get(name);
+    }
+
+    if (var == null) {
+      var = new Var();
+
+      varMap.put(name, var);
+    }
+
+    return var;
   }
 
   //
