@@ -49,6 +49,10 @@
 <li>jsp: array index exception from utf-8 encoding buffer issues (#5436)</li>
 <li>jsp: utf-8 encoding buffer issues with surrogate pairs (#5437)</li>
 <li>network: issue with socket-timeout an non-jni (#5426, rep by HS Im)</li>
+<li>quercus: preg_replace($array[0]) array dereference fix for preg_replace</li>
+<li>quercus: ReflectionProperty::isProtected() fix</li>
+<li>quercus: method_exists("__invoke") does not work with closures (#5501)</li>
+<li>quercus: static local variables must be unique to a particular closure instance (#5502)</li>
 </ul>
 </s2>
 
