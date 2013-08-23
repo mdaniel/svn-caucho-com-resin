@@ -474,7 +474,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
         
         setFlush(isFlush);
       } catch (Exception e) {
-        e.printStackTrace();
+        log.log(Level.FINER, e.toString(), e);
       } finally {
         _isCharFlushing = false;
       }

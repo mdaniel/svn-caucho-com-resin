@@ -338,8 +338,8 @@ public class ResinBeanContainer {
         addCdiProducer();
       }
 
-      // env/0e81
-      _cdiManager.update();
+      // env/0e81 vs env/0e3b
+      // _cdiManager.update();
       
       _classLoader.start();
     } finally {
