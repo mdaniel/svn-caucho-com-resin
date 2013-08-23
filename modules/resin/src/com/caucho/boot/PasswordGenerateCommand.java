@@ -90,7 +90,7 @@ public class PasswordGenerateCommand extends AbstractBootCommand
       
       String password2 = readPasswordFromConsole("Verify");
       
-      if (! password.equals(password2)) {
+      if (password == null || ! password.equals(password2)) {
         throw new ConfigException(L().l("password must match"));
       }
     }

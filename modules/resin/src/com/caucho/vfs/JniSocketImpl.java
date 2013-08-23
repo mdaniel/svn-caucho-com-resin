@@ -35,7 +35,7 @@ public final class JniSocketImpl extends QSocket {
   private static final JniTroubleshoot _jniTroubleshoot;
 
   private JniServerSocketImpl _ss;
-  private long _socketFd;
+  private final long _socketFd;
   private int _nativeFd;
   private JniStream _stream;
 
@@ -703,7 +703,7 @@ public final class JniSocketImpl extends QSocket {
     throws Throwable
   {
     long fd = _socketFd;
-    _socketFd = 0;
+    // _socketFd = 0;
     
     try {
       super.finalize();

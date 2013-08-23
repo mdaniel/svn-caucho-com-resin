@@ -566,13 +566,16 @@ public class HostController
       }
     }
     
-    super.configureInstance(host);
-
+    // server/1269
+    // super.configureInstance(host);
+    
     if (_container != null) {
       for (WebAppConfig config : _container.getWebAppDefaultList()) {
         host.getWebAppContainer().addWebAppDefault(config);
       }
     }
+    
+    super.configureInstance(host);
   }
 
   @Override

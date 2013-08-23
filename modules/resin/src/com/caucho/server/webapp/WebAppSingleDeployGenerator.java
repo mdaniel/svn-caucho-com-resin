@@ -229,8 +229,9 @@ public class WebAppSingleDeployGenerator
     
     _controller.setParentWebApp(_parentWebApp);
 
-    for (WebAppConfig config : _defaultList)
+    for (WebAppConfig config : _defaultList) {
       _controller.addConfigDefault(config);
+    }
     
     // server/1h13 vs server/2e00
     _controller.setConfig(_config);

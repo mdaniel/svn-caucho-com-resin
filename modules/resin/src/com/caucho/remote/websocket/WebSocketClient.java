@@ -271,6 +271,10 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     throws IOException
   {
     String status = in.readln();
+    
+    if (status == null) {
+      throw new WebSocketProtocolException(L.l("Unexpected connection close", status));
+    }
 
     if (! status.startsWith("HTTP")) {
       throw new WebSocketProtocolException(L.l("Unexpected response {0}", status));

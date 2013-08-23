@@ -112,8 +112,9 @@ abstract public class
     if (config == null)
       return;
 
-    if (_config != null && ! _configDefaults.contains(_config))
+    if (_config != null && ! _configDefaults.contains(_config)) {
       addConfigDefault(_config);
+    }
 
     addConfigController(config);
 
@@ -503,15 +504,17 @@ abstract public class
       for (DeployConfig config : _configDefaults) {
         DeployConfig prologue = config.getPrologue();
 
-        if (prologue != null)
+        if (prologue != null) {
           initList.add(prologue);
+        }
       }
     
       initList.addAll(_configDefaults);
     }
 
-    if (_config != null && ! initList.contains(_config))
+    if (_config != null && ! initList.contains(_config)) {
       initList.add(_config);
+    }
   }
 
   protected void configureInstanceVariables(I instance)

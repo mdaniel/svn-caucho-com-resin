@@ -386,8 +386,9 @@ conn_close(connection_t *conn)
   int pipe0;
   int pipe1;
 
-  if (! conn)
+  if (! conn) {
     return -1;
+  }
 
   fd = conn->fd;
   conn->fd = -1;
@@ -424,15 +425,18 @@ std_accept(server_socket_t *ss, connection_t *conn)
   int poll_result;
   int result;
 
-  if (! ss || ! conn)
+  if (! ss || ! conn) {
     return 0;
+  }
   
   fd = ss->fd;
-  if (fd < 0)
+  if (fd < 0) {
     return 0;
+  }
 
-  if (conn->fd > 0)
+  if (conn->fd > 0) {
     return 0;
+  }
 
   /*
   memset(sin_data, 0, sizeof(sin_data));

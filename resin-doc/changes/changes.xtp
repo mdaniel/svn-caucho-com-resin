@@ -12,6 +12,7 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>log: check for null logger name in LogRecord (#5499)</li>
 <li>cdi: cdi vs jpa load order (#5493)</li>
 <li>elastic: elastic servers use server-multi defaults (#5412)</li>
 <li>jni: added check on nativeRead for buffer length (#5428, rep by Daniel Shearer)</li>

@@ -50,6 +50,7 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.CommitBuilder;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.jmx.MXParam;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
@@ -889,6 +890,10 @@ public class ManagementAdmin extends AbstractManagedObject
   
   private ActorSender getSender(String serverId)
   {
+    if (serverId == null) {
+      serverId = ResinSystem.getCurrentId();
+    }
+    
     ActorSender sender = _senderCache.get(serverId);
   
     if (sender == null) {
@@ -908,11 +913,12 @@ public class ManagementAdmin extends AbstractManagedObject
 
     CloudServer server = getServer(serverId);
 
-    if (server == null)
-      throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
-
-    if (server.isSelf()) {
+    if (server != null && server.isSelf()
+        || server == null && serverId.equals(ResinSystem.getCurrentId())) {
       sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");
+    }
+    else if (server == null) {
+      throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
     }
     else {
       String authKey = Resin.getCurrent().getClusterSystemKey();
