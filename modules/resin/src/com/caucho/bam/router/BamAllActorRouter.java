@@ -110,7 +110,7 @@ public class BamAllActorRouter extends AbstractBamRouter
     for (int i = 0; i < actors.length; i++) {
       BamActorRef actor = actors[i];
       
-      if (actor.isActive()) {
+      if (actor != null && actor.isActive()) {
         _sender.query(actor, payload, new AllMethodCallback(scoreboard, i));
       }
       else {

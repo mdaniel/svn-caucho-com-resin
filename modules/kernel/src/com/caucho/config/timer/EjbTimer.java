@@ -30,6 +30,7 @@ package com.caucho.config.timer;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import javax.ejb.EJBException;
@@ -53,6 +54,7 @@ public class EjbTimer implements Timer, Runnable {
   private static final Logger log = Logger.getLogger(EjbTimer.class.getName());
 
   private TimerTask _timerTask;
+  private AtomicInteger _runCount = new AtomicInteger();
 
   /**
    * Creates timer.
@@ -286,8 +288,19 @@ public class EjbTimer implements Timer, Runnable {
   public void run()
   {
     if (_timerTask.getStatus() == ScheduledTaskStatus.ACTIVE) {
-      _timerTask.invoke(this);
+      _runCount.incrementAndGet();
+      
+      try {
+        _timerTask.invoke(this);
+      } finally {
+        _runCount.decrementAndGet();
+      }
     }
+  }
+  
+  public boolean isRunning()
+  {
+    return _runCount.get() > 0;
   }
 
   /**

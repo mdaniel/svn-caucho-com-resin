@@ -558,15 +558,15 @@ public class CloudPod
 
     case 1:
       _serverDispatcher 
-        = new TriadDispatcherDouble<CloudServer>(_servers[0],
-                                                 _servers[1]);
+        = TriadDispatcherDouble.create(_servers[0],
+                                       _servers[1]);
       break;
 
     default:
       _serverDispatcher 
-        = new TriadDispatcherTriple<CloudServer>(_servers[0],
-                                                 _servers[1],
-                                                 _servers[2]);
+        = TriadDispatcherTriple.create(_servers[0],
+                                       _servers[1],
+                                       _servers[2]);
       break;
     }
   }

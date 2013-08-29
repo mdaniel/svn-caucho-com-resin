@@ -254,19 +254,26 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   {
     CloudServer []servers = pod.getServerList();
     
-    if (servers.length == 0)
+    if (servers.length == 0) {
       return;
+    }
     
     String address = servers[0].getAddress();
     boolean isMultipleAddress = false;
     
     for (int i = 0; i < servers.length; i++) {
-      if (! address.equals(servers[i].getAddress()))
+      if (servers[i] == null) {
+        continue;
+      }
+      
+      if (! address.equals(servers[i].getAddress())) {
         isMultipleAddress = true;
+      }
     }
     
-    if (! isMultipleAddress)
+    if (! isMultipleAddress) {
       return;
+    }
     
     int triadMax = Math.min(servers.length, 3);
     
@@ -274,6 +281,10 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       for (int j = i + 1; j < triadMax; j++) {
         CloudServer serverA = servers[i];
         CloudServer serverB = servers[j];
+        
+        if (serverA == null || serverB == null) {
+          continue;
+        }
         
         if (serverA.getAddress().equals(serverB.getAddress())) {
           log.warning(L.l("Triad servers should be on separate machines for better reliability.\n{0}\n{1}",

@@ -52,7 +52,7 @@ public class TimerTask implements AlarmListener, Closeable {
 
   private long _taskId;
   private TimeoutInvoker _invoker;
-  private Runnable _task;
+  private EjbTimer _task;
   private CronExpression _cronExpression;
   private Trigger _trigger;
   private Alarm _alarm;
@@ -81,7 +81,7 @@ public class TimerTask implements AlarmListener, Closeable {
    * @param data
    *          The data to be passed to the invocation target.
    */
-  public TimerTask(TimeoutInvoker invoker, Runnable task,
+  public TimerTask(TimeoutInvoker invoker, EjbTimer task,
                    CronExpression cronExpression, Trigger trigger,
                    Serializable data)
   {
@@ -205,7 +205,9 @@ public class TimerTask implements AlarmListener, Closeable {
     try {
       thread.setContextClassLoader(_loader);
 
-      ThreadPool.getCurrent().schedule(_task);
+      if (! _task.isRunning()) {
+        ThreadPool.getCurrent().schedule(_task);
+      }
 
       long now = CurrentTime.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);

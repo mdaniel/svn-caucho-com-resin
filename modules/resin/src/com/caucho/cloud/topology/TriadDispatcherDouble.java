@@ -47,6 +47,19 @@ public class TriadDispatcherDouble<X> extends TriadDispatcher<X> {
       throw new NullPointerException();
   }
   
+  public static <T> TriadDispatcher<T> create(T valueA, T valueB)
+  {
+    if (valueA == null) {
+      return new TriadDispatcherSingle<T>(valueB);
+    }
+    
+    if (valueB == null) {
+      return new TriadDispatcherSingle<T>(valueA);
+    }
+    
+    return new TriadDispatcherDouble<T>(valueA, valueB);
+  }
+  
   /**
    * Returns the member A.
    */
