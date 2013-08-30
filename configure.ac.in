@@ -797,6 +797,10 @@ else
    echo "no"
 fi
 
+if test -n "$b64_jni" -a -z "$b64"; then
+  b64=$b64_jni
+fi
+
 #
 # --enable-64bit
 #
