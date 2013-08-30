@@ -1391,7 +1391,7 @@ static command_rec caucho_commands[] = {
 
 static int
 prefork_pre_config(apr_pool_t *p, apr_pool_t *plog,
-		    apr_pool_t *dummy, server_rec *ptemp)
+                   apr_pool_t *dummy)
 {
   apr_proc_mutex_create(&g_proc_lock, "/mod_caucho", APR_LOCK_DEFAULT, p);
 
