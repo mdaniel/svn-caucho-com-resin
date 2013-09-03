@@ -12,6 +12,7 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>windows: Added a global mutex to windows service wrapper to avoid starting multiple instances of Resin Watchdog</li>
 <li>cloud: elastic server issues with dynamic remove/timeout (#5510, rep by T Pohl)</li>
 <li>log: check for null logger name in LogRecord (#5499)</li>
 <li>cdi: cdi vs jpa load order (#5493)</li>
