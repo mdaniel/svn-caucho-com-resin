@@ -99,6 +99,10 @@ public class BlockWriter extends AbstractTaskWorker {
     }
 
     wake();
+    
+    if (isClosed()) {
+      return;
+    }
 
     // if (findBlock(block.getBlockId()) != block) {
     //System.err.println(" OFFER: " + Long.toHexString(block.getBlockId()));
