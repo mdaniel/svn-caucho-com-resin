@@ -94,9 +94,11 @@ public class BlockWriter extends AbstractTaskWorker {
     }
     */
 
-    if (! _blockWriteRing.isEmpty()) {
-      wake();
+    if (_blockWriteRing.offer(block, 0, TimeUnit.SECONDS)) {
+      return;
     }
+
+    wake();
 
     // if (findBlock(block.getBlockId()) != block) {
     //System.err.println(" OFFER: " + Long.toHexString(block.getBlockId()));
