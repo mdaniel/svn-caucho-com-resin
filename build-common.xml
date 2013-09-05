@@ -58,7 +58,7 @@
 
   <property name="shell" value="bash"/>
 
-  <property name="jsf.jar" value="javax.faces-2.1.15.jar"/>
+  <property name="jsf.jar" value="javax.faces-2.1.24.jar"/>
   <property name="eclipselink.jar" value="eclipselink-2.4.0.jar"/>
 
   <target name="update">
