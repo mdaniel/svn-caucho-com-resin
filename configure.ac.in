@@ -967,7 +967,7 @@ if test -z "${jni_ld_shlib}"; then
 
       if test -n "$b64"; then
         CFLAGS="$CFLAGS -arch x86_64"
-        jni_ldflags_shlib="$-arch x86_64 $jni_ldflags_shlib"
+        jni_ldflags_shlib="-arch x86_64 $jni_ldflags_shlib"
         plugin_ldflags_shlib="-arch x86_64 $jni_ldflags_shlib"
       fi
       
