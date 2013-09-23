@@ -12,6 +12,7 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>ioc: extends observers now auto-convert ProcessManagedBean&lt;Foo> to ProcessManagedBean&lt;? extends Foo> (#5531, rep by A Tijms)</li>
 </ul>
 </s2>
 

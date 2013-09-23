@@ -464,6 +464,11 @@ abstract public class BaseType
   {
   }
 
+  public BaseType extendGenericType()
+  {
+    return this;
+  }
+
   public String getSimpleName()
   {
     return getRawClass().getSimpleName();

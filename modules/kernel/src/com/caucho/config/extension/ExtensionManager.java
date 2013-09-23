@@ -239,9 +239,14 @@ public class ExtensionManager
       observer = new ExtensionObserver(ext,
                                        method.getMethod(),
                                        method.getArgs());
+      
+      BaseType baseType = method.getBaseType();
+      
+      // #5531, convert Process<Foo> to Process<? extends Foo>
+      baseType = baseType.extendGenericType();
 
       _cdiManager.getEventManager().addExtensionObserver(observer,
-                                                         method.getBaseType(),
+                                                         baseType,
                                                          method.getQualifiers());
       
       if ((ProcessAnnotatedType.class.isAssignableFrom(rawType))

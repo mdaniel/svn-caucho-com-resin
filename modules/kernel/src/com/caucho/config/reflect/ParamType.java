@@ -40,7 +40,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 /**
- * param type matching
+ * GenericParameterized type: Foo<Bar>
  */
 @Module
 public class ParamType extends BaseType implements ParameterizedType
@@ -239,6 +239,45 @@ public class ParamType extends BaseType implements ParameterizedType
     return true;
   }
 
+  /**
+   * Convert Foo<Bar> to Foo<? extends Bar> for CDI extension matching.
+   */
+  @Override
+  public BaseType extendGenericType()
+  {
+    BaseType []oldParams = getParameters();    
+    BaseType []newParams = new BaseType[oldParams.length];
+    boolean isExtend = false;
+    
+    for (int i = 0; i < newParams.length; i++) {
+      BaseType param = oldParams[i];
+      
+      if (param instanceof ClassType
+          || param instanceof ParamType) {
+        BaseType []upperBounds = new BaseType[] { param };
+        BaseType []lowerBounds = new BaseType[] { };//ObjectType.OBJECT_TYPE };
+        
+        BaseType extParam = new WildcardTypeImpl(lowerBounds, upperBounds);
+        
+        newParams[i] = extParam;
+        isExtend = true;
+      }
+      else {
+        newParams[i] = param;
+      }
+    }
+    
+    if (isExtend) {
+      ParamType extendsType = new ParamType(_type, newParams, _paramMap);
+
+      return extendsType;
+    }
+    else {
+      return this;
+    }
+  }
+
+  
   @Override
   public int hashCode()
   {
