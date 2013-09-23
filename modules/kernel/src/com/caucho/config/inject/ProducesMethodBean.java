@@ -196,6 +196,7 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     bean.introspect();
     bean.introspect(producesMethod);
     
+    /* #5522
     BaseType type = manager.createSourceBaseType(producesMethod.getBaseType());
     
     if (type.isGeneric()) {
@@ -204,6 +205,7 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
                                        producesMethod.getJavaMember(),
                                        type));
     }
+    */
 
     return bean;
   }
