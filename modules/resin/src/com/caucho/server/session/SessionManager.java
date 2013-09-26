@@ -37,12 +37,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -52,6 +54,7 @@ import javax.servlet.http.HttpSessionListener;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ByteStreamCache;
@@ -157,6 +160,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private String _cookiePort;
   private int _reuseSessionId = COOKIE;
   private int _cookieLength = 21;
+  private HashSet<SessionTrackingMode> _trackingModes;
   //Servlet 3.0 plain | ssl session tracking cookies become secure when set to true
   private boolean _isSecure;
 
@@ -951,10 +955,37 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   {
     return (int) (_cookieMaxAge / 1000);
   }
+  
+  
+  @Configurable
+  public SessionCookieConfig createCookieConfig()
+  {
+    return this;
+  }
 
   public void setCookieName(String cookieName)
   {
     _cookieName = cookieName;
+  }
+  
+  public void setTrackingMode(SessionTrackingMode mode)
+  {
+    if (_trackingModes == null) {
+      _trackingModes = new HashSet<SessionTrackingMode>();
+      
+      setEnableCookies(false);
+      setEnableUrlRewriting(false);
+    }
+
+    switch (mode) {
+    case COOKIE:
+      setEnableCookies(true);
+      break;
+      
+    case URL:
+      setEnableUrlRewriting(true);
+      break;
+    }
   }
   /**
    * Returns the default cookie name.

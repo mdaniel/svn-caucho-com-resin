@@ -547,6 +547,7 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("getServlets is deprecated");
   }
 
+  @Override
   public void setSessionTrackingModes(Set<SessionTrackingMode> modes)
   {
     throw new UnsupportedOperationException("unimplemented");

@@ -31,6 +31,8 @@ package com.caucho.env.meter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -84,10 +86,13 @@ public final class JmxAttributeMeter extends AbstractMeter {
       _value = ((Number) value).doubleValue();
     } catch (Exception e) {
       if (isOptional()
-          && e instanceof javax.management.InstanceNotFoundException)
+          && (e instanceof InstanceNotFoundException
+              || e instanceof AttributeNotFoundException)) {
         log.log(Level.FINEST, e.toString(), e);
-      else
+      }
+      else {
         log.log(Level.FINE, e.toString(), e);
+      }
 
       _value = 0;
     }

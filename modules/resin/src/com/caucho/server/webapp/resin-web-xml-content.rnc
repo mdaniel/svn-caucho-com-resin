@@ -90,6 +90,29 @@ r_constraint = element constraint {
   r_any-Group
 }
 
+r_cookie-config = element cookie-config {
+ (attribute name { string }
+  | element name { string })?
+  
+ & (attribute comment { string }
+    | element comment { string })?
+  
+ & (attribute domain { string }
+    | element domain { string })?
+  
+ & (attribute http-only { string }
+    | element http-only { string })?
+  
+ & (attribute path { string }
+    | element path { string })?
+  
+ & (attribute secure { string }
+    | element secure { string })?
+  
+ & (attribute max-age { string }
+    | element max-age { string })?
+}
+
 r_config-file =
   attribute config-file { string }
   | element config-file { string }
@@ -968,6 +991,8 @@ r_session-config = element session-config {
   & (attribute always-save-session { r_boolean-Type }
      | element always-save-session { r_boolean-Type })?
 
+  & r_cookie-config?
+  
   & (attribute cookie-append-server-index { r_boolean-Type }
      | element cookie-append-server-index { r_boolean-Type })?
 

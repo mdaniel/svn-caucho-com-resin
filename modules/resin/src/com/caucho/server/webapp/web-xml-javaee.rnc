@@ -189,9 +189,21 @@ javaee_servlet-name = element servlet-name {
 }
 
 javaee_session-config = element session-config {
-  attribute id { string }?,
+  attribute id { string }?
 
-  element session-timeout { string }?
+  & element cookie-config {
+      element name { string }
+      & element domain { string }
+      & element path { string }
+      & element comment { string }
+      & element http-only { string }
+      & element secure { string }
+      & element max-age { string }
+    }?
+  
+  & element session-timeout { string }?
+
+  & element tracking-mode { string }*
 }
 
 javaee_taglib = element taglib {

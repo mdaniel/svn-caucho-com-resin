@@ -38,4 +38,4 @@ public enum SessionTrackingMode {
   COOKIE,
   URL,
   SSL
-  }
+}

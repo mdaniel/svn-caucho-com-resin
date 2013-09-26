@@ -79,6 +79,7 @@ import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletSecurityElement;
 import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
 import javax.servlet.UnavailableException;
 import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.ServletSecurity;
@@ -1777,6 +1778,20 @@ public class WebApp extends ServletContextImpl
   public boolean getCookieHttpOnly()
   {
     return _cookieHttpOnly;
+  }
+
+  @Override
+  public void setSessionTrackingModes(Set<SessionTrackingMode> modes)
+  {
+    if (modes == null) {
+      _sessionManager.setEnableCookies(false);
+      _sessionManager.setEnableUrlRewriting(false);
+      
+      return;
+    }
+    
+    _sessionManager.setEnableCookies(modes.contains(SessionTrackingMode.COOKIE));
+    _sessionManager.setEnableUrlRewriting(modes.contains(SessionTrackingMode.URL));
   }
 
   /**
