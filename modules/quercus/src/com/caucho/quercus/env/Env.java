@@ -6801,6 +6801,9 @@ public class Env
    */
   public Value error(int code, String msg, Location location)
   {
+    System.err.println("Env.error0: " + code + " " + msg + " " + location);
+    Thread.dumpStack();
+
     if (location == null || location.isUnknown()) {
       location = getLocation();
     }
