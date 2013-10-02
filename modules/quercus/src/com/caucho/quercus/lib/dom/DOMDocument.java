@@ -765,9 +765,13 @@ public class DOMDocument
 
   public int xinclude(Env env, @Optional Value options)
   {
-    if (options != null)
+    if (options != null) {
       env.stub(L.l("`{0}' is ignored", "options"));
+    }
 
-    throw new UnimplementedException();
+    // nam: 2013-10-02 stubbed to return 0
+    return 0;
+
+    //throw new UnimplementedException();
   }
 }
