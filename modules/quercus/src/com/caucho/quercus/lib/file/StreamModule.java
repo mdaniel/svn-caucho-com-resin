@@ -46,6 +46,7 @@ import com.caucho.quercus.lib.file.SocketInputOutput.Domain;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
@@ -392,6 +393,19 @@ public class StreamModule extends AbstractQuercusModule {
                                                 @Optional int flags)
   {
     return stream_wrapper_register(env, protocol, className, flags);
+  }
+
+  public static Value stream_resolve_include_path(Env env, StringValue relPath)
+  {
+    Path path = env.lookupInclude(relPath);
+
+    if (path != null && path.exists()) {
+      return env.createString(path.getNativePath());
+    }
+    else {
+      return BooleanValue.FALSE;
+    }
+
   }
 
   /**
