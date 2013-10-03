@@ -96,6 +96,7 @@ import com.caucho.util.TimedCache;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -286,8 +287,9 @@ public class QuercusContext
    */
   public Path getPwd()
   {
-    if (_pwd == null)
-      _pwd = new FilePath(System.getProperty("user.dir"));
+    if (_pwd == null) {
+      _pwd = Vfs.getPwd();
+    }
 
     return _pwd;
   }
