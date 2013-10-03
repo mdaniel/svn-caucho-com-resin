@@ -51,7 +51,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getQuercus();
   }
-  
+
   /**
    * Returns the Env object.
    */
@@ -60,7 +60,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env;
   }
-  
+
   /**
    * Returns the version of Quercus.
    */
@@ -69,7 +69,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getQuercus().getVersion();
   }
-  
+
   /**
    * Returns true if this is the Professional version.
    */
@@ -78,7 +78,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getQuercus().isPro();
   }
-  
+
   /**
    * Returns true if pages will be compiled.
    */
@@ -87,7 +87,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getQuercus().isCompile();
   }
-  
+
   /**
    * Returns true if Quercus is running under Resin.
    */
@@ -96,7 +96,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getQuercus().isResin();
   }
-  
+
   /**
    * Returns true if a JDBC database has been explicitly set.
    */
@@ -105,7 +105,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getQuercus().getDatabase() != null;
   }
-  
+
   /**
    * Returns true if there is an HttpRequest associated with this Env.
    */
@@ -114,7 +114,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getRequest() != null;
   }
-  
+
   /**
    * Returns the HttpServletRequest associated with this Env.
    */
@@ -124,7 +124,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getRequest();
   }
-  
+
   /**
    * Returns the HttpServletRequest associated with this Env.
    */
@@ -133,7 +133,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getRequest();
   }
-  
+
   /**
    * Returns the HttpServletResponse associated with this Env.
    */
@@ -143,7 +143,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getResponse();
   }
-  
+
   /**
    * Returns the HttpServletResponse associated with this Env.
    */
@@ -152,7 +152,7 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getResponse();
   }
-  
+
   /**
    * Returns the ServletContext.
    */
@@ -161,7 +161,18 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getServletContext();
   }
-  
+
+  /**
+   * Dumps the stack.
+   */
+  @Name("quercus_dump_stack")
+  public static boolean dump_stack(Env env)
+  {
+    Thread.dumpStack();
+
+    return true;
+  }
+
   /**
    * Special quercus-only import statements.
    */

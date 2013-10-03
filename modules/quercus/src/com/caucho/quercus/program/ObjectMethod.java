@@ -76,7 +76,7 @@ public class ObjectMethod extends Function {
   {
     return _quercusClass.getName();
   }
-  
+
   @Override
   public ClassDef getDeclaringClass()
   {
