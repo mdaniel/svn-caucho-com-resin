@@ -368,7 +368,11 @@ public class QuercusParser {
         parser.setLocation(fileName, line);
 
       return parser.parse();
-    } finally {
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    finally {
       is.close();
     }
   }

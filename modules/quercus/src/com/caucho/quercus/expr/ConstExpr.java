@@ -85,7 +85,13 @@ public class ConstExpr extends Expr {
     else if ("parent".equals(specialClassName)) {
       className = parser.getParentClassName();
 
-      return factory.createClassConst(className, name);
+      if (className != null) {
+        return factory.createClassConst(className, name);
+      }
+      else {
+        // trait's parent is not known at parse time
+        return factory.createParentClassConst(name);
+      }
     }
     else if ("static".equals(specialClassName)) {
       return factory.createClassVirtualConst(name);

@@ -145,9 +145,14 @@ public class ReflectionProperty
     return _prop.getValue(env, obj);
   }
 
-  public void setValue(Env env, ObjectValue obj, Value value)
+  public void setValue(Env env, Value obj, @Optional Value value)
   {
     _prop.setValue(env, obj, value);
+  }
+
+  public void setAccessible(boolean isAccessible)
+  {
+    _prop.setAccessible(isAccessible);
   }
 
   public ReflectionClass getDeclaringClass(Env env)
@@ -226,9 +231,14 @@ public class ReflectionProperty
       return obj.getField(env, _nameV);
     }
 
-    public void setValue(Env env, ObjectValue obj, Value value)
+    public void setValue(Env env, Value obj, Value value)
     {
       obj.putField(env, _nameV, value);
+    }
+
+    public void setAccessible(boolean isAccessible)
+    {
+      // XXX: protected and private always accessible through Reflection
     }
 
     public final ReflectionClass getDeclaringClass(Env env)
@@ -327,9 +337,9 @@ public class ReflectionProperty
     }
 
     @Override
-    public void setValue(Env env, ObjectValue obj, Value value)
+    public void setValue(Env env, Value obj, Value value)
     {
-      _cls.getStaticFieldVar(env, _name).set(value);
+      _cls.getStaticFieldVar(env, _name).set(obj);
     }
 
     @Override
