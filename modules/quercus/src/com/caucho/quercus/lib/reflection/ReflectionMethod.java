@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
@@ -39,6 +40,8 @@ import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.expr.CallExpr;
+import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
 import com.caucho.quercus.program.ClassDef;
@@ -81,8 +84,7 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     else
       clsName = obj.toString();
 
-    return new ReflectionMethod(
-        clsName, env.getClass(clsName).getFunction(name));
+    return new ReflectionMethod(clsName, env.getClass(clsName).getFunction(name));
   }
 
   public static String export(Env env,
@@ -95,14 +97,25 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
 
   public Value invoke(Env env, ObjectValue object, Value []args)
   {
-    return getFunction().callMethod(
-        env, object.getQuercusClass(), object, args);
+    return getFunction().callMethod(env, object.getQuercusClass(), object, args);
   }
 
   public Value invokeArgs(Env env, ObjectValue object, ArrayValue args)
   {
-    return getFunction().callMethod(env, object.getQuercusClass(), object,
-                                    args.getValueArray(env));
+    AbstractFunction fun = getFunction();
+
+    Expr expr = new CallExpr(Location.UNKNOWN, env.createString(getName()), (Expr[]) null);
+    env.pushCall(expr, object, args.getValueArray(env));
+
+    try {
+      return fun.callMethod(env, object.getQuercusClass(), object,
+                            args.getValueArray(env));
+    }
+    finally {
+      env.popCall();
+    }
+
+
   }
 
   public boolean isFinal()
@@ -122,7 +135,7 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
 
   public boolean isPrivate()
   {
-    throw new UnimplementedException("isPrivate()");
+    return getFunction().isPrivate();
   }
 
   public boolean isProtected()
@@ -191,6 +204,11 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     }
 
     return array;
+  }
+
+  public void setAccessible(boolean isAccessible)
+  {
+    // XXX: always accessible from Reflection for quercus
   }
 
   public String toString()

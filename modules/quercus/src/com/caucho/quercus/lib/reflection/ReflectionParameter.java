@@ -146,6 +146,11 @@ public class ReflectionParameter
     return false;
   }
 
+  public boolean isCallable()
+  {
+    return "Callable".equalsIgnoreCase(_arg.getExpectedClass());
+  }
+
   public boolean isOptional()
   {
     return ! (_arg.getDefault() instanceof ParamRequiredExpr);

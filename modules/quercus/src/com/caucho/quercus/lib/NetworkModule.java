@@ -185,6 +185,19 @@ public class NetworkModule extends AbstractQuercusModule {
   }
 
   /**
+   * Persistent version of fsockopen.
+   */
+  public static SocketInputOutput pfsockopen(Env env,
+                                             String host,
+                                             @Optional int port,
+                                             @Optional @Reference Value errno,
+                                             @Optional @Reference Value errstr,
+                                             @Optional double timeout)
+  {
+    return fsockopen(env, host, port, errno, errstr, timeout);
+  }
+
+  /**
    * Converts string to long
    */
   public static Value ip2long(String ip)

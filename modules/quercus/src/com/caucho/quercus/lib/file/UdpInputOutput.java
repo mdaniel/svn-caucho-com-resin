@@ -61,6 +61,7 @@ public class UdpInputOutput
     throws IOException
   {
     super(env);
+    env.addCleanup(this);
 
     _socket = new DatagramSocket();
     _socket.connect(InetAddress.getByName(host), port);

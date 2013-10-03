@@ -33,14 +33,19 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.*;
+
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -68,21 +73,30 @@ public class ApacheModule extends AbstractQuercusModule {
   /**
    * Gets and sets apache notes
    */
-  public String apache_note(Env env,
-                            String name,
-                            @Optional Value value)
+  public Value apache_note(Env env,
+                           String name,
+                           @Optional Value value)
   {
-    HttpServletRequest req = env.getRequest();
+    Map<String,Value> map = (Map) env.getSpecialValue("_caucho_apache_note");
 
-    Object oldValue = req.getAttribute(name);
+    if (map == null) {
+      map = new HashMap<String,Value>();
 
-    if (value.isset())
-      req.setAttribute(name, value.toString());
+      env.setSpecialValue("_caucho_apache_note", map);
+    }
 
-    if (oldValue != null)
-      return oldValue.toString();
-    else
-      return null;
+    Value oldValue = map.get(name);
+
+    if (value.isset()) {
+      map.put(name, value);
+    }
+
+    if (oldValue != null) {
+      return oldValue.toStringValue(env);
+    }
+    else {
+      return NullValue.NULL;
+    }
   }
 
   /**

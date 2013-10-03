@@ -56,6 +56,9 @@ public class MysqliResult extends JdbcResultResource {
 
   private int _resultSetSize;
 
+  // nam 2013-10-03: box, hack for now
+  public int num_rows;
+
   private final Mysqli _conn;
 
   /**
@@ -75,6 +78,7 @@ public class MysqliResult extends JdbcResultResource {
 
     // getNumRows() is efficient for MySQL
     _resultSetSize = getNumRows();
+    this.num_rows = _resultSetSize;
   }
 
   /**
