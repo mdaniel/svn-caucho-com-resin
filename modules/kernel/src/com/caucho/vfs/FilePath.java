@@ -29,21 +29,21 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.CharBuffer;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.*;
-import java.security.AccessControlException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.util.CharBuffer;
 
 /**
  * FilePath implements the native filesystem.
@@ -55,6 +55,9 @@ public class FilePath extends FilesystemPath {
   private static byte []NEWLINE = getNewlineString().getBytes();
 
   private static FilesystemPath PWD;
+
+  private static Method _isSymlink;
+  private static Method _toPath;
 
   private File _file;
   protected boolean _isWindows;
@@ -389,6 +392,25 @@ public class FilePath extends FilesystemPath {
     }
   }
 
+  @Override
+  public boolean isLink()
+  {
+    try {
+      return isLinkImpl();
+    } catch (Throwable e) {
+      if (log.isLoggable(Level.FINEST)) {
+        log.finest(e.toString());
+      }
+      return false;
+    }
+  }
+  
+  private boolean isLinkImpl()
+    throws Exception
+  {
+    return (Boolean) _isSymlink.invoke(_toPath.invoke(getFile()));
+  }
+
   public long getLength()
   {
     try {
@@ -690,5 +712,22 @@ public class FilePath extends FilesystemPath {
       return true;
 
     return false;
+  }
+  
+  static {
+    Method isSymlink = null;
+    Method toPath = null;
+    
+    try {
+      Class<?> path = Class.forName("java.nio.file.Path");
+      Class<?> files = Class.forName("java.nio.file.Files");
+      
+      isSymlink = files.getMethod("isSymbolicLink", path);
+      toPath = File.class.getMethod("toPath");
+    } catch (Throwable e) {
+    }
+    
+    _isSymlink = isSymlink;
+    _toPath = toPath;
   }
 }

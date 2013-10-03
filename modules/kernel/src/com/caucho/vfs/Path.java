@@ -997,7 +997,7 @@ public abstract class Path implements Comparable<Path> {
    */
   public boolean removeAll() throws IOException
   {
-    if (isDirectory()) {
+    if (isDirectory() && ! isLink()) {
       String []list = list();
 
       for (int i = 0; i < list.length; i++) {

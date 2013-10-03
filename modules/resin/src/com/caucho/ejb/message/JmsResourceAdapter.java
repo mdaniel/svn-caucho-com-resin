@@ -325,7 +325,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
     Consumer(Connection conn, Destination destination)
       throws Exception
     {
-      if (conn instanceof XAConnection) {
+      if (false && conn instanceof XAConnection) {
         XASession xaSession = ((XAConnection) conn).createXASession();
         _session = xaSession;
         _xaResource = xaSession.getXAResource();
@@ -392,7 +392,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
     {
       try {
         Message msg = _consumer.receive();
-        
+
         if (msg != null) {
           _listener.onMessage(msg);
         }

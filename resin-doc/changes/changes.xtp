@@ -12,6 +12,10 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>jms: transaction/ack issues with file and message driven bean (#5535, rep by Scott Weatbrook)</li>
+<li>hessian: InetAddress serialization (#5540, rep by Michael Charnoky)</li>
+<li>servlet: on shutdown, check facade._request for null (#5537)</li>
+<li>deploy: redeploy delete issues with symlinks (#5536, rep by ssmax)</li>
 <li>health: OpenFileDescriptorCount is not available on some JMVs (#5515, rep by Y. Zhao)</li>
 <li>servlet: missing cookie-config in web.xml (#5521, rep by Arjan Tijms)</li>
 <li>ioc: remove validatio of generic type on produces method (#5522, rep by A Tijms)</li>
@@ -21,6 +25,7 @@
 
 <s2 title="4.0.37 - Sept 7, 2013">
 <ul>
+<li>ejb: avoid double EJB timer call when timer is slow (#5518, rep by K. Hosein)</li>
 <li>admin/rest: missing close on resource</li>
 <li>windows: Added a global mutex to windows service wrapper to avoid starting multiple instances of Resin Watchdog</li>
 <li>cloud: elastic server issues with dynamic remove/timeout (#5510, rep by T Pohl)</li>

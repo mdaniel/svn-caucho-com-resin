@@ -279,8 +279,9 @@ public class MessageConsumerImpl<E> implements MessageConsumer
       QueueEntry<E> entry
         = _queue.receiveEntry(expireTime, _isAutoAcknowledge, _selector);
 
-      if (entry == null)
+      if (entry == null) {
         return null;
+      }
 
       E payload = entry.getPayload();
 
@@ -312,8 +313,9 @@ public class MessageConsumerImpl<E> implements MessageConsumer
       if (log.isLoggable(Level.FINE))
         log.fine(_queue + " receiving message " + msg);
 
-      if (! _isAutoAcknowledge)
+      if (! _isAutoAcknowledge) {
         _session.addTransactedReceive(_queue, msg);
+      }
 
       return msg;
       //}

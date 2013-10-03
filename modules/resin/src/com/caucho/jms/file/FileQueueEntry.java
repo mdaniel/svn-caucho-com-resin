@@ -29,7 +29,6 @@
 
 package com.caucho.jms.file;
 
-import java.io.Serializable;
 import java.lang.ref.SoftReference;
 
 import com.caucho.jms.queue.QueueEntry;

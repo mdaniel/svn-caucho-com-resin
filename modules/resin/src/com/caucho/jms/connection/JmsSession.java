@@ -73,7 +73,6 @@ import com.caucho.jms.message.TextMessageImpl;
 import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.jms.queue.AbstractQueue;
 import com.caucho.jms.queue.AbstractTopic;
-import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -133,7 +132,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     _classLoader = Thread.currentThread().getContextClassLoader();
     
     _connection = connection;
-
     _isXA = isXA;
     
     _isTransacted = isTransacted;
@@ -169,7 +167,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
         break;
       }
     }
-
+    
     // ejb/7000
     /*
     try {
@@ -1024,8 +1022,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       try {
         Transaction trans = _tm.getTransaction();
 
-        if (trans != null)
+        if (trans != null) {
           trans.enlistResource(this);
+        }
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -1054,13 +1053,14 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   {
     message.setSession(this);
     
-    if (_transactedMessages == null)
+    if (_transactedMessages == null) {
       _transactedMessages = new ArrayList<TransactedMessage>();
+    }
     
     TransactedMessage transMsg = new ReceiveMessage(queue, message);
-      
-    _transactedMessages.add(transMsg);
 
+    _transactedMessages.add(transMsg);
+    
     if (_tm != null && _transactedMessages.size() == 1) {
       enlist();
     }

@@ -723,7 +723,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   protected void removeExpandDirectory(Path path, String prefix)
   {
     try {
-      if (path.isDirectory()) {
+      if (path.isDirectory() && ! path.isLink()) {
         String []list = path.list();
         for (int i = 0; list != null && i < list.length; i++) {
           removeExpandDirectory(path.lookup(list[i]), prefix);
