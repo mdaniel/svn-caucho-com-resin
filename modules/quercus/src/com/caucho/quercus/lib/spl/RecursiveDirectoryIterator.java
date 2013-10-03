@@ -53,7 +53,7 @@ public class RecursiveDirectoryIterator
   @Override
   public boolean hasChildren(Env env)
   {
-    DirectoryIterator current = getCurrent(env);
+    SplFileInfo current = getCurrent(env);
 
     if (current == null) {
       return false;
@@ -69,7 +69,7 @@ public class RecursiveDirectoryIterator
   }
 
   @Override
-  protected DirectoryIterator createCurrentIterator(Env env, Path path)
+  protected SplFileInfo createCurrentIterator(Env env, Path path)
   {
     if (path.isDirectory()) {
       return new RecursiveDirectoryIterator(path, getFlags());

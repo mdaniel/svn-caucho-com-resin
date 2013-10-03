@@ -2672,6 +2672,8 @@ public class FileModule extends AbstractQuercusModule {
       return parseIni(env, is, processSections);
     }
     catch (IOException e) {
+      e.printStackTrace();
+
       env.warning(e);
 
       return BooleanValue.FALSE;

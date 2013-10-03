@@ -712,24 +712,26 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Sets the options for a connection.
    */
-  public static boolean mysqli_options(@NotNull Mysqli mysqli,
+  public static boolean mysqli_options(Env env,
+                                       @NotNull Mysqli mysqli,
                                        int option,
                                        Value value)
   {
     if (mysqli == null)
       return false;
 
-    return mysqli.options(option, value);
+    return mysqli.options(env, option, value);
   }
 
   /**
    * Alias of {@link #mysqli_options}.
    */
-  public static boolean mysqli_set_opt(@NotNull Mysqli mysqli,
+  public static boolean mysqli_set_opt(Env env,
+                                       @NotNull Mysqli mysqli,
                                        int option,
                                        Value value)
   {
-    return mysqli_options(mysqli, option, value);
+    return mysqli_options(env, mysqli, option, value);
   }
 
   /**
@@ -752,18 +754,6 @@ public class MysqliModule extends AbstractQuercusModule {
       return false;
 
     return conn.rollback();
-  }
-
-  /**
-   * Sets the character set for a conneciton.
-   */
-  public static boolean mysqli_set_charset(@NotNull Mysqli mysqli,
-             String charset)
-  {
-    if (mysqli == null)
-      return false;
-
-    return mysqli.set_charset(charset);
   }
 
   /**

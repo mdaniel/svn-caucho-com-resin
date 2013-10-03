@@ -58,6 +58,10 @@ public class IniParser {
       else if (ch == ';') {
         skipToNewline(is);
       }
+      else if (ch == '#') {
+        // nam 2013-10-02: box
+        skipToNewline(is);
+      }
       else if (ch == '[') {
         StringValue key = parseBracketKey(env, is);
 

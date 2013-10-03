@@ -1,6 +1,7 @@
 com.caucho.quercus.lib.ApacheModule
 com.caucho.quercus.lib.ApcModule
 com.caucho.quercus.lib.ArrayModule
+com.caucho.quercus.lib.Array2Module
 com.caucho.quercus.lib.BcmathModule
 com.caucho.quercus.lib.ClassesModule
 com.caucho.quercus.lib.CoreModule

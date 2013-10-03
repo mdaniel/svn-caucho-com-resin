@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.spl;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.MethodIntern;
@@ -70,8 +71,9 @@ public class ArrayIterator
     _env = env;
     _qThis = qThis;
 
-    if (value == null)
-      value = NullValue.NULL;
+    if (value == null || value.isNull()) {
+      value = new ArrayValueImpl();
+    }
 
     _value = value;
     _flags = flags;

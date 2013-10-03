@@ -89,7 +89,7 @@ public class FilesystemIterator extends DirectoryIterator
     int flags = _flags;
 
     if ((flags & KEY_AS_PATHNAME) == KEY_AS_PATHNAME) {
-      DirectoryIterator current = getCurrent(env);
+      SplFileInfo current = getCurrent(env);
 
       if (current == null) {
         return UnsetValue.UNSET;
@@ -100,7 +100,7 @@ public class FilesystemIterator extends DirectoryIterator
       return env.createString(path);
     }
     else if ((flags & KEY_AS_FILENAME) == KEY_AS_FILENAME) {
-      DirectoryIterator current = getCurrent(env);
+      SplFileInfo current = getCurrent(env);
 
       if (current == null) {
         return UnsetValue.UNSET;

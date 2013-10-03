@@ -46,7 +46,7 @@ public class DirectoryIterator
   private String[] _list;
   private int _index;
 
-  private DirectoryIterator _current;
+  private SplFileInfo _current;
 
   public DirectoryIterator(Env env, StringValue fileName)
   {
@@ -77,17 +77,17 @@ public class DirectoryIterator
   @Override
   public Value current(Env env)
   {
-    DirectoryIterator current = getCurrent(env);
+    SplFileInfo current = getCurrent(env);
 
     return current != null ? env.wrapJava(current) : UnsetValue.UNSET;
   }
 
-  protected DirectoryIterator createCurrentIterator(Env env, Path path)
+  protected SplFileInfo createCurrentIterator(Env env, Path path)
   {
     return new DirectoryIterator(path);
   }
 
-  protected DirectoryIterator getCurrent(Env env)
+  protected SplFileInfo getCurrent(Env env)
   {
     if (_current == null && _index < _list.length) {
       String name = _list[_index];
@@ -100,7 +100,7 @@ public class DirectoryIterator
     return _current;
   }
 
-  protected DirectoryIterator getCurrentRaw()
+  protected SplFileInfo getCurrentRaw()
   {
     return _current;
   }

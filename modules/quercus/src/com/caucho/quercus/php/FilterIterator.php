@@ -1,33 +1,18 @@
 <?php
 
-class FilterIterator extends IteratorIterator {
-  var $_key = NULL;
-  var $_current = NULL;
-
+abstract class FilterIterator extends IteratorIterator
+{
   function __construct($iter)
   {
     parent::__construct($iter);
   }
-
-  function current()
-  {
-    return $this->_current;
-  }
+  
+  abstract function accept();
 
   function fetch()
   {
-    $this->_key = $this->it->key();
-    $this->_current = $this->it->current();
-
     for (; $this->it->valid() && ! $this->accept(); $this->it->next()) {
-      $this->_key = $this->it->key();
-      $this->_current = $this->it->current();
     }
-  }
-
-  function key()
-  {
-    return $this->_key;
   }
 
   function next()

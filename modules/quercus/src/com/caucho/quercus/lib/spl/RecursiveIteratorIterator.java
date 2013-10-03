@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
 import java.util.ArrayList;
@@ -76,7 +77,14 @@ public class RecursiveIteratorIterator
   @Override
   public Value current(Env env)
   {
-    return _currentValue;
+    Value value = _currentValue;
+
+    if (value != null) {
+      return value;
+    }
+    else {
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -85,7 +93,14 @@ public class RecursiveIteratorIterator
   @Override
   public Value key(Env env)
   {
-    return _currentKey;
+    Value key = _currentKey;
+
+    if (key != null) {
+      return key;
+    }
+    else {
+      return NullValue.NULL;
+    }
   }
 
   /**

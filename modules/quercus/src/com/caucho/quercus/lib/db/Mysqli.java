@@ -42,8 +42,11 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.VariableModule;
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
+import com.caucho.vfs.Path;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -202,7 +205,18 @@ public class Mysqli extends JdbcConnectionResource
       }
 
       if (url == null || url.length() == 0) {
-        url = getUrl(env, host, port, dbname, driverContext.getDefaultEncoding(),
+        String encoding;
+
+        if (_charset != null) {
+          encoding = _charset.toString();
+        }
+        else {
+          //encoding = driverContext.getDefaultEncoding();
+
+          encoding = null;
+        }
+
+        url = getUrl(env, host, port, dbname, encoding,
                      (flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
@@ -293,17 +307,24 @@ public class Mysqli extends JdbcConnectionResource
     {
       char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
 
-      // this sends a "SET character_set_results = latin1" query, thereby
-      // telling the server to do all the result set encoding on the server-side
-      // (e.g. the raw wire bytes will be in the character_set_client encoding)
-      urlBuilder.append(sep);
-      urlBuilder.append("characterSetResults=ISO8859_1");
+      if (encoding != null) {
+        urlBuilder.append(sep);
+        urlBuilder.append("characterEncoding=");
+        urlBuilder.append(encoding);
+      }
+      else {
+        // this sends a "SET character_set_results = latin1" query, thereby
+        // telling the server to do all the result set encoding on the server-side
+        // (e.g. the raw wire bytes will be in the character_set_client encoding)
+        urlBuilder.append(sep);
+        urlBuilder.append("characterSetResults=ISO8859_1");
 
-      // this sets the encoding that the jdbc driver uses to encode the queries,
-      // ISO8859_1 matches PHP's behavior, whereas the JDBC driver maps latin1
-      // to cp1252 and cp1252 doesn't translate to utf-8 properly in Java
-      urlBuilder.append('&');
-      urlBuilder.append("characterEncoding=ISO8859_1");
+        // this sets the encoding that the jdbc driver uses to encode the queries,
+        // ISO8859_1 matches PHP's behavior, whereas the JDBC driver maps latin1
+        // to cp1252 and cp1252 doesn't translate to utf-8 properly in Java
+        urlBuilder.append('&');
+        urlBuilder.append("characterEncoding=ISO8859_1");
+      }
     }
 
     //urlBuilder.append("&useInformationSchema=true");
@@ -777,9 +798,35 @@ public class Mysqli extends JdbcConnectionResource
   /**
    * Sets a mysqli option.
    */
-  public boolean options(int option, Value value)
+  public boolean options(Env env, int option, Value value)
   {
-    return false;
+    if (option == MysqliModule.MYSQLI_READ_DEFAULT_FILE) {
+      Path path = env.lookupPwd(value);
+
+      Value result = FileModule.parse_ini_file(env, path, true);
+
+      if (result.isArray()) {
+        ArrayValue array = result.toArrayValue(env);
+
+        Value clientArray = array.get(env.createString("client"));
+
+        if (clientArray.isArray()) {
+          Value charset = clientArray.get(env.createString("default-character-set"));
+
+          if (! charset.isNull()) {
+            _charset = charset.toStringValue();
+          }
+        }
+
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -1134,19 +1181,11 @@ public class Mysqli extends JdbcConnectionResource
   }
 
   /**
-   * Sets the character set
-   */
-  public boolean set_charset(String charset)
-  {
-    return false;
-  }
-
-  /**
    * Sets a mysqli option
    */
-  public boolean set_opt(int option, Value value)
+  public boolean set_opt(Env env, int option, Value value)
   {
-    return options(option, value);
+    return options(env, option, value);
   }
 
   /**

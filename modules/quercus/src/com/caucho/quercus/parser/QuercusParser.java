@@ -2463,31 +2463,50 @@ public class QuercusParser {
   {
    int token;
 
+   ArrayList<StringValue> traitList = new ArrayList<StringValue>();
+
     do {
-      _classDef.addTrait(parseNamespaceIdentifier().toString());
+      traitList.add(parseNamespaceIdentifier());
 
       token = parseToken();
     } while (token == ',');
+
+    for (StringValue traitName : traitList) {
+      _classDef.addTrait(traitName.toString());
+    }
 
     if (token == '{') {
       while ((token = parseToken()) >= 0 && token != '}') {
         _peekToken = token;
 
-        String traitName = parseNamespaceIdentifier().toString();
-        expect(SCOPE);
-        StringValue funName = parseIdentifier();
+        StringValue traitNameV = parseNamespaceIdentifier();
+        StringValue funName;
 
         token = parseToken();
+
+        if (token == SCOPE) {
+          funName = parseIdentifier();
+
+          token = parseToken();
+        }
+        else if (traitList.size() == 1) {
+          funName = traitNameV;
+
+          traitNameV = traitList.get(0);
+        }
+        else {
+          throw error(L.l("cannot resolve method because multiple traits are defined"));
+        }
 
         if (token == INSTEADOF) {
           String insteadofTraitName = parseNamespaceIdentifier().toString();
 
-          _classDef.addTraitInsteadOf(funName, traitName, insteadofTraitName);
+          _classDef.addTraitInsteadOf(funName, traitNameV.toString(), insteadofTraitName);
         }
         else if (token == AS) {
           StringValue funNameAlias = parseIdentifier();
 
-          _classDef.addTraitAlias(funName, funNameAlias, traitName);
+          _classDef.addTraitAlias(funName, funNameAlias, traitNameV.toString());
         }
         else {
           throw error(L.l("expected 'insteadof' or 'as' at {0}",
@@ -2501,10 +2520,13 @@ public class QuercusParser {
         }
       }
 
+      _peekToken = token;
+
       expect('}');
     }
-
-    _peekToken = token;
+    else {
+      _peekToken = token;
+    }
   }
 
   private int parseModifiers()
@@ -5921,10 +5943,11 @@ public class QuercusParser {
   {
     int token = parseToken();
 
-    if (token != expect)
+    if (token != expect) {
       throw error(L.l("expected {0} at {1}",
                       tokenName(expect),
                       tokenName(token)));
+    }
   }
 
   /**
