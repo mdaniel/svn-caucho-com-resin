@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snapshot">
 <ul>
+<li>loader: classloader deadlock (#5465, rep by Shinomiya Nobuaki)</li>
 <li>jsp: static text chunk generation limited to 8k characters (#5368)</li>
 </ul>
 </s2>

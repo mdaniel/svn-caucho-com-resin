@@ -56,7 +56,7 @@ public class DeployListGenerator<E extends DeployController>
   {
     super(container);
   }
-  
+
   /**
    * Adds a deploy.
    */
@@ -65,7 +65,7 @@ public class DeployListGenerator<E extends DeployController>
     if (! _generatorList.contains(deploy))
       _generatorList.add(deploy);
   }
-  
+
   /**
    * Removes a deploy.
    */
@@ -81,7 +81,7 @@ public class DeployListGenerator<E extends DeployController>
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
       if (_generatorList.get(i).isModified())
-	return true;
+        return true;
     }
 
     return false;
@@ -94,7 +94,7 @@ public class DeployListGenerator<E extends DeployController>
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
       if (_generatorList.get(i).logModified(log))
-	return true;
+        return true;
     }
 
     return false;
@@ -165,7 +165,7 @@ public class DeployListGenerator<E extends DeployController>
 
     return controller;
   }
-  
+
   /**
    * Starts the deploys.
    */
@@ -178,7 +178,7 @@ public class DeployListGenerator<E extends DeployController>
       _generatorList.get(i).start();
     }
   }
-  
+
   /**
    * Stops the deploys.
    */
@@ -191,7 +191,7 @@ public class DeployListGenerator<E extends DeployController>
 
     super.stopImpl();
   }
-  
+
   /**
    * Closes the deploys.
    */
@@ -200,14 +200,14 @@ public class DeployListGenerator<E extends DeployController>
   {
     ArrayList<DeployGenerator<E>> generatorList
       = new ArrayList<DeployGenerator<E>>(_generatorList);
-    
+
     _generatorList.clear();
 
     for (int i = 0; i < generatorList.size(); i++) {
       try {
-	generatorList.get(i).destroy();
+        generatorList.get(i).destroy();
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 

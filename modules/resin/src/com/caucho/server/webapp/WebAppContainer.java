@@ -339,7 +339,7 @@ public class WebAppContainer
   {
     if (config.getURLRegexp() != null) {
       DeployGenerator<WebAppController> deploy
-	= new WebAppRegexpDeployGenerator(_appDeploy, this, config);
+        = new WebAppRegexpDeployGenerator(_appDeploy, this, config);
       _appDeploy.add(deploy);
       return;
     }
@@ -349,7 +349,7 @@ public class WebAppContainer
 
     if (oldEntry != null && oldEntry.getSourceType().equals("single")) {
       throw new ConfigException(L.l("duplicate web-app '{0}' forbidden.",
-				    config.getId()));
+                                    config.getId()));
     }
 
     WebAppSingleDeployGenerator deploy
@@ -463,7 +463,7 @@ public class WebAppContainer
       Throwable configException = controller.getConfigException();
 
       if (configException != null)
-	throw configException;
+        throw configException;
     }
   }
 
@@ -494,7 +494,7 @@ public class WebAppContainer
       Throwable configException = entry.getConfigException();
 
       if (configException != null)
-	throw configException;
+        throw configException;
     }
   }
 
@@ -659,9 +659,9 @@ public class WebAppContainer
       _appDeploy.start();
     } catch (ConfigException e) {
       log.warning(e.toString());
-      
+
       if (log.isLoggable(Level.FINE))
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -688,7 +688,7 @@ public class WebAppContainer
       FilterChain chain = new ExceptionFilterChain(_configException);
       invocation.setFilterChain(chain);
       invocation.setDependency(AlwaysModified.create());
-      
+
       return invocation;
     }
     else if (! _lifecycle.waitForActive(_startWaitTime)) {
@@ -697,12 +697,12 @@ public class WebAppContainer
       invocation.setFilterChain(chain);
 
       if (_dispatchServer instanceof Server) {
-	Server server = (Server) _dispatchServer;
-	invocation.setWebApp(getErrorWebApp());
+        Server server = (Server) _dispatchServer;
+        invocation.setWebApp(getErrorWebApp());
       }
 
       invocation.setDependency(AlwaysModified.create());
-      
+
       return invocation ;
     }
 
@@ -730,22 +730,22 @@ public class WebAppContainer
     if (_rewriteDispatch != null) {
       String uri = invocation.getURI();
       String queryString = invocation.getQueryString();
-      
+
       FilterChain rewriteChain = _rewriteDispatch.map(uri,
-						      queryString,
+                                                      queryString,
                                                       chain);
 
       if (rewriteChain != chain) {
-	Server server = (Server) _dispatchServer;
+        Server server = (Server) _dispatchServer;
         // server/13sf
-	WebApp webApp = findWebAppByURI("/");
-	
-	if (webApp != null)
-	  invocation.setWebApp(webApp);
-	else
-	  invocation.setWebApp(getErrorWebApp());
-	
-	invocation.setFilterChain(rewriteChain);
+        WebApp webApp = findWebAppByURI("/");
+
+        if (webApp != null)
+          invocation.setWebApp(webApp);
+        else
+          invocation.setWebApp(getErrorWebApp());
+
+        invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;
       }
     }
@@ -788,11 +788,11 @@ public class WebAppContainer
       buildDispatchInvocation(dispatchInvocation);
 
       RequestDispatcher disp
-	= new RequestDispatcherImpl(includeInvocation,
-				    forwardInvocation,
-				    errorInvocation,
-				    dispatchInvocation,
-				    getWebApp(includeInvocation, false));
+        = new RequestDispatcherImpl(includeInvocation,
+                                    forwardInvocation,
+                                    errorInvocation,
+                                    dispatchInvocation,
+                                    getWebApp(includeInvocation, false));
 
       return disp;
     } catch (Exception e) {
@@ -909,7 +909,7 @@ public class WebAppContainer
    * Returns the webApp for the current request.
    */
   private WebApp getWebApp(Invocation invocation,
-				     boolean enableRedeploy)
+                                     boolean enableRedeploy)
     throws ServletException
   {
     try {
@@ -923,9 +923,9 @@ public class WebAppContainer
         else
           app = controller.subrequest();
 
-	if (app == null) {
-	  return null;
-	}
+        if (app == null) {
+          return null;
+        }
 
         invocation.setWebApp(app);
 
@@ -998,9 +998,10 @@ public class WebAppContainer
    */
   public WebAppController findByURI(String uri)
   {
-    if (_appDeploy.isModified())
+    if (_appDeploy.isModified()) {
       _uriToAppCache.clear();
-    
+    }
+
     WebAppController controller = _uriToAppCache.get(uri);
 
     if (controller != null)
@@ -1042,9 +1043,9 @@ public class WebAppContainer
       controller = _appDeploy.findController(subURI);
 
       if (controller != null) {
-	_uriToAppCache.put(subURI, controller);
+        _uriToAppCache.put(subURI, controller);
 
-	return controller;
+        return controller;
       }
     }
 
@@ -1052,7 +1053,7 @@ public class WebAppContainer
       controller = findByURIImpl(subURI.substring(0, p));
 
       if (controller != null)
-	_uriToAppCache.put(subURI, controller);
+        _uriToAppCache.put(subURI, controller);
     }
 
     return controller;
@@ -1133,21 +1134,21 @@ public class WebAppContainer
   public WebApp getErrorWebApp()
   {
     if (_errorWebApp == null
-	&& _classLoader != null
-	&& ! _classLoader.isModified()) {
+        && _classLoader != null
+        && ! _classLoader.isModified()) {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       try {
-	thread.setContextClassLoader(_classLoader);
+        thread.setContextClassLoader(_classLoader);
 
-	_errorWebApp = new WebApp(getRootDirectory().lookup("caucho-web-app-error"));
+        _errorWebApp = new WebApp(getRootDirectory().lookup("caucho-web-app-error"));
         _errorWebApp.setParent(this);
-	//_errorWebApp.init();
-	//_errorWebApp.start();
+        //_errorWebApp.init();
+        //_errorWebApp.start();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	thread.setContextClassLoader(loader);
+        thread.setContextClassLoader(loader);
       }
     }
 
@@ -1175,7 +1176,7 @@ public class WebAppContainer
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where the environment is starting (after init).
    */
