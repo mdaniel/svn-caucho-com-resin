@@ -451,6 +451,8 @@ function pdf_load_json_dump($name, $start=0, $end=0)
     return;
   }
 
+  sort($times);
+
   $time = $times[sizeof($times) - 1];
 
   if (! $time) {

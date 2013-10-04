@@ -12,6 +12,8 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>health: sort message times so PDF report of health dump will be most recent (#5358)</li>
+<li>watchdog: increate idle thread on startup to avoid dependency on swap (#5500, rep by K. Hosein)</li>
 <li>jms: transaction/ack issues with file and message driven bean (#5535, rep by Scott Weatbrook)</li>
 <li>hessian: InetAddress serialization (#5540, rep by Michael Charnoky)</li>
 <li>servlet: on shutdown, check facade._request for null (#5537)</li>

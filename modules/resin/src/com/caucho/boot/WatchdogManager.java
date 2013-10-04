@@ -165,8 +165,12 @@ class WatchdogManager implements AlarmListener {
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(_system.getClassLoader());
 
-    ThreadPool.getThreadPool().setIdleMin(4);
-    ThreadPool.getThreadPool().setPriorityIdleMin(4);
+    ThreadPool.getThreadPool().setIdleMin(8);
+    ThreadPool.getThreadPool().setPriorityIdleMin(8);
+    
+    // add max with long timeout to avoid the manager spawning.
+    ThreadPool.getThreadPool().setIdleMax(16);
+    ThreadPool.getThreadPool().setIdleTimeout(Integer.MAX_VALUE);
 
     ResinELContext elContext = _args.getELContext();
 
