@@ -32,7 +32,6 @@ package com.caucho.config.type;
 import java.util.HashMap;
 
 import com.caucho.config.core.ResinChoose;
-import com.caucho.config.core.ResinConfigFile;
 import com.caucho.config.core.ResinIf;
 import com.caucho.config.core.ResinImport;
 import com.caucho.config.core.ResinLog;
