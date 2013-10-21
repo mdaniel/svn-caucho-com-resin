@@ -12,6 +12,7 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>cluster: dynamic server must heartbeat address to recover from triad restarts (#5561, rep by T Pohl)</li>
 <li>health: sort message times so PDF report of health dump will be most recent (#5358)</li>
 <li>watchdog: increate idle thread on startup to avoid dependency on swap (#5500, rep by K. Hosein)</li>
 <li>jms: transaction/ack issues with file and message driven bean (#5535, rep by Scott Weatbrook)</li>

@@ -52,11 +52,15 @@ public class BamAllActorRouter extends AbstractBamRouter
   private final Broker _broker;
   private final ActorSender _sender;
   private final BamActorRef []_actors;
+  private final boolean _isForce;
   
-  public BamAllActorRouter(ActorSender sender, BamActorRef ...actors)
+  public BamAllActorRouter(ActorSender sender,
+                           boolean isForce,
+                           BamActorRef ...actors)
   {
     _broker = sender.getBroker();
     _sender = sender;
+    _isForce = isForce;
     _actors = actors;
   }
 
@@ -69,6 +73,10 @@ public class BamAllActorRouter extends AbstractBamRouter
   @Override
   public boolean isActive()
   {
+    if (_isForce) {
+      return true;
+    }
+    
     for (BamActorRef actor : getActors()) {
       if (actor.isActive()) {
         return true;
@@ -93,7 +101,7 @@ public class BamAllActorRouter extends AbstractBamRouter
   public void message(String from, Serializable payload)
   {
     for (BamActorRef actor : getActors()) {
-      if (actor.isActive()) {
+      if (actor.isActive() || _isForce) {
         actor.message(from, payload);
       }
     }
@@ -110,7 +118,7 @@ public class BamAllActorRouter extends AbstractBamRouter
     for (int i = 0; i < actors.length; i++) {
       BamActorRef actor = actors[i];
       
-      if (actor != null && actor.isActive()) {
+      if (actor != null && (actor.isActive() || _isForce)) {
         _sender.query(actor, payload, new AllMethodCallback(scoreboard, i));
       }
       else {
