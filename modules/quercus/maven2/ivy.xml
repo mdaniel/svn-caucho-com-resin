@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-  <info organisation="com.caucho" module="resin-quercus" revision="@VERSION@">
+  <info organisation="com.caucho" module="quercus" revision="@VERSION@">
     <license name="GPL"/>
   </info>
 
