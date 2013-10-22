@@ -953,6 +953,18 @@
       <param name="pom.xml" value="${modules}/javaee/maven2/pom.xml"/>
       <param name="ivy.xml" value="${modules}/javaee/maven2/ivy.xml"/>
     </antcall>
+  	
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="kernel"/>
+      <param name="jar.name" value="resin-kernel.jar"/>
+      <param name="maven.name" value="resin-kernel"/>
+    </antcall>
+  	
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="quercus"/>
+      <param name="jar.name" value="quercus.jar"/>
+      <param name="maven.name" value="quercus"/>
+    </antcall>
 <!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="ant"/>
