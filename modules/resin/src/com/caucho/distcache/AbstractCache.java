@@ -42,19 +42,21 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 import javax.cache.Cache;
-import javax.cache.Configuration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
+import javax.cache.Configuration;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
+import com.caucho.db.block.BlockManager;
 import com.caucho.distcache.jcache.CacheManagerFacade;
 import com.caucho.loader.Environment;
 import com.caucho.server.distcache.CacheBacking;
@@ -92,6 +94,8 @@ public class AbstractCache
   private boolean _isClosed;
   
   private CacheImpl _delegate;
+  
+  private long _memorySizeMin;
 
   public AbstractCache()
   {
@@ -447,6 +451,18 @@ public class AbstractCache
   public void setPersistenceMode(Persistence persistence)
   {
     
+  }
+  
+  /**
+   * Sets the minimum memory size for the internal byte buffer cache.
+   * Since the buffer cache is shared across all caches, the minimum
+   * memory size is for all caches, not the sum of each of the memory sizes.
+   */
+  
+  @Configurable
+  public void setMemorySizeMin(Bytes size)
+  {
+    _memorySizeMin = size.getBytes();
   }
   
   //
@@ -1138,6 +1154,10 @@ public class AbstractCache
     
     if (_config.getEngine() == null) {
       _config.setEngine(cacheService.getDistCacheManager().getCacheEngine());
+    }
+    
+    if (_memorySizeMin > 0) {
+      BlockManager.create().ensureMemoryCapacity(_memorySizeMin);
     }
     
     _delegate = manager.createIfAbsent(_name, _config);

@@ -178,6 +178,13 @@ public final class BlockManager
     }
   }
   
+  public void ensureMemoryCapacity(long memorySize)
+  {
+    int blocks = (int) (memorySize + BlockStore.BLOCK_SIZE - 1) / BlockStore.BLOCK_SIZE;
+    
+    ensureCapacity(blocks);
+  }
+  
   public long getBlockCacheMemoryCapacity()
   {
     return _blockCache.getCapacity() * BlockStore.BLOCK_SIZE;

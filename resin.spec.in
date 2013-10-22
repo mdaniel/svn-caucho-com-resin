@@ -30,12 +30,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%config /etc/resin/*
-%config /etc/init.d/resin
-%attr(-,resin,resin) %config /var/resin
-/usr/local/share
+%config(noreplace) /etc/resin/*
+%config(noreplace) /etc/init.d/resin
+%attr(-,resin,resin) %config(noreplace) /var/resin
+/usr/local/share/*
 /var/log/resin
-/usr/bin
+/usr/bin/*
 
 %pre
 /usr/bin/getent group resin || /usr/sbin/groupadd -r resin
