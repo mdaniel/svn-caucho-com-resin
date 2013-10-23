@@ -23,6 +23,7 @@ mkdir m4
 DESTDIR="$RPM_BUILD_ROOT" ./configure
 DESTDIR="$RPM_BUILD_ROOT" make rpm-dist
 DESTDIR="$RPM_BUILD_ROOT" make install
+chmod -R 555 $RPM_BUILD_ROOT/usr/bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -30,7 +31,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%config /etc/resin
+%config /etc/resin/*
 %config /etc/init.d/resin
 %attr(-,resin,resin) %config /var/resin
 /usr/local/share
