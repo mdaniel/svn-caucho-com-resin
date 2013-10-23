@@ -23,7 +23,6 @@ mkdir m4
 DESTDIR="$RPM_BUILD_ROOT" ./configure
 DESTDIR="$RPM_BUILD_ROOT" make rpm-dist
 DESTDIR="$RPM_BUILD_ROOT" make install
-chmod -R 555 $RPM_BUILD_ROOT/usr/bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
