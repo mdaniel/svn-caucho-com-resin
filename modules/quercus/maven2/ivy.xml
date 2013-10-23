@@ -4,6 +4,7 @@
   </info>
 
   <dependencies>
-    <dependency org="com.caucho" name="resin-util" rev="@VERSION@"/>
+    <dependency org="com.caucho" name="resin-kernel" rev="@VERSION@"/>
+    <dependency org="com.caucho" name="resin-javaee16" rev="@VERSION@"/>
   </dependencies>
 </ivy-module> 
