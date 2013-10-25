@@ -29,8 +29,9 @@
 
 package com.caucho.make;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.caucho.loader.Environment;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Dependency;
 
@@ -39,12 +40,12 @@ import com.caucho.vfs.Dependency;
  */
 abstract public class CachedDependency implements Dependency {
   private long _checkInterval;
-  private long _lastCheckTime;
+  private AtomicLong _lastCheckTime = new AtomicLong();
   private boolean _isModified;
 
   public CachedDependency()
   {
-    _checkInterval = Environment.getDependencyCheckInterval();
+    setCheckInterval(Environment.getDependencyCheckInterval());
   }
   
   /**
@@ -60,7 +61,7 @@ abstract public class CachedDependency implements Dependency {
    */
   public void setCheckInterval(long checkInterval)
   {
-    _checkInterval = checkInterval;
+    _checkInterval = Math.max(0, checkInterval);
   }
   
   /**
@@ -70,19 +71,23 @@ abstract public class CachedDependency implements Dependency {
   public final boolean isModified()
   {
     long now = CurrentTime.getCurrentTime();
-    if (now <= _lastCheckTime + _checkInterval)
+    long lastCheckTime = _lastCheckTime.get();
+    
+    if (now <= lastCheckTime + _checkInterval) {
       return _isModified;
-
-    synchronized (this) {
-      now = CurrentTime.getCurrentTime();
-      
-      if (now <= _lastCheckTime + _checkInterval)
-        return _isModified;
-
-      _lastCheckTime = now;
     }
 
-    _isModified = isModifiedImpl();
+    if (! _lastCheckTime.compareAndSet(lastCheckTime, now)) {
+      return _isModified;
+    }
+
+    if (isModifiedImpl()) {
+      _isModified = true;
+      _lastCheckTime.set(0);
+    }
+    else {
+      _isModified = false;
+    }
 
     return _isModified;
   }

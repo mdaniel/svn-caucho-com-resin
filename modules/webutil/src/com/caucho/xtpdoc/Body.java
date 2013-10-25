@@ -127,8 +127,8 @@ public class Body extends ContainerNode {
     _index = new Index(getDocument());
     return _index;
   }
-  
-  
+
+
   public void setTitle(String title)
   {
     _title = title;
@@ -187,10 +187,10 @@ public class Body extends ContainerNode {
 
     out.writeStartElement("h1");
     out.writeAttribute("class", "title");
-    
+
     if (getDocument().getHeader() != null)
       out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase(Locale.ENGLISH));
-    
+
     out.writeEndElement();
 
     out.writeStartElement("hr");
@@ -370,10 +370,11 @@ public class Body extends ContainerNode {
     out.writeStartElement("td");
     out.writeAttribute("width","70%");
     out.writeStartElement("h1");
-    
+
     // out.writeCharacters("Resin Documentation");
     out.writeCharacters(_title);
-    
+
+    /*
     out.writeEndElement();
     out.writeStartElement("div");
     out.writeAttribute("style","float: right; border: 1px solid; padding: 10px;  margin: 10px; opacity:1.0; background-color:white;");
@@ -398,6 +399,7 @@ public class Body extends ContainerNode {
     out.writeEndElement(); // small
     out.writeEndElement(); // div
     out.writeEndElement(); // td
+    */
 
     //Top links
     out.writeStartElement("td");
@@ -433,7 +435,7 @@ public class Body extends ContainerNode {
     return item;
   }
 
-  private void writeTopLinks(XMLStreamWriter out) throws XMLStreamException 
+  private void writeTopLinks(XMLStreamWriter out) throws XMLStreamException
   {
     out.writeStartElement("a");
     out.writeAttribute("href", "http://www.caucho.com/");

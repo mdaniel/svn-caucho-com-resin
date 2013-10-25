@@ -1101,8 +1101,11 @@ public class WebAppContainer
    */
   public WebAppUriMap findEntryByURI(String uri)
   {
-    if (_appDeploy.isModified())
+    if (_appDeploy.isModified()) {
+      _appDeploy.logModified(log);
+      
       _uriToAppCache.clear();
+    }
 
     WebAppUriMap entry = _uriToAppCache.get(uri);
 

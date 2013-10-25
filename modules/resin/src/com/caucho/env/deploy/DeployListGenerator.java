@@ -79,8 +79,9 @@ public class DeployListGenerator<E extends DeployControllerApi<?>>
   public boolean isModified()
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
-      if (_generatorList.get(i).isModified())
+      if (_generatorList.get(i).isModified()) {
         return true;
+      }
     }
 
     return false;
