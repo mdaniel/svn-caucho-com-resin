@@ -1432,7 +1432,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     int bLen;
 
     synchronized (entry) {
-      Class cl = entry.getEntryClass();
+      cl = entry.getEntryClass();
 
       if (cl != null)
         return cl;

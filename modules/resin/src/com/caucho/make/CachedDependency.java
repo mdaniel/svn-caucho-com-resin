@@ -45,7 +45,7 @@ abstract public class CachedDependency implements Dependency {
   {
     _checkInterval = Environment.getDependencyCheckInterval();
   }
-  
+
   /**
    * Gets the check interval.
    */
@@ -61,7 +61,7 @@ abstract public class CachedDependency implements Dependency {
   {
     _checkInterval = checkInterval;
   }
-  
+
   /**
    * Returns true if the underlying resource has changed.
    */
@@ -70,21 +70,27 @@ abstract public class CachedDependency implements Dependency {
     long now = Alarm.getCurrentTime();
     if (now <= _lastCheckTime + _checkInterval)
       return _isModified;
-	
+
     synchronized (this) {
       now = Alarm.getCurrentTime();
-      
+
       if (now <= _lastCheckTime + _checkInterval)
-	return _isModified;
+        return _isModified;
 
       _lastCheckTime = now;
     }
 
-    _isModified = isModifiedImpl();
+    if (isModifiedImpl()) {
+      _isModified = true;
+      _lastCheckTime = 0;
+    }
+    else {
+      _isModified = false;
+    }
 
     return _isModified;
   }
-  
+
   /**
    * Returns true if the underlying resource has changed.
    */
