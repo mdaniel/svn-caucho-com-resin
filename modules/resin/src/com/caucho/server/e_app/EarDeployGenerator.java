@@ -48,14 +48,14 @@ public class EarDeployGenerator
   private String _urlPrefix = "";
 
   private WebAppContainer _parentContainer;
-  
+
   private EarConfig _earDefault;
 
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
   public EarDeployGenerator(DeployContainer<EarDeployController> deployContainer,
-			    WebAppContainer parentContainer)
+                            WebAppContainer parentContainer)
   {
     super(deployContainer, parentContainer.getRootDirectory());
 
@@ -130,7 +130,7 @@ public class EarDeployGenerator
     else
       return archiveName.substring(0, archiveName.length() - 4);
   }
-  
+
   /**
    * Returns the current array of application entries.
    */
@@ -149,13 +149,16 @@ public class EarDeployGenerator
       rootDirectory = getExpandDirectory().lookup(getExpandName(name));
 
       if (! archivePath.canRead() && ! rootDirectory.canRead())
-	return null;
+        return null;
     }
 
     EarDeployController controller
       = new EarDeployController(name, rootDirectory, _parentContainer);
 
     controller.setArchivePath(archivePath);
+
+    controller.setStartupMode(getStartupMode());
+    controller.setRedeployMode(getRedeployMode());
 
     for (EarConfig config : _earDefaultList)
       controller.addConfigDefault(config);

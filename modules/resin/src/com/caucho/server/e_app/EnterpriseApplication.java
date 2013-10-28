@@ -114,7 +114,7 @@ public class EnterpriseApplication
   {
     if (container == null || controller == null)
       throw new NullPointerException();
-    
+
     _container = container;
 
     _controller = controller;
@@ -424,7 +424,7 @@ public class EnterpriseApplication
 
       for (Path path : _ejbPaths) {
         ejbContainer.addRoot(path);
-	_loader.addJar(path);
+        _loader.addJar(path);
       }
 
       _loader.validate();
@@ -601,9 +601,11 @@ public class EnterpriseApplication
 
     if (controller == null) {
       controller = new WebAppController(contextUrl,
-					contextUrl,
+                                        contextUrl,
                                         path,
                                         _container);
+
+      controller.setRedeployMode(_controller.getRedeployMode());
 
       _webApps.add(controller);
     }

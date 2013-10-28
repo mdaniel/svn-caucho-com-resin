@@ -12,6 +12,7 @@
 
 <s2 title="3.1.14 Oct 26, 2013">
 <ul>
+<li>ear: redeploy-mode needs to apply to web-app</li>
 <li>ear: ear isModified issue causing cache clear (#5525, rep by Ryan Edwards)</li>
 <li>loader: classloader deadlock (#5465, rep by Shinomiya Nobuaki)</li>
 <li>jsp: static text chunk generation limited to 8k characters (#5368)</li>
