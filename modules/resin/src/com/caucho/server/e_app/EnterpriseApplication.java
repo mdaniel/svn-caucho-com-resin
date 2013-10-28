@@ -659,6 +659,8 @@ public class EnterpriseApplication
                                         _webAppContainer,
                                         contextUrl);
       
+      controller.setRedeployMode(_controller.getRedeployMode());
+      
       _webApps.add(controller);
     }
 

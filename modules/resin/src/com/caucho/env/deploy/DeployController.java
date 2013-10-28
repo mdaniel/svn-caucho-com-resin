@@ -397,13 +397,17 @@ abstract public class DeployController<I extends DeployInstance>
   @Override
   public boolean isModified()
   {
-    if (isControllerModified()) {
-      return true;
-    }
-    
     DeployInstance instance = getDeployInstanceImpl();
 
     if (instance == null) {
+      return true;
+    }
+    
+    if (DeployMode.MANUAL.equals(getRedeployMode())) {
+      return false;
+    }
+    
+    if (isControllerModified()) {
       return true;
     }
     
@@ -415,12 +419,13 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public boolean isModifiedNow()
   {
-    if (isControllerModifiedNow())
-      return true;
-    
     DeployInstance instance = getDeployInstanceImpl();
     
     if (instance == null) {
+      return true;
+    }
+    
+    if (isControllerModifiedNow()) {
       return true;
     }
     

@@ -51,7 +51,7 @@ public class StartAutoRedeployAutoStrategy
   public final static StartAutoRedeployAutoStrategy STRATEGY
     = new StartAutoRedeployAutoStrategy();
 
-  private StartAutoRedeployAutoStrategy()
+  protected StartAutoRedeployAutoStrategy()
   {
   }
 

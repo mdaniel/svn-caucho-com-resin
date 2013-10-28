@@ -30,6 +30,7 @@
 package com.caucho.env.deploy;
 
 import com.caucho.inject.Module;
+import com.caucho.lifecycle.LifecycleState;
 
 /**
  * The start-mode="auto", redeploy-model="manual" controller strategy.
@@ -48,7 +49,8 @@ import com.caucho.inject.Module;
  */
 @Module
 public class StartAutoRedeployManualStrategy
-  extends StartManualRedeployManualStrategy {
+  extends StartAutoRedeployAutoStrategy
+{
   public final static StartAutoRedeployManualStrategy STRATEGY
     = new StartAutoRedeployManualStrategy();
 
@@ -65,16 +67,40 @@ public class StartAutoRedeployManualStrategy
   {
     return STRATEGY;
   }
-  
+
   /**
-   * Called at initialization time for automatic start.
+   * Checks for updates from an admin command.  The target state will be the
+   * initial state, i.e. update will not start a lazy instance.
    *
    * @param controller the owning controller
    */
   @Override
   public<I extends DeployInstance>
-  void startOnInit(DeployController<I> controller)
+  void update(DeployController<I> controller)
   {
-    controller.startImpl();
+    LifecycleState state = controller.getState();
+    
+    if (state.isStopped()) {
+      controller.startImpl();
+    }
+    else if (state.isError()) {
+      controller.restartImpl();
+    }
+    else if (controller.isModifiedNow()) {
+      controller.restartImpl();
+    }
+    else { /* active */
+    }
+  }
+
+  /**
+   * Redeployment on a timeout alarm.
+   *
+   * @param controller the owning controller
+   */
+  @Override
+  public <I extends DeployInstance>
+  void alarm(DeployController<I> controller)
+  {
   }
 }

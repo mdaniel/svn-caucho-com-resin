@@ -83,7 +83,7 @@ abstract public class CachedDependency implements Dependency {
 
     if (isModifiedImpl()) {
       _isModified = true;
-      _lastCheckTime.set(0);
+      //_lastCheckTime.set(0);
     }
     else {
       _isModified = false;

@@ -140,9 +140,11 @@ public class EarDeployGenerator
                                 _parentContainer, null);
 
     controller.setArchivePath(archivePath);
+    controller.setRedeployMode(getRedeployMode());
 
-    for (EarConfig config : _earDefaultList)
+    for (EarConfig config : _earDefaultList) {
       controller.addConfigDefault(config);
+    }
 
     return controller;
   }

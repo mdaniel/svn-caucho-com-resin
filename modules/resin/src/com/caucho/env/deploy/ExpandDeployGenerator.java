@@ -496,13 +496,18 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       }
 
       _lastCheckTime = CurrentTime.getCurrentTime();
+      
+      if (DeployMode.MANUAL.equals(getRedeployMode())) {
+        return false;
+      }
 
       if (_expandManager != null) {
         _isModified = _expandManager.isModified();
         // _digest = _expandManager.getDigest();
       }
-      else
+      else {
         _isModified = true;
+      }
 
       return _isModified;
     } catch (Exception e) {
