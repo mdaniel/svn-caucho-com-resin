@@ -10,8 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snapshot">
+<s2 title="3.1.14 Oct 26, 2013">
 <ul>
+<li>ear: ear isModified issue causing cache clear (#5525, rep by Ryan Edwards)</li>
 <li>loader: classloader deadlock (#5465, rep by Shinomiya Nobuaki)</li>
 <li>jsp: static text chunk generation limited to 8k characters (#5368)</li>
 </ul>
