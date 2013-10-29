@@ -77,11 +77,12 @@ public class DeployListGenerator<E extends DeployController>
   /**
    * Returns true if the deployment has modified.
    */
-  public boolean isModified()
+  protected boolean isModifiedImpl(boolean isNew)
   {
     for (int i = _generatorList.size() - 1; i >= 0; i--) {
-      if (_generatorList.get(i).isModified())
+      if (_generatorList.get(i).isModifiedImpl(isNew)) {
         return true;
+      }
     }
 
     return false;

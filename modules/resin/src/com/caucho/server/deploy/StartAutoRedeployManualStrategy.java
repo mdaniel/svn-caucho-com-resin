@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.lifecycle.LifecycleState;
+
 /**
  * The start-mode="auto", redeploy-model="manual" controller strategy.
  *
@@ -45,9 +47,10 @@ package com.caucho.server.deploy;
  * </table>
  */
 public class StartAutoRedeployManualStrategy
-  extends StartManualRedeployManualStrategy {
-  private final static StartAutoRedeployManualStrategy STRATEGY =
-          new StartAutoRedeployManualStrategy();
+  extends StartAutoRedeployAutoStrategy
+{
+  public final static StartAutoRedeployManualStrategy STRATEGY
+    = new StartAutoRedeployManualStrategy();
 
   private StartAutoRedeployManualStrategy()
   {
@@ -62,15 +65,38 @@ public class StartAutoRedeployManualStrategy
   {
     return STRATEGY;
   }
-  
+
   /**
-   * Called at initialization time for automatic start.
+   * Checks for updates from an admin command.  The target state will be the
+   * initial state, i.e. update will not start a lazy instance.
    *
    * @param controller the owning controller
    */
+  @Override
   public<I extends DeployInstance>
-    void startOnInit(DeployController<I> controller)
+  void update(DeployController<I> controller)
   {
-    controller.startImpl();
+    if (controller.isStopped()) {
+      controller.startImpl();
+    }
+    else if (controller.isError()) {
+      controller.restartImpl();
+    }
+    else if (controller.isModifiedNow()) {
+      controller.restartImpl();
+    }
+    else { /* active */
+    }
+  }
+
+  /**
+   * Redeployment on a timeout alarm.
+   *
+   * @param controller the owning controller
+   */
+  @Override
+  public <I extends DeployInstance>
+  void alarm(DeployController<I> controller)
+  {
   }
 }

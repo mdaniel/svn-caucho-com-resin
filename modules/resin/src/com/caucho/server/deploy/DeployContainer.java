@@ -64,7 +64,7 @@ public class DeployContainer<C extends DeployController>
   {
     setCheckInterval(Environment.getDependencyCheckInterval());
   }
-  
+
   /**
    * Adds a deploy generator.
    */
@@ -78,7 +78,7 @@ public class DeployContainer<C extends DeployController>
     if (_lifecycle.isActive())
       update(names);
   }
-  
+
   /**
    * Removes a deploy.
    */
@@ -142,6 +142,7 @@ public class DeployContainer<C extends DeployController>
     HashSet<String> keys = new LinkedHashSet<String>();
 
     _deployListGenerator.fillDeployedKeys(keys);
+
     for (String key : keys) {
       startImpl(key);
     }
@@ -168,8 +169,9 @@ public class DeployContainer<C extends DeployController>
   {
     C controller = findDeployedController(name);
 
-    if (controller != null)
+    if (controller != null) {
       return controller;
+    }
 
     controller = generateController(name);
 
@@ -222,7 +224,7 @@ public class DeployContainer<C extends DeployController>
   public C update(String name)
   {
     C newController = updateImpl(name);
-    
+
     if (_lifecycle.isActive() && newController != null)
       newController.startOnInit();
 
@@ -243,16 +245,16 @@ public class DeployContainer<C extends DeployController>
 
     synchronized (_controllerList) {
       oldController = findDeployedController(name);
-      
+
       if (oldController != null)
-	_controllerList.remove(oldController);
+        _controllerList.remove(oldController);
     }
-    
+
     if (oldController != null)
       oldController.destroy();
 
     // destroy must be before generate because of JMX unregistration
-      
+
     C newController = generateController(name);
 
     return newController;
@@ -274,7 +276,7 @@ public class DeployContainer<C extends DeployController>
 
     if (oldController != null)
       return oldController;
-      
+
     return generateController(name);
   }
 
@@ -289,7 +291,7 @@ public class DeployContainer<C extends DeployController>
       oldController = findDeployedController(name);
 
       if (oldController != null)
-	_controllerList.remove(oldController);
+        _controllerList.remove(oldController);
     }
 
     if (oldController != null)
@@ -303,7 +305,7 @@ public class DeployContainer<C extends DeployController>
   {
     if (! _lifecycle.isActive())
       return null;
-    
+
     C newController = _deployListGenerator.generateController(name);
 
     // server/1h00,13g4
@@ -317,22 +319,22 @@ public class DeployContainer<C extends DeployController>
       C controller = findDeployedController(newController.getId());
 
       if (controller != null)
-	return controller;
+        return controller;
 
       _controllerList.add(newController);
     }
-    
+
     init(newController);
 
     return newController;
   }
-  
+
 
   private void init(C controller)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       thread.setContextClassLoader(controller.getParentClassLoader());
 
@@ -349,17 +351,17 @@ public class DeployContainer<C extends DeployController>
   {
     synchronized (_controllerList) {
       for (int i = 0; i < _controllerList.size(); i++) {
-	C controller = _controllerList.get(i);
+        C controller = _controllerList.get(i);
 
-	if (controller.isNameMatch(name)) {
-	  return controller;
-	}
+        if (controller.isNameMatch(name)) {
+          return controller;
+        }
       }
     }
 
     return null;
   }
-  
+
   /**
    * Closes the stop.
    */
@@ -379,17 +381,17 @@ public class DeployContainer<C extends DeployController>
     for (int i = controllers.size() - 1; i >= 0; i--)
       controllers.get(i).stop();
   }
-  
+
   /**
    * Closes the deploys.
    */
   public void destroy()
   {
     stop();
-    
+
     if (! _lifecycle.toDestroy())
       return;
-    
+
     _deployListGenerator.destroy();
 
     ArrayList<C> controllerList;
@@ -419,11 +421,11 @@ public class DeployContainer<C extends DeployController>
     public int compare(C a, C b)
     {
       if (a.getStartupPriority() == b.getStartupPriority())
-	return 0;
+        return 0;
       else if (a.getStartupPriority() < b.getStartupPriority())
-	return -1;
+        return -1;
       else
-	return 1;
+        return 1;
     }
   }
 }

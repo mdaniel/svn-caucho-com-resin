@@ -52,6 +52,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
@@ -410,6 +411,11 @@ public class WebApp extends ServletContextImpl
 
     if (parent == null)
       return;
+  }
+
+  public WebAppController getController()
+  {
+    return _controller;
   }
 
   /**
@@ -1796,7 +1802,7 @@ public class WebApp extends ServletContextImpl
 
       if (getSessionManager() != null)
         getSessionManager().init();
-      
+
       if (_sessionManager.getCookieDomainRegexp() != null) {
         _cookieDomainPattern
           = Pattern.compile(_sessionManager.getCookieDomainRegexp());
@@ -1925,6 +1931,9 @@ public class WebApp extends ServletContextImpl
     // restart
     if (_lifecycle.isAfterActive())
       return true;
+    else if (DeployController.REDEPLOY_MANUAL.equals(_controller.getRedeployMode())) {
+      return false;
+    }
     else if (_classLoader.isModified())
       return true;
     else
@@ -1940,7 +1949,15 @@ public class WebApp extends ServletContextImpl
     _classLoader.isModifiedNow();
     _invocationDependency.isModifiedNow();
 
-    return isModified();
+    if (_lifecycle.isAfterActive()) {
+      return true;
+    }
+    else if (_classLoader.isModified()) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -2729,7 +2746,7 @@ public class WebApp extends ServletContextImpl
     else
       return 0;
   }
-  
+
   public String generateCookieDomain(HttpServletRequest request)
   {
     String serverName = request.getServerName();

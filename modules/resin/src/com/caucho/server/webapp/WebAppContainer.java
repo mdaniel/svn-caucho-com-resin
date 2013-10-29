@@ -331,6 +331,11 @@ public class WebAppContainer
     return _lifecycle.isDestroyed() || _classLoader.isModified();
   }
 
+  public boolean isDeployModified()
+  {
+    return _appDeploy.isModified();
+  }
+
   /**
    * Adds an webApp.
    */

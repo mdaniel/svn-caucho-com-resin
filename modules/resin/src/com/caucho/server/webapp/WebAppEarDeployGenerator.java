@@ -43,11 +43,11 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   private static final Logger log = Log.open(WebAppEarDeployGenerator.class);
 
   private WebAppContainer _container;
-  
+
   private String _urlPrefix = "";
 
   private ClassLoader _parentLoader;
-  
+
   private DeployContainer<EarDeployController> _earContainer;
 
   private EarDeployGenerator _earDeploy;
@@ -56,12 +56,12 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
    * Creates the new host deploy.
    */
   public WebAppEarDeployGenerator(DeployContainer<WebAppController> deployContainer,
-				  WebAppContainer container,
-				  EarDeployGenerator earDeploy)
+                                  WebAppContainer container,
+                                  EarDeployGenerator earDeploy)
     throws Exception
   {
     super(deployContainer);
-    
+
     setContainer(container);
 
     _earDeploy = earDeploy;
@@ -103,7 +103,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
     while (prefix.endsWith("/")) {
       prefix = prefix.substring(0, prefix.length() - 1);
     }
-    
+
     _urlPrefix = prefix;
   }
 
@@ -137,9 +137,14 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   /**
    * Return true if modified.
    */
-  public boolean isModified()
+  protected  boolean isModifiedImpl(boolean isNow)
   {
-    return _earContainer.isModified();
+    if (isNow) {
+      return _earContainer.isModified();
+    }
+    else {
+      return _earContainer.isModified();
+    }
   }
 
   /**
@@ -149,7 +154,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   {
     _earContainer.update();
   }
-  
+
   /**
    * Returns the current array of webApp entries.
    */
@@ -161,12 +166,12 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
       webAppController = earController.findWebAppController(name);
 
       if (webAppController != null)
-	return webAppController;
+        return webAppController;
     }
 
     return null;
   }
-  
+
   /**
    * Destroy the deployment.
    */
@@ -177,7 +182,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
 
     super.stopImpl();
   }
-  
+
   /**
    * Destroy the deployment.
    */

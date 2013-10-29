@@ -153,7 +153,23 @@ abstract public class DeployGenerator<E extends DeployController>
   /**
    * Returns true if the deployment has modified.
    */
-  public boolean isModified()
+  public final boolean isModified()
+  {
+    return isModifiedImpl(false);
+  }
+
+  /**
+   * Returns true if the deployment has modified.
+   */
+  public final boolean isModifiedNow()
+  {
+    return isModifiedImpl(true);
+  }
+
+  /**
+   * Returns true if the deployment has modified.
+   */
+  protected boolean isModifiedImpl(boolean isNow)
   {
     return false;
   }
@@ -169,7 +185,7 @@ abstract public class DeployGenerator<E extends DeployController>
   public String getState()
   {
     return _lifecycle.getStateName();
-  } 
+  }
 
   /**
    * Starts the deployment.

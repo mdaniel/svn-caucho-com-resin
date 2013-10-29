@@ -69,16 +69,16 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private Path _expandDirectory;
 
   private String _extension = ".jar";
-  
+
   private String _expandPrefix = "";
   private String _expandSuffix = "";
 
   private boolean _isVersioning;
-  
+
   private ArrayList<String> _requireFiles = new ArrayList<String>();
 
   private TreeSet<String> _controllerNames = new TreeSet<String>();
-  
+
   private TreeMap<String,ArrayList<String>> _versionMap
     = new TreeMap<String,ArrayList<String>>();
 
@@ -98,7 +98,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    * Creates the deploy.
    */
   public ExpandDeployGenerator(DeployContainer<E> container,
-			       Path containerRootDirectory)
+                               Path containerRootDirectory)
   {
     super(container);
 
@@ -179,7 +179,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return expandDir;
 
     Path extPath = getExpandDirectory().lookup(name + _extension);
-    
+
     if (extPath.isDirectory())
       return extPath;
     else
@@ -261,7 +261,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (! extension.startsWith("."))
       throw new ConfigException(L.l("deployment extension '{0}' must begin with '.'",
-				    extension));
+                                    extension));
 
     _extension = extension;
   }
@@ -281,11 +281,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     throws ConfigException
   {
     if (! prefix.equals("")
-	&& ! prefix.startsWith("_")
-	&& ! prefix.startsWith("."))
+        && ! prefix.startsWith("_")
+        && ! prefix.startsWith("."))
       throw new ConfigException(L.l("expand-prefix '{0}' must start with '.' or '_'.",
-				    prefix));
-			       
+                                    prefix));
+
     _expandPrefix = prefix;
   }
 
@@ -347,21 +347,21 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     return log;
   }
 
-  /**
-   * Returns true if the deployment has modified.
-   */
-  @Override
-  public boolean isModified()
+  protected boolean isModifiedImpl(boolean isNow)
   {
     synchronized (this) {
       long now = Alarm.getCurrentTime();
-      
+
       if (now < _lastCheckTime + _checkInterval || _isChecking) {
-	return _isModified;
+        return _isModified;
       }
 
       _isChecking = true;
       _lastCheckTime = Alarm.getCurrentTime();
+    }
+
+    if (! isNow && DeployController.REDEPLOY_MANUAL.equals(getRedeployMode())) {
+      return false;
     }
 
     try {
@@ -372,7 +372,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return _isModified;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     } finally {
       _isChecking = false;
@@ -389,23 +389,23 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (_digest != digest) {
       String reason = "";
-      
+
       String name = getClass().getName();
       int p = name.lastIndexOf('.');
       if (p > 0)
-	name = name.substring(p + 1);
-    
+        name = name.substring(p + 1);
+
       Path archiveDirectory = getArchiveDirectory();
       if (archiveDirectory != null)
-	reason = name + "[" + archiveDirectory.getNativePath() + "] is modified";
-    
+        reason = name + "[" + archiveDirectory.getNativePath() + "] is modified";
+
       Path expandDirectory = getExpandDirectory();
       if (expandDirectory != null
-	  && ! expandDirectory.equals(archiveDirectory)) {
-	if (! "".equals(reason))
-	  reason = reason + " or ";
-	
-	reason = name + "[" + expandDirectory.getNativePath() + "] is modified";
+          && ! expandDirectory.equals(archiveDirectory)) {
+        if (! "".equals(reason))
+          reason = reason + " or ";
+
+        reason = name + "[" + expandDirectory.getNativePath() + "] is modified";
       }
 
       log.info(reason);
@@ -439,7 +439,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   protected void startImpl()
   {
     super.startImpl();
-    
+
     handleAlarm(_alarm);
   }
 
@@ -448,11 +448,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    */
   protected void fillDeployedKeys(Set<String> keys)
   {
-    if (isModified()) {
+    // server/2a38
+    if (true || isModified()) {
       try {
-	deploy();
+        deploy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -479,7 +480,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     request();
   }
-  
+
 
   /**
    * Redeploys if modified.
@@ -488,9 +489,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (isModified()) {
       try {
-	deploy();
+        deploy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -502,50 +503,50 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     throws Exception
   {
     boolean isDeploying = false;
-    
+
     log.finer(this + " redeploy " + _isDeploying);
 
     try {
       ArrayList<String> updatedNames = null;
 
       synchronized (this) {
-	if (_isDeploying)
-	  return;
-	else {
-	  _isDeploying = true;
-	  isDeploying = true;
-	}
-	  
-	TreeSet<String> entryNames = findEntryNames();
+        if (_isDeploying)
+          return;
+        else {
+          _isDeploying = true;
+          isDeploying = true;
+        }
 
-	_digest = getDigest();
+        TreeSet<String> entryNames = findEntryNames();
 
-	if (! _controllerNames.equals(entryNames)) {
-	  updatedNames = new ArrayList<String>();
-	  
-	  for (String name : _controllerNames) {
-	    if (! entryNames.contains(name))
-	      updatedNames.add(name);
-	  }
+        _digest = getDigest();
 
-	  for (String name : entryNames) {
-	    if (! _controllerNames.contains(name))
-	      updatedNames.add(name);
-	  }
+        if (! _controllerNames.equals(entryNames)) {
+          updatedNames = new ArrayList<String>();
 
-	  _controllerNames = entryNames;
-	}
+          for (String name : _controllerNames) {
+            if (! entryNames.contains(name))
+              updatedNames.add(name);
+          }
+
+          for (String name : entryNames) {
+            if (! _controllerNames.contains(name))
+              updatedNames.add(name);
+          }
+
+          _controllerNames = entryNames;
+        }
       }
 
       for (int i = 0; updatedNames != null && i < updatedNames.size(); i++) {
-	String name = updatedNames.get(i);
+        String name = updatedNames.get(i);
 
-	getDeployContainer().update(name);
+        getDeployContainer().update(name);
       }
     } finally {
       if (isDeploying) {
-	_isModified = false;
-	_isDeploying = false;
+        _isModified = false;
+        _isDeploying = false;
       }
     }
   }
@@ -561,15 +562,15 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getParentClassLoader());
-	
+
       E controller = createController(name);
 
       if (controller != null) {
-	controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+        controller.setExpandCleanupFileSet(_expandCleanupFileSet);
 
-	_controllerNames.add(name); // server/1d19
+        _controllerNames.add(name); // server/1d19
       }
-      
+
       return controller;
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -582,13 +583,13 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private long getDigest()
   {
     long archiveDigest = 0;
-    
+
     Path archiveDirectory = getArchiveDirectory();
     if (archiveDirectory != null)
       archiveDigest = archiveDirectory.getCrc64();
-    
+
     long expandDigest = 0;
-    
+
     Path expandDirectory = getExpandDirectory();
     if (expandDirectory != null)
       expandDigest = expandDirectory.getCrc64();
@@ -600,7 +601,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (! isVersioning())
       return null;
-    
+
     TreeSet<String> entryNames;
 
     try {
@@ -613,7 +614,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     return versionMap.get(name);
   }
-  
+
   /**
    * Return the entry names for all deployed objects.
    */
@@ -638,28 +639,28 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       Path archivePath = archiveDirectory.lookup(archiveName);
 
       String entryName = null;
-      
+
       if (! archivePath.canRead())
         continue;
       else
-	entryName = archiveNameToEntryName(archiveName);
+        entryName = archiveNameToEntryName(archiveName);
 
       if (entryName != null) {
-	entryNames.add(entryName);
+        entryNames.add(entryName);
 
-	if (_isVersioning) {
-	  int p = entryName.lastIndexOf('-');
+        if (_isVersioning) {
+          int p = entryName.lastIndexOf('-');
 
-	  if (p >= 0) {
-	    entryName = entryName.substring(0, p);
+          if (p >= 0) {
+            entryName = entryName.substring(0, p);
 
-	    if (! entryNames.contains(entryName))
-	      entryNames.add(entryName);
-	  }
-	}
+            if (! entryNames.contains(entryName))
+              entryNames.add(entryName);
+          }
+        }
       }
     }
-    
+
     String []entryExpandList = expandDirectory.list();
 
     // collect all the new war expand directories
@@ -673,35 +674,35 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       */
 
       Path rootDirectory = expandDirectory.lookup(pathName);
-      
+
       String entryName = pathNameToEntryName(pathName);
 
       if (entryName == null)
-	continue;
+        continue;
       else if (entryName.endsWith(getExtension()))
-	continue;
+        continue;
 
       if (! isValidDirectory(rootDirectory, pathName))
-	continue;
+        continue;
 
       if (! entryNames.contains(entryName))
-	entryNames.add(entryName);
+        entryNames.add(entryName);
 
       if (_isVersioning) {
-	int p = entryName.lastIndexOf('-');
+        int p = entryName.lastIndexOf('-');
 
-	if (p >= 0) {
-	  entryName = entryName.substring(0, p);
+        if (p >= 0) {
+          entryName = entryName.substring(0, p);
 
-	  if (! entryNames.contains(entryName))
-	    entryNames.add(entryName);
-	}
+          if (! entryNames.contains(entryName))
+            entryNames.add(entryName);
+        }
       }
     }
 
     return entryNames;
   }
-  
+
   /**
    * Return the entry names for all deployed objects.
    */
@@ -715,13 +716,13 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       String baseName = versionedNameToBaseName(name);
 
       if (_isVersioning && ! baseName.equals(name)) {
-	ArrayList<String> list = versionMap.get(baseName);
-	if (list == null)
-	  list = new ArrayList<String>();
+        ArrayList<String> list = versionMap.get(baseName);
+        if (list == null)
+          list = new ArrayList<String>();
 
-	list.add(name);
+        list.add(name);
 
-	versionMap.put(baseName, list);
+        versionMap.put(baseName, list);
       }
     }
 
@@ -730,20 +731,20 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
   protected boolean isValidDirectory(Path rootDirectory, String pathName)
   {
-    
+
     if (! rootDirectory.isDirectory() || pathName.startsWith(".")) {
       return false;
     }
 
     if (pathName.equalsIgnoreCase("web-inf")
-	|| pathName.equalsIgnoreCase("meta-inf"))
+        || pathName.equalsIgnoreCase("meta-inf"))
       return false;
 
     for (int j = 0; j < _requireFiles.size(); j++) {
       String file = _requireFiles.get(j);
 
       if (! rootDirectory.lookup(file).canRead())
-	return false;
+        return false;
     }
 
     return true;
@@ -758,11 +759,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     if (_expandPrefix == null) {
     }
     else if (_expandPrefix.equals("")
-	     && (name.startsWith("_")
-		 || name.startsWith(".")
-		 || name.endsWith(".") && CauchoSystem.isWindows()
-		 || name.equalsIgnoreCase("META-INF")
-		 || name.equalsIgnoreCase("WEB-INF"))) {
+             && (name.startsWith("_")
+                 || name.startsWith(".")
+                 || name.endsWith(".") && CauchoSystem.isWindows()
+                 || name.equalsIgnoreCase("META-INF")
+                 || name.equalsIgnoreCase("WEB-INF"))) {
       return null;
     }
     else if (name.startsWith(_expandPrefix)) {
@@ -835,9 +836,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     int p = name.lastIndexOf('-');
     int ch;
-    
+
     if (p > 0 && p + 1 < name.length()
-	&& '0' <= (ch = name.charAt(p + 1)) && ch <= '9')
+        && '0' <= (ch = name.charAt(p + 1)) && ch <= '9')
       return name.substring(0, p);
     else
       return name;
@@ -892,7 +893,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     }
 
     controller.start();
-    
+
     return true;
   }
 
@@ -996,7 +997,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (isDestroyed())
       return;
-    
+
     try {
       // XXX: tck, but no QA test
 
@@ -1035,8 +1036,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     Path deployExpandDirectory = deploy.getExpandDirectory();
 
     if (expandDirectory != deployExpandDirectory &&
-	(expandDirectory == null ||
-	 ! expandDirectory.equals(deployExpandDirectory)))
+        (expandDirectory == null ||
+         ! expandDirectory.equals(deployExpandDirectory)))
       return false;
 
     return true;
@@ -1048,7 +1049,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     int p = name.lastIndexOf('.');
     if (p > 0)
       name = name.substring(p + 1);
-    
+
     return name + "[" + getExpandDirectory() + "]";
   }
 
