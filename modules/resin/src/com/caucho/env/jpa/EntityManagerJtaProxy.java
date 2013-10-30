@@ -868,8 +868,9 @@ public class EntityManagerJtaProxy
   {
     EntityManager em = getCurrent();
 
-    if(em != null)
+    if (em != null) {
       em.clear();
+    }
   }
 
   /**
@@ -983,9 +984,10 @@ public class EntityManagerJtaProxy
   private void freeEntityManager(EntityManager em)
   {
     em.clear();
-
-    if (! _idleEntityManagerPool.free(em))
+System.out.println("FEM: " + em + " " + em.isOpen());
+    if (! em.isOpen() || ! _idleEntityManagerPool.free(em)) {
       em.close();
+    }
   }
 
   /**
