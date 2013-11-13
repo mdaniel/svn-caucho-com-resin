@@ -634,7 +634,7 @@ public class UrlModule
     StringValue pass = null;
 
     // username:password
-    if (0 <= atSign && atSign < question && hasHost) {
+    if (0 <= atSign && (question < 0 || atSign < question) && hasHost) {
       if (0 <= colon && colon < atSign) {
         if (i < colon) {
           user = env.createStringBuilder();
