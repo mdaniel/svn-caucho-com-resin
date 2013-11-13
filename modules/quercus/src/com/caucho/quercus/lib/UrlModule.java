@@ -625,13 +625,16 @@ public class UrlModule
     }
 
     colon = str.indexOf(':', i);
+
+    int question = str.indexOf('?', i);
+    int pound = str.indexOf('#', i);
     int atSign = str.lastIndexOf('@');
 
     StringValue user = null;
     StringValue pass = null;
 
     // username:password
-    if (0 <= atSign && hasHost) {
+    if (0 <= atSign && atSign < question && hasHost) {
       if (0 <= colon && colon < atSign) {
         if (i < colon) {
           user = env.createStringBuilder();
@@ -654,9 +657,6 @@ public class UrlModule
         i = atSign + 1;
       }
     }
-
-    int question = str.indexOf('?', i);
-    int pound = str.indexOf('#', i);
 
     if (0 <= i && hasHost) {
       int slash = str.indexOf('/', i);
