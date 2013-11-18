@@ -94,7 +94,7 @@ public class QuercusScriptEngine
 
   public QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
-    this(factory, false);
+    this(factory, true);
   }
 
   public QuercusScriptEngine(QuercusScriptEngineFactory factory,
