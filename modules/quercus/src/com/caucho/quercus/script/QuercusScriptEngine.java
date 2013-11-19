@@ -79,7 +79,7 @@ public class QuercusScriptEngine
 
   public QuercusScriptEngine()
   {
-    this(new QuercusScriptEngineFactory(), true);
+    this(new QuercusScriptEngineFactory());
   }
 
   public QuercusScriptEngine(boolean isUnicodeSemantics)
@@ -310,12 +310,10 @@ public class QuercusScriptEngine
   /**
    * compiles based on a reader.
    */
-  public CompiledScript compile(Reader script)
+  public CompiledScript compile(Reader reader)
     throws ScriptException
   {
     try {
-      ReadStream reader = ReaderStream.open(script);
-
       QuercusProgram program = QuercusParser.parse(getQuercus(), null, reader);
 
       return new QuercusCompiledScript(this, program);
@@ -371,7 +369,7 @@ public class QuercusScriptEngine
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _isUnicodeSemantics + "]";
   }
 }
 

@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.script;
 
+import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.InterpretedPage;
@@ -40,12 +42,18 @@ import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+
 import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Script engine
  */
 public class QuercusCompiledScript extends CompiledScript {
+  private static final Logger log
+    = Logger.getLogger(QuercusCompiledScript.class.getName());
+
   private final QuercusScriptEngine _engine;
   private final QuercusProgram _program;
 
@@ -61,6 +69,7 @@ public class QuercusCompiledScript extends CompiledScript {
   public Object eval(ScriptContext cxt)
     throws ScriptException
   {
+    QuercusContext quercus = _engine.getQuercus();
     Env env = null;
 
     try {
@@ -69,35 +78,59 @@ public class QuercusCompiledScript extends CompiledScript {
       WriteStream out;
 
       if (writer != null) {
-        ReaderWriterStream s = new ReaderWriterStream(null, writer);
+        WriterStreamImpl s = new WriterStreamImpl();
+        s.setWriter(writer);
         WriteStream os = new WriteStream(s);
 
         os.setNewlineString("\n");
-    
+
+        String outputEncoding = quercus.getOutputEncoding();
+
+        if (outputEncoding == null) {
+          outputEncoding = "utf-8";
+        }
+
         try {
-          os.setEncoding("utf-8");
-        } catch (Exception e) {
+          os.setEncoding(outputEncoding);
+        }
+        catch (Exception e) {
+          log.log(Level.FINE, e.getMessage(), e);
         }
 
         out = os;
       }
-      else
+      else {
         out = new NullWriteStream();
+      }
 
       QuercusPage page = new InterpretedPage(_program);
 
-      env = new Env(_engine.getQuercus(), page, out, null, null);
+      env = new Env(quercus, page, out, null, null);
 
       env.setScriptContext(cxt);
 
       // php/214g
       env.start();
 
-      Value resultV = _program.execute(env);
-      
       Object result = null;
-      if (resultV != null)
-        result = resultV.toJavaObject();
+
+      try {
+        Value value = _program.execute(env);
+
+        if (value != null) {
+          //if (value instanceof JavaValue || value instanceof JavaAdapter) {
+          //  result = value.toJavaObject();
+          //}
+          //else {
+          //  result = value;
+          //}
+
+          result = value;
+        }
+      }
+      catch (QuercusExitException e) {
+        //php/2148
+      }
 
       out.flushBuffer();
       out.free();
