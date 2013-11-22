@@ -65,10 +65,12 @@ import java.util.logging.Logger;
  * Compilation interface for JSP pages.
  *
  * <pre>
- * com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...");
- *     -app-dir  : The directory root of the web-app.");
- *     -class-dir: The working directory to use as output.");
- *     -conf: A configuration file for the compiler.");
+ * com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...
+ *     -app-dir  : The directory root of the web-app.
+ *     -class-dir: The working directory to use as output.
+ *     -conf: A configuration file for the compiler.
+ *     -extensions: A comma-separated list of file extensions to compile (default: jsp, jspx, jsfx).
+ *     -verbose: enable compilation logging.
  * </pre>
  */
 public class JspCompiler implements EnvironmentBean {
@@ -103,6 +105,8 @@ public class JspCompiler implements EnvironmentBean {
   private ResinEmbed _resin;
 
   private HashSet<String> _fileExtensionSet = new HashSet<String>();
+
+  private boolean _isVerbose;
 
   public JspCompiler()
   {
@@ -221,6 +225,14 @@ public class JspCompiler implements EnvironmentBean {
   public boolean isXml()
   {
     return _isXml;
+  }
+
+  /**
+   * Set true to enable compilation logging.
+   */
+  public void setVerbose(boolean isVerbose)
+  {
+    _isVerbose = isVerbose;
   }
 
   /**
@@ -598,7 +610,8 @@ public class JspCompiler implements EnvironmentBean {
       System.out.println(" -class-dir: The working directory to use as output.");
       System.out.println(" -compiler: sets the javac.");
       System.out.println(" -conf: A configuration file for the compiler.");
-      System.out.println(" -extensions: A comma-separated list of file extensions to compile (default: jsp, jspx, jsfx)");
+      System.out.println(" -extensions: A comma-separated list of file extensions to compile (default: jsp, jspx, jsfx).");
+      System.out.println(" -verbose: enable compilation logging.");
       System.exit(1);
     }
 
@@ -640,11 +653,12 @@ public class JspCompiler implements EnvironmentBean {
    * will configure the JspCompiler, but not start any compilations.
    *
    * <pre>
-   * com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...")
-   *     -app-dir  : The directory root of the web-app.")
-   *     -class-dir: The working directory to use as output.")
-   *     -conf: A configuration file for the compiler.")
-   *     -extensions: A comma-separated list of file extensions to compile (default: jsp, jspx, jsfx)
+   * com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...
+   *     -app-dir  : The directory root of the web-app.
+   *     -class-dir: The working directory to use as output.
+   *     -conf: A configuration file for the compiler.
+   *     -extensions: A comma-separated list of file extensions to compile (default: jsp, jspx, jsfx).
+   *     -verbose: enable compilation logging
    * </pre>
    */
   public int configureFromArgs(String []args)
@@ -699,7 +713,7 @@ public class JspCompiler implements EnvironmentBean {
           String[] split = extensions.split(",");
 
           for (String ext : split) {
-            _fileExtensionSet.add(ext);
+            addExtension(ext);
           }
 
           i += 2;
@@ -709,9 +723,9 @@ public class JspCompiler implements EnvironmentBean {
       }
 
       if (_fileExtensionSet.size() == 0) {
-        _fileExtensionSet.add(".jsp");
-        _fileExtensionSet.add(".jspx");
-        _fileExtensionSet.add(".jsfx");
+        addExtension(".jsp");
+        addExtension(".jspx");
+        addExtension(".jsfx");
       }
 
       WebApp webApp = getWebApp();
@@ -837,10 +851,10 @@ public class JspCompiler implements EnvironmentBean {
     }
   }
 
-  private static void compileJsp(Path path,
-                                 Path appDir,
-                                 JspCompiler compiler,
-                                 ArrayList<String> pendingClasses)
+  private void compileJsp(Path path,
+                          Path appDir,
+                          JspCompiler compiler,
+                          ArrayList<String> pendingClasses)
     throws Exception
   {
     String uri;
@@ -851,6 +865,10 @@ public class JspCompiler implements EnvironmentBean {
       compiler.setXml(true);
     else
       compiler.setXml(false);
+
+    if (_isVerbose) {
+      System.out.println("Compiling " + path.getNativePath());
+    }
 
     String className = JspCompiler.urlToClassName(uri);
     JspCompilerInstance compInst;
