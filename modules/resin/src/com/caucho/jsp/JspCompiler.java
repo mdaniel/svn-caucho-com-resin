@@ -695,9 +695,12 @@ public class JspCompiler implements EnvironmentBean {
           i += 2;
         }
         else if (args[i].equals("-extensions")) {
-          String extension = args[i + 1];
+          String extensions = args[i + 1];
+          String[] split = extensions.split(",");
 
-          _fileExtensionSet.add(extension);
+          for (String ext : split) {
+            _fileExtensionSet.add(ext);
+          }
 
           i += 2;
         }
