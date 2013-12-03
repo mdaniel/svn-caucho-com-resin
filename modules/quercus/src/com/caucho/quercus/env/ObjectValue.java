@@ -43,7 +43,7 @@ import java.util.TreeSet;
 /**
  * Represents a Quercus object value.
  */
-abstract public class ObjectValue extends Value {
+abstract public class ObjectValue extends Value implements Callable {
   transient protected QuercusClass _quercusClass;
 
   protected String _className;
@@ -192,6 +192,17 @@ abstract public class ObjectValue extends Value {
     }
 
     return true;
+  }
+
+  @Override
+  public Callable toCallable(Env env, boolean isOptional)
+  {
+    if (_quercusClass.getInvoke() != null) {
+      return this;
+    }
+    else {
+      return super.toCallable(env, isOptional);
+    }
   }
 
   /**
