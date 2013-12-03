@@ -106,6 +106,17 @@ abstract public class Closure extends Callback
     return true;
   }
 
+  @Override
+  public boolean isA(String name)
+  {
+    if ("Closure".equalsIgnoreCase(name)) {
+      return true;
+    }
+    else {
+      return super.isA(name);
+    }
+  }
+
   public Var getStaticVar(StringValue name)
   {
     HashMap<StringValue,Var> varMap = _staticVarMap;
