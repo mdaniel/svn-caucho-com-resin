@@ -83,7 +83,7 @@ abstract public class ObjectValue extends Value implements Callable {
     return _incompleteObjectName != null;
   }
 
-  /*
+  /**
    * Returns the name of the uninitialized object.
    */
   public String getIncompleteObjectName()
@@ -91,7 +91,7 @@ abstract public class ObjectValue extends Value implements Callable {
     return _incompleteObjectName;
   }
 
-  /*
+  /**
    * Sets the name of uninitialized object.
    */
   public void setIncompleteObjectName(String name)
@@ -99,7 +99,7 @@ abstract public class ObjectValue extends Value implements Callable {
     _incompleteObjectName = name;
   }
 
-  /*
+  /**
    * Initializes the incomplete class.
    */
   public void initObject(Env env, QuercusClass cls)
@@ -203,6 +203,48 @@ abstract public class ObjectValue extends Value implements Callable {
     else {
       return super.toCallable(env, isOptional);
     }
+  }
+
+  @Override
+  public boolean isValid(Env env)
+  {
+    return _quercusClass.getInvoke() != null;
+  }
+
+  @Override
+  public String getCallbackName()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Value callArray(Env env,
+                         ArrayValue array,
+                         Value key,
+                         Value a1)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Value callArray(Env env,
+                         ArrayValue array,
+                         Value key,
+                         Value a1,
+                         Value a2)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Value callArray(Env env,
+                         ArrayValue array,
+                         Value key,
+                         Value a1,
+                         Value a2,
+                         Value a3)
+  {
+    throw new UnsupportedOperationException();
   }
 
   /**
