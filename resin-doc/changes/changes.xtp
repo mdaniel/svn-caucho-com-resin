@@ -12,6 +12,7 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>memcached: MemcachedClient in independent Resin's was improperly caching (rep by Scott Weatbrook)</li>
 <li>jpa: EntityManager proxy needs to check isOpen before freeing EntityManager for reuse (#5541, rep by Riccardo Cohen)</li>
 <li>ear: dependency-check could get stuck in the modified state (#5525, rep by Ryan Edwards)</li>
 <li>rpm: %config updates for /etc/resin, and file mode on /usr/bin (#5562, rep by Christopher Powell, #5539, rep by Khalid Hosein)</li>

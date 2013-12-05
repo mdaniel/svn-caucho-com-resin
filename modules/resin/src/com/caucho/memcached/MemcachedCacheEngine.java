@@ -30,10 +30,8 @@
 package com.caucho.memcached;
 
 import com.caucho.server.distcache.AbstractCacheEngine;
-import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheStoreManager;
 import com.caucho.server.distcache.DistCacheEntry;
-import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.Base64;

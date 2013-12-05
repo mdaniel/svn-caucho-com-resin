@@ -411,8 +411,11 @@ public class IncludeRequest extends CauchoDispatchRequest {
   /**
    * Starts the request
    */
-  void startRequest()
+  @Override
+  protected void startRequest()
   {
+    super.startRequest();
+    
     _response.startRequest();
   }
 

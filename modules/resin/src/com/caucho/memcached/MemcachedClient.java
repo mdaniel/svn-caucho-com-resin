@@ -177,7 +177,17 @@ public class MemcachedClient implements Cache
     
     CacheImpl cache = getLocalCache();
     
-    return cache.get(key);
+    Object value = cache.get(key);
+    
+    if (value != null) {
+      return value;
+    }
+    
+    value = getImpl(String.valueOf(key));
+    
+    cache.put(key, value);
+    
+    return value;
   }
     
   Object getImpl(String key) 
@@ -199,7 +209,7 @@ public class MemcachedClient implements Cache
       out.print(key);
       out.print("\r\n");
       out.flush();
-      
+
       // ts.writeToStream(out);
       readString(is, _cb);
       
@@ -211,7 +221,7 @@ public class MemcachedClient implements Cache
       }
       
       if (! _cb.matches("VALUE")) {
-        System.out.println("V: " + _cb);
+        System.out.println("Expected value: " + _cb);
         return null;
       }
       
@@ -420,9 +430,8 @@ public class MemcachedClient implements Cache
       
       cache.put(key, value);
     }
-    else {
-      putImpl(key, value);
-    }
+    
+    putImpl(key, value);
   }
   
   private void putImpl(Object key, Object value) throws CacheException

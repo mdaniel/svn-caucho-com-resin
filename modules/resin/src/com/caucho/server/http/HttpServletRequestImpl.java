@@ -971,8 +971,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     Cookie []cookies = getCookies();
 
-    if (cookies == null)
+    if (cookies == null) {
       return null;
+    }
 
     int length = cookies.length;
     for (int i = 0; i < length; i++) {

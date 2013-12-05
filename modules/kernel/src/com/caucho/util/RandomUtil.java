@@ -40,8 +40,6 @@ public class RandomUtil {
     = new FreeList<Random>(64);
   
   private static Random _testRandom;
-  
-  private static boolean _isTest;
 
   /**
    * Returns the next random long.
@@ -52,8 +50,7 @@ public class RandomUtil {
 
     long value = random.nextLong();
 
-    if (! _isTest)
-      _freeRandomList.free(random);
+    freeRandom(random);
 
     return value;
   }
@@ -67,8 +64,7 @@ public class RandomUtil {
 
     int value = random.nextInt(n);
 
-    if (! _isTest)
-      _freeRandomList.free(random);
+    freeRandom(random);
 
     return value;
   }
@@ -82,8 +78,7 @@ public class RandomUtil {
 
     double value = random.nextDouble();
 
-    if (! _isTest)
-      _freeRandomList.free(random);
+    freeRandom(random);
 
     return value;
   }
@@ -93,16 +88,22 @@ public class RandomUtil {
    */
   private static Random getRandom()
   {
-    if (_isTest) {
-      return _testRandom;
-    }
-
     Random random = _freeRandomList.allocate();
 
-    if (random == null)
-      random = new SecureRandom();
-
-    return random;
+    if (random != null) {
+      return random;
+    }
+    else if (_testRandom != null) {
+      return _testRandom;
+    }
+    else {
+      return new SecureRandom();
+    }
+  }
+  
+  private static void freeRandom(Random random)
+  {
+    _freeRandomList.free(random);
   }
 
   /**
@@ -110,7 +111,9 @@ public class RandomUtil {
    */
   public static void setTestSeed(long seed)
   {
-    _isTest = true;
     _testRandom = new Random(seed);
+    
+    while (_freeRandomList.allocate() != null) {
+    }
   }
 }

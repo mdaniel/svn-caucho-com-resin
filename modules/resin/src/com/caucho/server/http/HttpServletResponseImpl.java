@@ -44,7 +44,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import com.caucho.VersionFactory;
-import com.caucho.server.httpcache.AbstractCacheEntry;
 import com.caucho.server.httpcache.AbstractCacheFilterChain;
 import com.caucho.server.session.CookieImpl;
 import com.caucho.server.session.SessionManager;

@@ -48,7 +48,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.network.listen.AbstractProtocolConnection;
-import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
@@ -61,7 +60,6 @@ import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
 import com.caucho.util.CaseInsensitiveIntMap;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
@@ -1077,13 +1075,16 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
    */
   Cookie []fillCookies()
   {
-    int size = _cookies.size();
+    ArrayList<Cookie> cookies = _cookies;
+    
+    int size = cookies.size();
 
     if (size > 0) {
       Cookie []cookiesIn = new Cookie[size];
 
-      for (int i = size - 1; i >= 0; i--)
-        cookiesIn[i] = _cookies.get(i);
+      for (int i = size - 1; i >= 0; i--) {
+        cookiesIn[i] = cookies.get(i);
+      }
 
       return cookiesIn;
     }

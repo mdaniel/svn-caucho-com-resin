@@ -45,7 +45,6 @@ import javax.servlet.http.HttpSession;
 import com.caucho.env.meter.CountSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.server.dispatch.BadRequestException;
-import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.LogBuffer;
 import com.caucho.server.session.CookieImpl;
 import com.caucho.server.session.SessionImpl;
@@ -55,7 +54,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.TempBuffer;
 
 /**
  * Encapsulates the servlet response, controlling response headers and the
@@ -116,10 +114,10 @@ abstract public class AbstractHttpResponse {
   private static final ConcurrentHashMap<String,ContentType> _contentTypeMap
     = new ConcurrentHashMap<String,ContentType>();
 
-  protected final AbstractHttpRequest _request;
+  private final AbstractHttpRequest _request;
 
-  protected final ArrayList<String> _headerKeys = new ArrayList<String>();
-  protected final ArrayList<String> _headerValues = new ArrayList<String>();
+  private final ArrayList<String> _headerKeys = new ArrayList<String>();
+  private final ArrayList<String> _headerValues = new ArrayList<String>();
 
   private final ArrayList<String> _footerKeys = new ArrayList<String>();
   private final ArrayList<String> _footerValues = new ArrayList<String>();
@@ -298,7 +296,7 @@ abstract public class AbstractHttpResponse {
   //
   // headers
   //
-
+  
   /**
    * Returns true if the response already contains the named header.
    *

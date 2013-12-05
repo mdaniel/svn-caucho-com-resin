@@ -98,6 +98,19 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   private List<Part> _parts;
 
   abstract public CauchoResponse getResponse();
+  
+  /**
+   * initialization
+   */
+  protected void startRequest()
+  {
+    _sessionGroup = -1;
+    _sessionIsLoaded = false;
+    _session = null;
+    _removeOnExit = null;
+    _filledForm = null;
+    _parts = null;
+  }
 
   @Override
   public RequestDispatcher getRequestDispatcher(String path)

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import javax.servlet.http.Cookie;
 
+import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpServletResponseImpl;
@@ -81,10 +82,13 @@ public class HmuxResponse extends AbstractHttpResponse {
                                     boolean isHead)
     throws IOException
   {
-    if (! _request.hasRequest())
+    AbstractHttpRequest request = getRequest();
+    
+    if (! request.hasRequest()) {
       return false;
+    }
 
-    HttpServletResponseImpl response = _request.getResponseFacade();
+    HttpServletResponseImpl response = request.getResponseFacade();
 
     int statusCode = response.getStatus();
 
@@ -120,11 +124,14 @@ public class HmuxResponse extends AbstractHttpResponse {
 
     _req.writeString(HmuxRequest.HMUX_META_HEADER, "cpu-load");
     _req.writeString(HmuxRequest.HMUX_STRING, String.valueOf(load));
+    
+    ArrayList<String> headerKeys = getHeaderKeys();
+    ArrayList<String> headerValues = getHeaderValues();
 
-    int size = _headerKeys.size();
+    int size = headerKeys.size();
     for (int i = 0; i < size; i++) {
-      String key = (String) _headerKeys.get(i);
-      String value = (String) _headerValues.get(i);
+      String key = (String) headerKeys.get(i);
+      String value = (String) headerValues.get(i);
 
       _req.writeHeader(key, value);
     }
@@ -141,7 +148,7 @@ public class HmuxResponse extends AbstractHttpResponse {
       _req.writeHeader("Content-Length", cb);
     }
 
-    HttpServletResponseImpl responseFacade = _request.getResponseFacade();
+    HttpServletResponseImpl responseFacade = request.getResponseFacade();
 
     long now = CurrentTime.getCurrentTime();
     ArrayList<Cookie> cookiesOut = responseFacade.getCookies();

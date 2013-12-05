@@ -94,7 +94,7 @@ public class ForwardRequest extends CauchoDispatchRequest {
   /**
    * Starts the request
    */
-  void startRequest()
+  protected void startRequest()
   {
     _response.startRequest();
   }

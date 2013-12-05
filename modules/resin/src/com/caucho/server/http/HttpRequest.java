@@ -944,7 +944,14 @@ public class HttpRequest extends AbstractHttpRequest
     _protocol.clear();
 
     _uriLength = 0;
-    if (bufferStore == null) {
+    
+    if (bufferStore != null) {
+      _uri = bufferStore.getUriBuffer();
+      _headerBuffer = bufferStore.getHeaderBuffer();
+      _headerKeys = bufferStore.getHeaderKeys();
+      _headerValues = bufferStore.getHeaderValues();
+    }
+    else {
       // server/05h8
       _uri = getSmallUriBuffer(); // httpBuffer.getUriBuffer();
       
@@ -1451,6 +1458,7 @@ public class HttpRequest extends AbstractHttpRequest
   {
     super.onCloseConnection();
     
+    _uri = null;
     _headerBuffer = null;
     _headerKeys = null;
     _headerValues = null;

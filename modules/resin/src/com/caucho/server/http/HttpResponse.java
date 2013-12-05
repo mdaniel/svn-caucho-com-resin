@@ -37,12 +37,9 @@ import java.util.logging.Logger;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.env.meter.CountSensor;
-import com.caucho.env.meter.MeterService;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.WriteStream;
@@ -69,14 +66,6 @@ public class HttpResponse extends AbstractHttpResponse
 
   private final HttpRequest _request;
   private final CharBuffer _cb = new CharBuffer();
-  
-  /*
-  private final byte []_dateBuffer = new byte[256];
-  private final CharBuffer _dateCharBuffer = new CharBuffer();
-
-  private int _dateBufferLength;
-  private long _lastDate;
-  */
   
   private boolean _isChunked;
 
@@ -324,10 +313,13 @@ public class HttpResponse extends AbstractHttpResponse
         }
       }
     }
+    
+    ArrayList<String> headerKeys = getHeaderKeys();
+    ArrayList<String> headerValues = getHeaderValues();
 
-    int size = _headerKeys.size();
+    int size = headerKeys.size();
     for (int i = 0; i < size; i++) {
-      String key = (String) _headerKeys.get(i);
+      String key = (String) headerKeys.get(i);
 
       if (isUpgrade && "Upgrade".equalsIgnoreCase(key))
         continue;
@@ -337,11 +329,11 @@ public class HttpResponse extends AbstractHttpResponse
       os.printLatin1NoLf(key);
       os.write(':');
       os.write(' ');
-      os.printLatin1NoLf((String) _headerValues.get(i));
+      os.printLatin1NoLf((String) headerValues.get(i));
 
       if (debug) {
         log.fine(_request.dbgId() + "" +
-                 key + ": " + _headerValues.get(i));
+                 key + ": " + headerValues.get(i));
       }
     }
 

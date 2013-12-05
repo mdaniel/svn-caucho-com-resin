@@ -984,7 +984,7 @@ public class EntityManagerJtaProxy
   private void freeEntityManager(EntityManager em)
   {
     em.clear();
-System.out.println("FEM: " + em + " " + em.isOpen());
+
     if (! em.isOpen() || ! _idleEntityManagerPool.free(em)) {
       em.close();
     }
