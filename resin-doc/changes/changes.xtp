@@ -12,6 +12,9 @@
 
 <s2 title="4.0 snapshot">
 <ul>
+<li>win32: windows returns incorrect mtime for stat() for DST (#5578, rep by Jason Barr)</li>
+<li>deploy: NPE on undeploy (#5596)</li>
+<li>session: update to session id generation to reduce reliance on SecureRandom to avoid duplication (#5602)</li>
 <li>memcached: MemcachedClient in independent Resin's was improperly caching (rep by Scott Weatbrook)</li>
 <li>jpa: EntityManager proxy needs to check isOpen before freeing EntityManager for reuse (#5541, rep by Riccardo Cohen)</li>
 <li>ear: dependency-check could get stuck in the modified state (#5525, rep by Ryan Edwards)</li>

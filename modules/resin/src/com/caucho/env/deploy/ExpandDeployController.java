@@ -797,7 +797,11 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     String tag = getId();
     
     // server/6b0e, server/1h03
-    String treeHash = _repositorySpi.getTagContentHash(tag);
+    String treeHash = null;
+    
+    if (_repositorySpi != null) {
+      treeHash = _repositorySpi.getTagContentHash(tag);
+    }
     String rootHash = _rootHash;
     
     if (treeHash == null && rootHash != null) {
