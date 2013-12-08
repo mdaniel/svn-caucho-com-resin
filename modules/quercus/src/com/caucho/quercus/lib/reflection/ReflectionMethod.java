@@ -31,20 +31,17 @@ package com.caucho.quercus.lib.reflection;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.CallExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
-import com.caucho.quercus.program.ClassDef;
 import com.caucho.util.L10N;
 
 public class ReflectionMethod extends ReflectionFunctionAbstract
@@ -197,7 +194,7 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     ArrayValue array = new ArrayValueImpl();
 
     AbstractFunction fun = getFunction();
-    Arg []args = fun.getArgs();
+    Arg []args = fun.getArgs(env);
 
     for (int i = 0; i < args.length; i++) {
       array.put(env.wrapJava(new ReflectionParameter(_clsName, fun, args[i])));
@@ -209,6 +206,11 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
   public void setAccessible(boolean isAccessible)
   {
     // XXX: always accessible from Reflection for quercus
+  }
+
+  private AbstractFunction getFunction()
+  {
+    return (AbstractFunction) getCallable();
   }
 
   public String toString()

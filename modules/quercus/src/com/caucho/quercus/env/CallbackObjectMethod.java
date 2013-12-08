@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
@@ -41,12 +43,12 @@ import java.util.IdentityHashMap;
 public class CallbackObjectMethod extends Callback {
   private static final L10N L = new L10N(CallbackObjectMethod.class);
 
-  private final Value _obj;
+  private final ObjectValue _obj;
 
   private final StringValue _methodName;
   private final int _hash;
 
-  public CallbackObjectMethod(Value obj, StringValue methodName)
+  public CallbackObjectMethod(ObjectValue obj, StringValue methodName)
   {
     // XXX: obj and fun should not be mixed
 
@@ -165,6 +167,47 @@ public class CallbackObjectMethod extends Callback {
   {
     // return _fun instanceof JavaInvoker;
     return false;
+  }
+
+  @Override
+  public String getDeclFileName(Env env)
+  {
+    return getMethod().getDeclFileName(env);
+  }
+
+  @Override
+  public int getDeclStartLine(Env env)
+  {
+    return getMethod().getDeclStartLine(env);
+  }
+
+  @Override
+  public int getDeclEndLine(Env env)
+  {
+    return getMethod().getDeclEndLine(env);
+  }
+
+  @Override
+  public String getDeclComment(Env env)
+  {
+    return getMethod().getDeclComment(env);
+  }
+
+  @Override
+  public boolean isReturnsReference(Env env)
+  {
+    return getMethod().isReturnsReference(env);
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    return getMethod().getArgs(env);
+  }
+
+  private AbstractFunction getMethod()
+  {
+    return _obj.getMethod(_methodName);
   }
 
   private Value error(Env env)

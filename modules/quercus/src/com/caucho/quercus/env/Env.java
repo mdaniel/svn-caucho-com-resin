@@ -5168,8 +5168,11 @@ public class Env
                                 boolean useAutoload,
                                 boolean useImport)
   {
-    if (id < _qClass.length && _qClass[id] != null)
+    System.err.println("Env.findClass0: " + id + " . " + _quercus.getClassName(id));
+
+    if (id < _qClass.length && _qClass[id] != null) {
       return _qClass[id];
+    }
 
     QuercusClass cl = createClassFromCache(id, useAutoload, useImport);
 
@@ -5860,7 +5863,7 @@ public class Env
     }
   }
 
-  /*
+  /**
    * Returns true if this path is likely to be a URL.
    */
   private boolean isUrl(Path path)

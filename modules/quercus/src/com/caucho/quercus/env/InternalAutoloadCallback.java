@@ -29,8 +29,13 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.page.QuercusPage;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
 
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -57,15 +62,43 @@ public class InternalAutoloadCallback
   public QuercusClass loadClass(Env env, String name)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
     URL url = loader.getResource(_prefix + name + ".php");
 
-    if (url == null)
+    if (url == null) {
       return null;
+    }
 
-    Path path = env.getPwd().lookup(url.toString());
+    String urlStr = url.toString();
 
-    env.executePage(path);
+    // for JBoss, #5606
+    if (! env.getQuercus().isResin() && urlStr.startsWith("vfs:")) {
+      try {
+        InputStream is = url.openStream();
+
+        try {
+          ReadStream rs = new ReadStream(new VfsStream(is, null));
+
+          QuercusPage page = env.getQuercus().parse(rs);
+
+          page.execute(env);
+        }
+        finally {
+          try {
+            is.close();
+          }
+          catch (Exception e) {
+          }
+        }
+      }
+      catch (Exception e) {
+        throw new QuercusException(e);
+      }
+    }
+    else {
+      Path path = env.getPwd().lookup(urlStr);
+
+      env.executePage(path);
+    }
 
     return env.findClass(name, false, false);
   }

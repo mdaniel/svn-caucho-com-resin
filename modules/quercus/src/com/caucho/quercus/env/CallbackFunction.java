@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.Arg;
 
 /**
  * Represents a call to a function.
@@ -189,6 +190,42 @@ public class CallbackFunction extends Callback {
   public boolean isInternal(Env env)
   {
     return getFunction(env) instanceof JavaInvoker;
+  }
+
+  @Override
+  public String getDeclFileName(Env env)
+  {
+    return getFunction(env).getDeclFileName(env);
+  }
+
+  @Override
+  public int getDeclStartLine(Env env)
+  {
+    return getFunction(env).getDeclStartLine(env);
+  }
+
+  @Override
+  public int getDeclEndLine(Env env)
+  {
+    return getFunction(env).getDeclEndLine(env);
+  }
+
+  @Override
+  public String getDeclComment(Env env)
+  {
+    return getFunction(env).getDeclComment(env);
+  }
+
+  @Override
+  public boolean isReturnsReference(Env env)
+  {
+    return getFunction(env).isReturnsReference(env);
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    return getFunction(env).getArgs(env);
   }
 
   /**

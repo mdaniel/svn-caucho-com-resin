@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.program.Arg;
+
 /**
  * Represents a call to a function.
  */
@@ -42,6 +44,36 @@ public interface Callable {
    * Checks for a valid callback.
    */
   public boolean isValid(Env env);
+
+  /**
+   * Returns the name of the file where this is defined in.
+   */
+  public String getDeclFileName(Env env);
+
+  /**
+   * Returns the start line in the file where this is defined in.
+   */
+  public int getDeclStartLine(Env env);
+
+  /**
+   * Returns the end line in the file where this is defined in.
+   */
+  public int getDeclEndLine(Env env);
+
+  /**
+   * Returns the comment in the file where this is defined in.
+   */
+  public String getDeclComment(Env env);
+
+  /**
+   * Returns true if this returns a reference.
+   */
+  public boolean isReturnsReference(Env env);
+
+  /**
+   * Returns the formal arguments.
+   */
+  public Arg[] getArgs(Env env);
 
   /**
    * Evaluates the callback with no arguments.

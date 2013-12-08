@@ -52,8 +52,9 @@ public class Arg {
     _isReference = isReference;
     _expectedClass = expectedClass;
 
-    if (_default == null)
+    if (_default == null) {
       throw new IllegalStateException();
+    }
   }
 
   /**

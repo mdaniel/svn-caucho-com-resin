@@ -37,6 +37,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -98,9 +99,11 @@ public class XmlModule extends AbstractQuercusModule {
   public static final int LIBXML_ERR_ERROR = 2;
   public static final int LIBXML_ERR_FATAL = 3;
 
+  public static final String LIBXML_DOTTED_VERSION = "2.9.0";
+
   public String []getLoadedExtensions()
   {
-    return new String[] { "xml", "libxml" };
+    return new String[] { "xml", "libxml", "xmlreader", "xmlwriter" };
   }
 
   /**
@@ -377,7 +380,7 @@ public class XmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    */
   public boolean xml_set_object(@NotNull Xml parser,
-                                @NotNull Value obj)
+                                @NotNull ObjectValue obj)
   {
     if (parser == null)
       return false;

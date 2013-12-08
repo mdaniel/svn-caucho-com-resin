@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
@@ -172,6 +174,47 @@ public class CallbackClassMethod extends Callback {
   public String getCallbackName()
   {
     return _qClass.getName() + "::" +  _methodName.toString();
+  }
+
+  @Override
+  public String getDeclFileName(Env env)
+  {
+    return getMethod().getDeclFileName(env);
+  }
+
+  @Override
+  public int getDeclStartLine(Env env)
+  {
+    return getMethod().getDeclStartLine(env);
+  }
+
+  @Override
+  public int getDeclEndLine(Env env)
+  {
+    return getMethod().getDeclEndLine(env);
+  }
+
+  @Override
+  public String getDeclComment(Env env)
+  {
+    return getMethod().getDeclComment(env);
+  }
+
+  @Override
+  public boolean isReturnsReference(Env env)
+  {
+    return getMethod().isReturnsReference(env);
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    return getMethod().getArgs(env);
+  }
+
+  private AbstractFunction getMethod()
+  {
+    return _qClass.getFunction(_methodName);
   }
 
   @Override

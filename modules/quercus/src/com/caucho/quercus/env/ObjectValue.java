@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ArrayModule;
+import com.caucho.quercus.program.Arg;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ import java.util.TreeSet;
 /**
  * Represents a Quercus object value.
  */
-abstract public class ObjectValue extends Value implements Callable {
+abstract public class ObjectValue extends Callback {
   transient protected QuercusClass _quercusClass;
 
   protected String _className;
@@ -76,6 +77,11 @@ abstract public class ObjectValue extends Value implements Callable {
   public QuercusClass findQuercusClass(Env env)
   {
     return _quercusClass;
+  }
+
+  public AbstractFunction getMethod(StringValue name)
+  {
+    return getQuercusClass().getMethod(name);
   }
 
   public boolean isIncompleteObject()
@@ -218,33 +224,51 @@ abstract public class ObjectValue extends Value implements Callable {
   }
 
   @Override
-  public Value callArray(Env env,
-                         ArrayValue array,
-                         Value key,
-                         Value a1)
+  public String getDeclFileName(Env env)
   {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   @Override
-  public Value callArray(Env env,
-                         ArrayValue array,
-                         Value key,
-                         Value a1,
-                         Value a2)
+  public int getDeclStartLine(Env env)
   {
-    throw new UnsupportedOperationException();
+    return -1;
   }
 
   @Override
-  public Value callArray(Env env,
-                         ArrayValue array,
-                         Value key,
-                         Value a1,
-                         Value a2,
-                         Value a3)
+  public int getDeclEndLine(Env env)
   {
-    throw new UnsupportedOperationException();
+    return -1;
+  }
+
+  @Override
+  public String getDeclComment(Env env)
+  {
+    return null;
+  }
+
+  @Override
+  public boolean isReturnsReference(Env env)
+  {
+    return false;
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    AbstractFunction fun = _quercusClass.getInvoke();
+
+    if (fun == null) {
+      return null;
+    }
+
+    return fun.getArgs(env);
+  }
+
+  @Override
+  public boolean isInternal(Env env)
+  {
+    return false;
   }
 
   /**
@@ -717,8 +741,10 @@ abstract public class ObjectValue extends Value implements Callable {
 
     if (fun != null)
       return fun.callMethod(env, _quercusClass, this, args);
-    else
-      return super.call(env, args);
+    else {
+      return env.warning(L.l("{0} is not a valid function",
+                             this));
+    }
   }
 
   public void varDumpObject(Env env,

@@ -32,109 +32,110 @@ package com.caucho.quercus.lib.reflection;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Callable;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
 
 public abstract class ReflectionFunctionAbstract
 {
-  private AbstractFunction _fun;
-  
-  protected ReflectionFunctionAbstract(AbstractFunction fun)
+  private Callable _callable;
+
+  protected ReflectionFunctionAbstract(Callable callable)
   {
-    _fun = fun;
-    
-    if (fun == null)
+    _callable = callable;
+
+    if (callable == null) {
       throw new NullPointerException();
+    }
   }
-  
-  protected AbstractFunction getFunction()
+
+  protected Callable getCallable()
   {
-    return _fun;
+    return _callable;
   }
-  
+
   private void __clone()
   {
   }
-  
+
   public String getName()
   {
-    return _fun.getName();
+    return _callable.getCallbackName();
   }
-    
+
   public boolean isInternal()
   {
     return false;
   }
-  
+
   public boolean isUserDefined()
   {
     return false;
   }
-  
-  public String getFileName()
+
+  public String getFileName(Env env)
   {
-    return _fun.getLocation().getFileName();
+    return _callable.getDeclFileName(env);
   }
-  
-  public int getStartLine()
+
+  public int getStartLine(Env env)
   {
-    return _fun.getLocation().getLineNumber();
+    return _callable.getDeclStartLine(env);
   }
-  
-  public int getEndLine()
+
+  public int getEndLine(Env env)
   {
     // TODO
-    return _fun.getLocation().getLineNumber();
+    return _callable.getDeclEndLine(env);
   }
-  
+
   @ReturnNullAsFalse
-  public String getDocComment()
+  public String getDocComment(Env env)
   {
-    return _fun.getComment();
+    return _callable.getDeclComment(env);
   }
-  
+
   public ArrayValue getStaticVariables()
   {
     // TODO
-    return null; 
+    return null;
   }
-  
-  public boolean returnsReference()
+
+  public boolean returnsReference(Env env)
   {
-    return _fun.isReturnsReference();
+    return _callable.isReturnsReference(env);
   }
-  
+
   public ArrayValue getParameters(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
-    
-    Arg []args = _fun.getArgs();
-    
+
+    Arg []args = _callable.getArgs(env);
+
     for (int i = 0; i < args.length; i++) {
-      array.put(env.wrapJava(new ReflectionParameter(_fun, args[i])));
+      array.put(env.wrapJava(new ReflectionParameter(_callable, args[i])));
     }
-    
+
     return array;
   }
-  
-  public int getNumberOfParameters()
+
+  public int getNumberOfParameters(Env env)
   {
-    return _fun.getArgs().length;
+    return _callable.getArgs(env).length;
   }
-  
-  public int getNumberOfRequiredParameters()
+
+  public int getNumberOfRequiredParameters(Env env)
   {
-    Arg []args = _fun.getArgs();
-    
+    Arg []args = _callable.getArgs(env);
+
     int requiredParams = 0;
     for (int i = 0; i < args.length; i++) {
       if (args[i].getDefault() instanceof ParamRequiredExpr)
         requiredParams++;
     }
-    
+
     return requiredParams;
   }
 }

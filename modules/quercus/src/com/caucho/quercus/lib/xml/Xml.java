@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Callable;
 import com.caucho.quercus.env.CallbackObjectMethod;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
@@ -53,6 +54,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -113,7 +115,7 @@ public class Xml {
   private Callable _unparsedEntityDeclHandler;
 
   private Value _parser;
-  private Value _obj;
+  private ObjectValue _obj;
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
 
@@ -357,10 +359,11 @@ public class Xml {
    * @param obj
    * @return returns true unless obj == null
    */
-  public boolean xml_set_object(Value obj)
+  public boolean xml_set_object(ObjectValue obj)
   {
-    if (obj == null)
+    if (obj == null) {
       return false;
+    }
 
     _obj = obj;
 

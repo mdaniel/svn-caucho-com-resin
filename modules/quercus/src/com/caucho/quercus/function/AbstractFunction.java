@@ -106,6 +106,57 @@ abstract public class AbstractFunction extends Callback {
     return true;
   }
 
+  /**
+   * Returns the name of the file where this is defined in.
+   */
+  @Override
+  public String getDeclFileName(Env env)
+  {
+    return _location.getFileName();
+  }
+
+  /**
+   * Returns the start line in the file where this is defined in.
+   */
+  @Override
+  public int getDeclStartLine(Env env)
+  {
+    return _location.getLineNumber();
+  }
+
+  /**
+   * Returns the end line in the file where this is defined in.
+   */
+  @Override
+  public int getDeclEndLine(Env env)
+  {
+    return _location.getLineNumber();
+  }
+
+  /**
+   * Returns the comment in the file where this is defined in.
+   */
+  @Override
+  public String getDeclComment(Env env)
+  {
+    return getComment();
+  }
+
+  /**
+   * Returns true if this returns a reference.
+   */
+  @Override
+  public boolean isReturnsReference(Env env)
+  {
+    return true;
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    return NULL_ARGS;
+  }
+
   public boolean isJavaMethod()
   {
     return false;
@@ -352,19 +403,19 @@ abstract public class AbstractFunction extends Callback {
   }
 
   /**
-   * True for a returns reference.
+   * Returns the args.
    */
-  public boolean isReturnsReference()
+  public Arg []getClosureUseArgs()
   {
-    return true;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * Returns the args.
    */
-  public Arg []getArgs()
+  public void setClosureUseArgs(Arg []useArgs)
   {
-    return NULL_ARGS;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -461,6 +512,14 @@ abstract public class AbstractFunction extends Callback {
   public Value callCopy(Env env, Value []args)
   {
     return call(env, args).copyReturn();
+  }
+
+  /**
+   * Evaluates the function as a closure.
+   */
+  public Value callClosure(Env env, Value []args, Value []useArgs)
+  {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -782,7 +841,7 @@ abstract public class AbstractFunction extends Callback {
                           Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
-    Arg []args = getArgs();
+    Arg []args = getArgs(env);
 
     for (int i = 0; i < exprs.length; i++) {
       if (i < args.length && args[i].isReference()) {
@@ -804,7 +863,7 @@ abstract public class AbstractFunction extends Callback {
                              Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
-    Arg []args = getArgs();
+    Arg []args = getArgs(env);
 
     for (int i = 0; i < exprs.length; i++) {
       if (i < args.length && args[i].isReference())

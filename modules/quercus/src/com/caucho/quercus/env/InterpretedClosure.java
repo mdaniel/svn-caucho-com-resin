@@ -29,8 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
-import com.caucho.quercus.program.Function;
 
 /**
  * Represents a closure
@@ -38,10 +38,10 @@ import com.caucho.quercus.program.Function;
 @SuppressWarnings("serial")
 public class InterpretedClosure extends Closure
 {
-  private final Function _fun;
+  private final AbstractFunction _fun;
   private final Value []_args;
 
-  public InterpretedClosure(Env env, Function fun, Value qThis)
+  public InterpretedClosure(Env env, AbstractFunction fun, Value qThis)
   {
     super(fun.getName(), qThis);
 
@@ -66,13 +66,55 @@ public class InterpretedClosure extends Closure
   }
 
   @Override
+  public String getDeclFileName(Env env)
+  {
+    return _fun.getDeclFileName(env);
+  }
+
+  @Override
+  public int getDeclStartLine(Env env)
+  {
+    return _fun.getDeclStartLine(env);
+  }
+
+  @Override
+  public int getDeclEndLine(Env env)
+  {
+    return _fun.getDeclEndLine(env);
+  }
+
+  @Override
+  public String getDeclComment(Env env)
+  {
+    return _fun.getDeclComment(env);
+  }
+
+  @Override
+  public boolean isReturnsReference(Env env)
+  {
+    return _fun.isReturnsReference(env);
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    return _fun.getArgs(env);
+  }
+
+  @Override
+  public boolean isInternal(Env env)
+  {
+    return _fun.isInternal(env);
+  }
+
+  @Override
   public Value call(Env env, Value []args)
   {
     Value oldThis = env.setThis(getThis());
     Closure oldClosure = env.setClosure(this);
 
     try {
-      return _fun.callImpl(env, args, false, _fun.getClosureUseArgs(), _args);
+      return _fun.callClosure(env, args, _args);
     }
     finally {
       env.setClosure(oldClosure);

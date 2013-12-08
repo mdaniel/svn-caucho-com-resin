@@ -159,7 +159,8 @@ public class Function extends AbstractFunction {
   /**
    * Returns the args.
    */
-  public Arg []getArgs()
+  @Override
+  public Arg []getArgs(Env env)
   {
     return _args;
   }
@@ -167,6 +168,7 @@ public class Function extends AbstractFunction {
   /**
    * Returns the args.
    */
+  @Override
   public Arg []getClosureUseArgs()
   {
     return _closureUseArgs;
@@ -175,6 +177,7 @@ public class Function extends AbstractFunction {
   /**
    * Returns the args.
    */
+  @Override
   public void setClosureUseArgs(Arg []useArgs)
   {
     _closureUseArgs = useArgs;
@@ -188,7 +191,8 @@ public class Function extends AbstractFunction {
   /**
    * True for a returns reference.
    */
-  public boolean isReturnsReference()
+  @Override
+  public boolean isReturnsReference(Env env)
   {
     return _isReturnsReference;
   }
@@ -355,6 +359,12 @@ public class Function extends AbstractFunction {
   public Value callRef(Env env, Value []args)
   {
     return callImpl(env, args, true, null, null);
+  }
+
+  @Override
+  public Value callClosure(Env env, Value []args, Value []useArgs)
+  {
+    return callImpl(env, args, false, getClosureUseArgs(), useArgs).copy();
   }
 
   public Value callImpl(Env env, Value []args, boolean isRef,

@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import com.caucho.quercus.env.Callable;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
@@ -44,10 +45,10 @@ public class ReflectionParameter
   private static final L10N L = new L10N(ReflectionParameter.class);
 
   private String _clsName;
-  private AbstractFunction _fun;
+  private Callable _fun;
   private Arg _arg;
 
-  protected ReflectionParameter(AbstractFunction fun, Arg arg)
+  protected ReflectionParameter(Callable fun, Arg arg)
   {
     _fun = fun;
     _arg = arg;
@@ -72,7 +73,7 @@ public class ReflectionParameter
   {
     AbstractFunction fun = env.findFunction(funName);
 
-    Arg []args = fun.getArgs();
+    Arg []args = fun.getArgs(env);
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].getName().equals(paramName))
@@ -107,10 +108,13 @@ public class ReflectionParameter
       QuercusClass cls = env.findClass(_clsName);
       QuercusClass parent = cls.getParent();
 
-      if (parent == null || parent.findFunction(_fun.getName()) != _fun)
+      if (parent == null
+          || parent.findFunction(_fun.getCallbackName()) != _fun) {
         return new ReflectionClass(cls);
-      else
+      }
+      else {
         return getDeclaringClass(env, parent);
+      }
     }
     else
       return null;
@@ -125,7 +129,7 @@ public class ReflectionParameter
 
     if (refClass != null)
       return refClass;
-    else if (cls.findFunction(_fun.getName()) != null)
+    else if (cls.findFunction(_fun.getCallbackName()) != null)
       return new ReflectionClass(cls);
     else
       return null;
@@ -172,7 +176,7 @@ public class ReflectionParameter
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _fun.getName()
+    return getClass().getSimpleName() + "[" + _fun.getCallbackName()
                                       + "(" + _arg.getName() + ")]";
   }
 }

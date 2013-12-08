@@ -359,6 +359,11 @@ public class QuercusClass extends NullValue {
     return _methodMap;
   }
 
+  public AbstractFunction getMethod(StringValue name)
+  {
+    return _methodMap.get(name);
+  }
+
   public HashSet<String> getInstanceofSet()
   {
     return _instanceofSet;
