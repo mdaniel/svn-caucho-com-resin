@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 
 import com.caucho.config.Config;
 import com.caucho.config.types.PathBuilder;
-import com.caucho.config.types.StringTypeBuilder;
 import com.caucho.el.EL;
 import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.env.deploy.DeployControllerApi;
