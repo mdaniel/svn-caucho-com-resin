@@ -137,7 +137,11 @@ public class ReflectionParameter
 
   public ReflectionClass getClass(Env env)
   {
-    return null;
+    String name = _arg.getExpectedClass();
+
+    ReflectionClass cls = new ReflectionClass(env, name);
+
+    return cls;
   }
 
   public boolean isArray()

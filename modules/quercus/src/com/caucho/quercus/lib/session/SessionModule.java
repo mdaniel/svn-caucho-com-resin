@@ -55,6 +55,10 @@ public class SessionModule extends AbstractQuercusModule
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
+  public static final int PHP_SESSION_DISABLED = 0;
+  public static final int PHP_SESSION_NONE = 1;
+  public static final int PHP_SESSION_ACTIVE = 2;
+
   /**
    * Returns the default php.ini values.
    */
@@ -403,6 +407,19 @@ public class SessionModule extends AbstractQuercusModule
     env.setSessionCallback(cb);
 
     return true;
+  }
+
+  /**
+   * Returns the status of the session.
+   */
+  public static int session_status(Env env)
+  {
+    if (env.getSession() != null) {
+      return PHP_SESSION_ACTIVE;
+    }
+    else {
+      return PHP_SESSION_NONE;
+    }
   }
 
   /**

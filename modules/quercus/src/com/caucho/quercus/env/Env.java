@@ -5168,8 +5168,6 @@ public class Env
                                 boolean useAutoload,
                                 boolean useImport)
   {
-    System.err.println("Env.findClass0: " + id + " . " + _quercus.getClassName(id));
-
     if (id < _qClass.length && _qClass[id] != null) {
       return _qClass[id];
     }

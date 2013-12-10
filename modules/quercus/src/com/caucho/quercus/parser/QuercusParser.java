@@ -182,6 +182,7 @@ public class QuercusParser {
   private final static int NAMESPACE = 577;
   private final static int USE = 578;
   private final static int INSTEADOF = 579;
+  private final static int EMPTY = 580;
 
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -4024,6 +4025,10 @@ public class QuercusParser {
     else if (name.equalsString("__NAMESPACE__")) {
       return createStringExpr(_namespace);
     }
+    else if (name.equalsString("self") && _classDef != null) {
+      // php/0m28
+      return _factory.createConst(_classDef.getName());
+    }
 
     name = resolveIdentifier(name);
 
@@ -4119,10 +4124,12 @@ public class QuercusParser {
       name = nameExpr.evalConstant().toString();
 
       // php/0957
-      if ("self".equals(name) && _classDef != null)
+      if ("self".equals(name) && _classDef != null) {
         name = _classDef.getName();
-      else if ("parent".equals(name) && getParentClassName() != null)
+      }
+      else if ("parent".equals(name) && getParentClassName() != null) {
         name = getParentClassName().toString();
+      }
       else {
         // name = resolveIdentifier(name);
       }

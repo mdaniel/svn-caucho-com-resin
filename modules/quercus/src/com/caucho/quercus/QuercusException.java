@@ -39,7 +39,7 @@ import java.lang.reflect.*;
 public class QuercusException extends RuntimeException
 {
   private ArrayList<String> _quercusStackTrace;
-  
+
   public QuercusException()
   {
   }
@@ -63,13 +63,13 @@ public class QuercusException extends RuntimeException
                                         ArrayList<String> stackTrace)
   {
     QuercusException qExn;
-    
+
     if (e instanceof QuercusException)
       qExn = (QuercusException) e;
     else {
       if (e instanceof InvocationTargetException && e.getCause() != null)
         e = e.getCause();
-      
+
       qExn = new QuercusException(e);
     }
 
@@ -83,7 +83,7 @@ public class QuercusException extends RuntimeException
   public String getMessage()
   {
     String msg = super.getMessage();
-    
+
     if (_quercusStackTrace != null) {
       StringBuilder sb = new StringBuilder();
       sb.append(msg);
@@ -108,7 +108,7 @@ public class QuercusException extends RuntimeException
   {
     _quercusStackTrace = stackTrace;
   }
-  
+
   public String __toString()
   {
     return toString();
