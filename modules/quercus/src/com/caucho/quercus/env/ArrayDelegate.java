@@ -55,6 +55,11 @@ public interface ArrayDelegate {
   public boolean isset(Env env, ObjectValue qThis, Value key);
 
   /**
+   * Returns true if the value is empty.
+   */
+  public boolean isEmpty(Env env, ObjectValue qThis, Value key);
+
+  /**
    * Removes the value at the speified key.
    */
   public Value unset(Env env, ObjectValue qThis, Value key);

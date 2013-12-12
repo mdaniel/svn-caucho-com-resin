@@ -328,6 +328,15 @@ public class Var extends Value
   }
 
   /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty(Env env, Value index)
+  {
+    return _value.isEmpty(env, index);
+  }
+
+  /**
    * True if the object is null
    */
   @Override

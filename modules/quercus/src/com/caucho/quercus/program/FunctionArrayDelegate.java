@@ -125,6 +125,12 @@ public class FunctionArrayDelegate implements ArrayDelegate {
     return get(env, qThis, key).isset();
   }
 
+  @Override
+  public boolean isEmpty(Env env, ObjectValue qThis, Value key)
+  {
+    return get(env, qThis, key).isEmpty();
+  }
+
   /**
    * Removes the value at the speified key.
    */

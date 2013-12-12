@@ -3708,6 +3708,9 @@ public class QuercusParser {
     case DIE:
       return parseDie();
 
+    case EMPTY:
+      return parseEmpty();
+
     case IDENTIFIER:
     case NAMESPACE:
       {
@@ -4286,6 +4289,28 @@ public class QuercusParser {
     }
     else {
       return _factory.createDie(null);
+    }
+  }
+
+  /**
+   * Parses the empty() expression.
+   */
+  private Expr parseEmpty()
+    throws IOException
+  {
+    int token = parseToken();
+    _peekToken = token;
+
+    if (token == '(') {
+      ArrayList<Expr> args = parseArgs();
+
+      if (args.size() > 0)
+        return _factory.createEmpty(getLocation(), args.get(0));
+      else
+        throw error(L.l("empty must have one arg"));
+    }
+    else {
+      throw error(L.l("expected '('"));
     }
   }
 
@@ -6415,6 +6440,7 @@ public class QuercusParser {
     _insensitiveReserved.put("include_once", INCLUDE_ONCE);
     _insensitiveReserved.put("require_once", REQUIRE_ONCE);
     _insensitiveReserved.put("unset", UNSET);
+    _insensitiveReserved.put("empty", EMPTY);
     _insensitiveReserved.put("foreach", FOREACH);
     _insensitiveReserved.put("as", AS);
     _insensitiveReserved.put("switch", SWITCH);

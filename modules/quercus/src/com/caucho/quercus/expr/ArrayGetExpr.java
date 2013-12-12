@@ -249,6 +249,18 @@ public class ArrayGetExpr extends AbstractVarExpr {
     _expr.evalUnsetArray(env, _index);
   }
 
+  /**
+   * Evaluates as an empty() expression.
+   */
+  @Override
+  public boolean evalEmpty(Env env)
+  {
+    Value array = _expr.evalIssetValue(env);
+    Value index = _index.evalIssetValue(env);
+
+    return array.isEmpty(env, index);
+  }
+
   @Override
   public String toString()
   {

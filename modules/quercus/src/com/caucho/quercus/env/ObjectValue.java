@@ -466,6 +466,22 @@ abstract public class ObjectValue extends Callback {
   }
 
   /**
+   * Return true if empty.
+   */
+  @Override
+  public boolean isEmpty(Env env, Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null) {
+      return delegate.isEmpty(env, this, key);
+    }
+    else {
+      return true;
+    }
+  }
+
+  /**
    * Unsets the array value
    */
   @Override

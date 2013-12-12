@@ -577,6 +577,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates an empty() expression.
+   */
+  public Expr createEmpty(Location location, Expr expr)
+  {
+    return new FunEmptyExpr(location, expr);
+  }
+
+  /**
    * Creates a required
    */
   public Expr createRequired()

@@ -826,6 +826,14 @@ abstract public class Expr {
   }
 
   /**
+   * Evaluates as an empty() expression.
+   */
+  public boolean evalEmpty(Env env)
+  {
+    return eval(env).isEmpty();
+  }
+
+  /**
    * Evaluates as a QuercusClass.
    */
   public QuercusClass evalQuercusClass(Env env)

@@ -71,6 +71,7 @@ public class InternalAutoloadCallback
     String urlStr = url.toString();
 
     // for JBoss, #5606
+    // XXX: use this for resin and no-resin?
     if (! env.getQuercus().isResin() && urlStr.startsWith("vfs:")) {
       try {
         InputStream is = url.openStream();

@@ -72,6 +72,20 @@ public class ArrayAccessDelegate implements ArrayDelegate
   }
 
   @Override
+  public boolean isEmpty(Env env, ObjectValue qThis, Value index)
+  {
+    boolean isExists = qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();
+
+    if (! isExists) {
+      return true;
+    }
+
+    Value value = get(env, qThis, index);
+
+    return value.isEmpty();
+  }
+
+  @Override
   public Value unset(Env env, ObjectValue qThis, Value index)
   {
     return qThis.callMethod(env, OFFSET_UNSET, index);
