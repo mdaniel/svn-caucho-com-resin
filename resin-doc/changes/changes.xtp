@@ -10,7 +10,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0 snapshot">
+<s2 title="4.0.38 (Dec 13, 2013)">
 <ul>
 <li>win32: windows returns incorrect mtime for stat() for DST (#5578, rep by Jason Barr)</li>
 <li>deploy: NPE on undeploy (#5596)</li>
