@@ -431,7 +431,7 @@ abstract public class Value implements java.io.Serializable
    */
   public boolean isEmpty()
   {
-    return true;
+    return false;
   }
 
   /**
