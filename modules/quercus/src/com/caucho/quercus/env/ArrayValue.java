@@ -657,6 +657,12 @@ abstract public class ArrayValue extends Value {
     return getSize() == 0;
   }
 
+  @Override
+  public boolean isEmpty(Env env, Value key)
+  {
+    return ! isset(key);
+  }
+
   /**
    * Clears the array
    */
