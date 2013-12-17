@@ -31,6 +31,17 @@
 <li>servlet: missing cookie-config in web.xml (#5521, rep by Arjan Tijms)</li>
 <li>ioc: remove validatio of generic type on produces method (#5522, rep by A Tijms)</li>
 <li>ioc: extends observers now auto-convert ProcessManagedBean&lt;Foo> to ProcessManagedBean&lt;? extends Foo> (#5531, rep by A Tijms)</li>
+<li>quercus: empty() needs to call ArrayAccess->offsetExists() (#5612, rep by G. Krall)</li>
+<li>quercus: session_status() not implemented (#5609, rep by G. Krall)</li>
+<li>quercus: self doesn't work inside a namespace (#5608, G. Krall)</li>
+<li>quercus: ReflectionParameter->getClass() not implemented (#5607, rep by G. Krall)</li>
+<li>quercus: IllegalArgumentException vfs: not found on JBoss (#5606, rep by G. Krall)</li>
+<li>quercus: ReflectionFunction does not work for closures (#5605, rep by G. Krall)</li>
+<li>quercus: Xml reader is not working (#5603, rep by qumo)</li>
+<li>quercus: call_user_func() needs to call __invoke (#5601, rep by G. Krall)</li>
+<li>quercus: instanceof Closure returns false for closures (#5600, rep by G. Krall)</li>
+<li>quercus: QuercusCompiledScript.eval() needs to return the Value object (#5589, rep by S. Guo)</li>
+<li>quercus: ScriptEngineManager.getEngineByName("php") returns Quercus with unicode.semantics=off (#5588, rep by S. Guo)</li>
 </ul>
 </s2>
 
