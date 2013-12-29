@@ -111,7 +111,7 @@ public class ObjectExtValue extends ObjectValue
   }
 
   @Override
-  protected void setQuercusClass(QuercusClass cl)
+  public void setQuercusClass(QuercusClass cl)
   {
     super.setQuercusClass(cl);
 

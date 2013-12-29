@@ -61,7 +61,7 @@ abstract public class ObjectValue extends Callback {
     _className = quercusClass.getName();
   }
 
-  protected void setQuercusClass(QuercusClass cl)
+  public void setQuercusClass(QuercusClass cl)
   {
     _quercusClass = cl;
     _className = cl.getName();
@@ -130,6 +130,11 @@ abstract public class ObjectValue extends Callback {
   public String getClassName()
   {
     return _className;
+  }
+
+  public void setClassName(String className)
+  {
+    _className = className;
   }
 
   /**

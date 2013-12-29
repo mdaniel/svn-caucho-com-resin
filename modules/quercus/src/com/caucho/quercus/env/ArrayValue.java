@@ -660,7 +660,9 @@ abstract public class ArrayValue extends Value {
   @Override
   public boolean isEmpty(Env env, Value key)
   {
-    return ! isset(key);
+    Value value = get(key);
+
+    return value.isEmpty();
   }
 
   /**
@@ -1637,7 +1639,7 @@ abstract public class ArrayValue extends Value {
     throws IOException
   {
     out.println("Array");
-    printDepth(out, 8 * depth);
+    printDepth(out, 4 * depth);
     out.println("(");
 
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
@@ -1646,7 +1648,7 @@ abstract public class ArrayValue extends Value {
       entry.printRImpl(env, out, depth, valueSet);
     }
 
-    printDepth(out, 8 * depth);
+    printDepth(out, 4 * depth);
     out.println(")");
   }
 
@@ -1907,12 +1909,14 @@ abstract public class ArrayValue extends Value {
                               IdentityHashMap<Value, String> valueSet)
       throws IOException
     {
-      printDepth(out, 8 * depth);
-      out.print("    [");
+      printDepth(out, 4 * (depth + 1));
+      out.print("[");
       out.print(_key);
       out.print("] => ");
-      if (getRawValue() != null)
-        getRawValue().printR(env, out, depth + 1, valueSet);
+      if (getRawValue() != null) {
+        getRawValue().printR(env, out, depth + 2, valueSet);
+      }
+
       out.println();
     }
 

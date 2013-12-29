@@ -70,10 +70,10 @@ public class SimpleXMLModule
   {
     if (data.isNull() || data == BooleanValue.FALSE)
       return BooleanValue.FALSE;
-    
+
     if (className == null || className.length() == 0)
       className = "SimpleXMLElement";
-    
+
     QuercusClass cls = env.getClass(className);
 
     return SimpleXMLElement.create(env, cls,
@@ -88,8 +88,9 @@ public class SimpleXMLModule
                                    @Optional Value namespaceV,
                                    @Optional boolean isPrefix)
   {
-    if (className == null || className.length() == 0)
+    if (className == null || className.length() == 0) {
       className = "SimpleXMLElement";
+    }
 
     QuercusClass cls = env.getClass(className);
 
@@ -97,7 +98,7 @@ public class SimpleXMLModule
                                    file, options, true,
                                    namespaceV, isPrefix);
   }
-  
+
   public SimpleXMLElement simplexml_import_dom(Env env)
   {
     // XXX: DOMNode needs to be able to export partial documents

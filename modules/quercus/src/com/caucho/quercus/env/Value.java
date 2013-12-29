@@ -439,7 +439,7 @@ abstract public class Value implements java.io.Serializable
    */
   public boolean isEmpty(Env env, Value index)
   {
-    return true;
+    return isEmpty();
   }
 
   /**
