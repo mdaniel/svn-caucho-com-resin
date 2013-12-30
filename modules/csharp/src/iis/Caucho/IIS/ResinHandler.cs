@@ -689,7 +689,10 @@ namespace Caucho.IIS
         } else if (code == HmuxConnection.HMUX_CHANNEL) {
           int channel = sublen;
           Trace.TraceInformation("Hmux[{0}] <<C: (channel) ({1})", traceId, channel);
-        } else if (code == 0) {
+        } else if (code == HmuxConnection.CSE_SEND_HEADER) {
+          Skip(rs, sublen);
+        }
+        else if (code == 0) {
           Trace.TraceInformation("Hmux[{0}] <<0: unknown code (0)", traceId);
 
           return FAIL | EXIT;
