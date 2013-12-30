@@ -690,6 +690,7 @@ namespace Caucho.IIS
           int channel = sublen;
           Trace.TraceInformation("Hmux[{0}] <<C: (channel) ({1})", traceId, channel);
         } else if (code == HmuxConnection.CSE_SEND_HEADER) {
+          Trace.TraceInformation("Hmux[{0}] <<G: send headers", traceId);
           Skip(rs, sublen);
         }
         else if (code == 0) {
