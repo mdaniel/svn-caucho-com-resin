@@ -507,7 +507,7 @@ public class PDO implements EnvCleanup {
     }
 
     try {
-      closeStatements();
+      //closeStatements();
 
       PDOStatement pdoStatement
         = new PDOStatement(env, this, _error, query, true, driverOptions, true);
@@ -549,7 +549,7 @@ public class PDO implements EnvCleanup {
     }
 
     try {
-      closeStatements();
+      //closeStatements();
 
       PDOStatement pdoStatement
          = new PDOStatement(env, this, _error, query, false, null, true);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,19 +30,21 @@
 package com.caucho.quercus.lib.spl;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.CallbackFunction;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.util.CharBuffer;
 
-/*
- * XXX: Not finished.
- */
 public class SplModule extends AbstractQuercusModule
 {
   private static String DEFAULT_EXTENSIONS = ".php,.inc";
@@ -58,15 +60,19 @@ public class SplModule extends AbstractQuercusModule
   {
     QuercusClass cls;
 
-    if (obj.isObject())
+    if (obj.isObject()) {
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
-    else
+    }
+    else {
       cls = env.findClass(obj.toString(), autoload,  true);
+    }
 
-    if (cls != null)
+    if (cls != null) {
       return cls.getInterfaces(env, autoload);
-    else
+    }
+    else {
       return BooleanValue.FALSE;
+    }
   }
 
   public static Value class_parents(Env env,
@@ -75,10 +81,12 @@ public class SplModule extends AbstractQuercusModule
   {
     QuercusClass cls;
 
-    if (obj.isObject())
+    if (obj.isObject()) {
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
-    else
+    }
+    else {
       cls = env.findClass(obj.toString(), autoload, true);
+    }
 
     if (cls != null) {
       ArrayValue array = new ArrayValueImpl();
@@ -93,8 +101,9 @@ public class SplModule extends AbstractQuercusModule
 
       return array;
     }
-    else
+    else {
       return BooleanValue.FALSE;
+    }
   }
 
   public static boolean spl_autoload_register(Env env,
@@ -123,8 +132,9 @@ public class SplModule extends AbstractQuercusModule
   {
     ArrayList<Callable> funList = env.getAutoloadFunctions();
 
-    if (funList == null)
+    if (funList == null) {
       return BooleanValue.FALSE;
+    }
 
     ArrayValue array = new ArrayValueImpl();
 
@@ -143,8 +153,9 @@ public class SplModule extends AbstractQuercusModule
   {
     String oldExtensions = getAutoloadExtensions(env);
 
-    if (extensions != null)
+    if (extensions != null) {
       env.setSpecialValue("caucho.spl_autoload", extensions);
+    }
 
     return oldExtensions;
   }
@@ -153,10 +164,12 @@ public class SplModule extends AbstractQuercusModule
   {
     Object obj = env.getSpecialValue("caucho.spl_autoload");
 
-    if (obj == null)
+    if (obj == null) {
       return DEFAULT_EXTENSIONS;
-    else
+    }
+    else {
       return (String) obj;
+    }
   }
 
   public static void spl_autoload(Env env,
@@ -168,22 +181,36 @@ public class SplModule extends AbstractQuercusModule
 
     String []extensionList;
 
-    if (extensions == null || "".equals(extensions))
+    if (extensions == null || "".equals(extensions)) {
       extensionList = new String[] { ".php", ".inc" };
-    else
+    }
+    else {
       extensionList = extensions.split("[,\\s]+");
+    }
 
     String filePrefix = className.toLowerCase(Locale.ENGLISH);
 
     for (String ext : extensionList) {
-      StringValue filename = new StringBuilderValue(filePrefix).append(ext);
+      StringValue sb = env.createStringBuilder();
 
-      env.include(filename);
+      sb.append(filePrefix);
+      sb.append(ext);
+
+      env.include(sb);
 
       QuercusClass cls = env.findClass(className, false, true);
 
-      if (cls != null)
+      if (cls != null) {
         return;
+      }
     }
+  }
+
+  /*
+   * string spl_object_hash ( object $obj )
+   */
+  public static StringValue spl_object_hash(Env env, ObjectValue obj)
+  {
+    return obj.getObjectHash(env);
   }
 }

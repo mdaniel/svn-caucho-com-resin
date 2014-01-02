@@ -60,16 +60,16 @@ public class ObjectExtValue extends ObjectValue
 
   private boolean _isFieldInit;
 
-  public ObjectExtValue(QuercusClass cl)
+  public ObjectExtValue(Env env, QuercusClass cl)
   {
-    super(cl);
+    super(env, cl);
 
     _methodMap = cl.getMethodMap();
   }
 
   public ObjectExtValue(Env env, ObjectExtValue copy, CopyRoot root)
   {
-    super(copy.getQuercusClass());
+    super(env, copy.getQuercusClass());
 
     root.putCopy(copy, this);
 
@@ -90,7 +90,7 @@ public class ObjectExtValue extends ObjectValue
                         IdentityHashMap<Value,Value> copyMap,
                         ObjectExtValue copy)
   {
-    super(copy.getQuercusClass());
+    super(env, copy.getQuercusClass());
 
     _methodMap = copy._methodMap;
 
@@ -934,7 +934,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value clone(Env env)
   {
-    ObjectExtValue newObject = new ObjectExtValue(_quercusClass);
+    ObjectExtValue newObject = new ObjectExtValue(env, _quercusClass);
 
     clone(env, newObject);
 

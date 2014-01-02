@@ -369,7 +369,7 @@ public class QuercusScriptEngine
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _isUnicodeSemantics + "]";
+    return getClass().getSimpleName() + "[isUnicodeSemantics=" + _isUnicodeSemantics + "]";
   }
 }
 

@@ -1053,7 +1053,7 @@ public class OptionsModule extends AbstractQuercusModule {
     else if (value.isObject()) {
       ObjectValue obj = (ObjectValue)value.toObject(env);
 
-      ObjectValue result = new ObjectExtValue(obj.getQuercusClass());
+      ObjectValue result = new ObjectExtValue(env, obj.getQuercusClass());
 
       for (Map.Entry<Value,Value> entry : obj.entrySet()) {
         Value key = escape(env, entry.getKey());

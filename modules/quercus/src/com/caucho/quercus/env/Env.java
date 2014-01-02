@@ -355,7 +355,6 @@ public class Env
 
   public enum OVERLOADING_TYPES {INVALID_FIRST, FIELDGET, FIELDSET, ISSET, UNSET, INVALID_LAST};
 
-
   private Path _selfPath;
   private Path _selfDirectory;
   private Path _pwd;
@@ -4932,7 +4931,7 @@ public class Env
   /**
    * Generate an object id.
    */
-  public int generateId()
+  public int generateObjectId()
   {
     return ++_objectId;
   }

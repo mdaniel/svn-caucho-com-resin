@@ -48,15 +48,19 @@ abstract public class ObjectValue extends Callback {
   transient protected QuercusClass _quercusClass;
 
   protected String _className;
-
   protected String _incompleteObjectName;
 
-  protected ObjectValue()
+  private final int _objectId;
+
+  protected ObjectValue(Env env)
   {
+    _objectId = env.generateObjectId();
   }
 
-  protected ObjectValue(QuercusClass quercusClass)
+  protected ObjectValue(Env env, QuercusClass quercusClass)
   {
+    this(env);
+
     _quercusClass = quercusClass;
     _className = quercusClass.getName();
   }
@@ -175,6 +179,22 @@ abstract public class ObjectValue extends Callback {
   public String getType()
   {
     return "object";
+  }
+
+  /**
+   * Returns the unique object hash.
+   */
+  public StringValue getObjectHash(Env env)
+  {
+    StringValue sb = env.createStringBuilder();
+
+    sb.append(getClassName());
+    sb.append('-');
+    sb.append(_objectId);
+    sb.append('-');
+    sb.append(System.identityHashCode(this));
+
+    return sb;
   }
 
   /**

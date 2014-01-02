@@ -288,7 +288,7 @@ public class SimpleUtil
                                SimpleXMLNode node)
   {
     if (! "SimpleXMLElement".equals(cls.getName())) {
-      return new ObjectExtJavaValue(cls, node, cls.getJavaClassDef());
+      return new ObjectExtJavaValue(env, cls, node, cls.getJavaClassDef());
     }
     else {
       return new JavaValue(env, node, cls.getJavaClassDef());

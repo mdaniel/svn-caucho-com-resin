@@ -49,21 +49,14 @@ public class ObjectExtJavaValue extends ObjectExtValue
   private Object _object;
   private final JavaClassDef _javaClassDef;
 
-  public ObjectExtJavaValue(QuercusClass cl,
+  public ObjectExtJavaValue(Env env,
+                            QuercusClass cl,
                             Object object,
                             JavaClassDef javaClassDef)
   {
-    super(cl);
+    super(env, cl);
 
     _object = object;
-    _javaClassDef = javaClassDef;
-  }
-
-  public ObjectExtJavaValue(QuercusClass cl,
-                            JavaClassDef javaClassDef)
-  {
-    super(cl);
-
     _javaClassDef = javaClassDef;
   }
 
@@ -226,7 +219,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     }
 
     ObjectExtValue newObject
-      = new ObjectExtJavaValue(_quercusClass, obj, _javaClassDef);
+      = new ObjectExtJavaValue(env, _quercusClass, obj, _javaClassDef);
 
     clone(env, newObject);
 

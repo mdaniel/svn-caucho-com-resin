@@ -345,7 +345,7 @@ public abstract class SimpleXMLNode
   protected Value wrapJava(Env env)
   {
     if (! "SimpleXMLElement".equals(_cls.getName())) {
-      return new ObjectExtJavaValue(_cls, this, _cls.getJavaClassDef());
+      return new ObjectExtJavaValue(env, _cls, this, _cls.getJavaClassDef());
     }
     else {
       return new JavaValue(env, this, _cls.getJavaClassDef());

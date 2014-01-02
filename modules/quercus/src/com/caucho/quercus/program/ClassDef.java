@@ -335,7 +335,7 @@ abstract public class ClassDef {
         L.l("interface '{0}' cannot be instantiated.", getName()));
     }
 
-    return new ObjectExtValue(qcl);
+    return new ObjectExtValue(env, qcl);
   }
 
   /**
@@ -352,7 +352,7 @@ abstract public class ClassDef {
         L.l("interface '{0}' cannot be instantiated.", getName()));
     }
 
-    return new ObjectExtValue(cls);
+    return new ObjectExtValue(env, cls);
   }
 
   /**

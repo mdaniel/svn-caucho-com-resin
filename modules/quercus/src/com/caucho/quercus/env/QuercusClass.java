@@ -1138,7 +1138,7 @@ public class QuercusClass extends NullValue {
       return _javaClassDef.callNew(env, Value.NULL_ARGS);
     }
     else if (_javaClassDef != null && _javaClassDef.isDelegate()) {
-      objectValue = new ObjectExtValue(this);
+      objectValue = new ObjectExtValue(env, this);
     }
     else if (_javaClassDef != null && _javaClassDef.isPhpClass()) {
       Object object = null;
@@ -1147,10 +1147,10 @@ public class QuercusClass extends NullValue {
       //Value javaWrapper = _javaClassDef.callNew(env, Value.NULL_ARGS);
       //object = javaWrapper.toJavaObject();
 
-      objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
+      objectValue = new ObjectExtJavaValue(env, this, object, _javaClassDef);
     }
     else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
-      objectValue = new ObjectExtJavaValue(this, null, _javaClassDef);
+      objectValue = new ObjectExtJavaValue(env, this, null, _javaClassDef);
     }
     else {
       objectValue = _classDef.createObject(env, this);
@@ -1190,7 +1190,7 @@ public class QuercusClass extends NullValue {
       }
 
       ObjectValue objectValue
-        = new ObjectExtJavaValue(this, parentJavaObject, _javaClassDef);
+        = new ObjectExtJavaValue(env, this, parentJavaObject, _javaClassDef);
 
       initObject(env, objectValue);
 
@@ -1242,7 +1242,7 @@ public class QuercusClass extends NullValue {
         return obj;
       }
       else if (_javaClassDef != null && _javaClassDef.isDelegate()) {
-        objectValue = new ObjectExtValue(this);
+        objectValue = new ObjectExtValue(env, this);
       }
       else if (_javaClassDef != null && _javaClassDef.isPhpClass()) {
         Object object = null;
@@ -1251,10 +1251,10 @@ public class QuercusClass extends NullValue {
         //Value javaWrapper = _javaClassDef.callNew(env, args);
         //object = javaWrapper.toJavaObject();
 
-        objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
+        objectValue = new ObjectExtJavaValue(env, this, object, _javaClassDef);
       }
       else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
-        objectValue = new ObjectExtJavaValue(this, null, _javaClassDef);
+        objectValue = new ObjectExtJavaValue(env, this, null, _javaClassDef);
       }
       else {
         objectValue = _classDef.newInstance(env, this);
