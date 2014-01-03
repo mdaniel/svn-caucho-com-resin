@@ -4652,10 +4652,22 @@ public class QuercusParser {
           if (ch == '=')
             return LSHIFT_ASSIGN;
           else if (ch == '<') {
-            return parseHeredocToken();
+            ch = read();
+
+            if (ch == '\'') {
+              return parseNowdoc();
+            }
+            else if (ch == '"') {
+              return parseHeredocToken(true);
+            }
+            else {
+              _peek = ch;
+              return parseHeredocToken(false);
+            }
           }
-          else
+          else {
             _peek = ch;
+          }
 
           return LSHIFT;
         }
@@ -5215,9 +5227,101 @@ public class QuercusParser {
   }
 
   /**
+   * Parses the nowdoc.
+   */
+  private int parseNowdoc()
+    throws IOException
+  {
+    _sb.setLength(0);
+    int ch;
+
+    while ((ch = read()) >= 0 && ch != '\'' && ! Character.isWhitespace(ch)) {
+      _sb.append((char) ch);
+    }
+
+    if (ch != '\'') {
+      throw expect("'", ch);
+    }
+
+    ch = read();
+
+    if (ch == '\r') {
+      ch = read();
+    }
+
+    if (ch != '\n') {
+      throw expect(L.l("nowdoc newline"), ch);
+    }
+
+    String nowdocName = _sb.toString();
+    _sb.setLength(0);
+
+    while ((ch = read()) >= 0) {
+      if (ch == '\r') {
+        if ((ch = read()) == '\n') {
+          if (parseNowdocEnd(nowdocName)) {
+            break;
+          }
+          else {
+            _sb.append('\r');
+            _sb.append((char) ch);
+          }
+        }
+        else {
+          _sb.append('\r');
+        }
+      }
+      else if (ch == '\n') {
+        if (parseNowdocEnd(nowdocName)) {
+          break;
+        }
+
+        _sb.append((char) ch);
+      }
+      else {
+        _sb.append((char) ch);
+      }
+    }
+
+    _lexeme = createStringValue(_sb.toString());
+
+    return STRING;
+  }
+
+  private boolean parseNowdocEnd(String nowdocName)
+    throws IOException
+  {
+    int i = 0;
+    int len = nowdocName.length();
+
+    int ch = read();
+    for (; i < len; i++) {
+      if (nowdocName.charAt(i) == ch) {
+        ch = read();
+
+        continue;
+      }
+      else {
+        break;
+      }
+    }
+
+    _peek = ch;
+
+    if (i == len) {
+      return true;
+    }
+    else {
+      _sb.append(nowdocName, 0, i);
+
+      return false;
+    }
+  }
+
+  /**
    * Parses the next heredoc token.
    */
-  private int parseHeredocToken()
+  private int parseHeredocToken(boolean isQuoted)
     throws IOException
   {
     _sb.setLength(0);
@@ -5229,21 +5333,35 @@ public class QuercusParser {
     }
     _peek = ch;
 
-    while ((ch = read()) >= 0 && ch != '\r' && ch != '\n') {
+    while ((ch = read()) >= 0
+           && ! Character.isWhitespace(ch)
+           && ! (isQuoted && ch == '"')) {
       _sb.append((char) ch);
     }
 
     _heredocEnd = _sb.toString();
 
-    if (ch == '\n') {
+    if (isQuoted && ch == '"') {
+      ch = read();
+
+      if (ch == '\r') {
+        ch = read();
+      }
+
+      if (ch != '\n') {
+        throw expect("\n", ch);
+      }
+    }
+    else if (ch == '\n') {
     }
     else if (ch == '\r') {
       ch = read();
       if (ch != '\n')
         _peek = ch;
     }
-    else
+    else {
       _peek = ch;
+    }
 
     return parseEscapedString('"');
   }

@@ -174,29 +174,40 @@ public class JdbcPreparedStatementResource
 
     for (int i = 0; i < size; i++) {
       ColumnType type = _types[i];
+      Value value = _params[i];
 
       if (type == ColumnType.BOOLEAN) {
-        _preparedStmt.setBoolean(i + 1, _params[i].toBoolean());
+        if (value.isDouble()) {
+          _preparedStmt.setDouble(i + 1, value.toDouble());
+        }
+        else {
+          _preparedStmt.setBoolean(i + 1, value.toBoolean());
+        }
       }
       else if (type == ColumnType.NULL) {
         _preparedStmt.setNull(i + 1, Types.NULL);
       }
       else if (type == ColumnType.LONG) {
-        _preparedStmt.setLong(i + 1, _params[i].toInt());
+        if (value.isDouble()) {
+          _preparedStmt.setDouble(i + 1, value.toDouble());
+        }
+        else {
+          _preparedStmt.setLong(i + 1, value.toLong());
+        }
       }
       else if (type == ColumnType.DOUBLE) {
-        _preparedStmt.setDouble(i + 1, _params[i].toDouble());
+        _preparedStmt.setDouble(i + 1, value.toDouble());
       }
       else if (type == ColumnType.BLOB) {
         // XXX: blob needs to be redone
         // Currently treated as a string
-        _preparedStmt.setString(i + 1, _params[i].toString());
+        _preparedStmt.setString(i + 1, value.toString());
       }
       else if (type == ColumnType.STRING) {
-        _preparedStmt.setString(i + 1, _params[i].toString());
+        _preparedStmt.setString(i + 1, value.toString());
       }
       else if (type == ColumnType.LOB) {
-        setLobParameter(env, i + 1, _params[i]);
+        setLobParameter(env, i + 1, value);
       }
       else {
         throw new SQLException("unknown type: " + type);
