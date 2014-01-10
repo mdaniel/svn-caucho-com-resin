@@ -120,8 +120,12 @@ public class DateModule extends AbstractQuercusModule {
    */
   public StringValue date(Env env,
                           StringValue format,
-                          @Optional("time()") long time)
+                          @Optional("-1") long time)
   {
+    if (time < 0) {
+      time = time(env);
+    }
+
     return date(env, format, time, false);
   }
 
@@ -130,7 +134,7 @@ public class DateModule extends AbstractQuercusModule {
    */
   public Value idate(Env env,
                      StringValue format,
-                     @Optional("time()") long time)
+                     @Optional("-1") long time)
   {
     if (format.length() != 1) {
       log.log(Level.FINE, L.l("idate format '{0}' needs to be of length one and only one",
@@ -140,6 +144,10 @@ public class DateModule extends AbstractQuercusModule {
                       format));
 
       return BooleanValue.FALSE;
+    }
+
+    if (time < 0) {
+      time = time(env);
     }
 
     switch (format.charAt(0)) {
@@ -304,8 +312,12 @@ public class DateModule extends AbstractQuercusModule {
    */
   public StringValue gmdate(Env env,
                             StringValue format,
-                            @Optional("time()") long time)
+                            @Optional("-1") long time)
   {
+    if (time < 0) {
+      time = time(env);
+    }
+
     return date(env, format, time, true);
   }
 
@@ -1172,7 +1184,7 @@ public class DateModule extends AbstractQuercusModule {
   {
     DateTimeZone dateTimeZone = new DateTimeZone(env);
     QDate qDate = new QDate(dateTimeZone.getTimeZone(), env.getCurrentTime());
-    
+
     DateParser parser = new DateParser(date, qDate);
     parser.parse();
 

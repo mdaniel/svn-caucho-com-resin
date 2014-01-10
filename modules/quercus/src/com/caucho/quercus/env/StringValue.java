@@ -2636,25 +2636,29 @@ abstract public class StringValue
   @Override
   public boolean equals(Object o)
   {
-    if (this == o)
+    if (this == o) {
       return true;
-    else if (! (o instanceof StringValue))
+    }
+    else if (! (o instanceof StringValue)) {
       return false;
+    }
 
     StringValue s = (StringValue) o;
 
-    if (s.isUnicode() != isUnicode())
-      return false;
+    //if (s.isUnicode() != isUnicode())
+    //  return false;
 
     int aLength = length();
     int bLength = s.length();
 
-    if (aLength != bLength)
+    if (aLength != bLength) {
       return false;
+    }
 
     for (int i = aLength - 1; i >= 0; i--) {
-      if (charAt(i) != s.charAt(i))
+      if (charAt(i) != s.charAt(i)) {
         return false;
+      }
     }
 
     return true;

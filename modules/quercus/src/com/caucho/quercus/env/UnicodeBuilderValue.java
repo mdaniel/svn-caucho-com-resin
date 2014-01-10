@@ -1249,27 +1249,48 @@ public class UnicodeBuilderValue
     }
 
     ValueType typeA = getValueType();
+
     if (typeA.isNumberCmp() && typeB.isNumberCmp()) {
       double l = toDouble();
       double r = rValue.toDouble();
 
       return l == r;
     }
-
-    if (rValue instanceof UnicodeBuilderValue) {
+    else if (rValue instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) rValue;
 
       int length = _length;
 
-      if (length != value._length)
+      if (length != value._length) {
         return false;
+      }
 
       char []bufferA = _buffer;
       char []bufferB = value._buffer;
 
       for (int i = length - 1; i >= 0; i--) {
-        if (bufferA[i] != bufferB[i])
+        if (bufferA[i] != bufferB[i]) {
           return false;
+        }
+      }
+
+      return true;
+    }
+    else if (rValue instanceof StringValue) {
+      StringValue value = (StringValue) rValue;
+
+      int length = _length;
+
+      if (length != value.length()) {
+        return false;
+      }
+
+      char []buffer = _buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (buffer[i] != value.charAt(i)) {
+          return false;
+        }
       }
 
       return true;
@@ -1297,16 +1318,18 @@ public class UnicodeBuilderValue
   @Override
   public boolean equals(Object o)
   {
-    if (o == this)
+    if (o == this) {
       return true;
+    }
 
     if (o instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) o;
 
       int length = _length;
 
-      if (length != value._length)
+      if (length != value._length) {
         return false;
+      }
 
       char []bufferA = _buffer;
       char []bufferB = value._buffer;
@@ -1314,6 +1337,25 @@ public class UnicodeBuilderValue
       for (int i = length - 1; i >= 0; i--) {
         if (bufferA[i] != bufferB[i])
           return false;
+      }
+
+      return true;
+    }
+    else if (o instanceof StringValue) {
+      StringValue str = (StringValue) o;
+
+      int len = _length;
+
+      if (len != str.length()) {
+        return false;
+      }
+
+      char []buffer = _buffer;
+
+      for (int i = len - 1; i >= 0; i--) {
+        if (buffer[i] != str.charAt(i)) {
+          return false;
+        }
       }
 
       return true;
@@ -1325,8 +1367,9 @@ public class UnicodeBuilderValue
       return value.equals(this);
     }
     */
-    else
+    else {
       return false;
+    }
   }
 
   @Override
@@ -1334,29 +1377,52 @@ public class UnicodeBuilderValue
   {
     o = o.toValue();
 
-    if (o == this)
+    if (o == this) {
       return true;
+    }
 
     if (o instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) o;
 
       int length = _length;
 
-      if (length != value._length)
+      if (length != value._length) {
         return false;
+      }
 
       char []bufferA = _buffer;
       char []bufferB = value._buffer;
 
       for (int i = length - 1; i >= 0; i--) {
-        if (bufferA[i] != bufferB[i])
+        if (bufferA[i] != bufferB[i]) {
           return false;
+        }
       }
 
       return true;
     }
-    else
+    else if (o instanceof StringValue) {
+      StringValue str = (StringValue) o;
+
+      int length = _length;
+
+      if (length != str.length()) {
+        return false;
+      }
+
+      char []buffer = _buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (buffer[i] != str.charAt(i)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
       return false;
+    }
   }
 
   private void readObject(ObjectInputStream in)
