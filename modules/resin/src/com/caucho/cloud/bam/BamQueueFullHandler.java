@@ -98,12 +98,11 @@ public class BamQueueFullHandler // implements QueueFullHandler
 
     String msg;
 
-    msg = L.l("Queue full in service {0}: queue-size={1}, timeout={2}ms, start={3}, now={4}, message={5}",
+    msg = L.l("Queue full in service {0}: queue-size={1}, timeout={2}ms, full-duration={3}ms, message={4}",
               service,
               queueSize,
               unit.toMillis(timeout),
-              firstSequenceTime,
-              now,
+              now - firstSequenceTime,
               message);
 
     if (repeatCount > 0) {
