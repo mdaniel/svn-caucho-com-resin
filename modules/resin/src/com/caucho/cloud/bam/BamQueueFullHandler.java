@@ -51,7 +51,7 @@ public class BamQueueFullHandler // implements QueueFullHandler
     = Logger.getLogger(BamQueueFullHandler.class.getName());
 
   private static final L10N L = new L10N(BamQueueFullHandler.class);
-  
+
   public static final BamQueueFullHandler DEFAULT = new BamQueueFullHandler(null);
 
   private final ResinSystem _resinSystem;
@@ -98,7 +98,7 @@ public class BamQueueFullHandler // implements QueueFullHandler
 
     String msg;
 
-    msg = L.l("Queue full in service {0} with queue-size {1} timeout {2}ms message {4}",
+    msg = L.l("Queue full in service {0} with queue-size {1} timeout {2}ms message {3}",
               service,
               queueSize,
               unit.toMillis(timeout),
