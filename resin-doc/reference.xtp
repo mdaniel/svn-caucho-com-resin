@@ -1880,7 +1880,7 @@ for ear expansion.</p>
   <th>Default</th>
 </tr>
 <tr>
-  <td>archive-path</td>
+  <td>archive-directory</td>
   <td>The path to the directory containing ear files</td>
   <td>path</td>
 </tr>
