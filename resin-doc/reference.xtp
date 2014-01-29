@@ -12023,8 +12023,8 @@ element servlet-mapping {
   &lt;/servlet&gt;
 
   &lt;servlet-mapping&gt;
-    &lt;url-pattern&gt;/hello.html&lt;/servlet-class&gt;
-    &lt;servlet-name&gt;hello&lt;/servlet-class&gt;
+    &lt;url-pattern&gt;/hello.html&lt;/url-pattern&gt;
+    &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
   &lt;/servlet-mapping&gt;
 
   &lt;!-- resin shortcut syntax --&gt;
