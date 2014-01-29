@@ -407,7 +407,7 @@ abstract public class ArrayValue extends Value {
         if (cls == null) {
           return false;
         }
-        else if (! obj.isA(cls)) {
+        else if (! obj.isA(env, cls)) {
           return false;
         }
 

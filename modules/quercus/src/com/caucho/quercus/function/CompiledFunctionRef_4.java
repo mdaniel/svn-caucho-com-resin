@@ -32,6 +32,7 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -44,32 +45,13 @@ abstract public class CompiledFunctionRef_4 extends CompiledFunctionRef {
     = Logger.getLogger(CompiledFunctionRef_4.class.getName());
   private static final L10N L = new L10N(CompiledFunctionRef_4.class);
 
-  private final String _name;
-  private final Expr _default_0;
-  private final Expr _default_1;
-  private final Expr _default_2;
-  private final Expr _default_3;
-
   public CompiledFunctionRef_4(String name,
-                               Expr default_0,
-                               Expr default_1,
-                               Expr default_2,
-                               Expr default_3)
+                               Arg default_0,
+                               Arg default_1,
+                               Arg default_2,
+                               Arg default_3)
   {
-    _name = name;
-    _default_0 = default_0;
-    _default_1 = default_1;
-    _default_2 = default_2;
-    _default_3 = default_3;
-  }
-
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, new Arg[] {default_0, default_1, default_2, default_3});
   }
 
   /**
@@ -94,29 +76,29 @@ abstract public class CompiledFunctionRef_4 extends CompiledFunctionRef {
     switch (argValues.length) {
     case 0:
       return callRef(env,
-                     _default_0.eval(env),
-                     _default_1.eval(env),
-                     _default_2.eval(env),
-                     _default_3.eval(env));
+                     _args[0].eval(env),
+                     _args[1].eval(env),
+                     _args[2].eval(env),
+                     _args[3].eval(env));
 
     case 1:
       return callRef(env,
                      argValues[0],
-                     _default_1.eval(env),
-                     _default_2.eval(env),
-                     _default_3.eval(env));
+                     _args[1].eval(env),
+                     _args[2].eval(env),
+                     _args[3].eval(env));
     case 2:
       return callRef(env,
                      argValues[0],
                      argValues[1],
-                     _default_2.eval(env),
-                     _default_3.eval(env));
+                     _args[2].eval(env),
+                     _args[3].eval(env));
     case 3:
       return callRef(env,
                      argValues[0],
                      argValues[1],
                      argValues[2],
-                     _default_3.eval(env));
+                     _args[3].eval(env));
     case 4:
     default:
       return callRef(env,
@@ -130,19 +112,19 @@ abstract public class CompiledFunctionRef_4 extends CompiledFunctionRef {
   public Value callRef(Env env)
   {
     return callRef(env,
-                   _default_0.eval(env),
-                   _default_1.eval(env),
-                   _default_2.eval(env),
-                   _default_3.eval(env));
+                   _args[0].eval(env),
+                   _args[1].eval(env),
+                   _args[2].eval(env),
+                   _args[3].eval(env));
   }
 
   public Value callRef(Env env, Value a1)
   {
     return callRef(env,
                    a1,
-                   _default_1.eval(env),
-                   _default_2.eval(env),
-                   _default_3.eval(env));
+                   _args[1].eval(env),
+                   _args[2].eval(env),
+                   _args[3].eval(env));
   }
 
   public Value callRef(Env env, Value a1, Value a2)
@@ -150,8 +132,8 @@ abstract public class CompiledFunctionRef_4 extends CompiledFunctionRef {
     return callRef(env,
                    a1,
                    a2,
-                   _default_2.eval(env),
-                   _default_3.eval(env));
+                   _args[2].eval(env),
+                   _args[3].eval(env));
   }
 
   public Value callRef(Env env, Value a1, Value a2, Value a3)
@@ -160,7 +142,7 @@ abstract public class CompiledFunctionRef_4 extends CompiledFunctionRef {
                     a1,
                     a2,
                     a3,
-                    _default_3.eval(env));
+                    _args[3].eval(env));
   }
 
   /**

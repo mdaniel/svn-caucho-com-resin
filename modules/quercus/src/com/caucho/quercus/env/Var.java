@@ -42,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.caucho.quercus.program.ClassField;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -195,9 +196,9 @@ public class Var extends Value
    * Returns true for an implementation of a class
    */
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    return _value.isA(name);
+    return _value.isA(env, name);
   }
 
   /**
@@ -1760,6 +1761,19 @@ public class Var extends Value
   }
 
   /**
+   * Appends a value to an array that is a field of an object.
+   */
+  @Override
+  public Value putThisFieldArray(Env env,
+                                 Value obj,
+                                 StringValue fieldName,
+                                 Value index,
+                                 Value value)
+  {
+    return _value.putThisFieldArray(env, obj, fieldName, index, value);
+  }
+
+  /**
    * Returns the field value as an object
    */
   @Override
@@ -1771,11 +1785,13 @@ public class Var extends Value
   /**
    * Initializes a new field, does not call __set if it is defined.
    */
-  public void initField(StringValue key,
-                        Value value,
-                        FieldVisibility visibility)
+  @Override
+  public void initField(Env env,
+                        StringValue name,
+                        StringValue canonicalName,
+                        Value value)
   {
-    _value.initField(key, value, visibility);
+    _value.initField(env, name, canonicalName, value);
   }
 
   /**
@@ -1803,6 +1819,15 @@ public class Var extends Value
   public void unsetThisField(StringValue name)
   {
     _value.unsetThisField(name);
+  }
+
+  /**
+   * Unsets the field.
+   */
+  @Override
+  public void unsetThisPrivateField(String className, StringValue name)
+  {
+    _value.unsetThisPrivateField(className, name);
   }
 
   /**

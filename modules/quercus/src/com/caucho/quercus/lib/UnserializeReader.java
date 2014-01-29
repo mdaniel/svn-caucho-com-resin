@@ -267,7 +267,7 @@ public final class UnserializeReader {
 
           Value value = unserialize(env);
 
-          obj.initField(key, value, visibility);
+          obj.initIncompleteField(env, key, value, visibility);
         }
 
         expect('}');

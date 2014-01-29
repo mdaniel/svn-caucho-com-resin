@@ -713,9 +713,9 @@ abstract public class JavaAdapter extends ArrayValue
   }
 
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    return _classDef.isA(name);
+    return _classDef.isA(env, name);
   }
 
   /**

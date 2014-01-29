@@ -161,6 +161,20 @@ abstract public class ClassDef {
     _traitList = traitList;
   }
 
+  /**
+   * Returns true if this class locally declares usage of this trait.
+   */
+  public boolean hasTrait(String traitName)
+  {
+    for (String trait : _traitList) {
+      if (trait.equals(traitName)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public final TraitInsteadofMap getTraitInsteadofMap()
   {
     return _traitInsteadofMap;
@@ -374,14 +388,16 @@ abstract public class ClassDef {
   /**
    * Returns value for instanceof.
    */
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    if (_name.equalsIgnoreCase(name))
+    if (_name.equalsIgnoreCase(name)) {
       return true;
+    }
 
     for (int i = 0; i < _ifaceList.length; i++) {
-      if (_ifaceList[i].equalsIgnoreCase(name))
+      if (_ifaceList[i].equalsIgnoreCase(name)) {
         return true;
+      }
     }
 
     return false;
@@ -433,7 +449,7 @@ abstract public class ClassDef {
            + "[" + _name + "]";
   }
 
-  public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
+  public Set<Map.Entry<StringValue,ClassField>> fieldSet()
   {
     return null;
   }

@@ -45,17 +45,13 @@ import com.caucho.quercus.parser.QuercusParser;
 public class ThisFieldVarExpr extends AbstractVarExpr {
   protected final ThisExpr _qThis;
   protected final Expr _nameExpr;
-  protected final boolean _isInStaticClassScope;
 
-  public ThisFieldVarExpr(Location location, ThisExpr qThis, Expr nameExpr,
-                          boolean isInStaticClassScope)
+  public ThisFieldVarExpr(Location location, ThisExpr qThis, Expr nameExpr)
   {
     super(location);
 
     _qThis = qThis;
     _nameExpr = nameExpr;
-
-    _isInStaticClassScope = isInStaticClassScope;
   }
 
   //
@@ -73,8 +69,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     ExprFactory factory = parser.getExprFactory();
 
-    return factory.createThisMethod(location, _qThis, _nameExpr, args,
-                                    _isInStaticClassScope);
+    return factory.createThisMethod(location, _qThis, _nameExpr, args);
   }
 
   /**

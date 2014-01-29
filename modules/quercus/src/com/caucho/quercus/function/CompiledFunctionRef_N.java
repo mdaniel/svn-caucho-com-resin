@@ -33,6 +33,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ParamRequiredExpr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -45,34 +46,24 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
     = Logger.getLogger(CompiledFunctionRef_N.class.getName());
   private static final L10N L = new L10N(CompiledFunctionRef_N.class);
 
-  private final String _name;
-  protected final Expr []_defaultArgs;
   private final int _requiredArgs;
 
-  public CompiledFunctionRef_N(String name, Expr []defaultArgs)
+  public CompiledFunctionRef_N(String name, Arg []defaultArgs)
   {
-    _name = name;
-    _defaultArgs = defaultArgs;
-    
+    super(name, defaultArgs);
+
     int requiredArgs = 0;
-    
-    for (int i = 0; i < _defaultArgs.length; i++) {
-      if (_defaultArgs[i] == ParamRequiredExpr.REQUIRED)
+
+    for (int i = 0; i < defaultArgs.length; i++) {
+      if (defaultArgs[i].isRequired()) {
         requiredArgs++;
-      else
+      }
+      else {
         break;
+      }
     }
-    
+
     _requiredArgs = requiredArgs;
-  }
-  
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
   }
 
   /**
@@ -93,10 +84,10 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
 
     if (_defaultArgs.length != argValues.length) {
       int len = _defaultArgs.length;
-      
+
       if (len < argValues.length)
         len = argValues.length;
-	
+
       args = new Value[len];
 
       System.arraycopy(argValues, 0, args, 0, argValues.length);
@@ -109,13 +100,13 @@ abstract public class CompiledFunctionRef_N extends CompiledFunctionRef {
 
     if (argValues.length < _requiredArgs) {
       env.warning("required argument missing");
-    } 
-    
+    }
+
     return callRefImpl(env, argValues);
   }
 
   abstract public Value callRefImpl(Env env, Value []args);
-  
+
   public String toString()
   {
     return "CompiledFunction_N[" + _name + "]";

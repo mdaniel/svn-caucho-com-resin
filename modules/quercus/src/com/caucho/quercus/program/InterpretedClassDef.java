@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,7 +31,6 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.FieldVisibility;
-import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
@@ -40,7 +39,6 @@ import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusException;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;
@@ -54,14 +52,14 @@ import java.util.Set;
 public class InterpretedClassDef extends ClassDef
   implements InstanceInitializer
 {
-  private static final L10N L = new L10N(InterpretedClassDef.class);
-
   protected boolean _isAbstract;
   protected boolean _isInterface;
   protected boolean _isTrait;
   protected boolean _isFinal;
 
-  protected boolean _hasNonPublicMethods;
+  protected boolean _hasPublicMethods;
+  protected boolean _hasProtectedMethods;
+  protected boolean _hasPrivateMethods;
 
   // true if defined in the top scope of a page
   private boolean _isTopScope;
@@ -69,8 +67,8 @@ public class InterpretedClassDef extends ClassDef
   protected final HashMap<StringValue,AbstractFunction> _functionMap
     = new HashMap<StringValue,AbstractFunction>();
 
-  protected final LinkedHashMap<StringValue,FieldEntry> _fieldMap
-    = new LinkedHashMap<StringValue,FieldEntry>();
+  protected final LinkedHashMap<StringValue,ClassField> _fieldMap
+    = new LinkedHashMap<StringValue,ClassField>();
 
   protected final LinkedHashMap<StringValue,StaticFieldEntry> _staticFieldMap
     = new LinkedHashMap<StringValue,StaticFieldEntry>();
@@ -199,11 +197,27 @@ public class InterpretedClassDef extends ClassDef
   }
 
   /**
+   * Returns true if class has public methods.
+   */
+  public boolean hasPublicMethods()
+  {
+    return _hasPublicMethods;
+  }
+
+  /**
    * Returns true if class has protected or private methods.
    */
-  public boolean getHasNonPublicMethods()
+  public boolean hasProtectedMethods()
   {
-    return _hasNonPublicMethods;
+    return _hasProtectedMethods;
+  }
+
+  /**
+   * Returns true if the class has private methods.
+   */
+  public boolean hasPrivateMethods()
+  {
+    return _hasPrivateMethods;
   }
 
   /**
@@ -232,6 +246,14 @@ public class InterpretedClassDef extends ClassDef
     name = name.replace("\\", "__");
 
     return name + "_" + _parseIndex;
+  }
+
+  /**
+   * Unique instance name for the compiled class.
+   */
+  public String getCompilationInstanceName()
+  {
+    return "q_cl_" + getCompilationName();
   }
 
   /**
@@ -305,23 +327,17 @@ public class InterpretedClassDef extends ClassDef
   public void initClassFields(QuercusClass cl, String declaringClassName)
   {
     if (isTrait()) {
-      for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
-        FieldEntry fieldEntry = entry.getValue();
+      for (Map.Entry<StringValue,ClassField> entry : _fieldMap.entrySet()) {
+        ClassField field = entry.getValue();
 
-        cl.addTraitField(getName(),
-                         entry.getKey(),
-                         fieldEntry.getValue(),
-                         fieldEntry.getVisibility());
+        cl.addTraitField(field);
       }
     }
     else {
-      for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
-        FieldEntry fieldEntry = entry.getValue();
+      for (Map.Entry<StringValue,ClassField> entry : _fieldMap.entrySet()) {
+        ClassField field = entry.getValue();
 
-        cl.addField(getName(),
-                    entry.getKey(),
-                    fieldEntry.getValue(),
-                    fieldEntry.getVisibility());
+        cl.addField(field);
       }
     }
 
@@ -374,33 +390,51 @@ public class InterpretedClassDef extends ClassDef
   {
     _functionMap.put(name, fun);
 
-    if (! fun.isPublic()) {
-      _hasNonPublicMethods = true;
+    if (fun.isPublic()) {
+      _hasPublicMethods = true;
     }
 
-    if (name.equalsString("__construct"))
+    if (fun.isProtected()) {
+      _hasProtectedMethods = true;
+    }
+
+    if (fun.isPrivate()) {
+      _hasPrivateMethods = true;
+    }
+
+    if (name.equalsString("__construct")) {
       _constructor = fun;
-    else if (name.equalsString("__destruct"))
+    }
+    else if (name.equalsString("__destruct")) {
       _destructor = fun;
-    else if (name.equalsString("__get"))
+    }
+    else if (name.equalsString("__get")) {
       _getField = fun;
-    else if (name.equalsString("__set"))
+    }
+    else if (name.equalsString("__set")) {
       _setField = fun;
-    else if (name.equalsString("__call"))
+    }
+    else if (name.equalsString("__call")) {
       _call = fun;
+    }
     else if (name.equalsString("__callStatic")) {
       _callStatic = fun;
     }
-    else if (name.equalsString("__invoke"))
+    else if (name.equalsString("__invoke")) {
       _invoke = fun;
-    else if (name.equalsString("__toString"))
+    }
+    else if (name.equalsString("__toString")) {
       _toString = fun;
-    else if (name.equalsString("__isset"))
+    }
+    else if (name.equalsString("__isset")) {
       _isset = fun;
-    else if (name.equalsString("__unset"))
+    }
+    else if (name.equalsString("__unset")) {
       _unset = fun;
-    else if (name.equalsStringIgnoreCase(getName()) && _constructor == null)
+    }
+    else if (name.equalsStringIgnoreCase(getName()) && _constructor == null) {
       _constructor = fun;
+    }
   }
 
   /**
@@ -438,34 +472,29 @@ public class InterpretedClassDef extends ClassDef
   /**
    * Adds a value.
    */
-  public void addValue(Value name, Expr value, FieldVisibility visibility)
+  public void addClassField(StringValue name,
+                            Expr value,
+                            FieldVisibility visibility,
+                            String comment)
   {
-    _fieldMap.put(name.toStringValue(), new FieldEntry(value, visibility));
+    ClassField field = new ClassField(name,
+                                      getName(),
+                                      value,
+                                      visibility,
+                                      comment,
+                                      isTrait());
+
+    _fieldMap.put(name, field);
   }
 
   /**
    * Adds a value.
    */
-  public void addValue(Value name,
-                       Expr value,
-                       FieldVisibility visibility,
-                       String comment)
+  public ClassField getClassField(StringValue name)
   {
-    _fieldMap.put(name.toStringValue(),
-                  new FieldEntry(value, visibility, comment));
-  }
+    ClassField field = _fieldMap.get(name);
 
-  /**
-   * Adds a value.
-   */
-  public Expr get(Value name)
-  {
-    FieldEntry entry = _fieldMap.get(name.toStringValue());
-
-    if (entry != null)
-      return entry.getValue();
-    else
-      return null;
+    return field;
   }
 
   /**
@@ -501,12 +530,10 @@ public class InterpretedClassDef extends ClassDef
   {
     ObjectValue object = (ObjectValue) value;
 
-    for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
-      FieldEntry fieldEntry = entry.getValue();
+    for (Map.Entry<StringValue,ClassField> entry : _fieldMap.entrySet()) {
+      ClassField field = entry.getValue();
 
-      object.initField(entry.getKey(),
-                       fieldEntry.getValue().eval(env).copy(),
-                       fieldEntry.getVisibility());
+      object.initField(env, field);
     }
 
     if (_destructor != null) {
@@ -545,7 +572,7 @@ public class InterpretedClassDef extends ClassDef
   @Override
   public String getFieldComment(StringValue name)
   {
-    FieldEntry field = _fieldMap.get(name);
+    ClassField field = _fieldMap.get(name);
 
     if (field != null)
       return field.getComment();
@@ -567,9 +594,15 @@ public class InterpretedClassDef extends ClassDef
       return null;
   }
 
-  public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
+  @Override
+  public Set<Map.Entry<StringValue,ClassField>> fieldSet()
   {
     return _fieldMap.entrySet();
+  }
+
+  public ClassField getField(StringValue name)
+  {
+    return _fieldMap.get(name);
   }
 
   @Override
@@ -582,6 +615,16 @@ public class InterpretedClassDef extends ClassDef
   public Set<Map.Entry<StringValue, AbstractFunction>> functionSet()
   {
     return _functionMap.entrySet();
+  }
+
+  public AbstractFunction getFunction(StringValue name)
+  {
+    return _functionMap.get(name);
+  }
+
+  public HashMap<StringValue,AbstractFunction> getFunctionMap()
+  {
+    return _functionMap;
   }
 }
 

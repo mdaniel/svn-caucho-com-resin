@@ -32,15 +32,19 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.Arg;
 
 /**
  * Represents a compiled function
  */
 @SuppressWarnings("serial")
-abstract public class CompiledFunction extends AbstractFunction {
+abstract public class CompiledFunction extends CompiledAbstractFunction {
 
-  @Override
-  public abstract String getName();
+  public CompiledFunction(String name,
+                          Arg []args)
+  {
+    super(name, args);
+  }
 
   @Override
   public Value callRef(Env env, Value []argValues)

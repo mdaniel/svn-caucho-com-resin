@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.TraitAliasMap;
@@ -233,9 +235,8 @@ public class QuercusClass extends NullValue {
       QuercusClass cls;
 
       // XXX: php/0cn2, but this is wrong:
-      cls = Env.getInstance().findClass(iface,
-                                        ! isJavaClassDef,
-                                        true);
+      cls = Env.getInstance().findClass(iface, -1,
+                                        ! isJavaClassDef, true, true);
 
       if (cls == null) {
         throw new QuercusRuntimeException(L.l("cannot find interface {0}",
@@ -386,6 +387,22 @@ public class QuercusClass extends NullValue {
   }
 
   /**
+   * Returns the parent context for the trait.
+   */
+  public QuercusClass getTraitParent(Env env, String traitName)
+  {
+    if (_classDef.hasTrait(traitName)) {
+      return _parent;
+    }
+    else if (_parent != null) {
+      return _parent.getTraitParent(env, traitName);
+    }
+    else {
+      throw new QuercusException("this scope does not have a parent");
+    }
+  }
+
+  /**
    * Returns the module context.
    */
   public ModuleContext getModuleContext()
@@ -393,7 +410,7 @@ public class QuercusClass extends NullValue {
     return _moduleContext;
   }
 
-  /*
+  /**
    * Returns the class definitions for this class.
    */
   public ClassDef []getClassDefList()
@@ -658,13 +675,11 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a field.
    */
-  public void addField(String declaringClassName,
-                       StringValue name,
-                       Expr initExpr,
-                       FieldVisibility visibility)
+  public void addField(ClassField field)
   {
-    ClassField field = new ClassField(declaringClassName, name,
-                                      initExpr, visibility);
+    StringValue name = field.getName();
+
+    //ClassField existingField = _fieldMap.get(name);
 
     _fieldMap.put(name, field);
   }
@@ -672,25 +687,20 @@ public class QuercusClass extends NullValue {
   /**
    * Adds a trait field.
    */
-  public void addTraitField(String declaringClassName,
-                            StringValue name,
-                            Expr initExpr,
-                            FieldVisibility visibility)
+  public void addTraitField(ClassField field)
   {
+    StringValue name = field.getName();
+
     ClassField existingField = _fieldMap.get(name);
 
     if (existingField != null
-        && ! existingField.getInitValue().equals(initExpr)) {
+        && ! existingField.getInitExpr().equals(field.getInitExpr())) {
       Env env = Env.getInstance();
       throw env.createErrorException(L.l("trait field {0}->{1} conflicts with class field {2}->{1}.",
-                                         declaringClassName,
+                                         field.getDeclaringClassName(),
                                          name,
                                          getName()));
     }
-
-    boolean isTraitField = true;
-    ClassField field = new ClassField(declaringClassName, name,
-                                      initExpr, visibility, isTraitField);
 
     _fieldMap.put(name, field);
   }
@@ -1289,9 +1299,21 @@ public class QuercusClass extends NullValue {
    * Returns true for an implementation of a class
    */
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    return _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));
+    boolean isA = _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));
+
+    if (isA) {
+      return true;
+    }
+
+    QuercusClass cls = env.findClassByAlias(name);
+
+    if (cls == null) {
+      return false;
+    }
+
+    return isA(env, cls.getName());
   }
 
   /**
@@ -1396,7 +1418,7 @@ public class QuercusClass extends NullValue {
             return v_current;
         }
         if(_fieldGet == null){
-            return ((ClassField) _fieldMap.get(name)).getInitValue().eval(env);
+            return ((ClassField) _fieldMap.get(name)).getInitExpr().eval(env);
         }
     }
 

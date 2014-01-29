@@ -50,6 +50,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.marshal.Marshal;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
@@ -125,7 +126,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for an implementation of a class
    */
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
     return false;
   }
@@ -133,18 +134,18 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for an implementation of a class
    */
-  final public boolean isA(Value value)
+  final public boolean isA(Env env, Value value)
   {
     if (value.isObject()) {
       // php/03p7
-      return isA(value.getClassName());
+      return isA(env, value.getClassName());
     }
     else if (value instanceof QuercusClass) {
       // php/1277
-      return isA(value.getClassName());
+      return isA(env, value.getClassName());
     }
     else {
-      return isA(value.toJavaString());
+      return isA(env, value.toJavaString());
     }
   }
 
@@ -2448,6 +2449,19 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Appends a value to an array that is a field of an object.
+   */
+  public Value putThisFieldArray(Env env,
+                                   Value obj,
+                                   StringValue fieldName,
+                                   Value index,
+                                   Value value)
+  {
+    // php/03mm
+    return put(index, value);
+  }
+
+  /**
    * Returns the field as a Var or Value.
    */
   public Value getThisField(Env env, StringValue name)
@@ -2515,27 +2529,37 @@ abstract public class Value implements java.io.Serializable
     }
   }
 
-  /**
-   * Appends a value to an array that is a field of an object.
-   */
-  public Value putThisFieldArray(Env env,
-                                   Value obj,
-                                   StringValue fieldName,
-                                   Value index,
-                                   Value value)
+  public final void initField(Env env, ClassField field)
   {
-    // php/03mm
-    return put(index, value);
+    initField(env,
+              field.getName(),
+              field.getCanonicalName(),
+              field.evalInitExpr(env));
   }
 
-  /**
-   * Initializes a new field, does not call __set if it is defined.
-   */
-  public void initField(StringValue key,
-                        Value value,
-                        FieldVisibility visibility)
+  public final void initField(Env env,
+                              StringValue canonicalName,
+                              Value value)
   {
-    putThisField(Env.getInstance(), key, value);
+    StringValue name = ClassField.getOrdinaryName(canonicalName);
+
+    initField(env, name, canonicalName, value);
+  }
+
+  public void initField(Env env,
+                        StringValue name,
+                        StringValue canonicalName,
+                        Value value)
+  {
+    putThisField(env, canonicalName, value);
+  }
+
+  public void initIncompleteField(Env env,
+                                  StringValue name,
+                                  Value value,
+                                  FieldVisibility visibility)
+  {
+    putThisField(env, name, value);
   }
 
   /**
@@ -2574,6 +2598,14 @@ abstract public class Value implements java.io.Serializable
    * Removes the field ref.
    */
   public void unsetThisField(StringValue name)
+  {
+    unsetField(name);
+  }
+
+  /**
+   * Removes the field ref.
+   */
+  public void unsetThisPrivateField(String className, StringValue name)
   {
     unsetField(name);
   }

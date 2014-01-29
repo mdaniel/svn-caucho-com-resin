@@ -32,6 +32,7 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -44,20 +45,9 @@ abstract public class CompiledFunction_0 extends CompiledFunction {
     = Logger.getLogger(CompiledFunction_0.class.getName());
   private static final L10N L = new L10N(CompiledFunction_0.class);
 
-  private String _name;
-
   public CompiledFunction_0(String name)
   {
-    _name = name;
-  }
-
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, AbstractFunction.NULL_ARGS);
   }
 
   /**

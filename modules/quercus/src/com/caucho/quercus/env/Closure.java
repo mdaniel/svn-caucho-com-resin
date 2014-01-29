@@ -107,14 +107,9 @@ abstract public class Closure extends Callback
   }
 
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    if ("Closure".equalsIgnoreCase(name)) {
-      return true;
-    }
-    else {
-      return super.isA(name);
-    }
+    return "Closure".equalsIgnoreCase(name);
   }
 
   public Var getStaticVar(StringValue name)

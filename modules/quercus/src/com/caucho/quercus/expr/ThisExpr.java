@@ -44,28 +44,16 @@ import com.caucho.util.L10N;
 public class ThisExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(Expr.class);
 
-  protected final InterpretedClassDef _quercusClass;
+  protected final InterpretedClassDef _classDef;
 
-  public ThisExpr(InterpretedClassDef quercusClass)
+  public ThisExpr(InterpretedClassDef classDef)
   {
-    _quercusClass = quercusClass;
+    _classDef = classDef;
   }
 
-  public InterpretedClassDef getQuercusClass()
+  public InterpretedClassDef getClassDef()
   {
-    return _quercusClass;
-  }
-
-  /**
-   * Creates a field ref
-   */
-  @Override
-  public Expr createFieldGet(ExprFactory factory,
-                             Location location,
-                             StringValue name,
-                             boolean isInStaticClassScope)
-  {
-    return factory.createThisField(location, this, name, isInStaticClassScope);
+    return _classDef;
   }
 
   /**
@@ -74,10 +62,20 @@ public class ThisExpr extends AbstractVarExpr {
   @Override
   public Expr createFieldGet(ExprFactory factory,
                              Location location,
-                             Expr name,
-                             boolean isInStaticClassScope)
+                             StringValue name)
   {
-    return factory.createThisField(location, this, name, isInStaticClassScope);
+    return factory.createThisField(location, this, name);
+  }
+
+  /**
+   * Creates a field ref
+   */
+  @Override
+  public Expr createFieldGet(ExprFactory factory,
+                             Location location,
+                             Expr name)
+  {
+    return factory.createThisField(location, this, name);
   }
 
   /**

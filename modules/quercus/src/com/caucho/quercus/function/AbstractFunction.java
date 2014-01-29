@@ -48,7 +48,7 @@ import com.caucho.util.L10N;
 abstract public class AbstractFunction extends Callback {
   private static final L10N L = new L10N(AbstractFunction.class);
 
-  private static final Arg []NULL_ARGS = new Arg[0];
+  public static final Arg []NULL_ARGS = new Arg[0];
   private static final Value []NULL_ARG_VALUES = new Value[0];
 
   private final Location _location;

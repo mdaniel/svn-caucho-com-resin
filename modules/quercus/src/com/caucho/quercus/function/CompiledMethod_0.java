@@ -44,20 +44,9 @@ abstract public class CompiledMethod_0 extends CompiledMethod {
     = Logger.getLogger(CompiledMethod_0.class.getName());
   private static final L10N L = new L10N(CompiledMethod_0.class);
 
-  private String _name;
-
   public CompiledMethod_0(String name)
   {
-    _name = name;
-  }
-
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, AbstractFunction.NULL_ARGS);
   }
 
   /**

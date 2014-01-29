@@ -90,7 +90,7 @@ public class ConstExpr extends Expr {
       }
       else {
         // trait's parent is not known at parse time
-        return factory.createParentClassConst(name);
+        return factory.createTraitParentClassConst(parser.getClassName(), name);
       }
     }
     else if ("static".equals(specialClassName)) {

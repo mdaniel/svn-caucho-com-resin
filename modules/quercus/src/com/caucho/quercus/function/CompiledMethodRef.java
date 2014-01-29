@@ -32,11 +32,19 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.Arg;
 
 /**
  * Represents a compiled function with 1 arg
  */
-abstract public class CompiledMethodRef extends AbstractFunction {
+abstract public class CompiledMethodRef extends CompiledAbstractFunction {
+
+  public CompiledMethodRef(String name,
+                           Arg []args)
+  {
+    super(name, args);
+  }
+
   /**
    * Evaluates the method as a static function
    */
@@ -47,7 +55,7 @@ abstract public class CompiledMethodRef extends AbstractFunction {
   }
 
   @Override
-  public Value callMethod(Env env, 
+  public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
                           Value []args)
@@ -74,7 +82,7 @@ abstract public class CompiledMethodRef extends AbstractFunction {
   }
 
   @Override
-  public Value callMethod(Env env, 
+  public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
                           Value a1, Value a2)
@@ -83,7 +91,7 @@ abstract public class CompiledMethodRef extends AbstractFunction {
   }
 
   @Override
-  public Value callMethod(Env env, 
+  public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
                           Value a1, Value a2, Value a3)
@@ -92,7 +100,7 @@ abstract public class CompiledMethodRef extends AbstractFunction {
   }
 
   @Override
-  public Value callMethod(Env env, 
+  public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
                           Value a1, Value a2, Value a3, Value a4)
@@ -101,7 +109,7 @@ abstract public class CompiledMethodRef extends AbstractFunction {
   }
 
   @Override
-  public Value callMethod(Env env, 
+  public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
                           Value a1, Value a2, Value a3, Value a4, Value a5)

@@ -35,6 +35,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -69,7 +70,7 @@ public class ClassesModule extends AbstractQuercusModule {
     }
   }
 
-  /*
+  /**
    * Calls a object method with arguments in an array.
    */
   public static Value call_user_method_array(Env env,
@@ -83,6 +84,34 @@ public class ClassesModule extends AbstractQuercusModule {
   }
 
   /**
+   * bool class_alias ( string $original , string $alias [, bool $autoload = TRUE ] )
+   */
+  public boolean class_alias(Env env,
+                             String original, String alias,
+                             @Optional("true") boolean isAutoLoad)
+  {
+    QuercusClass aliasCls = env.findClass(alias, -1, false, true, true);
+
+    if (aliasCls != null) {
+      env.warning(L.l("cannot redeclare class {0}", alias));
+
+      return false;
+    }
+
+    QuercusClass cls = env.findClass(original, -1, isAutoLoad, true, true);
+
+    if (cls == null) {
+      env.warning(L.l("original class not found {0}", original));
+
+      return false;
+    }
+
+    env.addClassAlias(alias, cls);
+
+    return true;
+  }
+
+  /**
    * returns true if the class exists.
    */
   public static boolean class_exists(Env env,
@@ -92,7 +121,7 @@ public class ClassesModule extends AbstractQuercusModule {
     if (className == null)
       return false;
 
-    QuercusClass cl =  env.findClass(className, useAutoload, true);
+    QuercusClass cl =  env.findClass(className, -1, useAutoload, true, true);
 
     // php/[03]9m1
     return cl != null && ! cl.isInterface();
@@ -200,7 +229,7 @@ public class ClassesModule extends AbstractQuercusModule {
     for (ClassField field : cl.getClassFields().values()) {
       if (field.isPublic()) {
         StringValue name = field.getName();
-        Expr initValue = field.getInitValue();
+        Expr initValue = field.getInitExpr();
 
         Value value = initValue.eval(env);
 
@@ -286,7 +315,7 @@ public class ClassesModule extends AbstractQuercusModule {
                                   String interfaceName,
                                   @Optional("true") boolean useAutoload)
   {
-    QuercusClass cl =  env.findClass(interfaceName, useAutoload, true);
+    QuercusClass cl =  env.findClass(interfaceName, -1, useAutoload, true, true);
 
     // php/[03]9m0
     return cl != null && cl.isInterface();
@@ -295,9 +324,9 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns true if the object implements the given class.
    */
-  public static boolean is_a(@ReadOnly Value value, String name)
+  public static boolean is_a(Env env, @ReadOnly Value value, String name)
   {
-    return value.isA(name);
+    return value.isA(env, name);
   }
 
   /**
@@ -318,10 +347,10 @@ public class ClassesModule extends AbstractQuercusModule {
     if (value.isString()) {
       QuercusClass cl = env.findClass(value.toString());
 
-      return cl.isA(name) && ! cl.getName().equalsIgnoreCase(name);
+      return cl.isA(env, name) && ! cl.getName().equalsIgnoreCase(name);
     }
     else {
-      return value.isA(name) && ! value.getClassName().equalsIgnoreCase(name);
+      return value.isA(env, name) && ! value.getClassName().equalsIgnoreCase(name);
     }
   }
 

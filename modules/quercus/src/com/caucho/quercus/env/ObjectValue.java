@@ -29,9 +29,11 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.expr.LiteralNullExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.quercus.program.Arg;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -309,9 +311,9 @@ abstract public class ObjectValue extends Callback {
    * Returns true for an implementation of a class
    */
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    return _quercusClass.isA(name);
+    return _quercusClass.isA(env, name);
   }
 
   /**
@@ -644,11 +646,21 @@ abstract public class ObjectValue extends Callback {
    * Initializes a new field, does not call __set if it is defined.
    */
   @Override
-  public void initField(StringValue key,
-                        Value value,
-                        FieldVisibility visibility)
+  public void initField(Env env,
+                        StringValue name,
+                        StringValue canonicalName,
+                        Value value)
   {
-    putThisField(Env.getInstance(), key, value);
+    putThisField(env, canonicalName, value);
+  }
+
+  @Override
+  public void initIncompleteField(Env env,
+                                  StringValue name,
+                                  Value value,
+                                  FieldVisibility visibility)
+  {
+    initField(env, name, value);
   }
 
   /**

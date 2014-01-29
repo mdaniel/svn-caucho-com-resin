@@ -61,11 +61,6 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
     args.toArray(_args);
   }
 
-  public ObjectMethodExpr(Expr objExpr, StringValue name, ArrayList<Expr> args)
-  {
-    this(Location.UNKNOWN, objExpr, name, args);
-  }
-
   public String getName()
   {
     return _methodName.toString();
@@ -81,8 +76,6 @@ public class ObjectMethodExpr extends AbstractMethodExpr {
   @Override
   public Value eval(Env env)
   {
-    env.checkTimeout();
-
     Value obj = _objExpr.eval(env);
 
     StringValue methodName = _methodName;

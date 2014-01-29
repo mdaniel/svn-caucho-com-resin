@@ -39,7 +39,6 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ClassField;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.env.ObjectValue;
@@ -50,6 +49,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.util.L10N;
 
 public class ReflectionClass
@@ -194,10 +194,12 @@ public class ReflectionClass
   {
     AbstractFunction cons = _cls.getConstructor();
 
-    if (cons != null)
+    if (cons != null) {
       return new ReflectionMethod(_name, cons);
-    else
+    }
+    else {
       return null;
+    }
   }
 
   public boolean hasMethod(StringValue name)
@@ -403,16 +405,19 @@ public class ReflectionClass
   {
     String clsName;
 
-    if (obj instanceof ReflectionClass)
+    if (obj instanceof ReflectionClass) {
       clsName = ((ReflectionClass) obj).getName();
-    else
+    }
+    else {
       clsName = obj.toString();
+    }
 
     // php/520p
-    if (_cls.getName().equals(clsName))
+    if (_cls.getName().equals(clsName)) {
       return false;
+    }
 
-    return _cls.isA(clsName);
+    return _cls.isA(env, clsName);
   }
 
   public ArrayValue getStaticProperties(Env env)
@@ -472,7 +477,7 @@ public class ReflectionClass
 
     HashMap<StringValue, ClassField> fieldMap = _cls.getClassFields();
     for (Map.Entry<StringValue, ClassField> entry : fieldMap.entrySet()) {
-      Expr initExpr = entry.getValue().getInitValue();
+      Expr initExpr = entry.getValue().getInitExpr();
 
       array.put(entry.getKey(), initExpr.eval(env));
     }

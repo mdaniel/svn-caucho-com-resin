@@ -245,10 +245,9 @@ public class ExprFactory {
    */
   public ThisFieldExpr createThisField(Location location,
                                        ThisExpr qThis,
-                                       StringValue name,
-                                       boolean isInStaticClassScope)
+                                       StringValue name)
   {
-    return new ThisFieldExpr(location, qThis, name, isInStaticClassScope);
+    return new ThisFieldExpr(location, qThis, name);
   }
 
   /**
@@ -256,10 +255,9 @@ public class ExprFactory {
    */
   public ThisFieldVarExpr createThisField(Location location,
                                           ThisExpr qThis,
-                                          Expr name,
-                                          boolean isInStaticClassScope)
+                                          Expr name)
   {
-    return new ThisFieldVarExpr(location, qThis, name, isInStaticClassScope);
+    return new ThisFieldVarExpr(location, qThis, name);
   }
 
   /**
@@ -268,11 +266,9 @@ public class ExprFactory {
   public Expr createThisMethod(Location loc,
                                ThisExpr qThis,
                                StringValue methodName,
-                               ArrayList<Expr> args,
-                               boolean isInStaticClassScope)
+                               ArrayList<Expr> args)
   {
-    return new ThisMethodExpr(loc, qThis, methodName, args,
-                              isInStaticClassScope);
+    return new ThisMethodExpr(loc, qThis, methodName, args);
   }
 
   /**
@@ -281,11 +277,9 @@ public class ExprFactory {
   public Expr createThisMethod(Location loc,
                                ThisExpr qThis,
                                Expr methodName,
-                               ArrayList<Expr> args,
-                               boolean isInStaticClassScope)
+                               ArrayList<Expr> args)
   {
-    return new ThisMethodVarExpr(loc, qThis, methodName, args,
-                                 isInStaticClassScope);
+    return new ThisMethodVarExpr(loc, qThis, methodName, args);
   }
 
   //
@@ -303,9 +297,10 @@ public class ExprFactory {
   /**
    * Creates a parent const expression.
    */
-  public ParentClassConstExpr createParentClassConst(StringValue name)
+  public TraitParentClassConstExpr createTraitParentClassConst(String traitName,
+                                                               StringValue name)
   {
-    return new ParentClassConstExpr(name);
+    return new TraitParentClassConstExpr(traitName, name);
   }
 
   /**
@@ -1028,6 +1023,12 @@ public class ExprFactory {
   {
     Location loc = parser.getLocation();
 
+    StringValue systemName = parser.getSystemFunctionName(name);
+
+    if (systemName != null) {
+      name = systemName;
+    }
+
     if (name.equalsString("isset") && args.size() == 1)
       return new FunIssetExpr(args.get(0));
     else if (name.equalsString("get_called_class") && args.size() == 0)
@@ -1113,11 +1114,12 @@ public class ExprFactory {
   /**
    * Creates a parent class method call parent::foo(...)
    */
-  public Expr createParentClassMethodCall(Location loc,
-                                          StringValue methodName,
-                                          ArrayList<Expr> args)
+  public Expr createTraitParentClassMethodCall(Location loc,
+                                               String traitName,
+                                               StringValue methodName,
+                                               ArrayList<Expr> args)
   {
-    return new ParentClassMethodExpr(loc, methodName, args);
+    return new TraitParentClassMethodExpr(loc, traitName, methodName, args);
   }
 
   /**

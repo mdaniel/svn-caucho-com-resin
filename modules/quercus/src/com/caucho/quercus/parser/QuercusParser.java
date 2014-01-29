@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -37,15 +37,12 @@ import com.caucho.quercus.expr.*;
 import com.caucho.quercus.function.*;
 import com.caucho.quercus.program.*;
 import com.caucho.quercus.statement.*;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import java.io.CharConversionException;
-import java.io.InputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -2285,18 +2282,16 @@ public class QuercusParser {
         }
 
         case CLASS:
+        {
           parseClassDefinition(0);
           break;
-
-            /* quercus/0260
-        case VAR:
-              parseClassVarDefinition(false);
-              break;
-        */
+        }
 
         case CONST:
+        {
           parseClassConstDefinition();
           break;
+        }
 
         case PUBLIC:
         case PRIVATE:
@@ -2375,25 +2370,25 @@ public class QuercusParser {
       }
 
       if ((modifiers & M_STATIC) != 0) {
-        ((ClassScope) _scope).addStaticVar(name, expr, _comment);
+        ((ClassScope) _scope).addStaticClassField(name, expr, _comment);
       }
       else if ((modifiers & M_PRIVATE) != 0) {
-        ((ClassScope) _scope).addVar(name,
-                                     expr,
-                                     FieldVisibility.PRIVATE,
-                                     comment);
+        ((ClassScope) _scope).addClassField(name,
+                                            expr,
+                                            FieldVisibility.PRIVATE,
+                                            comment);
       }
       else if ((modifiers & M_PROTECTED) != 0) {
-        ((ClassScope) _scope).addVar(name,
-                                     expr,
-                                     FieldVisibility.PROTECTED,
-                                     comment);
+        ((ClassScope) _scope).addClassField(name,
+                                            expr,
+                                            FieldVisibility.PROTECTED,
+                                            comment);
       }
       else {
-        ((ClassScope) _scope).addVar(name,
-                                     expr,
-                                     FieldVisibility.PUBLIC,
-                                     comment);
+        ((ClassScope) _scope).addClassField(name,
+                                            expr,
+                                            FieldVisibility.PUBLIC,
+                                            comment);
       }
 
       token = parseToken();
@@ -3534,9 +3529,6 @@ public class QuercusParser {
 
     int token = parseToken();
 
-    boolean isInClassScope = _classDef != null
-                             && ! _function.isStaticClassMethod();
-
     if (token == '$') {
       // php/09e0
       _peekToken = token;
@@ -3544,22 +3536,19 @@ public class QuercusParser {
       //nameExpr = parseTerm(false);
       nameExpr = parseTermArray(); // php/098e, php/398e
 
-      return term.createFieldGet(_factory, getLocation(),
-                                 nameExpr, isInClassScope);
+      return term.createFieldGet(_factory, getLocation(), nameExpr);
     }
     else if (token == '{') {
       nameExpr = parseExpr();
       expect('}');
 
-      return term.createFieldGet(_factory, getLocation(),
-                                 nameExpr, isInClassScope);
+      return term.createFieldGet(_factory, getLocation(), nameExpr);
     }
     else {
       _peekToken = token;
       StringValue name = parseIdentifier();
 
-      return term.createFieldGet(_factory, getLocation(),
-                                 name, isInClassScope);
+      return term.createFieldGet(_factory, getLocation(), name);
     }
   }
 
@@ -5440,12 +5429,8 @@ public class QuercusParser {
                 _sb.append((char) ch);
               }
 
-              boolean isInClassScope = _classDef != null
-                                       && ! _function.isStaticClassMethod();
-
               tail = tail.createFieldGet(_factory, getLocation(),
-                                         copyStringValue(_sb),
-                                         isInClassScope);
+                                         copyStringValue(_sb));
             }
             else {
               tail = _factory.createAppend(tail, createStringExpr("->"));

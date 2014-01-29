@@ -1335,8 +1335,9 @@ public class ArrayModule
 
     int maxsize = 0;
     for (int i = 0; i < arrays.length; i++)
-      if (arrays[i] instanceof ArrayValue)
+      if (arrays[i].isArray()) {
         maxsize = Math.max(maxsize, arrays[i].getSize());
+      }
 
     // create the identity permutation [1..n]
     LongValue []p = new LongValue[maxsize];
@@ -1349,7 +1350,7 @@ public class ArrayModule
     // apply the permuation
     for (int i = 0; i < arrays.length; i++) {
       if (arrays[i].isArray()) {
-        permute(env, (ArrayValue)arrays[i], p, isNewKeys);
+        permute(env, arrays[i].toArrayValue(env), p, isNewKeys);
       }
     }
 

@@ -64,7 +64,7 @@ public class SplModule extends AbstractQuercusModule
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
     }
     else {
-      cls = env.findClass(obj.toString(), autoload,  true);
+      cls = env.findClass(obj.toString(), autoload, true, true);
     }
 
     if (cls != null) {
@@ -85,7 +85,7 @@ public class SplModule extends AbstractQuercusModule
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
     }
     else {
-      cls = env.findClass(obj.toString(), autoload, true);
+      cls = env.findClass(obj.toString(), autoload, true, true);
     }
 
     if (cls != null) {
@@ -176,7 +176,7 @@ public class SplModule extends AbstractQuercusModule
                                   String className,
                                   @Optional String extensions)
   {
-    if (env.findClass(className, false, true) != null)
+    if (env.findClass(className, false, true, true) != null)
       return;
 
     String []extensionList;
@@ -198,7 +198,7 @@ public class SplModule extends AbstractQuercusModule
 
       env.include(sb);
 
-      QuercusClass cls = env.findClass(className, false, true);
+      QuercusClass cls = env.findClass(className, false, true, true);
 
       if (cls != null) {
         return;
@@ -206,7 +206,7 @@ public class SplModule extends AbstractQuercusModule
     }
   }
 
-  /*
+  /**
    * string spl_object_hash ( object $obj )
    */
   public static StringValue spl_object_hash(Env env, ObjectValue obj)

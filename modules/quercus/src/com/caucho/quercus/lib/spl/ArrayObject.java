@@ -62,8 +62,9 @@ public class ArrayObject
                      @Optional int flags,
                      @Optional("ArrayIterator") String iteratorClassName)
   {
-    if (value.isNull())
+    if (value.isNull()) {
       value = new ArrayValueImpl();
+    }
 
     _env = env;
     _value = value.toValue();
@@ -71,9 +72,9 @@ public class ArrayObject
 
     QuercusClass iteratorClass = _env.findClass(iteratorClassName);
 
-    if (iteratorClass == null || ! iteratorClass.isA("Iterator"))
-      throw new IllegalArgumentException(
-          L.l("A class that implements Iterator must be specified"));
+    if (iteratorClass == null || ! iteratorClass.isA(env, "Iterator")) {
+      throw new IllegalArgumentException(L.l("A class that implements Iterator must be specified"));
+    }
 
     _iteratorClass = iteratorClass;
   }
@@ -261,7 +262,7 @@ public class ArrayObject
     throws IOException
   {
     String name = object.getClassName();
-    
+
     if ((_flags & STD_PROP_LIST) != 0) {
       // XXX:
       out.println("object(" + name + ") (0) {");

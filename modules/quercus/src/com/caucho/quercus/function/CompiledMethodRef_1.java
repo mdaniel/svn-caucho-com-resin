@@ -34,6 +34,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -46,22 +47,9 @@ abstract public class CompiledMethodRef_1 extends CompiledMethodRef {
     = Logger.getLogger(CompiledMethodRef_1.class.getName());
   private static final L10N L = new L10N(CompiledMethodRef_1.class);
 
-  private String _name;
-  private Expr _default_0;
-
-  public CompiledMethodRef_1(String name, Expr default_0)
+  public CompiledMethodRef_1(String name, Arg default_0)
   {
-    _name = name;
-    _default_0 = default_0;
-  }
-  
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, new Arg[] {default_0});
   }
 
   /**
@@ -73,10 +61,12 @@ abstract public class CompiledMethodRef_1 extends CompiledMethodRef {
   {
     switch (args.length) {
     case 0:
-      return callMethodRef(env, qClass, qThis, _default_0.eval(env));
+      return callMethodRef(env, qClass, qThis,
+                           _args[0].eval(env));
     case 1:
     default:
-      return callMethodRef(env, qClass, qThis, args[0]);
+      return callMethodRef(env, qClass, qThis,
+                           args[0]);
     }
   }
 
@@ -86,7 +76,8 @@ abstract public class CompiledMethodRef_1 extends CompiledMethodRef {
   @Override
   public Value callMethodRef(Env env, QuercusClass qClass, Value qThis)
   {
-    return callMethodRef(env, qClass, qThis, _default_0.eval(env));
+    return callMethodRef(env, qClass, qThis,
+                         _args[0].eval(env));
   }
 
   @Override

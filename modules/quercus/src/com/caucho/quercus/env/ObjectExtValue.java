@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.WriteStream;
 
@@ -38,6 +39,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.AbstractSet;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -56,7 +58,7 @@ public class ObjectExtValue extends ObjectValue
   private LinkedHashMap<StringValue,Entry> _fieldMap
     = new LinkedHashMap<StringValue,Entry>();
 
-  private Entry _head;
+  private HashMap<StringValue,Entry> _protectedFieldMap;
 
   private boolean _isFieldInit;
 
@@ -137,12 +139,19 @@ public class ObjectExtValue extends ObjectValue
     while (iter.hasNext()) {
       Entry newField = iter.next();
 
+      Entry entry = createEntryFromInit(newField.getKey());
+      entry._value = newField._value;
+
+      /*
       Entry entry = getThisEntry(newField._key);
 
-      if (entry != null)
+      if (entry != null) {
         entry._value = newField._value;
-      else
-        initField(newField._key, newField._value, newField._visibility);
+      }
+      else {
+        putThisField(env, newField._key, newField._value);
+      }
+      */
     }
   }
 
@@ -196,7 +205,7 @@ public class ObjectExtValue extends ObjectValue
    */
   protected Value getFieldExt(Env env, StringValue name)
   {
-    Entry e = this.getEntry(env, name);
+    Entry e = getEntry(env, name);
 
     if(e != null && e._value != NullValue.NULL && e._value != UnsetValue.UNSET) {
       return e._value;
@@ -235,7 +244,7 @@ public class ObjectExtValue extends ObjectValue
     }
 
     // php/3d28
-    entry = createEntry(name, FieldVisibility.PUBLIC);
+    entry = createEntry(name);
 
     value = entry._value;
 
@@ -278,12 +287,13 @@ public class ObjectExtValue extends ObjectValue
         return new Var(value);
     }
 
-    entry = createEntry(name, FieldVisibility.PUBLIC);
+    entry = createEntry(name);
 
     value = entry._value;
 
-    if (value instanceof Var)
+    if (value instanceof Var) {
       return (Var) value;
+    }
 
     Var var = new Var(value);
 
@@ -401,7 +411,7 @@ public class ObjectExtValue extends ObjectValue
         }
       }
 
-      entry = createEntry(name, FieldVisibility.PUBLIC);
+      entry = createEntry(name);
     }
 
     Value oldValue = entry._value;
@@ -461,7 +471,7 @@ public class ObjectExtValue extends ObjectValue
       }
     }
 
-    entry = createEntry(name, FieldVisibility.PUBLIC);
+    entry = createEntry(name);
 
     Value oldValue = entry._value;
 
@@ -508,11 +518,14 @@ public class ObjectExtValue extends ObjectValue
    * Adds a new value to the object.
    */
   @Override
-  public void initField(StringValue key,
-                        Value value,
-                        FieldVisibility visibility)
+  public void initField(Env env,
+                        StringValue name,
+                        StringValue canonicalName,
+                        Value value)
   {
-    Entry entry = createEntry(key, visibility);
+    Entry entry;
+
+    entry = createEntryFromInit(name, canonicalName);
 
     entry._value = value;
   }
@@ -545,7 +558,7 @@ public class ObjectExtValue extends ObjectValue
     if (_quercusClass.getFieldGet() != null)
       return;
 
-    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
+    Entry entry = createEntry(name);
 
     // XXX
     //if (entry._visibility == FieldVisibility.PRIVATE)
@@ -559,10 +572,11 @@ public class ObjectExtValue extends ObjectValue
    */
   public void unsetThisArray(Env env, StringValue name, Value index)
   {
-    if (_quercusClass.getFieldGet() != null)
+    if (_quercusClass.getFieldGet() != null) {
       return;
+    }
 
-    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
+    Entry entry = createEntry(name);
 
     entry.toValue().remove(index);
   }
@@ -575,10 +589,14 @@ public class ObjectExtValue extends ObjectValue
     Entry entry = _fieldMap.get(name);
 
     if (entry == null) {
+      entry = getThisProtectedEntry(name);
+    }
+
+    if (entry == null) {
       return null;
     }
 
-    if (entry._visibility == FieldVisibility.PRIVATE) {
+    if (entry.isPrivate()) {
       QuercusClass cls = env.getCallingClass();
 
       // XXX: this really only checks access from outside of class scope
@@ -608,19 +626,65 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry getThisEntry(StringValue name)
   {
-    return _fieldMap.get(name);
+    Entry entry = _fieldMap.get(name);
+
+    if (entry == null) {
+      entry = getThisProtectedEntry(name);
+    }
+
+    return entry;
+  }
+
+  /**
+   * Returns the field with protected visibility.
+   */
+  private Entry getThisProtectedEntry(StringValue name)
+  {
+    if (_protectedFieldMap == null) {
+      return null;
+    }
+
+    return _protectedFieldMap.get(name);
+  }
+
+  private Entry createEntryFromInit(StringValue canonicalName)
+  {
+    StringValue name = ClassField.getOrdinaryName(canonicalName);
+
+    return createEntryFromInit(name, canonicalName);
+  }
+
+  private Entry createEntryFromInit(StringValue name,
+                                    StringValue canonicalName)
+  {
+    Entry entry = _fieldMap.get(canonicalName);
+
+    if (entry == null) {
+      entry = new Entry(canonicalName);
+      _fieldMap.put(canonicalName, entry);
+
+      if (ClassField.isProtected(canonicalName)) {
+        if (_protectedFieldMap == null) {
+          _protectedFieldMap = new HashMap<StringValue,Entry>();
+        }
+
+        _protectedFieldMap.put(name, entry);
+      }
+    }
+
+    return entry;
   }
 
   /**
    * Creates the entry for a key.
    */
-  private Entry createEntry(StringValue name, FieldVisibility visibility)
+  private Entry createEntry(StringValue canonicalName)
   {
-    Entry entry = _fieldMap.get(name);
+    Entry entry = _fieldMap.get(canonicalName);
 
     if (entry == null) {
-      entry = new Entry(name, visibility);
-      _fieldMap.put(name, entry);
+      entry = new Entry(canonicalName);
+      _fieldMap.put(canonicalName, entry);
     }
 
     return entry;
@@ -949,10 +1013,10 @@ public class ObjectExtValue extends ObjectValue
     while (iter.hasNext()) {
       Entry entry = iter.next();
 
-      Entry copy = obj.createEntry(entry.getKey(),
-                                   entry.getVisibility());
+      StringValue canonicalName = entry.getKey();
+      Value value = entry.getValue().copy();
 
-      copy.setValue(entry.getValue().copy());
+      obj.initField(env, canonicalName, value);
     }
   }
 
@@ -1000,26 +1064,14 @@ public class ObjectExtValue extends ObjectValue
       Value key = entry.getKey();
       int len = key.length();
 
-      if (entry._visibility == FieldVisibility.PROTECTED) {
-        sb.append(len + 3);
+      sb.append(len);
+      sb.append(':');
 
-        sb.append(":\"");
-        sb.append("\u0000*\u0000");
-      }
-      else if (entry._visibility == FieldVisibility.PRIVATE) {
-        sb.append(len + 3);
-
-        sb.append(":\"");
-        sb.append("\u0000A\u0000");
-      }
-      else {
-        sb.append(len);
-
-        sb.append(":\"");
-      }
-
+      sb.append('"');
       sb.append(key);
-      sb.append("\";");
+      sb.append('"');
+
+      sb.append(';');
 
       Value value = ((Entry) entry).getRawValue();
 
@@ -1249,11 +1301,13 @@ public class ObjectExtValue extends ObjectValue
     while (iter.hasNext()) {
       Entry entry = iter.next();
 
-      if (entry.getVisibility() != FieldVisibility.PUBLIC)
+      if (! entry.isPublic()) {
         continue;
+      }
 
-      if (length > 0)
+      if (length > 0) {
         sb.append(',');
+      }
 
       entry.getKey().toStringValue(env).jsonEncode(env, context, sb);
       sb.append(':');
@@ -1428,43 +1482,25 @@ public class ObjectExtValue extends ObjectValue
                Comparable<Map.Entry<Value, Value>>
   {
     private final StringValue _key;
-    private final FieldVisibility _visibility;
-    private Value _value;
 
-    private Entry _next;
+    private Value _value;
 
     public Entry(StringValue key)
     {
       _key = key;
-      _visibility = FieldVisibility.PUBLIC;
-      _value = NullValue.NULL;
-    }
-
-    public Entry(StringValue key, FieldVisibility visibility)
-    {
-      _key = key;
-      _visibility = visibility;
-      _value = NullValue.NULL;
+      _value = UnsetValue.UNSET;
     }
 
     public Entry(StringValue key, Value value)
     {
       _key = key;
-      _visibility = FieldVisibility.PUBLIC;
-      _value = value;
-    }
-
-    public Entry(StringValue key, Value value, FieldVisibility visibility)
-    {
-      _key = key;
-      _visibility = visibility;
       _value = value;
     }
 
     public Entry(Env env, IdentityHashMap<Value,Value> map, Entry entry)
     {
       _key = entry._key;
-      _visibility = entry._visibility;
+
       _value = entry._value.copy(env, map);
     }
 
@@ -1483,29 +1519,19 @@ public class ObjectExtValue extends ObjectValue
       return _key;
     }
 
-    public FieldVisibility getVisibility()
-    {
-      return _visibility;
-    }
-
-    public Entry getNext()
-    {
-      return _next;
-    }
-
-    public void setNext(Entry next)
-    {
-      _next = next;
-    }
-
     public boolean isPublic()
     {
-      return _visibility == FieldVisibility.PUBLIC;
+      return ! isPrivate() && ! isProtected();
+    }
+
+    public boolean isProtected()
+    {
+      return ClassField.isProtected(_key);
     }
 
     public boolean isPrivate()
     {
-      return _visibility == FieldVisibility.PRIVATE;
+      return ClassField.isPrivate(_key);
     }
 
     public Value toValue()
@@ -1599,10 +1625,11 @@ public class ObjectExtValue extends ObjectValue
     {
       Value copy = root.getCopy(_value);
 
-      if (copy == null)
+      if (copy == null) {
         copy = _value.copyTree(env, root);
+      }
 
-      return new Entry(_key, copy, _visibility);
+      return new Entry(_key, copy);
     }
 
     public int compareTo(Map.Entry<Value, Value> other)
@@ -1628,15 +1655,18 @@ public class ObjectExtValue extends ObjectValue
                             IdentityHashMap<Value, String> valueSet)
       throws IOException
     {
+      StringValue name = ClassField.getOrdinaryName(getKey());
       String suffix = "";
 
-      if (_visibility == FieldVisibility.PROTECTED)
+      if (isProtected()) {
         suffix = ":protected";
-      else if (_visibility == FieldVisibility.PRIVATE)
+      }
+      else if (isPrivate()) {
         suffix = ":private";
+      }
 
       printDepth(out, 2 * depth);
-      out.println("[\"" + getKey() + suffix + "\"]=>");
+      out.println("[\"" + name + suffix + "\"]=>");
 
       printDepth(out, 2 * depth);
 
@@ -1651,15 +1681,18 @@ public class ObjectExtValue extends ObjectValue
                               IdentityHashMap<Value, String> valueSet)
       throws IOException
     {
+      StringValue name = ClassField.getOrdinaryName(getKey());
       String suffix = "";
 
-      if (_visibility == FieldVisibility.PROTECTED)
+      if (isProtected()) {
         suffix = ":protected";
-      else if (_visibility == FieldVisibility.PRIVATE)
+      }
+      else if (isPrivate()) {
         suffix = ":private";
+      }
 
       printDepth(out, 4 * depth);
-      out.print("[" + getKey() + suffix + "] => ");
+      out.print("[" + name + suffix + "] => ");
 
       _value.printR(env, out, depth + 1, valueSet);
 

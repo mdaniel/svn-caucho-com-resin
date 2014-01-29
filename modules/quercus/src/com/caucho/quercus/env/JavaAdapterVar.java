@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.program.ClassField;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -144,9 +145,9 @@ public class JavaAdapterVar extends Value
    * Returns true for an implementation of a class
    */
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    return getValue().isA(name);
+    return getValue().isA(env, name);
   }
 
   /**
@@ -1127,13 +1128,15 @@ public class JavaAdapterVar extends Value
   /**
    * Initializes a new field, does not call __set if it is defined.
    */
-  public void initField(StringValue key,
-                        Value value,
-                        FieldVisibility visibility)
+  @Override
+  public void initField(Env env,
+                        StringValue name,
+                        StringValue canonicalName,
+                        Value value)
   {
     setRaw(getValue());
 
-    super.initField(key, value, visibility);
+    super.initField(env, name, canonicalName, value);
 
     setValue(getRawValue());
   }

@@ -60,10 +60,12 @@ public class QuercusLanguageException extends QuercusException
   public Value toException(Env env)
   {
     // php/0g0j
-    if (_value.isA("Exception"))
+    if (_value.isA(env, "Exception")) {
       return _value;
-    else
+    }
+    else {
       return env.wrapJava(this);
+    }
   }
 
   /**
@@ -82,7 +84,7 @@ public class QuercusLanguageException extends QuercusException
     return _value;
   }
 
-  /*
+  /**
    * Returns the PHP exception message.  If null, returns the empty string.
    */
   public String getMessage(Env env)

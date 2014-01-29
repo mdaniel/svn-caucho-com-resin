@@ -101,7 +101,7 @@ public class InternalAutoloadCallback
       env.executePage(path);
     }
 
-    return env.findClass(name, false, false);
+    return env.findClass(name, -1, false, false, false);
   }
 }
 

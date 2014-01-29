@@ -42,18 +42,22 @@ import com.caucho.quercus.parser.QuercusParser;
 /**
  * Represents a PHP parent::FOO constant call expression.
  */
-public class ParentClassConstExpr extends Expr {
+public class TraitParentClassConstExpr extends Expr {
+  protected final String _traitName;
   protected final StringValue _name;
 
-  public ParentClassConstExpr(Location location, StringValue name)
+  public TraitParentClassConstExpr(Location location,
+                                   String traitName, StringValue name)
   {
     super(location);;
 
+    _traitName = traitName;
     _name = name;
   }
 
-  public ParentClassConstExpr(StringValue name)
+  public TraitParentClassConstExpr(String traitName, StringValue name)
   {
+    _traitName = traitName;
     _name = name;
   }
 
@@ -72,7 +76,7 @@ public class ParentClassConstExpr extends Expr {
   {
     ExprFactory factory = parser.getExprFactory();
 
-    return factory.createParentClassMethodCall(location, _name, args);
+    return factory.createTraitParentClassMethodCall(location, _traitName, _name, args);
   }
 
   /**
@@ -87,7 +91,7 @@ public class ParentClassConstExpr extends Expr {
   {
     Value qThis = env.getThis();
 
-    QuercusClass parent = qThis.getQuercusClass().getParent();
+    QuercusClass parent = qThis.getQuercusClass().getTraitParent(env, _traitName);
 
     return parent.getConstant(env, _name);
   }

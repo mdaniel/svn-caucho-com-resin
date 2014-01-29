@@ -33,6 +33,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -45,29 +46,12 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
     = Logger.getLogger(CompiledFunction_3.class.getName());
   private static final L10N L = new L10N(CompiledFunction_3.class);
 
-  private String _name;
-  private Expr _default_0;
-  private Expr _default_1;
-  private Expr _default_2;
-
   public CompiledFunction_3(String name,
-                            Expr default_0,
-                            Expr default_1,
-                            Expr default_2)
+                            Arg default_0,
+                            Arg default_1,
+                            Arg default_2)
   {
-    _name = name;
-    _default_0 = default_0;
-    _default_1 = default_1;
-    _default_2 = default_2;
-  }
-
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, new Arg[] {default_0, default_1, default_2});
   }
 
   /**
@@ -92,19 +76,19 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
     switch (argValues.length) {
     case 0:
       return call(env,
-                  _default_0.eval(env),
-                  _default_1.eval(env),
-                  _default_2.eval(env));
+                  _args[0].eval(env),
+                  _args[1].eval(env),
+                  _args[2].eval(env));
     case 1:
       return call(env,
                   argValues[0],
-                  _default_1.eval(env),
-                  _default_2.eval(env));
+                  _args[1].eval(env),
+                  _args[2].eval(env));
     case 2:
       return call(env,
                   argValues[0],
                   argValues[1],
-                  _default_2.eval(env));
+                  _args[2].eval(env));
     case 3:
     default:
       return call(env,
@@ -117,17 +101,17 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
   public Value call(Env env)
   {
     return call(env,
-                _default_0.eval(env),
-                _default_1.eval(env),
-                _default_2.eval(env));
+                _args[0].eval(env),
+                _args[1].eval(env),
+                _args[2].eval(env));
   }
 
   public Value call(Env env, Value a1)
   {
     return call(env,
                 a1,
-                _default_1.eval(env),
-                _default_2.eval(env));
+                _args[1].eval(env),
+                _args[2].eval(env));
   }
 
   public Value call(Env env, Value a1, Value a2)
@@ -135,7 +119,7 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
     return call(env,
                 a1,
                 a2,
-                _default_2.eval(env));
+                _args[2].eval(env));
   }
 
   /**

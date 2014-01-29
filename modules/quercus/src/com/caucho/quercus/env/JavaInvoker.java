@@ -696,7 +696,7 @@ abstract public class JavaInvoker
       if (parentName != null) {
         ClassDef classDef = getDeclaringClass();
 
-        if (classDef != null && qThis.isA(classDef.getName())) {
+        if (classDef != null && qThis.isA(env, classDef.getName())) {
           qThis.setJavaObject(result);
         }
       }

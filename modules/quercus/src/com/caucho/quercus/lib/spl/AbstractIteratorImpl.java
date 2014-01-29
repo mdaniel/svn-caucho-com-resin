@@ -23,16 +23,17 @@ public abstract class AbstractIteratorImpl<T> implements Iterator<T> {
     private final AbstractFunction _validFun;
     private boolean _needNext;
 
-    public AbstractIteratorImpl(Env env, 
+    public AbstractIteratorImpl(Env env,
                                 ObjectValue obj)
     {
       _env = env;
       _qClass = obj.getQuercusClass();
       _obj = obj;
 
-      if (!obj.isA("iterator"))
-        throw new IllegalStateException(L.l("'{0}' is an invalid iterator",
-          obj));
+      if (! obj.isA(env, "iterator")) {
+        throw new IllegalStateException(L.l("'{0}' is an invalid iterator", obj));
+      }
+
       _currentFun = _qClass.getFunction(env.createString("current"));
       _keyFun = _qClass.getFunction(env.createString("key"));
       _nextFun = _qClass.getFunction(env.createString("next"));
@@ -46,8 +47,9 @@ public abstract class AbstractIteratorImpl<T> implements Iterator<T> {
 
     public boolean hasNext()
     {
-      if (_needNext)
+      if (_needNext) {
         _nextFun.callMethod(_env, _qClass, _obj);
+      }
 
       _needNext = true;
 

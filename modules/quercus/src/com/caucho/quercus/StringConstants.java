@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,34 +24,23 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.quercus.expr;
+package com.caucho.quercus;
 
-import com.caucho.quercus.Location;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.StringValue;
 
-import java.util.ArrayList;
+public class StringConstants
+{
+  public static final StringValue __CONSTRUCT = new ConstStringValue("__construct");
+  public static final StringValue __INVOKE = new ConstStringValue("__invoke");
+  public static final StringValue __GET = new ConstStringValue("__get");
+  public static final StringValue __SET = new ConstStringValue("__set");
+  public static final StringValue __CALL = new ConstStringValue("__call");
+  public static final StringValue __CALL_STATIC = new ConstStringValue("__callStatic");
+  public static final StringValue __TOSTRING = new ConstStringValue("__toString");
 
-/**
- * Represents a PHP method call expression from $this.
- */
-public class ThisMethodVarExpr extends ObjectMethodVarExpr {
-  public ThisMethodVarExpr(Location location,
-                        ThisExpr qThis,
-                        Expr methodName,
-                        ArrayList<Expr> args)
-  {
-    super(location, qThis, methodName, args);
-  }
 
-  //
-  // java code generation
-  //
-
-  public String toString()
-  {
-    return "$this->" + _name + "()";
-  }
 }
-

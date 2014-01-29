@@ -49,10 +49,10 @@ public class IteratorAggregateDelegate
   implements TraversableDelegate
 {
   private static final L10N L = new L10N(IteratorAggregateDelegate.class);
-  
+
   private static final StringBuilderValue GET_ITERATOR
     = new ConstStringValue("getIterator");
-  
+
   private static final IteratorDelegate _iteratorDelegate
     = new IteratorDelegate();
 
@@ -72,31 +72,30 @@ public class IteratorAggregateDelegate
   public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
   {
     Value target = getTarget(env, qThis);
-    
-    if (target instanceof ObjectValue)
+
+    if (target instanceof ObjectValue) {
       return _iteratorDelegate.getKeyIterator(env, (ObjectValue) target);
-    else
-      throw new QuercusException(L.l("'{0}' is not a valid Traversable",
-                                     qThis));
+    }
+    else {
+      throw new QuercusException(L.l("'{0}' is not a valid Traversable", qThis));
+    }
   }
 
   public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
   {
     Value target = getTarget(env, qThis);
-    
+
     if (target instanceof ObjectValue){
-      if(target.isA("iteratoraggregate"))
-      {
+      if(target.isA(env, "IteratorAggregate")) {
         return target.getValueIterator(env);
       }
-      else
-      {
+      else {
         return _iteratorDelegate.getValueIterator(env, (ObjectValue) target);
       }
     }
-    else
-      throw new QuercusException(L.l("'{0}' is not a valid Traversable",
-                                     qThis));
+    else {
+      throw new QuercusException(L.l("'{0}' is not a valid Traversable", qThis));
+    }
   }
 
   private Value getTarget(Env env, ObjectValue qThis)

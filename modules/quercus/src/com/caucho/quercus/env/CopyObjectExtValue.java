@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralStringExpr;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ import java.util.TreeSet;
 public class CopyObjectExtValue extends ObjectExtValue
 {
   private CopyRoot _root;
-  
+
   public CopyObjectExtValue(Env env, ObjectExtValue copy, CopyRoot root)
   {
     super(env, copy, root);
@@ -148,7 +149,7 @@ public class CopyObjectExtValue extends ObjectExtValue
 
     return super.putThisField(env, name, value);
   }
-  
+
   protected Value putFieldExt(Env env, StringValue name, Value value)
   {
     return null;
@@ -158,13 +159,12 @@ public class CopyObjectExtValue extends ObjectExtValue
    * Adds a new value to the object.
    */
   @Override
-  public void initField(StringValue key,
-                        Value value,
-                        FieldVisibility visibility)
+  public void initField(Env env, StringValue name,
+                        StringValue canonicalName, Value value)
   {
     _root.setModified();
 
-    super.initField(key, value, visibility);
+    super.initField(env, canonicalName, value);
   }
 
   /**
@@ -177,7 +177,7 @@ public class CopyObjectExtValue extends ObjectExtValue
 
     super.unsetField(name);
   }
-  
+
   /**
    * Removes the field ref.
    */
@@ -185,17 +185,17 @@ public class CopyObjectExtValue extends ObjectExtValue
   public void unsetArray(Env env, StringValue name, Value index)
   {
     _root.setModified();
-    
+
     super.unsetArray(env, name, index);
   }
-  
+
   /**
    * Removes the field ref.
    */
   public void unsetThisArray(Env env, StringValue name, Value index)
   {
     _root.setModified();
-    
+
     super.unsetThisArray(env, name, index);
   }
 

@@ -34,6 +34,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -46,35 +47,14 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
     = Logger.getLogger(CompiledMethodRef_5.class.getName());
   private static final L10N L = new L10N(CompiledMethodRef_5.class);
 
-  private String _name;
-  private Expr _default_0;
-  private Expr _default_1;
-  private Expr _default_2;
-  private Expr _default_3;
-  private Expr _default_4;
-
   public CompiledMethodRef_5(String name,
-                             Expr default_0,
-                             Expr default_1,
-                             Expr default_2,
-                             Expr default_3,
-                             Expr default_4)
+                             Arg default_0,
+                             Arg default_1,
+                             Arg default_2,
+                             Arg default_3,
+                             Arg default_4)
   {
-    _name = name;
-    _default_0 = default_0;
-    _default_1 = default_1;
-    _default_2 = default_2;
-    _default_3 = default_3;
-    _default_4 = default_4;
-  }
-  
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, new Arg[] {default_0, default_1, default_2, default_3, default_4});
   }
 
   /**
@@ -86,39 +66,39 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
     switch (args.length) {
     case 0:
       return callMethodRef(env, qClass, qThis,
-                           _default_0.eval(env),
-                           _default_1.eval(env),
-                           _default_2.eval(env),
-                           _default_3.eval(env),
-                           _default_4.eval(env));
+                           _args[0].eval(env),
+                           _args[1].eval(env),
+                           _args[2].eval(env),
+                           _args[3].eval(env),
+                           _args[4].eval(env));
     case 1:
       return callMethodRef(env, qClass, qThis,
                            args[0],
-                           _default_1.eval(env),
-                           _default_2.eval(env),
-                           _default_3.eval(env),
-                           _default_4.eval(env));
+                           _args[1].eval(env),
+                           _args[2].eval(env),
+                           _args[3].eval(env),
+                           _args[4].eval(env));
     case 2:
       return callMethodRef(env, qClass, qThis,
                            args[0],
                            args[1],
-                           _default_2.eval(env),
-                           _default_3.eval(env),
-                           _default_4.eval(env));
+                           _args[2].eval(env),
+                           _args[3].eval(env),
+                           _args[4].eval(env));
     case 3:
       return callMethodRef(env, qClass, qThis,
                            args[0],
                            args[1],
                            args[2],
-                           _default_3.eval(env),
-                           _default_4.eval(env));
+                           _args[3].eval(env),
+                           _args[4].eval(env));
     case 4:
       return callMethodRef(env, qClass, qThis,
                            args[0],
                            args[1],
                            args[2],
                            args[3],
-                           _default_4.eval(env));
+                           _args[4].eval(env));
     case 5:
     default:
       return callMethodRef(env, qClass, qThis,
@@ -137,11 +117,11 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
   public Value callMethodRef(Env env, QuercusClass qClass, Value qThis)
   {
     return callMethodRef(env, qClass, qThis,
-                         _default_0.eval(env),
-                         _default_1.eval(env),
-                         _default_2.eval(env),
-                         _default_3.eval(env),
-                         _default_4.eval(env));
+                         _args[0].eval(env),
+                         _args[1].eval(env),
+                         _args[2].eval(env),
+                         _args[3].eval(env),
+                         _args[4].eval(env));
   }
 
   /**
@@ -153,10 +133,10 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
   {
     return callMethodRef(env, qClass, qThis,
                          a1,
-                         _default_1.eval(env),
-                         _default_2.eval(env),
-                         _default_3.eval(env),
-                         _default_4.eval(env));
+                         _args[1].eval(env),
+                         _args[2].eval(env),
+                         _args[3].eval(env),
+                         _args[4].eval(env));
   }
 
   /**
@@ -170,9 +150,9 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
     return callMethodRef(env, qClass, qThis,
                          a1,
                          a2,
-                         _default_2.eval(env),
-                         _default_3.eval(env),
-                         _default_4.eval(env));
+                         _args[2].eval(env),
+                         _args[3].eval(env),
+                         _args[4].eval(env));
   }
 
   /**
@@ -188,8 +168,8 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
                          a1,
                          a2,
                          a3,
-                         _default_3.eval(env),
-                         _default_4.eval(env));
+                         _args[3].eval(env),
+                         _args[4].eval(env));
   }
 
   /**
@@ -207,7 +187,7 @@ abstract public class CompiledMethodRef_5 extends CompiledMethodRef {
                          a2,
                          a3,
                          a4,
-                         _default_4.eval(env));
+                         _args[4].eval(env));
   }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -35,6 +35,21 @@ package com.caucho.quercus.env;
 public enum FieldVisibility
 {
   PUBLIC,
-  PRIVATE,
-  PROTECTED
+  PROTECTED,
+  PRIVATE;
+
+  public boolean isPublic()
+  {
+    return this == PUBLIC;
+  }
+
+  public boolean isProtected()
+  {
+    return this == PROTECTED;
+  }
+
+  public boolean isPrivate()
+  {
+    return this == PRIVATE;
+  }
 }

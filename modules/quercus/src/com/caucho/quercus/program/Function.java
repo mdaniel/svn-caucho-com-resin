@@ -44,7 +44,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.statement.BlockStatement;
 import com.caucho.quercus.statement.Statement;
 
 import java.util.HashMap;
@@ -67,27 +66,6 @@ public class Function extends AbstractFunction {
   protected String _comment;
 
   protected Arg []_closureUseArgs;
-
-  Function(Location location,
-           String name,
-           FunctionInfo info,
-           Arg []args,
-           Statement []statements)
-  {
-    super(location);
-
-    _name = name.intern();
-    _info = info;
-    _info.setFunction(this);
-    _isReturnsReference = info.isReturnsReference();
-    _args = args;
-    _statement = new BlockStatement(location, statements);
-
-    setGlobal(info.isPageStatic());
-    setClosure(info.isClosure());
-
-    _isStatic = true;
-  }
 
   public Function(ExprFactory exprFactory,
                   Location location,

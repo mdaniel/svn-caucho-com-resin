@@ -40,7 +40,8 @@ import com.caucho.quercus.env.Value;
 /**
  * A parent::bar(...) method call expression.
  */
-public class ParentClassMethodExpr extends AbstractMethodExpr {
+public class TraitParentClassMethodExpr extends AbstractMethodExpr {
+  protected final String _traitName;
   protected final StringValue _methodName;
 
   protected final int _hash;
@@ -48,12 +49,14 @@ public class ParentClassMethodExpr extends AbstractMethodExpr {
 
   protected boolean _isMethod;
 
-  public ParentClassMethodExpr(Location location,
-                               StringValue methodName,
-                               ArrayList<Expr> args)
+  public TraitParentClassMethodExpr(Location location,
+                                    String traitName,
+                                    StringValue methodName,
+                                    ArrayList<Expr> args)
   {
     super(location);
 
+    _traitName = traitName;
     _methodName = methodName;
 
     _hash = _methodName.hashCodeCaseInsensitive();
@@ -62,11 +65,14 @@ public class ParentClassMethodExpr extends AbstractMethodExpr {
     args.toArray(_args);
   }
 
-  public ParentClassMethodExpr(Location location,
-                               StringValue methodName, Expr []args)
+  public TraitParentClassMethodExpr(Location location,
+                                    String traitName,
+                                    StringValue methodName,
+                                    Expr []args)
   {
     super(location);
 
+    _traitName = traitName;
     _methodName = methodName;
 
     _hash = _methodName.hashCodeCaseInsensitive();
@@ -83,7 +89,9 @@ public class ParentClassMethodExpr extends AbstractMethodExpr {
    */
   public Value eval(Env env)
   {
-    QuercusClass cl = env.getThis().getQuercusClass().getParent();
+    QuercusClass cls = env.getThis().getQuercusClass();
+
+    QuercusClass parent = cls.getTraitParent(env, _traitName);
 
     Value []values = evalArgs(env, _args);
 
@@ -103,13 +111,13 @@ public class ParentClassMethodExpr extends AbstractMethodExpr {
     // php/024b
     // qThis = cl;
 
-    env.pushCall(this, cl, values);
+    env.pushCall(this, parent, values);
     // QuercusClass oldClass = env.setCallingClass(cl);
 
     try {
       env.checkTimeout();
 
-      return cl.callStaticMethod(env, qThis, _methodName, _hash, values);
+      return parent.callStaticMethod(env, qThis, _methodName, _hash, values);
     } finally {
       env.popCall();
       env.setThis(oldThis);

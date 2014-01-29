@@ -78,8 +78,8 @@ public class ClassScope extends Scope
     _cl.addFunction(name, function);
   }
 
-  /*
-   *  Adds a function defined in a conditional block.
+  /**
+   * Adds a function defined in a conditional block.
    */
   @Override
   public void addConditionalFunction(StringValue name, Function function)
@@ -90,18 +90,18 @@ public class ClassScope extends Scope
   /**
    * Adds a value
    */
-  public void addVar(StringValue name,
-                     Expr value,
-                     FieldVisibility visibility,
-                     String comment)
+  public void addClassField(StringValue name,
+                            Expr value,
+                            FieldVisibility visibility,
+                            String comment)
   {
-    _cl.addValue(name, value, visibility, comment);
+    _cl.addClassField(name, value, visibility, comment);
   }
 
   /**
    * Adds a static value
    */
-  public void addStaticVar(StringValue name, Expr value, String comment)
+  public void addStaticClassField(StringValue name, Expr value, String comment)
   {
     _cl.addStaticValue(name, value, comment);
   }

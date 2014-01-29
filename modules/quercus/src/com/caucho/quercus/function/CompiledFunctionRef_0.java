@@ -44,20 +44,9 @@ abstract public class CompiledFunctionRef_0 extends CompiledFunctionRef {
     = Logger.getLogger(CompiledFunctionRef_0.class.getName());
   private static final L10N L = new L10N(CompiledFunctionRef_0.class);
 
-  private String _name;
-
   public CompiledFunctionRef_0(String name)
   {
-    _name = name;
-  }
-  
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, AbstractFunction.NULL_ARGS);
   }
 
   /**
@@ -80,7 +69,7 @@ abstract public class CompiledFunctionRef_0 extends CompiledFunctionRef {
   }
 
   abstract public Value callRef(Env env);
-  
+
   public String toString()
   {
     return "CompiledFunctionRef_0[" + _name + "]";

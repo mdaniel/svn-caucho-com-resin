@@ -46,7 +46,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -70,7 +69,7 @@ public class QuercusProgram {
 
   private boolean _isCompilable = true;
 
-  private Exception _compileException;
+  private Throwable _compileException;
 
   private HashMap<StringValue,Function> _functionMap;
   private HashMap<StringValue,Function> _functionMapLowerCase
@@ -248,6 +247,9 @@ public class QuercusProgram {
 
   public void setCompileException(Throwable e)
   {
+    _compileException = e;
+
+    /*
     if (e == null) {
       _compileException = null;
       return;
@@ -261,6 +263,7 @@ public class QuercusProgram {
     }
 
     _compileException = new QuercusException(msg);
+    */
   }
 
   public Throwable getCompileException()

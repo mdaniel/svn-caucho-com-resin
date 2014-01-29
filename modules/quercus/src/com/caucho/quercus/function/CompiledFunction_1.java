@@ -32,6 +32,7 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -44,22 +45,9 @@ abstract public class CompiledFunction_1 extends CompiledFunction {
     = Logger.getLogger(CompiledFunction_1.class.getName());
   private static final L10N L = new L10N(CompiledFunction_1.class);
 
-  private String _name;
-  private Expr _default_0;
-
-  public CompiledFunction_1(String name, Expr default_0)
+  public CompiledFunction_1(String name, Arg default_0)
   {
-    _name = name;
-    _default_0 = default_0;
-  }
-
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, new Arg[] {default_0});
   }
 
   /**
@@ -84,7 +72,7 @@ abstract public class CompiledFunction_1 extends CompiledFunction {
     switch (argValues.length) {
     case 0:
       return call(env,
-                  _default_0.eval(env));
+                  _args[0].eval(env));
     case 1:
     default:
       return call(env,
@@ -94,7 +82,7 @@ abstract public class CompiledFunction_1 extends CompiledFunction {
 
   public Value call(Env env)
   {
-    return call(env, _default_0.eval(env));
+    return call(env, _args[0].eval(env));
   }
 
   abstract public Value call(Env env, Value arg1);

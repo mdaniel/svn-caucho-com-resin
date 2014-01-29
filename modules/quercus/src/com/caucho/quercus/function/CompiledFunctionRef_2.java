@@ -32,6 +32,7 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -44,24 +45,9 @@ abstract public class CompiledFunctionRef_2 extends CompiledFunctionRef {
     = Logger.getLogger(CompiledFunctionRef_2.class.getName());
   private static final L10N L = new L10N(CompiledFunctionRef_2.class);
 
-  private String _name;
-  private Expr _default_0;
-  private Expr _default_1;
-
-  public CompiledFunctionRef_2(String name, Expr default_0, Expr default_1)
+  public CompiledFunctionRef_2(String name, Arg default_0, Arg default_1)
   {
-    _name = name;
-    _default_0 = default_0;
-    _default_1 = default_1;
-  }
-
-  /**
-   * Returns this function's name.
-   */
-  @Override
-  public String getName()
-  {
-    return _name;
+    super(name, new Arg[] {default_0, default_1});
   }
 
   /**
@@ -86,12 +72,12 @@ abstract public class CompiledFunctionRef_2 extends CompiledFunctionRef {
     switch (argValues.length) {
     case 0:
       return callRef(env,
-                     _default_0.eval(env),
-                     _default_1.eval(env));
+                     _args[0].eval(env),
+                     _args[1].eval(env));
     case 1:
       return callRef(env,
                      argValues[0],
-                     _default_1.eval(env));
+                     _args[1].eval(env));
     case 2:
     default:
       return callRef(env,
@@ -103,15 +89,15 @@ abstract public class CompiledFunctionRef_2 extends CompiledFunctionRef {
   public Value callRef(Env env)
   {
     return callRef(env,
-		   _default_0.eval(env),
-		   _default_1.eval(env));
+                   _args[0].eval(env),
+                   _args[1].eval(env));
   }
 
   public Value callRef(Env env, Value a1)
   {
     return callRef(env,
-		   a1,
-		   _default_1.eval(env));
+                   a1,
+                   _args[1].eval(env));
   }
 
   abstract public Value callRef(Env env, Value a1, Value a2);

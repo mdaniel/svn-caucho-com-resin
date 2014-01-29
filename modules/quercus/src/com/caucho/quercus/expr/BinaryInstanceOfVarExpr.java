@@ -74,8 +74,8 @@ public class BinaryInstanceOfVarExpr extends AbstractBinaryExpr {
   {
     Value lValue = _left.eval(env);
     Value rValue = _right.eval(env);
-    
-    return lValue.isA(rValue);
+
+    return lValue.isA(env, rValue);
   }
 
   public String toString()

@@ -317,8 +317,7 @@ abstract public class Expr {
    */
   public Expr createFieldGet(ExprFactory factory,
                              Location location,
-                             StringValue name,
-                             boolean isInClassScope)
+                             StringValue name)
   {
     return factory.createFieldGet(this, name);
   }
@@ -328,8 +327,7 @@ abstract public class Expr {
    */
   public Expr createFieldGet(ExprFactory factory,
                              Location location,
-                             Expr name,
-                             boolean isInClassScope)
+                             Expr name)
   {
     return factory.createFieldVarGet(this, name);
   }

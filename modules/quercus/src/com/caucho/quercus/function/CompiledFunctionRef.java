@@ -31,6 +31,7 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -38,13 +39,16 @@ import java.util.logging.Logger;
 /**
  * Represents a compiled function with 1 arg
  */
-abstract public class CompiledFunctionRef extends AbstractFunction {
+abstract public class CompiledFunctionRef extends CompiledAbstractFunction {
   private static final Logger log
     = Logger.getLogger(CompiledFunctionRef.class.getName());
   private static final L10N L = new L10N(CompiledFunctionRef.class);
 
-  @Override
-  public abstract String getName();
+  public CompiledFunctionRef(String name,
+                             Arg []args)
+  {
+    super(name, args);
+  }
 
   @Override
   public Value call(Env env, Value []argValues)

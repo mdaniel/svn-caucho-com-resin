@@ -32,6 +32,7 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -66,6 +67,12 @@ public class LazyFunction extends AbstractFunction
   public String getName()
   {
     return _name;
+  }
+
+  @Override
+  public Arg []getArgs(Env env)
+  {
+    return getFun(env).getArgs(env);
   }
 
   public AbstractFunction toFun()

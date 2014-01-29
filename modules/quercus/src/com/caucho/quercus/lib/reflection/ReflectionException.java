@@ -29,46 +29,45 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.Value;
 
 public class ReflectionException extends QuercusLanguageException
 {
+  private Location _location;
   private String _message;
 
   public ReflectionException(Env env)
   {
     super(env);
+
+    _location = env.getLocation();
   }
 
   public ReflectionException(Env env, String msg)
   {
     super(env);
 
+    _location = env.getLocation();
+
     _message = msg;
   }
 
-  @Override
+  public Location getLocation(Env env)
+  {
+    return _location;
+  }
+
   public String getMessage()
   {
     return _message;
   }
 
-  @Override
   public String getMessage(Env env)
   {
     return getMessage();
-  }
-
-  /**
-   * Converts the exception to a Value.
-   */
-  @Override
-  public Value toValue(Env env)
-  {
-    Value e = env.createException("ReflectionException", _message);
-
-    return e;
   }
 }

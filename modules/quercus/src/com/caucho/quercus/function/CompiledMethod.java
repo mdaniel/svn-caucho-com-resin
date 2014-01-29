@@ -32,12 +32,25 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.Arg;
 
 /**
  * Represents a compiled method with 0 args
  */
 @SuppressWarnings("serial")
-abstract public class CompiledMethod extends AbstractFunction {
+abstract public class CompiledMethod extends CompiledAbstractFunction {
+
+  public CompiledMethod(String name)
+  {
+    super(name, AbstractFunction.NULL_ARGS);
+  }
+
+  public CompiledMethod(String name,
+                        Arg []args)
+  {
+    super(name, args);
+  }
+
   @Override
   public Value call(Env env, Value []args)
   {

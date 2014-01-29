@@ -76,8 +76,9 @@ public class ReflectionParameter
     Arg []args = fun.getArgs(env);
 
     for (int i = 0; i < args.length; i++) {
-      if (args[i].getName().equals(paramName))
+      if (args[i].getName().equals(paramName)) {
         return new ReflectionParameter(fun, args[i]);
+      }
     }
 
     throw new ReflectionException(env,
@@ -172,8 +173,9 @@ public class ReflectionParameter
   public Value getDefaultValue(Env env)
   {
     //XXX: more specific exception
-    if (! isOptional())
+    if (! isOptional()) {
       throw new ReflectionException(env, L.l("parameter '{0}' is not optional", _arg.getName()));
+    }
 
     return _arg.getDefault().eval(env);
   }

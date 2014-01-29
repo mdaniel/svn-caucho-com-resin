@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,34 +24,36 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.quercus.expr;
+package com.caucho.quercus.function;
 
-import com.caucho.quercus.Location;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.program.Arg;
 
-import java.util.ArrayList;
+public abstract class CompiledAbstractFunction extends AbstractFunction
+{
+  protected final String _name;
+  protected final Arg []_args;
 
-/**
- * Represents a PHP method call expression from $this.
- */
-public class ThisMethodVarExpr extends ObjectMethodVarExpr {
-  public ThisMethodVarExpr(Location location,
-                        ThisExpr qThis,
-                        Expr methodName,
-                        ArrayList<Expr> args)
+  public CompiledAbstractFunction(String name,
+                                  Arg []args)
   {
-    super(location, qThis, methodName, args);
+    _name = name;
+
+    _args = args;
   }
 
-  //
-  // java code generation
-  //
-
-  public String toString()
+  @Override
+  public final String getName()
   {
-    return "$this->" + _name + "()";
+    return _name;
+  }
+
+  @Override
+  public final Arg []getArgs(Env env)
+  {
+    return _args;
   }
 }
-

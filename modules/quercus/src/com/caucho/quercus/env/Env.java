@@ -264,6 +264,8 @@ public class Env
   public ClassDef []_classDef;
   public QuercusClass []_qClass;
 
+  public HashMap<String,QuercusClass> _classAliasMap;
+
   // Constant map
   public Value []_const;
 
@@ -5117,11 +5119,13 @@ public class Env
    */
   public Value wrapJava(Object obj, JavaClassDef def)
   {
-    if (obj == null)
+    if (obj == null) {
       return NullValue.NULL;
+    }
 
-    if (obj instanceof Value)
+    if (obj instanceof Value) {
       return (Value) obj;
+    }
 
     // XXX: why is this logic here?  The def should be correct on the call
     // logic is for JavaMarshal, where can avoid the lookup call
@@ -5137,6 +5141,30 @@ public class Env
   }
 
   /**
+   * Adds a class alias.
+   */
+  public void addClassAlias(String alias, QuercusClass cls)
+  {
+    if (_classAliasMap == null) {
+      _classAliasMap = new HashMap<String,QuercusClass>();
+    }
+
+    _classAliasMap.put(alias, cls);
+  }
+
+  /**
+   * Finds the class with the given alias name.
+   */
+  public QuercusClass findClassByAlias(String alias)
+  {
+    if (_classAliasMap == null) {
+      return null;
+    }
+
+    return _classAliasMap.get(alias);
+  }
+
+  /**
    * Finds the class with the given name.
    *
    * @param name the class name
@@ -5144,7 +5172,7 @@ public class Env
    */
   public QuercusClass findClass(String name)
   {
-    return findClass(name, true, true);
+    return findClass(name, -1, true, true, true);
   }
 
   /**
@@ -5156,22 +5184,60 @@ public class Env
    */
   public QuercusClass findClass(String name,
                                 boolean useAutoload,
-                                boolean useImport)
+                                boolean useImport,
+                                boolean useAliasMap)
   {
-    int id = _quercus.getClassId(name);
-
-    return findClass(id, useAutoload, useImport);
+    return findClass(name, -1, useAutoload, useImport, useAliasMap);
   }
 
+  /**
+   * Finds the class with the given name id.
+   *
+   * @param name the class name
+   * @return the found class or null if no class found.
+   */
+  public QuercusClass findClass(int id)
+  {
+    return findClass(null, id, true, true, true);
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   * @param useAutoload use autoload to locate the class if necessary
+   * @return the found class or null if no class found.
+   */
   public QuercusClass findClass(int id,
                                 boolean useAutoload,
-                                boolean useImport)
+                                boolean useImport,
+                                boolean useAliasMap)
   {
+    return findClass(null, id, useAutoload, useImport, useAliasMap);
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   * @param useAutoload use autoload to locate the class if necessary
+   * @return the found class or null if no class found.
+   */
+  public QuercusClass findClass(String name,
+                                int id,
+                                boolean useAutoload,
+                                boolean useImport,
+                                boolean useAliasMap)
+  {
+    if (id < 0) {
+      id = _quercus.getClassId(name);
+    }
+
     if (id < _qClass.length && _qClass[id] != null) {
       return _qClass[id];
     }
 
-    QuercusClass cl = createClassFromCache(id, useAutoload, useImport);
+    QuercusClass cl = createClassFromCache(id, useAutoload, useImport, useAliasMap);
 
     if (cl != null) {
       _qClass[id] = cl;
@@ -5182,24 +5248,40 @@ public class Env
       return cl;
     }
     else {
-      String name = _quercus.getClassName(id);
+      if (name == null) {
+        name = _quercus.getClassName(id);
+      }
 
-      QuercusClass qcl = findClassExt(name, useAutoload, useImport);
+      QuercusClass qcl = null;
 
-      if (qcl != null)
+      if (useAliasMap) {
+        qcl = findClassByAlias(name);
+      }
+
+      if (qcl == null) {
+        qcl = findClassExt(name, id, useAutoload, useImport, useAliasMap);
+      }
+
+      if (qcl != null) {
         _qClass[id] = qcl;
-      else
+      }
+      else {
         return null;
+      }
 
       return qcl;
     }
   }
 
   private QuercusClass findClassExt(String name,
+                                    int id,
                                     boolean useAutoload,
-                                    boolean useImport)
+                                    boolean useImport,
+                                    boolean useAliasMap)
   {
-    int id = _quercus.getClassId(name);
+    if (id < 0) {
+      id = _quercus.getClassId(name);
+    }
 
     if (useAutoload) {
       if (! _autoloadClasses.contains(name)) {
@@ -5216,7 +5298,7 @@ public class Env
             cb.call(this, nameString);
 
             // php/0977
-            QuercusClass cls = findClass(name, false, useImport);
+            QuercusClass cls = findClass(name, id, false, useImport, useAliasMap);
 
             if (cls != null)
               return cls;
@@ -5230,7 +5312,7 @@ public class Env
               _autoload.call(this, nameString);
 
               // php/0976
-              QuercusClass cls = findClass(name, false, useImport);
+              QuercusClass cls = findClass(name, id, false, useImport, useAliasMap);
 
               if (cls != null)
                 return cls;
@@ -5244,7 +5326,7 @@ public class Env
 
     if (useImport) {
       if (importPhpClass(name)) {
-        return findClass(name, false, false);
+        return findClass(name, id, false, false, useAliasMap);
       }
       else {
         try {
@@ -5300,7 +5382,7 @@ public class Env
     ClassDef def = _classDef[classId];
 
     if (def == null) {
-      QuercusClass cl = findClass(classId, true, true);
+      QuercusClass cl = findClass(null, classId, true, true, true);
 
       if (cl != null)
         return cl;
@@ -5393,7 +5475,8 @@ public class Env
    */
   private QuercusClass createClassFromCache(int id,
                                             boolean useAutoload,
-                                            boolean useImport)
+                                            boolean useImport,
+                                            boolean useAliasMap)
   {
     if (id < _classDef.length && _classDef[id] != null) {
       ClassDef classDef = _classDef[id];
@@ -5402,24 +5485,29 @@ public class Env
 
       QuercusClass parent = null;
 
-      if (parentName != null)
-        parent = findClass(parentName);
+      if (parentName != null) {
+        parent = findClass(parentName, -1, useAutoload, useImport, useAliasMap);
+      }
 
-      if (parentName == null || parent != null)
+      if (parentName == null || parent != null) {
         return createQuercusClass(id, classDef, parent);
-      else
+      }
+      else {
         return null; // php/
+      }
     }
 
     ClassDef staticClass = _quercus.getClassDef(id);
 
-    if (staticClass != null)
+    if (staticClass != null) {
       return createQuercusClass(id, staticClass, null); // XXX: cache
-    else
+    }
+    else {
       return null;
+    }
   }
 
-  /*
+  /**
    * Registers an SPL autoload function.
    */
   public void addAutoloadFunction(Callable fun, boolean isPrepend)
@@ -5438,7 +5526,7 @@ public class Env
     }
   }
 
-  /*
+  /**
    * Unregisters an SPL autoload function.
    */
   public void removeAutoloadFunction(Callable fun)
@@ -5452,7 +5540,7 @@ public class Env
     }
   }
 
-  /*
+  /**
    * Returns the registered SPL autoload functions.
    */
   public ArrayList<Callable> getAutoloadFunctions()
@@ -5539,10 +5627,11 @@ public class Env
    */
   public QuercusClass findAbstractClass(String name)
   {
-    QuercusClass cl = findClass(name, true, true);
+    QuercusClass cl = findClass(name, -1, true, true, true);
 
-    if (cl != null)
+    if (cl != null) {
       return cl;
+    }
 
     throw createErrorException(L.l("'{0}' is an unknown class name.", name));
     /*

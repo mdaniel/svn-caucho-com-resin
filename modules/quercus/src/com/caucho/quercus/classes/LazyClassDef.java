@@ -37,6 +37,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.quercus.env.CompiledClassDef;
 import com.caucho.util.L10N;
 
@@ -276,9 +277,9 @@ public class LazyClassDef extends CompiledClassDef
    * Returns value for instanceof.
    */
   @Override
-  public boolean isA(String name)
+  public boolean isA(Env env, String name)
   {
-    return getClassDef().isA(name);
+    return getClassDef().isA(env, name);
   }
 
   /**
@@ -316,7 +317,7 @@ public class LazyClassDef extends CompiledClassDef
   }
 
   @Override
-  public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
+  public Set<Map.Entry<StringValue,ClassField>> fieldSet()
   {
     return getClassDef().fieldSet();
   }
