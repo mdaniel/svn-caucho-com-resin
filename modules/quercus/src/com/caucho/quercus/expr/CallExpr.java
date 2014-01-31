@@ -181,8 +181,9 @@ public class CallExpr extends Expr {
       _funId = env.findFunctionId(_name);
 
       if (_funId <= 0) {
-        if (_nsName != null)
+        if (_nsName != null) {
           _funId = env.findFunctionId(_nsName);
+        }
 
         if (_funId <= 0) {
           env.error(L.l("'{0}' is an unknown function.", _name), getLocation());
@@ -192,7 +193,7 @@ public class CallExpr extends Expr {
       }
     }
 
-    AbstractFunction fun = env.findFunction(_funId);
+    AbstractFunction fun = env.getFunction(_funId);
 
     if (fun == null) {
       env.error(L.l("'{0}' is an unknown function.", _name), getLocation());

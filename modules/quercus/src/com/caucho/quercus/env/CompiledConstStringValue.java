@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.Locale;
+
 /**
  * Represents a StringValue that is never modified.
  * For compiled code.
@@ -92,9 +94,11 @@ public final class CompiledConstStringValue
     setString(String.valueOf(ch));
     setLongValue(longValue);
     setDoubleValue(doubleValue);
-
     setValueType(valueType);
+
     setKey(super.toKey());
+    setLowerCase(toLowerCase(Locale.ENGLISH));
+
     _compiledHashCode = hashCode;
   }
 
@@ -113,7 +117,8 @@ public final class CompiledConstStringValue
     setValueType(valueType);
 
     setKey(key);
-    
+    setLowerCase(toLowerCase(Locale.ENGLISH));
+
     _compiledHashCode = hashCode;
   }
 
@@ -131,6 +136,8 @@ public final class CompiledConstStringValue
     setValueType(valueType);
 
     setKey(super.toKey());
+    setLowerCase(toLowerCase(Locale.ENGLISH));
+
     _compiledHashCode = hashCode;
   }
 

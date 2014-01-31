@@ -3962,6 +3962,10 @@ public class QuercusParser {
 
     name = resolveIdentifier(name);
 
+    if (! _quercus.isStrict()) {
+      name = name.toLowerCase(Locale.ENGLISH);
+    }
+
     return _factory.createCall(this, name, args);
 
     /*

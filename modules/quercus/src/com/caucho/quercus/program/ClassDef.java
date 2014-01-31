@@ -336,23 +336,6 @@ abstract public class ClassDef {
   }
 
   /**
-   * Creates a new instance.
-   */
-  public ObjectValue newInstance(Env env, QuercusClass qcl)
-  {
-    if (isAbstract()) {
-      throw env.createErrorException(
-        L.l("abstract class '{0}' cannot be instantiated.", getName()));
-    }
-    else if (isInterface()) {
-      throw env.createErrorException(
-        L.l("interface '{0}' cannot be instantiated.", getName()));
-    }
-
-    return new ObjectExtValue(env, qcl);
-  }
-
-  /**
    * Creates a new object.
    */
   public ObjectValue createObject(Env env, QuercusClass cls)

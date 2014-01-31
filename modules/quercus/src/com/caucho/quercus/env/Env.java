@@ -4014,24 +4014,9 @@ public class Env
       return null;
   }
 
-  /**
-   * Returns the function with a given name.
-   *
-   * Compiled mode normally uses the _fun array directly, so this call
-   * is rare.
-   */
-  public AbstractFunction findFunction(int id)
+  public AbstractFunction getFunction(int id)
   {
-    if (id >= 0) {
-      if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction)) {
-        return _fun[id];
-      }
-      else {
-        return null;
-      }
-    }
-
-    return null;
+    return _fun[id];
   }
 
   public AbstractFunction getFunction(StringValue name)
@@ -4055,8 +4040,9 @@ public class Env
       System.arraycopy(oldFun, 0, _fun, 0, oldFun.length);
     }
 
-    if (_fun[id] == null)
+    if (_fun[id] == null) {
       _fun[id] = fun;
+    }
   }
 
   /*

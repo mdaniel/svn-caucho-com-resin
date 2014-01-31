@@ -1375,8 +1375,9 @@ public class QuercusContext
       return id;
     }
 
-    if (! isStrict())
+    if (! isStrict()) {
       name = name.toLowerCase(Locale.ENGLISH);
+    }
 
     if (name.startsWith("\\")) {
       // php/0m18
@@ -1392,8 +1393,9 @@ public class QuercusContext
     synchronized (_functionNameMap) {
       id = _functionNameMap.get(name);
 
-      if (id >= 0)
+      if (id >= 0) {
         return id;
+      }
 
       // 0 is used for an undefined function
       // php/1p0g
@@ -1444,8 +1446,10 @@ public class QuercusContext
       name = name.substring(1);
     }
 
+    id = _functionNameMap.get(name);
+
     // IntMap is internally synchronized
-    return _functionNameMap.get(name);
+    return id;
   }
 
   /**

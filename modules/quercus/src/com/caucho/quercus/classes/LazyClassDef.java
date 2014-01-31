@@ -237,15 +237,6 @@ public class LazyClassDef extends CompiledClassDef
     getClassDef().initClassFields(cl, bindingClassName);
   }
 
-  /**
-   * Creates a new instance.
-   */
-  @Override
-  public ObjectValue newInstance(Env env, QuercusClass qcl)
-  {
-    return getClassDef().newInstance(env, qcl);
-  }
-
   /*
    * Creates a new object.
    */

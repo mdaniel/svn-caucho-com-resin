@@ -1176,8 +1176,8 @@ public class QuercusClass extends NullValue {
    */
   public void initObject(Env env, ObjectValue obj)
   {
-    for (int i = 0; i < _initializers.size(); i++) {
-      _initializers.get(i).initInstance(env, obj);
+    for (InstanceInitializer initializer : _initializers) {
+      initializer.initInstance(env, obj);
     }
   }
 
@@ -1267,7 +1267,7 @@ public class QuercusClass extends NullValue {
         objectValue = new ObjectExtJavaValue(env, this, null, _javaClassDef);
       }
       else {
-        objectValue = _classDef.newInstance(env, this);
+        objectValue = new ObjectExtValue(env, this);
       }
 
       initObject(env, objectValue);

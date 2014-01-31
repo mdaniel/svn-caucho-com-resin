@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.IdentityHashMap;
 import java.util.Locale;
@@ -2078,6 +2079,17 @@ public class StringBuilderValue
     }
     else
       return false;
+  }
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generate(PrintWriter out)
+    throws IOException
+  {
+    ConstStringValue.generateImpl(out, this);
   }
 
   //

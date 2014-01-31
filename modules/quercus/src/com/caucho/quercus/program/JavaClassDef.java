@@ -584,29 +584,6 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   }
 
   /**
-   * Creates a new instance.
-   */
-  @Override
-  public ObjectValue newInstance(Env env, QuercusClass qClass)
-  {
-    // return newInstance();
-    return null;
-  }
-
-  public Value newInstance()
-  {
-    return null;
-    /*
-    try {
-      //Object obj = _type.newInstance();
-      return new JavaValue(null, _type.newInstance(), this);
-    } catch (Exception e) {
-      throw new QuercusRuntimeException(e);
-    }
-    */
-  }
-
-  /**
    * Eval new
    */
   @Override
