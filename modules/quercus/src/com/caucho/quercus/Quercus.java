@@ -63,8 +63,14 @@ public class Quercus
   {
     Quercus quercus = new Quercus();
 
+    startMain(args, quercus);
+  }
+
+  public static void startMain(String []args, Quercus quercus)
+    throws IOException
+  {
     if (! quercus.parseArgs(args)) {
-      printUsage();
+      quercus.printUsage();
       return;
     }
 
@@ -79,9 +85,9 @@ public class Quercus
     }
   }
 
-  public static void printUsage()
+  public void printUsage()
   {
-    System.out.println("usage: " + Quercus.class.getName() + " [flags] <file> [php-args]");
+    System.out.println("usage: " + getClass().getName() + " [flags] <file> [php-args]");
     System.out.println(" -f            : Explicitly set the script filename.");
     System.out.println(" -d name=value : Sets a php ini value.");
   }
@@ -139,7 +145,8 @@ public class Quercus
       else if ("--".equals(args[i])) {
         break;
       }
-      else if ("-h".equals(args[i])) {
+      else if ("-h".equals(args[i])
+               || "--help".equals(args[i])) {
         return false;
       }
       else if (args[i].startsWith("-")) {

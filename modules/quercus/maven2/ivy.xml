@@ -2,9 +2,4 @@
   <info organisation="com.caucho" module="quercus" revision="@VERSION@">
     <license name="GPL"/>
   </info>
-
-  <dependencies>
-    <dependency org="com.caucho" name="resin-kernel" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-javaee16" rev="@VERSION@"/>
-  </dependencies>
 </ivy-module> 

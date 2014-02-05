@@ -58,17 +58,7 @@ public class CgiQuercus
   {
     CgiQuercus quercus = new CgiQuercus();
 
-    quercus.parseArgs(args);
-
-    quercus.init();
-    quercus.start();
-
-    if (quercus.getFileName() != null) {
-      quercus.execute();
-    }
-    else {
-      throw new RuntimeException("input file not specified");
-    }
+    startMain(args, quercus);
   }
 
   /**

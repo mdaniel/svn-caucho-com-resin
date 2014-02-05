@@ -13,17 +13,5 @@
       <name>GNU General Public License 2.0</name>
     </license>
   </licenses>
-    
-  <dependencies>
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-kernel</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-javaee16</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-  </dependencies>
+  
 </project>

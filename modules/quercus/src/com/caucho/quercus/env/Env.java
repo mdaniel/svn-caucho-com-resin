@@ -5565,7 +5565,7 @@ public class Env
     }
 
     if (url != null) {
-      includeOnce(new StringBuilderValue(url.toString()));
+      includeOnce(createString(url.toString()));
       return true;
     }
     else {

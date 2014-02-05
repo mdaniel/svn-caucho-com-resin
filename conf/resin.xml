@@ -37,9 +37,6 @@
 
   <logger name="com.caucho.java" level="config"/>
   <logger name="com.caucho.loader" level="config"/>
-  <!--
-  <logger name="com.caucho.quercus.page" level="finest"/>
-  -->
 
   <!--
      - Default configuration applied to all clusters, including

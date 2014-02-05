@@ -960,10 +960,7 @@
       <param name="maven.name" value="resin-kernel"/>
     </antcall>
   	
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="quercus"/>
-      <param name="jar.name" value="quercus.jar"/>
-      <param name="maven.name" value="quercus"/>
+    <antcall target="quercus-maven2" inheritRefs="true">
     </antcall>
 <!--
     <antcall target="maven2-artifact" inheritRefs="true">
@@ -1022,6 +1019,52 @@
       <param name="maven.name" value="resin-support"/>
     </antcall>
     -->
+  </target>
+	
+  <target name="quercus-maven2" depends="init, compile">
+    <property name="module.name" value="quercus"/>
+    <property name="jar.name" value="quercus.jar"/>
+    <property name="maven.name" value="quercus"/>
+
+    <property name="maven" value="${maven.root}/com/caucho/"/>
+  	
+    <property name="module.dir" value="${resin.modules}"/>
+    <property name="module.src" value="${module.dir}/${module.name}/src"/>
+    <property name="jar.name" value="${module.name}.${module.ext}"/>
+    <property name="maven.name" value="resin-${module.name}"/>
+    <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
+    <property name="jar" value="${dist}/quercus-with-dependencies.jar"/>
+    
+    <jar destfile="${jar}" manifest="${module.dir}/quercus/maven2/META-INF/MANIFEST.MF">
+      <fileset dir="${module.dir}/quercus/classes">
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/.svn/**"/>
+      </fileset>
+      <fileset dir="${module.dir}/kernel/classes">
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/**"/>
+      </fileset>
+      <fileset dir="${module.dir}/servlet16/classes">
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/.svn/**"/>
+        <include name="javax/servlet/*.class"/>
+        <include name="javax/servlet/http/*.class"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="LICENSE"/>
+      </fileset>
+    </jar>
+    		
+    <mkdir dir="${maven.dist}"/>
+
+    <antcall target="maven2-jar" inheritRefs="true">
+      <param name="pom.xml" value="${module.dir}/quercus/maven2/pom.xml"/>
+      <param name="ivy.xml" value="${module.dir}/quercus/maven2/ivy.xml"/>
+    </antcall>
   </target>
 
   <target name="maven-rsync" depends="init,maven-dist">

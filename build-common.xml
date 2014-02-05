@@ -1079,7 +1079,7 @@
       <param name="jar" value="${resin.artifacts}/${module.name}/dist/${jar.name}"/>
     </antcall>
   </target>
-    
+  
   <target name="maven2-module">
     <property name="module.dir" value="${resin.modules}"/>
     <property name="module.src" value="${module.dir}/${module.name}/src"/>
@@ -1100,7 +1100,7 @@
     <!-- PARAMETERS -->
     <!--
          maven.name
-         maven.jar
+         jar
          ivy.xml
          pom.xml
     -->
