@@ -778,19 +778,19 @@ them after a period of time.
 
 </s3>
 
-<s3 name="syslog" title="SyslogLogHandler">
+<s3 name="syslog" title="SyslogHandler">
 
-<p>On Unix systems, the SyslogLogHandler lets you log messages to syslog.</p>
+<p>On Unix systems, the SyslogHandler lets you log messages to syslog.</p>
 
 <example title="Example: syslog configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
       xmlns:resin="urn:java:com.caucho.resin">
 
 &lt;logger name="">
-  &lt;resin:SyslogLogHandler level="warning">
+  &lt;resin:SyslogHandler level="warning">
     &lt;facility&gt;daemon&lt;/facility&gt;
     &lt;severity&gt;notice&lt;/severity&gt;
-  &lt;/resin:SyslogLogHandler>
+  &lt;/resin:SyslogHandler>
 &lt;/logger&gt;
 
 &lt;/resin>
