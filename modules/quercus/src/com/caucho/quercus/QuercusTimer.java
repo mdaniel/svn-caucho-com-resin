@@ -108,7 +108,7 @@ public class QuercusTimer
     LockSupport.unpark(_timerThread);
 
     try {
-      long sleepTime = 1000;
+      long sleepTime = 200;
 
       if (CurrentTime.isTest()) {
         sleepTime = 1;
