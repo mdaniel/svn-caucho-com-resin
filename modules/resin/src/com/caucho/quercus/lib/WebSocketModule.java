@@ -27,7 +27,6 @@
  * @author Scott Ferguson
  */
 
-
 package com.caucho.quercus.lib;
 
 import com.caucho.network.listen.SocketLinkDuplexListener;
@@ -35,12 +34,10 @@ import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 import java.io.*;
 import java.util.Locale;
@@ -52,7 +49,7 @@ public class WebSocketModule
   private static final L10N L = new L10N(WebSocketModule.class);
   private static final Logger log
     = Logger.getLogger(WebSocketModule.class.getName());
-  
+
   /**
    * Writes a string to the websocket.
    */
@@ -77,15 +74,15 @@ public class WebSocketModule
 
       out.write(0xff);
       out.flush();
-    
+
       return BooleanValue.TRUE;
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Reads a string from the websocket.
    */
@@ -101,7 +98,7 @@ public class WebSocketModule
 
       if (ch != 0x00) {
         log.fine("websocket_read expected 0x00 at '0x" + Integer.toHexString(ch) + "'");
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -112,7 +109,7 @@ public class WebSocketModule
           sb.append((char) ch);
         else if ((ch & 0xe0) == 0xc0) {
           int ch2 = is.read();
-          
+
           if ((ch2 & 0x80) == 0x80) {
             sb.append(ch);
             sb.append(ch2);
@@ -127,7 +124,7 @@ public class WebSocketModule
         else if ((ch & 0xf0) == 0xe0) {
           int ch2 = is.read();
           int ch3 = is.read();
-          
+
           if ((ch2 & 0x80) == 0x80 && (ch3 & 0x80) == 0x80) {
             sb.append(ch);
             sb.append(ch2);
@@ -138,7 +135,7 @@ public class WebSocketModule
                      + " '0x" + Integer.toHexString(ch2)
                      + "' '0x" + Integer.toHexString(ch3)
                      + "' for string " + sb);
-            
+
             sb.append(0xfe);
             sb.append(0xdd);
           }
@@ -147,7 +144,7 @@ public class WebSocketModule
           log.fine("websocket_read invalid lead character "
                    + " '0x" + Integer.toHexString(ch)
                    + "' for string " + sb);
-            
+
           sb.append(0xfe);
           sb.append(0xdd);
         }
@@ -157,17 +154,17 @@ public class WebSocketModule
           log.fine("websocket_read expected 0xff "
                    + " '0x" + Integer.toHexString(ch)
                    + "' for string " + sb);
-            
+
       }
-    
+
       return sb;
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Reads a string from the websocket.
    */
@@ -193,7 +190,7 @@ public class WebSocketModule
       env.warning("request connection header '" + connection + "' must be 'Upgrade' for a websocket_start");
       return null;
     }
-    
+
     String origin = request.getHeader("Origin");
 
     if (origin == null) {
@@ -218,7 +215,7 @@ public class WebSocketModule
       sb.append(":");
       sb.append(request.getServerPort());
     }
-    
+
     sb.append(request.getContextPath());
     if (request.getServletPath() != null)
       sb.append(request.getServletPath());
@@ -230,9 +227,9 @@ public class WebSocketModule
 
     if (protocol != null)
       env.getResponse().setHeader("WebSocket-Protocol", protocol);
-    
+
     env.getResponse().setHeader("WebSocket-Location", url);
-    
+
     // XXX: validate path
 
     QuercusWebSocketListener listener = new QuercusWebSocketListener(env, path);
@@ -255,29 +252,29 @@ public class WebSocketModule
       _env = env;
       _path = path;
     }
-    
+
     @Override
     public void onRead(SocketLinkDuplexController context)
     {
       boolean isValid = false;
-      
+
       try {
         if (log.isLoggable(Level.FINE))
           log.fine(this + " WebSocket read " + _path);
-        
+
         _env.include(_path);
-        
+
         isValid = true;
       } finally {
         if (! isValid) {
           if (log.isLoggable(Level.FINE))
             log.fine(this + " WebSocket exit " + _path);
-          
+
           context.complete();
         }
       }
     }
-    
+
     public void onDisconnect(SocketLinkDuplexController context)
     {
       try {
@@ -286,7 +283,7 @@ public class WebSocketModule
         context.complete();
       }
     }
-    
+
     public void onTimeout(SocketLinkDuplexController context)
     {
       try {

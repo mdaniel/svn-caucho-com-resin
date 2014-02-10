@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.session;
 
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
 import com.caucho.server.cluster.*;
 import com.caucho.server.distcache.*;
 import com.caucho.server.webapp.*;
@@ -39,6 +40,8 @@ import com.caucho.util.*;
 
 import java.io.*;
 import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Stripped down version of com.caucho.server.session.SessionManager,
@@ -58,7 +61,7 @@ public class ProSessionManager extends QuercusSessionManager
   public ProSessionManager(QuercusContext quercus, String contextId)
   {
     super(quercus);
-    
+
     _webApp = WebApp.getLocal();
 
     if (_webApp != null)
@@ -66,7 +69,7 @@ public class ProSessionManager extends QuercusSessionManager
 
     if (_sessionManager != null)
       setSessionTimeout(_sessionManager.getSessionTimeout());
-    
+
     ServletService server = ServletService.getCurrent();
 
     /*
@@ -81,9 +84,9 @@ public class ProSessionManager extends QuercusSessionManager
 
       if (hostName == null || hostName.equals(""))
 	hostName = "default";
-      
+
       String storeId = hostName + contextPath + "-PHP";
-      
+
       _store = _storeManager.createStore(storeId, objectManager);
     }
     */
@@ -99,11 +102,13 @@ public class ProSessionManager extends QuercusSessionManager
   {
     if (_sessionManager == null)
       return super.createSessionId(env);
-    
+
     String id;
 
     do {
-      id = _sessionManager.createSessionIdImpl(env.getRequest());
+      QuercusHttpServletRequest request = env.getRequest();
+
+      id = _sessionManager.createSessionIdImpl(request.toRequest(HttpServletRequest.class));
     } while (getSession(env, id, 0) != null);
 
     if (id == null || id.equals(""))
@@ -111,7 +116,7 @@ public class ProSessionManager extends QuercusSessionManager
 
     return id;
   }
-  
+
   public long getMaxIdleTime()
   {
     return _sessionManager.getMaxIdleTime();

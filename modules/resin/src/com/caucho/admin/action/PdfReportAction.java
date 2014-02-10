@@ -19,6 +19,10 @@ import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequestImpl;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponseImpl;
 import com.caucho.server.http.StubServletRequest;
 import com.caucho.server.http.StubServletResponse;
 import com.caucho.server.resin.Resin;
@@ -28,15 +32,15 @@ import com.caucho.vfs.*;
 public class PdfReportAction implements AdminAction
 {
   private static final L10N L = new L10N(PdfReportAction.class);
-  private static final Logger log 
+  private static final Logger log
     = Logger.getLogger(PdfReportAction.class.getName());
-  
+
   private static final long HOUR = 3600 * 1000L;
   private static final long DAY = 24 * 3600 * 1000L;
-  
+
   private String _serverId;
   private String _logDirectory;
-  
+
   private String _path;
   private long _period;
   private String _report;
@@ -45,17 +49,17 @@ public class PdfReportAction implements AdminAction
   private MailService _mailService = new MailService();
   private String _mailTo;
   private String _mailFrom;
-  
+
   private boolean _isSnapshot;
   private long _profileTime;
   private long _profileTick;
-  
+
   private boolean _isWatchdog;
 
   private boolean _isReturnPdf;
-  
+
   private QuercusContext _quercus;
-  
+
   private Path _phpPath;
   private Path _logPath;
   private String _fileName;
@@ -69,72 +73,72 @@ public class PdfReportAction implements AdminAction
   {
     _path = path;
   }
-  
+
   public String getReport()
   {
     return _report;
   }
-  
+
   public void setReport(String report)
   {
     _report = report;
   }
-  
+
   public String getTitle()
   {
     return _title;
   }
-  
+
   public void setTitle(String title)
   {
     _title = title;
   }
-  
+
   public long getPeriod()
   {
     return _period;
   }
-  
+
   public void setPeriod(long period)
   {
     _period = period;
   }
-  
+
   public boolean isSnapshot()
   {
     return _isSnapshot;
   }
-  
+
   public void setSnapshot(boolean isSnapshot)
   {
     _isSnapshot = isSnapshot;
   }
-  
+
   public void setWatchdog(boolean isWatchdog)
   {
     _isWatchdog = isWatchdog;
   }
-  
+
   public boolean isWatchdog()
   {
     return _isWatchdog;
   }
-  
+
   public long getProfileTime()
   {
     return _profileTime;
   }
-  
+
   public void setProfileTime(long profileTime)
   {
     _profileTime = profileTime;
   }
-  
+
   public long getProfileTick()
   {
     return _profileTick;
   }
-  
+
   public void setProfileTick(long profileTick)
   {
     _profileTick = profileTick;
@@ -144,33 +148,33 @@ public class PdfReportAction implements AdminAction
   {
     return _logDirectory;
   }
-  
+
   public Path getLogPath()
   {
     return _logPath;
   }
-  
+
   public void setLogDirectory(String logDirectory)
   {
     _logDirectory = logDirectory;
   }
-  
+
   public String getMailTo()
   {
     return _mailTo;
   }
-  
+
   public void setMailTo(String mailTo)
   {
     if (! "".equals(mailTo))
       _mailTo = mailTo;
   }
-  
+
   public String getMailFrom()
   {
     return _mailFrom;
   }
-  
+
   public void setMailFrom(String mailFrom)
   {
     if (! "".equals(mailFrom))
@@ -196,7 +200,7 @@ public class PdfReportAction implements AdminAction
     else
       return "Snapshot";
   }
-  
+
   private String calculateTitle()
   {
     if (_title != null)
@@ -204,7 +208,7 @@ public class PdfReportAction implements AdminAction
     else
       return calculateReport();
   }
-  
+
   private long calculatePeriod()
   {
     if (_period != 0)
@@ -215,23 +219,23 @@ public class PdfReportAction implements AdminAction
       return DAY;
   }
 
-  
+
   public void init()
   {
     Resin resin = Resin.getCurrent();
     if (resin != null) {
       _serverId = resin.getServerId();
-      
+
       if (_logDirectory == null)
         _logPath = resin.getLogDirectory();
     } else {
       _serverId = "unknown";
-      
+
       if (_logDirectory == null)
         _logPath = Vfs.getPwd();
     }
-    
-    // If Resin is running then path is optional and should default 
+
+    // If Resin is running then path is optional and should default
     // to ${resin.home}/doc/admin/pdf-gen.php
     //
     // If Resin is not running, then path is required
@@ -247,7 +251,7 @@ public class PdfReportAction implements AdminAction
           _path = path.getNativePath();
         }
       }
-      
+
       if (_path == null) {
         Path path = resin.getResinHome().lookup("doc/admin/pdf-gen.php");
 
@@ -266,16 +270,16 @@ public class PdfReportAction implements AdminAction
       if (_path != null)
         _phpPath = Vfs.lookup(_path);
     }
-    
+
     if (_phpPath == null) {
       log.warning(L.l("{0} requires a 'path' attribute to a PDF generating .php file or '{1}'",
                       getClass().getSimpleName(),
                       resin.getResinHome().lookup("php/admin/pdf-gen.php").getNativePath()));
     }
-    
+
     if (_logPath == null)
       _logPath = Vfs.lookup(_logDirectory);
-    
+
     if (_mailTo != null) {
       try {
         _mailService.addTo(new InternetAddress(_mailTo));
@@ -321,28 +325,31 @@ public class PdfReportAction implements AdminAction
     Env env = null;
     WriteStream ws = null;
     TempOutputStream pdfOut = null;
-    
+
     if (_phpPath == null) {
       Resin resin = Resin.getCurrent();
 
       Path path = resin.getRootDirectory().lookup("doc/admin/pdf-gen.php");
-      
-      throw new ConfigException(L.l("{0} report generation failed because the PHP file cannot be found.\n  Expected {1}", 
+
+      throw new ConfigException(L.l("{0} report generation failed because the PHP file cannot be found.\n  Expected {1}",
                                      calculateReport(),
                                      path.getNativePath()));
     }
 
     try {
       QuercusPage page = getQuercusContext().parse(_phpPath);
-  
+
       TempStream ts = new TempStream();
       ts.openWrite();
       ws = new WriteStream(ts);
-      
+
       HttpServletRequest request = new StubServletRequest();
       HttpServletResponse response = new StubServletResponse();
-      
-      env = _quercus.createEnv(page, ws, request, response);
+
+      QuercusHttpServletRequest qRequest = new QuercusHttpServletRequestImpl(request);
+      QuercusHttpServletResponse qResponse = new QuercusHttpServletResponseImpl(response);
+
+      env = _quercus.createEnv(page, ws, qRequest, qResponse);
       //env.setGlobalValue("health_service", env.wrapJava(healthService));
       env.setGlobalValue("g_report", env.wrapJava(calculateReport()));
       env.setGlobalValue("g_title", env.wrapJava(calculateTitle()));
@@ -352,21 +359,21 @@ public class PdfReportAction implements AdminAction
       env.setGlobalValue("g_is_watchdog", env.wrapJava(isWatchdog()));
 
       if (getProfileTime() > 0) {
-        env.setGlobalValue("profile_time", 
+        env.setGlobalValue("profile_time",
                            env.wrapJava(getProfileTime() / 1000));
       }
 
       if (getProfileTick() > 0) {
         env.setGlobalValue("profile_tick", env.wrapJava(getProfileTick()));
       }
-      
+
       env.start();
-  
+
       Value result = env.executeTop();
 
       if (! result.toString().equals("ok")) {
-        throw new RuntimeException(L.l("{0} report generation failed: {1}", 
-                                       calculateReport(), 
+        throw new RuntimeException(L.l("{0} report generation failed: {1}",
+                                       calculateReport(),
                                        result.toString()));
       }
 
@@ -375,8 +382,8 @@ public class PdfReportAction implements AdminAction
       if (_mailTo != null && ! "".equals(_mailTo)) {
         mailPdf(ts);
 
-        String message = L.l("{0} report mailed to {1}", 
-                             calculateReport(), 
+        String message = L.l("{0} report mailed to {1}",
+                             calculateReport(),
                              _mailTo);
 
         PdfReportActionResult actionResult =
@@ -392,7 +399,7 @@ public class PdfReportAction implements AdminAction
         ts.writeToStream(pdfOut);
       }
 
-      String message = L.l("{0} report generated at {1}", 
+      String message = L.l("{0} report generated at {1}",
                            calculateReport(),
                            path);
 
@@ -409,7 +416,7 @@ public class PdfReportAction implements AdminAction
 
     }
   }
-  
+
   private QuercusContext getQuercusContext()
   {
     synchronized (this) {
@@ -420,36 +427,36 @@ public class PdfReportAction implements AdminAction
         _quercus.start();
       }
     }
-    
+
     return _quercus;
   }
-  
+
   private void mailPdf(TempStream ts)
     throws IOException
   {
     String fileName = getReportFileName();
-    
+
     String userDate = QDate.formatLocal(CurrentTime.getCurrentTime(),
                                         "%Y-%m-%d %H:%M");
-    
+
     String subject = "[Resin] PDF Report: " + calculateTitle() + "@" + _serverId
                      + " " + userDate;
-    
+
     StringBuilder text = new StringBuilder();
-    
+
     text.append("Resin generated PDF Report");
     text.append("\n");
     text.append("\nReport: ").append(calculateReport());
     text.append("\nGenerated: ").append(userDate);
     text.append("\nServer: ").append(_serverId);
-    
+
     _mailService.sendWithAttachment(subject,
                                     text.toString(),
                                     "application/pdf",
                                     fileName,
                                     ts.openInputStream());
   }
-  
+
   private Path writePdfToFile(TempStream ts)
     throws IOException
   {
@@ -458,14 +465,14 @@ public class PdfReportAction implements AdminAction
     Path path = _logPath.lookup(fileName);
 
     path.getParent().mkdirs();
-    
+
     WriteStream os = path.openWrite();
     try {
       ts.writeToStream(os);
     } finally {
       IoUtil.close(os);
     }
-    
+
     return path;
   }
 

@@ -1047,13 +1047,6 @@
         <exclude name="**/.svn/**"/>
         <include name="com/caucho/**"/>
       </fileset>
-      <fileset dir="${module.dir}/servlet16/classes">
-        <exclude name=".svnignore"/>
-        <exclude name="*~"/>
-        <exclude name="**/.svn/**"/>
-        <include name="javax/servlet/*.class"/>
-        <include name="javax/servlet/http/*.class"/>
-      </fileset>
       <fileset dir="${basedir}">
         <include name="LICENSE"/>
       </fileset>
