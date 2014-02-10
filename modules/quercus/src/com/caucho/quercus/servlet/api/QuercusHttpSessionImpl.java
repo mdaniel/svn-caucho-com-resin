@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,41 +27,22 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.servlet.api;
 
-import com.caucho.quercus.env.CliEnv;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
-import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
-import com.caucho.vfs.WriteStream;
+import javax.servlet.http.HttpSession;
 
-import java.io.IOException;
-
-public class CliQuercus extends Quercus
+public class QuercusHttpSessionImpl implements QuercusHttpSession
 {
-  @Override
-  public Env createEnv(QuercusPage page,
-                       WriteStream out,
-                       QuercusHttpServletRequest request,
-                       QuercusHttpServletResponse response)
+  private final HttpSession _session;
+
+  public QuercusHttpSessionImpl(HttpSession session)
   {
-    return new CliEnv(this, page, out, getArgv());
+    _session = session;
   }
 
-  public static void main(String []args)
-    throws IOException
-  {
-    CliQuercus quercus = new CliQuercus();
-
-    startMain(args, quercus);
-  }
-
-  /**
-   * Hard-coded to true for CLI according to php.net.
-   */
   @Override
-  public boolean isRegisterArgv() {
-    return true;
+  public String getId()
+  {
+    return _session.getId();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,12 +31,11 @@ package com.caucho.quercus;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.caucho.quercus.env.CgiEnv;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StdoutStream;
 import com.caucho.vfs.WriteStream;
@@ -47,8 +46,8 @@ public class CgiQuercus
   @Override
   public Env createEnv(QuercusPage page,
                        WriteStream out,
-                       HttpServletRequest request,
-                       HttpServletResponse response)
+                       QuercusHttpServletRequest request,
+                       QuercusHttpServletResponse response)
   {
     return new CgiEnv(this, page, out, request, response);
   }

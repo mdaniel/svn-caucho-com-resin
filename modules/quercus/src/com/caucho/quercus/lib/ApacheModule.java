@@ -33,15 +33,13 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.util.L10N;
-
-import javax.servlet.http.*;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -104,7 +102,7 @@ public class ApacheModule extends AbstractQuercusModule {
    */
   public Value apache_request_headers(Env env)
   {
-    HttpServletRequest req = env.getRequest();
+    QuercusHttpServletRequest req = env.getRequest();
 
     ArrayValue result = new ArrayValueImpl();
 
@@ -147,8 +145,8 @@ public class ApacheModule extends AbstractQuercusModule {
   public boolean virtual(Env env, String url)
   {
     try {
-      HttpServletRequest req = env.getRequest();
-      HttpServletResponse res = env.getResponse();
+      QuercusHttpServletRequest req = env.getRequest();
+      QuercusHttpServletResponse res = env.getResponse();
 
       // XXX: need to put the output, so the included stream gets the
       // buffer, too

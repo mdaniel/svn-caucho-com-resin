@@ -37,10 +37,11 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.servlet.api.QuercusCookie;
+import com.caucho.quercus.servlet.api.QuercusCookieImpl;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.util.L10N;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import java.util.logging.Logger;
 import java.util.Iterator;
 
@@ -466,7 +467,7 @@ public class SessionModule extends AbstractQuercusModule
         sessionId = sessionIdValue.toString();
 
       if (sessionId == null || "".equals(sessionId)) {
-        Cookie []cookies = env.getRequest().getCookies();
+        QuercusCookie []cookies = env.getRequest().getCookies();
 
         for (int i = 0; cookies != null && i < cookies.length; i++) {
           if (cookies[i].getName().equals(cookieName)
@@ -511,7 +512,7 @@ public class SessionModule extends AbstractQuercusModule
       create = true;
     }
 
-    HttpServletResponse response = env.getResponse();
+    QuercusHttpServletResponse response = env.getResponse();
 
     if (response == null) {
     }
@@ -574,7 +575,7 @@ public class SessionModule extends AbstractQuercusModule
    */
   private static void generateSessionCookie(Env env, String sessionId)
   {
-    final HttpServletResponse response = env.getResponse();
+    final QuercusHttpServletResponse response = env.getResponse();
 
     String cookieName = env.getIni("session.name").toString();
 
@@ -583,7 +584,7 @@ public class SessionModule extends AbstractQuercusModule
     env.removeConstant("SID");
     env.addConstant("SID", cookieValue, false);
 
-    Cookie cookie = new Cookie(cookieName, sessionId);
+    QuercusCookie cookie = new QuercusCookieImpl(cookieName, sessionId);
     // #2649
     String cookieVersion = env.getIniString("session.cookie_version");
     if (! "0".equals(cookieVersion))

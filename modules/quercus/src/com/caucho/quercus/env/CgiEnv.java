@@ -31,13 +31,11 @@ package com.caucho.quercus.env;
 
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.caucho.quercus.QuercusContext;
-
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.vfs.WriteStream;
 
 public class CgiEnv
@@ -46,28 +44,28 @@ public class CgiEnv
   public CgiEnv(QuercusContext quercus,
                 QuercusPage page,
                 WriteStream out,
-                HttpServletRequest request,
-                HttpServletResponse response)
+                QuercusHttpServletRequest request,
+                QuercusHttpServletResponse response)
   {
     super(quercus, page, out, request, response);
   }
-  
+
   @Override
   protected String getQueryString()
   {
     Value serverEnv = getGlobalValue("_SERVER");
-    
+
     return serverEnv.get(createString("QUERY_STRING")).toString();
   }
-  
+
   @Override
   protected String getContentType()
   {
     Value serverEnv = getGlobalValue("_SERVER");
-    
+
     return serverEnv.get(createString("CONTENT_TYPE")).toString();
   }
-  
+
   @Override
   protected ArrayValue getCookies()
   {
@@ -76,29 +74,29 @@ public class CgiEnv
 
     Value serverEnv = getGlobalValue("_SERVER");
     String cookies = serverEnv.get(createString("HTTP_COOKIE")).toString();
-    
+
     int i = 0;
     int j = 0;
     int len = cookies.length();
-    
+
     while ((j = cookies.indexOf(';', i)) >= 0) {
       if (j == i) {
         i = j + 1;
         continue;
       }
-      
+
       addCookie(array, cookies, i, j, isMagicQuotes);
-      
+
       i = j + 1;
     }
-    
+
     if (i < len) {
       addCookie(array, cookies, i, len, isMagicQuotes);
     }
-    
+
     return array;
   }
-  
+
   private void addCookie(ArrayValue array,
                          String cookies,
                          int start,
@@ -106,48 +104,48 @@ public class CgiEnv
                          boolean isMagicQuotes)
   {
     int eqIndex = cookies.indexOf('=', start);
-    
+
     String name = "";
     String value = "";
-    
+
     StringValue valueV;
-    
+
     if (eqIndex < end) {
       name = cookies.substring(start, eqIndex);
-      
+
       StringValue nameV = cleanCookieName(name);
       if (array.get(nameV) != UnsetValue.UNSET)
         return;
-      
+
       value = cookies.substring(eqIndex + 1, end);
       value = decodeValue(value);
       valueV = createString(value);
-      
+
       if (isMagicQuotes) // php/0876
         valueV = StringModule.addslashes(valueV);
-      
+
       array.append(nameV, valueV);
     }
     else {
       name = cookies.substring(start, end);
-      
+
       StringValue nameV = cleanCookieName(name);
-      
+
       if (nameV.length() > 0 && nameV.charAt(0) == '$')
         array.append(nameV, getEmptyString());
     }
   }
-  
+
   private StringValue cleanCookieName(CharSequence name)
   {
     int len = name.length();
-    
+
     StringValue sb = createStringBuilder();
-    
+
     int i = 0;
     while (i < len) {
       char ch = name.charAt(i);
-      
+
       if (ch == ' ')
         i++;
       else if (ch == '+')
@@ -158,14 +156,14 @@ public class CgiEnv
                && name.charAt(i + 2) == '0')
         i += 3;
       else
-        break; 
+        break;
     }
-    
+
     int spaces = 0;
-    
+
     for (; i < len; i++) {
       char ch = name.charAt(i);
-      
+
       switch (ch) {
         case '%':
           if (i + 2 < len
@@ -179,7 +177,7 @@ public class CgiEnv
               sb.append('_');
               spaces--;
             }
-            
+
             sb.append(ch);
           }
 
@@ -194,7 +192,7 @@ public class CgiEnv
             sb.append('_');
             spaces--;
           }
-        
+
           sb.append(ch);
       }
     }
@@ -211,10 +209,10 @@ public class CgiEnv
 
     CharBuffer cbName = new CharBuffer();
     CharBuffer cbValue = new CharBuffer();
-    
+
     while (j < end) {
       char ch = 0;
-      
+
       cbName.clear();
       cbValue.clear();
 
@@ -291,21 +289,21 @@ public class CgiEnv
     }
   }
   */
-  
+
   @Override
   protected void fillPost(ArrayValue postArray,
                           ArrayValue files,
-                          HttpServletRequest request,
+                          QuercusHttpServletRequest request,
                           boolean isMagicQuotes)
   {
     InputStream is = System.in;
-    
+
     Value serverEnv = getGlobalValue("_SERVER");
-    
+
     String method = serverEnv.get(createString("REQUEST_METHOD")).toString();
     String contentType
       = serverEnv.get(createString("CONTENT_TYPE")).toString();
-  
+
     int contentLength = Integer.MAX_VALUE;
     Value contentLengthV = serverEnv.get(createString("CONTENT_LENGTH"));
 

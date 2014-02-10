@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,6 +32,9 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
+import com.caucho.quercus.servlet.api.QuercusServletContext;
 import com.caucho.quercus.annotation.Name;
 
 import javax.servlet.ServletContext;
@@ -122,7 +125,7 @@ public class QuercusModule extends AbstractQuercusModule
   @Name("quercus_get_request")
   public static HttpServletRequest get_request(Env env)
   {
-    return env.getRequest();
+    return get_servlet_request(env);
   }
 
   /**
@@ -131,7 +134,9 @@ public class QuercusModule extends AbstractQuercusModule
   @Name("quercus_servlet_request")
   public static HttpServletRequest get_servlet_request(Env env)
   {
-    return env.getRequest();
+    QuercusHttpServletRequest request = env.getRequest();
+
+    return request.toRequest(HttpServletRequest.class);
   }
 
   /**
@@ -141,7 +146,7 @@ public class QuercusModule extends AbstractQuercusModule
   @Name("quercus_get_response")
   public static HttpServletResponse get_response(Env env)
   {
-    return env.getResponse();
+    return get_servlet_response(env);
   }
 
   /**
@@ -150,7 +155,9 @@ public class QuercusModule extends AbstractQuercusModule
   @Name("quercus_servlet_response")
   public static HttpServletResponse get_servlet_response(Env env)
   {
-    return env.getResponse();
+    QuercusHttpServletResponse response = env.getResponse();
+
+    return response.toResponse(HttpServletResponse.class);
   }
 
   /**
@@ -159,7 +166,13 @@ public class QuercusModule extends AbstractQuercusModule
   @Name("quercus_get_servlet_context")
   public static ServletContext get_servlet_context(Env env)
   {
-    return env.getServletContext();
+    QuercusServletContext ctx = env.getServletContext();
+
+    if (ctx == null) {
+      return null;
+    }
+
+    return ctx.toServletContext(ServletContext.class);
   }
 
   /**

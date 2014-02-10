@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,41 +27,27 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus;
-
-import com.caucho.quercus.env.CliEnv;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
-import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
-import com.caucho.vfs.WriteStream;
+package com.caucho.quercus.servlet.api;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
-public class CliQuercus extends Quercus
+public interface QuercusHttpServletResponse
 {
-  @Override
-  public Env createEnv(QuercusPage page,
-                       WriteStream out,
-                       QuercusHttpServletRequest request,
-                       QuercusHttpServletResponse response)
-  {
-    return new CliEnv(this, page, out, getArgv());
-  }
+  public void setContentType(String type);
+  public void addHeader(String name, String value);
+  public void setHeader(String name, String value);
+  public void setStatus(int code, String status);
 
-  public static void main(String []args)
-    throws IOException
-  {
-    CliQuercus quercus = new CliQuercus();
+  public String getCharacterEncoding();
+  public void setCharacterEncoding(String encoding);
 
-    startMain(args, quercus);
-  }
+  public void addCookie(QuercusCookie cookie);
 
-  /**
-   * Hard-coded to true for CLI according to php.net.
-   */
-  @Override
-  public boolean isRegisterArgv() {
-    return true;
-  }
+  public boolean isCommitted();
+
+  public OutputStream getOutputStream()
+    throws IOException;
+
+  public <T> T toResponse(Class<T> cls);
 }

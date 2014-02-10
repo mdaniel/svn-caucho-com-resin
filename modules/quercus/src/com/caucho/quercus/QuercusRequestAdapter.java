@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,81 +29,85 @@
 
 package com.caucho.quercus;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
 
 public class QuercusRequestAdapter
 {
-  public static String getPageURI(HttpServletRequest request)
+  public static String getPageURI(QuercusHttpServletRequest request)
   {
-    String uri = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+    String uri = request.getIncludeRequestUri();
 
     if (uri != null)
       return uri;
     else {
       // php/0829
 
-      uri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+      uri = request.getForwardRequestUri();
 
-      if (uri != null)
+      if (uri != null) {
         return uri;
-      else
+      }
+      else {
         return request.getRequestURI();
+      }
     }
   }
 
-  public static String getPageContextPath(HttpServletRequest request)
+  public static String getPageContextPath(QuercusHttpServletRequest request)
   {
-    String contextPath
-      = (String) request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+    String contextPath = request.getIncludeContextPath();
 
-    if (contextPath != null)
+    if (contextPath != null) {
       return contextPath;
-    else
+    }
+    else {
       return request.getContextPath();
+    }
   }
 
   /**
    * Returns the servlet-path for the current page, i.e. this will return the
    * url of the include page, not the original request.
    */
-  public static String getPageServletPath(HttpServletRequest request)
+  public static String getPageServletPath(QuercusHttpServletRequest request)
   {
-    String servletPath
-      = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+    String servletPath = request.getIncludeServletPath();
 
-    if (servletPath != null)
+    if (servletPath != null) {
       return servletPath;
-    else
+    }
+    else {
       return request.getServletPath();
+    }
   }
 
   /**
    * Returns the path-info for the current page, i.e. this will return the
    * url of the include page, not the original request.
    */
-  public static String getPagePathInfo(HttpServletRequest request)
+  public static String getPagePathInfo(QuercusHttpServletRequest request)
   {
-    String uri
-      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+    String uri = request.getIncludeRequestUri();
 
-    if (uri != null)
-      return (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
-    else
+    if (uri != null) {
+      return request.getIncludePathInfo();
+    }
+    else {
       return request.getPathInfo();
+    }
   }
 
   /**
    * Returns the query-string for the current page, i.e. this will return the
    * url of the include page, not the original request.
    */
-  public static String getPageQueryString(HttpServletRequest request)
+  public static String getPageQueryString(QuercusHttpServletRequest request)
   {
-    String uri
-      = (String) request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI);
+    String uri = request.getIncludeRequestUri();
 
-    if (uri != null)
-      return (String) request.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING);
+    if (uri != null) {
+      return request.getIncludeQueryString();
+    }
     else {
       /*
       // php/0829

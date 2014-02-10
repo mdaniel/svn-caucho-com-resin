@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,11 +30,9 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRequestAdapter;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
 import com.caucho.util.Base64;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -45,6 +43,7 @@ import java.util.Set;
 /**
  * Represents the server
  */
+@SuppressWarnings("serial")
 public class ServerArrayValue extends ArrayValueImpl
 {
   private static final StringValue SERVER_ADDR_V
@@ -360,7 +359,7 @@ public class ServerArrayValue extends ArrayValueImpl
       super.put(entry.getKey(), entry.getValue());
     }
 
-    HttpServletRequest request = _env.getRequest();
+    QuercusHttpServletRequest request = _env.getRequest();
     boolean isUnicode = _env.isUnicodeSemantics();
 
     if (request != null) {

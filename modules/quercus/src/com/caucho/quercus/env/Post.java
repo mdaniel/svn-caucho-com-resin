@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.MultipartStream;
@@ -40,7 +41,6 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class Post
   static void fillPost(Env env,
                        ArrayValue postArray,
                        ArrayValue files,
-                       HttpServletRequest request,
+                       QuercusHttpServletRequest request,
                        boolean addSlashesToValues,
                        boolean isAllowUploads)
   {
@@ -709,7 +709,7 @@ public class Post
   private static void putRequestMap(Env env,
                                     ArrayValue post,
                                     ArrayValue files,
-                                    HttpServletRequest request,
+                                    QuercusHttpServletRequest request,
                                     boolean addSlashesToValues,
                                     boolean isAllowUploads)
   {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -41,6 +41,11 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequestImpl;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponseImpl;
+import com.caucho.quercus.servlet.api.QuercusServletContextImpl;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
@@ -54,6 +59,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.FileNotFoundException;
@@ -63,6 +69,7 @@ import java.util.logging.Logger;
 /**
  * Servlet to call PHP through javax.script.
  */
+@SuppressWarnings("serial")
 public class QuercusServletImpl extends HttpServlet
 {
   private static final L10N L = new L10N(QuercusServletImpl.class);
@@ -139,8 +146,11 @@ public class QuercusServletImpl extends HttpServlet
     Env env = null;
     WriteStream ws = null;
 
+    QuercusHttpServletRequest req = new QuercusHttpServletRequestImpl(request);
+    QuercusHttpServletResponse res = new QuercusHttpServletResponseImpl(response);
+
     try {
-      Path path = getPath(request);
+      Path path = getPath(req);
 
       QuercusPage page;
 
@@ -168,12 +178,12 @@ public class QuercusServletImpl extends HttpServlet
 
       QuercusContext quercus = getQuercus();
 
-      env = quercus.createEnv(page, ws, request, response);
+      env = quercus.createEnv(page, ws, req, res);
 
       // php/815d
       env.setPwd(path.getParent());
 
-      quercus.setServletContext(_servletContext);
+      quercus.setServletContext(new QuercusServletContextImpl(_servletContext));
 
       try {
         env.start();
@@ -295,7 +305,7 @@ public class QuercusServletImpl extends HttpServlet
     return ws;
   }
 
-  protected Path getPath(HttpServletRequest req)
+  protected Path getPath(QuercusHttpServletRequest req)
   {
     // php/8173
     Path pwd = getQuercus().getPwd().copy();

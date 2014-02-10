@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,41 +27,33 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.servlet.api;
 
-import com.caucho.quercus.env.CliEnv;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
-import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
-import com.caucho.vfs.WriteStream;
+import javax.servlet.ServletContext;
 
-import java.io.IOException;
-
-public class CliQuercus extends Quercus
+public class QuercusServletContextImpl implements QuercusServletContext
 {
-  @Override
-  public Env createEnv(QuercusPage page,
-                       WriteStream out,
-                       QuercusHttpServletRequest request,
-                       QuercusHttpServletResponse response)
+  private final ServletContext _ctx;
+
+  public QuercusServletContextImpl(ServletContext ctx)
   {
-    return new CliEnv(this, page, out, getArgv());
+    _ctx = ctx;
   }
 
-  public static void main(String []args)
-    throws IOException
+  @Override
+  public String getMimeType(String name)
   {
-    CliQuercus quercus = new CliQuercus();
-
-    startMain(args, quercus);
+    return _ctx.getMimeType(name);
   }
 
-  /**
-   * Hard-coded to true for CLI according to php.net.
-   */
   @Override
-  public boolean isRegisterArgv() {
-    return true;
+  @SuppressWarnings("unchecked")
+  public <T> T toServletContext(Class<T> cls)
+  {
+    if (cls != ServletContext.class) {
+      throw new IllegalArgumentException("class must be a " + ServletContext.class);
+    }
+
+    return (T) _ctx;
   }
 }

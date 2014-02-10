@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -47,11 +47,6 @@ import java.util.logging.Logger;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import com.caucho.java.WorkDir;
@@ -86,6 +81,11 @@ import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.program.UndefinedFunction;
 import com.caucho.quercus.resources.StreamContextResource;
+import com.caucho.quercus.servlet.api.QuercusCookie;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
+import com.caucho.quercus.servlet.api.QuercusHttpSession;
+import com.caucho.quercus.servlet.api.QuercusServletContext;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
 import com.caucho.util.IntMap;
@@ -366,8 +366,8 @@ public class Env
 
   private final boolean _isStrict;
 
-  private HttpServletRequest _request;
-  private HttpServletResponse _response;
+  private QuercusHttpServletRequest _request;
+  private QuercusHttpServletResponse _response;
 
   private ArrayValue _inputGet;
   private ArrayValue _inputCookie;
@@ -380,7 +380,7 @@ public class Env
   private StringValue _inputData;
 
   private SessionArrayValue _session;
-  private HttpSession _javaSession;
+  private QuercusHttpSession _javaSession;
 
   private ScriptContext _scriptContext;
 
@@ -441,8 +441,8 @@ public class Env
   public Env(QuercusContext quercus,
              QuercusPage page,
              WriteStream out,
-             HttpServletRequest request,
-             HttpServletResponse response)
+             QuercusHttpServletRequest request,
+             QuercusHttpServletResponse response)
   {
     _quercus = quercus;
 
@@ -627,11 +627,11 @@ public class Env
   }
 
   private void fillCookies(ArrayValue array,
-                           Cookie []cookies,
+                           QuercusCookie []cookies,
                            boolean isMagicQuotes)
   {
     for (int i = 0; cookies != null && i < cookies.length; i++) {
-      Cookie cookie = cookies[i];
+      QuercusCookie cookie = cookies[i];
 
       String decodedValue = decodeValue(cookie.getValue());
 
@@ -646,7 +646,7 @@ public class Env
 
   protected void fillPost(ArrayValue postArray,
                           ArrayValue files,
-                          HttpServletRequest request,
+                          QuercusHttpServletRequest request,
                           boolean isMagicQuotes)
   {
     if (request != null && request.getMethod().equals("POST")) {
@@ -946,7 +946,7 @@ public class Env
   /**
    * Returns the ServletContext.
    */
-  public ServletContext getServletContext()
+  public QuercusServletContext getServletContext()
   {
     return _quercus.getServletContext();
   }
@@ -1654,16 +1654,19 @@ public class Env
     String realPath;
 
     if (_tmpPath == null) {
-      if (getRequest() != null)
+      if (getRequest() != null) {
         realPath = getRequest().getRealPath("/WEB-INF/tmp");
-      else
+      }
+      else {
         realPath = "file:/tmp";
+      }
 
       _tmpPath = getPwd().lookup(realPath);
 
       try {
-        if (! _tmpPath.isDirectory())
+        if (! _tmpPath.isDirectory()) {
           _tmpPath.mkdirs();
+        }
       }
       catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
@@ -1678,8 +1681,9 @@ public class Env
    */
   public void addRemovePath(Path path)
   {
-    if (_removePaths == null)
+    if (_removePaths == null) {
       _removePaths = new ArrayList<Path>();
+    }
 
     _removePaths.add(path);
   }
@@ -1687,7 +1691,7 @@ public class Env
   /**
    * Returns the request.
    */
-  public HttpServletRequest getRequest()
+  public QuercusHttpServletRequest getRequest()
   {
     return _request;
   }
@@ -1722,7 +1726,7 @@ public class Env
   /**
    * Returns the response.
    */
-  public HttpServletResponse getResponse()
+  public QuercusHttpServletResponse getResponse()
   {
     return _response;
   }
@@ -1754,7 +1758,7 @@ public class Env
   /**
    * Returns the Java Http session.
    */
-  public HttpSession getJavaSession()
+  public QuercusHttpSession getJavaSession()
   {
     return _javaSession;
   }
@@ -2917,10 +2921,10 @@ public class Env
 
     boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
 
-    Cookie []cookies = _request.getCookies();
+    QuercusCookie []cookies = _request.getCookies();
     if (cookies != null) {
       for (int i = 0; i < cookies.length; i++) {
-        Cookie cookie = cookies[i];
+        QuercusCookie cookie = cookies[i];
 
         String value = decodeValue(cookie.getValue());
 

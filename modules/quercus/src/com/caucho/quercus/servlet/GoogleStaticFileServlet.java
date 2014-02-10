@@ -31,6 +31,8 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.quercus.GoogleQuercus;
 import com.caucho.quercus.QuercusRequestAdapter;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequestImpl;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -111,7 +113,8 @@ public class GoogleStaticFileServlet extends GenericServlet {
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
-    HttpServletRequest req = (HttpServletRequest) request;
+    QuercusHttpServletRequest req
+      = new QuercusHttpServletRequestImpl((HttpServletRequest) request);
     HttpServletResponse res = (HttpServletResponse) response;
 
     String uri = QuercusRequestAdapter.getPageURI(req);
@@ -217,7 +220,7 @@ public class GoogleStaticFileServlet extends GenericServlet {
     path.writeToStream(os);
   }
 
-  protected Path getPath(HttpServletRequest req)
+  protected Path getPath(QuercusHttpServletRequest req)
   {
     // copy to clear status cache
     // XXX: improve caching so we don't need to do this anymore

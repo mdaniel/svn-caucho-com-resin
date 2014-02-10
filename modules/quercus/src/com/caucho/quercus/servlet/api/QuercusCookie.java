@@ -27,35 +27,19 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.env;
+package com.caucho.quercus.servlet.api;
 
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.vfs.WriteStream;
+public interface QuercusCookie
+{
+  public String getName();
+  public String getValue();
 
-public class CliEnv extends Env {
-  private final String[] _argv;
+  public void setVersion(int version);
+  public void setPath(String path);
+  public void setMaxAge(int maxAge);
+  public void setDomain(String domain);
+  public void setSecure(boolean isSecure);
+  public void setHttpOnly(boolean isHttpOnly);
 
-  public CliEnv(QuercusContext quercus,
-                QuercusPage page,
-                WriteStream out,
-                String[] argv)
-  {
-    super(quercus, page, out, null, null);
-
-    _argv = argv;
-  }
-
-  @Override
-  protected ArrayValue createArgv() {
-    ArrayValue array = new ArrayValueImpl();
-
-    String[] argv = _argv;
-
-    for (int i = 0; i < argv.length; i++) {
-      array.put(argv[i]);
-    }
-
-    return array;
-  }
+  public <T> T toCookie(Class<T> cls);
 }

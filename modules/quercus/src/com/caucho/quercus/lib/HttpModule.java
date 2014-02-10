@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -38,11 +38,12 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.servlet.api.QuercusCookie;
+import com.caucho.quercus.servlet.api.QuercusCookieImpl;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 /**
@@ -72,7 +73,7 @@ public class HttpModule extends AbstractQuercusModule {
                              @Optional("true") boolean replace,
                              @Optional long httpResponseCode)
   {
-    HttpServletResponse res = env.getResponse();
+    QuercusHttpServletResponse res = env.getResponse();
 
     if (res == null) {
       env.error(L.l("header requires an http context"));
@@ -198,7 +199,7 @@ public class HttpModule extends AbstractQuercusModule {
                                      @Optional @Reference Value file,
                                      @Optional @Reference Value line)
   {
-    HttpServletResponse res = env.getResponse();
+    QuercusHttpServletResponse res = env.getResponse();
 
     // php/1b0n
     return res != null && res.isCommitted();
@@ -216,7 +217,7 @@ public class HttpModule extends AbstractQuercusModule {
                                   @Optional boolean secure,
                                   @Optional boolean httpOnly)
   {
-    HttpServletResponse response = env.getResponse();
+    QuercusHttpServletResponse response = env.getResponse();
 
     if (response == null) {
       return false;
@@ -261,7 +262,7 @@ public class HttpModule extends AbstractQuercusModule {
       }
     }
 
-    Cookie cookie = new Cookie(name, sb.toString());
+    QuercusCookie cookie = new QuercusCookieImpl(name, sb.toString());
 
     int maxAge = 0;
 

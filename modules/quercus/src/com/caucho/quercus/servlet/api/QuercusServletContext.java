@@ -27,35 +27,11 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.env;
+package com.caucho.quercus.servlet.api;
 
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.vfs.WriteStream;
+public interface QuercusServletContext
+{
+  public String getMimeType(String name);
 
-public class CliEnv extends Env {
-  private final String[] _argv;
-
-  public CliEnv(QuercusContext quercus,
-                QuercusPage page,
-                WriteStream out,
-                String[] argv)
-  {
-    super(quercus, page, out, null, null);
-
-    _argv = argv;
-  }
-
-  @Override
-  protected ArrayValue createArgv() {
-    ArrayValue array = new ArrayValueImpl();
-
-    String[] argv = _argv;
-
-    for (int i = 0; i < argv.length; i++) {
-      array.put(argv[i]);
-    }
-
-    return array;
-  }
+  public <T> T toServletContext(Class<T> cls);
 }

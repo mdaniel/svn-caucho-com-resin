@@ -45,9 +45,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.cache.Cache;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
@@ -89,6 +86,9 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.program.UndefinedFunction;
+import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
+import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
+import com.caucho.quercus.servlet.api.QuercusServletContext;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -227,7 +227,7 @@ public class QuercusContext
   private Path _workDir;
   private Path _webInfDir;
 
-  private ServletContext _servletContext;
+  private QuercusServletContext _servletContext;
 
   private QuercusTimer _quercusTimer;
 
@@ -616,7 +616,7 @@ public class QuercusContext
   /**
    * Sets the ServletContext.
    */
-  public void setServletContext(ServletContext servletContext)
+  public void setServletContext(QuercusServletContext servletContext)
   {
     _servletContext = servletContext;
   }
@@ -624,7 +624,7 @@ public class QuercusContext
   /**
    * Returns the ServletContext.
    */
-  public ServletContext getServletContext()
+  public QuercusServletContext getServletContext()
   {
     return _servletContext;
   }
@@ -2177,8 +2177,8 @@ public class QuercusContext
 
   public Env createEnv(QuercusPage page,
                        WriteStream out,
-                       HttpServletRequest request,
-                       HttpServletResponse response)
+                       QuercusHttpServletRequest request,
+                       QuercusHttpServletResponse response)
   {
     return new Env(this, page, out, request, response);
   }

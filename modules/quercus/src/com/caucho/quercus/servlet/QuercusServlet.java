@@ -118,7 +118,11 @@ public class QuercusServlet
   {
     QuercusServletImpl impl = null;
 
+    System.err.println("QuercusServlet0");
+
     if (isResin) {
+      System.err.println("QuercusServlet1");
+
       try {
         Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProResinQuercusServlet");
         Constructor<?> cons = cls.getConstructor(File.class);
@@ -130,7 +134,11 @@ public class QuercusServlet
       }
     }
 
+    System.err.println("QuercusServlet2");
+
     if (impl == null) {
+      System.err.println("QuercusServlet3");
+
       try {
         Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
         Constructor<?> cons = cls.getConstructor(File.class);
@@ -138,6 +146,8 @@ public class QuercusServlet
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
       }
       catch (Exception e) {
+        e.printStackTrace();
+
         log.log(Level.FINEST, e.getMessage(), e);
       }
     }

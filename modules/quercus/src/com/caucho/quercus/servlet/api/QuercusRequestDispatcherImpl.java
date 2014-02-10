@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,41 +27,29 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.servlet.api;
 
-import com.caucho.quercus.env.CliEnv;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
-import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
-import com.caucho.vfs.WriteStream;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-
-public class CliQuercus extends Quercus
+public class QuercusRequestDispatcherImpl implements QuercusRequestDispatcher
 {
-  @Override
-  public Env createEnv(QuercusPage page,
-                       WriteStream out,
-                       QuercusHttpServletRequest request,
-                       QuercusHttpServletResponse response)
+  private final RequestDispatcher _dispatcher;
+
+  public QuercusRequestDispatcherImpl(RequestDispatcher dispatcher)
   {
-    return new CliEnv(this, page, out, getArgv());
+    _dispatcher = dispatcher;
   }
 
-  public static void main(String []args)
-    throws IOException
-  {
-    CliQuercus quercus = new CliQuercus();
-
-    startMain(args, quercus);
-  }
-
-  /**
-   * Hard-coded to true for CLI according to php.net.
-   */
   @Override
-  public boolean isRegisterArgv() {
-    return true;
+  public void include(QuercusHttpServletRequest request,
+                      QuercusHttpServletResponse response)
+    throws Exception
+  {
+    HttpServletRequest req = request.toRequest(HttpServletRequest.class);
+    HttpServletResponse res = response.toResponse(HttpServletResponse.class);
+
+    _dispatcher.include(req, res);
   }
 }
