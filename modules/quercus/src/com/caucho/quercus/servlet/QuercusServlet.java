@@ -609,7 +609,6 @@ public class QuercusServlet
    */
   public void destroy()
   {
-    _quercus.close();
     _impl.destroy();
   }
 

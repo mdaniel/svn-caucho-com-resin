@@ -2311,6 +2311,12 @@ public class QuercusContext
       _isRunnable = false;
 
       LockSupport.unpark(this);
+
+      try {
+        Thread.sleep(ENV_TIMEOUT_UPDATE_INTERVAL * 2);
+      }
+      catch (InterruptedException e) {
+      }
     }
 
     public void run()

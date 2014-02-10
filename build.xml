@@ -1188,14 +1188,19 @@
     <mkdir dir="${dist}/${quercus.dist.name}"/>
     <mkdir dir="${dist}/${quercus.dist.name}/WEB-INF/licenses"/>
 
-    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/resin.jar"
-          file="${dist.build}/lib/resin.jar"/>
-
-    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javaee-16.jar"
-          file="${dist.build}/lib/javaee-16.jar"/>
-
-    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/cdi-16.jar"
-          file="${resin.lib}/cdi-16.jar"/>
+    <jar destfile="${dist}/${quercus.dist.name}/WEB-INF/lib/quercus.jar" manifest="${resindir}/modules/quercus/maven2/META-INF/MANIFEST.MF">
+      <fileset dir="${resindir}/modules/quercus/classes">
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/.svn/**"/>
+      </fileset>
+      <fileset dir="${resindir}/modules/kernel/classes">
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/**"/>
+      </fileset>
+    </jar>
 
     <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
@@ -1217,9 +1222,7 @@
 
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${dist}/${quercus.dist.name}">
-        <include name="WEB-INF/lib/resin.jar"/>
-	<include name="WEB-INF/lib/javaee-16.jar"/>
-        <include name="WEB-INF/lib/cdi-16.jar"/>
+        <include name="WEB-INF/lib/quercus.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
         <include name="WEB-INF/licenses"/>
         <include name="WEB-INF/web.xml"/>

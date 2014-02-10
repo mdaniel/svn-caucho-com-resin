@@ -32,19 +32,21 @@ package com.caucho.quercus;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Logger;
 
+import com.caucho.util.CurrentTime;
+
 public class QuercusTimer
 {
   private static final Logger log
     = Logger.getLogger(QuercusTimer.class.getName());
 
   private TimerThread _timerThread;
-  
+
   private volatile long _currentTime;
   private volatile boolean _isCurrentTimeUsed;
   private volatile boolean _isSlowTime;
-  
+
   private volatile boolean _isRunnable = true;
-  
+
   public QuercusTimer()
   {
     _currentTime = System.currentTimeMillis();
@@ -60,7 +62,7 @@ public class QuercusTimer
 
     _timerThread = timerThread;
   }
-  
+
   /**
    * Returns the approximate current time in milliseconds.
    * Convenient for minimizing system calls.
@@ -71,7 +73,7 @@ public class QuercusTimer
     if (! _isCurrentTimeUsed) {
       if (_timerThread == null)
         return System.currentTimeMillis();
-      
+
       if (_isSlowTime) {
         return System.currentTimeMillis();
       }
@@ -82,7 +84,7 @@ public class QuercusTimer
 
     return _currentTime;
   }
-  
+
   /**
    * Returns the exact current time in milliseconds.
    */
@@ -90,7 +92,7 @@ public class QuercusTimer
   {
     return System.currentTimeMillis();
   }
-  
+
   /**
    * Returns the exact current time in nanoseconds.
    */
@@ -98,19 +100,25 @@ public class QuercusTimer
   {
     return System.nanoTime();
   }
-  
+
   public void shutdown()
   {
     _isRunnable = false;
-    
+
     LockSupport.unpark(_timerThread);
-    
+
     try {
-      Thread.sleep(1);
+      long sleepTime = 1000;
+
+      if (CurrentTime.isTest()) {
+        sleepTime = 1;
+      }
+
+      Thread.sleep(sleepTime);
     } catch (Exception e) {
     }
   }
-  
+
   class TimerThread extends Thread {
     TimerThread()
     {
@@ -127,12 +135,12 @@ public class QuercusTimer
       while (_isRunnable) {
         try {
           long now = System.currentTimeMillis();
-            
+
           _currentTime = now;
-            
+
           boolean isCurrentTimeUsed = _isCurrentTimeUsed;
           _isCurrentTimeUsed = false;
-          
+
           if (isCurrentTimeUsed) {
             _isSlowTime = false;
           }
@@ -147,7 +155,7 @@ public class QuercusTimer
           // long sleepTime = _isSlowTime ? 1000L : 5L;
           //long sleepTime = _isSlowTime ? 1000L : 25L;
           long sleepTime = 100L;
-              
+
           Thread.sleep(sleepTime);
         } catch (Throwable e) {
         }
