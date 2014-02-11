@@ -37,10 +37,6 @@ import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.quercus.servlet.api.QuercusServletContext;
 import com.caucho.quercus.annotation.Name;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Quercus functions to get information about the Quercus environment.
  */
@@ -123,7 +119,7 @@ public class QuercusModule extends AbstractQuercusModule
    */
   @Deprecated
   @Name("quercus_get_request")
-  public static HttpServletRequest get_request(Env env)
+  public static Object get_request(Env env)
   {
     return get_servlet_request(env);
   }
@@ -132,11 +128,11 @@ public class QuercusModule extends AbstractQuercusModule
    * Returns the HttpServletRequest associated with this Env.
    */
   @Name("quercus_servlet_request")
-  public static HttpServletRequest get_servlet_request(Env env)
+  public static Object get_servlet_request(Env env)
   {
     QuercusHttpServletRequest request = env.getRequest();
 
-    return request.toRequest(HttpServletRequest.class);
+    return request.toRequest(Object.class);
   }
 
   /**
@@ -144,7 +140,7 @@ public class QuercusModule extends AbstractQuercusModule
    */
   @Deprecated
   @Name("quercus_get_response")
-  public static HttpServletResponse get_response(Env env)
+  public static Object get_response(Env env)
   {
     return get_servlet_response(env);
   }
@@ -153,18 +149,18 @@ public class QuercusModule extends AbstractQuercusModule
    * Returns the HttpServletResponse associated with this Env.
    */
   @Name("quercus_servlet_response")
-  public static HttpServletResponse get_servlet_response(Env env)
+  public static Object get_servlet_response(Env env)
   {
     QuercusHttpServletResponse response = env.getResponse();
 
-    return response.toResponse(HttpServletResponse.class);
+    return response.toResponse(Object.class);
   }
 
   /**
    * Returns the ServletContext.
    */
   @Name("quercus_get_servlet_context")
-  public static ServletContext get_servlet_context(Env env)
+  public static Object get_servlet_context(Env env)
   {
     QuercusServletContext ctx = env.getServletContext();
 
@@ -172,7 +168,7 @@ public class QuercusModule extends AbstractQuercusModule
       return null;
     }
 
-    return ctx.toServletContext(ServletContext.class);
+    return ctx.toServletContext(Object.class);
   }
 
   /**
