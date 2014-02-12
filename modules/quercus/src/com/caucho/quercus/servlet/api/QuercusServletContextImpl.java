@@ -50,10 +50,6 @@ public class QuercusServletContextImpl implements QuercusServletContext
   @SuppressWarnings("unchecked")
   public <T> T toServletContext(Class<T> cls)
   {
-    if (cls != ServletContext.class) {
-      throw new IllegalArgumentException("class must be a " + ServletContext.class);
-    }
-
     return (T) _ctx;
   }
 }

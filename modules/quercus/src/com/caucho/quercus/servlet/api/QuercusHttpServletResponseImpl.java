@@ -100,12 +100,9 @@ public class QuercusHttpServletResponseImpl implements QuercusHttpServletRespons
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T toResponse(Class<T> cls)
   {
-    if (cls != HttpServletResponse.class) {
-      throw new IllegalArgumentException("class must be a " + HttpServletResponse.class);
-    }
-
     return (T) _response;
   }
 }

@@ -162,6 +162,10 @@ public class QuercusHttpServletRequestImpl implements QuercusHttpServletRequest
   {
     HttpSession session = _request.getSession(isCreate);
 
+    if (session == null) {
+      return null;
+    }
+
     return new QuercusHttpSessionImpl(session);
   }
 
@@ -273,10 +277,6 @@ public class QuercusHttpServletRequestImpl implements QuercusHttpServletRequest
   @SuppressWarnings("unchecked")
   public <T> T toRequest(Class<T> cls)
   {
-    if (cls != HttpServletRequest.class) {
-      throw new IllegalArgumentException("class must be a " + HttpServletRequest.class);
-    }
-
     return (T) _request;
   }
 }
