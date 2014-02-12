@@ -98,7 +98,7 @@ public abstract class SimpleView
     return encoding;
   }
 
-  public SelectedChildrenView getChildren(String namespace, String prefix)
+  public ChildrenView getChildren(String namespace, String prefix)
   {
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }

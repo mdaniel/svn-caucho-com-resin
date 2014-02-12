@@ -46,7 +46,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -86,9 +85,40 @@ public class ElementView extends SimpleView
   }
 
   @Override
-  public SelectedChildrenView getChildren(String namespace, String prefix)
+  public ChildrenView getChildren(String namespace, String prefix)
   {
-    return new SelectedChildrenView(this, null, namespace, prefix);
+    ArrayList<SimpleView> childList = new ArrayList<SimpleView>();
+
+    Node node = getNode();
+
+    Node child = node.getFirstChild();
+    while (child != null) {
+      String childName = child.getNodeName();
+
+      if (child.getNodeType() == Node.ELEMENT_NODE
+          && (namespace == null || SimpleUtil.isSameNamespace(child, namespace))
+          && (prefix == null || prefix.equals(SimpleUtil.getPrefix(childName)))) {
+        ElementView view = new ElementView((Element) child);
+
+        childList.add(view);
+      }
+
+      child = child.getNextSibling();
+    }
+
+    ArrayList<AttributeView> attrList = new ArrayList<AttributeView>();
+
+    NamedNodeMap attrMap = _node.getAttributes();
+
+    for (int i = 0; i < attrMap.getLength(); i++) {
+      Attr attr = (Attr) attrMap.item(i);
+
+      AttributeView view = new AttributeView(attr);
+
+      attrList.add(view);
+    }
+
+    return new ChildrenView(this, childList, attrList);
   }
 
   @Override
@@ -101,7 +131,7 @@ public class ElementView extends SimpleView
       Attr attr = (Attr) attrMap.item(i);
 
       String name = attr.getNodeName();
-      String prefix = getPrefix(name);
+      String prefix = SimpleUtil.getPrefix(name);
 
       if ("xmlns".equals(name) || "xmlns".equals(prefix)) {
         continue;
@@ -184,7 +214,7 @@ public class ElementView extends SimpleView
 
     _node.appendChild(e);
 
-    if (namespace != null && ! hasNamespace(prefix, namespace)) {
+    if (namespace != null && ! SimpleUtil.hasNamespace(_node, prefix, namespace)) {
       Attr attr;
 
       if (prefix != null) {
@@ -216,9 +246,9 @@ public class ElementView extends SimpleView
   {
     Document doc = getOwnerDocument();
 
-    String prefix = getPrefix(name);
+    String prefix = SimpleUtil.getPrefix(name);
 
-    if (namespace != null && ! hasNamespace(prefix, namespace)) {
+    if (namespace != null && ! SimpleUtil.hasNamespace(_node, prefix, namespace)) {
       Attr namespaceAttr;
 
       if (prefix != null) {
@@ -243,50 +273,6 @@ public class ElementView extends SimpleView
   {
     NamedNodeMap attrMap = node.getAttributes();
     attrMap.setNamedItem(attr);
-  }
-
-  private String getPrefix(String name)
-  {
-    int i = name.indexOf(':');
-
-    if (i < 0) {
-      return null;
-    }
-
-    String prefix = name.substring(0, i);
-
-    return prefix;
-  }
-
-  private boolean hasNamespace(String prefix, String namespace)
-  {
-    String attrName;
-
-    if (prefix != null && prefix.length() > 0) {
-      attrName = "xmlns:" + prefix;
-    }
-    else {
-      attrName = "xmlns";
-    }
-
-    Node node = _node;
-    while (node != null) {
-      NamedNodeMap attrMap = node.getAttributes();
-
-      if (attrMap == null) {
-        break;
-      }
-
-      Attr attr = (Attr) attrMap.getNamedItem(attrName);
-
-      if (attr != null) {
-        return attr.getNodeValue().equals(namespace);
-      }
-
-      node = node.getParentNode();
-    }
-
-    return false;
   }
 
   @Override
@@ -456,9 +442,32 @@ public class ElementView extends SimpleView
   @Override
   public SimpleView getField(Env env, Value indexV)
   {
-    String nodeName = indexV.toString();
+    String nodeName = indexV.toStringValue(env).toString();
 
-    return new SelectedChildrenView(this, nodeName);
+    ArrayList<SimpleView> childList = new ArrayList<SimpleView>();
+
+    Node child = getNode().getFirstChild();
+
+    while (child != null) {
+      if (child.getNodeType() == Node.ELEMENT_NODE) {
+        String childName = child.getNodeName();
+
+        if (nodeName.equals(childName)) {
+          ElementView view = new ElementView(child);
+
+          childList.add(view);
+        }
+      }
+
+      child = child.getNextSibling();
+    }
+
+    ArrayList<AttributeView> attrList = new ArrayList<AttributeView>();
+
+    SelectedView view
+      = new SelectedView(this, nodeName, childList, attrList);
+
+    return view;
   }
 
   private Node getChild(String name)
@@ -560,7 +569,7 @@ public class ElementView extends SimpleView
   @Override
   public Iterator<Map.Entry<IteratorIndex,SimpleView>> getIterator()
   {
-    SelectedChildrenView view = new SelectedChildrenView(this);
+    ChildrenView view = getChildren(null, null);
 
     return view.getIterator();
   }
@@ -752,6 +761,27 @@ public class ElementView extends SimpleView
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _node + "]";
+    StringBuilder sb = new StringBuilder();
+
+    Node child = _node.getFirstChild();
+
+    while (child != null) {
+      if (child.getNodeType() == Node.TEXT_NODE) {
+        String text = child.getNodeValue().trim();
+        text = text.replace("\n", " ");
+
+        sb.append(text);
+      }
+
+      child = child.getNextSibling();
+    }
+
+    if (sb.length() > 0) {
+      return getClass().getSimpleName() + "[name=" + _node.getNodeName() + ",text=" + sb + ",hash=" + _node.hashCode() + "]";
+    }
+    else {
+      return getClass().getSimpleName() + "[name=" + _node.getNodeName() + ",hash=" + _node.hashCode() + "]";
+    }
+
   }
 }

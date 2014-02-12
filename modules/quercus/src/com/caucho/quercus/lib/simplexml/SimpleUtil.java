@@ -283,6 +283,60 @@ public class SimpleUtil
     }
   }
 
+  public static boolean isSameNamespace(Node node, String namespace)
+  {
+    String prefix = getPrefix(node.getNodeName());
+
+    return hasNamespace(node, prefix, namespace);
+  }
+
+  public static String getPrefix(String name)
+  {
+    int i = name.indexOf(':');
+
+    if (i < 0) {
+      return null;
+    }
+
+    String prefix = name.substring(0, i);
+
+    return prefix;
+  }
+
+  public static boolean hasNamespace(Node node, String prefix, String namespace)
+  {
+    if (namespace == null) {
+      return true;
+    }
+
+    String attrName;
+
+    if (prefix != null && prefix.length() > 0) {
+      attrName = "xmlns:" + prefix;
+    }
+    else {
+      attrName = "xmlns";
+    }
+
+    while (node != null) {
+      NamedNodeMap attrMap = node.getAttributes();
+
+      if (attrMap == null) {
+        break;
+      }
+
+      Attr attr = (Attr) attrMap.getNamedItem(attrName);
+
+      if (attr != null) {
+        return attr.getNodeValue().equals(namespace);
+      }
+
+      node = node.getParentNode();
+    }
+
+    return false;
+  }
+
   public static Value wrapJava(Env env,
                                QuercusClass cls,
                                SimpleXMLNode node)

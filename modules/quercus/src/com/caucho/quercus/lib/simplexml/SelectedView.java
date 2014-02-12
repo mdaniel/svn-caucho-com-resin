@@ -37,9 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.caucho.quercus.env.ArrayValue;
@@ -50,122 +48,26 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
-public class SelectedChildrenView extends SimpleView
+public class SelectedView extends SimpleView
 {
   private final SimpleView _parent;
-
   private final String _nodeName;
 
-  private final ArrayList<SimpleView> _childList = new ArrayList<SimpleView>();
-  private final ArrayList<AttributeView> _attrList = new ArrayList<AttributeView>();
+  private final ArrayList<SimpleView> _childList;
+  private final ArrayList<AttributeView> _attrList;
 
-  public SelectedChildrenView(SimpleView parent)
-  {
-    this(parent, null, null, null);
-  }
-
-  public SelectedChildrenView(SimpleView parent, String nodeName)
-  {
-    this(parent, nodeName, null, null);
-  }
-
-  public SelectedChildrenView(SimpleView parent, String nodeName,
-                              String namespace)
-  {
-    this(parent, nodeName, namespace, null);
-  }
-
-  public SelectedChildrenView(SimpleView parent,
-                              String nodeName,
-                              String namespace,
-                              String prefix)
+  public SelectedView(SimpleView parent,
+                      String nodeName,
+                      ArrayList<SimpleView> childList,
+                      ArrayList<AttributeView> attrList)
   {
     super(parent.getOwnerDocument());
 
     _parent = parent;
     _nodeName = nodeName;
 
-    Node node = _parent.getNode();
-
-    Node child = node.getFirstChild();
-    while (child != null) {
-      String childName = child.getNodeName();
-
-      if (child.getNodeType() == Node.ELEMENT_NODE
-          && (nodeName == null || nodeName.equals(childName))
-          && (namespace == null || isSameNamespace(child, namespace))
-          && (prefix == null || prefix.equals(getPrefix(childName)))) {
-        ElementView view = new ElementView((Element) child);
-
-        _childList.add(view);
-      }
-
-      child = child.getNextSibling();
-    }
-
-    NamedNodeMap attrMap = parent.getNode().getAttributes();
-
-    for (int i = 0; i < attrMap.getLength(); i++) {
-      Attr attr = (Attr) attrMap.item(i);
-
-      AttributeView view = new AttributeView(attr);
-
-      _attrList.add(view);
-    }
-  }
-
-  private boolean isSameNamespace(Node node, String namespace)
-  {
-    String prefix = getPrefix(node.getNodeName());
-
-    return hasNamespace(node, prefix, namespace);
-  }
-
-  private String getPrefix(String name)
-  {
-    int i = name.indexOf(':');
-
-    if (i < 0) {
-      return null;
-    }
-
-    String prefix = name.substring(0, i);
-
-    return prefix;
-  }
-
-  private boolean hasNamespace(Node node, String prefix, String namespace)
-  {
-    if (namespace == null) {
-      return true;
-    }
-
-    String attrName;
-
-    if (prefix != null && prefix.length() > 0) {
-      attrName = "xmlns:" + prefix;
-    }
-    else {
-      attrName = "xmlns";
-    }
-
-    while (node != null) {
-      NamedNodeMap attrMap = node.getAttributes();
-
-      if (attrMap == null) {
-        break;
-      }
-
-      Attr attr = (Attr) attrMap.getNamedItem(attrName);
-
-      if (attr != null) {
-        return attr.getNodeValue().equals(namespace);
-      }
-
-      node = node.getParentNode();
-    }
-
-    return false;
+    _childList = childList;
+    _attrList = attrList;
   }
 
   @Override
@@ -180,7 +82,7 @@ public class SelectedChildrenView extends SimpleView
   }
 
   @Override
-  public SelectedChildrenView getChildren(String namespace, String prefix)
+  public ChildrenView getChildren(String namespace, String prefix)
   {
     if (_childList.size() > 0) {
       return _childList.get(0).getChildren(namespace, prefix);
@@ -261,9 +163,7 @@ public class SelectedChildrenView extends SimpleView
   public SimpleView getField(Env env, Value indexV)
   {
     if (_childList.size() > 0) {
-      SimpleView firstChild = _childList.get(0);
-
-      return firstChild.getField(env, indexV);
+      return _childList.get(0).getField(env, indexV);
     }
     else {
       return null;
@@ -420,6 +320,12 @@ public class SelectedChildrenView extends SimpleView
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _parent + "]";
+    SimpleView firstChild = null;
+
+    if (_childList.size() > 0) {
+      firstChild = _childList.get(0);
+    }
+
+    return getClass().getSimpleName() + "[name=" + _nodeName + ",first=" + firstChild + ",parent=" + _parent + "]";
   }
 }

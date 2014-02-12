@@ -266,7 +266,7 @@ public abstract class SimpleXMLNode
       }
     }
 
-    SelectedChildrenView view = _view.getChildren(namespace, prefix);
+    ChildrenView view = _view.getChildren(namespace, prefix);
 
     SimpleXMLElement e = new SimpleXMLElement(_cls, view);
 

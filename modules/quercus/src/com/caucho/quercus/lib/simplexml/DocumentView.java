@@ -62,7 +62,7 @@ public class DocumentView extends SimpleView
   }
 
   @Override
-  public SelectedChildrenView getChildren(String namespace, String prefix)
+  public ChildrenView getChildren(String namespace, String prefix)
   {
     return _element.getChildren(namespace, prefix);
   }
