@@ -481,7 +481,7 @@ public class ModuleContext
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusModule
+   * Scans the classpath for META-INF/quercus/com.caucho.quercus.QuercusModule
    */
   private void initStaticFunctions()
   {
@@ -492,7 +492,7 @@ public class ModuleContext
       setContextClassLoader(_loader);
 
       String quercusModule
-        = "META-INF/services/com.caucho.quercus.QuercusModule";
+        = "META-INF/quercus/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = _loader.getResources(quercusModule);
 
       while (urls.hasMoreElements()) {
@@ -643,7 +643,7 @@ public class ModuleContext
   }
 
   /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
+   * Scans the classpath for META-INF/quercus/com.caucho.quercus.QuercusClass
    */
   private void initStaticClassServices()
   {
@@ -652,7 +652,7 @@ public class ModuleContext
 
     try {
       String quercusModule
-        = "META-INF/services/com.caucho.quercus.QuercusClass";
+        = "META-INF/quercus/com.caucho.quercus.QuercusClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
       HashSet<URL> urlSet = new HashSet<URL>();
