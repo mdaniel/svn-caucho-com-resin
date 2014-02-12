@@ -113,6 +113,10 @@ public class QuercusHttpServletRequestImpl implements QuercusHttpServletRequest
   {
     Cookie []cookies = _request.getCookies();
 
+    if (cookies == null) {
+      return new QuercusCookie[0];
+    }
+
     QuercusCookie []qCookies = new QuercusCookie[cookies.length];
 
     for (int i = 0; i < cookies.length; i++) {
