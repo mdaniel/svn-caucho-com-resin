@@ -77,6 +77,7 @@ public class FormatNumberTag extends BodyTagSupport {
   {
     try {
       if (value == null || "".equals(value)) {
+        _value = null;//jsp/1dbd
       }
       else if (value instanceof Number)
         _value = ((Number) value).doubleValue();
