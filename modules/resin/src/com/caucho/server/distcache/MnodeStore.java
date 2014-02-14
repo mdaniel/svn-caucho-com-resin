@@ -56,15 +56,15 @@ import com.caucho.util.L10N;
  */
 public class MnodeStore {
   private static final L10N L = new L10N(MnodeStore.class);
-  
+
   private static final Logger log
     = Logger.getLogger(MnodeStore.class.getName());
-  
+
   private FreeList<CacheMapConnection> _freeConn
     = new FreeList<CacheMapConnection>(32);
 
   private final String _serverName;
-  
+
   private final String _tableName;
 
   private DataSource _dataSource;
@@ -77,7 +77,7 @@ public class MnodeStore {
   private String _updateAccessTimeQuery;
 
   private String _selectExpireQuery;
-  
+
   private String _selectCacheKeysQuery;
 
   private String _countQuery;
@@ -87,9 +87,9 @@ public class MnodeStore {
 
   private long _serverVersion;
   private long _startupLastAccessTime;
-  
+
   private final AtomicLong _entryCount = new AtomicLong();
-  
+
   // private long _expireReaperTimeout = 60 * 60 * 1000L;
   // private long _expireReaperTimeout = 15 * 60 * 1000L;
 
@@ -99,9 +99,9 @@ public class MnodeStore {
     throws Exception
   {
     _dataSource = dataSource;
-    
+
     _isLocalDataSource = dataSource instanceof DataSourceImpl;
-    
+
     _serverName = serverName;
     _tableName = tableName;
 
@@ -148,25 +148,25 @@ public class MnodeStore {
 
     try {
       conn = _dataSource.getConnection();
-      
+
       String sql = ("SELECT MAX(update_time)"
                     + " FROM " + _tableName
                     + " WHERE cache_id=?");
-        
+
       PreparedStatement pStmt = conn.prepareStatement(sql);
-      
+
       pStmt.setBytes(1, cacheKey.getHash());
 
       rs = pStmt.executeQuery(sql);
-      
+
       if (rs.next()) {
         return rs.getLong(1);
       }
-      
+
       return 0;
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       return 0;
     } finally {
       JdbcUtil.close(rs);
@@ -209,10 +209,19 @@ public class MnodeStore {
          + " SET access_timeout=?,access_time=?"
          + " WHERE id=? AND item_version=?");
 
+    /*
     _selectExpireQuery = ("SELECT resin_oid,id,cache_id,value_data_id FROM " + _tableName
                           + " WHERE ? < resin_oid"
                           + " AND (access_time + 1.25 * access_timeout < ?"
                           + "      OR modified_time + modified_timeout < ?)"
+                          + " LIMIT 4096");
+    */
+
+    _selectExpireQuery = ("SELECT resin_oid,id,cache_id,value_data_id,"
+                          + "     access_time,access_timeout,"
+                          + "     modified_time,modified_timeout"
+                          + " FROM " + _tableName
+                          + " WHERE ? < resin_oid"
                           + " LIMIT 4096");
 
     _selectCacheKeysQuery = ("SELECT resin_oid,id FROM " + _tableName
@@ -245,9 +254,9 @@ public class MnodeStore {
 
     _serverVersion = initVersion();
     _startupLastAccessTime = initLastAccessTime();
-    
+
     long initCount = getCountImpl();
-    
+
     if (initCount > 0) {
       _entryCount.set(initCount);
     }
@@ -326,7 +335,7 @@ public class MnodeStore {
                     + " FROM " + _tableName);
 
       rs = stmt.executeQuery(sql);
-      
+
       if (rs.next())
         return rs.getInt(1) + 1;
     } finally {
@@ -357,7 +366,7 @@ public class MnodeStore {
         return rs.getLong(1);
     } finally {
       JdbcUtil.close(rs);
-      
+
       conn.close();
     }
 
@@ -389,7 +398,7 @@ public class MnodeStore {
              + " WHERE ?<=update_time"
              + " LIMIT 1024");
       */
-      
+
       PreparedStatement pstmt = conn.prepareStatement(sql);
 
       pstmt.setLong(1, updateTime);
@@ -411,7 +420,7 @@ public class MnodeStore {
         long modifiedTimeout = rs.getLong(9);
         long accessTime = rs.getLong(10);
         long modifiedTime = rs.getLong(11);
-        
+
         long leaseTimeout = 30000;
 
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
@@ -484,9 +493,9 @@ public class MnodeStore {
         long modifiedTimeout = rs.getLong(9);
         long accessTime = rs.getLong(10);
         long modifiedTime = rs.getLong(11);
-        
+
         long leaseTimeout = 30000;
-        
+
         /*
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
         */
@@ -545,7 +554,7 @@ public class MnodeStore {
         long valueHash = rs.getLong(1);
         long valueDataId = rs.getLong(2);
         long valueLength = rs.getLong(3);
-        
+
         byte []cacheHash = rs.getBytes(4);
         long flags = rs.getLong(5);
         long itemVersion = rs.getLong(6);
@@ -555,11 +564,11 @@ public class MnodeStore {
         long accessTime = rs.getLong(10);
         long modifiedTime = rs.getLong(11);
         // long accessTime = CurrentTime.getCurrentTime();
-        
+
         long leaseTimeout = 300000;
-        
+
         MnodeEntry entry;
-        entry = new MnodeEntry(valueHash, valueLength, 
+        entry = new MnodeEntry(valueHash, valueLength,
                                itemVersion,
                                flags,
                                accessedExpireTimeout, modifiedExpireTimeout,
@@ -572,10 +581,10 @@ public class MnodeStore {
 
         if (log.isLoggable(Level.FINER))
           log.finer(this + " load " + id + " " + entry);
-        
+
         return entry;
       }
-      
+
       if (log.isLoggable(Level.FINEST))
         log.finest(this + " load: no mnode for cache key " + id);
 
@@ -584,7 +593,7 @@ public class MnodeStore {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
         conn.close();
     }
@@ -615,7 +624,7 @@ public class MnodeStore {
       pstmt.setLong(2, oid);
 
       rs = pstmt.executeQuery();
-      
+
       boolean isValue = false;
 
       while (rs.next()) {
@@ -623,7 +632,7 @@ public class MnodeStore {
         byte []keyHash = rs.getBytes(2);
 
         iter.addKey(newOid, keyHash);
-        
+
         isValue = true;
       }
 
@@ -662,7 +671,7 @@ public class MnodeStore {
 
     try {
       conn = getConnection();
-      
+
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
       stmt.setLong(2, mnodeUpdate.getValueHash());
@@ -680,7 +689,7 @@ public class MnodeStore {
       stmt.setLong(8, _serverVersion);
       stmt.setLong(9, mnodeUpdate.getAccessedExpireTimeout());
       stmt.setLong(10, mnodeUpdate.getModifiedExpireTimeout());
-      
+
       long now = CurrentTime.getCurrentTime();
       stmt.setLong(11, lastAccessTime);
       stmt.setLong(12, lastModifiedTime);
@@ -690,7 +699,7 @@ public class MnodeStore {
       if (log.isLoggable(Level.FINER)) {
         log.finer(this + " insert key=" + id + " " + mnodeUpdate + " count=" + count);
       }
-      
+
       if (count > 0) {
         _entryCount.addAndGet(1);
       }
@@ -726,19 +735,19 @@ public class MnodeStore {
       conn = getConnection();
 
       PreparedStatement stmt = conn.prepareUpdateSave();
-      
+
       stmt.setLong(1, mnodeUpdate.getValueHash());
       stmt.setLong(2, valueDataId);
       stmt.setLong(3, mnodeUpdate.getValueLength());
       stmt.setBytes(4, cacheHash);
       stmt.setLong(5, mnodeUpdate.getFlags());
-      
+
       stmt.setLong(6, mnodeUpdate.getVersion());
       stmt.setLong(7, _serverVersion);
       stmt.setLong(8, mnodeUpdate.getAccessedExpireTimeout());
       stmt.setLong(9, mnodeUpdate.getModifiedExpireTimeout());
-      
-      
+
+
       stmt.setLong(10, lastAccessTime);
       stmt.setLong(11, lastModifiedTime);
       /*
@@ -829,14 +838,14 @@ public class MnodeStore {
       pstmt.setBytes(1, key);
 
       int count = pstmt.executeUpdate();
-      
+
       if (count > 0) {
         _entryCount.addAndGet(-1);
-        
+
         if (log.isLoggable(Level.FINER)) {
           log.finer(this + " remove " + HashKey.create(key));
         }
-        
+
         return true;
       }
       else {
@@ -846,7 +855,7 @@ public class MnodeStore {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
         conn.close();
     }
@@ -862,12 +871,12 @@ public class MnodeStore {
   /**
    * Clears the expired data
    */
-  public ArrayList<ExpiredMnode> selectExpiredData(long startOid)
+  public ArrayList<Mnode> selectExpiredData(long startOid)
   {
-    ArrayList<ExpiredMnode> expireList = new ArrayList<ExpiredMnode>();
-    
+    ArrayList<Mnode> expireList = new ArrayList<Mnode>();
+
     CacheMapConnection conn = null;
- 
+
     try {
       conn = getConnection();
       PreparedStatement pstmt = conn.prepareSelectExpire();
@@ -877,16 +886,28 @@ public class MnodeStore {
       pstmt.setLong(1, startOid);
       pstmt.setLong(2, now);
       pstmt.setLong(3, now);
-      
+
       ResultSet rs = pstmt.executeQuery();
-      
+
       while (rs.next()) {
         long oid = rs.getLong(1);
         byte []key = rs.getBytes(2);
         byte []cacheHash = rs.getBytes(3);
         long dataId = rs.getLong(4);
-        
-        expireList.add(new ExpiredMnode(oid, key, cacheHash, dataId));
+
+        long accessTime = rs.getLong(5);
+        long accessTimeout = rs.getLong(6);
+
+        long modifiedTime = rs.getLong(7);
+        long modifiedTimeout = rs.getLong(8);
+
+        if (accessTime + 1.25 * accessTimeout < now
+            || modifiedTime + modifiedTimeout < now) {
+          expireList.add(new ExpiredMnode(oid, key, cacheHash, dataId));
+        }
+        else {
+          expireList.add(new Mnode(oid));
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -894,14 +915,14 @@ public class MnodeStore {
     } finally {
       conn.close();
     }
-    
+
     return expireList;
   }
 
   //
   // statistics
   //
-  
+
   public long getCount()
   {
     return _entryCount.get();
@@ -931,7 +952,7 @@ public class MnodeStore {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       conn.close();
     }
 
@@ -1059,44 +1080,52 @@ public class MnodeStore {
       }
     }
   }
-  
-  public static final class ExpiredMnode {
+
+  public static class Mnode {
     private final long _oid;
-    private final byte []_key;
-    private final byte []_cacheHash;
-    private final long _dataId;
-    
-    ExpiredMnode(long oid, 
-                 byte []key,
-                 byte []cacheHash,
-                 long dataId)
+
+    Mnode(long oid)
     {
       _oid = oid;
-      _key = key;
-      _cacheHash = cacheHash;
-      _dataId = dataId;
     }
-    
+
     public final long getOid()
     {
       return _oid;
     }
-    
+  }
+
+  public static final class ExpiredMnode extends Mnode {
+    private final byte []_key;
+    private final byte []_cacheHash;
+    private final long _dataId;
+
+    ExpiredMnode(long oid,
+                 byte []key,
+                 byte []cacheHash,
+                 long dataId)
+    {
+      super(oid);
+      _key = key;
+      _cacheHash = cacheHash;
+      _dataId = dataId;
+    }
+
     public final byte []getKey()
     {
       return _key;
     }
-    
+
     public final byte []getCacheHash()
     {
       return _cacheHash;
     }
-    
+
     public final long getDataId()
     {
       return _dataId;
     }
-    
+
     public String toString()
     {
       return (getClass().getSimpleName()
@@ -1104,14 +1133,14 @@ public class MnodeStore {
           + "," + Long.toHexString(_dataId) + "]");
     }
   }
-  
+
   class KeysIterator implements Iterator<HashKey> {
     private HashKey _cacheKey;
-    
+
     private long _startOid;
     private ArrayList<HashKey> _keys = new ArrayList<HashKey>();
     private boolean _isClosed;
-    
+
     KeysIterator(HashKey cacheKey)
     {
       _cacheKey = cacheKey;
@@ -1123,7 +1152,7 @@ public class MnodeStore {
       if (_keys.size() == 0) {
         loadKeys();
       }
-      
+
       return _keys.size() > 0;
     }
 
@@ -1133,11 +1162,11 @@ public class MnodeStore {
       if (_keys.size() == 0) {
         loadKeys();
       }
-      
+
       if (_keys.size() == 0) {
         return null;
       }
-      
+
       return _keys.remove(0);
     }
 
@@ -1146,7 +1175,7 @@ public class MnodeStore {
       _startOid = Math.max(_startOid, newOid);
       _keys.add(HashKey.create(keyHash));
     }
-    
+
     private void loadKeys()
     {
       if (! _isClosed) {

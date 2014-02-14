@@ -341,6 +341,14 @@ public class BlockStore {
   }
 
   /**
+   * Returns the store's path.
+   */
+  public Path getPath()
+  {
+    return _path;
+  }
+
+  /**
    * Returns the table's lock.
    */
   public Lock getWriteLock()
@@ -924,7 +932,7 @@ public class BlockStore {
   public final int getAllocation(long blockIndex)
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
-    
+
     if (_allocationTable.length <= allocOffset) {
       return -1;
     }

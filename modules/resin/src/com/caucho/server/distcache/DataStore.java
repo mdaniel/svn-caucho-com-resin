@@ -60,7 +60,7 @@ import com.caucho.vfs.WriteStream;
  */
 public class DataStore {
   private static final L10N L = new L10N(DataStore.class);
-  
+
   private static final Logger log
     = Logger.getLogger(DataStore.class.getName());
 
@@ -84,10 +84,10 @@ public class DataStore {
   private final String _validateQuery;
 
   private final String _countQuery;
-  
+
   private final ConcurrentArrayList<MnodeOrphanListener> _orphanListeners
     = new ConcurrentArrayList<MnodeOrphanListener>(MnodeOrphanListener.class);
-  
+
   private final AtomicLong _entryCount = new AtomicLong();
 
   private Alarm _alarm;
@@ -142,9 +142,9 @@ public class DataStore {
     throws Exception
   {
     initDatabase();
-    
+
     long count = getCountImpl();
-    
+
     if (count > 0) {
       _entryCount.set(count);
     }
@@ -165,7 +165,7 @@ public class DataStore {
 
     try {
       Statement stmt = conn.createStatement();
-      
+
       boolean isOld = false;
 
       try {
@@ -175,7 +175,7 @@ public class DataStore {
         ResultSet rs = stmt.executeQuery(sql);
         rs.next();
         rs.close();
-        
+
         isOld = true;
       } catch (Exception e) {
         log.log(Level.ALL, e.toString(), e);
@@ -216,12 +216,12 @@ public class DataStore {
       conn.close();
     }
   }
-  
+
   public void addOrphanListener(MnodeOrphanListener listener)
   {
     _orphanListeners.add(listener);
   }
-  
+
   public void removeOrphanListener(MnodeOrphanListener listener)
   {
     _orphanListeners.remove(listener);
@@ -245,7 +245,7 @@ public class DataStore {
 
         if (is == null)
           return false;
-        
+
         try {
           os.writeStream(is);
         } finally {
@@ -290,19 +290,19 @@ public class DataStore {
 
       if (rs.next()) {
         Blob blob = rs.getBlob(1);
-        
+
         return blob;
       }
 
       if (log.isLoggable(Level.FINER))
         log.finer(this + " no blob data loaded for " + id);
-      
+
       Thread.dumpStack();
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
         conn.close();
     }
@@ -329,7 +329,7 @@ public class DataStore {
       // pstmt.setBytes(1, id.getHash());
       pstmt.setLong(1, id);
       rs = pstmt.executeQuery();
-      
+
       if (rs.next()) {
         return true;
       }
@@ -337,7 +337,7 @@ public class DataStore {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
         conn.close();
     }
@@ -369,7 +369,7 @@ public class DataStore {
 
       if (rs.next()) {
         InputStream is = rs.getBinaryStream(1);
-        
+
         if (is == null) {
           System.out.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: " + Long.toHexString(id));
 
@@ -385,7 +385,7 @@ public class DataStore {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
         conn.close();
     }
@@ -431,7 +431,7 @@ public class DataStore {
     if (is == null) {
       throw new NullPointerException();
     }
-    
+
     DataConnection conn = null;
 
     try {
@@ -439,22 +439,22 @@ public class DataStore {
 
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBinaryStream(1, is, length);
-      
+
       int count = stmt.executeUpdate();
 
 
       // System.out.println("INSERT: " + id);
-      
+
       if (count > 0) {
         _entryCount.addAndGet(1);
-        
+
         ResultSet keys = stmt.getGeneratedKeys();
         if (keys.next()) {
           long id = keys.getLong("id");
-          
+
           return id;
         }
-        
+
         throw new IllegalStateException();
       }
       else {
@@ -464,7 +464,7 @@ public class DataStore {
       // the data already exists in the cache, so this is okay
       log.finer(this + " " + e.toString());
       log.log(Level.FINEST, e.toString(), e);
-      
+
       return 1;
     } catch (SQLException e) {
       e.printStackTrace();
@@ -496,14 +496,14 @@ public class DataStore {
 
       PreparedStatement stmt = conn.prepareDelete();
       stmt.setLong(1, id);
-      
+
       int count = stmt.executeUpdate();
 
       // System.out.println("INSERT: " + id);
 
       if (count > 0) {
         _entryCount.addAndGet(-1);
-        
+
         return true;
       }
       else {
@@ -521,61 +521,12 @@ public class DataStore {
     return false;
   }
 
-  /**
-   * Update used expire times.
-   */
-  private void deleteOrphans()
-  {
-    DataConnection conn = null;
-    ResultSet rs = null;
-
-    boolean isValid = false;
-    
-    try {
-      conn = getConnection();
-
-      PreparedStatement pstmt = conn.prepareSelectOrphan();
-
-      rs = pstmt.executeQuery();
-
-      try {
-        while (rs.next()) {
-          long id = rs.getLong(1);
-          long oid = rs.getLong(2);
-          
-          if (oid <= 0) {
-            if (log.isLoggable(Level.FINER)) {
-              log.finer(this + " delete orphan " + Long.toHexString(id));
-            }
-            
-            rs.deleteRow();
-          }
-        }
-      } finally {
-        rs.close();
-      }
-      
-      isValid = true;
-    } catch (SQLException e) {
-      e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
-    } catch (Throwable e) {
-      e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      if (isValid)
-        conn.close();
-      else
-        conn.destroy();
-    }
-  }
-  
   /*
   private void notifyOrphan(byte []valueHash)
   {
     if (valueHash == null)
       return;
-    
+
     for (MnodeOrphanListener listener : _orphanListeners) {
       listener.onOrphanValue(new HashKey(valueHash));
     }
@@ -609,7 +560,7 @@ public class DataStore {
   //
   // statistics
   //
-  
+
   public long getCount()
   {
     return _entryCount.get();
@@ -639,14 +590,14 @@ public class DataStore {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
         conn.close();
     }
 
     return -1;
   }
-  
+
   public boolean isClosed()
   {
     return _dataSource == null;
@@ -656,10 +607,10 @@ public class DataStore {
   {
     _dataSource = null;
     _freeConn = null;
-    
+
     Alarm alarm = _alarm;
     _alarm = null;
-    
+
     if (alarm != null)
       alarm.dequeue();
   }
@@ -690,6 +641,52 @@ public class DataStore {
         deleteOrphans();
       }
     }
+
+    private void deleteOrphans()
+    {
+      DataConnection conn = null;
+      ResultSet rs = null;
+
+      boolean isValid = false;
+
+      try {
+        conn = getConnection();
+
+        PreparedStatement pstmt = conn.prepareSelectOrphan();
+
+        rs = pstmt.executeQuery();
+
+        try {
+          while (rs.next()) {
+            long id = rs.getLong(1);
+            long oid = rs.getLong(2);
+
+            if (oid <= 0) {
+              if (log.isLoggable(Level.FINER)) {
+                log.finer(this + " delete orphan " + Long.toHexString(id));
+              }
+
+              rs.deleteRow();
+            }
+          }
+        } finally {
+          rs.close();
+        }
+
+        isValid = true;
+      } catch (SQLException e) {
+        e.printStackTrace();
+        log.log(Level.FINE, e.toString(), e);
+      } catch (Throwable e) {
+        e.printStackTrace();
+        log.log(Level.FINE, e.toString(), e);
+      } finally {
+        if (isValid)
+          conn.close();
+        else
+          conn.destroy();
+      }
+    }
   }
 
   class DataInputStream extends InputStream {
@@ -702,7 +699,7 @@ public class DataStore {
       _conn = conn;
       _rs = rs;
       _is = is;
-      
+
       if (is == null) {
         throw new NullPointerException();
       }
