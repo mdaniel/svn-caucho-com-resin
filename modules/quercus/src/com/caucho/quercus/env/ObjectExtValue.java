@@ -1292,6 +1292,12 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
+    if (true) {
+      super.jsonEncode(env, context, sb);
+
+      return;
+    }
+
     sb.append('{');
 
     int length = 0;

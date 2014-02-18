@@ -138,6 +138,11 @@ public class ClassField
     return sb;
   }
 
+  public static boolean isPublic(StringValue canonicalName)
+  {
+    return ! isProtected(canonicalName) && ! isPrivate(canonicalName);
+  }
+
   public static boolean isPrivate(StringValue canonicalName)
   {
     return canonicalName.startsWith("\u0000");

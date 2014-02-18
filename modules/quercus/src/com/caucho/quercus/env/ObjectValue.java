@@ -870,25 +870,48 @@ abstract public class ObjectValue extends Callback {
   @Override
   public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
-    sb.append('{');
+    if (isA(env, "JsonSerializable")) {
+      AbstractFunction fun = getMethod(env.createString("jsonSerialize"));
 
-    int length = 0;
+      if (fun == null) {
+        throw new IllegalStateException(L.l("must implement jsonSerialize()"));
+      }
 
-    Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
+      Value value = fun.callMethod(env, getQuercusClass(), this);
 
-    while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
+      value.jsonEncode(env, context, sb);
 
-      if (length > 0)
-        sb.append(',');
-
-      entry.getKey().toStringValue(env).jsonEncode(env, context, sb);
-      sb.append(':');
-      entry.getValue().jsonEncode(env, context, sb);
-      length++;
+      return;
     }
+    else {
+      sb.append('{');
 
-    sb.append('}');
+      int length = 0;
+
+      Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
+
+      while (iter.hasNext()) {
+        Map.Entry<Value,Value> entry = iter.next();
+
+        StringValue key = entry.getKey().toStringValue(env);
+        Value value = entry.getValue();
+
+        if (! ClassField.isPublic(key)) {
+          continue;
+        }
+
+        if (length > 0) {
+          sb.append(',');
+        }
+
+        key.jsonEncode(env, context, sb);
+        sb.append(':');
+        value.jsonEncode(env, context, sb);
+        length++;
+      }
+
+      sb.append('}');
+    }
   }
 }
 
