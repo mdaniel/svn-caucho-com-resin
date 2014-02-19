@@ -835,7 +835,11 @@ public class Resin
       System.gc();
 
       _servletSystem = createServer();
-      
+
+      ShutdownSystem shutdown = ShutdownSystem.getCurrent();
+
+      shutdown.setShutdownWaitTime(_servletSystem.getShutdownWaitMax());
+
       NetworkListenSystem listenService 
         = _resinSystem.getService(NetworkListenSystem.class);
 

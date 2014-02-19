@@ -49,6 +49,7 @@ import com.caucho.vfs.TempBuffer;
 public class ShutdownSystem extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = 1;
+  public static final long shutdownWaitMax = 120000L;
 
   private static final Logger log = 
     Logger.getLogger(ShutdownSystem.class.getName());
@@ -57,8 +58,8 @@ public class ShutdownSystem extends AbstractResinSubSystem
   private static final AtomicReference<ShutdownSystem> _activeService
     = new AtomicReference<ShutdownSystem>();
   
-  private long _shutdownWaitMax = 120000L;
-  
+  private long _shutdownWaitMax = shutdownWaitMax;
+
   private boolean _isShutdownOnOutOfMemory = true;
 
   private WeakReference<ResinSystem> _resinSystemRef;

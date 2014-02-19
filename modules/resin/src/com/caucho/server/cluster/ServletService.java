@@ -154,7 +154,7 @@ public class ServletService
 
   private boolean _isDevelopmentModeErrorPage;
 
-  private long _shutdownWaitMax = 60 * 1000;
+  private long _shutdownWaitMax = ShutdownSystem.shutdownWaitMax;//60 * 1000;
   
   private boolean _isIgnoreClientDisconnect = true;
 

@@ -179,12 +179,14 @@ public class ResinConfig extends AbstractResinConfig implements EnvironmentBean
   /**
    * Sets the shutdown time
    */
+/*
   @Configurable
   public void setShutdownWaitMax(Period shutdownWaitMax)
   {
     _resin.setShutdownWaitTime(shutdownWaitMax.getPeriod());
   }
-  
+*/
+
   @Configurable
   public void setElasticServer(boolean isElasticServer)
   {

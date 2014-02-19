@@ -12,6 +12,7 @@
 
 <s2 title="4.0.39 snapshot">
 <ul>
+<li>resin: shutdown-wait-max not propagating to ShutdownSystem fix(#5660, rep by Shinomiya Nobuaki)</li>
 <li>jsp: taglib defined listeners should be called before Filter's init()(#5659, rep by Mattias Jiderhamn)</li>
 </ul>
 </s2>
