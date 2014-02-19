@@ -478,6 +478,11 @@ public class Mysqli extends JdbcConnectionResource
     return version;
   }
 
+  public String get_client_info(Env env)
+  {
+    return getclient_info(env);
+  }
+
   protected static String getClientInfoStatic(Env env)
   {
     QuercusContext quercus = env.getQuercus();

@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.filter;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 public class AbstractFilter implements Filter
@@ -60,8 +61,38 @@ public class AbstractFilter implements Filter
     return filterImpl(env, value, flags, options);
   }
 
+  public static int getFlags(Env env, Value flagsV)
+  {
+    int flags = 0;
+
+    if (flagsV.isNull()) {
+    }
+    else if (flagsV.isArray()) {
+      ArrayValue array = flagsV.toArrayValue(env);
+
+      Value optionsV = array.get(env.createString("options"));
+
+      flags = array.get(env.createString("flags")).toInt();
+    }
+    else {
+      flags = flagsV.toInt();
+    }
+
+    return flags;
+  }
+
   protected Value filterImpl(Env env, Value value, int flags, ArrayValue options)
   {
     throw new UnsupportedOperationException();
+  }
+
+  protected static void appendEncoded(StringValue sb, char ch)
+  {
+    sb.append('&');
+    sb.append('#');
+
+    sb.append((int) ch);
+
+    sb.append(';');
   }
 }

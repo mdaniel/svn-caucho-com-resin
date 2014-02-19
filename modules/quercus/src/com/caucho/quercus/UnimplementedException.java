@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,6 +30,7 @@ package com.caucho.quercus;
 
 import com.caucho.util.L10N;
 
+@SuppressWarnings("serial")
 public class UnimplementedException
   extends UnsupportedOperationException
 {

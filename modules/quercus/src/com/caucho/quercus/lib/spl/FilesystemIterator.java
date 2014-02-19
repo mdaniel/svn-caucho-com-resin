@@ -95,7 +95,7 @@ public class FilesystemIterator extends DirectoryIterator
         return UnsetValue.UNSET;
       }
 
-      String path = current.getPathname();
+      String path = current.getPathname(env);
 
       return env.createString(path);
     }
@@ -106,7 +106,7 @@ public class FilesystemIterator extends DirectoryIterator
         return UnsetValue.UNSET;
       }
 
-      String path = current.getFilename();
+      String path = current.getFilename(env);
 
       return env.createString(path);
     }

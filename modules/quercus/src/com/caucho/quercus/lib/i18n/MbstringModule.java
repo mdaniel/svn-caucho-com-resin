@@ -185,8 +185,8 @@ public class MbstringModule
    */
   public static StringValue mb_convert_kana(Env env,
                               StringValue str,
-                              @Optional("") String option,
-                              @Optional("") String encoding)
+                              @Optional String option,
+                              @Optional String encoding)
   {
     throw new UnimplementedException("mb_convert_kana");
   }
@@ -225,7 +225,7 @@ public class MbstringModule
    * Decodes mime field.
    */
   public static Value mb_decode_mimeheader(Env env,
-                              StringValue str)
+                                           StringValue str)
   {
     String encoding = getEncoding(env);
 
@@ -310,7 +310,7 @@ public class MbstringModule
   }
 
   private static ArrayList<String> getDetectOrderList(Env env,
-                                                         Value encodingV)
+                                                      Value encodingV)
   {
     if (encodingV.isDefault() && env.getSpecialValue("mb.detect_order") != null)
       return (ArrayList<String>) env.getSpecialValue("mb.detect_order");
@@ -373,16 +373,16 @@ public class MbstringModule
    */
   public static StringValue mb_encode_mimeheader(Env env,
                               StringValue str,
-                              @Optional("") String charset,
-                              @Optional("B") String transfer_encoding,
-                              @Optional("") String linefeed)
+                              @Optional String charset,
+                              @Optional("'B'") String transferEncoding,
+                              @Optional("'\r\n'") String linefeed)
   {
     charset = getEncoding(env, charset);
 
     try {
       String mime = QuercusMimeUtility.encodeMimeWord(str.toString(),
                                                       charset,
-                                                      transfer_encoding,
+                                                      transferEncoding,
                                                       linefeed,
                                                       76);
       return env.createString(mime);
@@ -397,9 +397,9 @@ public class MbstringModule
    * Encodes HTML numeric string entity.
    */
   public static StringValue mb_encode_numericentity(Env env,
-                              StringValue str,
-                              ArrayValue convmap,
-                              @Optional String encoding)
+                                                    StringValue str,
+                                                    ArrayValue convmap,
+                                                    @Optional String encoding)
   {
     throw new UnimplementedException();
   }
@@ -752,7 +752,7 @@ public class MbstringModule
    * Returns and/or sets the http input encoding
    */
   public static Value mb_http_input(Env env,
-                              @Optional String type)
+                                    @Optional String type)
   {
     throw new UnimplementedException("mb_http_input");
   }
@@ -878,8 +878,8 @@ public class MbstringModule
    * Multibyte version of parse_str.
    */
   public static BooleanValue mb_parse_str(Env env,
-                              StringValue strValue,
-                              @Optional @Reference Value result)
+                                          StringValue strValue,
+                                          @Optional @Reference Value result)
   {
     String encoding = getEncoding(env);
     StringModule.parse_str(env, strValue, result);
@@ -900,7 +900,7 @@ public class MbstringModule
    * Returns the preferred mime name of this encoding.
    */
   public static StringValue mb_preferred_mime_name(Env env,
-                              StringValue encoding)
+                                                   StringValue encoding)
   {
     String mimeName = Encoding.getMimeName(encoding.toString());
 
@@ -958,8 +958,8 @@ public class MbstringModule
    */
   public static Value mb_split(Env env,
                                UnicodeEreg ereg,
-                              StringValue string,
-                              @Optional("-1") long limit)
+                               StringValue string,
+                               @Optional("-1") long limit)
   {
     String encoding = getEncoding(env);
 
@@ -975,10 +975,10 @@ public class MbstringModule
    * boundaries.
    */
   public static StringValue mb_strcut(Env env,
-                              final StringValue str,
-                              int start,
-                              @Optional("7fffffff") int length,
-                              @Optional String encoding)
+                                      final StringValue str,
+                                      int start,
+                                      @Optional("7fffffff") int length,
+                                      @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -994,8 +994,9 @@ public class MbstringModule
       return str.EMPTY;
 
     // XXX: not quite exactly the same behavior as PHP
-    if (start < len && Character.isHighSurrogate(unicodeStr.charAt(start)))
+    if (start < len && Character.isHighSurrogate(unicodeStr.charAt(start))) {
       start--;
+    }
 
     StringBuilder sb = new StringBuilder();
 
@@ -1008,11 +1009,11 @@ public class MbstringModule
    * Truncates the string.
    */
   public static StringValue mb_strimwidth(Env env,
-                              final StringValue str,
-                              int start,
-                              int width,
-                              @Optional() StringValue trimmarker,
-                              @Optional("") String encoding)
+                                          final StringValue str,
+                                          int start,
+                                          int width,
+                                          @Optional StringValue trimmarker,
+                                          @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -1045,8 +1046,8 @@ public class MbstringModule
    * Multibyte version of strlen.
    */
   public static LongValue mb_strlen(Env env,
-                              StringValue str,
-                              @Optional("") String encoding)
+                                    StringValue str,
+                                    @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -1062,7 +1063,7 @@ public class MbstringModule
                                 StringValue haystack,
                                 StringValue needle,
                                 @Optional("0") int offset,
-                                @Optional("") String encoding)
+                                @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -1123,8 +1124,8 @@ public class MbstringModule
    * Returns the width of this multibyte string.
    */
   public static LongValue mb_strwidth(Env env,
-                              StringValue str,
-                              @Optional("") String encoding)
+                                      StringValue str,
+                                      @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -1165,9 +1166,9 @@ public class MbstringModule
   }
 
   public static LongValue mb_substr_count(Env env,
-                              StringValue haystack,
-                              StringValue needle,
-                              @Optional("") String encoding)
+                                          StringValue haystack,
+                                          StringValue needle,
+                                          @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -34,7 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
-public class StringSanitizeFilter
+public class SpecialCharsSanitizeFilter
   extends AbstractFilter
   implements SanitizeFilter
 {
@@ -47,13 +47,9 @@ public class StringSanitizeFilter
 
     int len = str.length();
 
-    boolean isEncodeLow = (flags & FilterModule.FILTER_FLAG_ENCODE_LOW) > 0;
     boolean isEncodeHigh = (flags & FilterModule.FILTER_FLAG_ENCODE_HIGH) > 0;
     boolean isStripLow = (flags & FilterModule.FILTER_FLAG_STRIP_LOW) > 0;
     boolean isStripHigh = (flags & FilterModule.FILTER_FLAG_STRIP_HIGH) > 0;
-
-    boolean isEncodeAmp = (flags & FilterModule.FILTER_FLAG_ENCODE_AMP) > 0;
-    boolean isNoEncodeQuotes = (flags & FilterModule.FILTER_FLAG_NO_ENCODE_QUOTES) > 0;
 
     for (int i = 0; i < len; i++) {
       char ch = str.charAt(i);
@@ -61,13 +57,8 @@ public class StringSanitizeFilter
       if (0x00 <= ch && ch <= 0x1f) {
         if (isStripLow) {
         }
-        else if (isEncodeLow) {
-          appendEncoded(sb, ch);
-        }
-        else if (ch == 0x00) {
-        }
         else {
-          sb.append(ch);
+          appendEncoded(sb, ch);
         }
       }
       else if (0x80 <= ch) {
@@ -80,23 +71,14 @@ public class StringSanitizeFilter
           sb.append(ch);
         }
       }
-      else if (isEncodeAmp && ch == '&') {
+      else if (ch == '&') {
         appendEncoded(sb, ch);
       }
       else if (ch == '"' || ch == '\'') {
-        if (isNoEncodeQuotes) {
-          sb.append(ch);
-        }
-        else {
-          appendEncoded(sb, ch);
-        }
+        appendEncoded(sb, ch);
       }
-      else if (ch == '<') {
-        while (++i < len) {
-          if (str.charAt(i) == '>') {
-            break;
-          }
-        }
+      else if (ch == '<' || ch == '>') {
+        appendEncoded(sb, ch);
       }
       else {
         sb.append(ch);

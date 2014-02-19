@@ -45,12 +45,13 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 public class QuercusMimeUtility
 {
-  private static final Logger log = Logger.getLogger(
-      QuercusMimeUtility.class.getName());
-  
+  private static final L10N L = new L10N(QuercusMimeUtility.class);
+  private static final Logger log
+    = Logger.getLogger(QuercusMimeUtility.class.getName());
   /*
    * Returns an array of decoded Mime headers/fields.
    */
@@ -93,15 +94,15 @@ public class QuercusMimeUtility
       }
 
       return headers;
-    
+
     } catch (MessagingException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e.getMessage());
-      
+
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Returns decoded Mime header/field.
    */
@@ -111,7 +112,7 @@ public class QuercusMimeUtility
     throws UnsupportedEncodingException
   {
     String decodedStr = MimeUtility.decodeText(word.toString());
-    
+
     StringValue str
       = env.createString(MimeUtility.unfold(decodedStr));
 
@@ -135,7 +136,7 @@ public class QuercusMimeUtility
                       "\r\n",
                       76);
   }
-  
+
   /**
    * Encodes a MIME header.
    *
@@ -157,7 +158,7 @@ public class QuercusMimeUtility
     throws UnsupportedEncodingException
   {
     Decoder decoder = Decoder.create(inCharset);
-    
+
     CharSequence nameUnicode = decoder.decode(env, name);
 
     decoder.reset();
@@ -178,7 +179,7 @@ public class QuercusMimeUtility
 
     return sb;
   }
-  
+
   public static String encodeMimeWord(String value,
                                       String charset,
                                       String scheme,
@@ -189,8 +190,20 @@ public class QuercusMimeUtility
     if (lineLength != 76)
       throw new UnimplementedException("Mime line length option");
 
-    if (! lineBreakChars.equals("\r\n"))
-      throw new UnimplementedException("Mime line break option");
+    if (! lineBreakChars.equals("\r\n")) {
+      StringBuilder sb = new StringBuilder();
+
+      for (int i = 0; i < lineBreakChars.length(); i++) {
+        char ch = lineBreakChars.charAt(i);
+
+        String hex = Integer.toHexString(ch);
+
+        sb.append("0x");
+        sb.append(hex);
+      }
+
+      throw new UnimplementedException(L.l("Mime line break option: '{0}'", sb));
+    }
 
     return MimeUtility.encodeWord(value, charset, scheme);
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -69,13 +69,13 @@ public class RecursiveDirectoryIterator
   }
 
   @Override
-  protected SplFileInfo createCurrentIterator(Env env, Path path)
+  protected SplFileInfo createCurrent(Env env, Path path)
   {
     if (path.isDirectory()) {
       return new RecursiveDirectoryIterator(path, getFlags());
     }
     else {
-      return super.createCurrentIterator(env, path);
+      return super.createCurrent(env, path);
     }
   }
 }

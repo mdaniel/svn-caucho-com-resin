@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -79,12 +80,7 @@ public class DirectoryIterator
   {
     SplFileInfo current = getCurrent(env);
 
-    return current != null ? env.wrapJava(current) : UnsetValue.UNSET;
-  }
-
-  protected SplFileInfo createCurrentIterator(Env env, Path path)
-  {
-    return new DirectoryIterator(path);
+    return current != null ? env.wrapJava(this) : UnsetValue.UNSET;
   }
 
   protected SplFileInfo getCurrent(Env env)
@@ -94,20 +90,29 @@ public class DirectoryIterator
 
       Path child = _path.lookup(name);
 
-      _current = createCurrentIterator(env, child);
+      _current = createCurrent(env, child);
     }
 
     return _current;
   }
 
-  protected SplFileInfo getCurrentRaw()
+  protected SplFileInfo createCurrent(Env env, Path path)
   {
-    return _current;
+    return new SplFileInfo(path);
   }
 
   protected int getKey()
   {
     return _index;
+  }
+
+  public boolean isDot(Env env)
+  {
+    SplFileInfo current = getCurrent(env);
+
+    String fileName = current.getFilename(env);
+
+    return ".".equals(fileName) || "..".equals(fileName);
   }
 
   @Override
@@ -140,5 +145,167 @@ public class DirectoryIterator
   public void seek(Env env, int index)
   {
     _index = index;
+  }
+
+  //
+  // SplFileInfo
+  //
+  @Override
+  public long getATime(Env env)
+  {
+    return getCurrent(env).getATime(env);
+  }
+
+  @Override
+  public String getBasename(Env env, @Optional String suffix)
+  {
+    return getCurrent(env).getBasename(env, suffix);
+  }
+
+  @Override
+  public long getCTime(Env env)
+  {
+    return getCurrent(env).getCTime(env);
+  }
+
+  @Override
+  public String getExtension(Env env)
+  {
+    return getCurrent(env).getExtension(env);
+  }
+
+  @Override
+  public SplFileInfo getFileInfo(Env env, @Optional String className)
+  {
+    return getCurrent(env).getFileInfo(env, className);
+  }
+
+  @Override
+  public String getFilename(Env env)
+  {
+    return getCurrent(env).getFilename(env);
+  }
+
+  @Override
+  public int getGroup(Env env)
+  {
+    return getCurrent(env).getGroup(env);
+  }
+
+  @Override
+  public long getInode(Env env)
+  {
+    return getCurrent(env).getInode(env);
+  }
+
+  @Override
+  public String getLinkTarget(Env env)
+  {
+    return getCurrent(env).getLinkTarget(env);
+  }
+
+  @Override
+  public long getMTime(Env env)
+  {
+    return getCurrent(env).getMTime(env);
+  }
+
+  @Override
+  public int getOwner(Env env)
+  {
+    return getCurrent(env).getOwner(env);
+  }
+
+  @Override
+  public String getPath(Env env)
+  {
+    return getCurrent(env).getPath(env);
+  }
+
+  @Override
+  public SplFileInfo getPathInfo(Env env, @Optional String className)
+  {
+    return getCurrent(env).getPathInfo(env, className);
+  }
+
+  @Override
+  public String getPathname(Env env)
+  {
+    return getCurrent(env).getPathname(env);
+  }
+
+  @Override
+  public int getPerms(Env env)
+  {
+    return getCurrent(env).getPerms(env);
+  }
+
+  @Override
+  public String getRealPath(Env env)
+  {
+    return getCurrent(env).getRealPath(env);
+  }
+
+  @Override
+  public long getSize(Env env)
+  {
+    return getCurrent(env).getSize(env);
+  }
+
+  @Override
+  public String getType(Env env)
+  {
+    return getCurrent(env).getType(env);
+  }
+
+  @Override
+  public boolean isDir(Env env)
+  {
+    return getCurrent(env).isDir(env);
+  }
+
+  @Override
+  public boolean isExecutable(Env env)
+  {
+    return getCurrent(env).isExecutable(env);
+  }
+
+  @Override
+  public boolean isFile(Env env)
+  {
+    return getCurrent(env).isFile(env);
+  }
+
+  @Override
+  public boolean isLink(Env env)
+  {
+    return getCurrent(env).isLink(env);
+  }
+
+  @Override
+  public boolean isReadable(Env env)
+  {
+    return getCurrent(env).isReadable(env);
+  }
+
+  @Override
+  public boolean isWritable(Env env)
+  {
+    return getCurrent(env).isWritable(env);
+  }
+
+  @Override
+  public SplFileObject openFile(Env env,
+                                @Optional("r") String mode,
+                                @Optional boolean isUseIncludePath,
+                                @Optional Value context)
+  {
+    return getCurrent(env).openFile(env, mode, isUseIncludePath, context);
+  }
+
+  @Override
+  public String __toString(Env env)
+  {
+    return getCurrent(env).__toString(env);
   }
 }
