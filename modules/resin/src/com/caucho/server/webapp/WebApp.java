@@ -3686,26 +3686,11 @@ public class WebApp extends ServletContextImpl
 
       callInitializers();
 
-      ServletContextEvent event = new ServletContextEvent(this);
+      fireContextInitializedEvent();
 
-      for (ListenerConfig listener : _listeners) {
-        try {
-          addListenerObject(listener.createListenerObject(), false);
-        } catch (Exception e) {
-          throw ConfigException.create(e);
-        }
-      }
+      //jsp/18n7
+      _servletManager.initializeJspServlets();
 
-      for (int i = 0; i < _webAppListeners.size(); i++) {
-        ServletContextListener listener = _webAppListeners.get(i);
-
-        try {
-          listener.contextInitialized(event);
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-      
       //Servlet 3.0
       initAnnotated();
 
@@ -3773,6 +3758,29 @@ public class WebApp extends ServletContextImpl
       setAttribute("caucho.login", _login);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
+    }
+  }
+
+  private void fireContextInitializedEvent()
+  {
+    for (ListenerConfig listener : _listeners) {
+      try {
+        addListenerObject(listener.createListenerObject(), false);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+
+    ServletContextEvent event = new ServletContextEvent(this);
+
+    for (int i = 0; i < _webAppListeners.size(); i++) {
+      ServletContextListener listener = _webAppListeners.get(i);
+
+      try {
+        listener.contextInitialized(event);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
     }
   }
 
@@ -4252,7 +4260,8 @@ public class WebApp extends ServletContextImpl
   
   private void buildSecurity(Invocation invocation)
   {
-    invocation.setFilterChain(buildSecurity(invocation.getFilterChain(), invocation));
+    invocation.setFilterChain(buildSecurity(invocation.getFilterChain(),
+                                            invocation));
   }
   
   private FilterChain buildSecurity(FilterChain chain, Invocation invocation)

@@ -1195,7 +1195,7 @@ public class ServletConfigImpl
    *
    * @return the initialized servlet.
    */
-  Object createServlet()
+  public Object createServlet()
       throws ServletException
   {
     return createServlet(false);

@@ -29,24 +29,17 @@
 
 package com.caucho.server.dispatch;
 
+import com.caucho.config.ConfigException;
+import com.caucho.jsp.JspServlet;
 import com.caucho.util.L10N;
-import com.caucho.config.*;
-import com.caucho.config.inject.InjectManager;
 
 import javax.annotation.PostConstruct;
-import javax.el.ELContext;
-import javax.el.ELContextEvent;
-import javax.el.ELContextListener;
-import javax.el.ELResolver;
-import javax.faces.FactoryFinder;
-import javax.faces.application.Application;
-import javax.faces.application.ApplicationFactory;
-import javax.faces.context.FacesContextFactory;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletSecurityElement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -189,6 +182,18 @@ public class ServletManager {
   public HashMap<String, ServletConfigImpl> getServlets()
   {
     return _servlets;
+  }
+
+  public void initializeJspServlets() throws ServletException
+  {
+    Collection<ServletConfigImpl> servlets
+      = _servlets.values();
+
+    for (ServletConfigImpl servlet : servlets) {
+      if (JspServlet.class.isAssignableFrom(servlet.getServletClass())) {
+        servlet.createServlet();
+      }
+    }
   }
 
   /**
