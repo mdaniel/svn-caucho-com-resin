@@ -190,7 +190,11 @@ public class ServletManager {
       = _servlets.values();
 
     for (ServletConfigImpl servlet : servlets) {
-      if (JspServlet.class.isAssignableFrom(servlet.getServletClass())) {
+      Class servletClass = servlet.getServletClass();
+
+      if (servletClass == null) {
+      }
+      else if (JspServlet.class.isAssignableFrom(servletClass)) {
         servlet.createServlet();
       }
     }
