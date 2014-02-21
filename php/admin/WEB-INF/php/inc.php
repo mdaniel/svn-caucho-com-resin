@@ -33,7 +33,7 @@ if (function_exists('header')) {
   header("Pragma: No-Cache");
 }  
 
-function admin_init($query="", $is_refresh=false, $fragment = false)
+function admin_init($is_refresh=false, $fragment = false)
 {
   global $g_server_id;
   global $g_server;
@@ -45,7 +45,7 @@ function admin_init($query="", $is_refresh=false, $fragment = false)
     else
       $title = "Resin: $g_page for server default";
 
-    display_header($g_page, $title, $g_server, $query, $is_refresh);
+    display_header($g_page, $title, $g_server, $is_refresh);
 
     $mbean_server = new MBeanServer($g_server_id);
 
@@ -65,7 +65,7 @@ function admin_init($query="", $is_refresh=false, $fragment = false)
   if ($fragment)
     return true;
   else
-    return display_header($g_page, $title, $g_server, $query, $is_refresh, true);
+    return display_header($g_page, $title, $g_server, $is_refresh, true);
 }
 
 function mbean_init()
@@ -81,10 +81,11 @@ function mbean_init()
 
   $is_valid = 1;
 
-  $server_index = $_GET["s"];
+  $server_index = get_request_param("s");
 
-  if (isset($_REQUEST["new_s"])) {
-    $server_index = $_REQUEST["new_s"];
+  $new_s = get_request_param("new_s");
+  if ($new_s !== NULL) {
+    $server_index = $new_s;
   }
 
   $g_mbean_server = new MBeanServer();
@@ -562,7 +563,6 @@ function jmx_short_name($name, $exclude_array)
  * @return true if the header was output, false if a header has already been output
  */
 function display_header($script, $title, $server,
-                        $query = "",
                         $is_refresh = false,
                         $allow_remote = false)
 {
@@ -582,17 +582,21 @@ function display_header($script, $title, $server,
 
   $title = $title . " for server " . $g_server_id;
 
-  $next_url = "?q=${g_page}&s=${g_server_index}${query}";
+  $next_url = "?q=${g_page}&s=${g_server_index}";
 
-  foreach ($_GET as $key => $value) {
+  $GET_array = get_filtered_GET();
+
+  foreach ($GET_array as $key => $value) {
     if (! preg_match("/^[sq]{1}$/", $key)) {
       $next_url .= "&${key}=${value}";
     }
   }
 
-  $g_next_url = str_replace('&', '&amp;', $next_url);
+  $g_next_url = $next_url;
+  $new_s = get_request_param("new_s");
+  $s = get_request_param("s");
 
-  if (isset($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
+  if ($new_s !== NULL && $new_s != $s) {
     header("Location: ${next_url}");
     return false;
   }
@@ -1318,14 +1322,25 @@ function require_professional($msg = "This feature requires Resin Professional a
   return true;
 }
 
-function get_param($current, $name, $default=null)
+function get_filtered_GET()
 {
-  if ($current)
-    return $current;
+  $array = filter_input_array(INPUT_GET, FILTER_SANITIZE_SPECIAL_CHARS);
+  
+  return $array;
+}
 
-  if ($_REQUEST[$name])
-    return $_REQUEST[$name];
-
+function get_request_param($name, $default = NULL)
+{
+  $value = filter_input(INPUT_GET, $name, FILTER_SANITIZE_SPECIAL_CHARS);
+  if ($value) {
+    return $value;
+  }
+  
+  $value = filter_input(INPUT_POST, $name, FILTER_SANITIZE_SPECIAL_CHARS);
+  if ($value) {
+    return $value;
+  }
+  
   return $default;
 }
 
