@@ -12,9 +12,20 @@
 
 <s2 title="4.0.39 snapshot">
 <ul>
-<li>resin: disable-soft command timeout error fix(#5656, rep by Sarah Gillespie)</li>
-<li>resin: shutdown-wait-max not propagating to ShutdownSystem fix(#5660, rep by Shinomiya Nobuaki)</li>
-<li>jsp: taglib defined listeners should be called before Filter's init()(#5659, rep by Mattias Jiderhamn)</li>
+<li>resin: disable-soft command timeout error fix (#5656, rep by Sarah Gillespie)</li>
+<li>resin: shutdown-wait-max not propagating to ShutdownSystem fix (#5660, rep by Shinomiya Nobuaki)</li>
+<li>resin-admin: cross-site scripting vulnerability in /resin-admin (#5669, rep by G. Krstic)</li>
+<li>jsp: taglib defined listeners should be called before Filter's init() (#5659, rep by Mattias Jiderhamn)</li>
+<li>quercus: SimpleXMLElement->xpath() does not work for relative queries (#5622, rep by G. Krall)</li>
+<li>quercus: SimpleXMLElement->children() returns null values (#5432, rep by ckir)</li>
+<li>quercus: DOMDocument->schemaValidate() not implemented (#5613, rep by G. Krall)</li>
+<li>quercus: empty() needs to call ArrayAccess->offsetExists() (#5620, rep by tssets)</li>
+<li>quercus: spl_object_hash() not implemented (#5623, rep by G. Krall)</li>
+<li>quercus: cannot execute multiple PDO statements on the same connection (#5625, rep by remaus)</li>
+<li>quercus: nowdoc does not work (#5626, rep by remaus)</li>
+<li>quercus: parent classes needs to call its version of private methods within its scope (#5631, rep by G. Krall)</li>
+<li>quercus: ReflectionParameter::getClass() returns null (#4863, rep by ds82)</li>
+<li>quercus: Parent keyword does not work inside a Trait (#5581, rep by tobia)</li>
 </ul>
 </s2>
 
