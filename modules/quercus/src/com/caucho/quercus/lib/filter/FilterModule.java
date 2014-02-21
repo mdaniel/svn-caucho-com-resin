@@ -33,6 +33,7 @@ import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -43,6 +44,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class FilterModule extends AbstractQuercusModule
 {
@@ -153,13 +155,66 @@ public class FilterModule extends AbstractQuercusModule
     return filter.filter(env, value, flagV);
   }
 
+  public Value filter_input_array(Env env,
+                                  int type,
+                                  @Optional Value definition,
+                                  @Optional("true") boolean isAddEmpty)
+  {
+    ArrayValue inputArray;
+
+    switch (type) {
+      case INPUT_POST:
+        inputArray = env.getInputPostArray();
+        break;
+      case INPUT_GET:
+        inputArray = env.getInputGetArray();
+        break;
+      case INPUT_COOKIE:
+        inputArray = env.getInputCookieArray();
+        break;
+      case INPUT_ENV:
+        inputArray = env.getInputEnvArray();
+        break;
+      default:
+        return env.warning(L.l("filter input type is unknown: {0}", type));
+    }
+
+    Filter filter = getFilter(env, definition);
+
+    ArrayValue array = new ArrayValueImpl();
+
+    for (Map.Entry<Value,Value> entry : inputArray.entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+
+      Value newKey = filter.filter(env, key, definition);
+      Value newValue = filter.filter(env, value, definition);
+
+      array.put(newKey, newValue);
+    }
+
+    return array;
+  }
+
   public static Filter getFilter(Env env, Value filterIdV)
   {
     int filterId;
 
+    int defaultFilterId = FILTER_UNSAFE_RAW;
+
     if (filterIdV.isDefault()) {
       // XXX: lookup in ini
-      filterId = FILTER_UNSAFE_RAW;
+      filterId = defaultFilterId;
+    }
+    else if (filterIdV.isArray()) {
+      Value value = filterIdV.get(env.createString("filter"));
+
+      if (value.isNull()) {
+        filterId = defaultFilterId;
+      }
+      else {
+        filterId = value.toInt();
+      }
     }
     else {
       filterId = filterIdV.toInt();
