@@ -31,7 +31,6 @@ package com.caucho.boot;
 
 import com.caucho.cloud.scaling.ResinScalingClient;
 import com.caucho.config.ConfigException;
-import com.caucho.network.listen.TcpPort;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
@@ -68,7 +67,7 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
     String portArg = args.getArg("-port");
 
     try {
-      if (portArg != null && !portArg.isEmpty())
+      if (portArg != null && ! portArg.isEmpty())
         port = Integer.parseInt(portArg);
     } catch (NumberFormatException e) {
       NumberFormatException e1 = new NumberFormatException(
@@ -79,7 +78,7 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
     }
 
     if (port == -1)
-      port = findPort(client);
+      port = client.getConfig().getPort();
 
     if (port == 0) {
       throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
@@ -105,16 +104,6 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
     } catch (Exception e) {
       throw new ConfigException(e.getMessage(), e);
     }
-  }
-
-  private int findPort(WatchdogClient client)
-  {
-    for (OpenPort openPort : client.getConfig().getPorts()) {
-      if ("http".equals(openPort.getProtocolName()))
-        return openPort.getPort();
-    }
-
-    return 0;
   }
 
   @Override
