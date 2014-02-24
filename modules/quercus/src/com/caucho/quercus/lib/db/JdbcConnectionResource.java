@@ -84,6 +84,8 @@ public abstract class JdbcConnectionResource
   protected int _flags;
   protected String _socket;
 
+  protected boolean _isEmulatePrepares;
+
   private String _catalog;
   private boolean _isCatalogOptimEnabled = false;
 
@@ -160,6 +162,11 @@ public abstract class JdbcConnectionResource
     return _url;
   }
 
+  public boolean isEmulatePrepares()
+  {
+    return _isEmulatePrepares;
+  }
+
   /**
    * Set the current underlying connection and
    * corresponding information: host, port and
@@ -179,7 +186,8 @@ public abstract class JdbcConnectionResource
                                           int flags,
                                           String driver,
                                           String url,
-                                          boolean isNewLink)
+                                          boolean isNewLink,
+                                          boolean isEmulatePrepares)
   {
     if (_conn != null) {
       throw new IllegalStateException(getClass().getSimpleName() + " attempt to open multiple connections");
@@ -193,6 +201,7 @@ public abstract class JdbcConnectionResource
     _flags = flags;
     _driver = driver;
     _url = url;
+    _isEmulatePrepares = isEmulatePrepares;
 
     if (dbname == null)
       dbname = "";
@@ -201,7 +210,7 @@ public abstract class JdbcConnectionResource
 
     _conn = connectImpl(env, host, userName, password,
                         dbname, port, socket, flags, driver, url,
-                        isNewLink);
+                        isNewLink, isEmulatePrepares);
 
     if (_conn != null) {
       try {
@@ -228,7 +237,8 @@ public abstract class JdbcConnectionResource
                                                  int flags,
                                                  String driver,
                                                  String url,
-                                                 boolean isNewLink);
+                                                 boolean isNewLink,
+                                                 boolean isEmulatePrepares);
 
   /**
    * Escape the given string for SQL statements.
@@ -990,7 +1000,7 @@ public abstract class JdbcConnectionResource
         conn.phpClose();
 
       connectInternal(env, _host, _userName, _password, name,
-                      _port, _socket, _flags, _driver, _url, false);
+                      _port, _socket, _flags, _driver, _url, false, _isEmulatePrepares);
     }
     else {
       _conn.setCatalog(name);

@@ -44,9 +44,10 @@ public class SQLite3 extends JdbcConnectionResource
     super(env);
 
     connectInternal(env, null, null, null, null, -1, null, 0,
-                    null, jdbcUrl, true);
+                    null, jdbcUrl, true, false);
   }
 
+  @Override
   protected ConnectionEntry connectImpl(Env env,
                                         String host,
                                         String userName,
@@ -57,7 +58,8 @@ public class SQLite3 extends JdbcConnectionResource
                                         int flags,
                                         String driver,
                                         String url,
-                                        boolean isNewLink)
+                                        boolean isNewLink,
+                                        boolean isEmulatePrepares)
   {
     try {
       if (driver == null) {

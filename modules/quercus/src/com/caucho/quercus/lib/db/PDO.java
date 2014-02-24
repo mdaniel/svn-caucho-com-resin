@@ -159,6 +159,8 @@ public class PDO implements EnvCleanup {
   private String _statementClassName;
   private Value[] _statementClassArgs;
 
+  private boolean _isEmulatePrepares;
+
   private int _columnCase = JdbcResultResource.COLUMN_CASE_NATURAL;
 
   public PDO(Env env,
@@ -691,7 +693,7 @@ public class PDO implements EnvCleanup {
       }
       case ATTR_EMULATE_PREPARES:
       {
-        return true;
+        return setEmulatePrepares(value.toBoolean());
       }
     }
 
@@ -820,6 +822,17 @@ public class PDO implements EnvCleanup {
     return true;
   }
 
+  private boolean setEmulatePrepares(boolean isEmulate)
+  {
+    if (_conn != null) {
+      return false;
+    }
+
+    _isEmulatePrepares = true;
+
+    return true;
+  }
+
   /**
    * Convert numeric values to strings when fetching.
    *
@@ -925,7 +938,7 @@ public class PDO implements EnvCleanup {
     boolean isNewLink = false;
 
     return new Mysqli(env, host, user, pass, dbName, port,
-                      socket, flags, driver, url, isNewLink);
+                      socket, flags, driver, url, isNewLink, _isEmulatePrepares);
   }
 
   /**

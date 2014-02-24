@@ -53,9 +53,10 @@ public class DataSourceConnection extends JdbcConnectionResource
     _conn = new ConnectionEntry(env);
     _conn.init(ds, user, pass);
 
-    connectInternal(env, null, user, pass, null, -1, null, 0, null, null, false);
+    connectInternal(env, null, user, pass, null, -1, null, 0, null, null, false, false);
   }
 
+  @Override
   protected ConnectionEntry connectImpl(Env env,
                                         String host,
                                         String userName,
@@ -66,7 +67,8 @@ public class DataSourceConnection extends JdbcConnectionResource
                                         int flags,
                                         String driver,
                                         String url,
-                                        boolean isNewLink)
+                                        boolean isNewLink,
+                                        boolean isEmulatePrepares)
   {
     try {
       _conn.connect(! isNewLink);

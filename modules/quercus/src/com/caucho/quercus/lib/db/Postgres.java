@@ -77,7 +77,7 @@ public class Postgres extends JdbcConnectionResource
     super(env);
 
     connectInternal(env, host, user, password, db, port, "", 0,
-                    driver, url, false);
+                    driver, url, false, false);
   }
 
   @Override
@@ -100,7 +100,8 @@ public class Postgres extends JdbcConnectionResource
                                         int flags,
                                         String driver,
                                         String url,
-                                        boolean isNewLink)
+                                        boolean isNewLink,
+                                        boolean isEmulatePrepares)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));

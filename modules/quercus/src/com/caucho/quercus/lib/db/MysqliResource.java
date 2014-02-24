@@ -74,9 +74,9 @@ public class MysqliResource extends Mysqli {
                  String url,
                  boolean isNewLink)
   {
-    super(env, 
+    super(env,
           host, user, password,
-          db, port, socket, flags, driver, url, isNewLink);
+          db, port, socket, flags, driver, url, isNewLink, false);
   }
 
   protected MysqliResource(Env env)
