@@ -824,13 +824,19 @@ public class PDO implements EnvCleanup {
 
   private boolean setEmulatePrepares(boolean isEmulate)
   {
-    if (_conn != null) {
+    if (! isEmulate) {
+      _isEmulatePrepares = false;
+
+      return true;
+    }
+    else if (_conn != null) {
       return false;
     }
+    else {
+      _isEmulatePrepares = true;
 
-    _isEmulatePrepares = true;
-
-    return true;
+      return true;
+    }
   }
 
   /**
