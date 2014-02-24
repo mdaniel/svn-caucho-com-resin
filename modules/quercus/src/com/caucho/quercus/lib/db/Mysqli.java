@@ -327,6 +327,13 @@ public class Mysqli extends JdbcConnectionResource
       }
     }
 
+    {
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+      urlBuilder.append(sep);
+      urlBuilder.append("useServerPrepStmts=true");
+    }
+
     //urlBuilder.append("&useInformationSchema=true");
 
     // required to get the result table name alias,
