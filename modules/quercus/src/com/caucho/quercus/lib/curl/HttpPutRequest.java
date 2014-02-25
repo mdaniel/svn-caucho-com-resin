@@ -29,7 +29,11 @@
 
 package com.caucho.quercus.lib.curl;
 
+import com.caucho.quercus.env.Callable;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.file.BinaryInput;
 
 import java.io.IOException;
@@ -53,11 +57,12 @@ public class HttpPutRequest
   protected boolean init(Env env)
     throws ProtocolException
   {
-    if (! super.init(env))
+    if (! super.init(env)) {
       return false;
-    
+    }
+
     getHttpConnection().setDoOutput(true);
-    
+
     return true;
   }
 
@@ -74,18 +79,51 @@ public class HttpPutRequest
 
     CurlResource curl = getCurlResource();
 
-    BinaryInput in = curl.getUploadFile();
-    int length = curl.getUploadFileSize();
+    try {
+      BinaryInput in = curl.getUploadFile();
+      long length = curl.getUploadFileSize();
 
-    for (int i = 0; i < length; i++) {
-      int ch = in.read();
+      long totalWritten = 0;
 
-      if (ch < 0)
-        break;
+      if (curl.getWriteCallback() != null) {
+        Callable callback = curl.getWriteCallback();
 
-      out.write(ch);
+        Value fileV = env.wrapJava(in);
+        LongValue lengthV = LongValue.create(length);
+
+        while (totalWritten < length) {
+          StringValue str
+            = callback.call(env, fileV, lengthV).toStringValue(env);
+
+          int count = str.length();
+
+          if (count == 0) {
+            break;
+          }
+
+          str.writeTo(out);
+
+          totalWritten += count;
+        }
+      }
+      else {
+        byte []buffer = new byte[1024 * 4];
+
+        while (totalWritten < length) {
+          int count = in.read(buffer, 0, buffer.length);
+
+          if (count < 0) {
+            break;
+          }
+
+          out.write(buffer, 0, count);
+
+          totalWritten += count;
+        }
+      }
     }
-
-    out.close();
+    finally {
+      out.close();
+    }
   }
 }

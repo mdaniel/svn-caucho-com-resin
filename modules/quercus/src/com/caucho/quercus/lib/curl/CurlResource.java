@@ -104,7 +104,7 @@ public class CurlResource extends ResourceValue
   private BinaryOutput _outputFile;
   private BinaryOutput _outputHeaderFile;
   private BinaryInput _uploadFile;
-  private int _uploadFileSize;
+  private long _uploadFileSize = -1;
 
   private Callable _headerCallback;
   private Callable _passwordCallback;
@@ -661,7 +661,7 @@ public class CurlResource extends ResourceValue
   /**
    * Returns size of file to upload.
    */
-  public int getUploadFileSize()
+  public long getUploadFileSize()
   {
     return _uploadFileSize;
   }
@@ -669,7 +669,7 @@ public class CurlResource extends ResourceValue
   /**
    * Sets size of file to upload.
    */
-  public void setUploadFileSize(int size)
+  public void setUploadFileSize(long size)
   {
     _uploadFileSize = size;
   }
@@ -704,6 +704,11 @@ public class CurlResource extends ResourceValue
   public void setUsername(String user)
   {
     _username = user;
+  }
+
+  public Callable getWriteCallback()
+  {
+    return _writeCallback;
   }
 
   /**
@@ -932,7 +937,8 @@ public class CurlResource extends ResourceValue
 
 
   @Override
-  public boolean isResource() {
-      return true;
+  public boolean isResource()
+  {
+    return true;
   }
 }

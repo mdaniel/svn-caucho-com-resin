@@ -376,13 +376,19 @@ public class QuercusServlet
    */
   public void setLicenseDirectory(String relPath)
   {
+    String dir;
+
     if (relPath.startsWith("/") || relPath.contains(":")) {
+      dir = relPath;
     }
     else {
-      relPath = getServletContext().getRealPath(relPath);
+      // Undertow returns null for files that dont exist
+      dir = getServletContext().getRealPath(relPath);
     }
 
-    _licenseDirectory = new File(relPath);
+    if (dir != null) {
+      _licenseDirectory = new File(dir);
+    }
   }
 
   /**
@@ -522,7 +528,7 @@ public class QuercusServlet
     }
 
     if (_iniPath != null) {
-      Path path;
+      Path path = null;
 
       if (_iniPath.startsWith("/") || _iniPath.contains(":")) {
         // php/2026
@@ -531,14 +537,21 @@ public class QuercusServlet
       else {
         String realPath = getServletContext().getRealPath(_iniPath);
 
-        path = getQuercus().getPwd().lookup(realPath);
+        if (realPath != null) {
+          path = getQuercus().getPwd().lookup(realPath);
+        }
       }
 
-      quercus.setIniFile(path);
+      if (path != null) {
+        quercus.setIniFile(path);
+      }
     }
     else {
       String realPath = getServletContext().getRealPath("WEB-INF/php.ini");
-      quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
+
+      if (realPath != null) {
+        quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
+      }
     }
 
     if (_scriptEncoding != null)

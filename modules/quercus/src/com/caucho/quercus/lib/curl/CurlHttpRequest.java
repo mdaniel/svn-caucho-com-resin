@@ -444,8 +444,8 @@ public class CurlHttpRequest
       throw new QuercusModuleException(e);
     }
 
-    if (_curl.getReadCallback() != null) {
-      Value len = _curl.getReadCallback().call(env, env.wrapJava(_curl), bb);
+    if (_curl.getWriteCallback() != null) {
+      Value len = _curl.getWriteCallback().call(env, env.wrapJava(_curl), bb);
 
       if (len.toInt() != bb.length()) {
         _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
