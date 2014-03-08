@@ -2168,12 +2168,7 @@ public class WebApp extends ServletContextImpl
       if (start) {
         ServletContextEvent event = new ServletContextEvent(this);
 
-        try {
-          scListener.contextInitialized(event);
-        } catch (Exception e) {
-          e.printStackTrace();
-          log.log(Level.FINE, e.toString(), e);
-        }
+        scListener.contextInitialized(event);
       }
     }
 
@@ -3776,11 +3771,7 @@ public class WebApp extends ServletContextImpl
     for (int i = 0; i < _webAppListeners.size(); i++) {
       ServletContextListener listener = _webAppListeners.get(i);
 
-      try {
-        listener.contextInitialized(event);
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
+      listener.contextInitialized(event);
     }
   }
 
