@@ -45,7 +45,6 @@ import com.caucho.util.Hex;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
-import com.sun.tools.javac.resources.version;
 
 /**
  * An entry in the cache map
