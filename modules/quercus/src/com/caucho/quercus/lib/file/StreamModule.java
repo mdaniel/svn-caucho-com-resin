@@ -46,6 +46,8 @@ import com.caucho.quercus.lib.file.SocketInputOutput.Domain;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.L10N;
+import com.caucho.vfs.FilePath;
+import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
@@ -385,6 +387,21 @@ public class StreamModule extends AbstractQuercusModule {
     array.append(env.createString("ftp"));
 
     return array;
+  }
+
+  /**
+   * bool stream_is_local ( mixed $stream_or_url )
+   */
+  public static boolean stream_is_local(Env env, Value stream)
+  {
+    if (stream.isString()) {
+      Path path = env.lookupPwd(stream);
+
+      return (path instanceof FilePath) || (path instanceof MemoryPath);
+    }
+    else {
+      return false;
+    }
   }
 
   public static boolean stream_register_wrapper(Env env,

@@ -546,17 +546,52 @@ public class CurlModule
   }
 
   /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   * @param curls
-   * @param curl
+   *  int curl_multi_add_handle ( resource $mh , resource $ch )
    */
-  public static LongValue curl_multi_add_handle(Env env,
-                                                Value curls,
-                                                Value curl)
+  public static int curl_multi_add_handle(Env env,
+                                          CurlMultiResource multi,
+                                          CurlResource curl)
   {
-    throw new UnimplementedException("curl_multi_add_handle");
+    multi.addCurl(curl);
+
+    return 0;
+  }
+
+  /**
+   * void curl_multi_close ( resource $mh )
+   */
+  public static void curl_multi_close(Env env,
+                                      CurlMultiResource multi)
+  {
+    for (CurlResource curl : multi.getCurlList()) {
+      curl_close(env, curl);
+    }
+  }
+
+  /**
+   * int curl_multi_exec ( resource $mh , int &$still_running )
+   */
+  public static int curl_multi_exec(Env env,
+                                    CurlMultiResource multi,
+                                    @Reference Value stillRunning)
+  {
+    return multi.execute(env, stillRunning);
+  }
+
+  /**
+   * string curl_multi_getcontent ( resource $ch )
+   */
+  public static Value curl_multi_getcontent(Env env,
+                                            CurlResource curl)
+  {
+    StringValue data = curl.getReturnTransfer();
+
+    if (data != null) {
+      return data;
+    }
+    else {
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -565,86 +600,41 @@ public class CurlModule
    * @param env
    * @param curls
    */
-  public static LongValue curl_multi_close(Env env,
-                                           Value curls)
+  public static Value curl_multi_info_read(Env env,
+                                           CurlMultiResource multi,
+                                           @Optional @Reference Value msgsInQueue)
   {
-    throw new UnimplementedException("curl_multi_close");
+    return multi.readInfo(env, msgsInQueue);
   }
 
   /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   * @param curls
-   * @param stillRunning
+   * resource curl_multi_init ( void )
    */
-  public static LongValue curl_multi_exec(Env env,
-                                          Value curls,
-                                          @Reference Value stillRunning)
+  public static CurlMultiResource curl_multi_init(Env env)
   {
-    throw new UnimplementedException("curl_multi_exec");
+    return new CurlMultiResource();
   }
 
   /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   * @param curl
+   * int curl_multi_remove_handle ( resource $mh , resource $ch )
    */
-  public static StringValue curl_multi_getcontent(Env env,
-                                                  Value curl)
+  public static int curl_multi_remove_handle(Env env,
+                                             CurlMultiResource multi,
+                                             CurlResource curl)
   {
-    throw new UnimplementedException("curl_multi_getcontent");
+    multi.removeCurl(curl);
+
+    return 0;
   }
 
   /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   * @param curls
+   * int curl_multi_select ( resource $mh [, float $timeout = 1.0 ] )
    */
-  public static ArrayValue curl_multi_info_read(Env env,
-                                                Value curls)
+  public static int curl_multi_select(Env env,
+                                      CurlMultiResource multi,
+                                      @Optional Value timeout)
   {
-    throw new UnimplementedException("curl_multi_info_read");
-  }
-
-  /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   */
-  public static Value curl_multi_init(Env env)
-  {
-    throw new UnimplementedException("curl_multi_init");
-  }
-
-  /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   * @param curls
-   * @param curl
-   */
-  public static LongValue curl_multi_remove_handle(Env env,
-                                                   Value curls,
-                                                   Value curl)
-  {
-    throw new UnimplementedException("curl_multi_remove_handle");
-  }
-
-  /**
-   * XXX: not documented by PHP
-   *
-   * @param env
-   * @param curls
-   * @param timeout
-   */
-  public static LongValue curl_multi_select(Env env,
-                                            Value curls,
-                                            @Optional Value timeout)
-  {
-    throw new UnimplementedException("curl_multi_select");
+    return 0;
   }
 
   /**

@@ -214,8 +214,9 @@ public class CurlHttpRequest
     try {
       create(env);
 
-      if (! init(env))
+      if (! init(env)) {
         return false;
+      }
 
       connect(env);
 

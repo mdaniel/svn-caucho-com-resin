@@ -302,13 +302,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param env the PHP executing environment
    */
-  public static Value clearstatcache(Env env)
+  public static void clearstatcache(Env env,
+                                    @Optional boolean clearRealPathCache,
+                                    @Optional String fileName)
   {
-    // quercus/160l
-
-    // XXX: stubbed
-
-    return NullValue.NULL;
+    // stubbed
   }
 
   /**

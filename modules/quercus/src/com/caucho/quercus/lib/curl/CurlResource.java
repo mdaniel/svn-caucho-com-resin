@@ -95,6 +95,8 @@ public class CurlResource extends ResourceValue
   private StringValue _body;
   private Value _postBody;
 
+  private StringValue _returnTransfer;
+
   private String _contentType;
   private int _contentLength;
 
@@ -764,14 +766,16 @@ public class CurlResource extends ResourceValue
 
     env.addCleanup(httpRequest);
 
-    if (! httpRequest.execute(env))
+    if (! httpRequest.execute(env)) {
       return BooleanValue.FALSE;
+    }
 
     //if (hasError())
       //return BooleanValue.FALSE;
 
-    if (_cookie != null && _cookieFilename != null)
+    if (_cookie != null && _cookieFilename != null) {
       saveCookie(env);
+    }
 
     return getReturnValue(env);
   }
@@ -819,6 +823,8 @@ public class CurlResource extends ResourceValue
     }
 
     if (_isReturningData) {
+      _returnTransfer = data;
+
       return data;
     }
     else {
@@ -826,6 +832,14 @@ public class CurlResource extends ResourceValue
 
       return BooleanValue.TRUE;
     }
+  }
+
+  /**
+   * Returns the value for the CURLOPT_RETURNTRANSFER option.
+   */
+  public StringValue getReturnTransfer()
+  {
+    return _returnTransfer;
   }
 
   /**
@@ -932,7 +946,7 @@ public class CurlResource extends ResourceValue
 
   public String toString()
   {
-    return "CurlResource[" + _requestMethod + "]";
+    return "CurlResource[" + _requestMethod + " " + _URL + "]";
   }
 
 

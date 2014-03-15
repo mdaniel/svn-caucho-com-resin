@@ -1235,7 +1235,7 @@ public class MiscModule extends AbstractQuercusModule {
         i++;
       }
       else {
-        env.warning("a: not enough arguments");
+        env.warning(L.l("a: not enough arguments"));
 
         return i;
       }
@@ -1318,7 +1318,7 @@ public class MiscModule extends AbstractQuercusModule {
         i++;
       }
       else {
-        env.warning("a: not enough arguments");
+        env.warning(L.l("a: not enough arguments"));
 
         return i;
       }
@@ -1392,7 +1392,7 @@ public class MiscModule extends AbstractQuercusModule {
         i++;
       }
       else {
-        env.warning("a: not enough arguments");
+        env.warning(L.l("a: not enough arguments"));
 
         return i;
       }
@@ -1404,7 +1404,7 @@ public class MiscModule extends AbstractQuercusModule {
       if (_length == Integer.MAX_VALUE) {
       }
       else if (strlen < _length) {
-        env.warning("not enough characters in hex string");
+        env.warning(L.l("not enough characters in hex string"));
 
         return i;
       }
