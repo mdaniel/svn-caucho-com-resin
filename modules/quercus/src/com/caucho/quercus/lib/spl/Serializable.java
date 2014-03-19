@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 public interface Serializable
 {
-  public Value serialize();
-  
-  public Value unserialize(Value serialized);
+  public Value serialize(Env env);
+
+  public void unserialize(Env env, StringValue serialized);
 }

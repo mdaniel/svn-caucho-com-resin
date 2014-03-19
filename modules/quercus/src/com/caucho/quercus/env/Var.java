@@ -135,7 +135,16 @@ public class Var extends Value
     return _value.getType();
   }
 
-  /*
+  /**
+   * Returns the SPL object hash.
+   */
+  @Override
+  public StringValue getObjectHash(Env env)
+  {
+    return _value.getObjectHash(env);
+  }
+
+  /**
    * Returns the type of the resource.
    */
   @Override

@@ -1375,7 +1375,15 @@ abstract public class Value implements java.io.Serializable
     return "value";
   }
 
-  /*
+  /**
+   * Returns the SPL object hash.
+   */
+  public StringValue getObjectHash(Env env)
+  {
+    return env.getEmptyString();
+  }
+
+  /**
    * Returns the resource type.
    */
   public String getResourceType()

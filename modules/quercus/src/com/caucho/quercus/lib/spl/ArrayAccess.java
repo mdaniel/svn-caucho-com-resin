@@ -29,16 +29,18 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.annotation.Delegates;
 
 @Delegates(ArrayAccessDelegate.class)
-public interface ArrayAccess {
-  public boolean offsetExists(Value offset);
+public interface ArrayAccess
+{
+  public boolean offsetExists(Env env, Value offset);
 
-  public Value offsetSet(Value offset, Value value);
+  public Value offsetSet(Env env, Value offset, Value value);
 
-  public Value offsetGet(Value offset);
+  public Value offsetGet(Env env, Value offset);
 
-  public Value offsetUnset(Value offset);
+  public Value offsetUnset(Env env, Value offset);
 }

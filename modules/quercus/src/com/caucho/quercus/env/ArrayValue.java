@@ -1344,7 +1344,7 @@ abstract public class ArrayValue extends Value {
     }
   }
 
-  /*
+  /**
    * Serializes the value.
    *
    * @param sb holds result of serialization

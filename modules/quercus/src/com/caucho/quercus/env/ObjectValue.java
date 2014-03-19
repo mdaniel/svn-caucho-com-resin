@@ -186,6 +186,7 @@ abstract public class ObjectValue extends Callback {
   /**
    * Returns the unique object hash.
    */
+  @Override
   public StringValue getObjectHash(Env env)
   {
     StringValue sb = env.createStringBuilder();
