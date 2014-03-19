@@ -481,12 +481,10 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     */
 
     if ("before-headers".equals(mode)) {
-      _sessionSaveMode = (SAVE_BEFORE_HEADERS
-                          | SAVE_ON_SHUTDOWN);
+      _sessionSaveMode = (SAVE_BEFORE_HEADERS);
     }
     else if ("after-request".equals(mode)) {
-      _sessionSaveMode = (SAVE_AFTER_REQUEST
-                          | SAVE_ON_SHUTDOWN);
+      _sessionSaveMode = (SAVE_AFTER_REQUEST);
     }
     else if ("on-shutdown".equals(mode)) {
       _sessionSaveMode = (SAVE_ON_SHUTDOWN);

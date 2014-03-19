@@ -12,6 +12,7 @@
 
 <s2 title="4.0.39 snapshot">
 <ul>
+<li>session: session-mode=before-header was disabling reloading on secondary servers (#5639, rep by Thomas Rogan)</li>
 <li>resin: disable-soft command timeout error fix (#5656, rep by Sarah Gillespie)</li>
 <li>resin: shutdown-wait-max not propagating to ShutdownSystem fix (#5660, rep by Shinomiya Nobuaki)</li>
 <li>resin-admin: cross-site scripting vulnerability in /resin-admin (#5669, rep by G. Krstic)</li>

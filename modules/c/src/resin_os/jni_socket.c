@@ -1600,17 +1600,17 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
   jboolean value;
 
   if (! ss || ! conn || ! env || ! obj) {
-    return -1;
+    return 0;
   }
 
   if (conn->fd >= 0) {
     resin_throw_exception(env, "java/lang/IllegalStateException",
                           "unclosed socket in accept");
-    return -1;
+    return 0;
   }
 
   if (! ss->accept(ss, conn)) {
-    return -1;
+    return 0;
   }
 
   conn->ss = ss;

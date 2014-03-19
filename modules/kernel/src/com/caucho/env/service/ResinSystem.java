@@ -596,7 +596,7 @@ public class ResinSystem
           }
           
           service.stop();
-        } catch (Exception e) {
+        } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);
         }
       }
@@ -671,6 +671,12 @@ public class ResinSystem
     public int getStartPriority()
     {
       return START_PRIORITY_CLASSLOADER;
+    }
+    
+    @Override
+    public int getStopPriority()
+    {
+      return STOP_PRIORITY_CLASSLOADER;
     }
     
     @Override

@@ -854,8 +854,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public final void saveBeforeHeaders()
   {
-    if (_manager == null || ! _manager.isSaveBeforeHeaders())
+    if (_manager == null || ! _manager.isSaveBeforeHeaders()) {
       return;
+    }
 
     save();
   }
@@ -865,8 +866,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public final void saveAfterRequest()
   {
-    if (_manager == null || ! _manager.isSaveAfterRequest())
+    if (_manager == null || ! _manager.isSaveAfterRequest()) {
       return;
+    }
 
     save();
   }
@@ -880,11 +882,13 @@ public class SessionImpl implements HttpSession, CacheListener {
       return;
 
     try {
-      if (! _isModified && ! _manager.getAlwaysSaveSession())
+      if (! _isModified && ! _manager.getAlwaysSaveSession()) {
         return;
+      }
 
-      if (! _manager.isPersistenceEnabled())
+      if (! _manager.isPersistenceEnabled()) {
         return;
+      }
 
       _isModified = false;
 

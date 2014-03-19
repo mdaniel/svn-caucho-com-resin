@@ -49,6 +49,8 @@ public interface ResinSubSystem
   public static final int START_PRIORITY_CLUSTER_SERVICE = 50;
   
   public static final int START_PRIORITY_CLASSLOADER = 70;
+  public static final int STOP_PRIORITY_CLASSLOADER = 10;
+  
   public static final int START_PRIORITY_DEFAULT = 80;
 
   /**

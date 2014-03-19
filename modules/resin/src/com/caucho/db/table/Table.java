@@ -473,8 +473,7 @@ public class Table extends BlockStore {
 
       long shutdownTimestamp
         = BitsUtil.readLong(buffer, SHUTDOWN_TIMESTAMP_OFFSET);
-
-
+      
       return startupTimestamp == shutdownTimestamp && startupTimestamp != 0;
     } finally {
       metaBlock.free();
@@ -1175,6 +1174,10 @@ public class Table extends BlockStore {
   @Override
   public void close()
   {
+    if (! _lifecycle.toDestroy()) {
+      return;
+    }
+    
     try {
       if (fsync()) {
         writeShutdownTimestamp();

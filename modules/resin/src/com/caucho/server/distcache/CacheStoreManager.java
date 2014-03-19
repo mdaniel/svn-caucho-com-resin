@@ -448,8 +448,9 @@ public final class CacheStoreManager implements CacheEntryFactory
   {
     _isClosed = true;
 
-    if (getDataBacking() != null)
+    if (getDataBacking() != null) {
       getDataBacking().close();
+    }
   }
   
   public boolean isClosed()

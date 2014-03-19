@@ -73,7 +73,7 @@ public class DataStore {
   // remove unused data after 15 minutes
   // server/60i0
   // private long _expireTimeout = 60 * 60L * 1000L;
-  // private long _expireTimeout = 60 * 60L * 1000L;
+  private long _expireTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -152,7 +152,7 @@ public class DataStore {
     _alarm = new Alarm(new DeleteAlarm());
     // _alarm.queue(_expireTimeout);
 
-    _alarm.queue(0);
+    //_alarm.queue(0);
   }
 
   /**
@@ -638,7 +638,11 @@ public class DataStore {
     public void handleAlarm(Alarm alarm)
     {
       if (_dataSource != null) {
-        deleteOrphans();
+        try {
+          deleteOrphans();
+        } finally {
+          _alarm.queue(_expireTimeout);
+        }
       }
     }
 

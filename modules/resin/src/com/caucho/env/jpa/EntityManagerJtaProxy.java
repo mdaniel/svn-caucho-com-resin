@@ -105,8 +105,9 @@ public class EntityManagerJtaProxy
   {
     EntityManager em = getCurrent();
     
-    if (em != null)
+    if (em != null) {
       return em.getEntityManagerFactory();
+    }
     
     em = createEntityManager();
     

@@ -72,6 +72,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private long _createReaperCount;
 
   private Alarm _reaperAlarm = new Alarm(new ReaperListener());
+
+  private DataSourceImpl _dataSource;
+  
   private long _reaperTimeout = 5 * 60 * 1000;
 
   private long _reaperCycleMaxActiveDurationMs = 1 * 1000;
@@ -155,7 +158,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                      MnodeEntry oldEntryValue)
   {
     // MnodeUpdate mnodeUpdate = new MnodeUpdate(mnodeValue);
-
+    MnodeEntry entry = null;
+    boolean isSave = false;
+    
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeEntry.NULL) {
@@ -163,12 +168,12 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                              mnodeUpdate.getValueDataId(),
                              mnodeUpdate.getLastAccessedTime(),
                              mnodeUpdate.getLastModifiedTime())) {
-        return mnodeUpdate;
+        entry = mnodeUpdate;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
                  + "(key=" + key + ")");
 
-        return oldEntryValue;
+        entry = oldEntryValue;
       }
     } else {
       if (_mnodeStore.updateSave(key.getHash(),
@@ -177,21 +182,34 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                  mnodeUpdate.getValueDataId(),
                                  mnodeUpdate.getLastAccessedTime(),
                                  mnodeUpdate.getLastModifiedTime())) {
-        return mnodeUpdate;
+        isSave = true;
+        entry = mnodeUpdate;
       }
       else if (_mnodeStore.insert(key, cacheKey, mnodeUpdate,
                                   mnodeUpdate.getValueDataId(),
                                   mnodeUpdate.getLastAccessedTime(),
                                   mnodeUpdate.getLastModifiedTime())) {
-        return mnodeUpdate;
+        isSave = true;
+        entry = mnodeUpdate;
       }
       else {
         log.fine(this + " db update failed due to timing conflict"
                  + "(key=" + key + ")");
 
-        return oldEntryValue;
+        entry = oldEntryValue;
       }
     }
+    
+    if (isSave && oldEntryValue != null) {
+      long oldDataId = oldEntryValue.getValueDataId();
+
+      // XXX: create delete queue?
+      if (oldDataId > 0 && mnodeUpdate.getValueDataId() != oldDataId) {
+        removeData(oldDataId);
+      }
+    }
+    
+    return entry;
   }
 
   @Override
@@ -392,7 +410,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       if (serverId.isEmpty())
         serverId = "default";
 
-      DataSource dataSource = createDataSource(dataDirectory, serverId);
+      _dataSource = createDataSource(dataDirectory, serverId);
 
       Path mnodeDb = dataDirectory.lookup(serverId).lookup("mnode.db");
       Path dataDb = dataDirectory.lookup(serverId).lookup("data.db");
@@ -417,7 +435,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       }
 
       String tableName = "mnode";
-      _mnodeStore = new MnodeStore(dataSource, tableName, serverId);
+      _mnodeStore = new MnodeStore(_dataSource, tableName, serverId);
       _mnodeStore.init();
 
       _dataStore = new DataStore(serverId, _mnodeStore);
@@ -433,7 +451,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     _reaperAlarm.queue(0);
   }
 
-  private DataSource createDataSource(Path dataDirectory, String serverId)
+  private DataSourceImpl createDataSource(Path dataDirectory, String serverId)
   {
     Path path = dataDirectory.lookup("distcache");
 
@@ -503,14 +521,24 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     DataRemoveActor removeActor = _removeActor;
     _removeActor = null;
 
-    if (removeActor != null)
+    DataSourceImpl dataSource = _dataSource;
+    _dataSource = null;
+    
+    if (removeActor != null) {
       removeActor.close();
-
-    if (mnodeStore != null)
+    }
+    
+    if (mnodeStore != null) {
       mnodeStore.close();
+    }
 
-    if (dataStore != null)
+    if (dataStore != null) {
       dataStore.destroy();
+    }
+    
+    if (dataSource != null) {
+      dataSource.close();
+    }
   }
 
   class ReaperListener implements AlarmListener {
