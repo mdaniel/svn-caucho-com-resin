@@ -27,6 +27,21 @@
 <li>quercus: parent classes needs to call its version of private methods within its scope (#5631, rep by G. Krall)</li>
 <li>quercus: ReflectionParameter::getClass() returns null (#4863, rep by ds82)</li>
 <li>quercus: Parent keyword does not work inside a Trait (#5581, rep by tobia)</li>
+<li>quercus: class_alias() is not implemented (#5443, rep by jsnoriegam)</li>
+<li>quercus: quercus namespace issue in compiled mode (#5640, rep by R. Emaus)</li>
+<li>quercus: simplexml children()->foo does not work for nodes with only text (#5655, rep by G. Krall)</li>
+<li>quercus: rename META-INF/services/* so JBoss doesn't parse them (#5654, rep by G. Krall)</li>
+<li>quercus: JsonSerializable class not implemented (#5504)</li>
+<li>quercus: add FILTER_SANITIZE_STRIPPED as an alias of FILTER_SANITIZE_STRING (#5663, rep by M. McHugh)</li>
+<li>quercus: implement filter_input(FILTER_UNSAFE_RAW) for phpMyFaq (#5661, rep by M. McHugh)</li>
+<li>quercus: implement FILTER_SANITIZE_SPECIAL_CHARS (#5665, rep by M. McHugh)</li>
+<li>quercus: force the java Mysql driver to use prepared statements (#5671, rep by R. Emaus)</li>
+<li>quercus: quercus cannot start on Wildfly (#5674, rep by G. Krall)</li>
+<li>quercus: unpack("H*") returns nothing (#5676, rep by M. Dykman)</li>
+<li>quercus: clearstatcache() has 2 optional arguments (#5687, rep by G. Krall)</li>
+<li>quercus: stream_is_local() is not implemented (#5685, rep by G. Krall)</li>
+<li>quercus: curl_multi_init() suite of functions not implemented (#3516, rep by koreth)</li>
+<li>quercus: SplObjectStorage class not implemented (#5696, rep by G. Krall)</li>
 </ul>
 </s2>
 
