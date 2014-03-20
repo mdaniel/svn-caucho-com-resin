@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.caucho.quercus.annotation.Optional;
@@ -249,6 +248,24 @@ public class SplObjectStorage
   public StringValue getHash(Env env, Value obj)
   {
     return obj.getObjectHash(env);
+  }
+
+  public Value getInfo()
+  {
+    if (_current == null) {
+      return NullValue.NULL;
+    }
+
+    return _current.getValue();
+  }
+
+  public void setInfo(Value value)
+  {
+    if (_current == null) {
+      return;
+    }
+
+    _current.setValue(value);
   }
 
   public void removeAll(Env env, SplObjectStorage storage)
