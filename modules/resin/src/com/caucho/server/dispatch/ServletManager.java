@@ -29,21 +29,22 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.ConfigException;
-import com.caucho.jsp.JspServlet;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletSecurityElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.FilterChain;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletSecurityElement;
+
+import com.caucho.config.ConfigException;
+import com.caucho.jsp.JspServlet;
+import com.caucho.util.L10N;
 
 /**
  * Manages the servlets.
@@ -190,8 +191,15 @@ public class ServletManager {
       = _servlets.values();
 
     for (ServletConfigImpl servlet : servlets) {
-      Class servletClass = servlet.getServletClass();
-
+      Class<?> servletClass = null;
+      
+      try {
+        servletClass = servlet.getServletClass();
+      } catch (Throwable e) {
+        // throwable needed to ignore link errors.
+        log.log(Level.FINEST, e.toString(), e);
+      }
+      
       if (servletClass == null) {
       }
       else if (JspServlet.class.isAssignableFrom(servletClass)) {

@@ -1111,7 +1111,6 @@ public class WebAppContainer
   {
     if (_appDeploy.isModified()) {
       _appDeploy.logModified(log);
-      System.out.println("DEP_MODE: " + _appDeploy);
       
       _uriToAppCache.clear();
     }

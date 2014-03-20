@@ -549,7 +549,9 @@ class PdfCanvas
   
   public function setFontAndColor($font_name, $font_size, $color_name)
   {
-    $this->setFont($font_name, $font_size);
+    if ($font_name) {
+      $this->setFont($font_name, $font_size);
+    }
     $this->setColor($color_name);
   } 
    

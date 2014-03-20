@@ -30,6 +30,20 @@ $g_pdf_warnings = Array();
 $g_report = get_param($g_report, "report", "Snapshot");
 $g_title = get_param($g_title, "title", $g_report);
 
+function get_param($value, $name, $default_value)
+{
+  if ($value) {
+    return $value;
+  }
+
+  if ($_REQUEST[$name]) {
+    return $_REQUEST[$name];
+  }
+  else {
+    return $default_value;
+  }
+}  
+
 if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   $snapshot = $g_mbean_server->lookup("resin:type=SnapshotService");
 

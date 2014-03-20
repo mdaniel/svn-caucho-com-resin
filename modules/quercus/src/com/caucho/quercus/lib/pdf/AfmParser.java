@@ -63,16 +63,18 @@ public class AfmParser {
     mergePath.addClassPath();
 
     File webInfLibFile = new File(webInfLibPath);
-    if(webInfLibPath != null && !webInfLibPath.isEmpty() && webInfLibFile.isDirectory())
-    {
+    if (webInfLibPath != null 
+        && ! webInfLibPath.isEmpty() 
+        && webInfLibFile.isDirectory()) {
       Path webInfPath = Vfs.lookup(webInfLibFile.getAbsolutePath());
-      for( File f : webInfLibFile.listFiles())
-      {
+      
+      for (File f : webInfLibFile.listFiles()) {
         /*
         only look for files that are either jars or zips
          */
-        if(f.isFile() && (f.getAbsolutePath().endsWith(".jar") || f.getAbsolutePath().endsWith(".zip")))
-        {
+        if (f.isFile()
+            && (f.getAbsolutePath().endsWith(".jar") 
+                || f.getAbsolutePath().endsWith(".zip"))) {
           /*
           get a path object with the Jar relative to WEB-INF/lib
            */
@@ -85,11 +87,16 @@ public class AfmParser {
         }
       }
     }
-
+    
     Path path = mergePath.lookup("com/caucho/quercus/lib/pdf/font/" + name + ".afm");
 
-    if (! path.canRead())
-      throw new FileNotFoundException(L.l("Can't find font {0}", name));
+    if (! path.canRead()) {
+      if ("".equals(name)) {
+        throw new IllegalArgumentException(L.l("Missing font name"));
+      }
+
+      throw new FileNotFoundException(L.l("Can't find font '{0}'", name));
+    }
 
     _is = path.openRead();
 
