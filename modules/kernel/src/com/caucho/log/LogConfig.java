@@ -256,7 +256,7 @@ public class LogConfig extends RotateLog {
     throws ConfigException, java.io.IOException
   {
     _isInit = true;
-
+    
     if (_handlers == null)
       super.init();
     

@@ -112,10 +112,13 @@ abstract public class AbstractJavaCompiler implements Runnable {
       compileInt(_path, _lineMap);
     } catch (final Throwable e) {
       // env/0203 vs env/0206
-      if (e instanceof DisplayableException)
-        log.warning(e.getMessage());
-      else
-        log.warning(e.toString());
+      if (e instanceof DisplayableException) {
+        log.fine(e.getMessage());
+      }
+      else {
+        log.fine(e.toString());
+      }
+      log.log(Level.FINEST, e.toString(), e);
       
       _exception = e;
     } finally {
