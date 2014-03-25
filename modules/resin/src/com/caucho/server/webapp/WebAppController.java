@@ -193,32 +193,19 @@ public class WebAppController
    */
   public String getContextPath(String uri)
   {
-    if (getConfig() == null || getConfig().getURLRegexp() == null) {
+    System.out.println("GCP: " + uri + " " + getConfig() + " " + getConfig().getURLRegexp());
+    if (getConfig() == null) {
       return getContextPath();
     }
 
-    Pattern regexp = getConfig().getURLRegexp();
-    Matcher matcher = regexp.matcher(uri);
-
-    int tail = 0;
-    while (tail >= 0 && tail <= uri.length()) {
-      String prefix = uri.substring(0, tail);
-
-      matcher.reset(prefix);
-
-      if (matcher.find() && matcher.start() == 0)
-        return matcher.group();
-
-      if (tail < uri.length()) {
-        tail = uri.indexOf('/', tail + 1);
-        if (tail < 0)
-          tail = uri.length();
-      }
-      else
-        break;
+    String contextPath = getConfig().getContextPath(uri);
+    
+    if (contextPath != null) {
+      return contextPath;
     }
-
-    return _contextPath;
+    else {
+      return _contextPath;
+    }
   }
 
   /**

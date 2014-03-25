@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -117,7 +118,7 @@ public class WebAppConfig extends DeployConfig {
   {
     return _urlRegexp;
   }
-
+  
   /**
    * Sets the url-regexp
    */
@@ -199,6 +200,61 @@ public class WebAppConfig extends DeployConfig {
     return _prologue;
   }
 
+  /**
+   * Returns the context path for a URI, including regexp processing.
+   */
+  public String getContextPath(String uri)
+  {
+    Pattern regexp = getURLRegexp();
+    
+    String contextPath = getContextPath(regexp, uri);
+    
+    if (contextPath != null) {
+      return contextPath;
+    }
+    
+    for (Pattern pattern : _aliasUrlRegexpList) {
+      contextPath = getContextPath(pattern, uri);
+
+      if (contextPath != null) {
+        return contextPath;
+      }
+    }
+    
+    return null;
+  }
+  
+  private String getContextPath(Pattern regexp, String uri)
+  {
+    if (regexp == null) {
+      return null;
+    }
+    
+    Matcher matcher = regexp.matcher(uri);
+
+    int tail = 0;
+    while (tail >= 0 && tail <= uri.length()) {
+      String prefix = uri.substring(0, tail);
+
+      matcher.reset(prefix);
+
+      if (matcher.find() && matcher.start() == 0) {
+        return uri.substring(0, matcher.end());
+      }
+
+      if (tail < uri.length()) {
+        tail = uri.indexOf('/', tail + 1);
+        if (tail < 0) {
+          tail = uri.length();
+        }
+      }
+      else
+        break;
+    }
+    
+    return null;
+  }
+  
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _contextPath + "]";

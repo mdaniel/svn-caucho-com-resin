@@ -1045,22 +1045,24 @@ public class WebAppContainer
    */
   protected WebAppController getWebAppController(Invocation invocation)
   {
+    String invocationURI = invocation.getURI();
+    
     WebAppUriMap entry = findEntryByURI(invocation.getURI());
 
-    if (entry == null)
+    if (entry == null) {
       return null;
-
-    String invocationURI = invocation.getURI();
+    }
 
     // server/1hb1
-    // String contextPath = controller.getContextPath(invocationURI);
-    String contextPath = entry.getContextPath();
+    WebAppController controller = entry.getController();
+    String contextPath = controller.getContextPath(invocationURI);
+    // String contextPath = entry.getContextPath();
 
-    // invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
-    invocation.setContextPath(contextPath);
+    invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
+    // invocation.setContextPath(contextPath);
 
-    String uri = invocationURI.substring(contextPath.length());
-    invocation.setContextURI(uri);
+    String contextUri = invocationURI.substring(contextPath.length());
+    invocation.setContextURI(contextUri);
 
     return entry.getController();
   }
