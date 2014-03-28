@@ -1,1 +1,1 @@
-javac=JAVAC
+javac=@JAVAC@
