@@ -6956,7 +6956,8 @@ public class Env
         else {
           fullMsg = location.getMessagePrefix()
               + getCodeName(mask)
-              + msg;
+              + msg
+              + getFunctionLocation();
         }
 
         if (getIniBoolean("track_errors")) {

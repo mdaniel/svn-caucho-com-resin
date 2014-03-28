@@ -193,7 +193,6 @@ public class WebAppController
    */
   public String getContextPath(String uri)
   {
-//    System.out.println("GCP: " + uri + " " + getConfig() + " " + getConfig().getURLRegexp());
     if (getConfig() == null) {
       return getContextPath();
     }
