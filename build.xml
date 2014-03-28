@@ -1187,6 +1187,7 @@
   
     <mkdir dir="${dist}/${quercus.dist.name}"/>
     <mkdir dir="${dist}/${quercus.dist.name}/WEB-INF/licenses"/>
+    <mkdir dir="${dist}/${quercus.dist.name}/WEB-INF/lib"/>
 
     <jar destfile="${dist}/${quercus.dist.name}/WEB-INF/lib/quercus.jar" manifest="${resindir}/modules/quercus/maven2/META-INF/MANIFEST.MF">
       <fileset dir="${resindir}/modules/quercus/classes">
