@@ -1409,17 +1409,16 @@ public class QuercusClass extends NullValue {
   {
     // php/09km, php/09kn
     // push/pop to prevent infinite recursion
-    if(issetField(env, name) && _fieldMap.get(name).isPublic())
-    {
-        Value v_current = this.get(name); // TODO: move to ObjectExtValue if possible
+    if (issetField(env, name) && _fieldMap.get(name).isPublic()) {
+      Value v_current = this.get(name); // TODO: move to ObjectExtValue if possible
 
-        if(v_current != NullValue.NULL && v_current != UnsetValue.UNSET)
-        {
-            return v_current;
-        }
-        if(_fieldGet == null){
-            return ((ClassField) _fieldMap.get(name)).getInitExpr().eval(env);
-        }
+      if (v_current != NullValue.NULL && v_current != UnsetValue.UNSET) {
+        return v_current;
+      }
+      
+      if (_fieldGet == null) {
+        return ((ClassField) _fieldMap.get(name)).getInitExpr().eval(env);
+      }
     }
 
     if (_fieldGet != null) {
@@ -2637,6 +2636,26 @@ public class QuercusClass extends NullValue {
       return (_parent != null && _parent.equals(qClass._parent));
   }
 
+  public void setIsset(AbstractFunction isset)
+  {
+    _isset = isset;
+  }
+
+  public void setUnset(AbstractFunction unset)
+  {
+    _unset = unset;
+  }
+
+  public AbstractFunction getIsset()
+  {
+    return _isset;
+  }
+
+  public AbstractFunction getUnset()
+  {
+    return _unset;
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + "]";
@@ -2657,26 +2676,6 @@ public class QuercusClass extends NullValue {
     {
       return _name;
     }
-  }
-
-  public void setIsset(AbstractFunction isset)
-  {
-    _isset = isset;
-  }
-
-  public void setUnset(AbstractFunction unset)
-  {
-    _unset = unset;
-  }
-
-  public AbstractFunction getIsset()
-  {
-    return _isset;
-  }
-
-  public AbstractFunction getUnset()
-  {
-    return _unset;
   }
 }
 

@@ -3338,31 +3338,33 @@ public class Env
   {
     FieldGetEntry entry = new FieldGetEntry(className, fieldName);
 
-      LinkedList<FieldGetEntry> list = null;
-      switch (type) {
-          case FIELDGET:
-              list = _fieldGetList;
-              break;
-          case FIELDSET:
-              list = _fieldSetList;
-              break;
-          case ISSET:
-              list = _issetList;
-              break;
-          case UNSET:
-              list = _unsetList;
-              break;
-          case INVALID_FIRST:
-          case INVALID_LAST:
-              // defensive programming according to &quot;Code Complete 2nd Edition, MS Press&quot;
-              throw new IllegalStateException("IllegalState: pushFieldGet with FIRST/LAST Element");
-      }
+    LinkedList<FieldGetEntry> list = null;
+    switch (type) {
+    case FIELDGET:
+      list = _fieldGetList;
+      break;
+    case FIELDSET:
+      list = _fieldSetList;
+      break;
+    case ISSET:
+      list = _issetList;
+      break;
+    case UNSET:
+      list = _unsetList;
+      break;
+    case INVALID_FIRST:
+    case INVALID_LAST:
+      // defensive programming according to &quot;Code Complete 2nd Edition, MS Press&quot;
+      throw new IllegalStateException("IllegalState: pushFieldGet with FIRST/LAST Element");
+    }
 
-      if(list == null)
-        return false;
-
-    if (list.contains(entry))
+    if (list == null) {
       return false;
+    }
+
+    if (list.contains(entry)) {
+      return false;
+    }
     else {
       list.push(entry);
 
@@ -3372,24 +3374,23 @@ public class Env
 
   public void popFieldGet(Env.OVERLOADING_TYPES type)
   {
-      switch (type) {
-          case FIELDGET:
-              _fieldGetList.pop();
-              break;
-          case FIELDSET:
-              _fieldSetList.pop();
-              break;
-          case ISSET:
-              _issetList.pop();
-              break;
-          case UNSET:
-              _unsetList.pop();
-              break;
-          case INVALID_FIRST:
-          case INVALID_LAST:
-              // defensive programming according to &quot;Code Complete 2nd Edition, MS Press&quot;
-              throw new IllegalStateException("IllegalState: popFieldGet with FIRST/LAST Element");
-      }
+    switch (type) {
+    case FIELDGET:
+      _fieldGetList.pop();
+      break;
+    case FIELDSET:
+      _fieldSetList.pop();
+      break;
+    case ISSET:
+      _issetList.pop();
+      break;
+    case UNSET:
+      _unsetList.pop();
+      break;
+    case INVALID_FIRST:
+    case INVALID_LAST:
+      throw new IllegalStateException("IllegalState: popFieldGet with FIRST/LAST Element");
+    }
   }
 
   public QuercusClass getCallingClass()

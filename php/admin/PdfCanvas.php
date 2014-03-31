@@ -22,81 +22,81 @@ class PdfCanvas
   public $brown = new RGBColor(0.66, 0.20, 0.20);
   public $white = new RGBColor(1, 1, 1);
   
-  private $pdf;
+  public $pdf;
   
-  private $state_stack = Array();
+  public $state_stack = Array();
   
-  private $page_number = 0;
-  private $has_page = false;
+  public $page_number = 0;
+  public $has_page = false;
 
-  private $text_y;
+  public $text_y;
   
-  private $section_id;
-  private $subsection_id;
+  public $section_id;
+  public $subsection_id;
   
   // state
-  private $font;
-  private $color;
-  private $line_width;
-  private $origin;
+  public $font;
+  public $color;
+  public $line_width;
+  public $origin;
   
-  private $font_name;
-  private $font_size;
+  public $font_name;
+  public $font_size;
   
-  private $line_spacing = 3;
+  public $line_spacing = 3;
 
-  private $header_left_text;
-  private $header_center_text;
-  private $header_right_text;
+  public $header_left_text;
+  public $header_center_text;
+  public $header_right_text;
 
-  private $footer_left_text;
-  private $footer_center_text;
-  private $footer_right_text;
+  public $footer_left_text;
+  public $footer_center_text;
+  public $footer_right_text;
 
-	private $left_margin_width = 40;
-	private $top_margin_width = 40;
-	private $bottom_margin_width = 40;
-	private $right_margin_width = 40;
+	public $left_margin_width = 40;
+	public $top_margin_width = 40;
+	public $bottom_margin_width = 40;
+	public $right_margin_width = 40;
 	
-  private $page_width = 595;
-  private $page_height = 842;
+  public $page_width = 595;
+  public $page_height = 842;
   
-  private $section_font_name = "Times-Bold";
-  private $section_font_size = 14;
+  public $section_font_name = "Times-Bold";
+  public $section_font_size = 14;
   
-  private $subsection_font_name = "Times-Bold";
-  private $subsection_font_size = 12;
+  public $subsection_font_name = "Times-Bold";
+  public $subsection_font_size = 12;
 
-  private $text_font_name = "Helvetica";
-  private $text_font_size = 9;
+  public $text_font_name = "Helvetica";
+  public $text_font_size = 9;
   
-  private $data_font_name = "Courier";
-  private $data_font_size = 8;
+  public $data_font_name = "Courier";
+  public $data_font_size = 8;
   
-  private $header_font_name = "Helvetica";
-  private $header_font_size = 8;
+  public $header_font_name = "Helvetica";
+  public $header_font_size = 8;
   
-  private $column_spacing = 5;
-  private $column_x;
-  private $row_y;
-  private $row_max_y;
-  private $in_column = false;
+  public $column_spacing = 5;
+  public $column_x;
+  public $row_y;
+  public $row_max_y;
+  public $in_column = false;
   
-  private $graph_rows = 3;
-  private $graph_columns = 2;
+  public $graph_rows = 3;
+  public $graph_columns = 2;
   
-  private $graph_space_start_y;
+  public $graph_space_start_y;
   
-  private $graph_padding_x = 10;
-  private $graph_padding_y = 20;
-  private $legend_size = 35;
+  public $graph_padding_x = 10;
+  public $graph_padding_y = 20;
+  public $legend_size = 35;
   
-  private $in_graph = false;
+  public $in_graph = false;
   
-  private $graph;
-  private $graph_index;
-  private $graph_origin;
-  private $graph_size;
+  public $graph;
+  public $graph_index;
+  public $graph_origin;
+  public $graph_size;
   
   public function PdfCanvas()
   {
@@ -180,16 +180,6 @@ class PdfCanvas
   public function writeSelf()
   {
     echo($this->pdf->get_buffer());
-  }
-  
-  public function __get($name)
-  {
-    return $this->$name;
-  }
-  
-  public function __set($name, $value)
-  {
-    $this->$name = $value;
   }
   
   public function __toString()
@@ -1083,9 +1073,9 @@ class PdfCanvas
 
 class RGBColor 
 {
-  private $red;
-  private $green;
-  private $blue;
+  public $red;
+  public $green;
+  public $blue;
 
   public function RGBColor($red, $green, $blue)
   {
@@ -1101,11 +1091,6 @@ class RGBColor
     $this->blue = $blue;
   }
   
-  public function __get($name)
-  {
-    return $this->$name;
-  }
-  
   public function __toString()
   {
     return "RGBColor({$this->red},{$this->green},{$this->blue})";
@@ -1114,19 +1099,14 @@ class RGBColor
 
 class Point 
 {
-  private $x;
-  private $y;
+  public $x;
+  public $y;
 
   public function Point($x = 0, $y = 0)
   {
     $this->x = (float) $x;
     $this->y = (float) $y;
   }
-
-  public function __get($name)
-  {
-    return $this->$name;
-  }  
   
   public function __set($name, $value)
   {
@@ -1141,23 +1121,13 @@ class Point
 
 class Range 
 {
-  private $start;
-  private $stop;
+  public $start;
+  public $stop;
 
   public function Range($start, $stop)
   {
     $this->start = (float) $start;
     $this->stop = (float) $stop;
-  }
-
-  public function __set($name, $value)
-  {
-    $this->$name = (double) $value;
-  }
-
-  public function __get($name)
-  {
-    return $this->$name;
   }
 
   public function __toString()
@@ -1173,23 +1143,13 @@ class Range
 
 class Size 
 {
-  private $width;
-  private $height;
+  public $width;
+  public $height;
 
   public function Size($width = 0, $height = 0)
   {
     $this->width = $width;
     $this->height = $height;
-  }
-
-  public function __set($name, $value)
-  {
-    $this->$name = (double) $value;
-  }
-
-  public function __get($name)
-  {
-    return $this->$name;
   }
 
   public function __toString()
@@ -1202,14 +1162,14 @@ $state_counter = 1;
   
 class GraphicsState
 {
-  private $id;
+  public $id;
   
-  private $page_number;
-  private $font_name;
-  private $font_size;
-  private $color;
-  private $line_width;
-  private $origin;
+  public $page_number;
+  public $font_name;
+  public $font_size;
+  public $color;
+  public $line_width;
+  public $origin;
   // there's more we could add but these are the only ones we use right now
   
   public function GraphicsState($page_number, $font_name, $font_size, $color, $line_width, $origin = null)
@@ -1224,16 +1184,6 @@ class GraphicsState
     $this->origin = $origin;
     
     $this->id = $state_counter++;
-  }
-
-  public function __set($name, $value)
-  {
-    $this->$name = $value;
-  }
-
-  public function __get($name)
-  {
-    return $this->$name;
   }
 
   public function __toString()

@@ -100,7 +100,6 @@ public class ClassMethodExpr extends AbstractMethodExpr {
 
     Value oldThis = env.getThis();
 
-    // XXX: 2013-03-14 nam: ugly, ugly, clean this up
     // php/09qe
     Value qThis = oldThis;
     /*
@@ -111,6 +110,7 @@ public class ClassMethodExpr extends AbstractMethodExpr {
     else
       qThis = oldThis;
       */
+    
     // php/024b
     // qThis = cl;
 

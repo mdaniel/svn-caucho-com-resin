@@ -1183,7 +1183,12 @@ public class QuercusParser {
         sb.append("::");
         sb.append(name);
 
-        statement = _factory.createStatic(location, sb, var, init);
+        if (_classDef != null) {
+          statement = _factory.createClassStatic(location, sb, var, init);
+        }
+        else {
+          statement = _factory.createStatic(location, sb, var, init);
+        }
       }
 
       statementList.add(statement);

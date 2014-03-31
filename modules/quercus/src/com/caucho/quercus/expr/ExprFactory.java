@@ -29,18 +29,51 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.*;
-import com.caucho.quercus.statement.*;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.Arg;
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.Function;
+import com.caucho.quercus.program.FunctionInfo;
+import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.program.MethodDeclaration;
+import com.caucho.quercus.program.ObjectMethod;
+import com.caucho.quercus.statement.BlockStatement;
+import com.caucho.quercus.statement.BreakStatement;
+import com.caucho.quercus.statement.ClassDefStatement;
+import com.caucho.quercus.statement.ClassStaticStatement;
+import com.caucho.quercus.statement.ClosureStaticStatement;
+import com.caucho.quercus.statement.ContinueStatement;
+import com.caucho.quercus.statement.DoStatement;
+import com.caucho.quercus.statement.EchoStatement;
+import com.caucho.quercus.statement.ExprStatement;
+import com.caucho.quercus.statement.ForStatement;
+import com.caucho.quercus.statement.ForeachStatement;
+import com.caucho.quercus.statement.FunctionDefStatement;
+import com.caucho.quercus.statement.GlobalStatement;
+import com.caucho.quercus.statement.IfStatement;
+import com.caucho.quercus.statement.NullStatement;
+import com.caucho.quercus.statement.ReturnRefStatement;
+import com.caucho.quercus.statement.ReturnStatement;
+import com.caucho.quercus.statement.Statement;
+import com.caucho.quercus.statement.StaticStatement;
+import com.caucho.quercus.statement.SwitchStatement;
+import com.caucho.quercus.statement.TextStatement;
+import com.caucho.quercus.statement.ThrowStatement;
+import com.caucho.quercus.statement.TryStatement;
+import com.caucho.quercus.statement.VarGlobalStatement;
+import com.caucho.quercus.statement.WhileStatement;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Factory for creating PHP expressions and statements
@@ -1499,6 +1532,17 @@ public class ExprFactory {
                                    VarVarExpr var)
   {
     return new VarGlobalStatement(loc, var);
+  }
+
+  /**
+   * Creates a static statement
+   */
+  public Statement createClassStatic(Location loc,
+                                     StringValue staticName,
+                                     VarExpr var,
+                                     Expr value)
+  {
+    return new ClassStaticStatement(loc, staticName, var, value);
   }
 
   /**

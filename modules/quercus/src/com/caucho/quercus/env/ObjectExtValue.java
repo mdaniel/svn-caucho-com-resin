@@ -207,7 +207,9 @@ public class ObjectExtValue extends ObjectValue
   {
     Entry e = getEntry(env, name);
 
-    if(e != null && e._value != NullValue.NULL && e._value != UnsetValue.UNSET) {
+    if (e != null
+        && e._value != NullValue.NULL
+        && e._value != UnsetValue.UNSET) {
       return e._value;
     }
 
