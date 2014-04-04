@@ -330,7 +330,7 @@ public class Alarm implements ThreadTask {
       if (_heapIndex > 0)
         dequeueImpl(this);
 
-      long wakeTime = delta + getCurrentTime();
+      long wakeTime = delta + getExactTime();
       _wakeTime = wakeTime;
 
       insertImpl(this);
