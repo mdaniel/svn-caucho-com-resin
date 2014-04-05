@@ -83,10 +83,14 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     /// XXX: have this called by QuercusParser after class parsing
 
-    ClassField entry = _qThis.getClassDef().getField(_name);
+    if (! _isInit) {
+      _isInit = true;
 
-    if (entry != null) {
-      _name = entry.getCanonicalName();
+      ClassField entry = _qThis.getClassDef().getField(_name);
+
+      if (entry != null) {
+        _name = entry.getCanonicalName();
+      }
     }
   }
 

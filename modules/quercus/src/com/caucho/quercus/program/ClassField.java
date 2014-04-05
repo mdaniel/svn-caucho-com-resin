@@ -110,6 +110,20 @@ public class ClassField
     }
   }
 
+  public static StringValue getCanonicalName(Env env,
+                                             String classContext,
+                                             StringValue name)
+  {
+    ClassDef classDef = env.findClassDef(classContext);
+    ClassField entry = classDef.getField(name);
+
+    if (entry != null) {
+      return entry.getCanonicalName();
+    }
+
+    return name;
+  }
+
   public static StringValue createProtectedCanonicalName(StringValue sb,
                                                          StringValue name)
   {
@@ -233,6 +247,15 @@ public class ClassField
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _canonicalName + "]";
+    String access = "";
+
+    if (isPrivate()) {
+      access = "private:";
+    }
+    else if (isProtected()) {
+      access = "protected:";
+    }
+
+    return getClass().getSimpleName() + "[" + _declaringClassName + ":" + access + _name + "]";
   }
 }

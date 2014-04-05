@@ -237,7 +237,7 @@ public class LazyClassDef extends CompiledClassDef
     getClassDef().initClassFields(cl, bindingClassName);
   }
 
-  /*
+  /**
    * Creates a new object.
    */
   @Override
@@ -311,6 +311,12 @@ public class LazyClassDef extends CompiledClassDef
   public Set<Map.Entry<StringValue,ClassField>> fieldSet()
   {
     return getClassDef().fieldSet();
+  }
+
+  @Override
+  public ClassField getField(StringValue name)
+  {
+    return getClassDef().getField(name);
   }
 
   @Override

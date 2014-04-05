@@ -600,6 +600,7 @@ public class InterpretedClassDef extends ClassDef
     return _fieldMap.entrySet();
   }
 
+  @Override
   public ClassField getField(StringValue name)
   {
     return _fieldMap.get(name);

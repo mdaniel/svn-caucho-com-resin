@@ -38,9 +38,11 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.ClassField;
 import com.caucho.util.IdentityIntMap;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * Represents a PHP class value.
@@ -49,10 +51,13 @@ public class CompiledClassDef extends ClassDef {
   private final ArrayList<String> _fieldNames
     = new ArrayList<String>();
 
-  private final IdentityIntMap _fieldMap
+  private final IdentityIntMap _fieldMap2
     = new IdentityIntMap();
 
-  protected ArrayValue _extFields = new ArrayValueImpl();
+  protected final LinkedHashMap<StringValue,ClassField> _fieldMap
+    = new LinkedHashMap<StringValue,ClassField>();
+
+  //protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
   protected boolean _isFinal;
 
@@ -131,6 +136,7 @@ public class CompiledClassDef extends ClassDef {
   public void initClassFields(QuercusClass cl, String bindingClassName)
   {
   }
+
   /**
    * Returns true for a final class.
    */
@@ -145,7 +151,7 @@ public class CompiledClassDef extends ClassDef {
    */
   public int findFieldIndex(String name)
   {
-    return _fieldMap.get(name);
+    return _fieldMap2.get(name);
   }
 
   /**
@@ -161,8 +167,14 @@ public class CompiledClassDef extends ClassDef {
    */
   protected void addFieldIndex(String name, int id)
   {
-    _fieldMap.put(name, id);
+    _fieldMap2.put(name, id);
     _fieldNames.add(name);
+  }
+
+  @Override
+  public ClassField getField(StringValue name)
+  {
+    return _fieldMap.get(name);
   }
 
   /**

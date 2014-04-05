@@ -437,6 +437,11 @@ abstract public class ClassDef {
     return null;
   }
 
+  public ClassField getField(StringValue name)
+  {
+    return null;
+  }
+
   public Set<Map.Entry<StringValue, StaticFieldEntry>> staticFieldSet()
   {
     return null;

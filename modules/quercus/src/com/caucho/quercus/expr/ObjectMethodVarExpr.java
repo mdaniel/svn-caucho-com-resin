@@ -30,8 +30,9 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class ObjectMethodVarExpr extends Expr {
   private static final L10N L = new L10N(ObjectMethodVarExpr.class);
 
   protected final Expr _objExpr;
-  
+
   protected final Expr _name;
   protected final Expr []_args;
 
@@ -56,7 +57,7 @@ public class ObjectMethodVarExpr extends Expr {
   {
     super(location);
     _objExpr = objExpr;
-    
+
     _name = name;
 
     _args = new Expr[args.size()];
@@ -70,7 +71,7 @@ public class ObjectMethodVarExpr extends Expr {
   {
     super(location);
     _objExpr = objExpr;
-    
+
     _name = name;
 
     _args = args;
@@ -85,7 +86,7 @@ public class ObjectMethodVarExpr extends Expr {
   {
     this(Location.UNKNOWN, objExpr, name, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -101,7 +102,7 @@ public class ObjectMethodVarExpr extends Expr {
       values[i] = _args[i].evalArg(env, true);
     }
 
-    StringValue methodName = _name.eval(env).toStringValue();
+    StringValue methodName = _name.eval(env).toStringValue(env);
 
     Value obj = _objExpr.eval(env);
 
@@ -115,7 +116,7 @@ public class ObjectMethodVarExpr extends Expr {
       env.popCall();
     }
   }
-  
+
   public String toString()
   {
     return _objExpr + "->" + _name + "()";

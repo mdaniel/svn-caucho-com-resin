@@ -38,6 +38,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.ClassField;
 
 /**
  * Represents a PHP field reference.
@@ -72,6 +73,19 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
     return factory.createThisMethod(location, _qThis, _nameExpr, args);
   }
 
+  private StringValue evalName(Env env)
+  {
+    StringValue name = _nameExpr.evalStringValue(env);
+
+    ClassField entry = _qThis.getClassDef().getField(name);
+
+    if (entry != null) {
+      name = entry.getCanonicalName();
+    }
+
+    return name;
+  }
+
   /**
    * Evaluates the expression.
    *
@@ -84,7 +98,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value value = env.getThis();
 
-    return value.getThisFieldArg(env, _nameExpr.evalStringValue(env));
+    return value.getThisFieldArg(env, evalName(env));
   }
 
   /**
@@ -100,7 +114,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
     // quercus/0d1k
     Value value = env.getThis();
 
-    return value.getThisFieldVar(env, _nameExpr.evalStringValue(env));
+    return value.getThisFieldVar(env, evalName(env));
   }
 
   /**
@@ -115,7 +129,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getThisField(env, _nameExpr.evalStringValue(env));
+    return obj.getThisField(env, evalName(env));
   }
 
   /**
@@ -130,7 +144,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+    obj.putThisField(env, evalName(env), value);
 
     return value;
   }
@@ -147,7 +161,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+    obj.putThisField(env, evalName(env), value);
 
     return value;
   }
@@ -160,7 +174,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    StringValue name = _nameExpr.evalStringValue(env);
+    StringValue name = evalName(env);
 
     Value fieldVar = obj.getThisFieldArray(env, name);
     Value index = indexExpr.eval(env);
@@ -179,7 +193,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    StringValue name = _nameExpr.evalStringValue(env);
+    StringValue name = evalName(env);
 
     Value fieldVar = obj.getThisFieldArray(env, name);
     Value index = indexExpr.eval(env);
@@ -201,7 +215,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getThisFieldArray(env, _nameExpr.evalStringValue(env));
+    return obj.getThisFieldArray(env, evalName(env));
   }
 
   /**
@@ -215,7 +229,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    return obj.getThisFieldObject(env, _nameExpr.evalStringValue(env));
+    return obj.getThisFieldObject(env, evalName(env));
   }
 
   /**
@@ -229,7 +243,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
-    obj.unsetThisField(_nameExpr.evalStringValue(env));
+    obj.unsetThisField(evalName(env));
   }
 
   public String toString()
