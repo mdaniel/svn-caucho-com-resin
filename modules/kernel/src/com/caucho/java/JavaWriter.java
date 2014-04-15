@@ -403,7 +403,7 @@ public class JavaWriter extends Writer {
    */
   public void printClass(Class<?> cl) throws IOException
   {
-    if (!cl.isArray())
+    if (! cl.isArray())
       print(cl.getName().replace('$', '.'));
     else {
       printClass(cl.getComponentType());

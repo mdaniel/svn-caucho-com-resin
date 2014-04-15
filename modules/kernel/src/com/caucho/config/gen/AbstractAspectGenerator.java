@@ -220,7 +220,10 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
             || Error.class.isAssignableFrom(exn))
             && ! exn.isAnnotationPresent(ApplicationException.class));
 
-      out.println("} catch (" + exn.getName().replace('$', '.') + " e) {");
+      out.print("} catch (");
+      out.printClass(exn);
+      out.println(" e) {");
+
       out.pushDepth();
 
       if (isSystemException)
