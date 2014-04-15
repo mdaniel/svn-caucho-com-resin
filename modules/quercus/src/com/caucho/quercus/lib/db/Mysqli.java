@@ -105,6 +105,8 @@ public class Mysqli extends JdbcConnectionResource
 
   private MysqlMetaDataMethod _metaDataMethod;
 
+  private String _initQuery;
+
   /**
     * This is the constructor for the mysqli class.
     * It can be invoked by PHP or and by Java code.
@@ -134,15 +136,23 @@ public class Mysqli extends JdbcConnectionResource
 
   Mysqli(Env env, String host, String user, String pass, String db, int port,
          String socket, int flags, String driver, String url,
-         boolean isNewLink, boolean isEmulatePrepares)
+         boolean isNewLink, boolean isEmulatePrepares, String initQuery)
   {
     super(env);
 
-    if (host == null || host.length() == 0)
+    if (host == null || host.length() == 0) {
       host = "localhost";
+    }
 
     connectInternal(env, host, user, pass, db, port, socket,
                     flags, driver, url, isNewLink, isEmulatePrepares);
+
+    _initQuery = initQuery;
+
+    if (initQuery != null) {
+      realQuery(env, initQuery);
+    }
+
   }
 
   protected Mysqli(Env env)

@@ -76,7 +76,7 @@ public class MysqliResource extends Mysqli {
   {
     super(env,
           host, user, password,
-          db, port, socket, flags, driver, url, isNewLink, false);
+          db, port, socket, flags, driver, url, isNewLink, false, null);
   }
 
   protected MysqliResource(Env env)

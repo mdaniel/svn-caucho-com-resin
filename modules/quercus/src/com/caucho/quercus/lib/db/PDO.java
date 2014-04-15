@@ -82,6 +82,8 @@ public class PDO implements EnvCleanup {
   public static final int ATTR_DEFAULT_FETCH_MODE = 19;
   public static final int ATTR_EMULATE_PREPARES = 20;
 
+  public static final int MYSQL_ATTR_INIT_COMMAND = 1002;
+
   public static final int CASE_NATURAL = 0;
   public static final int CASE_UPPER = 1;
   public static final int CASE_LOWER = 2;
@@ -160,6 +162,8 @@ public class PDO implements EnvCleanup {
   private Value[] _statementClassArgs;
 
   private boolean _isEmulatePrepares;
+
+  private String _initQuery;
 
   private int _columnCase = JdbcResultResource.COLUMN_CASE_NATURAL;
 
@@ -695,6 +699,12 @@ public class PDO implements EnvCleanup {
       {
         return setEmulatePrepares(value.toBoolean());
       }
+
+      case MYSQL_ATTR_INIT_COMMAND:
+      {
+        return setInitQuery(value.toString());
+      }
+
     }
 
     if (isInit) {
@@ -837,6 +847,13 @@ public class PDO implements EnvCleanup {
     }
   }
 
+  private boolean setInitQuery(String query)
+  {
+    _initQuery = query;
+
+    return true;
+  }
+
   /**
    * Convert numeric values to strings when fetching.
    *
@@ -941,8 +958,11 @@ public class PDO implements EnvCleanup {
     String url = null;
     boolean isNewLink = false;
 
-    return new Mysqli(env, host, user, pass, dbName, port,
-                      socket, flags, driver, url, isNewLink, _isEmulatePrepares);
+    Mysqli mysqli =  new Mysqli(env, host, user, pass, dbName, port,
+                                socket, flags, driver, url, isNewLink,
+                                _isEmulatePrepares, _initQuery);
+
+    return mysqli;
   }
 
   /**
