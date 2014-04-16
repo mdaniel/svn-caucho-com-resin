@@ -370,9 +370,9 @@ public class ReflectionClass
     return flag;
   }
 
-  public boolean isInstance(ObjectValue obj)
+  public boolean isInstance(Env env, ObjectValue obj)
   {
-    return obj.getQuercusClass().getName().equals(_name);
+    return obj.isA(env, _name);
   }
 
   public Value newInstance(Env env, @Optional Value []args)
