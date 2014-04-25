@@ -118,7 +118,14 @@ public final class ISO8859_1Writer extends EncodingWriter {
       int sublen = Math.min(bEnd - bOffset, cEnd - cOffset);
 
       for (int i = sublen - 1; i >= 0; i--) {
-        bBuf[bOffset + i] = (byte) cBuf[cOffset + i];
+        char ch = cBuf[cOffset + i];
+        
+        if (ch < 0x100) {
+          bBuf[bOffset + i] = (byte) ch;
+        }
+        else {
+          bBuf[bOffset + i] = 0x3f;
+        }
       }
 
       bOffset += sublen;

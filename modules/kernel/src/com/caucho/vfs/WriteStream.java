@@ -627,7 +627,14 @@ public class WriteStream extends OutputStreamWithBuffer
       sublen = Math.min(sublen, length);
 
       for (int i = sublen - 1; i >= 0; i--) {
-        writeBuffer[writeLength + i] = (byte) buffer[offset + i];
+        char ch = buffer[offset + i];
+        
+        if (ch < 0x100) {
+          writeBuffer[writeLength + i] = (byte) ch;
+        }
+        else {
+          writeBuffer[writeLength + i] = 0x3f;
+        }
       }
 
       writeLength += sublen;

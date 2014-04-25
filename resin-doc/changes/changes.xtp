@@ -10,6 +10,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.40 (Mar 28, 2014)">
+<ul>
+<li>i18n: iso-8859-1 encoding issue with non-latin-1 characters needs to return error character (rep by Yoel Gluck)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.39 (Mar 28, 2014)">
 <ul>
 <li>session: session-mode=before-header was disabling reloading on secondary servers (#5639, rep by Thomas Rogan)</li>
