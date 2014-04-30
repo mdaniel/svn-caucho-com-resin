@@ -34,6 +34,7 @@ import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.quercus.program.Arg;
 import com.caucho.quercus.program.ClassField;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -194,8 +195,11 @@ abstract public class ObjectValue extends Callback {
     sb.append(getClassName());
     sb.append('-');
     sb.append(_objectId);
-    sb.append('-');
-    sb.append(System.identityHashCode(this));
+
+    if (! CurrentTime.isTest()) {
+      sb.append('-');
+      sb.append(System.identityHashCode(this));
+    }
 
     return sb;
   }

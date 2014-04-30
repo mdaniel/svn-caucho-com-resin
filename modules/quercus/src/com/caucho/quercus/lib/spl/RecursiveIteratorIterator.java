@@ -30,8 +30,9 @@
 package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 import java.util.ArrayList;
@@ -44,239 +45,177 @@ public class RecursiveIteratorIterator
   public static final int CHILD_FIRST = 2;
   public static final int CATCH_GET_CHILD = 16;
 
-  private final Iterator _iterator;
-  private ArrayList<Iterator> _iteratorStack;
-
-  private Value _currentValue;
-  private Value _currentKey;
-
+  private final ArrayList<RecursiveIterator> _iterStack;
   private final int _mode;
 
   public RecursiveIteratorIterator(Env env,
-                                   Iterator iterator,
-                                   @Optional int mode,  //LEAVES_ONLY
+                                   Value value,
+                                   @Optional int mode,  //0 == LEAVES_ONLY
                                    @Optional int flags)
   {
-    _iterator = iterator;
-    _iteratorStack = new ArrayList<Iterator>();
+    RecursiveIterator iter = RecursiveIteratorProxy.create(value);
+
+    _iterStack = new ArrayList<RecursiveIterator>();
+    _iterStack.add(iter);
 
     _mode = mode;
-
-    rewind(env);
   }
+
+  //
+  // OuterIterator
+  //
 
   @Override
-  public Iterator getInnerIterator()
+  public RecursiveIterator getInnerIterator()
   {
-    return _iterator;
+    int i = _iterStack.size() - 1;
+
+    return _iterStack.get(i);
   }
 
-  /**
-   * Returns the current value.
-   */
-  @Override
-  public Value current(Env env)
-  {
-    Value value = _currentValue;
+  //
+  // Iterator
+  //
 
-    if (value != null) {
-      return value;
-    }
-    else {
-      return NullValue.NULL;
-    }
-  }
-
-  /**
-   * Returns the current key.
-   */
-  @Override
-  public Value key(Env env)
-  {
-    Value key = _currentKey;
-
-    if (key != null) {
-      return key;
-    }
-    else {
-      return NullValue.NULL;
-    }
-  }
-
-  /**
-   * Advances to the next row.
-   */
-  @Override
-  public void next(Env env)
-  {
-    _currentKey = null;
-    _currentValue = null;
-
-    boolean isJustPopped = false;
-
-    while (true) {
-      Iterator iter = getCurrentIterator();
-
-      if (iter == null) {
-        break;
-      }
-
-      boolean oldIsJustPopped = isJustPopped;
-      isJustPopped = false;
-
-      if (! iter.valid(env)) {
-        pop();
-
-        isJustPopped = true;
-
-        continue;
-      }
-      else if (oldIsJustPopped && (_mode & CHILD_FIRST) == CHILD_FIRST) {
-        _currentKey = iter.key(env);
-        _currentValue = iter.current(env);
-
-        iter.next(env);
-
-        break;
-      }
-      else if (recurse(env, iter)) {
-        break;
-      }
-    }
-  }
-
-  /**
-   * Rewinds the iterator so it is at the first row.
-   */
-  @Override
-  public void rewind(Env env)
-  {
-    init(env);
-  }
-
-  private void init(Env env)
-  {
-    Iterator iter = _iterator;
-
-    if (iter == null) {
-      return;
-    }
-
-    iter.rewind(env);
-    _iteratorStack.clear();
-
-    push(iter);
-    recurse(env, iter);
-  }
-
-  /**
-   * Returns true if _currentValue is set by method.
-   */
-  private boolean recurse(Env env, Iterator iterator)
-  {
-    if (! iterator.valid(env)) {
-      return false;
-    }
-
-    Value currentKey = iterator.key(env);
-    Value currentValue = iterator.current(env);
-
-    Object obj = currentValue.toJavaObject();
-
-    if (obj instanceof RecursiveIterator) {
-      RecursiveIterator r = (RecursiveIterator) obj;
-
-      push(r);
-
-      if ((_mode & SELF_FIRST) == SELF_FIRST) {
-        _currentKey = currentKey;
-        _currentValue = currentValue;
-
-        iterator.next(env);
-
-        return true;
-      }
-      else if ((_mode & CHILD_FIRST) == CHILD_FIRST) {
-        return recurse(env, r);
-      }
-      else {
-        iterator.next(env);
-
-        return recurse(env, r);
-      }
-    }
-    else {
-      _currentKey = currentKey;
-      _currentValue = currentValue;
-
-      iterator.next(env);
-
-      return true;
-    }
-  }
-
-  /**
-   * Returns true if the iterator currently points to a valid row.
-   */
   @Override
   public boolean valid(Env env)
   {
-    return _currentKey != null;
+    return getInnerIterator().valid(env);
   }
 
-  private Iterator getCurrentIterator()
+  @Override
+  public Value current(Env env)
   {
-    int size = _iteratorStack.size();
+    return getInnerIterator().current(env);
+  }
 
-    if (size == 0) {
-      return null;
+  @Override
+  public Value key(Env env)
+  {
+    return getInnerIterator().key(env);
+  }
+
+  @Override
+  public void next(Env env)
+  {
+    RecursiveIterator currentIter = getInnerIterator();
+
+    currentIter.next(env);
+
+    if (! currentIter.valid(env) && _iterStack.size() > 1) {
+      _iterStack.remove(_iterStack.size() - 1);
+
+      next(env);
+
+      return;
     }
 
-    return _iteratorStack.get(size - 1);
+    if (currentIter.hasChildren(env)) {
+      RecursiveIterator recursiveIter = currentIter.getChildren(env);
+
+      _iterStack.add(recursiveIter);
+    }
   }
 
-  private void push(Iterator iterator)
+  @Override
+  public void rewind(Env env)
   {
-    _iteratorStack.add(iterator);
-  }
+    for (int i = _iterStack.size() - 1; i > 0; i--) {
+      _iterStack.remove(i);
+    }
 
-  private void pop()
-  {
-    int size = _iteratorStack.size();
-
-    _iteratorStack.remove(size - 1);
+    _iterStack.get(0).rewind(env);
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _iterator + "]";
+    return getClass().getSimpleName() + "[" + _iterStack + "]";
   }
 
-  static class Entry
-  {
-    private final Iterator _iterator;
+  static class RecursiveIteratorProxy implements RecursiveIterator {
+    private final Value _obj;
 
-    private boolean _isVisited;
+    private static final StringValue HAS_CHILDREN
+      = new ConstStringValue("hasChildren");
 
-    public Entry(Iterator iterator)
+    private static final StringValue GET_CHILDREN
+      = new ConstStringValue("getChildren");
+
+    private static final StringValue VALID
+      = new ConstStringValue("valid");
+
+    private static final StringValue CURRENT
+      = new ConstStringValue("current");
+
+    private static final StringValue KEY
+      = new ConstStringValue("key");
+
+    private static final StringValue NEXT
+      = new ConstStringValue("next");
+
+    private static final StringValue REWIND
+      = new ConstStringValue("rewind");
+
+    RecursiveIteratorProxy(Value obj)
     {
-      _iterator = iterator;
+      _obj = obj;
     }
 
-    public Iterator getIterator()
+    public static RecursiveIterator create(Value value)
     {
-      return _iterator;
+      Object obj = value.toJavaObject();
+
+      if (obj instanceof RecursiveIterator) {
+        return (RecursiveIterator) obj;
+      }
+      else {
+        return new RecursiveIteratorProxy(value);
+      }
     }
 
-    public boolean isVisited()
+    @Override
+    public boolean hasChildren(Env env)
     {
-      return _isVisited;
+      return _obj.callMethod(env, HAS_CHILDREN).toBoolean();
     }
 
-    public void setVisited()
+    @Override
+    public RecursiveIterator getChildren(Env env)
     {
-      _isVisited = true;
+      Value result = _obj.callMethod(env, GET_CHILDREN);
+
+      return create(result);
+    }
+
+    @Override
+    public boolean valid(Env env)
+    {
+      return _obj.callMethod(env, VALID).toBoolean();
+    }
+
+    @Override
+    public Value current(Env env)
+    {
+      return _obj.callMethod(env, CURRENT);
+    }
+
+    @Override
+    public Value key(Env env)
+    {
+      return _obj.callMethod(env, KEY);
+    }
+
+    @Override
+    public void next(Env env)
+    {
+      _obj.callMethod(env, NEXT);
+    }
+
+    @Override
+    public void rewind(Env env)
+    {
+      _obj.callMethod(env, REWIND);
     }
   }
 }

@@ -66,9 +66,9 @@ public class FilesystemIterator extends DirectoryIterator
     _flags = flags;
   }
 
-  protected FilesystemIterator(Path path, int flags)
+  protected FilesystemIterator(Path parent, Path path, String fileName, int flags)
   {
-    super(path);
+    super(parent, path, fileName);
 
     _flags = flags;
   }
@@ -86,32 +86,22 @@ public class FilesystemIterator extends DirectoryIterator
   @Override
   public Value key(Env env)
   {
+    SplFileInfo current = getCurrent(env);
+
+    if (current == null) {
+      return UnsetValue.UNSET;
+    }
+
+    String key;
     int flags = _flags;
 
-    if ((flags & KEY_AS_PATHNAME) == KEY_AS_PATHNAME) {
-      SplFileInfo current = getCurrent(env);
-
-      if (current == null) {
-        return UnsetValue.UNSET;
-      }
-
-      String path = current.getPathname(env);
-
-      return env.createString(path);
-    }
-    else if ((flags & KEY_AS_FILENAME) == KEY_AS_FILENAME) {
-      SplFileInfo current = getCurrent(env);
-
-      if (current == null) {
-        return UnsetValue.UNSET;
-      }
-
-      String path = current.getFilename(env);
-
-      return env.createString(path);
+    if ((flags & KEY_AS_FILENAME) == KEY_AS_FILENAME) {
+      key = current.getFilename(env);
     }
     else {
-      return super.key(env);
+      key = current.getPathname(env);
     }
+
+    return env.createString(key);
   }
 }

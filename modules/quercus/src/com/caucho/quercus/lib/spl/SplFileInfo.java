@@ -34,37 +34,54 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.vfs.Path;
 
 public class SplFileInfo
 {
+  private final Path _parent;
+
   protected Path _path;
   private String _openFileClassName;
   private String _infoFileClassName;
 
+  private String _fileName;
+
   public SplFileInfo(Env env, StringValue fileName)
   {
-    _path = init(env, fileName, false);
+    _path = env.lookupPwd(fileName);
+
+    _parent = _path.getParent();
+
+    _fileName = fileName.toString();
   }
 
-  protected SplFileInfo(Path path)
+  protected SplFileInfo(Path parent, Path path, String fileName)
   {
+    _parent = parent;
+
     _path = path;
+
+    _fileName = fileName;
   }
 
+  /*
   protected SplFileInfo(Env env, StringValue fileName, boolean isUseIncludePath)
   {
-    _path = init(env, fileName, true);
+    _path = env.lookupInclude(fileName);
+
+    _fileName = fileName.toString();
+  }
+  */
+
+  protected Path getRawParent()
+  {
+    return _parent;
   }
 
-  protected Path init(Env env, StringValue fileName, boolean isUseIncludePath)
+  protected Path getRawPath()
   {
-    if (isUseIncludePath) {
-      return env.lookupInclude(fileName);
-    }
-    else {
-      return env.lookupPwd(fileName);
-    }
+    return _path;
   }
 
   public long getATime(Env env)
@@ -109,7 +126,7 @@ public class SplFileInfo
 
   public String getFilename(Env env)
   {
-    return _path.getTail();
+    return _fileName;
   }
 
   public int getGroup(Env env)
@@ -139,9 +156,13 @@ public class SplFileInfo
 
   public String getPath(Env env)
   {
+    return _parent.getNativePath();
+
+    /*
     Path parent = _path.getParent();
 
     return parent.getNativePath();
+    */
   }
 
   public SplFileInfo getPathInfo(Env env, @Optional String className)
@@ -151,7 +172,39 @@ public class SplFileInfo
 
   public String getPathname(Env env)
   {
-    return _path.getNativePath();
+    String parentPath = "";
+
+    if (_parent != null) {
+      parentPath = _parent.getNativePath();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(parentPath);
+
+    if (! parentPath.endsWith(FileModule.DIRECTORY_SEPARATOR)) {
+      sb.append(FileModule.DIRECTORY_SEPARATOR);
+    }
+
+    if (_fileName.startsWith(FileModule.DIRECTORY_SEPARATOR)) {
+      sb.append(_fileName, 1, _fileName.length());
+    }
+    else {
+      sb.append(_fileName);
+    }
+
+    return sb.toString();
+
+    /*
+    if (".".equals(_fileName)) {
+      return _path.getNativePath() + FileModule.DIRECTORY_SEPARATOR + _fileName;
+    }
+    else if ("..".equals(_fileName)) {
+      return _path.getNativePath() + FileModule.DIRECTORY_SEPARATOR + _fileName;
+    }
+    else {
+      return _path.getNativePath();
+    }
+    */
   }
 
   public int getPerms(Env env)
@@ -241,6 +294,6 @@ public class SplFileInfo
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _path + "]";
+    return getClass().getSimpleName() + "[" + _parent + "," + _fileName + "]";
   }
 }

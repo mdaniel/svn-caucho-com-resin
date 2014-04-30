@@ -45,10 +45,14 @@ public class RecursiveDirectoryIterator
     super(env, fileName, flags);
   }
 
-  protected RecursiveDirectoryIterator(Path path, int flags)
+  protected RecursiveDirectoryIterator(Path parent, Path path, String fileName, int flags)
   {
-    super(path, flags);
+    super(parent, path, fileName, flags);
   }
+
+  //
+  // RecursiveIterator
+  //
 
   @Override
   public boolean hasChildren(Env env)
@@ -59,15 +63,27 @@ public class RecursiveDirectoryIterator
       return false;
     }
 
+    String fileName = current.getFilename(env);
+
+    if (".".equals(fileName) || "..".equals(fileName)) {
+      return false;
+    }
+
     return current.isDir(env);
   }
 
   @Override
-  public RecursiveIterator getChildren(Env env)
+  public RecursiveDirectoryIterator getChildren(Env env)
   {
-    return (RecursiveIterator) getCurrent(env);
+    SplFileInfo info = getCurrent(env);
+
+    return new RecursiveDirectoryIterator(info.getRawParent(),
+                                          info.getRawPath(),
+                                          info.getFilename(env),
+                                          getFlags());
   }
 
+  /*
   @Override
   protected SplFileInfo createCurrent(Env env, Path path)
   {
@@ -78,4 +94,5 @@ public class RecursiveDirectoryIterator
       return super.createCurrent(env, path);
     }
   }
+  */
 }

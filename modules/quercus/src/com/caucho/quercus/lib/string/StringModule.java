@@ -2498,6 +2498,12 @@ public class StringModule extends AbstractQuercusModule {
             segmentList.add(new ScanfInteger(maxLen, 10, false));
             break loop;
           }
+          case 'i':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfIntegerWithBaseDetection(maxLen));
+            break loop;
+          }
           case 'u':
           {
             scanfAddConstant(segmentList, sb);
@@ -6413,6 +6419,158 @@ public class StringModule extends AbstractQuercusModule {
       return sIndex;
     }
   }
+
+  static class ScanfIntegerWithBaseDetection extends ScanfSegment {
+    private final int _maxLen;
+
+    ScanfIntegerWithBaseDetection(int maxLen)
+    {
+      if (maxLen < 0)
+        maxLen = Integer.MAX_VALUE;
+
+      _maxLen = maxLen;
+    }
+
+    @Override
+    public boolean isAssigned()
+    {
+      return true;
+    }
+
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      if (sIndex == strlen) {
+        if (isReturnArray)
+          var.put(NullValue.NULL);
+
+        return sIndex;
+      }
+
+      long val = 0;
+
+      int sign = 1;
+
+      int maxLen = _maxLen;
+
+      // detect sign
+      if (sIndex < strlen) {
+        char ch = string.charAt(sIndex);
+
+        if (ch == '+') {
+          sIndex++;
+          maxLen--;
+        }
+        else if (ch == '-') {
+          sign = -1;
+
+          sIndex++;
+          maxLen--;
+        }
+      }
+
+      int base = 10;
+
+      // detect base
+      if (sIndex < strlen) {
+        char ch = string.charAt(sIndex);
+
+        if (ch == '0') {
+          sIndex++;
+
+          if (sIndex < strlen
+              && Character.toLowerCase(string.charAt(sIndex)) == 'x') {
+            base = 16;
+
+            sIndex++;
+          }
+          else {
+            base = 8;
+          }
+        }
+      }
+
+      boolean isNotMatched = true;
+
+      for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
+        char ch = string.charAt(sIndex);
+
+        int digit = toNumber(base, ch);
+
+        if (digit < 0) {
+          if (isNotMatched) {
+            sscanfPut(var, NullValue.NULL, isReturnArray);
+            return sIndex;
+          }
+          else {
+            break;
+          }
+        }
+
+        val = val * base + digit;
+        isNotMatched = false;
+      }
+
+      sscanfPut(var, LongValue.create(val * sign), isReturnArray);
+
+      return sIndex;
+    }
+
+    private static int toNumber(int base, char ch)
+    {
+      switch (base) {
+        case 10:
+          return base10ToNumber(ch);
+        case 8:
+          return base8ToNumber(ch);
+        case 16:
+          return base16ToNumber(ch);
+        default:
+          throw new IllegalStateException();
+      }
+    }
+
+    private static int base10ToNumber(char ch)
+    {
+      if ('0' <= ch && ch <= '9') {
+        return ch - '0';
+      }
+      else {
+        return -1;
+      }
+    }
+
+    private static int base8ToNumber(char ch)
+    {
+      if ('0' <= ch && ch <= '7') {
+        return ch - '0';
+      }
+      else {
+        return -1;
+      }
+    }
+
+    private static int base16ToNumber(char ch)
+    {
+      if ('0' <= ch && ch <= '9') {
+        return ch - '0';
+      }
+      else if ('a' <= ch && ch <= 'f') {
+        return ch - 'a' + 10;
+      }
+      else if ('A' <= ch && ch <= 'F') {
+        return ch - 'A' + 10;
+      }
+      else {
+        return -1;
+      }
+    }
+  }
+
 
   static class ScanfString extends ScanfSegment {
     private final int _maxLen;

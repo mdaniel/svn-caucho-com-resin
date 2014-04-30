@@ -262,7 +262,7 @@ public class StreamModule extends AbstractQuercusModule {
   public static Value stream_get_contents(Env env,
                                           @NotNull BinaryInput in,
                                           @Optional("-1") long maxLen,
-                                          @Optional long offset)
+                                          @Optional("-1") long offset)
   {
     try {
       if (in == null)
@@ -275,8 +275,14 @@ public class StreamModule extends AbstractQuercusModule {
       if (maxLen < 0)
         maxLen = Integer.MAX_VALUE;
 
+      /*
       while (offset-- > 0)
         in.read();
+      */
+
+      if (offset >= 0) {
+        in.setPosition(offset);
+      }
 
       while (maxLen-- > 0 && (ch = in.read()) >= 0) {
         sb.append((char) ch);
@@ -336,20 +342,29 @@ public class StreamModule extends AbstractQuercusModule {
   public static Value stream_get_meta_data(Env env,
                                            BinaryStream stream)
   {
-    if (stream == null)
+    if (stream == null) {
       return BooleanValue.FALSE;
+    }
 
     ArrayValue array = new ArrayValueImpl();
 
     boolean isTimeout = false;
+    boolean isSeekable = false;
+    StringValue mode = env.getEmptyString();
 
-    if (stream instanceof AbstractBinaryInputOutput)
+    if (stream instanceof AbstractBinaryInputOutput) {
       isTimeout = ((AbstractBinaryInputOutput) stream).isTimeout();
+    }
 
-    if (isTimeout)
-      array.put(env.createString("timed_out"), BooleanValue.TRUE);
-    else
-      array.put(env.createString("timed_out"), BooleanValue.FALSE);
+    if (stream instanceof FileInputOutput) {
+      isSeekable = true;
+
+      mode = env.createString("w+b");
+    }
+
+    array.put(env.createString("timed_out"), BooleanValue.create(isTimeout));
+    array.put(env.createString("seekable"), BooleanValue.create(isSeekable));
+    array.put(env.createString("mode"), mode);
 
     return array;
   }

@@ -77,12 +77,12 @@ public class FileInputOutput extends AbstractBinaryOutput
     this(env, path, append, truncate, false);
   }
 
-  public FileInputOutput(Env env, Path path, 
+  public FileInputOutput(Env env, Path path,
                           boolean append, boolean truncate, boolean temporary)
     throws IOException
   {
     _env = env;
-    
+
     env.addCleanup(this);
 
     _path = path;
@@ -99,7 +99,7 @@ public class FileInputOutput extends AbstractBinaryOutput
 
     _temporary = temporary;
   }
-  
+
   /**
    * Returns the write stream.
    */
@@ -127,7 +127,7 @@ public class FileInputOutput extends AbstractBinaryOutput
       return null;
     }
   }
-  
+
   @Override
   public int getAvailable()
     throws IOException
@@ -153,10 +153,10 @@ public class FileInputOutput extends AbstractBinaryOutput
     throws UnsupportedEncodingException
   {
     String mimeName = Encoding.getMimeName(encoding);
-    
+
     if (mimeName != null && mimeName.equals(_readEncodingName))
       return;
-    
+
     _readEncoding = Encoding.getReadEncoding(getInputStream(), encoding);
     _readEncodingName = mimeName;
   }
@@ -193,7 +193,7 @@ public class FileInputOutput extends AbstractBinaryOutput
       return _buffer;
     } else {
       _buffer = _stream.read();
-      
+
       return _buffer;
     }
   }
@@ -240,7 +240,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   {
     StringValue bb = _env.createBinaryBuilder();
     TempBuffer temp = TempBuffer.allocate();
-    
+
     try {
       byte []buffer = temp.getBuffer();
 
@@ -283,7 +283,7 @@ public class FileInputOutput extends AbstractBinaryOutput
     }
   }
 
- 
+
   /**
    * Reads a line from the buffer.
    */
@@ -304,7 +304,7 @@ public class FileInputOutput extends AbstractBinaryOutput
       return true;
     }
   }
-    
+
   /**
    * Prints a string to a file.
    */
@@ -357,7 +357,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   {
     close();
   }
-  
+
   /**
    * Closes the file for reading.
    */

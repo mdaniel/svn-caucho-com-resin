@@ -77,6 +77,8 @@ public class ArrayIterator
 
     _value = value;
     _flags = flags;
+
+    rewindJava(env);
   }
 
   public void append(Value value)
@@ -98,11 +100,9 @@ public class ArrayIterator
     return _value.getCount(env);
   }
 
+  @Override
   public Value current(Env env)
   {
-    if (_iterator == null)
-      rewindJava(env);
-
     return _current == null ? UnsetValue.UNSET : _current.getValue();
   }
 
@@ -116,11 +116,9 @@ public class ArrayIterator
     return _flags;
   }
 
+  @Override
   public Value key(Env env)
   {
-    if (_iterator == null)
-      rewindJava(env);
-
     return _current == null ? UnsetValue.UNSET : _current.getKey();
   }
 

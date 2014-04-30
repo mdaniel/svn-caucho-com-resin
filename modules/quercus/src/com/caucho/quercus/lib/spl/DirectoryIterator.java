@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class DirectoryIterator
   extends SplFileInfo
@@ -54,7 +55,7 @@ public class DirectoryIterator
     super(env, fileName);
 
     try {
-      _list = _path.list();
+      _list = getPathList(_path);
     }
     catch (IOException e) {
       // XXX: throw the right exception class
@@ -62,12 +63,12 @@ public class DirectoryIterator
     }
   }
 
-  protected DirectoryIterator(Path path)
+  protected DirectoryIterator(Path parent, Path path, String fileName)
   {
-    super(path);
+    super(parent, path, fileName);
 
     try {
-      _list = path.list();
+      _list = getPathList(path);
     }
     catch (IOException e) {
       // XXX: throw new the right exception class
@@ -75,12 +76,27 @@ public class DirectoryIterator
     }
   }
 
+  private static String[] getPathList(Path path)
+    throws IOException
+  {
+    String[] list = path.list();
+
+    String[] newList = new String[list.length + 2];
+
+    newList[0] = ".";
+    newList[1] = "..";
+
+    System.arraycopy(list, 0, newList, 2, list.length);
+
+    return newList;
+  }
+
   @Override
   public Value current(Env env)
   {
     SplFileInfo current = getCurrent(env);
 
-    return current != null ? env.wrapJava(this) : UnsetValue.UNSET;
+    return current != null ? env.wrapJava(current) : UnsetValue.UNSET;
   }
 
   protected SplFileInfo getCurrent(Env env)
@@ -90,15 +106,18 @@ public class DirectoryIterator
 
       Path child = _path.lookup(name);
 
-      _current = createCurrent(env, child);
+      _current = createCurrent(env, _path, child, name);
     }
 
     return _current;
   }
 
-  protected SplFileInfo createCurrent(Env env, Path path)
+  protected SplFileInfo createCurrent(Env env,
+                                      Path parent,
+                                      Path path,
+                                      String fileName)
   {
-    return new SplFileInfo(path);
+    return new SplFileInfo(parent, path, fileName);
   }
 
   protected int getKey()
@@ -150,6 +169,7 @@ public class DirectoryIterator
   //
   // SplFileInfo
   //
+  /*
   @Override
   public long getATime(Env env)
   {
@@ -308,4 +328,5 @@ public class DirectoryIterator
   {
     return getCurrent(env).__toString(env);
   }
+  */
 }

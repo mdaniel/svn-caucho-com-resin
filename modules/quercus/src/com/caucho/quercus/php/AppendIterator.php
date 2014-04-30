@@ -79,14 +79,16 @@ class AppendIterator
   }
 
   function rewind()
-  {
-    $count = $this->index;
+  {  
+    $count = $this->iters->count();
   
     for ($i = 0; $i < $count; $i++) {
       $iter = $this->iters[$i];
       
       $iter->rewind();
     }
+    
+    $this->iters->rewind();
     
     $this->index = 0;
   }
@@ -98,6 +100,10 @@ class AppendIterator
   
   function _getIterator()
   {
+    if ($this->index < 0) {
+      return NULL;
+    }
+  
     if (count($this->iters) <= $this->index) {
       return NULL;
     }
