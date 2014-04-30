@@ -217,17 +217,25 @@ public class SimpleXMLElement extends SimpleXMLNode
            SAXException
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    //factory.setNamespaceAware(true);
+
     DocumentBuilder builder = factory.newDocumentBuilder();
     DOMImplementation impl = builder.getDOMImplementation();
 
     SimpleHandler handler = new SimpleHandler(impl);
 
-    SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+    SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+    saxFactory.setNamespaceAware(true);
+
+    SAXParser parser = saxFactory.newSAXParser();
     XMLReader reader = parser.getXMLReader();
 
     //reader.setFeature("http://apache.org/xml/features/scanner/notify-char-refs", true);
     //reader.setFeature("http://xml.org/sax/features/external-general-entities", true);
     //reader.setFeature("http://xml.org/sax/features/lexical-handler/parameter-entities", true);
+
+    reader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+
     reader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
 
     if (dataIsUrl) {

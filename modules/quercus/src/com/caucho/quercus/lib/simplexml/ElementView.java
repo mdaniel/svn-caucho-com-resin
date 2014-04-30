@@ -353,10 +353,12 @@ public class ElementView extends SimpleView
   }
 
   @Override
-  public List<SimpleView> xpath(Env env, String expression)
+  public List<SimpleView> xpath(Env env,
+                                SimpleNamespaceContext context,
+                                String expression)
   {
     try {
-      return SimpleView.xpath(_node, expression);
+      return SimpleView.xpath(_node, context, expression);
     }
     catch (XPathExpressionException e) {
       log.log(Level.FINE, e.getMessage());

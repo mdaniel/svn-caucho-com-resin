@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -35,6 +39,8 @@ public abstract class SimpleXMLNode
 
   protected final QuercusClass _cls;
   protected final SimpleView _view;
+
+  private SimpleNamespaceContext _xpathNamespaceContext;
 
   public SimpleXMLNode(QuercusClass cls, SimpleView view)
   {
@@ -314,11 +320,29 @@ public abstract class SimpleXMLNode
   }
 
   /**
-   *  public array SimpleXMLElement::xpath(string $path)
+   *  public bool SimpleXMLElement::registerXPathNamespace ( string $prefix , string $ns )
+   */
+  public boolean registerXPathNamespace(Env env, String prefix, String ns)
+  {
+    if (_xpathNamespaceContext == null) {
+      _xpathNamespaceContext = new SimpleNamespaceContext();
+    }
+
+    _xpathNamespaceContext.addPrefix(prefix, ns);
+
+    return true;
+  }
+
+  /**
+   *  public array SimpleXMLElement::xpath( string $path )
    */
   public Value xpath(Env env, String expression)
   {
-    List<SimpleView> viewList = _view.xpath(env, expression);
+    if (_xpathNamespaceContext == null) {
+      _xpathNamespaceContext = new SimpleNamespaceContext();
+    }
+
+    List<SimpleView> viewList = _view.xpath(env, _xpathNamespaceContext, expression);
 
     if (viewList == null) {
       return NullValue.NULL;

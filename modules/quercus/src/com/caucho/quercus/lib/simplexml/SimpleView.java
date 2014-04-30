@@ -40,8 +40,8 @@ import java.util.Set;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -124,7 +124,9 @@ public abstract class SimpleView
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
-  public List<SimpleView> xpath(Env env, String expression)
+  public List<SimpleView> xpath(Env env,
+                                SimpleNamespaceContext context,
+                                String expression)
   {
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }
@@ -217,13 +219,25 @@ public abstract class SimpleView
     }
   }
 
-  protected static List<SimpleView> xpath(Node node, String expression)
+  protected static List<SimpleView> xpath(Node node,
+                                          SimpleNamespaceContext context,
+                                          String expression)
     throws XPathExpressionException
   {
-    XPath xpath = XPathFactory.newInstance().newXPath();
+    XPath xpath = context.getXPath();
 
-    NodeList nodes = (NodeList) xpath.evaluate(expression, node,
-                                               XPathConstants.NODESET);
+    NodeList nodes = null;
+
+    try {
+      XPathExpression expr = xpath.compile(expression);
+
+      nodes = (NodeList) expr.evaluate(node,
+                                       XPathConstants.NODESET);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
 
     int nodeLength = nodes.getLength();
 

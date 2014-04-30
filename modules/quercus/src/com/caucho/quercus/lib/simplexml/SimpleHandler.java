@@ -83,7 +83,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void startDocument()
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".startDocument0");
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".startDocument0");
+    }
 
     _doc = _impl.createDocument(null, null, null);
     _node = _doc;
@@ -92,20 +94,26 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void endDocument()
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".endDocument0");
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".endDocument0");
+    }
   }
 
   @Override
   public void processingInstruction(String target, String data)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".processingInstruction0: " + target + " . " + data);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".processingInstruction0: " + target + " . " + data);
+    }
   }
 
   @Override
   public void characters(char []ch, int start, int length)
     throws SAXException
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".characters0: " + new String(ch, start, length));
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".characters0: " + new String(ch, start, length));
+    }
 
     if (_entityName != null) {
       String entityName = _entityName;
@@ -129,15 +137,25 @@ public class SimpleHandler extends DefaultHandler2
   {
     appendText();
 
-    log.log(Level.FINE, getClass().getSimpleName() + ".startElement0: " + uri + " . " + localName + " . " + qName);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".startElement0: " + uri + " . " + localName + " . " + qName);
+    }
 
-    Element e = getDocument().createElement(qName);
+    Element e = getDocument().createElementNS(uri, qName);
+
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".startElement1: " + e.getNamespaceURI());
+    }
 
     for (int i = 0; i < attributes.getLength(); i++) {
       String attrName = attributes.getQName(i);
       String attrValue = attributes.getValue(i);
 
       e.setAttribute(attrName, attrValue);
+
+      if (log.isLoggable(Level.FINE)) {
+        log.log(Level.FINE, getClass().getSimpleName() + ".startElement2: " + attrName + " . " + attrValue);
+      }
     }
 
     _node.appendChild(e);
@@ -148,7 +166,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void endElement(String uri, String localName, String qName)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".endElement0: " + uri + " . " + localName + " . " + qName);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".endElement0: " + uri + " . " + localName + " . " + qName);
+    }
 
     appendText();
 
@@ -163,7 +183,9 @@ public class SimpleHandler extends DefaultHandler2
       String str = _sb.toString();
       _sb.setLength(0);
 
-      log.log(Level.FINE, "SimpleHandler.appendText0: " + str + " . " + str.length());
+      if (log.isLoggable(Level.FINE)) {
+        log.log(Level.FINE, "SimpleHandler.appendText0: " + str + " . " + str.length());
+      }
 
       Text text = getDocument().createTextNode(str);
 
@@ -174,13 +196,17 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void elementDecl(String name, String model)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".elementDecl0: " + name + " . " + model);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".elementDecl0: " + name + " . " + model);
+    }
   }
 
   @Override
   public void attributeDecl(String eName, String aName, String type, String mode, String value)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".attributeDecl0: " + eName + " . " + aName + " . " + type + " . " + mode + " . " + value);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".attributeDecl0: " + eName + " . " + aName + " . " + type + " . " + mode + " . " + value);
+    }
 
     ((Element) _node).setAttribute(aName, value);
   }
@@ -192,13 +218,17 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void notationDecl(String name, String publicId, String systemId)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".notationDecl0: " + name + " . " + publicId + " . " + systemId);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".notationDecl0: " + name + " . " + publicId + " . " + systemId);
+    }
   }
 
   @Override
   public void unparsedEntityDecl(String name, String publicId, String systemId, String notationName)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".unparsedEntityDecl0: " + name + " . " + publicId + " . " + systemId + " . " + notationName);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".unparsedEntityDecl0: " + name + " . " + publicId + " . " + systemId + " . " + notationName);
+    }
   }
 
   // DTDHandler end
@@ -206,7 +236,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void internalEntityDecl(String name, String value)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".internalEntityDecl0: " + name + " . " + value);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".internalEntityDecl0: " + name + " . " + value);
+    }
 
     _entityMap.put(name, value);
   }
@@ -214,7 +246,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void externalEntityDecl(String name, String publicId, String systemId)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".externalEntityDecl0: " + name + " . " + publicId + " . " + systemId);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".externalEntityDecl0: " + name + " . " + publicId + " . " + systemId);
+    }
   }
 
   //
@@ -224,7 +258,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void comment(char []ch, int start, int length)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".comment0: " + new String(ch, start, length));
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".comment0: " + new String(ch, start, length));
+    }
 
     appendText();
 
@@ -238,19 +274,25 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void startCDATA()
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".startCDATA0");
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".startCDATA0");
+    }
   }
 
   @Override
   public void endCDATA()
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".endCDATA0");
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".endCDATA0");
+    }
   }
 
   @Override
   public void startDTD(String name, String publicId, String systemId)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".startDTD0: " + name + " . " + publicId + " . " + systemId);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".startDTD0: " + name + " . " + publicId + " . " + systemId);
+    }
 
     DocumentType type = _impl.createDocumentType(name, publicId, systemId);
 
@@ -260,13 +302,17 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void endDTD()
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".endDTD0");
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".endDTD0");
+    }
   }
 
   @Override
   public void startEntity(String name)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".startEntity0: " + name);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".startEntity0: " + name);
+    }
 
     _entityName = name;
 
@@ -276,7 +322,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void endEntity(String name)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".endEntity0: " + name);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".endEntity0: " + name);
+    }
 
     //_entityMap.put(name, _sb.toString());
   }
@@ -286,7 +334,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public InputSource getExternalSubset(String name, String baseURI)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".getExternalSubset0: " + name + " . " + baseURI);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".getExternalSubset0: " + name + " . " + baseURI);
+    }
 
     return null;
   }
@@ -294,7 +344,10 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public InputSource resolveEntity(String publicId, String systemId)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".resolveEntity0: " + publicId + " . " + systemId);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".resolveEntity0: " + publicId + " . " + systemId);
+    }
+
 
     InputSource is = new InputSource(new StringReader(""));
 
@@ -305,7 +358,9 @@ public class SimpleHandler extends DefaultHandler2
   public InputSource resolveEntity(String name, String publicId,
                                    String baseURI, String systemId)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".resolveEntity1: " + name + " . " + publicId + " . " + baseURI + " . " + systemId);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".resolveEntity1: " + name + " . " + publicId + " . " + baseURI + " . " + systemId);
+    }
 
     InputSource is = new InputSource(new StringReader(""));
 
@@ -315,7 +370,9 @@ public class SimpleHandler extends DefaultHandler2
   @Override
   public void skippedEntity(String name)
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".skippedEntity0: " + name);
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".skippedEntity0: " + name);
+    }
 
     EntityReference ref = getDocument().createEntityReference(name);
 
@@ -326,23 +383,26 @@ public class SimpleHandler extends DefaultHandler2
   public void warning(SAXParseException e)
     throws SAXException
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".warning0: " + e);
-
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".warning0: " + e);
+    }
   }
 
   @Override
   public void error(SAXParseException e)
     throws SAXException
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".error0: " + e);
-
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".error0: " + e);
+    }
   }
 
   @Override
   public void fatalError(SAXParseException e)
     throws SAXException
   {
-    log.log(Level.FINE, getClass().getSimpleName() + ".fatalError0: " + e);
-
+    if (log.isLoggable(Level.FINE)) {
+      log.log(Level.FINE, getClass().getSimpleName() + ".fatalError0: " + e);
+    }
   }
 }

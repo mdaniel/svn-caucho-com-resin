@@ -36,6 +36,7 @@ import java.util.Map;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
@@ -43,6 +44,7 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
@@ -53,22 +55,22 @@ public class DOMXPath
 {
   private DOMNamespaceContext _context;
   private DOMDocument _document;
-  
+
   public static DOMXPath __construct(Env env, DOMDocument document)
   {
     return new DOMXPath(env, document);
   }
-  
+
   private DOMXPath(Env env, DOMDocument document)
   {
     _document = document;
   }
-  
+
   public Object evaluate(Env env,
                          String expression)
   {
     Node node = _document.getDelegate();
-    
+
     NodeList nodeList = (NodeList) query(env, expression, node);
 
     if (nodeList.getLength() == 1) {
@@ -76,30 +78,30 @@ public class DOMXPath
     }
     else
       return _document.wrap(nodeList);
-      
+
   }
-  
+
   public DOMNodeList query(Env env,
                            String expression,
                            @Optional DOMNode<Node> contextNode)
   {
     Node node;
-    
+
     if (contextNode != null)
       node = contextNode.getDelegate();
     else
       node = _document.getDelegate();
-    
+
     NodeList nodeList = (NodeList) query(env, expression, node);
 
     return _document.wrap(nodeList);
   }
 
-  private NodeList query(Env env, String pattern, Node node)
+  private NodeList query2(Env env, String pattern, Node node)
   {
     // the JDKs xpath is extremely inefficient, causing benchmark
     // problems with mediawiki
-    
+
     try {
       Expr expr = com.caucho.xpath.XPath.parseExpr(pattern);
 
@@ -109,12 +111,12 @@ public class DOMXPath
     }
   }
 
-  /*
+
   private NodeList query(Env env, String pattern, Node node)
   {
     try {
       if (_context == null) {
-        Quercus quercus = env.getQuercus();
+        QuercusContext quercus = env.getQuercus();
 
         ExpressionCache cache
           = (ExpressionCache) quercus.getSpecial("caucho.domxpath.cache");
@@ -156,37 +158,36 @@ public class DOMXPath
       throw new QuercusModuleException(e);
     }
   }
-  */
-  
+
   public boolean registerNamespace(String prefix, String namespaceURI)
   {
     if (_context == null)
       _context = new DOMNamespaceContext();
-    
+
     _context.addNamespace(prefix, namespaceURI);
 
     return true;
   }
-  
+
   public class DOMNamespaceContext
     implements NamespaceContext
   {
     private HashMap<String, LinkedHashSet<String>> _namespaceMap
       = new HashMap<String, LinkedHashSet<String>>();
-    
+
     protected void addNamespace(String prefix, String namespaceURI)
     {
       LinkedHashSet<String> list = _namespaceMap.get(namespaceURI);
-      
+
       if (list == null) {
         list = new LinkedHashSet<String>();
-        
+
         _namespaceMap.put(namespaceURI, list);
       }
 
       list.add(prefix);
     }
-    
+
     public String getNamespaceURI(String prefix)
     {
       for (Map.Entry<String, LinkedHashSet<String>> entry
@@ -197,21 +198,21 @@ public class DOMXPath
 
       return null;
     }
-    
+
     public String getPrefix(String namespaceURI)
     {
       Iterator<String> iter = getPrefixes(namespaceURI);
-      
+
       if (iter != null)
         return iter.next();
       else
         return null;
     }
-    
+
     public Iterator<String> getPrefixes(String namespaceURI)
     {
       LinkedHashSet<String> prefixList = _namespaceMap.get(namespaceURI);
-      
+
       if (prefixList != null)
         return prefixList.iterator();
       else
@@ -221,7 +222,7 @@ public class DOMXPath
 
   static class ExpressionCache {
     private final XPathFactory _factory = XPathFactory.newInstance();
-    
+
     private final LruCache<String,ExpressionEntry> _xpathCache
       = new LruCache<String,ExpressionEntry>(1024);
 

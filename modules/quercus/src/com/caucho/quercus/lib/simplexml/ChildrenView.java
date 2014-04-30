@@ -196,12 +196,14 @@ public class ChildrenView extends SimpleView
   }
 
   @Override
-  public List<SimpleView> xpath(Env env, String expression)
+  public List<SimpleView> xpath(Env env,
+                                SimpleNamespaceContext context,
+                                String expression)
   {
     if (_childList.size() > 0) {
       SimpleView firstChild = _childList.get(0);
 
-      return firstChild.xpath(env, expression);
+      return firstChild.xpath(env, context, expression);
     }
     else {
       return null;

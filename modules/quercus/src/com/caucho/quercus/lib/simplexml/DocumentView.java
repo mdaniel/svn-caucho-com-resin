@@ -116,9 +116,11 @@ public class DocumentView extends SimpleView
   }
 
   @Override
-  public List<SimpleView> xpath(Env env, String expression)
+  public List<SimpleView> xpath(Env env,
+                                SimpleNamespaceContext context,
+                                String expression)
   {
-    return _element.xpath(env, expression);
+    return _element.xpath(env, context, expression);
   }
 
   @Override
