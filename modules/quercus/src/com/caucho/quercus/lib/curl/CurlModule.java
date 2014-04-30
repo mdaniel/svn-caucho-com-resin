@@ -747,8 +747,10 @@ public class CurlModule
         curl.setIsVerifySSLPeer(value.toBoolean());
         break;
       case CURLOPT_UPLOAD:
-        if (value.toBoolean())
-          curl.setRequestMethod("PUT");
+        if (value.toBoolean()) {
+          // CURLOPT_UPLOAD implies PUT but not necessarily
+          //curl.setRequestMethod("PUT");
+        }
         break;
       case CURLOPT_VERBOSE:
         curl.setIsVerbose(value.toBoolean());

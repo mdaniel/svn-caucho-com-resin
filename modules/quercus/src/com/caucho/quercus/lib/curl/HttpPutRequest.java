@@ -85,8 +85,8 @@ public class HttpPutRequest
 
       long totalWritten = 0;
 
-      if (curl.getWriteCallback() != null) {
-        Callable callback = curl.getWriteCallback();
+      if (curl.getReadCallback() != null) {
+        Callable callback = curl.getReadCallback();
 
         Value fileV = env.wrapJava(in);
         LongValue lengthV = LongValue.create(length);

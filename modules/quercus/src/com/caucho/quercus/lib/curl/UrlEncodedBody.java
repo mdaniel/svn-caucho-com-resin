@@ -32,6 +32,8 @@ package com.caucho.quercus.lib.curl;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -40,30 +42,29 @@ public class UrlEncodedBody extends PostBody
 {
   private StringValue _body;
   private int _length;
-  
-  protected boolean init(Env env, Value body)
+
+  public UrlEncodedBody (Env env, Value body)
   {
     _body = body.toStringValue(env);
     _length = _body.length();
-    
-    return true;
   }
-  
+
   public String getContentType()
   {
     return "application/x-www-form-urlencoded";
   }
-  
+
+  @Override
   public long getContentLength()
   {
     return (long) _length;
   }
-  
+
   public void writeTo(Env env, OutputStream os)
     throws IOException
   {
     for (int i = 0; i < _length; i++) {
       os.write(_body.charAt(i));
     }
-  }  
+  }
 }

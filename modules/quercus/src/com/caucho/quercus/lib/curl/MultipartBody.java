@@ -36,6 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -57,7 +59,7 @@ public class MultipartBody extends PostBody
   private byte []_boundaryBytes;
   private long _length;
 
-  protected boolean init(Env env, Value body)
+  public MultipartBody(Env env, Value body)
   {
     _boundary = createBoundary();
     _boundaryBytes = _boundary.getBytes();
@@ -77,7 +79,10 @@ public class MultipartBody extends PostBody
 
         if (path == null || ! path.canRead()) {
           env.warning(L.l("cannot read file '{0}'", fileName));
-          return false;
+
+          setValid(false);
+
+          return;
         }
 
         _postItems.add(new PathEntry(env, key.toString(), path));
@@ -87,8 +92,6 @@ public class MultipartBody extends PostBody
     }
 
     _length = getContentLength(_postItems, _boundary);
-
-    return true;
   }
 
   private static String createBoundary()
@@ -108,11 +111,13 @@ public class MultipartBody extends PostBody
     return size;
   }
 
+  @Override
   public String getContentType()
   {
     return "multipart/form-data; boundary=\"" + _boundary + "\"";
   }
 
+  @Override
   public long getContentLength()
   {
     return _length;

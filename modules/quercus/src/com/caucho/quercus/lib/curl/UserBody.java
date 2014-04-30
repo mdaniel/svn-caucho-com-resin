@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,62 +33,71 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.caucho.quercus.env.Callable;
-import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.file.BinaryInput;
 
-abstract public class PostBody
+public class UserBody extends PostBody
 {
-  private boolean _isValid = true;
+  private final CurlResource _curl;
 
-  static PostBody create(Env env, CurlResource curl)
+  private Callable _callback;
+  private Value _fileV;
+  private long _length;
+
+  public UserBody(Env env,
+                  CurlResource curl,
+                  Callable callback, BinaryInput file, long length)
   {
-    PostBody post;
+    _curl = curl;
 
-    Value data = curl.getPostBody();
-    Callable bodyFun = curl.getReadCallback();
-
-    BinaryInput file = curl.getUploadFile();
-    long length = curl.getUploadFileSize();
-
-    if (data == null && bodyFun == null) {
-      return null;
-    }
-    else if (bodyFun != null) {
-      post = new UserBody(env, curl, bodyFun, file, length);
-    }
-    else if (data.isArray()) {
-      post = new MultipartBody(env, data);
-    }
-    else {
-      post = new UrlEncodedBody(env, data);
-    }
-
-    if (post.isValid()) {
-      return post;
-    }
-    else {
-      return null;
-    }
+    _callback = callback;
+    _fileV = env.wrapJava(file);
+    _length = length;
   }
 
+  @Override
+  public String getContentType()
+  {
+    return "application/x-www-form-urlencoded";
+  }
+
+  @Override
+  public long getContentLength()
+  {
+    return (long) _length;
+  }
+
+  @Override
   public boolean isChunked()
   {
-    return false;
+    return _length < 0;
   }
 
-  public void setValid(boolean isValid)
+  public void writeTo(Env env, OutputStream os)
+    throws IOException
   {
-    _isValid = isValid;
-  }
+    long length = _length;
 
-  public boolean isValid()
-  {
-    return true;
-  }
+    long totalWritten = 0;
 
-  abstract public long getContentLength();
-  abstract public String getContentType();
-  abstract public void writeTo(Env env, OutputStream os) throws IOException;
+    LongValue lengthV = LongValue.create(length);
+
+      while (totalWritten < length) {
+        StringValue str
+          = _callback.call(env, _curl, _fileV, lengthV).toStringValue(env);
+
+        int count = str.length();
+
+        if (count == 0) {
+          break;
+        }
+
+        str.writeTo(os);
+
+        totalWritten += count;
+      }
+  }
 }

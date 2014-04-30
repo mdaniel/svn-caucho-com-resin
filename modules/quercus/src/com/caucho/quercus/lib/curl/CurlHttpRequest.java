@@ -126,8 +126,9 @@ public class CurlHttpRequest
   protected boolean init(Env env)
     throws ProtocolException
   {
-    if (_conn == null || _curl == null)
+    if (_conn == null || _curl == null) {
       return false;
+    }
 
     if (! "GET".equals(_curl.getRequestMethod())) {
       _conn.setRequestMethod(_curl.getRequestMethod());
@@ -178,22 +179,25 @@ public class CurlHttpRequest
   protected boolean finish(Env env)
     throws IOException
   {
-    if (_curl == null || _conn == null)
+    if (_curl == null || _conn == null) {
       return false;
+    }
 
     _curl.setResponseCode(_conn.getResponseCode());
 
     Value header = getHeader(env, env.createBinaryBuilder());
 
-    if (header == BooleanValue.FALSE)
+    if (header == BooleanValue.FALSE) {
       return false;
+    }
 
     _curl.setHeader(header.toStringValue());
 
     Value body = getBody(env, env.createBinaryBuilder());
 
-    if (body == BooleanValue.FALSE)
+    if (body == BooleanValue.FALSE) {
       return false;
+    }
 
     _curl.setBody(body.toStringValue());
 
@@ -340,7 +344,7 @@ public class CurlHttpRequest
     bb.append("\r\n");
 
     if (_curl.getHeaderCallback() != null) {
-      StringValue sb = env.createUnicodeBuilder();
+      StringValue sb = env.createStringBuilder();
 
       sb.append(httpStatus);
       sb.append("\r\n");
@@ -362,16 +366,14 @@ public class CurlHttpRequest
       bb.append("\r\n");
 
       if (_curl.getHeaderCallback() != null) {
-        StringValue sb = env.createUnicodeBuilder();
+        StringValue sb = env.createStringBuilder();
 
         sb.append(key);
         sb.append(": ");
         sb.append(_conn.getHeaderField(i));
         sb.append("\r\n");
 
-        Value len = _curl.getHeaderCallback().call(env,
-                                                   env.wrapJava(_curl),
-                                                   sb);
+        Value len = _curl.getHeaderCallback().call(env, _curl, sb);
 
         if (len.toInt() != sb.length()) {
           _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
@@ -415,8 +417,9 @@ public class CurlHttpRequest
     else
       in = _conn.getErrorStream();
 
-    if (in == null)
+    if (in == null) {
       return StringValue.EMPTY;
+    }
 
     String encoding = _conn.getHeaderField("Content-Encoding");
 
