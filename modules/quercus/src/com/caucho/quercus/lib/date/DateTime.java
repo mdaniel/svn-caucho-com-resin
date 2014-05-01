@@ -126,6 +126,30 @@ public class DateTime implements Cloneable
   }
   */
 
+  public DateTime add(DateInterval interval)
+  {
+    int sign = interval.invert == 1 ? -1 : 1;
+
+    int month = _qDate.getMonth() + interval.m * sign;
+
+    int years = month / 12 + interval.y * sign;
+    month = month %12;
+
+    _qDate.setMonth(month);
+    _qDate.setYear(_qDate.getYear() + years);
+
+    int day = _qDate.getDayOfMonth() + interval.d * sign;
+    _qDate.setDayOfMonth(day);
+
+    long timeToAdd = interval.s;
+    timeToAdd += interval.i * 60;
+    timeToAdd += interval.h * 60 * 60;
+
+    setTime(getTime() + timeToAdd * 1000 * sign);
+
+    return this;
+  }
+
   @Override
   public Object clone()
   {
@@ -148,9 +172,7 @@ public class DateTime implements Cloneable
   {
     DateParser parser = new DateParser(modify, _qDate);
 
-    long time = parser.parse();
-
-    //setTime(time);
+    parser.parse();
   }
 
   public long getTimestamp()

@@ -189,7 +189,8 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Creates a new instance.
    */
-  public void initInstance(Env env, Value value)
+  @Override
+  public void initInstance(Env env, Value value, boolean isInitFieldValues)
   {
   }
 

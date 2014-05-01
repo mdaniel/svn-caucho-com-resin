@@ -57,6 +57,11 @@ public class JsonModule extends AbstractQuercusModule
   public static final int JSON_UNESCAPED_SLASHES = 256;
   public static final int JSON_UNESCAPED_UNICODE = 512;
 
+  public JsonModule(String foo)
+  {
+
+  }
+
   public String []getLoadedExtensions()
   {
     return new String[] { "json" };
@@ -110,8 +115,11 @@ public class JsonModule extends AbstractQuercusModule
                                   StringValue s,
                                   @Optional("false") boolean assoc)
   {
-    if (s.length() == 0)
+    env.removeSpecialValue("json.last_error");
+
+    if (s.length() == 0) {
       return new ArrayValueImpl();
+    }
 
     return (new JsonDecoder()).jsonDecode(env, s, assoc);
   }
@@ -126,5 +134,10 @@ public class JsonModule extends AbstractQuercusModule
     else {
       return ((Integer) obj).intValue();
     }
+  }
+
+  protected static void setErrorLast(Env env, int code)
+  {
+    env.setSpecialValue("json.last_error", new Integer(code));
   }
 }

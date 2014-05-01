@@ -140,6 +140,10 @@ public class ReflectionParameter
   {
     String name = _arg.getExpectedClass();
 
+    if (name == null) {
+      return null;
+    }
+
     ReflectionClass cls = new ReflectionClass(env, name);
 
     return cls;

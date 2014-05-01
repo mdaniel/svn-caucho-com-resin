@@ -753,12 +753,9 @@ public class NetworkModule extends AbstractQuercusModule {
 
   /**
    * Opens syslog.
-   *
-   * XXX: stubbed for now
    */
   public static boolean openlog(Env env, String ident, int option, int facility)
   {
-    env.stub("unimplemented");
     return true;
   }
 

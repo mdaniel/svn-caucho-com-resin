@@ -50,7 +50,7 @@ import java.util.Set;
 /**
  * Represents a Quercus class definition
  */
-abstract public class ClassDef {
+abstract public class ClassDef implements InstanceInitializer {
   private final static L10N L = new L10N(ClassDef.class);
 
   private final Location _location;
@@ -227,6 +227,16 @@ abstract public class ClassDef {
   }
 
   public AbstractFunction getCallStatic()
+  {
+    return null;
+  }
+
+  public AbstractFunction getSerialize()
+  {
+    return null;
+  }
+
+  public AbstractFunction getUnserialize()
   {
     return null;
   }

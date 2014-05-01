@@ -1048,6 +1048,31 @@ public class ObjectExtValue extends ObjectValue
     serializeMap.put(this);
     serializeMap.incrementIndex();
 
+    QuercusClass qClass = getQuercusClass();
+    AbstractFunction fun = qClass.getSerialize();
+
+    if (fun != null) {
+      sb.append("C:");
+      sb.append(_className.length());
+      sb.append(":");
+
+      sb.append('"');
+      sb.append(_className);
+      sb.append('"');
+      sb.append(':');
+
+      StringValue value = fun.callMethod(env, qClass, this).toStringValue(env);
+
+      sb.append(value.length());
+      sb.append(':');
+
+      sb.append("{");
+      sb.append(value);
+      sb.append("}");
+
+      return;
+    }
+
     sb.append("O:");
     sb.append(_className.length());
     sb.append(":\"");

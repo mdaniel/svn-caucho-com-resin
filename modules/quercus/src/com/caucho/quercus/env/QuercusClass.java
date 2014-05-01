@@ -91,6 +91,10 @@ public class QuercusClass extends NullValue {
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
 
+  // Serializable interface
+  private AbstractFunction _serializeFun;
+  private AbstractFunction _unserializeFun;
+
   private final ArrayList<InstanceInitializer> _initializers;
 
   private final MethodMap<AbstractFunction> _methodMap;
@@ -330,6 +334,9 @@ public class QuercusClass extends NullValue {
     _traversableDelegate = cacheClass._traversableDelegate;
     _countDelegate = cacheClass._countDelegate;
 
+    _serializeFun = cacheClass._serializeFun;
+    _unserializeFun = cacheClass._unserializeFun;
+
     _initializers = cacheClass._initializers;
 
     _fieldMap = cacheClass._fieldMap;
@@ -533,10 +540,6 @@ public class QuercusClass extends NullValue {
    */
   public void setTraversableDelegate(TraversableDelegate delegate)
   {
-    if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("{0} setting traversable delegate {1}",
-                                this,  delegate));
-
     _traversableDelegate = delegate;
   }
 
@@ -553,10 +556,6 @@ public class QuercusClass extends NullValue {
    */
   public void setCountDelegate(CountDelegate delegate)
   {
-    if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("{0} setting count delegate {1}",
-                                this,  delegate));
-
     _countDelegate = delegate;
   }
 
@@ -566,6 +565,26 @@ public class QuercusClass extends NullValue {
   public final CountDelegate getCountDelegate()
   {
     return _countDelegate;
+  }
+
+  /**
+   * Sets the Serializable functions.
+   */
+  public void setSerialize(AbstractFunction serializeFun,
+                           AbstractFunction unserializeFun)
+  {
+    _serializeFun = serializeFun;
+    _unserializeFun = unserializeFun;
+  }
+
+  public AbstractFunction getSerialize()
+  {
+    return _serializeFun;
+  }
+
+  public AbstractFunction getUnserialize()
+  {
+    return _unserializeFun;
   }
 
   /**
@@ -1128,6 +1147,15 @@ public class QuercusClass extends NullValue {
    */
   public Value createObject(Env env)
   {
+    return createObject(env, true);
+  }
+
+  /**
+   * Creates a new object without calling the constructor.  This is used
+   * for unserializing classes.
+   */
+  public Value createObject(Env env, boolean isInit)
+  {
     if (isAbstract()) {
       throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
                                          _className));
@@ -1166,7 +1194,7 @@ public class QuercusClass extends NullValue {
       objectValue = _classDef.createObject(env, this);
     }
 
-    initObject(env, objectValue);
+    initObject(env, objectValue, isInit);
 
     return objectValue;
   }
@@ -1176,8 +1204,16 @@ public class QuercusClass extends NullValue {
    */
   public void initObject(Env env, ObjectValue obj)
   {
+    initObject(env, obj, true);
+  }
+
+  /**
+   * Initializes the object's methods and fields.
+   */
+  public void initObject(Env env, ObjectValue obj, boolean isInitFieldValues)
+  {
     for (InstanceInitializer initializer : _initializers) {
-      initializer.initInstance(env, obj);
+      initializer.initInstance(env, obj, isInitFieldValues);
     }
   }
 
@@ -1301,6 +1337,10 @@ public class QuercusClass extends NullValue {
   @Override
   public boolean isA(Env env, String name)
   {
+    if (name.startsWith("\\")) {
+      name = name.substring(1);
+    }
+
     boolean isA = _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));
 
     if (isA) {
@@ -1415,7 +1455,7 @@ public class QuercusClass extends NullValue {
       if (v_current != NullValue.NULL && v_current != UnsetValue.UNSET) {
         return v_current;
       }
-      
+
       if (_fieldGet == null) {
         return ((ClassField) _fieldMap.get(name)).getInitExpr().eval(env);
       }

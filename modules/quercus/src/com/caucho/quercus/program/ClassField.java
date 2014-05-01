@@ -127,7 +127,9 @@ public class ClassField
   public static StringValue createProtectedCanonicalName(StringValue sb,
                                                          StringValue name)
   {
+    sb.append('\u0000');
     sb.append('*');
+    sb.append('\u0000');
     sb.append(name);
 
     return sb;
@@ -159,12 +161,17 @@ public class ClassField
 
   public static boolean isPrivate(StringValue canonicalName)
   {
-    return canonicalName.startsWith("\u0000");
+    return canonicalName.length() > 3
+           && canonicalName.charAt(0) == '\u0000'
+           && canonicalName.charAt(1) != '*';
   }
 
   public static boolean isProtected(StringValue canonicalName)
   {
-    return canonicalName.startsWith("*");
+    return canonicalName.length() > 3
+           && canonicalName.charAt(0) == '\u0000'
+           && canonicalName.charAt(1) == '*'
+           && canonicalName.charAt(2) == '\u0000';
   }
 
   public static StringValue getDeclaringClass(StringValue sb,

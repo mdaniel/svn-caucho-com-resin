@@ -30,6 +30,7 @@
 package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.DoubleValue;
@@ -455,7 +456,7 @@ public class ModuleContext
     list.add(clsName);
   }
 
-  /*
+  /**
    * Returns the list of the classes that are part of this extension.
    */
   public HashSet<String> getExtensionClasses(String ext)
@@ -556,8 +557,8 @@ public class ModuleContext
 
           introspectPhpModuleClass(cl);
         } catch (Throwable e) {
-          log.fine("Failed loading " + className + "\n" + e.toString());
-          log.log(Level.FINE, e.toString(), e);
+          log.info("Failed loading " + className + "\n" + e.toString());
+          log.log(Level.INFO, e.toString(), e);
         }
       }
     }
@@ -594,17 +595,29 @@ public class ModuleContext
    * @param cl the class to introspect.
    */
   private void introspectPhpModuleClass(Class<?> cl)
-    throws IllegalAccessException, InstantiationException, ConfigException
+    throws IllegalAccessException, InstantiationException, ConfigException,
+           InvocationTargetException, NoSuchMethodException
   {
     synchronized (_moduleInfoMap) {
-      if (_moduleInfoMap.get(cl.getName()) != null)
+      if (_moduleInfoMap.get(cl.getName()) != null) {
         return;
+      }
 
       log.finest(getClass().getSimpleName()
                  + " loading module "
                  + cl.getName());
 
-      QuercusModule module = (QuercusModule) cl.newInstance();
+      QuercusModule module;
+
+      try {
+        Constructor<?> constructor = cl.getConstructor();
+
+        module = (QuercusModule) constructor.newInstance();
+      }
+      catch (NoSuchMethodException e) {
+        throw new QuercusException(L.l("unable to instantiate Quercus module {0}"
+                                       + " because it does not have a default constructor", cl), e);
+      }
 
       ModuleInfo info = addModule(cl.getName(), module);
 

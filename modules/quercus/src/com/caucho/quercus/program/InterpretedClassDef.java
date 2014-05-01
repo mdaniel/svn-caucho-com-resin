@@ -39,7 +39,6 @@ import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.Location;
-import com.caucho.util.L10N;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -84,6 +83,9 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _unset;
   protected AbstractFunction _call;
   protected AbstractFunction _callStatic;
+
+  protected AbstractFunction _serializeFun;
+  protected AbstractFunction _unserializeFun;
 
   protected AbstractFunction _invoke;
   protected AbstractFunction _toString;
@@ -306,6 +308,9 @@ public class InterpretedClassDef extends ClassDef
     if (_unset != null)
       cl.setUnset(_unset);
 
+    if (_serializeFun != null) {
+      cl.setSerialize(_serializeFun, _unserializeFun);
+    }
 
     for (Map.Entry<StringValue,AbstractFunction> entry : _functionMap.entrySet()) {
       StringValue funName = entry.getKey();
@@ -383,6 +388,18 @@ public class InterpretedClassDef extends ClassDef
     return _callStatic;
   }
 
+  @Override
+  public AbstractFunction getSerialize()
+  {
+    return _serializeFun;
+  }
+
+  @Override
+  public AbstractFunction getUnserialize()
+  {
+    return _unserializeFun;
+  }
+
   /**
    * Adds a function.
    */
@@ -434,6 +451,12 @@ public class InterpretedClassDef extends ClassDef
     }
     else if (name.equalsStringIgnoreCase(getName()) && _constructor == null) {
       _constructor = fun;
+    }
+    else if (name.equalsString("serialize") && isA(null, "Serializable")) {
+      _serializeFun = fun;
+    }
+    else if (name.equalsString("unserialize") && isA(null, "Serializable")) {
+      _unserializeFun = fun;
     }
   }
 
@@ -526,14 +549,15 @@ public class InterpretedClassDef extends ClassDef
   /**
    * Initialize the fields
    */
-  public void initInstance(Env env, Value value)
+  @Override
+  public void initInstance(Env env, Value obj, boolean isInitFieldValues)
   {
-    ObjectValue object = (ObjectValue) value;
+    ObjectValue object = (ObjectValue) obj;
 
     for (Map.Entry<StringValue,ClassField> entry : _fieldMap.entrySet()) {
       ClassField field = entry.getValue();
 
-      object.initField(env, field);
+      object.initField(env, field, isInitFieldValues);
     }
 
     if (_destructor != null) {

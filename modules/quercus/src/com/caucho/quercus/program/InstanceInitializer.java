@@ -39,6 +39,6 @@ public interface InstanceInitializer {
   /**
    * Creates a new instance.
    */
-  public void initInstance(Env env, Value value);
+  public void initInstance(Env env, Value obj, boolean isInitFieldValues);
 }
 

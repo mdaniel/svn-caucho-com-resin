@@ -38,6 +38,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.lib.spl.Serializable;
 import com.caucho.quercus.marshal.JavaMarshal;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
@@ -130,6 +131,9 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
 
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
+
+  private AbstractFunction _serializeFun;
+  private AbstractFunction _unserializeFun;
 
   private Method _iteratorMethod;
 
@@ -251,7 +255,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     return _type;
   }
 
-  /*
+  /**
    * Returns the type of this resource.
    */
   public String getResourceType()
@@ -264,7 +268,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     return _moduleContext;
   }
 
-  /*
+  /**
    * Returns the name of the extension that this class is part of.
    */
   @Override
@@ -621,6 +625,18 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     return __callStatic;
   }
 
+  @Override
+  public AbstractFunction getSerialize()
+  {
+    return _serializeFun;
+  }
+
+  @Override
+  public AbstractFunction getUnserialize()
+  {
+    return _unserializeFun;
+  }
+
   /**
    * Eval a method
    */
@@ -776,6 +792,10 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     else if (_funArrayDelegate != null)
       cl.setArrayDelegate(_funArrayDelegate);
 
+    if (_serializeFun != null) {
+      cl.setSerialize(_serializeFun, _unserializeFun);
+    }
+
     if (_traversableDelegate != null)
       cl.setTraversableDelegate(_traversableDelegate);
     else if (cl.getTraversableDelegate() == null
@@ -818,7 +838,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   /**
    * Creates a new instance.
    */
-  public void initInstance(Env env, Value value)
+  @Override
+  public void initInstance(Env env, Value value, boolean isInitFieldValues)
   {
     if (value instanceof ObjectValue) {
       ObjectValue object = (ObjectValue) value;
@@ -914,6 +935,10 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         __construct = consMethod;
     }
 
+    if (Serializable.class.equals(_type)) {
+      _serializeFun = findFunction(Serializable.SERIALIZE);
+      _unserializeFun = findFunction(Serializable.UNSERIALIZE);
+    }
 
     //Method consMethod = getConsMethod(_type);
 

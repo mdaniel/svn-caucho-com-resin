@@ -30,9 +30,11 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -244,25 +246,36 @@ public final class UnserializeReader {
 
           FieldVisibility visibility = FieldVisibility.PUBLIC;
 
-          if (key.length() > 3 && key.charAt(0) == 0) {
-            switch (key.charAt(1)) {
-              case 'A': // 0x41
-                visibility = FieldVisibility.PRIVATE;
-                break;
-              case '*': // 0x2A
-                visibility = FieldVisibility.PROTECTED;
-                break;
-              default:
-                throw new IOException(L.l("field visibility modifier is not valid: 0x{0}",
-                                          Integer.toHexString(key.charAt(2))));
-            }
+          if (key.length() == 0) {
+            throw new IOException(L.l("field key is empty for class {0})",
+                                      className));
+          }
 
-            if (key.charAt(2) != 0) {
-              throw new IOException(L.l("end of field visibility modifier is not valid: 0x{0}",
-                                        Integer.toHexString(key.charAt(2))));
-            }
+          if (key.charAt(0) == 0) {
+            if (key.length() > 3
+                && key.charAt(1) == '*'
+                && key.charAt(2) == 0) {
+              visibility = FieldVisibility.PROTECTED;
 
-            key = key.substring(3);
+              //key = key.substring(3);
+            }
+            else if (key.length() > 4) {
+              int end = key.indexOf("\u0000", 1);
+
+              if (end < 0) {
+                throw new IOException(L.l("end of field visibility modifier is not valid: 0x{0} ({1}, {2})",
+                                          Integer.toHexString(key.charAt(2)), className, key));
+              }
+
+              StringValue declaringClass = key.substring(1, end);
+              StringValue fieldName = key.substring(end + 1);
+
+              visibility = FieldVisibility.PRIVATE;
+            }
+            else {
+              throw new IOException(L.l("field visibility modifier is not valid: 0x{0} ({1}, {2})",
+                                        Integer.toHexString(key.charAt(1)), className, key));
+            }
           }
 
           Value value = unserialize(env);
@@ -276,6 +289,58 @@ public final class UnserializeReader {
           return ref;
         else
           return obj;
+      }
+
+    case 'C':
+      {
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        if (! isValidString(len)) {
+          return BooleanValue.FALSE;
+        }
+
+        String className = readString(len);
+
+        expect('"');
+        expect(':');
+        int count = (int) readInt();
+        expect(':');
+        expect('{');
+
+        QuercusClass qClass = env.findClass(className);
+
+        if (qClass == null) {
+          log.fine(L.l("{0} is an undefined class in unserialize",
+                   className));
+
+          return BooleanValue.FALSE;
+        }
+
+        AbstractFunction fun = qClass.getUnserialize();
+
+        if (fun == null) {
+          log.fine(L.l("{0} does not implement unserialize()",
+                       className));
+
+          return BooleanValue.FALSE;
+        }
+
+        if (! isValidString(count)) {
+          return BooleanValue.FALSE;
+        }
+
+        String data = readString(count);
+        StringValue dataV = env.createString(data);
+
+        Value obj = qClass.createObject(env, false);
+        fun.callMethod(env, qClass, obj, dataV);
+
+        expect('}');
+
+        return obj;
       }
 
     case 'N':

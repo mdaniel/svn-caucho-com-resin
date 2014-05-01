@@ -110,7 +110,7 @@ public class Arg {
 
   public String toString()
   {
-    return "Arg[" + _name + "]";
+    return "Arg[" + _expectedClass + " $" + _name + "]";
   }
 }
 

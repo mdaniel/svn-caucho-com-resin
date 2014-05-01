@@ -2537,12 +2537,17 @@ abstract public class Value implements java.io.Serializable
     }
   }
 
-  public final void initField(Env env, ClassField field)
+  public final void initField(Env env,
+                              ClassField field,
+                              boolean isInitFieldValues)
   {
-    initField(env,
-              field.getName(),
-              field.getCanonicalName(),
-              field.evalInitExpr(env));
+    Value value = NullValue.NULL;
+
+    if (isInitFieldValues) {
+      value = field.evalInitExpr(env);
+    }
+
+    initField(env, field.getName(), field.getCanonicalName(), value);
   }
 
   public final void initField(Env env,

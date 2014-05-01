@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib.json;
 
+import java.util.logging.Logger;
+
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -43,6 +45,7 @@ import com.caucho.util.L10N;
 
 class JsonDecoder {
   private static final L10N L = new L10N(JsonDecoder.class);
+  private static final Logger log = Logger.getLogger(JsonDecoder.class.getName());
 
   private StringValue _str;
   private int _len;
@@ -550,12 +553,15 @@ class JsonDecoder {
     String token = _str.substring(_offset, end).toString();
 
     if (message != null) {
-      env.warning(L.l("error parsing '{0}': {1}\n  [{2}]",
-                      token, message,
-                      currentLine()));
+      log.fine(L.l("error parsing '{0}': {1}\n  [{2}]",
+                   token, message,
+                   currentLine()));
     }
-    else
-      env.warning(L.l("error parsing '{0}'\n  [{1}]", token, currentLine()));
+    else {
+      log.fine(L.l("error parsing '{0}'\n  [{1}]", token, currentLine()));
+    }
+
+    JsonModule.setErrorLast(env, JsonModule.JSON_ERROR_SYNTAX);
 
     return NullValue.NULL;
   }

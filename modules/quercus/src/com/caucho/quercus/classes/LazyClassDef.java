@@ -259,9 +259,9 @@ public class LazyClassDef extends CompiledClassDef
    * Initialize the quercus class.
    */
   @Override
-  public void initInstance(Env env, Value value)
+  public void initInstance(Env env, Value value, boolean isInitFieldValues)
   {
-    getClassDef().initInstance(env, value);
+    getClassDef().initInstance(env, value, isInitFieldValues);
   }
 
   /**

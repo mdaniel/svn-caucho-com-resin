@@ -1161,14 +1161,5 @@ public class OptionsModule extends AbstractQuercusModule {
 
   static final IniDefinition INI_SHORT_OPEN_TAG
     = _iniDefinitions.add("short_open_tag", true, PHP_INI_ALL);
-
-  // unsupported
-  static final IniDefinition MAGIC_QUOTES_RUNTIME
-    = _iniDefinitions.addUnsupported(
-      "magic_quotes_runtime", false, PHP_INI_ALL);
-  static final IniDefinition MAGIC_QUOTES_SYBASE
-    = _iniDefinitions.addUnsupported("magic_quotes_sybase", false, PHP_INI_ALL);
-  static final IniDefinition INI_REGISTER_GLOBALS
-    = _iniDefinitions.addUnsupported("register_globals", false, PHP_INI_ALL);
 }
 
