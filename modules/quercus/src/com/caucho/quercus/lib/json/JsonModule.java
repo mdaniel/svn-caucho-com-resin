@@ -57,11 +57,6 @@ public class JsonModule extends AbstractQuercusModule
   public static final int JSON_UNESCAPED_SLASHES = 256;
   public static final int JSON_UNESCAPED_UNICODE = 512;
 
-  public JsonModule(String foo)
-  {
-
-  }
-
   public String []getLoadedExtensions()
   {
     return new String[] { "json" };
