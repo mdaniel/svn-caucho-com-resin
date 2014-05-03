@@ -362,7 +362,7 @@ public class CurlModule
       return BooleanValue.FALSE;
     }
 
-    return curl.execute(env);
+    return curl.execute(env, true);
   }
 
   /**
@@ -865,6 +865,10 @@ public class CurlModule
       //
       // strings
       //
+      case CURLOPT_CAINFO:
+        env.notice(L.l("custom certificates not supported"));
+        break;
+
       case CURLOPT_COOKIE:
         curl.setCookie(value.toString());
         break;

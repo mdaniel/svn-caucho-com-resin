@@ -79,7 +79,7 @@ public class CurlMultiResource extends ResourceValue
       _runningCount = _curlList.size();
 
       for (CurlResource curl : _curlList) {
-        curl.execute(env);
+        curl.execute(env, false);
 
         _msgQueue.add(curl);
       }

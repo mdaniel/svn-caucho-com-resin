@@ -319,6 +319,14 @@ public class CurlResource extends ResourceValue
   }
 
   /**
+   * Returns true if returning data instead of to stdout.
+   */
+  public boolean isReturningData()
+  {
+    return _isReturningData;
+  }
+
+  /**
    * Set to true to return data instead of to stdout.
    */
   public void setIsReturningData(boolean returnData)
@@ -758,7 +766,7 @@ public class CurlResource extends ResourceValue
   /**
    * Executes this request.
    */
-  public Value execute(Env env)
+  public Value execute(Env env, boolean isPrintData)
   {
     init();
 
@@ -777,13 +785,13 @@ public class CurlResource extends ResourceValue
       saveCookie(env);
     }
 
-    return getReturnValue(env);
+    return getReturnValue(env, isPrintData);
   }
 
   /**
    * Returns headers and/or body of the last request.
    */
-  private Value getReturnValue(Env env)
+  private Value getReturnValue(Env env, boolean isPrintData)
   {
     StringValue data;
 
@@ -828,7 +836,9 @@ public class CurlResource extends ResourceValue
       return data;
     }
     else {
-      env.print(data);
+      if (isPrintData) {
+        env.print(data);
+      }
 
       return BooleanValue.TRUE;
     }
