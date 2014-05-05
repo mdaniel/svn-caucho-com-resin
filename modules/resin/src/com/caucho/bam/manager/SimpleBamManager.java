@@ -64,7 +64,7 @@ public class SimpleBamManager implements BamManager
   private final AtomicLong _sequence = new AtomicLong(CurrentTime.getCurrentTime());
   
   private ManagedBroker _broker;
-  private long _timeout = 120 * 1000L;
+  private long _timeout = 600 * 1000L;
   
   public SimpleBamManager(Broker broker)
   {

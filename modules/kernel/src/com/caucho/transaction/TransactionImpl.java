@@ -668,8 +668,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    if (_userTransaction != null)
+    if (_userTransaction != null) {
       _suspendState = _userTransaction.userSuspend();
+    }
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " suspended");
@@ -684,8 +685,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
       throw new IllegalStateException(L
           .l("can't resume non-suspended transaction"));
 
-    if (_timeout > 0)
+    if (_timeout > 0) {
       _alarm.queue(_timeout + EXTRA_TIMEOUT);
+    }
 
     for (int i = _resourceCount - 1; i >= 0; i--) {
       if ((_resourceStates[i] & (RES_ACTIVE | RES_SUSPENDED)) == RES_ACTIVE) {
@@ -699,9 +701,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    if (_userTransaction != null)
+    if (_userTransaction != null) {
       _userTransaction.userResume(_suspendState);
+    }
 
+    _suspendState = null;
     _isSuspended = false;
 
     if (log.isLoggable(Level.FINE))

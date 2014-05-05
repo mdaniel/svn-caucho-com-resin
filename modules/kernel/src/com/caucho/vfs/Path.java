@@ -178,8 +178,9 @@ public abstract class Path implements Comparable<Path> {
 
     Path path = getCache(userPath);
 
-    if (path != null)
+    if (path != null) {
       return path;
+    }
 
     path = lookupImpl(userPath, null, true);
 
@@ -271,13 +272,17 @@ public abstract class Path implements Comparable<Path> {
     // c:xxx -> file:/c:xxx
     if (isWindows()) {
       int length = scheme.length();
-      int ch;
+      char ch;
 
       if (length == 1
           && ('a' <= (ch = scheme.charAt(0)) && ch <= 'z'
               || 'A' <= ch && ch <= 'Z')) {
-        if (_isTestWindows)
+        
+        userPath = "" + Character.toLowerCase(ch) + userPath.substring(1);
+            
+        if (_isTestWindows) {
           return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
+        }
 
         path = schemeMap.get("file");
 

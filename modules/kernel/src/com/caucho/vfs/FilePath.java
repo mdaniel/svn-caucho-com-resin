@@ -97,9 +97,12 @@ public class FilePath extends FilesystemPath {
       return getPwd();
     else if (path.length() > 0 && path.charAt(0) == '/')
       return path;
-    else if (path.length() > 1 && path.charAt(1) == ':' && isWindows())
+    else if (path.length() > 1 && path.charAt(1) == ':' && isWindows()) {
+      char ch = Character.toLowerCase(path.charAt(0));
+      
       //return convertFromWindowsPath(path);
-      return path;
+      return "/" + ch + ":" + path.substring(2);
+    }
     else {
       String dir = getPwd();
 
@@ -136,9 +139,10 @@ public class FilePath extends FilesystemPath {
     int colon = path.indexOf(':');
     int length = path.length();
     char ch;
-
-    if (colon == 1 && (ch = path.charAt(0)) != '/' && ch != '\\')
-      return "/" + path.charAt(0) + ":/" + path.substring(2);
+    
+    if (colon == 1 && (ch = path.charAt(0)) != '/' && ch != '\\') {
+      return "/" + ch + ":/" + path.substring(2);
+    }
     else if (length > 1
              && ((ch = path.charAt(0)) == '/' || ch == '\\')
              && ((ch = path.charAt(1)) == '/' || ch == '\\')) {
@@ -150,12 +154,14 @@ public class FilePath extends FilesystemPath {
           return "/:" + path;
       }
 
-      ch = path.charAt(colon - 1);
+      ch = Character.toLowerCase(path.charAt(colon - 1));
 
-      if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
-        return path.substring(colon - 2);
-      else
+      if (ch >= 'a' && ch <= 'z') {
+        return "/" + ch + path.substring(colon);
+      }
+      else {
         return "/:" + path;
+      }
     }
     else
       return path;
@@ -203,12 +209,16 @@ public class FilePath extends FilesystemPath {
     char ch1 = filePath.charAt(offset + 1);
     char ch2 = filePath.charAt(offset);
 
+    /*
     if ((ch2 == '/' || ch2 == _separatorChar)
         && (ch1 == '/' || ch1 == _separatorChar))
       return super.schemeWalk(userPath, attributes,
                               convertFromWindowsPath(filePath.substring(offset)), 0);
     else
       return super.schemeWalk(userPath, attributes, filePath, offset);
+      */
+    return super.schemeWalk(userPath, attributes,
+                            convertFromWindowsPath(filePath.substring(offset)), 0);
   }
 
   /**

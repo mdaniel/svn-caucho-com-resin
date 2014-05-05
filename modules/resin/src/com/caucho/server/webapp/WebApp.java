@@ -3659,6 +3659,9 @@ public class WebApp extends ServletContextImpl
         isOkay = true;
         return;
       }
+      
+      WebAppEnv env = new WebAppEnv();
+      env.init();
 
       _classLoader.start();
 

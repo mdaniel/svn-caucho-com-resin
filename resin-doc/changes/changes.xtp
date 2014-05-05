@@ -12,6 +12,11 @@
 
 <s2 title="4.0.40 (Mar 28, 2014)">
 <ul>
+<li>classLoader: getResource() should skip broken jars (#5706, rep by Constantinos Karantzas)</li>
+<li>servlet-env: bind java:comp/BeanValidation (#5587, rep by Matthias Jiderhamn)</li>
+<li>vfs: normalize windows drive letters to lower case to avoid dups (#5592, rep by Matthias Jiderhamn)</li>
+<li>bam: increase default timeout for remote deploy (#5652, rep by Matthias Jiderhamn)</li> 
+<li>xa: clear _suspendState on transaction resume for memory issues (#5647, rep by Matthias Jiderhamn)</li>
 <li>i18n: iso-8859-1 encoding issue with non-latin-1 characters needs to return error character (rep by Yoel Gluck)</li>
 </ul>
 </s2>

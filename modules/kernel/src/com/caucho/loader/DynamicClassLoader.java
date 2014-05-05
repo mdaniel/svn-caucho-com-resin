@@ -2019,10 +2019,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
 
-    URL url;
+    URL url = null;
 
     if (parent != null) {
-      url = parent.getResource(name);
+      try {
+        url = parent.getResource(name);
+      } catch (Exception e) {
+        log().log(Level.FINER, e.toString(), e);
+      }
 
       if (url != null) {
         _resourceCache.put(name, url);
@@ -2077,7 +2081,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     for (int i = 0; loaders != null && i < loaders.size(); i++) {
       Loader loader = loaders.get(i);
 
-      is = loader.getResourceAsStream(name);
+      try {
+        is = loader.getResourceAsStream(name);
+      } catch (Exception e) {
+        log().log(Level.FINER, e.toString(), e);
+      }
 
       if (is != null)
         return is;
@@ -2096,10 +2104,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
 
-    InputStream is;
+    InputStream is = null;
 
     if (parent != null) {
-      is = parent.getResourceAsStream(name);
+      try {
+        is = parent.getResourceAsStream(name);
+      } catch (Exception e) {
+        log().log(Level.FINER, e.toString(), e);
+      }
 
       if (is != null)
         return is;
