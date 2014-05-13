@@ -1214,8 +1214,9 @@ public class SessionImpl implements HttpSession, CacheListener {
       // server/12i1, 12ch
       Login login = _manager.getWebApp().getLogin();
 
-      if (login != null)
+      if (login != null) {
         login.sessionInvalidate(this, logout == Logout.TIMEOUT);
+      }
 
       _manager.removeSession(this);
 
@@ -1256,8 +1257,9 @@ public class SessionImpl implements HttpSession, CacheListener {
         // server/018z
         isRemove = true;
 
-        if (isRemove)
+        if (isRemove) {
           _manager.getSessionStore().remove(_id);
+        }
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
