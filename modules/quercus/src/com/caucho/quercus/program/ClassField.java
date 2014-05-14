@@ -97,13 +97,10 @@ public class ClassField
 
   public static StringValue getOrdinaryName(StringValue canonicalName)
   {
-    if (isPrivate(canonicalName)) {
-      int p = canonicalName.lastIndexOf('\u0000');
+    int p = canonicalName.lastIndexOf('\u0000');
 
+    if (p >= 0) {
       return canonicalName.substring(p + 1);
-    }
-    else if (isProtected(canonicalName)) {
-      return canonicalName.substring(1);
     }
     else {
       return canonicalName;
@@ -156,7 +153,9 @@ public class ClassField
 
   public static boolean isPublic(StringValue canonicalName)
   {
-    return ! isProtected(canonicalName) && ! isPrivate(canonicalName);
+    int p = canonicalName.lastIndexOf('\u0000');
+
+    return p >= 0;
   }
 
   public static boolean isPrivate(StringValue canonicalName)

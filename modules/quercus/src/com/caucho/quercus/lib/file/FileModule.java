@@ -3264,7 +3264,7 @@ public class FileModule extends AbstractQuercusModule {
 
       Path path = env.lookupPwd(filename);
 
-      if (path == null || path.exists()) {
+      if (path == null || ! path.exists()) {
         env.warning(L.l("file does not exist: '{0}'", filename));
 
         return false;

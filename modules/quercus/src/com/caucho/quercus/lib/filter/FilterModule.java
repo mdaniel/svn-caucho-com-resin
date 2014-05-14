@@ -59,6 +59,7 @@ public class FilterModule extends AbstractQuercusModule
   public static final int FILTER_VALIDATE_INT = 0x101;           // 257
   public static final int FILTER_VALIDATE_BOOLEAN = 0x102;       // 258
   public static final int FILTER_VALIDATE_FLOAT = 0x103;         // 259
+  public static final int FILTER_VALIDATE_URL = 0x111;           // 273
   public static final int FILTER_VALIDATE_EMAIL = 0x112;         // 274
   public static final int FILTER_VALIDATE_IP = 0x113;            // 275
   public static final int FILTER_SANITIZE_STRING = 0x201;        // 513
