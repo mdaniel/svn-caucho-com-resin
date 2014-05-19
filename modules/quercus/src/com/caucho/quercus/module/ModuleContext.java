@@ -557,8 +557,13 @@ public class ModuleContext
 
           introspectPhpModuleClass(cl);
         } catch (Throwable e) {
-          log.info("Failed loading " + className + "\n" + e.toString());
-          log.log(Level.INFO, e.toString(), e);
+          if (className.startsWith("com.caucho")) {
+            log.log(Level.FINER, e.toString(), e);
+          }
+          else {
+            log.info("Failed loading " + className + "\n" + e.toString());
+            log.log(Level.INFO, e.toString(), e);
+          }
         }
       }
     }

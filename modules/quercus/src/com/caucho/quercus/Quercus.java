@@ -30,13 +30,17 @@
 package com.caucho.quercus;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.logging.*;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.vfs.InputStreamStream;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StdoutStream;
+import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.StringPath;
 import com.caucho.vfs.WriteStream;
 
@@ -81,7 +85,11 @@ public class Quercus
       quercus.execute();
     }
     else {
-      throw new RuntimeException("input file not specified");
+      InputStream is = System.in;
+
+      ReadStream stream = new ReadStream(new InputStreamStream(is));
+
+      quercus.execute(stream);
     }
   }
 
@@ -194,6 +202,34 @@ public class Quercus
     throws IOException
   {
     QuercusPage page = parse(path);
+
+    WriteStream os = new WriteStream(StdoutStream.create());
+
+    os.setNewlineString("\n");
+    os.setEncoding("iso-8859-1");
+
+    Env env = createEnv(page, os, null, null);
+    env.start();
+
+    try {
+      env.execute();
+    } catch (QuercusDieException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (QuercusExitException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (QuercusErrorException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      env.close();
+
+      os.flush();
+    }
+  }
+
+  public void execute(ReadStream stream)
+    throws IOException
+  {
+    QuercusPage page = parse(stream);
 
     WriteStream os = new WriteStream(StdoutStream.create());
 
