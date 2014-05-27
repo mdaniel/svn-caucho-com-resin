@@ -10,6 +10,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.41 (snapshot)">
+<ul>
+<li>jsp-el: cookie.containsKey() fix: (#5683, rep. by Jason Wang)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.40 (May 13, 2014)">
 <ul>
 <li>classLoader: getResource() should skip broken jars (#5706, rep by Constantinos Karantzas)</li>
