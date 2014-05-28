@@ -1046,6 +1046,7 @@
         <exclude name="*~"/>
         <exclude name="**/.svn/**"/>
         <include name="com/caucho/**"/>
+        <exclude name="com/caucho/config/core/**"/>
       </fileset>
       <fileset dir="${basedir}">
         <include name="LICENSE"/>
