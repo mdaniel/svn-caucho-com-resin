@@ -1196,11 +1196,12 @@
         <exclude name="*~"/>
         <exclude name="**/.svn/**"/>
       </fileset>
-      <fileset dir="${resindir}/modules/kernel/classes">
+      <fileset dir="${module.dir}/kernel/classes">
         <exclude name=".svnignore"/>
         <exclude name="*~"/>
         <exclude name="**/.svn/**"/>
         <include name="com/caucho/**"/>
+        <exclude name="com/caucho/config/core/**"/>
       </fileset>
     </jar>
 
