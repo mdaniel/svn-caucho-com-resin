@@ -976,7 +976,7 @@ public class PDO implements EnvCleanup {
     HashMap<String,String> attrMap = parseAttr(dsn, dsn.indexOf(':'));
 
     String host = "localhost";
-    int port = -1;
+    int port = 5432;
     String dbName = null;
 
     for (Map.Entry<String,String> entry : attrMap.entrySet()) {
