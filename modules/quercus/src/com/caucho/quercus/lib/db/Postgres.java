@@ -108,6 +108,10 @@ public class Postgres extends JdbcConnectionResource
       return null;
     }
 
+    if (port < 0) {
+      port = 5432;
+    }
+
     try {
       if (host == null || host.equals("")) {
         host = "localhost";
