@@ -1328,6 +1328,13 @@ public class DateModule extends AbstractQuercusModule {
     return new DateTimeZone(timeZone);
   }
 
+  public static Value timezone_transitions_get(DateTimeZone dateTimeZone,
+                                               @Optional int start,
+                                               @Optional int end)
+  {
+    return dateTimeZone.getTransitions(start, end);
+  }
+
   static {
     addConstant(_constMap, "DATE_ATOM", DateTime.ATOM);
     addConstant(_constMap, "DATE_COOKIE", DateTime.COOKIE);
@@ -1344,14 +1351,9 @@ public class DateModule extends AbstractQuercusModule {
 
 
   @Override
-  public Map<StringValue, Value> getConstMap() {
+  public Map<StringValue, Value> getConstMap()
+  {
       return _constMap;
   }
-  /* commented out for wordpress-2.8.1
-  public static Value timezone_transitions_get(DateTimeZone dateTimeZone)
-  {
-    return dateTimeZone.getTransitions();
-  }
-  */
 }
 

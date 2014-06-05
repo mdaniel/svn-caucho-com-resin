@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -147,13 +148,13 @@ public class DateTimeZone implements Cloneable
     return _timeZone.getOffset(dateTime.getTime()) / 1000L;
   }
 
-  /* commented out for wordpress-2.8.1
   public Value getTransitions(@Optional int timestampBegin,
                               @Optional int timestampEnd)
   {
-    throw new UnimplementedException("DateTimeZone->getTransitions()");
+    ArrayValue array = new ArrayValueImpl();
+
+    return array;
   }
-  */
 
   protected TimeZone getTimeZone()
   {
