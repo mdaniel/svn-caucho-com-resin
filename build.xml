@@ -1196,7 +1196,7 @@
         <exclude name="*~"/>
         <exclude name="**/.svn/**"/>
       </fileset>
-      <fileset dir="${module.dir}/kernel/classes">
+      <fileset dir="${resindir}/modules/kernel/classes">
         <exclude name=".svnignore"/>
         <exclude name="*~"/>
         <exclude name="**/.svn/**"/>
