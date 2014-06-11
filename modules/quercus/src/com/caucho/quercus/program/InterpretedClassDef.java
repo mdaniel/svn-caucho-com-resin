@@ -63,8 +63,8 @@ public class InterpretedClassDef extends ClassDef
   // true if defined in the top scope of a page
   private boolean _isTopScope;
 
-  protected final HashMap<StringValue,AbstractFunction> _functionMap
-    = new HashMap<StringValue,AbstractFunction>();
+  protected final LinkedHashMap<StringValue,AbstractFunction> _functionMap
+    = new LinkedHashMap<StringValue,AbstractFunction>();
 
   protected final LinkedHashMap<StringValue,ClassField> _fieldMap
     = new LinkedHashMap<StringValue,ClassField>();

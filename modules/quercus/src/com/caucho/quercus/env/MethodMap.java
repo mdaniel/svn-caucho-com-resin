@@ -51,6 +51,9 @@ public final class MethodMap<V>
   private int _prime = Primes.getBiggestPrime(_entries.length);
   private int _size;
 
+  private Entry<V> _head;
+  private Entry<V> _tail;
+
   public MethodMap(QuercusClass quercusClass, ClassDef classDef)
   {
     _quercusClass = quercusClass;
@@ -77,12 +80,29 @@ public final class MethodMap<V>
       }
     }
 
-    entry = new Entry<V>(name, value);
+    entry = createEntry(name, value);
 
     entry._next = _entries[bucket];
     _entries[bucket] = entry;
     _size++;
 
+  }
+
+  private Entry<V> createEntry(StringValue name, V value)
+  {
+    Entry<V> entry = new Entry<V>(name, value);
+
+    if (_head == null) {
+      _head = entry;
+    }
+
+    if (_tail != null) {
+      _tail.setAbsoluteNext(entry);
+    }
+
+    _tail = entry;
+
+    return entry;
   }
 
   public boolean containsKey(StringValue key)
@@ -189,7 +209,7 @@ public final class MethodMap<V>
 
   public Iterable<V> values()
   {
-    return new ValueIterator(_entries);
+    return new ValueIterator(_head);
   }
 
   private boolean match(char []a, char []b, int length)
@@ -252,6 +272,7 @@ public final class MethodMap<V>
     private V _value;
 
     private Entry<V> _next;
+    private Entry<V> _absoluteNext;
 
     Entry(StringValue key, V value)
     {
@@ -283,31 +304,32 @@ public final class MethodMap<V>
     {
       _next = next;
     }
+
+    public Entry<V> getAbsoluteNext()
+    {
+      return _absoluteNext;
+    }
+
+    public void setAbsoluteNext(Entry<V> next)
+    {
+      _absoluteNext = next;
+    }
   }
 
   final static class ValueIterator<V> implements Iterable<V>, Iterator<V>
   {
-    int _index;
-    Entry<V> []_entries;
     Entry<V> _next;
 
-    public ValueIterator(Entry<V> []entries)
+    public ValueIterator(Entry<V> next)
     {
-      _entries = entries;
-
-      getNext();
+      _next = next;
     }
 
     private void getNext()
     {
-      Entry<V> entry = _next == null ? null : _next._next;
+      Entry<V> current = _next;
 
-      while (entry == null
-             && _index < _entries.length
-             && (entry = _entries[_index++]) == null) {
-      }
-
-      _next = entry;
+      _next = current.getAbsoluteNext();
     }
 
     public boolean hasNext()
