@@ -1,0 +1,6 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <servlet-mapping url-pattern="/jamp/*"
+                   servlet-class="com.caucho.amp.jamp.JampServlet">
+    <init login-required="false"/>
+  </servlet-mapping>
+</web-app>

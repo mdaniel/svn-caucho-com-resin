@@ -1,0 +1,109 @@
+<project basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <property environment="env"/>
+
+  <property file="local.properties"/>
+
+  <property name="baratine.dir" location="${basedir}/../baratine"/>
+
+  <property name="resin.dir" location="."/>
+
+  <property name="install" location="${basedir}/"/>
+  
+  <property name="make.resin" location="${resin.dir}/make"/>
+  <property name="make.baratine" location="${baratine.dir}/make"/>
+
+  <property name="artifacts" location="${basedir}/artifacts"/>
+  <property name="artifacts.resin" location="${resin.dir}/artifacts"/>
+
+  <property name="modules" location="${basedir}/modules"/>
+  <property name="modules.resin" location="${resin.dir}/modules"/>
+  <property name="modules.baratine" location="${baratine.dir}/modules"/>
+  
+  <property name="native.resin" location="${resin.dir}/native"/>
+  <property name="native.baratine" location="${baratine.dir}/native"/>
+
+  <property name="ext.resin" location="${resin.dir}/modules/ext"/>
+  <property name="ext.baratine" location="${baratine.dir}/modules/ext"/>
+  
+  <property name="maven.lib" location="${resindir}/maven-lib"/>
+  <property name="doc.resin" location="${resindir}/resin-doc"/>
+
+  <property name="build" location="${basedir}/build"/>
+  <property name="build.resin" location="${resin.dir}/build"/>
+
+  <property name="lib" location="${basedir}/lib"/>
+  <property name="lib.baratine" location="${baratine.dir}/lib"/>
+  <property name="lib.resin" location="${resin.dir}/lib"/>
+
+  <property name="resin.http" value="8080"/>
+  <property name="resin.https" value="8443"/>
+
+  <property name="dist" location="${basedir}/dist"/>
+  <property name="dist.resin" location="${resin.dir}/dist"/>
+
+  <property name="javac" value="javac"/>
+  <property name="javac.verbose" value="off"/>
+  <property name="javac.debug" value="on"/>
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.deprecation" value="off"/>
+  <property name="javac.nowarn" value="on"/>
+  <property name="javac.memoryMaximumSize" value="512m"/>
+
+  <property name="javac.source" value="1.7"/>
+  <property name="javac.target" value="1.7"/>
+
+  <property name="jar.compress" value="false"/>
+  <!--
+  <property name="jar.index" value="true"/>
+  -->
+  <property name="jar.update" value="true"/>
+
+  <property name="jdkapi.href" value="http://java.sun.com/javase/6/docs/api"/>
+
+  <property name="shell" value="bash"/>
+
+  <property name="jsf.jar" value="javax.faces-2.1.24.jar"/>
+  <property name="eclipselink.jar" value="eclipselink-2.4.0.jar"/>
+  
+  <property name="jar.update" value="true"/>
+
+  <property name="jdkapi.href" value="http://java.sun.com/javase/6/docs/api"/>
+
+  <property name="shell" value="bash"/>
+
+  <property name="debian.component" value="universe"/>
+
+  <property name="eclipse.home" value="${user.home}/eclipse"/>
+
+  <target name="test" depends="init">
+    <echo>Machine '${native.name}'</echo>
+  </target>
+
+  <target name="clean" depends="init">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete>
+      <fileset dir="${modules}">
+        <include name="*/classes/**"/>
+        <include name="*/dist/**"/>
+      </fileset>
+    </delete>
+    <delete>
+      <fileset dir="${lib}">
+        <include name="**/*.jar"/>
+      </fileset>
+    </delete>
+    <delete>
+      <fileset dir=".">
+        <include name="**/*.class"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="win32clean" if="win32">
+    <delete dir="${install}/win32"/>
+    <delete dir="${install}/win64"/>
+  </target>
+
+</project>
+

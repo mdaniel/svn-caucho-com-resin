@@ -1,0 +1,321 @@
+<html>
+
+<head>
+
+    <title>Todo List Client</title>
+
+    <link rel="stylesheet" type="text/css" href="css/style.css"
+          media="screen" />
+
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
+
+    <script type="text/javascript">
+        var ENTER_KEY = '13';
+        var messageId = 1;
+        var calls = new Array();
+
+        var todoService = {
+            version : "1.0",
+            webSocketURL : buildWebSocketURL(),
+            webSocket : null,//WebSocket
+            userName : null
+        };
+
+
+        function invokeJampMethod(serviceName, methodName, callback, args) {
+
+            var list = new Array();
+            list.push("query");
+            list.push({});
+            list.push("me");
+            list.push(messageId);
+            list.push(serviceName);
+            list.push(methodName);
+            for (var index=0; index < args.length; index++) {
+                var obj = args[index];
+               list.push(obj);
+            }
+
+            if (todoService.webSocket.readyState == WebSocket.OPEN) {
+
+                todoService.webSocket.send(JSON.stringify(list));
+
+                todoService.status(JSON.stringify(list));
+
+                $("#tasks").prepend("<p style='color:black'>"  + JSON.stringify(list) + "</p>");
+
+
+                var call = {
+                    queryId: messageId,
+                    "serviceName": serviceName,
+                    "methodName" : methodName,
+                    func: callback,
+                    "args": args};
+
+                calls[messageId]=call;
+
+            } else {
+                todoService.status("websocket  unable to send ");
+            }
+            messageId++;
+        }
+
+
+        function buildWebSocketURL() {
+            var url = document.URL;
+            var parts = url.split('/');
+            var scheme = parts[0];
+            var hostPort = parts[2];
+            var wssScheme = null;
+
+
+            if (scheme=="http:") {
+                wssScheme="ws:";
+            } else if (scheme=="https:") {
+                wssScheme="wss:";
+            }
+
+            wssUrl = wssScheme + "//" + hostPort  + "/makaiTest-1.0.0-SNAPSHOT/jamp";
+
+            //wssUrl = "ws://localhost:8080/makaiTest-1.0.0-SNAPSHOT/jamp";
+
+            //wssUrl = "ws://localhost:8080/tasks/jamp";
+
+            return wssUrl;
+
+        }
+
+
+
+        function todo_createTask(taskName) {
+            var myargs = new Array();
+            myargs.push(taskName);
+            invokeJampMethod("/taskService", "addTask", showReturnFromServer, myargs);
+        }
+
+        function showReturnFromServer(data, call) {
+            $("#tasks").prepend("<p style='color:blue'>"  + data + "</p>");
+            var taskName = call.args[0];
+            $("#taskList").append("<p style='color:blue'>"  + taskName + "</p>");
+            invokeJampMethod("/taskService", "tasks", showAllItems, new Array());
+
+        }
+
+        function showAllItems(data, call) {
+            $("#tasks").prepend("<p style='color:blue'>"  + data + "</p>");
+
+            $("#taskList").text="";
+
+            for (task in call.returnValue) {
+
+                    append("<p style='color:purple'>"  + task.name + "</p>");
+            }
+
+        }
+
+        function saveReturned(data, call) {
+            $("#tasks").prepend("<p style='color:blue'>SAVED!</p>");
+
+            $("#tasks").prepend("<p style='color:blue'>"  + data + "</p>");
+
+        }
+
+        function readReturned(data, call) {
+            $("#tasks").prepend("<p style='color:blue'>READ!</p>");
+
+            $("#tasks").prepend("<p style='color:blue'>"  + data + "</p>");
+
+            invokeJampMethod("/taskService", "tasks", showAllItems, new Array());
+
+
+        }
+
+
+        function todo_openWebSocket() {
+            todoService.webSocket = new WebSocket(todoService.webSocketURL);
+            var socket = todoService.webSocket;
+
+            socket.onmessage = function(msg) {
+                todoService.onMessage(msg);
+            }
+
+            socket.onerror = function(errorEvent) {
+                todoService.onError(errorEvent);
+            }
+
+            socket.onopen = function() {
+                todoService.onOpen();
+            }
+            socket.onclose = function(closeEvent) {
+                todoService.onClose(closeEvent);
+            }
+
+        }
+
+
+        function todo_onOpen() {
+            todoService.status("Todo Client (logged in)");
+            $('#header').text(
+                    "Todo Client (logged in...)");
+
+            $("#inputArea").show(500);
+            $("#statusBar").show(500);
+            $("#todoNameInput").focus();
+        }
+
+
+        function todo_Status(message) {
+            $("#statusBar").show(500);
+            $('#statusBarPara1').text(message);
+
+            $("#statusBar").show(500);
+
+        }
+
+        function todo_onMessage(msgEvent) {
+            $('#onMessageBar').text(msgEvent.data);
+
+
+            var list = JSON.parse(msgEvent.data);
+
+            if (list[0] == "reply") {
+                replyRecieved(list[3], list[4], msgEvent.data);
+            } else {
+            }
+
+        }
+
+        function replyRecieved (qid, returnValue, data) {
+            var call = calls[qid];
+            call.returnValue = returnValue;
+            call.func(data, call);
+
+        }
+
+
+        function todo_onError(msg) {
+//            $('#statusBarPara1').text(" Websocket error :" + JSON.stringfy(msg));
+//            $("#statusBar").show(500);
+        }
+
+
+        function todo_onClose(closeEvent) {
+            $('#header').text(
+                    "Todo Client (not connected)  " );
+
+
+            $('#statusBarPara1').text(" not logged in. " +
+                    ":: Reason: " + closeEvent.reason +
+                    " Code: " + closeEvent.code);
+
+            $("#inputArea").hide(500);
+            $("#statusBar").show(500);
+
+        }
+
+        todoService.open = todo_openWebSocket;
+        todoService.onMessage = todo_onMessage;
+        todoService.onOpen = todo_onOpen;
+        todoService.onClose = todo_onClose;
+        todoService.onError = todo_onError;
+        todoService.createTask = todo_createTask;
+        todoService.status = todo_Status;
+
+        $(document).ready(function() {
+
+            todoService.open();
+
+
+
+
+            $("#inputArea").show();
+
+
+
+            $("#statusBar").click(function() {
+                $("#statusBar").hide(300);
+            });
+
+            $("#save").click(function() {
+                $("#tasks").prepend("<p style='color:red'>save called</p>");
+
+                invokeJampMethod("/taskService", "save", saveReturned, new Array());
+
+            });
+
+            $("#read").click(function() {
+                $("#tasks").prepend("<p style='color:red'>read called</p>");
+
+                invokeJampMethod("/taskService", "read", readReturned, new Array());
+
+            });
+
+            $("#showTasks").click(function() {
+                $("#tasks").prepend("<p style='color:red'>show tasks</p>");
+
+                invokeJampMethod("/taskService", "tasks", showAllItems, new Array());
+            });
+
+
+            $("#todoNameInput").keypress(function(event) {
+
+                var keycode = (event.keyCode ? event.keyCode : event.which);
+                if (keycode == ENTER_KEY) {
+                    var textMessage = $("#todoNameInput").val();
+
+                     $("#todoNameInput").val("");
+                     $("#hint").hide(500);
+                     todoService.createTask(textMessage);
+                }
+                event.stopPropagation();
+            });
+
+
+            invokeJampMethod("/taskService", "tasks", showAllItems, new Array());
+
+
+        });
+    </script>
+
+</head>
+
+<body>
+
+<h1 id="header">Todo</h1>
+
+
+<div id="statusBar">
+    <p id="statusBarPara1">Welcome to Todo App, Click to hide</p>
+</div>
+
+<div id="buttons">
+    <button id="showTasks">Show Tasks</button>
+    <button id="save">Save</button>
+    <button id="read">Read</button>
+</div>
+
+<div id="onMessageBar">
+    <p id="onMessageBar1"></p>
+</div>
+
+
+<div id="inputArea">
+    <p id="hint">Enter a new task in here:</p>
+    <input id="todoNameInput" type="text" value="" />
+</div>
+
+
+<div id="taskListDiv">
+    <p id="taskList"></p>
+</div>
+
+<div id="tasksDiv">
+    <p id="tasks"></p>
+</div>
+
+
+</body>
+
+</html>

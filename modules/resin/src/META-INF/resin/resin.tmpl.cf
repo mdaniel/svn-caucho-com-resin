@@ -1,0 +1,113 @@
+namespace resin "com.caucho.resin";
+
+#watchdog_port = 6700;
+
+log_pattern = "[%d] %p %c{1}: %m";
+
+resin_admin_insecure = true;
+resin_admin_external = false;
+
+#log_level = "info";
+
+#log-handler name="" level="all" path="stdout:"
+#            pattern=${log_pattern};
+
+#log-handler name="" level="all" path="stdout:"
+#            pattern="${log_pattern}"
+
+log-handler name="" level="all" path="stdout:" pattern="${log_pattern}";
+   
+#logger name="" level="${log_level}";
+
+logger config "com.caucho.java";
+logger config "com.caucho.loader";
+logger level="${log_level?:info}" "";
+
+#import "${__DIR__}/cluster-default.cf";
+
+health_config = "${__DIR__}/health.cf";
+
+#import path="${health_config}" optional="true";
+import path="${__DIR__}/health.cf";# optional="true";
+
+#
+# Remote management requires at least one enabled admin user.
+#
+
+#resin:AdminAuthenticator {
+#  user name="${admin_user}" password="${admin_password}";
+
+#XXX:  resin:import path="${__DIR__}/admin-users.xml" optional="true";
+#}
+#
+# For clustered systems, create a password in as cluster_system_key
+
+#cluster-system-key ${cluster_system_key};
+
+# For production sites, change dependency-check-interval to something
+# like 600s, so it only checks for updates every 10 minutes.
+
+#dependency-check-interval ${dependency_check_interval?:'2s'};
+
+# Configures the main application cluster.  Load-balancing configurations
+# will also have a web cluster.
+
+cluster-default {
+#  resin:DeployService;
+
+#  if ${remote_admin_enable} {
+#    resin:RemoteAdminService;
+#  }
+  
+#  resin:AdminServices;
+
+
+  #server-default {
+  #  watchdog-port $watchdog_port;
+  #}
+  
+  import "classpath:META-INF/resin/app-default.cf";
+
+  host-default {
+    service-default {
+      class-loader {
+        compiling-loader path="classes";
+        library-loader path=".";
+      }
+
+      servlet-mapping "/*" "com.caucho.amp.jamp.JampServlet";
+
+      import "META-INF/service.cf" optional="true";
+      # module-deploy "modules";
+    }
+    
+    # creates the baratine services directory for .bar expansion
+    service-deploy "services";
+
+    # creates the webapps directory for .war expansion
+    web-app-deploy path="webapps"
+                   expand-preserve-fileset="WEB-INF/work/**"
+                   multiversion-routing="${webapp_multiversion_routing}" {
+    }
+  }
+
+  # auto virtual host deployment in hosts/foo.example.com/webapps
+  host-deploy "hosts-${server_port}" {
+    host-default {
+      import path="host.xml" optional="true";
+    }
+  }
+
+  host root-directory="hosts-${server_port}/host" controller-type="DEFAULT" {
+    import path="host.xml" optional="true";
+
+    web-app id=""
+            root-directory="webapps-builtin/root"
+            archive-path="classpath:/com/caucho/webapps/root.war"
+            controller-type="DEFAULT";
+
+    web-app id="/resin-admin" root-directory="webapps-builtin/resin-admin"
+            archive-path="classpath:/com/caucho/webapps/resin-admin.war"
+            controller-type="DEFAULT";
+  }
+}

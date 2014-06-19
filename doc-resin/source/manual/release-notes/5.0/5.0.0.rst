@@ -1,0 +1,208 @@
+.. _release-notes-5.0.0:
+
+Resin 5.0.0 - alpha (2014-06-12)
+================================
+
+* Distribution and packaging changes
+* Feature focus (servlet, jsp)
+* Command-line changes
+* Configuration simplification
+* Deployment
+* Bartender
+* Baratine
+* Kelp/Kraken
+* HTTP/2.0
+* Proxy to HTTP/2.0
+* Websocket
+* Logging
+
+Distribution and Packaging
+===========================
+
+The runtime has been simplified so Resin can run as a single, independent
+jar, defaulting to a working directory in /tmp/resin, which allows
+simple deployments and testing to work immediately without additional
+configuration.
+
+Startup has been simplified as well. A webapp can be deployed in a new Resin
+configuration without additional directories or configuration::
+
+  $ bin/resin start --deploy ROOT.war
+  Resin/5.0.s140618 start with watchdog at 127.0.0.1:6600
+  Resin/5.0.s140618 launching watchdog at 127.0.0.1:6600
+    starting *:8080 (cluster-8080)
+    deployed hello.war to bfs:///system/webapp/deploy/cluster/host/hello/hello.war
+
+Or directly from a jar::
+
+  $ java -jar lib/resin.jar start --deploy ROOT.war
+
+The main command-line can also be called directly from frameworks like
+eclipse::
+
+  import com.caucho.cli.resin.ResinCommandLine;
+    
+  ResinCommandLine.main(new String[] { "start" });
+
+resin.jar
+^^^^^^^^^^
+
+The ``resin.jar`` is now complete and self-contained, including JNI support
+for Linux and Mac, and embedded configuration. It has also been simplified to
+a single jar of around 10M.
+  
+Root Directories
+^^^^^^^^^^^^^^^^^
+
+The default root working directory is in /tmp/resin. It can be easily changed
+using the "-d" or "--root-dir" option from the command line.
+
+Default Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+The ``resin.jar`` contains a default configuration that is complete for
+many simple configurations. The HTTP port can be changed from the
+command-line with ``-p`` or ``--port`` without needing extra configuration.
+
+Feature Focus
+==============
+
+Resin 5.0 has focused on the core servlet specifications::
+
+* Servlet
+* JSP
+* EL
+* CDI
+* WebSocket
+
+HTTP services have also been focused::
+
+* HTTP/2.0
+* Load Balance/Proxy using HTTP/2.0
+* HTTP Cache
+* Session distribution and persistence
+* URL rewriting and dispatch
+
+Other features that were used less frequently have been dropped, including
+EJB, JCA, JMS, jCache.
+
+Command-Line
+=============
+
+The command-line has been extended and organized. While the examples below
+use ``bin/resin``, the command-line is identical when used
+from ``resin.jar`` or directly from ``ResinCommandLine``.
+
+Starting the server, protected by the watchdog::
+
+  $ bin/resin start
+
+Shutting down the watchdog and all servers::
+
+  $ bin/resin shutdown
+
+Deploying a war::
+
+  $ bin/resin deploy -n ROOT my-war.war
+
+Start and deploy::
+
+  $ bin/resin start --deploy ROOT.war
+
+Start with an alternative port::
+
+  $ bin/resin start -p 8082
+
+Start with Resin 5 config file and alternative root directory::
+
+  $ bin/resin start -d /var/resin --conf /etc/resin/resin.cf
+
+Start with Resin 4.0 compat config file::
+
+  $ bin/resin start -d /var/resin --conf /etc/resin/resin.xml
+
+Start in the foreground in a single JVM, without the watchdog::
+
+  $ bin/resin start -fg
+
+View debugging file::
+
+  $ bin/resin cat /proc/servers
+
+Benchmarking::
+
+  $ bin/resin -n 10 bench-http http://localhost:8080/hello.jsp
+
+Command-line scripts::
+
+  $ bin/resin -i my-script
+
+Where the script might be a single JVM stress test that starts Resin in
+the shell JVM (-bg), deploys a test, and then starts the benchmark::
+
+  start -bg -p 8099
+  deploy test.war
+  sleep 2
+  bench-http -n 1000 http://localhost:8099/test/hello.jsp
+  bench-http -n 100000 http://localhost:8099/test/hello.jsp
+  
+
+Configuration Simplification
+============================
+
+Resin 5.0 configuration is now simplified both in syntax and with
+default templating, which minimizes the configuration new Resin users
+will need. For a single server installation, no configuration is needed.
+
+The new templating mechanisms means that configuration can focus on what's
+needed. Adding servers can be done without needing to include standard
+servlet configuration. For example, a cluster of three servers would have
+a resin.cf like::
+
+  cluster {
+    server 192.168.0.10 80;
+    server 192.168.0.11 80;
+    server 192.168.0.12 80;
+  }
+
+Unlike Resin 4, the web-app and servlet configuration is not required in
+the resin.cf, because those items are configured with a
+template, resin.tmpl.cf. Although sites can override the template, the
+default configuration will be sufficient for most.
+
+Backwards Compatibility Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Resin 4.0 configuration is supported in Resin 5.0. If the `--conf`` value
+is an XML file, Resin 5.0 will parse it as a Resin 4.0 configuration file.
+The structure of the configuration is identical.
+
+Deployment
+==========
+
+In Resin 5.0, the standard .war deployment is through the command line.
+The deployed .war will be saved in an internal database, and expended in
+the Resin working directory that defaults to ``/tmp/resin``. In a clustered
+environment, the deployed .war will be distributed to all servers
+in the cluster.
+
+A sample command-line deployment::
+
+  $ bin/resin deploy -n root my-app.war 
+
+For backwards compatibility, the older webapps directory can be configured
+with a Resin 4.0 configuration file.
+
+Internal Deployment Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Resin 5.0 uses an distributed filesystem (BFS) for deployment.
+The new filesystem replaces the Resin 4.0 git-based distribution.
+Deployed .wars can be viewed using command-line filesystem commands:
+ls, cat, get, put.
+
+Internally, the replication, persistence and distribution now use the same
+underlying systems as session replication. (Resin 4.0 distribution
+was implemented as a separate system.) Using one system in Resin 5.0
+simplifies the implementation, and improves Resin's internal testing.
+

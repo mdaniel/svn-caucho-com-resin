@@ -1,0 +1,37 @@
+Copyright (c) 1998-2014 Caucho Technology. All Rights Reserved.
+
+Resin(R) 5.0 README
+===================
+
+BINARIES
+
+  bin/resin               - Resin command-line
+
+LIBRARIES
+
+  lib/resin.jar           - full Resin distribution
+
+ROOT DIRECTORY
+
+  /tmp/resin              - default root directory
+
+RUNNING
+
+  $ bin/resin help                           # command-line list
+  $ bin/resin start                          # starts
+  $ bin/resin start --deploy my-app.war      # starts and (re)deploy a web-app
+  $ bin/resin shutdown                       # shutdown Resin daemon
+
+EXAMPLES
+
+  $ bin/resin start
+  $ bin/resin deploy -n root examples/hello.war
+  $ curl http://localhost:8080/hello-servlet
+
+DOCUMENTATION
+
+  http://resin.caucho.com/
+
+LICENSING
+
+Resin 5.0 is released under the GPL.

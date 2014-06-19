@@ -1,0 +1,23 @@
+<project name="resin" default="compile" basedir=".">
+  <import file="make/build-properties.xml"/>
+  
+  <import file="make/build-contrib.xml"/>
+  <import file="make/build-compile.xml"/>
+  
+  <import file="make/build-dist.xml"/>
+  <import file="make/build-dist-resin.xml"/>
+  
+  <import file="make/build-file.xml"/>
+  <import file="make/build-init.xml"/>
+  
+  <import file="make/build-maven.xml"/>
+
+  <import file="make/build-native.xml"/>
+
+  <target name="win32clean" if="win32">
+    <delete dir="${install}/win32"/>
+    <delete dir="${install}/win64"/>
+  </target>
+
+</project>
+

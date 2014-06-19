@@ -1,0 +1,64 @@
+<project basedir=".">
+    
+  <target name="init" depends="tstamp">
+    <property name="product" value="Resin"/>
+    <property name="shortproduct" value="resin"/>
+    
+    <condition property="maven.version" value="${version}">
+      <isset property="version"/>
+    </condition>
+    <property name="maven.version" value="5.0-SNAPSHOT"/>
+    
+    <condition property="maven.metadata.template" value="release">
+      <isset property="version"/>
+    </condition>
+    <property name="maven.metadata.template" value="snapshot"/>
+    
+    <exec executable="perl" outputproperty="native.name">
+      <arg value="make/scan_revision.pl"/>
+    </exec>
+
+    <condition property="maven.m2" value="m2">
+      <isset property="version"/>
+    </condition>
+    <property name="maven.m2" value="m2-snapshot"/>
+    <property name="maven.root" value="${dist}/${maven.m2}"/>
+
+    <!--nversion must be a nubmer, used with eclipse-plugin-->
+    <condition property="nversion" value="${version}">
+      <isset property="version"/>
+    </condition>
+    <property name="nversion" value="5.0.${snapshotdate}"/>
+    
+    <property name="version" value="5.0.s${snapshotdate}"/>
+    <property name="dist.name" value="${shortproduct}-${version}"/>
+    <property name="resin.dist.name" value="resin-${version}"/>
+    <property name="dist.build" location="${dist}/${dist.name}"/>
+    
+    <property name="dist.build.files" location="${dist.build}/files"/>
+    
+    <property name="bits" value=""/>
+
+    <condition property="bits" value="64">
+      <equals arg1="${sun.arch.data.model}" arg2="64"/>
+    </condition>
+
+    <condition property="unix">
+      <os family="unix"/>
+    </condition>
+  </target>
+
+  <target name="tstamp">
+    <tstamp/>
+    <tstamp>
+      <format property="date" pattern="EEE, dd MMM yyyy hh:mm:ss zzz"/>
+    </tstamp>
+    <tstamp>
+      <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
+    </tstamp>
+    <tstamp>
+      <format property="snapshotdate" pattern="yyMMdd"/>
+    </tstamp>
+  </target>
+
+</project>

@@ -1,0 +1,109 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.caucho.resin.admin</groupId>
+  <artifactId>resin-admin</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>ResinAdmin</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <resin.lib.path>/Users/cowan/resin5/resin/lib</resin.lib.path>
+    <baratine.lib.path>/Users/cowan/resin5/baratine/lib</baratine.lib.path>
+  </properties>
+
+  <repositories>
+    <!--
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+      <id>caucho snapshots</id>
+      <name>Caucho Snapshots</name>
+      <url>http://caucho.com/m2-snapshot</url>
+      <layout>default</layout>
+    </repository>
+    -->
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>resin</artifactId>
+      <version>5.0-snap</version>
+      <scope>system</scope>
+      <systemPath>${resin.lib.path}/resin.jar</systemPath>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>resin-kernel</artifactId>
+      <version>5.0-snap</version>
+      <scope>system</scope>
+      <systemPath>${resin.lib.path}/resin-kernel.jar</systemPath>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>javaee</artifactId>
+      <version>5.0-snap</version>
+      <scope>system</scope>
+      <systemPath>${resin.lib.path}/javaee-7.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>io.baratine</groupId>
+      <artifactId>baratine-api</artifactId>
+      <version>1.0-snap</version>
+      <scope>system</scope>
+      <systemPath>${baratine.lib.path}/baratine-api.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>io.baratine</groupId>
+      <artifactId>baratine</artifactId>
+      <version>1.0-snap</version>
+      <scope>system</scope>
+      <systemPath>${baratine.lib.path}/baratine.jar</systemPath>
+    </dependency>
+    
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+<!--
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+-->
+</project>

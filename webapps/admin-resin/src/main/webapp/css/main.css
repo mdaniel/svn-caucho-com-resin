@@ -1,0 +1,35 @@
+body {
+  background-color: #ffffff;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.2em;
+  margin: 15px;
+}
+
+h1, p {
+  color: #333;
+}
+
+.graph-container {
+  background-color: #ffffff; /* white */
+  display:inline-block;
+}
+
+.mini-graph {
+  width: 280px;
+  height: 200px;
+}
+
+.medium-graph {
+  width: 600px;
+  height: 200px;
+}
+
+.mini-title {
+  text-align: center;
+}
+
+.mini-legend {
+  font-size: .75em;
+}

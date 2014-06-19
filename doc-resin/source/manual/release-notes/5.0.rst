@@ -1,0 +1,10 @@
+.. _release-notes-5.0:
+
+Resin 5.0 Release Notes
+==========================
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+   
+   5.0/5.0.0

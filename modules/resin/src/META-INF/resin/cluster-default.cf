@@ -1,0 +1,117 @@
+#
+# default configuration applied to all clusters
+#
+
+namespace resin "java:com.caucho.resin";
+
+cluster-default {
+  #
+  server-default {
+    jvm-arg-line ${jvm_args};
+    jvm-mode ${jvm_mode};
+
+    #
+    # If starting Resin as root on Unix, specify the user name
+    # and group name for the web server user.
+    #
+    
+    user-name ${setuid_user};
+    group-name ${setuid_group};
+  }
+
+#  server-default {  
+#    if ${https} {
+#      http address="${http_address?:'*'}" port="${https}" {
+#        if "${openssl_file}" {
+#          openssl {
+#            certificate-file ${file_lookup(openssl_file,__DIR__)};
+#            certificate-key-file ${file_lookup(openssl_key, __DIR__)};
+#            password {
+#              resin:Password ${openssl_password};
+#            }
+#          }
+#        }
+#        else if test="${jsse_keystore_file != null}" {
+#          jsse-ssl {
+#            key-store-type ${jsse_keystore_type?:'jks'};
+#            key-store-file ${jsse_keystore_file};
+#            password {
+#              resin:Password ${jsse_keystore_password};
+#            }
+#          }
+#        else if test="${class_exists('sun.security.x509.CertAndKeyGen')}" {
+#          jsse-ssl self-signed-certificate-name="resin@localhost";
+#        }
+#      }
+#    }
+#  }
+
+  #
+  # Default host configuration applied to all virtual hosts.
+  #
+  host-default {
+#    access-log path="log/access.log" 
+#               format="%h %l %u %t \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\""
+#               rollover-period="1W";
+
+    #
+    # Defaults applied to each web-app.
+    #
+    web-app-default {
+      prologue {
+        allow-servlet-el;
+      }
+     
+      #
+      # Sets max-age for cacheable pages, e.g. static pages.
+      #
+#      cache-mapping max-age="5s" "/";
+#      cache-mapping max-age="60s" "*.gif" "*.jpg" "*.png" "*.css" "*.js";
+
+      session-config {
+        use-persistent-store ${session_store};
+          
+        enable-url-rewriting false;
+      }
+    }
+  }
+
+  host-default {
+    #
+    # Administration application /resin-admin
+    #
+#    if "${web_admin_enable}" {
+#      web-app id="/resin-admin" root-directory="classpath:com/caucho/webapps/resin-admin" {
+#        prologue {
+#          # only allow access from internal IP (10.*,192.168.*,127.*)
+#          resin_admin_external = "${web_admin_external}";
+#          resin_admin_insecure = "${! web_admin_ssl}";
+#        }
+#      }
+#    }
+
+#    if test="${rest_admin_enable}" {
+#      web-app id="/resin-rest"
+#              root-directory="classpath:com/caucho/webapps/resin-rest" {
+#        resin:BasicLogin realm-name="resin";
+
+#        resin:Allow "/*" {
+#          resin:IfUserInRole "resin-admin";
+#        }
+
+#        servlet-mapping "/*" "com.caucho.admin.servlet.AdminRestServlet" {
+#          init {
+#            require-secure ${rest_admin_ssl};
+#          }
+#        }
+#      }
+#    }
+  }
+
+  #
+  # standard servlet behavior, including .jsp, .php, and WEB-INF
+  #
+  import "classpath:META-INF/resin/app-default.cf";
+}
+
+

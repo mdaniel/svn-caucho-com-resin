@@ -1,0 +1,146 @@
+default namespace w = "http://xmlns.jcp.org/xml/ns/javaee"
+
+namespace xsi="http://www.w3.org/2001/XMLSchema-instance"
+namespace n=""
+
+start = b_beans | compat_beans
+
+b_Any = text | (attribute * {string} | element * { b_Any })*
+
+b_alternatives = element alternatives {
+  b_class*
+  & b_stereotype*
+}
+
+b_bean-Custom = element * - w:* {
+  (b_bean-Field-Custom*
+
+   & (attribute value { string }
+      | element value { b_Any })*
+
+   & (attribute name { string }
+      | element Named { attribute value { string }? | string }?)
+
+   & b_new?
+
+   & element ApplicationScoped { empty }?
+   & element ConversationScoped { empty }?
+   & element RequestScoped { empty }?
+   & element SessionScoped { empty }?
+   & element Dependent { empty }?
+
+   & element Production { b_bean-Custom* }?
+
+   & element Default { empty }?
+
+   & element Decorates { empty }?
+  )
+  | string
+}
+
+b_bean-Field-Custom = element * - w:* {
+  b_Any
+}
+
+b_binding = element binding {
+  string
+}
+
+b_class = element class {
+  string
+}
+
+b_deploy = element Deploy {
+  b_bean-Field-Custom*
+  & b_standard?
+  & b_production?
+  & b_class*
+  & b_stereotype*
+}
+
+b_decorators = element decorators {
+  b_class*
+}
+
+b_name = element name {
+  string
+}
+
+b_init = element init {
+  b_Any
+}
+
+b_new =
+  attribute new { string }
+  | element new { b_Any }
+
+b_interceptors = element interceptors {
+  b_class*
+}
+
+b_producer = element producer {
+  string
+}
+
+b_production = element Production {
+  empty
+}
+
+b_stereotype = element stereotype {
+  string
+}
+
+b_type = element type {
+  string
+}
+
+b_scope = element scope {
+  string
+}
+
+b_standard = element Standard {
+  empty
+}
+
+b_bean-discovery-mode = attribute bean-discovery-mode {
+  string
+}
+
+b_exclude = element exclude {
+  attribute name {string}
+
+  & element if-class-not-available { attribute name { string } } *
+
+  & element if-class-available { attribute name { string } } *
+
+  & element if-system-property { attribute name { string }
+                                  & attribute value { string } ? } *
+}
+
+b_scan = element scan {
+  b_exclude*
+}
+
+b_beans = element beans {
+  attribute xsi:schemaLocation { string }?
+
+  & attribute version {string} ?
+
+  & b_bean-discovery-mode ?
+
+  & b_bean-Custom*
+
+  & b_decorators?
+
+  & b_deploy?
+
+  & b_alternatives?
+
+  & b_interceptors?
+
+  & b_scan?
+}
+
+compat_beans = element n:beans {
+  b_Any
+}

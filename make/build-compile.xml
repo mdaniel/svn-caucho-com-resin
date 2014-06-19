@@ -1,0 +1,339 @@
+<project basedir=".">
+
+  <!--
+     - csharp
+    -->
+  <target name="csharp" depends="init">
+    <property name="module.name" value="csharp"/>
+    <property name="module.src" value="${modules}/${module.name}/src"/>
+    <property name="module.build" value="${modules}/${module.name}/classes"/>
+    <property name="module.dist" value="${lib}"/>
+
+    <mkdir dir="${module.build}" />
+    
+    <path id="cs-path">
+      <fileset dir="${module.src}">
+         <include name="**/*.cs"/>
+      </fileset>
+    </path>
+
+    <exec executable="gmcs" dir="${module.build}">
+       <arg value="-target:module"/>
+       <arg value="-out:${lib}/Hessian.netmodule"/>
+       <!--
+       <arg pathref="cs-path"/>
+       -->
+       <arg value="-recurse:${module.src}/**.cs"/>
+    </exec>
+  </target>
+
+  <!--
+     - compile top
+    -->
+  <target name="compile"
+          depends="init, javaee, jsf-stub, resin, conf, ext">
+  </target>
+
+  <!--
+     - ext
+    -->
+  <target name="ext" depends="init, resin">
+    <copy todir="${install}/lib" preservelastmodified="true">
+      <fileset dir="${ext.resin}">
+        <exclude name="jasper.jar"/>
+        <exclude name="tomcat-*.jar"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <!--
+     - hessian
+    -->
+  <!--
+  <target name="hessian" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="hessian"/>
+      <param name="module.jar" value="hessian.jar"/>
+      <param name="module.dist" value="${lib}"/>
+    </antcall>
+  </target>
+  -->
+
+  <!--
+     - javaee
+    -->
+  <target name="javaee" depends="jpa-stub, jstl, jta">
+    <!--
+       - javaee-7.jar
+      -->
+    <jar destfile="${lib.resin}/javaee-7.jar">
+      <fileset dir="${modules.baratine}/cdi/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/jstl/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/jta/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+
+      <fileset dir="${modules.baratine}/servlet/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+
+      <fileset dir="${modules.baratine}/websocket/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="jaxstream" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jaxstream"/>
+      <param name="module.jar" value="jaxstream-15.jar"/>
+      <param name="module.dist" value="${lib}"/>
+      <!--param name="javac.source" value="1.5"/-->
+    </antcall>
+  </target>
+
+  <!--
+     - jsf (for compile)
+    -->
+  <target name="jsf-stub" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jsf-stub"/>
+    </antcall>
+  </target>
+
+  <!--
+     - jpa
+    -->
+  
+  <target name="jpa-stub" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jpa-stub"/>
+    </antcall>
+  </target>
+
+  <!--
+     - jdkadapt
+    -->
+  <target name="jdkadapt" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jdkadapt"/>
+      <param name="module.jar" value="jdkadapt.jar"/>
+      <param name="module.dist" value="${lib}"/>
+    </antcall>
+  </target>
+
+  <!--
+     - jstl
+    -->
+  <target name="jstl" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jstl"/>
+      <param name="module.jar" value="jstl-11.jar"/>
+    </antcall>
+  </target>
+
+  <!--
+     - jta
+    -->
+  <target name="jta" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jta"/>
+      <param name="module.jar" value="jta-101.jar"/>
+    </antcall>
+  </target>
+
+  <!--
+     - module
+    -->
+  <target name="module">
+    <property name="module.src" value="${modules}/${module.name}/src"/>
+    <property name="module.build" value="${modules}/${module.name}/classes"/>
+    <property name="module.dist" value="${modules}/${module.name}/dist"/>
+    <property name="module.jar" value="${module.name}.jar"/>
+
+    <property file="${module.src}/module.properties"/>
+
+    <mkdir dir="${module.build}" />
+
+    <copy todir="${module.build}"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${module.src}">
+        <include name="**/*.afm"/>
+        <include name="**/*.ftld"/>
+        <include name="**/*.php"/>
+        <include name="**/*.properties"/>
+        <include name="**/*.rnc"/>
+        <include name="**/*.tld"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.xsl"/>
+        <include name="**/*.dtd"/>
+        <include name="**/jaxb.index"/>
+        <include name="**/namespace"/>
+        <include name="META-INF/**"/>
+      </fileset>
+    </copy>
+
+    <javac srcdir="${module.src}" destdir="${module.build}"
+           executable="${javac}"
+           fork="true" 
+           verbose="${javac.verbose}" 
+           debug="${javac.debug}" optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
+           source="${javac.source}"
+           target="${javac.target}"
+           excludes="**/.svn/**"
+           includeantruntime="false"
+           memoryMaximumSize="${javac.memoryMaximumSize}">
+      <classpath>
+        <dirset dir="${modules.baratine}">
+           <include name="*/classes"/>
+        </dirset>
+        <dirset dir="${modules.resin}">
+           <include name="*/classes"/>
+        </dirset>
+        <fileset dir="${ext.baratine}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${ext.resin}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <!--
+        <fileset dir="${maven.lib}">
+          <include name="**/*.jar"/>
+         <exclude name="ant-1.6.5.jar"/>
+        </fileset>
+        -->
+      </classpath>
+    </javac>
+
+    <mkdir dir="${module.dist}" />
+
+    <jar jarfile="${module.dist}/${module.jar}"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
+         manifest="${module.src}/manifest">
+      <fileset dir="${module.build}">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!--
+     - resin compile
+    -->
+  <target name="resin-compile" depends="version">
+    <!-- build module -->
+
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="resin"/>
+      <param name="module.dist" value="${lib}"/>
+    </antcall>
+  </target>
+
+  <!--
+     - resin top
+    -->
+  <target name="resin" depends="init, resin-files, javaee, resin-compile"/>
+
+  <target name="deploy" depends="init, resin">
+    <mkdir dir="${clientlib}"/>
+    <jar jarfile="${clientlib}/resin-deploy.jar"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
+         manifest="${modules}/deploy/src/manifest">
+
+      <fileset dir="${modules}/resin/classes">
+        <include name="com/caucho/hessian/**"/>
+        <include name="com/caucho/services/**"/>
+        <include name="com/caucho/j2ee/deployclient/**"/>
+        <include name="com/caucho/mbeans/**"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="win32" if="win32">
+    <mkdir dir="${install}/win32"/>
+    <!--
+    <mkdir dir="${install}/win32/apache-1.3"/>
+    -->
+    <mkdir dir="${install}/win32/apache-2.0"/>
+    <mkdir dir="${install}/win32/apache-2.2"/>
+    <!--
+    <copy todir="${install}/win32/apache-1.3"
+          file="${win32}/resin/modules/c/src/apache1/Apache136/mod_caucho.dll"/>
+    <copy todir="${install}/win32"
+          file="${win32}/resin/modules/c/src/resin_os/Release/resin_os.dll"/>
+    <copy todir="${install}/win64"
+          file="${win32}/resin/modules/c/src/resin_os_64/Release/resin_os.dll"/>
+	  -->
+    <copy todir="${install}/win32"
+          file="${win32}/resin/modules/c/src/resinssl/Release/resinssl.dll"/>
+    <copy todir="${install}/win64"
+          file="${win32}/resin/modules/c/src/resinssl_64/Release/resinssl.dll"/>
+    <copy todir="${install}"
+          file="${win32}/resin/modules/csharp/src/resin/bin/Release/resin.exe"/>
+    <copy todir="${install}"
+          file="${win32}/resin/modules/csharp/src/setup/bin/Release/setup.exe"/>
+    <copy todir="${install}/win32"
+          file="${win32}/resin/modules/c/src/isapi_srun/Release/isapi_srun.dll"/>
+    <copy todir="${install}/win64"
+          file="${win32}/resin/modules/c/src/isapi_64/Release/isapi_srun.dll"/>
+    <copy todir="${install}/win32/apache-2.2"
+          file="${win32}/resin/modules/c/src/apache22/Release/mod_caucho.dll"/>
+    <copy todir="${install}/win32/apache-2.0"
+          file="${win32}/resin/modules/c/src/apache2/Release/mod_caucho.dll"/>
+
+    <chmod perm="ugo+rx">
+      <fileset dir="${install}">
+        <include name="*.exe"/>
+        <include name="win32/*.dll"/>
+        <include name="win64/*.dll"/>
+      </fileset>
+    </chmod>
+  </target>
+  
+  <!--
+     - websocket-client
+    -->
+  <target name="websocket-client" depends="resin">
+    <!--
+       - resin-websocket-client.jar
+      -->
+    <jar destfile="${lib.resin}/resin-websocket-client.jar">
+      <fileset dir="${modules.resin}/kernel/classes">
+        <include name="com/caucho/util/*"/>
+        <include name="com/caucho/vfs/*"/>
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/resin/classes">
+        <include name="com/caucho/remote/websocket/**"/>
+        <include name="com/caucho/websocket/**"/>
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!--
+     - version
+    -->
+  <target name="version" depends="init">
+    <copy tofile="${modules.resin}/resin/src/META-INF/caucho/version"
+          file="${modules.resin}/resin/src/META-INF/caucho/version.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
+  </target>
+  
+</project>

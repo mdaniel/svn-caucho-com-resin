@@ -1,0 +1,16 @@
+<project default="compile" basedir=".">
+  
+  <property name="name" value="hello"/>
+  <property name="src" location="src"/>
+  <property name="files" location="files"/>
+  <property name="build" location="build"/>
+
+  <target name="compile">
+    <ant dir=".." target="compile"/>
+  </target>
+
+  <target name="clean">
+    <ant dir=".." target="clean-impl"/>
+  </target>
+  
+</project>

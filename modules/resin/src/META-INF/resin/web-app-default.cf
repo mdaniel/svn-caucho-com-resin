@@ -1,0 +1,224 @@
+namespace resin "com.caucho.resin";
+
+# configures the default class loader
+class-loader {
+  compiling-loader "WEB-INF/classes";
+  library-loader "WEB-INF/lib";
+}
+
+servlet resin-file com.caucho.servlets.FileServlet;
+
+servlet resin-jsp com.caucho.jsp.JspServlet {
+  init {
+    load-tld-on-init false;
+    page-cache-max 1024;
+  }
+  load-on-startup;
+}
+
+servlet resin-jspx com.caucho.jsp.JspServlet {
+  init {
+    load-tld-on-init false;
+    page-cache-max 1024;
+    xml true;
+  }
+  load-on-startup;
+}
+servlet-mapping url-pattern="*.jsp" servlet-name="resin-jsp" default="true";
+
+servlet-mapping url-pattern="*.jspf" servlet-name="resin-jsp" default="true";
+
+servlet-mapping url-pattern="*.jspx" servlet-name="resin-jspx" default="true";
+
+servlet-mapping url-pattern="/" servlet-name="resin-file" default="true";
+
+servlet "j_security_check" "com.caucho.http.security.FormLoginServlet";
+
+# Configures the special index files to check for directory URLs
+welcome-file-list {
+  welcome-file index.jsp;
+  welcome-file index.html;
+}
+
+mime-mapping ".html" "text/html";
+mime-mapping ".xhtml" "application/xhtml+xml";
+
+mime-mapping ".ai" "application/postscript";
+mime-mapping ".aif" "audio/x-aiff";
+mime-mapping ".aiff" "audio/x-aiff";
+mime-mapping ".aifc" "audio/x-aiff";
+mime-mapping ".au" "audio/basic";
+mime-mapping ".asc" "text/plain";
+mime-mapping ".asf" "video/x-ms-asf";
+mime-mapping ".asx" "video/x-ms-asf";
+mime-mapping ".atom" "application/atom+xml";
+mime-mapping ".avi" "video/x-msvideo";
+    
+mime-mapping ".bin" "application/octet-stream";
+mime-mapping ".bcpio" "application/x-bcpio";
+mime-mapping ".bmp" "image/bmp";
+    
+mime-mapping ".class" "application/octet-stream";
+mime-mapping ".cpt" "application/mac-compactpro";
+mime-mapping ".css" "text/css";
+mime-mapping ".cpio" "application/x-cpio";
+mime-mapping ".csh" "application/x-csh";
+mime-mapping ".cdf" "application/x-netcdf";
+    
+mime-mapping ".dmg" "application/octet-stream";
+mime-mapping ".dms" "application/octet-stream";
+mime-mapping ".doc" "application/msword";
+mime-mapping ".dcr" "application/x-director";
+mime-mapping ".dir" "application/x-director";
+mime-mapping ".dll" "application/x-msdownload";
+mime-mapping ".dxr" "application/x-director";
+mime-mapping ".dvi" "application/x-dvi";
+    
+mime-mapping ".exe" "application/octet-stream";
+mime-mapping ".eps" "application/postscript";
+mime-mapping ".etx" "text/x-setext";
+    
+mime-mapping ".gram" "application/srgs";
+mime-mapping ".grxml" "application/srgs+xml";
+mime-mapping ".gtar" "application/x-gtar";
+mime-mapping ".gif" "image/gif";
+mime-mapping ".gz" "application/octet-stream";
+    
+mime-mapping ".hdml" "text/x-hdml";
+mime-mapping ".hqx" "application/mac-binhex40";
+mime-mapping ".html" "text/html";
+mime-mapping ".htm" "text/html";
+mime-mapping ".hdf" "application/x-hdf";
+    
+mime-mapping ".ief" "image/ief";
+mime-mapping ".ice" "x-conference/x-cooltalk";
+
+mime-mapping ".jar" "application/java-archive";
+mime-mapping ".jnlp" "application/x-java-jnlp-file";
+mime-mapping ".jpeg" "image/jpeg";
+mime-mapping ".jpg" "image/jpeg";
+mime-mapping ".jpe" "image/jpeg";
+mime-mapping ".js" "application/x-javascript";
+    
+mime-mapping ".kar" "audio/midi";
+    
+mime-mapping ".latex" "application/x-latex";
+mime-mapping ".lha" "application/octet-stream";
+mime-mapping ".lhz" "application/octet-stream";
+    
+mime-mapping ".mathml" "application/mathml+xml";
+mime-mapping ".mid" "audio/midi";
+mime-mapping ".mif" "application/vnd.mif";
+mime-mapping ".mpeg" "video/mpeg";
+mime-mapping ".mpg" "video/mpeg";
+mime-mapping ".mpe" "video/mpeg";
+mime-mapping ".mov" "video/quicktime";
+mime-mapping ".movie" "video/x-sgi-movie";
+mime-mapping ".mpga" "audio/mpeg";
+mime-mapping ".mp2" "audio/mpeg";
+mime-mapping ".mp3" "audio/mpeg";
+mime-mapping ".man" "application/x-troff-man";
+mime-mapping ".me" "application/x-troff-me";
+mime-mapping ".ms" "application/x-troff-ms";
+    
+mime-mapping ".nc" "application/x-netcdf";
+    
+mime-mapping ".oda" "application/oda";
+mime-mapping ".ogg" "application/ogg";
+    
+mime-mapping ".pdf" "application/pdf";
+mime-mapping ".ps" "application/postscript";
+mime-mapping ".ppt" "application/vnd.ms-powerpoint";
+mime-mapping ".png" "image/png";
+mime-mapping ".pgn" "application/x-chess-pgn";
+mime-mapping ".pnm" "image/x-portable-anymap";
+mime-mapping ".pbm" "image/x-portable-bitmap";
+mime-mapping ".pgm" "image/x-portable-graymap";
+mime-mapping ".ppm" "image/x-portable-pixmap";
+    
+mime-mapping ".qt" "video/quicktime";
+    
+mime-mapping ".ra" "audio/x-realaudio";
+mime-mapping ".ram" "audio/x-pn-realaudio";
+mime-mapping ".rdf" "application/rdf+xml";
+mime-mapping ".rm" "audio/x-pn-realaudio";
+mime-mapping ".rpm" "audio/x-pn-realaudio-plugin";
+mime-mapping ".ras" "image/x-cmu-raster";
+mime-mapping ".rgb" "image/x-rgb";
+mime-mapping ".rtf" "application/rtf";
+mime-mapping ".rtx" "text/richtext";
+mime-mapping ".rtf" "text/rtf";
+    
+mime-mapping ".smi" "application/smil";
+mime-mapping ".smil" "application/smil";
+mime-mapping ".sml" "application/smil";
+mime-mapping ".skp" "application/x-koan";
+mime-mapping ".skd" "application/x-koan";
+mime-mapping ".skt" "application/x-koan";
+mime-mapping ".skm" "application/x-koan";
+mime-mapping ".src" "application/x-wais-source";
+mime-mapping ".sh" "application/x-sh";
+mime-mapping ".shar" "application/x-shar";
+mime-mapping ".swf" "application/x-shockwave-flash";
+mime-mapping ".sit" "application/x-stuffit";
+mime-mapping ".so" "application/octet-stream";
+mime-mapping ".spl" "application/x-futuresplash";
+mime-mapping ".sv4cpio" "application/x-sv4cpio";
+mime-mapping ".sv4crc" "application/x-sv4crc";
+mime-mapping ".snd" "audio/basic";
+mime-mapping ".sgml" "text/sgml";
+mime-mapping ".sgm" "text/sgml";
+    
+mime-mapping ".t" "application/x-troff";
+mime-mapping ".tar" "application/x-tar";
+mime-mapping ".tcl" "application/x-tcl";
+mime-mapping ".tex" "application/x-tex";
+mime-mapping ".texi" "application/x-texinfo";
+mime-mapping ".texinfo" "application/x-texinfo";
+mime-mapping ".tgz" "application/octet-stream";
+mime-mapping ".tiff" "image/tiff";
+mime-mapping ".tif" "image/tiff";
+mime-mapping ".torrent" "application/x-bittorrent";
+mime-mapping ".tr" "application/x-troff";
+mime-mapping ".troff" "application/x-troff";
+mime-mapping ".tsv" "text/tab-separated-values";
+mime-mapping ".txt" "text/plain";
+    
+mime-mapping ".ustar" "application/x-ustar";
+    
+mime-mapping ".vcd" "application/x-cdlink";
+mime-mapping ".vrml" "model/vrml";
+    
+mime-mapping ".wav" "audio/x-wav";
+mime-mapping ".wax" "audio/x-ms-wax";
+mime-mapping ".wbmp" "image/vnd.wap.wbmp";
+mime-mapping ".wbxml" "application/vnd.wap.wbxml";
+mime-mapping ".wrl" "model/vrml";
+mime-mapping ".wm" "audio/x-ms-wm";
+mime-mapping ".wma" "audio/x-ms-wma";
+mime-mapping ".wmd" "application/x-ms-wmd";
+mime-mapping ".wmz" "application/x-ms-wmz";
+mime-mapping ".wml" "text/vnd.wap.wml";
+mime-mapping ".wmls" "text/vnd.wap.wmlscript";
+mime-mapping ".wmlc" "application/vnd.wap.wmlc";
+mime-mapping ".wmlsc" "application/vnd.wap.wmlscript";
+mime-mapping ".wmv" "audio/x-ms-wmv";
+mime-mapping ".wvx" "video/x-ms-wvx";
+   
+mime-mapping ".xls" "application/vnd.ms-excel";
+mime-mapping ".xbm" "image/x-xbitmap";
+mime-mapping ".xml" "text/xml";
+mime-mapping ".xpm" "image/x-xpixmax";
+mime-mapping ".xsl" "text/xml";
+mime-mapping ".xwd" "image/x-xwindowdump";
+    
+mime-mapping ".zip" "application/zip";
+mime-mapping ".z" "application/octet-stream";
+
+import "WEB-INF/resin-web-pre.xml" optional="true";
+import "WEB-INF/web.xml" optional="true";
+import "WEB-INF/resin-web.xml" optional="true";
+import "WEB-INF/resin-web.cf" optional="true";
+import "WEB-INF/resin-web-post.xml" optional="true";
+
+

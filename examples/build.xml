@@ -1,0 +1,42 @@
+<project name="examples" default="all" basedir=".">
+  
+  <property name="lib" location="../lib"/>
+  <property name="src" location="src"/>
+  <property name="files" location="files"/>
+  <property name="build" location="build"/>
+  
+  <property name="dist" location="."/>
+
+  <property name="name" location="bogus"/>
+
+  <target name="all">
+    <ant dir="hello" inheritAll="false"/>
+  </target>
+    
+  <target name="compile">
+     <mkdir dir="${build}/classes"/>
+     
+     <javac srcdir="${src}" destdir="${build}/classes">
+      <classpath>
+        <fileset dir="${lib}">
+          <include name="resin.jar"/>
+        </fileset>
+      </classpath>
+     </javac>
+
+     <jar jarfile="${build}/war/WEB-INF/lib/${name}.jar">
+        <fileset dir="${build}/classes"/>
+     </jar>
+
+     <jar jarfile="${dist}/${name}.war">
+        <fileset dir="${build}/war"/>
+        <fileset dir="${files}"/>
+     </jar>
+  </target>
+
+  <target name="clean-impl">
+    <delete dir="${build}"/>
+  </target>
+  
+</project>
+

@@ -1,0 +1,430 @@
+<project basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <property environment="env"/>
+
+  <!--
+     - resin.dist.files
+    -->
+  <target name="resin.dist.files" depends="version">
+    <mkdir dir="${dist.build.files}"/>
+    
+    <copy todir="${dist.build.files}/com/caucho/native"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${native.baratine}">
+        <exclude name="**/*~"/>
+        <exclude name="**/.*"/>
+      </fileset>
+    </copy>
+    
+    <jar destfile="${dist.build.files}/com/caucho/webapps/root.war">
+      <fileset dir="${resin.dir}/webapps/ROOT">
+        <exclude name="**/*~"/>
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!--
+     - resin.dist.jar
+    -->
+  <target name="resin.dist.jar"
+          depends="init,compile,junit,resin.dist.files">
+    <mkdir dir="${dist.build}/lib"/>
+    <mkdir dir="${dist.build}/compat"/>
+
+    <!--
+       - javaee-7.jar
+      -->
+    <jar destfile="${dist.build}/lib/javaee-7.jar">
+      <fileset dir="${modules.baratine}/cdi/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/jstl/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/jta/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.baratine}/servlet/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    	
+      <fileset dir="${modules.baratine}/websocket/classes">
+         <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+
+
+    <!--
+       - resin.jar
+      -->
+    <jar destfile="${dist.build}/lib/resin.jar"
+         manifest="${modules.resin}/resin/src/manifest.dist">
+      <zipfileset src="${dist.build}/lib/javaee-7.jar"/>
+      
+      <fileset dir="${modules.baratine}/baratine-api/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.baratine}/baratine/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/resin/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.baratine}/hessian/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules.resin}/junit/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${dist.build.files}">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="resin.dist.artifacts" depends="init">
+  </target>
+  
+  <target name="resin.dist.build" 
+          depends="compile, resin.dist.files, resin.dist.jar, dist.examples">
+    <mkdir dir="${dist.build}"/>
+
+    <!--
+    <copy tofile="${install}/conf/resin.xml.orig"
+          file="${resindir}/conf/resin.xml"/>
+    
+    <copy tofile="${install}/conf/resin.properties.orig"
+          file="${resindir}/conf/resin.properties"/>
+    -->
+    
+    <copy tofile="${install}/conf/resin.cf.orig"
+          file="${resin.dir}/modules/resin/src/META-INF/resin/resin.cf"/>
+    
+    <copy tofile="${install}/conf/resin.tmpl.cf.orig"
+          file="${resin.dir}/modules/resin/src/META-INF/resin/resin.tmpl.cf"/>
+    
+    <copy tofile="${install}/conf/health.cf.orig"
+          file="${resin.dir}/modules/resin/src/META-INF/resin/health.cf"/>
+    
+    <copy tofile="${install}/conf/web-app-default.cf.orig"
+          file="${resin.dir}/modules/resin/src/META-INF/resin/web-app-default.cf"/>
+    
+    <copy tofile="${install}/bin/resin"
+          file="${resin.dir}/bin/resin-dist.in">
+      <filterset>
+        <filter token="JAVA_EXE" value="java"/>
+        <filter token="JAVA_ARGS" value=""/>
+        <filter token="home_dir" value=""/>
+        <filter token="root_dir" value=""/>
+        <filter token="conf_dir" value=""/>
+        <filter token="log_dir" value=""/>
+      </filterset>
+    </copy>
+
+    <!--
+    <copy tofile="${install}/bin/baratine"
+          file="${resindir}/bin/baratinectl"/>
+    -->
+
+    <copy todir="${dist.build}"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resin.dir}">
+        <exclude name="**/*~"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/.svnignore"/>
+        <exclude name="**/*.swp"/>
+        <exclude name="**/WEB-INF/work/**"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+        <exclude name="**/lib/Regex.jar"/>
+        <exclude name="**/lib/bcel*.jar"/>
+        <exclude name="**/lib/jace.jar"/>
+        <exclude name="**/*.o"/>
+        <exclude name="**/*.so"/>
+        <exclude name="**/*.jnilib"/>
+        <exclude name="**/*.dylib"/>
+        <exclude name="**/*.pdf"/>
+        <exclude name="**/*.graffle"/>
+        <exclude name="**/*.lo"/>
+        <exclude name="**/*.svnignore"/>
+        <exclude name="**/*.svn"/>
+        <exclude name="**/.*/**"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/*.swp"/>
+        <exclude name="**/WEB-INF/work/**"/>
+        <exclude name="**/WEB-INF/pre_work/**"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+        <exclude name="**/admin-users.xml"/>
+        <exclude name="**/*~"/>
+
+        <include name="conf/**"/>
+        <include name="examples/**"/>
+        <exclude name="examples/*/build/**"/>
+        <include name="init.d/**"/>
+        
+        <include name="modules/jstl/src/**"/>
+        <include name="modules/jta/src/**"/>
+        <include name="modules/junit/src/**"/>
+        <include name="modules/resin/src/**"/>
+        
+        <include name="modules/ext/activation.jar"/>
+        <include name="modules/ext/javamail-141.jar"/>
+        <include name="bin/**"/>
+	
+        <include name="lib/activation.jar"/>
+        <include name="lib/activation.LICENSE"/>
+
+        <include name="lib/javamail-141.jar"/>
+        <include name="lib/javamail-14.LICENSE"/>
+
+        <include name="LICENSE"/>
+        <include name="README"/>
+      </fileset>
+      
+      <fileset dir="${baratine.dir}">
+        <exclude name="**/*~"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/.svnignore"/>
+        <exclude name="**/*.swp"/>
+        <exclude name="**/.*/**"/>
+        
+        <include name="modules/baratine/src/**"/>
+        <include name="modules/baratine-api/src/**"/>
+        <include name="modules/cdi/src/**"/>
+        <include name="modules/hessian/src/**"/>
+        <include name="modules/servlet/src/**"/>
+        <include name="modules/websocket/src/**"/>
+        
+        <include name="make/**"/>
+        <include name="build.xml"/>
+      </fileset>
+    </copy>
+
+    <chmod perm="ugo+rx">
+      <fileset dir="${dist.build}">
+        <include name="configure"/>
+        <include name="bin/resin"/>
+        <include name="bin/resin-dist"/>
+        <include name="bin/baratine"/>
+        <include name="bin/baratine-dist"/>
+        <include name="automake/missing"/>
+        <include name="automake/install-sh"/>
+        <include name="automake/config.sub"/>
+        <include name="automake/config.guess"/>
+        <include name="automake/mkinstalldirs"/>
+      </fileset>
+    </chmod>
+    
+    <antcall target="resin.artifacts.dist" inheritRefs="true"/>
+    
+    <mkdir dir="${dist.build}/endorsed"/>
+    <mkdir dir="${dist.build}/conf/keys"/>
+    <mkdir dir="${dist.build}/ext-lib"/>
+  </target>
+  
+  <target name="dist.package" depends="init,dist.package.tar,dist.package.hessian,dist.package.copy.snap"/>
+
+  <!--
+     - dist.package.tar
+    -->
+  <target name="dist.package.tar" depends="init">
+    <patternset id="dist">
+      <exclude name="**/Makefile"/>
+      <exclude name="**/*.o"/>
+      <exclude name="**/*.so"/>
+      <exclude name="**/*.dylib"/>
+      <exclude name="**/*.jnilib"/>
+      <exclude name="**/*.pdf"/>
+      <exclude name="**/*.graffle"/>
+      <exclude name="**/*.lo"/>
+      <exclude name="**/*.svnignore"/>
+      <exclude name="**/*.svn"/>
+      <exclude name="**/.*/**"/>
+      <exclude name="**/.cvsignore"/>
+      <exclude name="**/*.swp"/>
+      <exclude name="**/WEB-INF/work/**"/>
+      <exclude name="**/WEB-INF/pre_work/**"/>
+      <exclude name="**/WEB-INF/tmp/**"/>
+      <exclude name="**/WEB-INF/db/**"/>
+      <exclude name="**/*~"/>
+
+      <include name="${dist.name}/conf/**"/>
+      <include name="${dist.name}/examples/**"/>
+      <exclude name="${dist.name}/examples/*/build/**"/>
+      <include name="${dist.name}/init.d/**"/>
+      
+      <include name="${dist.name}/lib/resin.jar"/>
+      <include name="${dist.name}/lib/activation.jar"/>
+      <include name="${dist.name}/lib/javamail-141.jar"/>
+
+      <include name="${dist.name}/LICENSE"/>
+      <include name="${dist.name}/README"/>
+    </patternset>
+
+    <patternset id="dist.bin">
+      <include name="${dist.name}/bin/resin"/>
+      <include name="${dist.name}/bin/resin-dist.in"/>
+      <include name="${dist.name}/bin/*.bat"/>
+    </patternset>
+
+    <delete file="${dist}/${shortproduct}-${version}.zip"/>
+    <delete file="${dist}/${shortproduct}-${version}.tar.gz"/>
+
+    <zip destfile="${dist}/${shortproduct}-${version}.zip">
+      <zipfileset dir="${dist}">
+        <patternset refid="dist"/>
+      </zipfileset>
+      
+      <zipfileset dir="${dist}" filemode="775">
+        <patternset refid="dist.bin"/>
+      </zipfileset>
+    </zip>
+
+    <tar destfile="${dist}/${shortproduct}-${version}.tar.gz"
+         longfile="gnu" compression="gzip">
+      <tarfileset dir="${dist}">
+        <patternset refid="dist"/>
+      </tarfileset>
+      <tarfileset dir="${dist}" mode="775">
+        <patternset refid="dist.bin"/>
+      </tarfileset>
+    </tar>
+  </target>
+
+  <!--
+     - dist.package.hessian
+    -->
+  <target name="dist.package.hessian" depends="init">
+    <delete file="${dist}/hessian-${version}.jar"/>
+    <delete file="${dist}/hessian-${version}-src.jar"/>
+    <delete file="${dist}/hessian-test.jar"/>
+    
+    <jar destfile="${dist}/hessian-${version}.jar">
+      <fileset dir="${modules.baratine}/hessian/classes">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/hessian/EJBServlet.class"/>
+        <exclude name="com/caucho/hessian/HessianContextFactory.class"/>
+        <exclude name="com/caucho/burlap/EJBServlet.class"/>
+        <exclude name="com/caucho/burlap/BurlapContextFactory.class"/>
+        <exclude name="com/caucho/hessian/test/**"/>
+        <include name="com/caucho/kernel/CharBuffer.class"/>
+        <include name="com/caucho/kernel/CharBuffer$CBInputStream.class"/>
+        <include name="com/caucho/kernel/CharSegment.class"/>
+        <include name="com/caucho/hessian/**"/>
+        <include name="com/caucho/burlap/**/"/>
+        <include name="com/caucho/services/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/hessian-${version}-src.jar">
+      <fileset dir="${modules.baratine}/hessian/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/hessian/EJBServlet.java"/>
+        <exclude name="com/caucho/hessian/HessianContextFactory.java"/>
+        <exclude name="com/caucho/burlap/EJBServlet.java"/>
+        <exclude name="com/caucho/burlap/BurlapContextFactory.java"/>
+        <include name="com/caucho/hessian/**"/>
+        <include name="com/caucho/burlap/**"/>
+        <include name="com/caucho/services/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/hessian-applet-${version}.jar">
+      <fileset dir="${modules.baratine}/hessian/classes">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/hessian/io/Hessian2*"/>
+        <exclude name="com/caucho/hessian/io/HessianDebug*"/>
+        <include name="com/caucho/kernel/CharBuffer.class"/>
+        <include name="com/caucho/kernel/CharBuffer$CBInputStream.class"/>
+        <include name="com/caucho/kernel/CharSegment.class"/>
+        <include name="com/caucho/hessian/io/**"/>
+        <include name="com/caucho/hessian/client/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/hessian-test.jar">
+      <fileset dir="${modules.baratine}/hessian/classes">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/hessian/test/**"/>
+      </fileset>
+      <fileset dir="${modules.baratine}/hessian/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/hessian/test/**"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="dist.package.copy.snap" depends="init">
+    <copy tofile="${dist}/${shortproduct}-5_0-snap.zip"
+          file="${dist}/${shortproduct}-${version}.zip"/>
+
+    <copy tofile="${dist}/${shortproduct}-5_0-snap.tar.gz"
+          file="${dist}/${shortproduct}-${version}.tar.gz"/>
+  </target>
+  
+  <!--
+     - dist.examples
+    -->
+
+  <target name="dist.examples" depends="init,resin.dist.jar">
+    <property name="dist.name" value="baratine-${version}"/>
+    <property name="install" value="${dist}/${dist.name}"/>
+    
+    <mkdir dir="${install}"/>
+    
+    <copy todir="${install}"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${basedir}">
+        <exclude name="**/.*/**"/>
+        <exclude name="**/*~"/>
+
+        <include name="examples/**"/>
+      </fileset>
+    </copy>
+
+    <ant dir="${install}/examples" inheritAll="false"/>
+    
+  </target>
+  
+</project>

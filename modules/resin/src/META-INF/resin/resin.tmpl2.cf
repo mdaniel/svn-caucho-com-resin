@@ -1,0 +1,75 @@
+#
+# Resin 5.0 configuration template file.
+#
+namespace resin "com.caucho.resin";
+
+#
+# default property values
+#
+
+log_pattern="[%d] %p %c{1}: %m";
+
+# Logging configuration for the JDK logging API
+log-handler name="" level="all" path="stdout:"
+            pattern="$log_pattern";
+   
+logger "${log_level?:'info'}" "";
+
+logger "config" "com.caucho.java";
+logger "config" "com.caucho.loader";
+logger "info" "javax.management";
+
+# Default configuration applied to all clusters, including
+# HTTP, HTTPS, and /resin-admin configuration.
+
+import "${__DIR__}/cluster-default.cf";
+  
+#
+# health configuration
+#
+import "${__DIR__}/health.cf" optional="true";
+
+#
+# Remote management requires at least one enabled admin user.
+#
+resin:AdminAuthenticator {
+  user "${admin_user}" "${admin_password}";
+    
+  import "${conf_dir}/admin-users.cf" optional="true";
+  import "${conf_dir}/admin-users.xml" optional="true";
+}
+
+#
+# Configures the main application cluster.  Load-balancing configurations
+# will also have a web cluster.
+#
+cluster {
+  # define the servers in the cluster
+  server-multi id-prefix="app-" address-list="${app_servers}" port="6800";
+
+  host-default {
+    # creates the webapps directory for .war expansion
+    web-app-deploy path="webapps"
+                   expand-preserve-fileset="WEB-INF/work/**"
+                   multiversion-routing="${webapp_multiversion_routing}"
+                   path-suffix="${elastic_webapp?resin.id:''}";
+  }
+
+  # auto virtual host deployment in hosts/foo.example.com/webapps 
+  host-deploy path="hosts" {
+    host-default {
+      import "host.xml" optional="true";
+    }
+  }
+}
+
+cluster "web" {
+  # define the servers in the cluster
+  server-multi id-prefix="web-" address-list="${web_servers}" port="6810";
+
+  host id="" root-directory="web" {
+    web-app id="" {
+      resin:LoadBalance regexp="" cluster="app";
+    }
+  }
+}

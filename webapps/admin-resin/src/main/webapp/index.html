@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Resin Admin</title>
+
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/admin.css">
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.flot.js"></script>
+<script src="js/jquery.flot.time.js"></script>
+<script src="js/jamp.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/graph.js"></script>
+
+<script src="js/services/admin-service.js"></script>
+<script src="js/services/stat-service.js"></script>
+
+<script src="js/views/view.js"></script>
+<script src="js/views/dashboard-view.js"></script>
+<script src="js/views/jmx-view.js"></script>
+<script src="js/views/login-view.js"></script>
+<script src="js/views/logout-view.js"></script>
+<script src="js/views/memory-view.js"></script>
+<script src="js/views/meters-view.js"></script>
+<script src="js/views/options-view.js"></script>
+<script src="js/views/server-view.js"></script>
+<!-- <script src="js/views/threads-view.js"></script> -->
+</head>
+
+<body>
+<div>Base URL: <input id="baseUrl" type="text" size="80" value="http://localhost:8080/resin-admin-1.0.0-SNAPSHOT/jamp"></div>
+
+<h1>Resin Administration</h1>
+
+<div id="header">
+  <img src="images/caucho-white.jpg">
+</div>
+
+<div id="navigation">
+</div>
+
+<div id="view">
+</div>
+
+<div id="footer">
+  <p>Copyright (c) 2014 Caucho Technology, Inc. All rights reserved.</p>
+</div>
+
+<script type="text/javascript">
+$(function() {
+  $("#callService").submit(function(event) {
+    event.preventDefault();
+    
+    var url = $("#baseUrl").val();
+    
+    var serviceName = $("#callServiceName").val();
+    var methodName = $("#callServiceMethod").val();
+    var args = $("#callServiceArgs").val();
+    var id = $("#callServiceID").val();
+    
+    if (id.length == 0) {
+      id = null;
+    }
+    
+    if (args.length == 0) {
+      args = "[]";
+    }
+    
+    args = JSON.parse(args);
+    
+    var paramMap = {
+      "service" : serviceName,
+      "method"  : methodName,
+      "args"    : args,
+      "id"      : id,
+      "url"     : url
+    };
+    
+    Jamp.sendRequest(paramMap)
+      .done(function(data) {
+        console.log("callService done: " + JSON.stringify(data));
+      })
+      .error(function(error) {
+        console.log("callService error: " + JSON.stringify(error));
+      })
+      .always(function() {
+        console.log("callService always");
+      });
+  });
+});
+</script>
+
+</body>
+
+</html>
+
+

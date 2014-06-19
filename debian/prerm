@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+if [ -x "/etc/init.d/resin" ]; then
+	if [ -x "`which service 2>/dev/null`" ]; then
+		service resin stop || exit $?
+	else
+		/etc/init.d/resin stop || exit $?
+	fi
+	update-rc.d -f resin remove
+fi

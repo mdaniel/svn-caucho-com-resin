@@ -1,0 +1,292 @@
+<project basedir=".">
+
+  <!--
+     - artifact compile
+    -->
+  <target name="artifact">
+    <property name="artifact.src" value="${resin.artifacts}/${artifact.name}/src"/>
+    <property name="artifact.maven" value="${resin.artifacts}/${artifact.name}/maven2"/>
+    <property name="artifact.build" value="${resin.artifacts}/${artifact.name}/classes"/>
+    <property name="artifact.dist" value="${resin.artifacts}/${artifact.name}/dist"/>
+    <property name="artifact.lib" value="${resin.artifacts}/${artifact.name}/lib"/>
+    <property name="artifact.ext" value="jar"/>
+    <property name="artifact.jar" value="resin-${artifact.name}.${artifact.ext}"/>
+
+    <property file="${artifact.src}/module.properties"/>
+
+    <mkdir dir="${artifact.build}" />
+
+    <copy todir="${artifact.build}"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${artifact.src}">
+        <include name="**/*.xml"/>
+        <include name="**/*.xsll"/>
+        <include name="**/*.rnc"/>
+        <include name="**/*.tld"/>
+        <include name="**/*.ftld"/>
+        <include name="**/*.afm"/>
+        <include name="**/*.properties"/>
+        <include name="**/jaxb.index"/>
+        <include name="META-INF/**"/>
+      </fileset>
+    </copy>
+
+    <copy tofile="${artifact.build}/META-INF/maven/caucho.com/pom.xml"
+          file="${artifact.maven}/pom.xml"
+          preservelastmodified="true"
+          overwrite="true">
+        <filterset>
+          <filter token="VERSION" value="${maven.version}"/>
+          <filter token="DATE" value="${date}"/>
+          <filter token="VERSION_DATE" value="${vdate}"/>
+        </filterset>
+    </copy>
+
+    <javac srcdir="${artifact.src}" destdir="${artifact.build}"
+           executable="${javac}"
+           fork="true" 
+           verbose="${javac.verbose}" 
+           debug="${javac.debug}" optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
+           source="${javac.source}"
+           target="${javac.target}"
+           excludes="**/.svn/**"
+           memoryMaximumSize="${javac.memoryMaximumSize}">
+      <classpath>
+        <dirset dir="${modules.baratine}">
+          <include name="*/classes"/>
+       </dirset>
+        <dirset dir="${modules.resin}">
+          <include name="*/classes"/>
+       </dirset>
+        <fileset dir="${artifacts}/${artifact.name}">
+          <include name="lib/**/*.jar"/>
+       </fileset>
+        <fileset dir="${ext.resin}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${maven.lib}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+
+    <mkdir dir="${artifact.dist}" />
+
+    <jar jarfile="${artifact.dist}/${artifact.jar}"
+         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
+         manifest="${artifact.src}/manifest">
+      <fileset dir="${artifact.build}">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+    </jar>
+  </target>
+  
+  <!--
+     - artifact dist
+    -->
+  <target name="artifact.dist.macro">
+    <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
+    <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
+    <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
+    <property name="artifact.jar" value="resin-${artifact.name}.jar"/>
+
+    <property file="${artifact.src}/module.properties"/>
+
+    <mkdir dir="${dist.build}/project-jars"/>
+
+    <copy tofile="${dist.build}/project-jars/resin-${artifact.name}-${version}.jar"
+          file="${artifact.dist}/${artifact.jar}"/>
+  </target>
+
+  <target name="artifact.dist" depends="init">
+    <!--
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="cxf"/>
+    </antcall>
+    -->
+    <!--
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="mule"/>
+    </antcall>
+    -->
+    
+<!-- XXX: temp
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="spring"/>
+    </antcall>
+    
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="wicket"/>
+    </antcall>
+    
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="xfire"/>
+    </antcall>
+    
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="xwork2"/>
+    </antcall>
+  -->
+  </target>
+
+  <!--
+     - resin-eclipselink
+    -->
+  <!--
+  <target name="resin-eclipselink" depends="eclipselink">
+    <copy file="modules/eclipselink/dist/resin-eclipselink.jar"
+          todir="${resin.lib}"/>
+  </target>
+  -->
+  
+  <target name="support" depends="init, compat">
+    <mkdir dir="plugins"/>
+    
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="support"/>
+      <param name="module.jar" value="../plugins/resin-support.jar"/>
+    </antcall>
+  </target>
+     
+  <target name="junit" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="modules" value="${modules.resin}"/>
+      <param name="module.name" value="junit"/>
+      <param name="module.jar" value="resin-junit.jar"/>
+    </antcall>
+  </target>
+
+  <target name="resin.artifacts.dist" depends="init">
+    <!--
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="ant"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+
+    <!--
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="cxf"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+    <!--
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="maven"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="mule"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+
+    <!-- XXX: temp
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="spring"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+    <!-- XXX: temp
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="wicket"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+<!--    
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="xfire"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+
+<!--
+    <antcall target="artifact.dist.macro" inheritRefs="true">
+      <param name="artifact.name" value="xwork2"/>
+      <param name="artifacts" value="${resin.artifacts}"/>
+    </antcall>
+    -->
+  </target>
+
+  <target name="jasper" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jasper"/>
+      <param name="module.jar" value="resin-jasper.jar"/>
+    </antcall>
+  </target>
+
+  <!--
+     - artifacts
+    -->
+
+  <!--
+  <target name="ant" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="ant"/>
+      <param name="artifact.jar" value="resin-ant.jar"/>
+    </antcall>
+  </target>
+  -->
+  <target name="resin-eclipselink" depends="eclipselink">
+    <copy file="modules/eclipselink/dist/resin-eclipselink.jar"
+          todir="${resin.lib}"/>
+  </target>
+
+  <target name="richfaces" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="richfaces"/>
+      <param name="artifact.jar" value="resin-richfaces.jar"/>
+    </antcall>
+  </target>
+
+  <target name="spring" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="spring"/>
+      <param name="artifact.jar" value="resin-spring.jar"/>
+    </antcall>
+  </target>
+  
+  <target name="artifacts" depends="init, compat">
+    <mkdir dir="artifacts"/>
+    <!--
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="xwork2"/>
+    </antcall>
+    -->
+  </target>
+
+  <target name="compat" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="compat"/>
+      <param name="module.jar" value="resin-compat.jar"/>
+    </antcall>
+  </target>
+
+  <target name="eclipselink" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="eclipselink"/>
+      <param name="module.jar" value="resin-eclipselink.jar"/>
+    </antcall>
+  </target>
+
+  <!-- gae APIs for quercus testing -->
+  <target name="gae" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="gae"/>
+      <param name="module.dist" value="${lib}"/>
+      <param name="module.jar" value="gae.jar"/>
+    </antcall>
+  </target>
+
+  <target name="hibernate" depends="init">
+    <antcall target="module" inheritRefs="true">
+	  <param name="module.name" value="hibernate"/>
+	  <param name="module.jar" value="resin-hibernate.jar"/>
+	</antcall>
+  </target>	
+
+</project>

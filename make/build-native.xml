@@ -1,0 +1,8 @@
+<project basedir=".">
+
+  
+  <target name="native" depends="init">
+     <ant target="native" dir="${baratine.dir}"/>
+  </target>
+
+</project>

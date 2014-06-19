@@ -1,0 +1,158 @@
+body {
+  font-family: Helvetica,Arial,sans-serif;
+  color:#6f6451;
+}
+
+a:link {color:#1982d1;}      /* unvisited link */
+a:visited {color:#1982d1;}  /* visited link */
+a:hover {color:#0b436c;}  /* mouse over link */
+a:active {color:#1982d1;}  /* selected link */
+
+#logo_login{
+  text-align:center;
+  margin-top:70px;
+  margin-bottom:50px;
+}
+#login_form{
+  font-size:34px;
+  width:590px;
+  margin-left:80px;
+  text-align:right;
+}
+#login_form h1{
+  padding:0 0 30px 0;
+  letter-spacing:2px;
+}
+
+.login input[type="text"] {
+  width: 200px;
+  font-size: 12pt;
+  padding: 10px;
+  -webkit-border-radius:4px;
+  -moz-border-radius:4px;
+  border-radius:4px;
+  border:1px solid #808181;
+}
+.login input[type="password"] {
+  width: 200px;
+  font-size: 12pt;
+  padding: 10px;
+  -webkit-border-radius:4px;
+  -moz-border-radius:4px;
+  border-radius:4px;
+  border:1px solid #808181;
+}
+
+.form_text{
+  padding:5px 0px 5px 30px;
+  line-height:50px;
+  letter-spacing:2px;
+  text-align:right;
+  clear:right;
+}
+.form_wrapper{
+  padding:5px 0px 5px 30px;
+  line-height:50px;
+  letter-spacing:2px;
+  float:left;
+  text-align:right;
+  clear:right;
+}
+.login_txt{
+  font-size:12px;
+  margin-right:14%;
+  padding:5px 0 0 0;
+}
+
+
+    .textinput{
+    margin:5px 0;
+      height:44px;
+      padding:0 18px;
+      line-height:44px;
+      text-align:left;
+      letter-spacing:2px;
+      background:#ffffff;
+      font-size:12px;
+      font-family: Helvetica, Arial, sans-serif;
+      -webkit-border-radius:4px;
+      -moz-border-radius:4px;
+      border-radius:4px;
+      border:1px solid #808181;
+    }
+
+      .textinput:hover{
+      }
+
+
+            .btn_login{
+    margin-left:41%;
+      display:block;
+      height:44px;
+      padding:0 70px;
+      line-height:44px;
+      text-align:center;
+      color:#ffffff;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      background:#ccc;
+      font-size:14px;
+      font-family: Helvetica, Arial, sans-serif;
+      -webkit-border-radius:4px;
+      -moz-border-radius:4px;
+      border-radius:4px;
+      border:1px solid #70910c;
+    cursor:pointer;
+    }
+
+
+    .btn{
+      display:block;
+      height:44px;
+      float:left;
+      padding:0 18px;
+      line-height:44px;
+      text-align:center;
+      color:#ffffff;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      background:#ccc;
+      font-size:14px;
+      font-family: Helvetica, Arial, sans-serif;
+      -webkit-border-radius:4px;
+      -moz-border-radius:4px;
+      border-radius:4px;
+      border:1px solid #70910c;
+    cursor:pointer;
+    }
+
+      .greenbtn{
+        background-color: #8cb411;
+        background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#8fb617), to(#88b209));
+        background-image: -webkit-linear-gradient(top, #8fb617, #88b209);
+        background-image:    -moz-linear-gradient(top, #8fb617, #88b209);
+        background-image:     -ms-linear-gradient(top, #8fb617, #88b209);
+        background-image:      -o-linear-gradient(top, #8fb617, #88b209);
+        border:1px solid #70910c;
+      }
+
+        .greenbtn:hover{
+          background-color: #94ba23;
+          background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#99bd2d), to(#88b209));
+          background-image: -webkit-linear-gradient(top, #99bd2d, #88b209);
+          background-image:    -moz-linear-gradient(top, #99bd2d, #88b209);
+          background-image:     -ms-linear-gradient(top, #99bd2d, #88b209);
+          background-image:      -o-linear-gradient(top, #99bd2d, #88b209);
+        }
+
+        .greenbtn:active{
+          background-color: #8db513;
+          background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#88b209), to(#99bd2d));
+          background-image: -webkit-linear-gradient(top, #88b209, #99bd2d);
+          background-image:    -moz-linear-gradient(top, #88b209, #99bd2d);
+          background-image:     -ms-linear-gradient(top, #88b209, #99bd2d);
+          background-image:      -o-linear-gradient(top, #88b209, #99bd2d);
+          -moz-box-shadow: inset 0 2px 2px #678707;
+          -webkit-box-shadow: inset 0 2px 2px #678707;
+          box-shadow: inset 0 2px 2px #678707;
+        }

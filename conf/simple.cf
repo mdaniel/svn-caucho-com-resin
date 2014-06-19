@@ -1,0 +1,3 @@
+cluster {
+  server port="80";
+}

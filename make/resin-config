@@ -1,0 +1,31 @@
+case "$1" in
+
+    --cflags) echo "-g -O2 -DB64 -DHAS_SOCK_TIMEOUT -DHAS_JVMTI -D_POSIX_PTHREAD_SEMANTICS";;
+    
+    --libexec) echo "libexec64";;
+    
+    --log-dir) echo "@resin_log@";;
+    
+    --home-dir) echo "@resin_home@";;
+    
+    --root-dir) echo "@resin_root@";;
+    
+    --conf-dir) echo "@resin_conf@";;
+    
+    --build-dir) echo "/Users/ferg/ws7/resin";;
+    
+    --usr-share) echo "";;
+    
+    --init-d) echo "@resin_init_d@";;
+    
+    --init-d-dir) echo "";;
+    
+    --resin-pro) echo "../pro";;
+    
+    --setuid_user) echo "resin";;
+    
+    --setuid_group) echo "resin";;
+    
+    *) echo "unknown";
+    
+esac

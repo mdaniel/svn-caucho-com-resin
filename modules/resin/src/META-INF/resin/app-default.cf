@@ -1,0 +1,5 @@
+namespace resin "com.caucho.resin";
+
+web-app-default {
+  import "${__DIR__}/web-app-default.cf";
+}
