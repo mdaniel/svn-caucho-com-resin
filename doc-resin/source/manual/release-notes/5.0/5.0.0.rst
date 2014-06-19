@@ -8,8 +8,8 @@ Resin 5.0.0 - alpha (2014-06-12)
 * Command-line changes
 * Configuration simplification
 * Deployment
-* Bartender
-* Baratine
+* Baratine (Service Architecture)
+* Bartender (Clustering)
 * Kelp/Kraken
 * HTTP/2.0
 * Proxy to HTTP/2.0
@@ -206,3 +206,13 @@ underlying systems as session replication. (Resin 4.0 distribution
 was implemented as a separate system.) Using one system in Resin 5.0
 simplifies the implementation, and improves Resin's internal testing.
 
+Baratine
+=========
+
+Resin 5.0 has been refactored to use a services architecture, using
+Baratine as the service framework. Baratine is the successor to the
+Resin 4.0 BAM framework, updated based on our experience with Resin 4.0.
+
+Using these services in Resin has eliminated several complicated multithreaded
+systems, and replaced them with fast single-threaded services. By reducing the
+synchronization, these services are simpler to maintain, and can be faster.
