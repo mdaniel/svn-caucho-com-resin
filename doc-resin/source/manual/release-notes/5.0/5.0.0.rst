@@ -3,6 +3,7 @@
 Resin 5.0.0 - alpha (2014-06-12)
 ================================
 
+* alpha status
 * Distribution and packaging changes
 * Feature focus (servlet, jsp)
 * Command-line changes
@@ -10,11 +11,19 @@ Resin 5.0.0 - alpha (2014-06-12)
 * Deployment
 * Baratine (Service Architecture)
 * Bartender (Clustering)
-* Kelp/Kraken
+* Kelp/Kraken (Internal Database)
 * HTTP/2.0
-* Proxy to HTTP/2.0
+* Load Balance Proxy to HTTP/2.0
+* HTTP cache updates
 * Websocket
 * Logging
+
+Alpha Status
+============
+
+Resin 5.0.0 is considered to be in alpha status. Since there are known
+reliability and performance issues, it is not likely to be suitable for
+external deployment yet, and should be considered a preview release.
 
 Distribution and Packaging
 ===========================
@@ -209,10 +218,87 @@ simplifies the implementation, and improves Resin's internal testing.
 Baratine
 =========
 
-Resin 5.0 has been refactored to use a services architecture, using
-Baratine as the service framework. Baratine is the successor to the
-Resin 4.0 BAM framework, updated based on our experience with Resin 4.0.
+Internal services in Resin 5.0 now use Baratine.
+Baratine is the successor to the Resin 4.0 BAM framework, updated based
+on our experience with Resin 4.0.
 
 Using these services in Resin has eliminated several complicated multithreaded
 systems, and replaced them with fast single-threaded services. By reducing the
 synchronization, these services are simpler to maintain, and can be faster.
+
+Bartender (Clustering)
+======================
+
+Clustering services like deployment and sessions now use Bartender for
+cluster management. Bartender replaces the heartbeat mechanism in Resin 4.0.
+
+Advantages in Resin 5.0 clustering include better support for cloud
+environments like EC2, increased reliability with better heartbeating, and
+transforming cluster into the single-threaded Baratine services, simplifying
+or eliminating synchronization issues.
+
+The new Resin 5.0 "pod" concept replaces the Resin 4.0 "triad", where the triad
+is a specific case of the pod. Pods can be organized as triad, or "solo",
+or "pair" or "cluster".
+
+Deployment and session replication use Bartender to save deployment files
+and locate sessions.
+
+Kelp/Kraken (Internal Database)
+===============================
+
+The internal database used for deployment, session replication,
+and admin statistics has been completely rewritten and redesigned for
+better reliability and write performance.
+
+* write-only files
+* journaling
+* single-threaded (Baratine) writer
+
+The write-only file format of the new database (Kelp/Kraken)  
+reduces database corruption. Because updates do not overwrite old data,
+there are fewer opportunities for timing problems or failures.
+
+Journalling of inserts and updates improves performance and reliability.
+Before updates are written to disk, they are written to a fast log. On recovery,
+the log can be replayed. The log minimizes database writes, because the database
+can update in memory and then batch writes to disk.
+
+Using a Baratine service for writes has reliability and performance benefits.
+Because the writer is single-threaded, locking is not needed, and debugging and
+testing is simplified. The single thread can also help write performance by
+improving the CPU cache behavior by minimizing write contention and cache use.
+
+HTTP/2.0
+=========
+
+HTTP/2.0 (draft 12) is now supported. HTTP/2.0 is a binary version of HTTP
+which improves TCP efficiency by allowing multiple asynchronous requests
+on a single TCP socket and reducing header size.
+
+Load Balance Proxy
+===================
+
+The load balance proxy, which forwards requests from a Resin web-server to
+a Resin app-server, now uses HTTP/2.0. The Resin web server
+can now load-balance to any backend servers that supports HTTP/2.0, and
+Resin can be an app-server to any web-server that supports HTTP/2.0
+as a proxy.
+
+HTTP Cache Updates
+===================
+
+The HTTP cache is now enabled by default. Internally, it's backing store has
+been updated to use the same low-level mmap segment reading and writing as
+the internal database.
+
+WebSocket
+=========
+
+WebSockets are supported with the Java standard WebSocket specification.
+
+Logging
+=======
+
+Logging supports patterns based log4j syntax. Logging now uses an
+asynchronous service for scalability.
