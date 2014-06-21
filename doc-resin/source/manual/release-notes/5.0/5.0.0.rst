@@ -302,3 +302,11 @@ Logging
 
 Logging supports patterns based log4j syntax. Logging now uses an
 asynchronous service for scalability.
+
+.git source
+===========
+
+The Resin source is available in git as: git://git.caucho.com/baratine.git
+and git://git.caucho.com/resin.git. 
+
+When building Resin, you will need to build Baratine first.
