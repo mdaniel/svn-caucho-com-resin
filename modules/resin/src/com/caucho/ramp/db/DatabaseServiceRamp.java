@@ -77,7 +77,7 @@ public class DatabaseServiceRamp
   
   public void findOne(String sql, Result<Cursor> result, Object []args)
   {
-    _tableManager.findOne(sql, args, result);
+    _tableManager.query(sql).findOne(result, args);
   }
   
   public void findAll(String sql, Result<Iterable<Cursor>> result, Object []args)
@@ -85,9 +85,18 @@ public class DatabaseServiceRamp
     _tableManager.findAll(sql, args, result);
   }
   
-  public void addTableWatch(String tableName, @Service DatabaseWatch watch)
+  public boolean watch(@Service DatabaseWatch watch, String sql, Object []args)
   {
-    _tableManager.addWatch(tableName, watch);
+    _tableManager.query(sql).watch(watch, args);
+    
+    return true;
+  }
+  
+  public boolean unwatch(@Service DatabaseWatch watch, String sql, Object []args)
+  {
+    _tableManager.query(sql).unwatch(watch, args);
+    
+    return true;
   }
 
   @Override
