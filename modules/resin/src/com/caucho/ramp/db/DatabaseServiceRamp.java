@@ -77,7 +77,7 @@ public class DatabaseServiceRamp
   
   public void findOne(String sql, Result<Cursor> result, Object []args)
   {
-    _tableManager.query(sql).findOne(result, args);
+    _tableManager.findOne(sql, args, result);
   }
   
   public void findAll(String sql, Result<Iterable<Cursor>> result, Object []args)
