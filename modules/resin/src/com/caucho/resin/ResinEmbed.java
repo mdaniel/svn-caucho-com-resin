@@ -46,6 +46,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.RawString;
+import com.caucho.deploy.ConfigInstanceBuilder;
 import com.caucho.http.container.HttpContainer;
 import com.caucho.http.host.Host;
 import com.caucho.http.host.HostConfig;
@@ -359,7 +360,9 @@ public class ResinEmbed implements Closeable
 
       // _server = _resin.createHttpContainer();
       
-      thread.setContextClassLoader(_server.getClassLoader());
+      _server = _resin.getHttpContainer();
+      
+      thread.setContextClassLoader(_resin.getClassLoader());
 
       if (_serverHeader != null)
         _server.setServerHeader(_serverHeader);
@@ -755,7 +758,14 @@ public class ResinEmbed implements Closeable
     public <T> void inject(T bean, CreationalContext<T> env)
       throws ConfigException
     {
-      _config.configure((WebApp) bean);
+      if (bean instanceof ConfigInstanceBuilder) {
+        ConfigInstanceBuilder builder = (ConfigInstanceBuilder) bean;
+        
+        builder.addContentProgram(this);
+      }
+      else {
+        _config.configure((WebApp) bean);
+      }
     }
   }
 }

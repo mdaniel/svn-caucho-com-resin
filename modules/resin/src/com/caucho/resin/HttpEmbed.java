@@ -103,7 +103,7 @@ public class HttpEmbed extends PortEmbed
       
       _port.init();
       
-      SystemManager system = server.getSystemManager();
+      //SystemManager system = server.getSystemManager();
       NetworkSystem networkSystem = NetworkSystem.getCurrent(); 
       
       networkSystem.addListener(_port);

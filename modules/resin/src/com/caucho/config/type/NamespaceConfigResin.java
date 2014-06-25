@@ -134,16 +134,16 @@ class NamespaceConfigResin extends NamespaceConfig
     // addBean("persistent-store", PersistentStoreConfig.class);
     addBean("persistence-unit-ref", "com.caucho.config.types.PersistenceUnitRef");
     
-    addBean("rar-deploy", "com.caucho.jca.ra.ResourceDeploy");
+    //addBean("rar-deploy", "com.caucho.jca.ra.ResourceDeploy");
     addBean("reference", "com.caucho.config.types.ReferenceConfig");
     addBean("remote-client", "com.caucho.remote.client.RemoteClient");
-    addBean("resource", "com.caucho.jca.cfg.Resource");
-    addBean("resource-adapter", "com.caucho.jca.cfg.ResourceAdapterBeanConfig");
-    addBean("resource-default", "com.caucho.jca.ra.ResourceDefault");
-    addBean("resource-deploy", "com.caucho.jca.ra.ResourceDeploy");
-    addBean("resource-env-ref", "com.caucho.config.types.ResourceEnvRef");
-    addBean("resource-manager", "com.caucho.jca.ra.ResourceManagerConfig");
-    addBean("resource-ref", "com.caucho.config.types.ResourceRef");
+    //addBean("resource", "com.caucho.jca.cfg.Resource");
+    //addBean("resource-adapter", "com.caucho.jca.cfg.ResourceAdapterBeanConfig");
+    //addBean("resource-default", "com.caucho.jca.ra.ResourceDefault");
+    //addBean("resource-deploy", "com.caucho.jca.ra.ResourceDeploy");
+    //addBean("resource-env-ref", "com.caucho.config.types.ResourceEnvRef");
+    //addBean("resource-manager", "com.caucho.jca.ra.ResourceManagerConfig");
+    //addBean("resource-ref", "com.caucho.config.types.ResourceRef");
     addBean("role-map", "com.caucho.security.RoleMap");
     
     addBean("scheduled-task", "com.caucho.resources.ScheduledTaskConfig");
