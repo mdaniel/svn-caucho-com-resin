@@ -54,6 +54,7 @@ import com.caucho.http.protocol.HttpProtocol;
 import com.caucho.http.protocol.RequestProtocolHttp;
 import com.caucho.http.webapp.DeployGeneratorWebAppSingle;
 import com.caucho.http.webapp.WebApp;
+import com.caucho.http.webapp.WebAppBuilder;
 import com.caucho.http.webapp.WebAppConfig;
 import com.caucho.http.webapp.WebAppContainer;
 import com.caucho.lifecycle.Lifecycle;
@@ -118,6 +119,8 @@ public class ResinEmbed implements Closeable
   private boolean _isConfig;
   private boolean _isDevelopmentMode;
   private boolean _isIgnoreClientDisconnect;
+
+  private ServerBuilderResin _serverBuilder;
 
   /**
    * Creates a new resin server.
@@ -189,8 +192,9 @@ public class ResinEmbed implements Closeable
   {
     _portList.add(port);
     
-    if (_server != null)
-      port.bindTo(_server);
+    if (_serverBuilder != null) {
+      port.bindTo(_serverBuilder);
+    }
     
     /*
     // server/1e00
@@ -345,9 +349,9 @@ public class ResinEmbed implements Closeable
     try {
       Environment.initializeEnvironment();
 
-      ServerBuilderResin builder = new ServerBuilderResin(_args);
+      _serverBuilder = new ServerBuilderResin(_args);
       
-      _resin = builder.build();
+      _resin = _serverBuilder.build();
       // _resin.preConfigureInit();
       
       thread.setContextClassLoader(_resin.getClassLoader());
@@ -363,6 +367,10 @@ public class ResinEmbed implements Closeable
       _server = _resin.getHttpContainer();
       
       thread.setContextClassLoader(_resin.getClassLoader());
+      
+      for (PortEmbed port : _portList) {
+        port.bindTo(_serverBuilder);
+      }
 
       if (_serverHeader != null)
         _server.setServerHeader(_serverHeader);
@@ -372,10 +380,6 @@ public class ResinEmbed implements Closeable
 
       for (BeanEmbed beanEmbed : _beanList) {
         beanEmbed.configure();
-      }
-      
-      for (PortEmbed port : _portList) {
-        port.bindTo(_server);
       }
 
       // _resin.start();
@@ -760,6 +764,11 @@ public class ResinEmbed implements Closeable
     {
       if (bean instanceof ConfigInstanceBuilder) {
         ConfigInstanceBuilder builder = (ConfigInstanceBuilder) bean;
+        
+        builder.addContentProgram(this);
+      }
+      else if (bean instanceof WebAppBuilder) {
+        WebAppBuilder builder = (WebAppBuilder) bean;
         
         builder.addContentProgram(this);
       }

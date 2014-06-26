@@ -29,7 +29,7 @@
 
 package com.caucho.resin;
 
-import com.caucho.http.container.*;
+import com.caucho.server.container.ServerBuilder;
 
 /**
  * Embeddable version of a Resin port
@@ -79,5 +79,5 @@ abstract public class PortEmbed
   /**
    * Binds the port to the server
    */
-  abstract public void bindTo(HttpContainer server);
+  abstract public void bindTo(ServerBuilder serverBuilder);
 }

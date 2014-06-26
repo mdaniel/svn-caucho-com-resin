@@ -31,11 +31,10 @@ package com.caucho.resin;
 
 import com.caucho.bartender.network.NetworkSystem;
 import com.caucho.config.ConfigException;
-import com.caucho.env.system.SystemManager;
-import com.caucho.http.container.HttpContainer;
 import com.caucho.http.protocol.HttpProtocol;
 import com.caucho.network.listen.PortTcp;
 import com.caucho.network.listen.PortTcpBuilder;
+import com.caucho.server.container.ServerBuilder;
 
 /**
  * Embeddable version of a HTTP port
@@ -89,7 +88,7 @@ public class HttpEmbed extends PortEmbed
    * Binds the port to the server
    */
   @Override
-  public void bindTo(HttpContainer server)
+  public void bindTo(ServerBuilder serverBuilder)
   {
     try {
       PortTcpBuilder portBuilder = new PortTcpBuilder();
@@ -105,9 +104,9 @@ public class HttpEmbed extends PortEmbed
       
       //SystemManager system = server.getSystemManager();
       NetworkSystem networkSystem = NetworkSystem.getCurrent(); 
-      
+
       networkSystem.addListener(_port);
-      
+
       // server.addPort(_port);
     } catch (Exception e) {
       throw ConfigException.create(e);
