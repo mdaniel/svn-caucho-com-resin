@@ -42,6 +42,7 @@ import com.caucho.http.webapp.WebAppConfig;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.resin.HttpEmbed;
 import com.caucho.server.container.ArgsServerBase;
+import com.caucho.server.container.ServerBuilderResin;
 import com.caucho.server.resin.Resin;
 
 /**
@@ -118,8 +119,10 @@ public class ResinEmbed
       _server = _resin.getHttpContainer();
       
       if (_httpPort >= 0) {
+        ServerBuilderResin builder = null;
+        
         HttpEmbed httpEmbed = new HttpEmbed(_httpPort);
-        httpEmbed.bindTo(_server);
+        httpEmbed.bindTo(builder);
       }
       
       HostConfig hostConfig = new HostConfig();
