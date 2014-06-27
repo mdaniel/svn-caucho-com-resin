@@ -83,6 +83,8 @@ public class TypeFactoryResin extends TypeFactoryConfig
     addNamespace(NamespaceConfigResin.URN_RESIN);
     addNamespace(NamespaceConfigResin.NS_RESIN);
     addNamespace(NamespaceConfigResin.NS_RESIN_CORE);
+    
+    addNamespace(NamespaceConfigResin.NS_JAVAEE);
   }
   
   

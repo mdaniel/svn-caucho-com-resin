@@ -36,10 +36,13 @@ import com.caucho.config.core.ResinIf;
 import com.caucho.config.core.ResinProperties;
 import com.caucho.config.core.ResinSet;
 import com.caucho.config.core.ResinSystemConfig;
+import com.caucho.config.types.EnvEntry;
 import com.caucho.loader.ClassLoaderConfig;
+import com.caucho.loader.SystemProperty;
 import com.caucho.log.impl.LogConfig;
 import com.caucho.log.impl.LogHandlerConfig;
 import com.caucho.log.impl.LoggerConfig;
+import com.caucho.resources.ScheduledTaskConfig;
 import com.caucho.sql.DBPool;
 import com.caucho.sql.DatabaseConfig;
 
@@ -49,6 +52,7 @@ class NamespaceConfigResin extends NamespaceConfig
   static final NamespaceConfig NS_RESIN;
   static final NamespaceConfig NS_RESIN_CORE;
   static final NamespaceConfig URN_RESIN;
+  static final NamespaceConfig NS_JAVAEE;
   
   NamespaceConfigResin(String ns, boolean isDefault)
   {
@@ -73,6 +77,7 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("value", ValueType.class);
   }
   
+  @Override
   protected void initExtensions()
   {
     addBean("authenticator", "com.caucho.security.Authenticator");
@@ -95,13 +100,15 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("dependency", "com.caucho.make.DependencyConfig");
     addBean("dependency-check-interval", "com.caucho.loader.DependencyCheckInterval");
     
+    /*
     addBean("ejb-local-ref", "com.caucho.config.types.EjbLocalRef");
     addBean("ejb-message-bean", "com.caucho.ejb.cfg.MessageBeanConfig");
     addBean("ejb-ref", "com.caucho.config.types.EjbRef");
     addBean("ejb-server", "com.caucho.ejb.EJBServer");
     addBean("ejb-stateless-bean", "com.caucho.ejb.cfg.StatelessBeanConfig");
     addBean("ejb-stateful-bean", "com.caucho.ejb.cfg.StatefulBeanConfig");
-    addBean("env-entry", "com.caucho.config.types.EnvEntry");
+    */
+    addBean("env-entry", EnvEntry.class);
     
     addBean("if", "com.caucho.config.core.ResinIf");
     addBean("import", ImportConfigXml.class);
@@ -146,13 +153,13 @@ class NamespaceConfigResin extends NamespaceConfig
     //addBean("resource-ref", "com.caucho.config.types.ResourceRef");
     addBean("role-map", "com.caucho.security.RoleMap");
     
-    addBean("scheduled-task", "com.caucho.resources.ScheduledTaskConfig");
+    addBean("scheduled-task", ScheduledTaskConfig.class);
     addBean("security-role-ref", "com.caucho.config.types.SecurityRoleRef");
     addBean("servlet-classloader-hack", "com.caucho.loader.ServletClassloaderHack");
     addBean("set", "com.caucho.config.core.ResinSet");
     addBean("stderr-log", "com.caucho.log.impl.StderrLog");
     addBean("stdout-log", "com.caucho.log.impl.StdoutLog");
-    addBean("system-property", "com.caucho.loader.SystemProperty");
+    addBean("system-property", SystemProperty.class);
     
     addBean("temp-dir", "com.caucho.java.TempDir");
     addBean("temporary-directory", "com.caucho.java.TempDir");
@@ -168,6 +175,10 @@ class NamespaceConfigResin extends NamespaceConfig
     NS_RESIN = new NamespaceConfigResin("http://caucho.com/ns/resin", true);
     NS_RESIN.initCore();
     NS_RESIN.initExtensions();
+    
+    NS_JAVAEE = new NamespaceConfigResin("http://java.sun.com/xml/ns/javaee", true);
+    NS_JAVAEE.initCore();
+    NS_JAVAEE.initExtensions();
     
     NS_RESIN_CORE = new NamespaceConfigResin("http://caucho.com/ns/resin/core", false);
     NS_RESIN_CORE.initCore();
