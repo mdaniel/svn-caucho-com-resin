@@ -230,12 +230,12 @@
       <param name="artifact.jar" value="resin-ant.jar"/>
     </antcall>
   </target>
-  -->
+
   <target name="resin-eclipselink" depends="eclipselink">
     <copy file="modules/eclipselink/dist/resin-eclipselink.jar"
           todir="${resin.lib}"/>
   </target>
-
+  -->
   <target name="richfaces" depends="init">
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="richfaces"/>
@@ -266,12 +266,14 @@
     </antcall>
   </target>
 
+  <!--
   <target name="eclipselink" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="eclipselink"/>
       <param name="module.jar" value="resin-eclipselink.jar"/>
     </antcall>
   </target>
+  -->
 
   <!-- gae APIs for quercus testing -->
   <target name="gae" depends="init">
