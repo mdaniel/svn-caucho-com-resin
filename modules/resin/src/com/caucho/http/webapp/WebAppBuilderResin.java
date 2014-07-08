@@ -46,6 +46,7 @@ import com.caucho.config.j2ee.PersistenceContextRefConfig;
 import com.caucho.config.types.EjbLocalRef;
 import com.caucho.config.types.EjbRef;
 import com.caucho.config.types.ResourceRef;
+import com.caucho.env.jpa.PersistenceManager;
 import com.caucho.http.dispatch.ServletBuilder;
 import com.caucho.http.dispatch.ServletBuilderResin;
 import com.caucho.http.rewrite.DispatchRuleBase;
@@ -583,6 +584,7 @@ System.out.println("PROG: " + jspConfig + " " + this);
     return new WebAppResin(this);
   }
 
+  @Override
   protected void initConstructor()
   {
     super.initConstructor();
@@ -593,6 +595,12 @@ System.out.println("PROG: " + jspConfig + " " + this);
     JspServlet.initStatic();
 
     //EjbManager.setScanAll();
+    
+    PersistenceManager manager = PersistenceManager.create(getClassLoader());
+
+    // called to configure the enhancer when the classloader updates before
+    // any loading of the class
+    manager.configurePersistenceRoots();
     
     // _restScanner = new RestScanner(getClassLoader(), 3);
     // getClassLoader().addScanListener(_restScanner);
