@@ -112,6 +112,6 @@ public class WebAppDispatchResin extends WebAppDispatch
 
   public boolean isFacesServletConfigured()
   {
-    return false;
+    return getServletManager().isFacesServletConfigured();
   }
 }

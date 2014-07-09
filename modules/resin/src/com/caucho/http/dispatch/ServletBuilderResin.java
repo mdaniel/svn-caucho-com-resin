@@ -37,6 +37,7 @@ import javax.servlet.ServletException;
 
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.http.webapp.WebAppResin;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
 import com.caucho.naming.JndiUtil;
@@ -268,6 +269,14 @@ public class ServletBuilderResin extends ServletBuilder
     }
   }
   */
+  
+  
+  @Override
+  protected void loadTld()
+  {
+    ((WebAppResin) getWebApp()).getJsp().setLoadTldOnInit(true);
+  }
+
 
   Servlet createProtocolServlet()
     throws ServletException

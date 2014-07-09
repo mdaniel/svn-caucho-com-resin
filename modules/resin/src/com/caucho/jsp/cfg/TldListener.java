@@ -58,7 +58,7 @@ public class TldListener {
   /**
    * Sets the listener class.
    */
-  public void setListenerClass(Class listenerClass)
+  public void setListenerClass(Class<?> listenerClass)
   {
     _listenerClass = listenerClass;
   }
@@ -66,7 +66,7 @@ public class TldListener {
   /**
    * Gets the listener class.
    */
-  public Class getListenerClass()
+  public Class<?> getListenerClass()
   {
     return _listenerClass;
   }
@@ -85,7 +85,6 @@ public class TldListener {
 
     String className = _listenerClass.getName();
 
-
     if ("com.sun.faces.config.ConfigureListener".equals(className)
         && ! webApp.isFacesServletConfigured()) {
       // avoid initializing JSF if it's not used.
@@ -96,12 +95,17 @@ public class TldListener {
       ListenerConfig listener = new ListenerConfig();
       listener.setListenerClass(_listenerClass);
       //listener.init();
-
       webApp.addListener(listener);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _listenerClass + "]";
   }
 }

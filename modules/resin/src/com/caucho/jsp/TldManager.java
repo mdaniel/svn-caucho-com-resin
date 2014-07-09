@@ -191,6 +191,7 @@ public class TldManager {
       fileSet.setDir(_resourceManager.resolvePath(dir));
       fileSet.addInclude(new PathPatternType("**/*.tld"));
       fileSet.addInclude(new PathPatternType("**/*.ftld"));
+      
       try {
         fileSet.init();
       } catch (Exception e) {
@@ -198,7 +199,7 @@ public class TldManager {
       }
     }
 
-    ArrayList<TldPreload> taglibs = new ArrayList<TldPreload>();
+    ArrayList<TldPreload> taglibs = new ArrayList<>();
 
     taglibs.addAll(_globalTaglibs);
 
@@ -221,8 +222,9 @@ public class TldManager {
         loadAllTlds(taglibs, subPath.lookup("META-INF"), 64, "META-INF");
     }
 
-    if (fileSet != null)
+    if (fileSet != null) {
       loadAllTlds(taglibs, fileSet);
+    }
 
     /*
     for (int i = 0; i < taglibs.size(); i++) {
@@ -704,21 +706,18 @@ public class TldManager {
   private TldPreload parseTldPreload(Path path)
     throws JspParseException, IOException
   {
-    ReadStream is = path.openRead();
-
-    try {
+    try (ReadStream is = path.openRead()) {
       TldPreload taglib = parseTldPreload(is);
 
       taglib.setPath(path);
       String appDir = _webApp.getRootDirectory().getPath();
       String tagPath = path.getPath();
 
-      if (tagPath.startsWith(appDir))
+      if (tagPath.startsWith(appDir)) {
         taglib.setLocation(tagPath.substring(appDir.length()));
+      }
 
       return taglib;
-    } finally {
-      is.close();
     }
   }
 
