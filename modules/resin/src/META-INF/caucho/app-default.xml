@@ -1,11 +1,6 @@
 <cluster xmlns="http://caucho.com/ns/resin"
          xmlns:resin="urn:java:com.caucho.resin">
 
-<ear-default>
-  <resin:import path="META-INF/application.xml" optional="true"/>
-  <resin:import path="META-INF/resin-application.xml" optional="true"/>
-</ear-default>
-
 <web-app-default>
   <!-- configures the default class loader -->
   <class-loader>
