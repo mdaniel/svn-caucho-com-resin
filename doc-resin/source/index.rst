@@ -9,6 +9,8 @@ Contents:
    :glob:
    :titlesonly:
    
+   manual/quick-start
+   manual/cluster
    manual/release-notes
 
 Indices and tables
