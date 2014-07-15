@@ -95,7 +95,8 @@ public class DeployServiceImpl
     */
   }
 
-  public DeployTagResult[] queryTags(String string) {
+  public DeployTagResult[] queryTags(String string)
+  {
     DeploySystem deploy = DeploySystem.getCurrent();
 
     Set<String> tags = deploy.getTagNames();

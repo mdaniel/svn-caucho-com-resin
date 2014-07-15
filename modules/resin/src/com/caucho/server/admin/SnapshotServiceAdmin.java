@@ -96,7 +96,7 @@ public class SnapshotServiceAdmin extends ManagedObjectBase
     try {
       ScoreboardAction action = new ScoreboardAction();
       String json = action.executeJson("resin", true);
-      saveSnapshot(ScoreboardReport.createLogType("resin"), json);
+      saveSnapshot(ReportScoreboard.createLogType("resin"), json);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -99,14 +99,12 @@ public class ProfileAction implements AdminAction
       _cancelledTime.compareAndSet(-1, CurrentTime.getCurrentTime());
     }
 
-    profile.stop();
+    ProfileReport report = profile.stop();
 
     StringWriter buffer = new StringWriter();
     PrintWriter out = new PrintWriter(buffer);
 
-    ProfileEntry []entries = profile.getResults();
-
-    if (entries == null || entries.length == 0) {
+    if (report == null) {
       out.println("Profile returned no entries.");
     }
     else {
@@ -132,13 +130,15 @@ public class ProfileAction implements AdminAction
       out.println(L.l(" Sampling rate {0}ms. Depth {1}.",
                       samplingRate,
                       String.valueOf(depth)));
+      
+      ProfileEntry[] entries = report.getEntries();
 
       double totalTicks = 0;
       for (ProfileEntry entry : entries) {
         totalTicks += entry.getCount();
       }
 
-      final double sampleTicks = profile.getTicks();
+      final double sampleTicks = report.getTicks();
       double totalPercent = 0d;
 
       out.println(" ref# |   % time   |time self(s)|   % sum    | Method Call");
@@ -182,10 +182,17 @@ public class ProfileAction implements AdminAction
   {
     Profile profile = Profile.create();
     
-    if (profile == null)
+    if (profile == null) {
       return null;
+    }
     
-    ProfileEntry []entries = profile.getResults();
+    ProfileReport report = profile.report();
+      
+    if (report == null) {
+      return null;
+    }
+    
+    ProfileEntry []entries = report.getEntries();
 
     if (entries == null || entries.length == 0) {
       return null;
@@ -198,11 +205,11 @@ public class ProfileAction implements AdminAction
     sb.append("{\n");
     sb.append("  \"create_time\": \"" + new Date(timestamp) + "\"");
     sb.append(",\n  \"timestamp\": " + timestamp);
-    sb.append(",\n  \"ticks\" : " + profile.getTicks());
-    sb.append(",\n  \"depth\" : " + profile.getDepth());
-    sb.append(",\n  \"period\" : " + profile.getPeriod());
-    sb.append(",\n  \"end_time\" : " + profile.getEndTime());
-    sb.append(",\n  \"gc_time\" : " + profile.getGcTime());
+    sb.append(",\n  \"ticks\" : " + report.getTicks());
+    sb.append(",\n  \"depth\" : " + report.getDepth());
+    sb.append(",\n  \"period\" : " + report.getPeriod());
+    sb.append(",\n  \"end_time\" : " + report.getEndTime());
+    sb.append(",\n  \"gc_time\" : " + report.getGcTime());
     sb.append(",\n  \"profile\" :  [\n");
     
     for (int i = 0; i < entries.length; i++) {

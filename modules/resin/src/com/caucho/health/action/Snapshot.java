@@ -38,7 +38,7 @@ public class Snapshot extends ActionSequence
   private final DumpHeap _dumpHeap = new DumpHeap();
   private final DumpJmx _dumpJmx = new DumpJmx();
   //private final PdfReport _pdfReport = new PdfReport();
-  private final ScoreboardReport _threadScoreboard = new ScoreboardReport();
+  private final ReportScoreboard _threadScoreboard = new ReportScoreboard();
   
   private boolean _isThreadDump = true;
   private boolean _isHeapDump = true;
