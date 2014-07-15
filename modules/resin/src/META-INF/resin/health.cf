@@ -123,7 +123,7 @@ health:HttpStatusHealthCheck {
 #
 # JMX Meters - for graphing and anomaly detection 
 #
-health:JmxMeter "Resin|Uptime|Uptime"
+health:JmxMeter "Caucho|Uptime|Uptime"
                 "caucho:type=Server"
                 Uptime;
    
@@ -211,69 +211,69 @@ health:JmxMeter "JVM|Thread|JVM Blocked Count"
 #
 # Meters: resin thread-pool metrics 
 #
-health:JmxMeter "Resin|Thread|Thread Count"
+health:JmxMeter "Caucho|Thread|Thread Count"
                 "caucho:type=ThreadPool"
                 ThreadCount;
 
-health:JmxMeter "Resin|Thread|Thread Active Count"
+health:JmxMeter "Caucho|Thread|Thread Active Count"
                 "caucho:type=ThreadPool"
                 ThreadActiveCount;
 
-health:JmxMeter "Resin|Thread|Thread Idle Count"
+health:JmxMeter "Caucho|Thread|Thread Idle Count"
                 "caucho:type=ThreadPool"
                 ThreadIdleCount;
 
-health:JmxMeter "Resin|Thread|Thread Starting Count"
+health:JmxMeter "Caucho|Thread|Thread Starting Count"
                 "caucho:type=ThreadPool"
                 ThreadStartingCount;
 
-health:JmxMeter "Resin|Thread|Thread Wait Count"
+health:JmxMeter "Caucho|Thread|Thread Wait Count"
                 "caucho:type=ThreadPool"
                 ThreadWaitCount;
 
-health:JmxMeter "Resin|Thread|Thread Task Queue"
+health:JmxMeter "Caucho|Thread|Thread Task Queue"
                 "caucho:type=ThreadPool"
                 ThreadTaskQueueSize;
 
-health:JmxMeter "Resin|Thread|Thread Priority Queue"
+health:JmxMeter "Caucho|Thread|Thread Priority Queue"
                 "caucho:type=ThreadPool"
                 ThreadPriorityQueueSize;
   
-health:JmxDeltaMeter "Resin|Thread|Thread Create Count"
+health:JmxDeltaMeter "Caucho|Thread|Thread Create Count"
                      "caucho:type=ThreadPool"
                      ThreadCreateCountTotal;
   
-health:JmxDeltaMeter "Resin|Thread|Thread Overflow Count"
+health:JmxDeltaMeter "Caucho|Thread|Thread Overflow Count"
                      "caucho:type=ThreadPool"
                      ThreadOverflowCountTotal;
 
 #
 # Meters: AMP/Clustering
 #
-health:JmxDeltaMeter "Resin|Cluster|Message Read Count"
+health:JmxDeltaMeter "Caucho|Cluster|Message Read Count"
                      "caucho:type=AmpSystem"
                      ExternalMessageReadCount;
   
-health:JmxDeltaMeter "Resin|Cluster|Message Write Count"
+health:JmxDeltaMeter "Caucho|Cluster|Message Write Count"
                      "caucho:type=AmpSystem"
                      ExternalMessageWriteCount;
   
 #
 # Meters: block manager 
 #
-#health:JmxDeltaMeter "Resin|Block Cache|Block Read Count"
+#health:JmxDeltaMeter "Caucho|Block Cache|Block Read Count"
 #                     "caucho:type=BlockManager"
 #                     BlockReadCountTotal;
 
-#health:JmxDeltaMeter "Resin|Block Cache|Block Write Count"
+#health:JmxDeltaMeter "Caucho|Block Cache|Block Write Count"
 #                     "caucho:type=BlockManager"
 #                     BlockWriteCountTotal;
 
-#health:JmxDeltaMeter "Resin|Block Cache|Block Miss Count"
+#health:JmxDeltaMeter "Caucho|Block Cache|Block Miss Count"
 #                     "caucho:type=BlockManager"
 #                     MissCountTotal;
 
-#health:JmxCalculationMeter "Resin|Block Cache|Miss Rate" {
+#health:JmxCalculationMeter "Caucho|Block Cache|Miss Rate" {
 #  rate {
 #     delta objectName="caucho:type=BlockManager"
 #           attribute="MissCountTotal";
@@ -282,36 +282,36 @@ health:JmxDeltaMeter "Resin|Cluster|Message Write Count"
 #  }
 #}
 
-#health:JmxMeter "Resin|Cache Store|Mnode Count"
+#health:JmxMeter "Caucho|Cache Store|Mnode Count"
 #                "caucho:type=CacheStore"
 #                MnodeCount;
 
-#health:JmxMeter "Resin|Cache Store|Data Count"
+#health:JmxMeter "Caucho|Cache Store|Data Count"
 #                "caucho:type=CacheStore"
 #                DataCount;
 
-#health:JmxDeltaMeter "Resin|Cache Store|Mnode Count|Delta"
+#health:JmxDeltaMeter "Caucho|Cache Store|Mnode Count|Delta"
 #                     "caucho:type=CacheStore"
 #                     MnodeCount;
 
-#health:JmxDeltaMeter "Resin|Cache Store|Data Count|Delta"
+#health:JmxDeltaMeter "Caucho|Cache Store|Data Count|Delta"
 #                     "caucho:type=CacheStore"
 #                     DataCount;
   
 #
 # Meters: http cache 
 #
-health:JmxDeltaMeter "Resin|Http Cache|Hit Count"
+health:JmxDeltaMeter "Caucho|Http Cache|Hit Count"
                      "caucho:type=ProxyCache"
                      HitCountTotal
                      optional=true;
 
-health:JmxDeltaMeter "Resin|Proxy Cache|Miss Count"
+health:JmxDeltaMeter "Caucho|Proxy Cache|Miss Count"
                      "caucho:type=ProxyCache"
                      MissCountTotal
                      optional=true;
 
-health:JmxCalculationMeter "Resin|Proxy Cache|Miss Rate" {
+health:JmxCalculationMeter "Caucho|Proxy Cache|Miss Rate" {
   rate {
      delta objectName="caucho:type=ProxyCache" 
            attribute="MissCountTotal"
@@ -322,17 +322,17 @@ health:JmxCalculationMeter "Resin|Proxy Cache|Miss Rate" {
   }
 }
 
-health:JmxDeltaMeter "Resin|Proxy Cache|Invocation Miss Count"
+health:JmxDeltaMeter "Caucho|Proxy Cache|Invocation Miss Count"
                      "caucho:type=ProxyCache"
                      InvocationMissCountTotal
                      optional=true;
 
-health:JmxDeltaMeter "Resin|Proxy Cache|Invocation Hit Count"
+health:JmxDeltaMeter "Caucho|Proxy Cache|Invocation Hit Count"
                      "caucho:type=ProxyCache"
                      InvocationHitCountTotal
                      optional=true;
 
-health:JmxCalculationMeter "Resin|Proxy Cache|Cacheable Rate" {
+health:JmxCalculationMeter "Caucho|Proxy Cache|Cacheable Rate" {
   ratio {
     add {
       delta objectName="caucho:type=ProxyCache"
@@ -380,26 +380,26 @@ health:AnomalyAnalyzer "JVM|Thread|JVM Blocked Count" {
   min-deviation 4;
 }
   
-health:AnomalyAnalyzer "Resin|Thread|Thread Active Count" {
+health:AnomalyAnalyzer "Caucho|Thread|Thread Active Count" {
   health-event "caucho.thread.anomaly.resin-active";
   min-deviation 4;
 }
   
-health:AnomalyAnalyzer "Resin|Database|Connection Active";
+#health:AnomalyAnalyzer "Caucho|Database|Connection Active";
 
-health:AnomalyAnalyzer "Resin|Http|Request Time";
+health:AnomalyAnalyzer "Caucho|Http|Request Time";
 
-health:AnomalyAnalyzer "Resin|Http|Ping Time Max";
+health:AnomalyAnalyzer "Caucho|Http|Ping Time Max";
 
-health:AnomalyAnalyzer "Resin|Port|Throttle Disconnect Count";
+health:AnomalyAnalyzer "Caucho|Port|Throttle Disconnect Count";
 
-health:AnomalyAnalyzer "Resin|Http|400";
+health:AnomalyAnalyzer "Caucho|Http|400";
 
-health:AnomalyAnalyzer "Resin|Http|5xx";
+health:AnomalyAnalyzer "Caucho|Http|5xx";
 
-health:AnomalyAnalyzer "Resin|Cluster|Message Read Count";
+health:AnomalyAnalyzer "Caucho|Cluster|Message Read Count";
 
-health:AnomalyAnalyzer "Resin|Cluster|Message Write Count";
+health:AnomalyAnalyzer "Caucho|Cluster|Message Write Count";
 
 #
 # Meter graphs pages: for resin-admin and PDF reports -->
@@ -410,41 +410,41 @@ health:MeterGraphPage Snapshot columns=3 {
   section "Requests" {
 
     graph "Request Active" {
-      meter "Resin|Http|Request Active";
-      meter "Resin|Port|Request Suspend Active";
-      meter "Resin|Port|Keepalive Thread Active";
-      meter "Resin|Port|Keepalive Async Active";
+      meter "Caucho|Http|Request Active";
+      meter "Caucho|Port|Request Suspend Active";
+      meter "Caucho|Port|Keepalive Thread Active";
+      meter "Caucho|Port|Keepalive Async Active";
     }
 
     graph "Request Count" {
-      meter "Resin|Http|Request Count";
-      meter "Resin|Port|Request Suspend Count";
-      meter "Resin|Port|Keepalive Thread Count";
-      meter "Resin|Port|Keepalive Async Count";
-      meter "Resin|Http|Session Save Count";
+      meter "Caucho|Http|Request Count";
+      meter "Caucho|Port|Request Suspend Count";
+      meter "Caucho|Port|Keepalive Thread Count";
+      meter "Caucho|Port|Keepalive Async Count";
+      meter "Caucho|Http|Session Save Count";
     }
       
     graph "Request Time" {
-      meter "Resin|Http|Request Time";
-      meter "Resin|Http|Request Time Max";
+      meter "Caucho|Http|Request Time";
+      meter "Caucho|Http|Request Time Max";
     }
 
     graph "Request Errors" {
-      meter "Resin|Http|400";
-      meter "Resin|Http|404";
-      meter "Resin|Http|4xx";
-      meter "Resin|Http|500";
-      meter "Resin|Http|503";
-      meter "Resin|Http|5xx";
+      meter "Caucho|Http|400";
+      meter "Caucho|Http|404";
+      meter "Caucho|Http|4xx";
+      meter "Caucho|Http|500";
+      meter "Caucho|Http|503";
+      meter "Caucho|Http|5xx";
     }
 
     graph "Throttle Disconnect" {
-      meter "Resin|Port|Throttle Disconnect Count";
+      meter "Caucho|Port|Throttle Disconnect Count";
     }
 
     graph "Http Ping Time" {
-      meter "Resin|Http|Ping Time";
-      meter "Resin|Http|Ping Time Max";
+      meter "Caucho|Http|Ping Time";
+      meter "Caucho|Http|Ping Time Max";
     }
   }
     
@@ -511,8 +511,8 @@ health:MeterGraphPage Snapshot columns=3 {
     }
 
     graph "Log Warnings" {
-      meter "Resin|Log|Warning";
-      meter "Resin|Log|Severe";
+      meter "Caucho|Log|Warning";
+      meter "Caucho|Log|Severe";
     }
   }
     
@@ -526,17 +526,17 @@ health:MeterGraphPage Snapshot columns=3 {
       meter "JVM|Thread|JVM Waiting Count";
     }
 
-    graph "Resin Thread Pool" {
-      meter "Resin|Thread|Thread Count";
-      meter "Resin|Thread|Thread Active Count";
-      meter "Resin|Thread|Thread Wait Count";
-      meter "Resin|Thread|Thread Overflow Count";
-      meter "Resin|Thread|Thread Starting Count";
+    graph "Caucho Thread Pool" {
+      meter "Caucho|Thread|Thread Count";
+      meter "Caucho|Thread|Thread Active Count";
+      meter "Caucho|Thread|Thread Wait Count";
+      meter "Caucho|Thread|Thread Overflow Count";
+      meter "Caucho|Thread|Thread Starting Count";
     }
     
-    graph "Resin Task Queue" {
-      meter "Resin|Thread|Thread Priority Queue";
-      meter "Resin|Thread|Thread Task Queue";
+    graph "Caucho Task Queue" {
+      meter "Caucho|Thread|Thread Priority Queue";
+      meter "Caucho|Thread|Thread Task Queue";
     }
 
   }
@@ -544,8 +544,8 @@ health:MeterGraphPage Snapshot columns=3 {
   section "Clustering" {
 
     graph "Cluster Messages" {
-      meter "Resin|Cluster|Message Read Count";
-      meter "Resin|Cluster|Message Write Count";
+      meter "Caucho|Cluster|Message Read Count";
+      meter "Caucho|Cluster|Message Write Count";
     }
     
   }
@@ -553,17 +553,17 @@ health:MeterGraphPage Snapshot columns=3 {
   section name="Database" {
 
     graph "Database Connection Active" {
-      meter "Resin|Database|Connection Count";
-      meter "Resin|Database|Connection Active";
+      meter "Caucho|Database|Connection Count";
+      meter "Caucho|Database|Connection Active";
     }
       
     graph "Database Query Time" {
-      meter "Resin|Database|Query Time";
-      meter "Resin|Database|Query Time Max";
+      meter "Caucho|Database|Query Time";
+      meter "Caucho|Database|Query Time Max";
     }
       
     graph "Database Query Count" {
-      meter "Resin|Database|Query Count";
+      meter "Caucho|Database|Query Count";
     }
     
   }
@@ -571,40 +571,40 @@ health:MeterGraphPage Snapshot columns=3 {
   section "Caching" {
 
     graph "Block Cache I/O" {
-      meter "Resin|Block Cache|Block Read Count";
-      meter "Resin|Block Cache|Block Write Count";
+      meter "Caucho|Block Cache|Block Read Count";
+      meter "Caucho|Block Cache|Block Write Count";
     }
 
     graph "Block Cache Miss Rate" {
-      meter "Resin|Block Cache|Miss Rate";
+      meter "Caucho|Block Cache|Miss Rate";
     }
 
     graph "Object Cache Entries" {
-      meter "Resin|Cache Store|Mnode Count";
-      meter "Resin|Cache Store|Data Count";
+      meter "Caucho|Cache Store|Mnode Count";
+      meter "Caucho|Cache Store|Data Count";
     }
 
     graph "Object Cache Entries Added" {
-      meter "Resin|Cache Store|Mnode Count|Delta";
-      meter "Resin|Cache Store|Data Count|Delta";
+      meter "Caucho|Cache Store|Mnode Count|Delta";
+      meter "Caucho|Cache Store|Data Count|Delta";
     }
       
     graph "Proxy Cache Hit/Miss" {
-      meter "Resin|Proxy Cache|Hit Count";
-      meter "Resin|Proxy Cache|Miss Count";
+      meter "Caucho|Proxy Cache|Hit Count";
+      meter "Caucho|Proxy Cache|Miss Count";
     }
 
     graph "Proxy Cache Miss Rate" {
-      meter "Resin|Proxy Cache|Miss Rate";
+      meter "Caucho|Proxy Cache|Miss Rate";
     }
       
     graph "Invocation Hit/Miss" {
-      meter "Resin|Proxy Cache|Invocation Hit Count";
-      meter "Resin|Proxy Cache|Invocation Miss Count";
+      meter "Caucho|Proxy Cache|Invocation Hit Count";
+      meter "Caucho|Proxy Cache|Invocation Miss Count";
     }
 
     graph "Proxy Cache Cacheable Rate" {
-      meter "Resin|Proxy Cache|Cacheable Rate";
+      meter "Caucho|Proxy Cache|Cacheable Rate";
     }
     
   }

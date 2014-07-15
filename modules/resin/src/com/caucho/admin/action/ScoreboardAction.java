@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.health.action.AbstractThreadActivityReport;
-import com.caucho.health.action.DatabaseThreadActivityReport;
-import com.caucho.health.action.ResinThreadActivityReport;
+import com.caucho.health.action.ThreadActivityReportBase;
+import com.caucho.health.action.ThreadActivityReportDatabase;
+import com.caucho.health.action.ThreadActivityReportResin;
 import com.caucho.health.action.ThreadActivityGroup;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -26,7 +26,7 @@ public class ScoreboardAction implements AdminAction
 
   public String excute(String type, boolean greedy, int lineWidth)
   {
-    AbstractThreadActivityReport report = getReportType(type);
+    ThreadActivityReportBase report = getReportType(type);
     if (report == null) {
       return L.l("Unknown Scoreboard Report type {0}", type);
     }
@@ -72,7 +72,7 @@ public class ScoreboardAction implements AdminAction
     sb.append("  \"create_time\": \"" + new Date(timestamp) + "\",\n");
     sb.append("  \"timestamp\": " + timestamp + ",\n");
 
-    AbstractThreadActivityReport report = getReportType(type);
+    ThreadActivityReportBase report = getReportType(type);
     
     sb.append("  \"scoreboards\": {\n");
     if (report != null) {
@@ -113,16 +113,16 @@ public class ScoreboardAction implements AdminAction
     return sb.toString();
   }
   
-  protected AbstractThreadActivityReport getReportType(String typeName)
+  protected ThreadActivityReportBase getReportType(String typeName)
   {
     if (typeName.equalsIgnoreCase("resin"))
-      return new ResinThreadActivityReport();
+      return new ThreadActivityReportResin();
     else if (typeName.equalsIgnoreCase("database"))
-      return new DatabaseThreadActivityReport();
+      return new ThreadActivityReportDatabase();
     
     try {
       Class c = Class.forName("com.caucho.admin.thread." + typeName);
-      return (AbstractThreadActivityReport) c.newInstance();
+      return (ThreadActivityReportBase) c.newInstance();
     } catch (Exception e) {
       log.log(Level.FINER, L.l("Failed to load scoreboard report type {0}: {1}", 
                                typeName, e.getMessage()), e);

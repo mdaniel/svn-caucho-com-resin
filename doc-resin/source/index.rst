@@ -11,6 +11,7 @@ Contents:
    
    manual/quick-start
    manual/cluster
+   manual/baratine
    manual/release-notes
 
 Indices and tables
