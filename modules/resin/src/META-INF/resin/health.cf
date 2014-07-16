@@ -614,22 +614,30 @@ health:MeterGraphPage Snapshot columns=3 {
 # Automatic PDF reports
 #
 health:PdfReport {
-  path "classpath:com/caucho/php/admin/pdf-gen.php";
+  path "bfs://local/system/report/summary/%Y-%m-%d.pdf";
   report Summary;
   period 7D;
-  snapshot;
-  mail-to ${email};
-  mail-from ${email_from};
+#  snapshot;
+#  mail-to ${email};
+#  mail-from ${email_from};
   # profile-time 60s;
     
   health:IfCron "0 0 * * 0";
 }
 
 health:PdfReport {
-  path "classpath:com/caucho/php/admin/pdf-gen.php";
+  path "bfs://local/system/report/restart/%a-%H.pdf";
   report Restart;
   period 2h;
   mail-to ${email};
   mail-from ${email_from};
   health:OnRestart;
+}
+
+health:PdfReport {
+  path "bfs://local/system/report/cron/%a-%H.pdf";
+  report Summary;
+  period "6h";
+  health:IfCron "0 */6 * * *";
+#  health:OnStart;
 }
