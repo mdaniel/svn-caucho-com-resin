@@ -42,7 +42,7 @@ import com.caucho.loader.EnvironmentLocal;
 public class ManagerService
 {
   private static EnvironmentLocal<ManagerService> _localManagerService
-    = new EnvironmentLocal<ManagerService>();
+    = new EnvironmentLocal<>();
   
   private AtomicBoolean _isInit = new AtomicBoolean();
   

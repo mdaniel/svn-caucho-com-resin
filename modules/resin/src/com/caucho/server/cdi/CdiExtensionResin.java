@@ -46,7 +46,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
-import javax.inject.Singleton;
 
 import com.caucho.amp.cdi.ActorManagerImpl;
 import com.caucho.config.CauchoBean;
