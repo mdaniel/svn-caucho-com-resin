@@ -34,7 +34,7 @@ import javax.annotation.PostConstruct;
 /**
  * Maps roles (permissions) to users and groups.
  */
-abstract public class AbstractRoleMap implements RoleMap {
+abstract public class RoleMapBase implements RoleMap {
   /**
    * Initialize the XML authenticator.
    */

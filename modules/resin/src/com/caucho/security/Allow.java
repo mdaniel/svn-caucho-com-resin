@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.config.ConfigException;
 import com.caucho.http.dispatch.UrlMap;
 import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.security.AbstractConstraint;
+import com.caucho.http.security.ConstraintBase;
 import com.caucho.http.security.AuthorizationResult;
 import com.caucho.util.CauchoUtil;
 
@@ -161,12 +161,12 @@ public class Allow extends com.caucho.http.security.SecurityConstraint
    * return the constraint
    */
   @Override
-  public AbstractConstraint getConstraint()
+  public ConstraintBase getConstraint()
   {
     return new AllowConstraint(_predicateList);
   }
 
-  class AllowConstraint extends AbstractConstraint
+  class AllowConstraint extends ConstraintBase
   {
     private RequestPredicate []_predicateList;
 

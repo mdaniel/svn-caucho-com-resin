@@ -31,7 +31,6 @@ package com.caucho.http.webapp;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.naming.NamingException;
@@ -59,6 +58,7 @@ import com.caucho.jsp.cfg.JspTaglib;
 import com.caucho.jsp.el.JspApplicationContextImpl;
 import com.caucho.naming.JndiUtil;
 import com.caucho.security.RoleMapManager;
+import com.caucho.security.XmlRoleMap;
 
 
 /**
@@ -81,6 +81,7 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
 
   private final JspPropertyGroup _jsp = new JspPropertyGroup();
   private JspConfig _jspConfig;
+  private JspConfigDescriptorImpl _jspConfigDescriptor;
 
   private JspApplicationContextImpl _jspApplicationContext;
   // special
@@ -100,8 +101,6 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
   private RewriteDispatch _includeRewriteDispatch;
 
   private RewriteDispatch _forwardRewriteDispatch;
-
-  private RoleMapManager _roleMapManager;
 
   /**
    * Builder Creates the webApp with its environment loader.
@@ -392,8 +391,7 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
    */
   public ArrayList<JspTaglib> getTaglibList()
   {
-    ArrayList<JspTaglib> taglibs
-    = new ArrayList<JspTaglib>();
+    ArrayList<JspTaglib> taglibs = new ArrayList<JspTaglib>();
 
     for (int i = 0; _taglibList != null && i < _taglibList.size(); i++) {
       taglibs.add(_taglibList.get(i));
@@ -443,7 +441,7 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
   public Collection<JspPropertyGroupDescriptor> getJspPropertyGroups()
   {
     JspConfig jspConfig = _jspConfig;
-System.out.println("PROG: " + jspConfig + " " + this);
+
     Collection<JspPropertyGroupDescriptor> propertyGroups
       = new ArrayList<JspPropertyGroupDescriptor>();
 
@@ -462,7 +460,12 @@ System.out.println("PROG: " + jspConfig + " " + this);
    */
   public RoleMapManager getRoleMapManager()
   {
-    return _roleMapManager;
+    return RoleMapManager.create();
+  }
+  
+  public void addRoleMap(XmlRoleMap roleMap)
+  {
+    getRoleMapManager().addRoleMap(roleMap);
   }
 
   /**
@@ -558,10 +561,12 @@ System.out.println("PROG: " + jspConfig + " " + this);
   /**
    * jsp-config: configuration
    */
+  @Configurable
   public JspConfig createJspConfig()
   {
     if (_jspConfig == null) {
       _jspConfig = new JspConfig(getWebApp());
+      _jspConfigDescriptor = new JspConfigDescriptorImpl();
     }
     
     return _jspConfig;
@@ -575,7 +580,7 @@ System.out.println("PROG: " + jspConfig + " " + this);
   // @Override
   public JspConfigDescriptor getJspConfigDescriptor()
   {
-    return getWebApp();
+    return _jspConfigDescriptor;
   }
   
   @Override
@@ -608,5 +613,24 @@ System.out.println("PROG: " + jspConfig + " " + this);
     //EjbModule.replace(webApp.getModuleName(), webApp.getClassLoader());
     //EjbModule.setAppName(webApp.getModuleName(), webApp.getClassLoader());
     //EjbManager.create();
+  }
+  
+  private class JspConfigDescriptorImpl implements JspConfigDescriptor
+  {
+    @Override
+    public Collection<TaglibDescriptor> getTaglibs()
+    {
+      // return getWebApp().getTaglibs();
+      
+      return WebAppBuilderResin.this.getTaglibs();
+    }
+
+    @Override
+    public Collection<JspPropertyGroupDescriptor> getJspPropertyGroups()
+    {
+      //return getWebApp().getJspPropertyGroups();
+      return WebAppBuilderResin.this.getJspPropertyGroups();
+    }
+    
   }
 }

@@ -59,7 +59,7 @@ import com.caucho.vfs.Path;
  * </pre></code>
  */
 @com.caucho.config.ResinService
-public class XmlRoleMap extends AbstractRoleMap
+public class XmlRoleMap extends RoleMapBase
 {
   private static final Logger log =
     Logger.getLogger(XmlRoleMap.class.getName());

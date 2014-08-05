@@ -48,7 +48,7 @@ public class RoleMapManager
   private final RoleMapManager _parent;
 
   private ArrayList<RoleMap> _roleMapList
-    = new ArrayList<RoleMap>();
+    = new ArrayList<>();
 
   private RoleMapManager(RoleMapManager parent)
   {

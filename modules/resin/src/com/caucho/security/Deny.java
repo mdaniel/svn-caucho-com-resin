@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.config.ConfigException;
 import com.caucho.http.dispatch.UrlMap;
 import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.security.AbstractConstraint;
+import com.caucho.http.security.ConstraintBase;
 import com.caucho.http.security.AuthorizationResult;
 import com.caucho.http.security.SecurityConstraint;
 import com.caucho.util.CauchoUtil;
@@ -144,12 +144,12 @@ public class Deny extends SecurityConstraint
    * return the constraint
    */
   @Override
-  public AbstractConstraint getConstraint()
+  public ConstraintBase getConstraint()
   {
     return new DenyConstraint(_predicateList);
   }
 
-  class DenyConstraint extends AbstractConstraint
+  class DenyConstraint extends ConstraintBase
   {
     private RequestPredicate []_predicateList;
 

@@ -98,7 +98,6 @@ public class WebAppResin extends WebApp
     return _builder.getJspConfigDescriptor();
   }
 
-  @Override
   public Collection<JspPropertyGroupDescriptor> getJspPropertyGroups()
   {
     return _builder.getJspPropertyGroups();

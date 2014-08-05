@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.security.AbstractConstraint;
+import com.caucho.http.security.ConstraintBase;
 import com.caucho.http.security.AuthorizationResult;
 
 /**
@@ -65,12 +65,12 @@ public class Require extends Allow
    * return the constraint
    */
   @Override
-  public AbstractConstraint getConstraint()
+  public ConstraintBase getConstraint()
   {
     return new RequireConstraint(getPredicateList());
   }
 
-  class RequireConstraint extends AbstractConstraint
+  class RequireConstraint extends ConstraintBase
   {
     private RequestPredicate []_predicateList;
 
