@@ -18,6 +18,12 @@ l_web-app = element l:web-app { r_any-Group }
 ## r_class-Type = string
 ## r_kbytes = string
 
+r_absolute-ordering = element absolute-ordering {
+  element name { string }*
+  
+  & element others { empty }?
+}
+
 r_access-log = element access-log {
   r_bean-Custom
 
@@ -494,6 +500,22 @@ r_multipart-form = element multipart-form {
 
   & (attribute parameter-length-max { r_kbytes }
      | element parameter-length-max { r_kbytes })?
+}
+
+r_ordering = element ordering {
+  element before {
+    element name { string }*
+
+    & element others { empty }?
+  }?
+  
+  & element after {
+    element name { string }*
+
+    & element others { empty }?
+  }?
+
+  & element name { string }*
 }
 
 ## this doesn't exist in servlet spec?
@@ -1247,6 +1269,8 @@ r_web-app-deploy = element web-app-deploy {
 r_web-app-Basis =
   r_env-Basis
 
+  & r_absolute-ordering*
+  
   & r_access-log*
 
   & (attribute allow-forward-after-flush { r_boolean-Type }
@@ -1397,6 +1421,12 @@ r_web-app = element web-app {
   attribute version { string }?,
   attribute xsi:schemaLocation { string }?,
   attribute metadata-complete { r_boolean-Type }?,
+  r_web-app-Content
+}
+
+r_web-fragment = element web-fragment {
+  attribute metadata-complete { r_boolean-Type }?,
+
   r_web-app-Content
 }
 

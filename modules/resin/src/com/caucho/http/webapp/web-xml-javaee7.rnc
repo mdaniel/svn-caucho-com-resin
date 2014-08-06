@@ -1,0 +1,16 @@
+default namespace javaee7 = "http://java.sun.com/xml/ns/javaee"
+namespace local = ""
+
+namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
+
+javaee7_web-app = element web-app {
+  attribute id { string }?,
+
+  attribute version { "3.0" },
+
+  attribute xsi:schemaLocation { string }?,
+
+  attribute metadata-complete { javaee_boolean }?,
+
+  r_any-Group
+}

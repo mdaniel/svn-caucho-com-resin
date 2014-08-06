@@ -36,12 +36,19 @@ import com.caucho.config.core.ResinIf;
 import com.caucho.config.core.ResinProperties;
 import com.caucho.config.core.ResinSet;
 import com.caucho.config.core.ResinSystemConfig;
+import com.caucho.config.types.DataSourceRef;
 import com.caucho.config.types.EnvEntry;
+import com.caucho.env.jpa.ConfigJpaPersistenceUnit;
+import com.caucho.env.jpa.ConfigJpaPersistenceUnitDefault;
+import com.caucho.java.JavacConfig;
 import com.caucho.loader.ClassLoaderConfig;
+import com.caucho.loader.DependencyCheckInterval;
 import com.caucho.loader.SystemProperty;
 import com.caucho.log.impl.LogConfig;
 import com.caucho.log.impl.LogHandlerConfig;
 import com.caucho.log.impl.LoggerConfig;
+import com.caucho.make.DependencyConfig;
+import com.caucho.naming.LinkProxy;
 import com.caucho.resources.ScheduledTaskConfig;
 import com.caucho.sql.DBPool;
 import com.caucho.sql.DatabaseConfig;
@@ -53,6 +60,7 @@ class NamespaceConfigResin extends NamespaceConfig
   static final NamespaceConfig NS_RESIN_CORE;
   static final NamespaceConfig URN_RESIN;
   static final NamespaceConfig NS_JAVAEE;
+  static final NamespaceConfig NS_J2EE;
   
   NamespaceConfigResin(String ns, boolean isDefault)
   {
@@ -96,9 +104,9 @@ class NamespaceConfigResin extends NamespaceConfig
     
     addBean("database", DBPool.class);
     addBean("database-default", DatabaseConfig.class);
-    addBean("data-source", "com.caucho.config.types.DataSourceRef");
-    addBean("dependency", "com.caucho.make.DependencyConfig");
-    addBean("dependency-check-interval", "com.caucho.loader.DependencyCheckInterval");
+    addBean("data-source", DataSourceRef.class);
+    addBean("dependency", DependencyConfig.class);
+    addBean("dependency-check-interval", DependencyCheckInterval.class);
     
     /*
     addBean("ejb-local-ref", "com.caucho.config.types.EjbLocalRef");
@@ -110,20 +118,20 @@ class NamespaceConfigResin extends NamespaceConfig
     */
     addBean("env-entry", EnvEntry.class);
     
-    addBean("if", "com.caucho.config.core.ResinIf");
+    addBean("if", ResinIf.class);
     addBean("import", ImportConfigXml.class);
-    addBean("include", "com.caucho.config.core.ResinInclude");
-    addBean("interceptor", "com.caucho.config.cfg.InterceptorConfig");
+    // addBean("include", ResinInclude.class);
+    // addBean("interceptor", "com.caucho.config.cfg.InterceptorConfig");
     
-    addBean("java", "com.caucho.java.JavacConfig");
-    addBean("javac", "com.caucho.java.JavacConfig");
-    addBean("jndi-link", "com.caucho.naming.LinkProxy");
+    addBean("java", JavacConfig.class);
+    addBean("javac", JavacConfig.class);
+    addBean("jndi-link", LinkProxy.class);
     //addBean("jms-connection-factory", "com.caucho.jms.cfg.JmsConnectionFactoryConfig");
     //addBean("jms-queue", "com.caucho.jms.cfg.JmsQueueConfig");
     //addBean("jms-topic", "com.caucho.jms.cfg.JmsTopicConfig");
-    addBean("jpa-persistence", "com.caucho.amber.cfg.PersistenceManager");
-    addBean("jpa-persistence-unit", "com.caucho.env.jpa.ConfigJpaPersistenceUnit");
-    addBean("jpa-persistence-unit-default", "com.caucho.env.jpa.ConfigJpaPersistenceUnitDefault");
+    // addBean("jpa-persistence", "com.caucho.amber.cfg.PersistenceManager");
+    addBean("jpa-persistence-unit", ConfigJpaPersistenceUnit.class);
+    addBean("jpa-persistence-unit-default", ConfigJpaPersistenceUnitDefault.class);
     
     addBean("list", "com.caucho.config.type.ListType");
     addBean("log", LogConfig.class);
@@ -179,6 +187,10 @@ class NamespaceConfigResin extends NamespaceConfig
     NS_JAVAEE = new NamespaceConfigResin("http://java.sun.com/xml/ns/javaee", true);
     NS_JAVAEE.initCore();
     NS_JAVAEE.initExtensions();
+    
+    NS_J2EE = new NamespaceConfigResin("http://java.sun.com/xml/ns/j2ee", true);
+    NS_J2EE.initCore();
+    NS_J2EE.initExtensions();
     
     NS_RESIN_CORE = new NamespaceConfigResin("http://caucho.com/ns/resin/core", false);
     NS_RESIN_CORE.initCore();
