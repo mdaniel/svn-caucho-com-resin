@@ -35,6 +35,8 @@ import java.util.logging.Level;
 
 import javax.el.ELContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebServlet;
 
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
@@ -62,6 +64,32 @@ public class ServletMapping extends ServletConfigImpl {
    */
   public ServletMapping()
   {
+  }
+
+  public void create(WebServlet webServlet)
+  {
+    if (webServlet.value().length > 0 && webServlet.urlPatterns().length == 0) {
+      for (String url : webServlet.value()) {
+        addURLPattern(url); // XXX: support addURLRegexp?
+      }
+    }
+    else if (webServlet.urlPatterns().length > 0 &&
+             webServlet.value().length == 0) {
+      for (String url : webServlet.urlPatterns()) {
+        addURLPattern(url); // XXX: support addURLRegexp?
+      }
+    } 
+    else {
+      throw new ConfigException(L.l("Annotation @WebServlet at '{0}' must specify either value or urlPatterns",
+                                    getServletClassName()));
+    }
+
+    for (WebInitParam initParam : webServlet.initParams()) {
+      setInitParam(initParam.name(), initParam.value()); //omit description
+    }
+
+    setLoadOnStartup(webServlet.loadOnStartup());
+    setAsyncSupported(webServlet.asyncSupported());
   }
 
   public void setIfAbsent(boolean ifAbsent)

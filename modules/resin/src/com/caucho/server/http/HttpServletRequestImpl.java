@@ -1456,8 +1456,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     AsyncContextImpl asyncContext = _asyncContext;
 
-    if (asyncContext == null)
+    if (asyncContext == null) {
       return false;
+    }
     
     return asyncContext.isAsyncStarted();
   }
@@ -1472,10 +1473,12 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     Invocation invocation = _invocation;
 
-    if (invocation != null)
+    if (invocation != null) {
       return invocation.isAsyncSupported();
-    else
+    }
+    else {
       return false;
+    }
   }
 
   /**

@@ -1122,24 +1122,7 @@ public class WebApp extends ServletContextImpl
 
     mapping.setServletName(name);
 
-    if (webServlet.value().length > 0 && webServlet.urlPatterns().length == 0) {
-      for (String url : webServlet.value())
-        mapping.addURLPattern(url); // XXX: support addURLRegexp?
-    }
-    else if (webServlet.urlPatterns().length > 0 &&
-             webServlet.value().length == 0) {
-      for (String url : webServlet.urlPatterns()) {
-        mapping.addURLPattern(url); // XXX: support addURLRegexp?
-      }
-    } else {
-      throw new ConfigException(L.l("Annotation @WebServlet at '{0}' must specify either value or urlPatterns", servletClassName));
-    }
-
-    for (WebInitParam initParam : webServlet.initParams())
-      mapping.setInitParam(initParam.name(), initParam.value()); //omit description
-
-    mapping.setLoadOnStartup(webServlet.loadOnStartup());
-    mapping.setAsyncSupported(webServlet.asyncSupported());
+    mapping.create(webServlet);
 
     addServletMapping(mapping);
   }

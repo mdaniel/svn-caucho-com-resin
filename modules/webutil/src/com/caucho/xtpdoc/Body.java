@@ -418,7 +418,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("width","10%");
     out.writeAttribute("valign","bottom");
     out.writeStartElement("a");
-    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/");
+    out.writeAttribute("href", "http://www.caucho.com/");
     out.writeAttribute("title", "Resin Server | Application Server (Java EE Certified) and Web Server");
     out.writeStartElement("img");
     out.writeAttribute("src", getDocument().getContextPath() + "/images/resin_logo_small.jpg");
@@ -473,12 +473,12 @@ public class Body extends ContainerNode {
     out.writeEmptyElement("br");
 
     out.writeStartElement("a");
-    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/");
+    out.writeAttribute("href", "http://www.caucho.com/");
     out.writeAttribute("title", "Resin | Java Application Server | Java EE Certified | Cloud Optimized ");
     out.writeCharacters("app server");
     out.writeEndElement(); // a
     out.writeEntityRef("nbsp");
-
+    /*
 
     out.writeStartElement("a");
     out.writeAttribute("href", "http://www.caucho.com/resin-web-server/");
@@ -490,7 +490,7 @@ public class Body extends ContainerNode {
     out.writeEmptyElement("br");
 
     out.writeStartElement("a");
-    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/server-monitoring-watchdog-health-system/");
+    out.writeAttribute("href", "http://www.caucho.com/");
     out.writeAttribute("title", "Resin Pro | Health System | Watchdog for recoverability and self healing | Server Monitoring | JVM Monitoring | Anomaly detection for detecting issues before they become problems | Server status reports");
     out.writeCharacters("health");
     out.writeEndElement(); // a
@@ -518,7 +518,8 @@ public class Body extends ContainerNode {
     out.writeCharacters("pro");
     out.writeEndElement(); // a
     out.writeEntityRef("nbsp");
-}
+    */
+  }
 
   protected void writeContent(XMLStreamWriter out)
     throws XMLStreamException

@@ -274,8 +274,9 @@ public class ServletManager {
     }
 
     if (invocation != null) { // XXX: namedDispatcher
-      if (! config.isAsyncSupported())
+      if (! config.isAsyncSupported()) {
         invocation.clearAsyncSupported();
+      }
 
       invocation.setMultipartConfig(config.getMultipartConfig());
 

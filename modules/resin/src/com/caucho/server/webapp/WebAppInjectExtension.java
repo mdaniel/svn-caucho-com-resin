@@ -153,14 +153,8 @@ public class WebAppInjectExtension implements Extension
           WebServlet webServlet = (WebServlet) ann;
       
           ServletMapping mapping = new ServletMapping();
-
-          for (String value : webServlet.value()) {
-            mapping.addURLPattern(value);
-          }
           
-          for (String value : webServlet.urlPatterns()) {
-            mapping.addURLPattern(value);
-          }
+          mapping.create(webServlet);
           
           mapping.setBean(bean);
         

@@ -6,9 +6,6 @@
 
   <!-- property-based Resin configuration -->
   <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
-  <resin:properties path="cloud:/resin.properties"
-                    optional="true" recover="true"/>
-
 
   <resin:if test="${properties_import_url}">
      <resin:properties path="${properties_import_url}"
@@ -42,7 +39,7 @@
      - Default configuration applied to all clusters, including
      - HTTP, HTTPS, and /resin-admin configuration.
     -->
-  <resin:import path="${__DIR__}/cluster-default.xml"/>
+  <resin:import path="classpath:META-INF/caucho/cluster-default.xml"/>
   
   <!--
      - health configuration
@@ -57,7 +54,6 @@
     <user name="${admin_user}" password="${admin_password}"/>
     
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
-    <resin:import path="cloud:/admin-users.xml" optional="true" recover="true"/>
   </resin:AdminAuthenticator>
 
   <!--
