@@ -1,4 +1,4 @@
-default namespace javaee7 = "http://java.sun.com/xml/ns/javaee"
+default namespace javaee7 = "http://xmlns.jcp.org/xml/ns/javaee"
 namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
