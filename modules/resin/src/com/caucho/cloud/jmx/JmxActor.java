@@ -6,7 +6,7 @@
 
 package com.caucho.cloud.jmx;
 
-import io.baratine.core.Remote;
+import com.caucho.baratine.Remote;
 
 import java.util.HashMap;
 import java.util.Iterator;

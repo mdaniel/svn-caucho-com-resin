@@ -5,7 +5,7 @@ import javax.annotation.PostConstruct;
 import io.baratine.channel.ChannelContext;
 import io.baratine.channel.ChannelScoped;
 import io.baratine.core.Services;
-import io.baratine.core.Remote;
+import com.caucho.baratine.Remote;
 import io.baratine.core.Service;
 
 @Remote

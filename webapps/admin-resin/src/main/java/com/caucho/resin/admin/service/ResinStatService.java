@@ -11,7 +11,7 @@ import com.caucho.management.server.DownTime;
 import com.caucho.management.server.StatServiceMXBean;
 import com.caucho.management.server.StatServiceValue;
 
-import io.baratine.core.Remote;
+import com.caucho.baratine.Remote;
 import io.baratine.core.OnActive;
 import io.baratine.core.Service;
 

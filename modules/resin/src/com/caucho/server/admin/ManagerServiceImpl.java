@@ -29,7 +29,7 @@
 
 package com.caucho.server.admin;
 
-import io.baratine.core.Remote;
+import com.caucho.baratine.Remote;
 
 import java.io.IOException;
 import java.io.Serializable;

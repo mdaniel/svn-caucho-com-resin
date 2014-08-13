@@ -29,10 +29,10 @@
 
 package com.caucho.server.deploy;
 
-import io.baratine.core.Remote;
+import com.caucho.baratine.Remote;
 import io.baratine.core.Result;
 import io.baratine.core.Service;
-import io.baratine.core.ServiceApi;
+import com.caucho.baratine.ServiceApi;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.LogServiceMXBean;
 
-import io.baratine.core.Remote;
+import com.caucho.baratine.Remote;
 import io.baratine.core.OnActive;
 import io.baratine.core.Service;
 

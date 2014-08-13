@@ -16,8 +16,8 @@ import javax.management.*;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeType;
 
-import com.caucho.amp.jamp.JampServlet;
 import com.caucho.amp.thread.ThreadAmp;
+import com.caucho.baratine.Remote;
 import com.caucho.health.action.ResinThreadActivityReport;
 import com.caucho.health.action.ThreadActivityGroup;
 import com.caucho.management.server.ClusterMXBean;
