@@ -221,8 +221,10 @@ public class ServletManager {
     for (int j = 0; j < _servletList.size(); j++) {
       ServletConfigImpl config = _servletList.get(j);
 
-      if (config.getLoadOnStartup() == Integer.MIN_VALUE)
+      // server/12r7
+      if (config.getLoadOnStartup() < 0) {
         continue;
+      }
 
       int i = 0;
       for (; i < loadOnStartup.size(); i++) {

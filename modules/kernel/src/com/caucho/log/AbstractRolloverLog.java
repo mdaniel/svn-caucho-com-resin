@@ -219,6 +219,11 @@ public class AbstractRolloverLog implements Closeable {
     else
       return _archiveFormat;
   }
+  
+  public String getArchiveSuffix()
+  {
+    return _archiveSuffix;
+  }
 
   /**
    * Sets the log rollover cron specification
@@ -726,7 +731,7 @@ public class AbstractRolloverLog implements Closeable {
   {
     StringBuilder sb = new StringBuilder();
 
-    String archiveFormat = getArchiveFormat();
+    String archiveFormat = getArchiveFormat() + getArchiveSuffix();
 
     for (int i = 0; i < archiveFormat.length(); i++) {
       char ch = archiveFormat.charAt(i);

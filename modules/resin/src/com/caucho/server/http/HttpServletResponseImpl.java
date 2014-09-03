@@ -1297,8 +1297,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     // XXX: server/1315 vs server/0506 vs server/170k vs server/01r(e,f)
     // could also set the nocache=JSESSIONID
-    if (_request.getWebApp().getSessionManager().enableSessionCookies())
+    WebApp webApp = _request.getWebApp();
+    
+    if (webApp != null && webApp.getSessionManager().enableSessionCookies()) {
       setPrivateOrResinCache(true);
+    }
   }
 
   protected void addServletCookie(WebApp webApp)

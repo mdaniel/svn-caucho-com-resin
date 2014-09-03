@@ -12,6 +12,11 @@
 
 <s2 title="4.0.41 in progress">
 <ul>
+<li>servlet: error-page for 400-bad request NPE (#5749)</li>
+<li>servlet: loadOnStartup was incorrectly enabled for @WebServlet even when unset (#5778, rep by Marko Asplund)</li>
+<li>load-balance: utf-8 encoding in urls (#5785, rep by R Cohen)</li>
+<li>access-log: rollover-count was not property matching files with .gz extension (#5789, rep by Uv Wildner)</li>
+<li>jdbc: UserStatement.getWarnings() needs to work even after close (rep by Ole Dalgaard)</li>
 <li>health: add critical/fatal messages to health shutdown message (#5762, rep by J. Meyer)</li>
 <li>resin.xml: moved default cluster-default.xml to classpath and defaulted app-default.xml to be dir-relative (#5762, rep by M. Lowe)</li>
 <li>@WebSocket: interference between @WebSocket and CDI/JSP EL (#5776, rep by marko_asplund)</li>

@@ -59,6 +59,7 @@ typedef struct connection_ops_t {
   int (*write_nonblock) (connection_t *conn, char *buf, int len);
   int (*close) (connection_t *conn);
   int (*read_client_certificate) (connection_t *conn, char *buf, int len);
+  int (*free) (connection_t *conn);
 } connection_ops_t;
 
 struct connection_t {

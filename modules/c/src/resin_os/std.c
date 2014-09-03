@@ -58,6 +58,7 @@ struct connection_ops_t std_ops = {
   std_write_nonblock,
   conn_close,
   std_read_client_certificate,
+  std_free,
 };
 
 static int
@@ -243,7 +244,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   
   fd = conn->fd;
   
-  if (fd < 0 || conn->is_read_shutdown) {
+  if (fd <= 0 || conn->is_read_shutdown) {
     return -1;
   }
 
@@ -319,7 +320,7 @@ std_write(connection_t *conn, char *buf, int len)
 
   fd = conn->fd;
 
-  if (fd < 0) {
+  if (fd <= 0) {
     return -1;
   }
 
@@ -366,8 +367,9 @@ std_write_nonblock(connection_t *conn, char *buf, int len)
 
   fd = conn->fd;
 
-  if (fd < 0)
+  if (fd <= 0) {
     return -1;
+  }
 
 #ifndef O_NONBLOCK
   if (poll_write(fd, 0) <= 0)
@@ -378,6 +380,11 @@ std_write_nonblock(connection_t *conn, char *buf, int len)
 
   return result;
 }
+
+void
+std_free(connection_t *conn)
+{
+}  
 
 int
 conn_close(connection_t *conn)
@@ -430,7 +437,8 @@ std_accept(server_socket_t *ss, connection_t *conn)
   }
   
   fd = ss->fd;
-  if (fd < 0) {
+  
+  if (fd <= 0) {
     return 0;
   }
 
@@ -465,6 +473,10 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (sock < 0) {
     return 0;
   }
+  else if (sock == 0) {
+    fprintf(stderr, "unexpected file descriptor %d\n", sock);
+    return 0;
+  }
 
   conn->ss = ss;
   conn->fd = sock;
@@ -478,7 +490,7 @@ std_init(connection_t *conn)
   server_socket_t *ss = conn->ss;
   int sock = conn->fd;
   struct timeval timeout;
-  int sin_len;
+  socklen_t sin_len;
 
   conn->socket_timeout = ss->conn_socket_timeout;
 

@@ -50,6 +50,22 @@ public final class Utf8 {
       os.write(0x80 + (ch & 0x3f));
     }
   }
+
+  public static void write(CharBuffer cb, char ch)
+  {
+    if (ch < 0x80) {
+      cb.append((char) ch);
+    }
+    else if (ch < 0x800) {
+      cb.append((char) (0xc0 + (ch >> 6)));
+      cb.append((char) (0x80 + (ch & 0x3f)));
+    }
+    else {
+      cb.append((char) (0xe0 + (ch >> 12)));
+      cb.append((char) (0x80 + ((ch >> 6) & 0x3f)));
+      cb.append((char) (0x80 + (ch & 0x3f)));
+    }
+  }
   
   public static void write(OutputStream os, String s)
     throws IOException

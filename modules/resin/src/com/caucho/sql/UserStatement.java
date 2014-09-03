@@ -784,7 +784,14 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     try {
-      return _stmt.getWarnings();
+      Statement stmt = _stmt;
+      
+      if (stmt != null) {
+        return stmt.getWarnings();
+      }
+      else {
+        return null;
+      }
     } catch (RuntimeException e) {
       onRuntimeException(e);
       

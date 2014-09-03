@@ -209,7 +209,7 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
   char buffer[STACK_BUFFER_SIZE];
   char *temp_buf;
 
-  if (! conn || conn->fd < 0 || ! buf) {
+  if (! conn || conn->fd <= 0 || ! buf) {
     return -1;
   }
 
@@ -248,8 +248,9 @@ Java_com_caucho_vfs_JniStream_readNonBlockNative(JNIEnv *env,
   int sublen;
   char buffer[STACK_BUFFER_SIZE];
 
-  if (! conn || conn->fd < 0 || ! buf)
+  if (! conn || conn->fd <= 0 || ! buf) {
     return -1;
+  }
 
   conn->jni_env = env;
 
@@ -284,7 +285,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   int write_length = 0;
   int result;
     
-  if (! conn || conn->fd < 0 || ! j_buf) {
+  if (! conn || conn->fd <= 0 || ! j_buf) {
     return -1;
   }
 
@@ -528,7 +529,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   int fd;
   off_t sendfile_offset;
     
-  if (! conn || conn->fd < 0 || conn->ssl_bits) {
+  if (! conn || conn->fd <= 0 || conn->ssl_bits) {
     return -1;
   }
 
@@ -591,7 +592,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   off_t sendfile_offset;
   char buffer[16 * 1024];
     
-  if (! conn || conn->fd < 0) {
+  if (! conn || conn->fd <= 0) {
     return -1;
   }
   
@@ -655,7 +656,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNativeNio(JNIEnv *env,
   int write_length = 0;
   int result;
 
-  if (! conn || conn->fd < 0 || ! byte_buffer) {
+  if (! conn || conn->fd <= 0 || ! byte_buffer) {
     return -1;
   }
   
@@ -838,7 +839,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeClose(JNIEnv *env,
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
-  if (conn && conn->fd >= 0) {
+  if (conn && conn->fd > 0) {
     conn->jni_env = env;
 
     conn->ops->close(conn);
@@ -871,7 +872,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeFree(JNIEnv *env,
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
   if (conn) {
-    if (conn->fd >= 0) {
+    if (conn->fd > 0) {
       conn->jni_env = env;
 
       conn->ops->close(conn);
@@ -883,6 +884,8 @@ Java_com_caucho_vfs_JniSocketImpl_nativeFree(JNIEnv *env,
       WSACloseEvent(conn->event);
 	  */
 #endif
+
+    conn->ops->free(conn);
     
     free(conn);
   }
@@ -943,8 +946,9 @@ Java_com_caucho_vfs_JniSocketImpl_nativeIsEof(JNIEnv *env,
 
   fd = conn->fd;
 
-  if (fd < 0)
+  if (fd <= 0) {
     return 1;
+  }
 
 #ifdef MSG_DONTWAIT
   result = recv(fd, buffer, 1, MSG_DONTWAIT|MSG_PEEK);
@@ -1138,6 +1142,10 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   if (sock < 0) {
     return 0;
   }
+  else if (sock == 0) {
+    fprintf(stderr, "Unexpected socket %d\n", sock);
+    return 0;
+  }
   
   val = 1;
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
@@ -1250,8 +1258,9 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeOpenPort(JNIEnv *env,
   }
 #endif
 
-  if (sock < 0)
+  if (sock <= 0) {
     return 0;
+  }
 
   ss = (server_socket_t *) cse_malloc(sizeof(server_socket_t));
 
@@ -1395,8 +1404,9 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeListen(JNIEnv *env,
 {
   server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
 
-  if (! ss || ss->fd < 0)
+  if (! ss || ss->fd <= 0) {
     return;
+  }
 
   if (backlog < 0)
     backlog = 0;
@@ -1449,8 +1459,9 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetSaveOnExec(JNIEnv *env,
     int arg = 0;
     int result = 0;
 
-    if (fd < 0)
+    if (fd <= 0) {
       return 0;
+    }
 
     /* sets the close on exec flag */
     arg = fcntl(fd, F_GETFD, 0);
@@ -1603,7 +1614,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
     return 0;
   }
 
-  if (conn->fd >= 0) {
+  if (conn->fd > 0) {
     resin_throw_exception(env, "java/lang/IllegalStateException",
                           "unclosed socket in accept");
     return 0;
@@ -1716,7 +1727,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
     return 0;
 
   sock = socket(family, SOCK_STREAM, 0);
-  if (sock < 0) {
+  if (sock <= 0) {
     return 0;
   }
 
@@ -1790,10 +1801,12 @@ Java_com_caucho_vfs_JniSocketImpl_getNativeFd(JNIEnv *env,
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
-  if (! conn)
+  if (! conn) {
     return -1;
-  else
+  }
+  else {
     return conn->fd;
+  }
 }
 
 JNIEXPORT jboolean JNICALL
