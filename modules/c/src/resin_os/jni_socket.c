@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
  *
  * @author Scott Ferguson
  */
@@ -576,6 +576,87 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
 }
 
 #else
+#ifdef WIN32
+
+static HANDLE
+jni_open_file_win32(JNIEnv *env,
+                    jbyteArray name,
+                    jint length)
+{
+  char buffer[8192];
+  HANDLE fd;
+  int flags;
+  int offset = 0;
+
+  if (! name || length <= 0 || sizeof(buffer) <= length) {
+    return 0;
+  }
+
+  (*env)->GetByteArrayRegion(env, name, offset, length, (void*) buffer);
+
+  buffer[length] = 0;
+ 
+  fd = OpenFile(buffer, 0, OF_READ);
+
+  return fd;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
+                                                      jobject obj,
+                                                      jlong conn_fd,
+                                                      jbyteArray j_buf,
+                                                      jint offset,
+                                                      jint length,
+                                                      jbyteArray name,
+                                                      jint name_length,
+                                                      jlong file_length)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  HANDLE hFile;
+  int sublen;
+  int write_length = 0;
+  int result;
+  int fd;
+  off_t sendfile_offset;
+    
+  if (! conn || conn->fd <= 0 || conn->ssl_bits) {
+    return -1;
+  }
+
+  if (length > 0) {
+    Java_com_caucho_vfs_JniSocketImpl_writeNative(env, obj, conn_fd,
+                                                  j_buf, offset, length);
+  }
+
+  conn->jni_env = env;
+
+  hFile = jni_open_file_win32(env, name, name_length);
+
+  if (hFile == 0) {
+    /* file not found */
+    return -1;
+  }
+
+  sendfile_offset = 0;
+
+  if (conn->ssl_context) {
+    fprintf(stderr, "OpenSSL and sendfile are not allowed\n");
+    return -1;
+  }
+
+  result = transmitFile(conn->fd, hFile, 0, 0, 0, 0, 0);
+
+  CloseHandle(hFile);
+
+  if (! result) {
+    fprintf(stderr, "sendfile ERR\n");
+  }
+
+  return 1;
+}
+
+#else
 
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
@@ -630,6 +711,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   return write_length + result;
 }
 
+#endif
 #endif
 
 JNIEXPORT jobject JNICALL
@@ -1809,6 +1891,17 @@ Java_com_caucho_vfs_JniSocketImpl_getNativeFd(JNIEnv *env,
   }
 }
 
+#ifdef WIN32
+
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeIsSendfileEnabled(JNIEnv *env,
+                                                                jobject obj)
+{
+  return 1;
+}
+
+#else
+
 JNIEXPORT jboolean JNICALL
 Java_com_caucho_vfs_JniServerSocketImpl_nativeIsSendfileEnabled(JNIEnv *env,
                                                                 jobject obj)
@@ -1819,6 +1912,8 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeIsSendfileEnabled(JNIEnv *env,
   return 0;
 #endif  
 }
+
+#endif
 
 JNIEXPORT jboolean JNICALL
 Java_com_caucho_vfs_JniServerSocketImpl_nativeIsCorkEnabled(JNIEnv *env,
