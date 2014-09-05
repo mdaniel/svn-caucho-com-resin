@@ -11,6 +11,7 @@
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <MSWSock.h>
 #include <io.h>
 #else
 #define _GNU_SOURCE
@@ -645,7 +646,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
     return -1;
   }
 
-  result = transmitFile(conn->fd, hFile, 0, 0, 0, 0, 0);
+  result = TransmitFile(conn->fd, hFile, 0, 0, 0, 0, 0);
 
   CloseHandle(hFile);
 
