@@ -44,6 +44,8 @@ import com.caucho.config.CauchoBean;
 import com.caucho.config.ModulePrivate;
 import com.caucho.config.custom.CookieCustomBean;
 import com.caucho.config.custom.ExtensionCustomBean;
+import com.caucho.config.event.EventManager;
+import com.caucho.config.event.EventManagerResin;
 import com.caucho.config.j2ee.DataSourceDefinitionHandler;
 import com.caucho.config.j2ee.ExtensionCustomBeanResin;
 import com.caucho.config.j2ee.PersistenceContextHandler;
@@ -90,6 +92,12 @@ public class InjectManagerResin extends InjectManager
     return _resourceManager;
   }
   
+  @Override
+  protected EventManager createEventManager()
+  {
+    return new EventManagerResin(this);
+  }
+
   @Override
   protected ExtensionCustomBean createExtensionCustomBean()
   {

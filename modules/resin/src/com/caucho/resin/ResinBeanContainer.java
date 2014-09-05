@@ -159,7 +159,6 @@ public class ResinBeanContainer {
 
       Environment.addCloseListener(this);
 
-      //_classLoader.addScanRoot();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -168,6 +167,13 @@ public class ResinBeanContainer {
   public void setId(String id)
   {
     _classLoader.setId(id);
+  }
+  
+  public ResinBeanContainer scanRoot()
+  {
+    _classLoader.addScanRoot();
+    
+    return this;
   }
 
   public InjectManager getCdiManager()
