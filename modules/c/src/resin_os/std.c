@@ -47,7 +47,7 @@ static int std_read_nonblock(connection_t *conn, char *buf, int len);
 static int std_write(connection_t *conn, char *buf, int len);
 static int std_write_nonblock(connection_t *conn, char *buf, int len);
 int conn_close(connection_t *conn);
-void std_free(connection_t *conn);
+static void std_free(connection_t *conn);
 static int std_read_client_certificate(connection_t *conn, char *buf, int len);
 
 struct connection_ops_t std_ops = {
@@ -490,7 +490,7 @@ std_init(connection_t *conn)
   server_socket_t *ss = conn->ss;
   int sock = conn->fd;
   struct timeval timeout;
-  socklen_t sin_len;
+  int sin_len;
 
   conn->socket_timeout = ss->conn_socket_timeout;
 
