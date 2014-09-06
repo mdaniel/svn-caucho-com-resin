@@ -37,7 +37,7 @@ import com.caucho.http.webapp.WebAppResin;
  * Configuration for the taglib listener in the .tld
  */
 public class TldListener {
-  private Class _listenerClass;
+  private Class<?> _listenerClass;
 
   public void setId(String id)
   {
