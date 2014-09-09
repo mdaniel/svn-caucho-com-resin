@@ -227,6 +227,9 @@ calculate_poll_result(connection_t *conn, int poll_result)
   else if (poll_result < 0 && errno != EINTR) {
     return read_exception_status(conn, errno);
   }
+  else {
+    return poll_result;
+  }
 }
 
 static int

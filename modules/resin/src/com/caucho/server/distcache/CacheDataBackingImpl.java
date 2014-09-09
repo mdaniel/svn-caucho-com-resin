@@ -143,9 +143,15 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   @Override
   public MnodeEntry loadLocalEntryValue(HashKey key)
   {
-    MnodeEntry entry = _mnodeStore.load(key);
-
-    return entry;
+    MnodeStore mnodeStore = _mnodeStore;
+    
+    if (mnodeStore != null) {
+      // #5633
+      return mnodeStore.load(key);
+    }
+    else {
+      return null;
+    }
   }
 
   /**
@@ -321,7 +327,14 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   public long saveData(StreamSource source, int length)
   {
     try {
-      return _dataStore.save(source, length);
+      DataStore dataStore = _dataStore;
+      
+      if (dataStore != null) {
+        return _dataStore.save(source, length);
+      }
+      else {
+        return -1;
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

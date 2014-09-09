@@ -32,6 +32,7 @@ package com.caucho.boot;
 import java.io.File;
 import java.util.ArrayList;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
@@ -39,7 +40,6 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.log.RotateStream;
-import com.caucho.network.listen.TcpPort;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -110,8 +110,9 @@ class WatchdogConfig
                  Path rootDirectory,
                  int index)
   {
-    if (id == null || "".equals(id))
+    if (id == null || "".equals(id)) {
       id = "default";
+    }
     
     _id = id;
     _cluster = cluster;

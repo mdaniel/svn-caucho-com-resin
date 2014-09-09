@@ -145,7 +145,7 @@ class WatchdogConfigHandle
       
       config.setAddress(_serverAddress);
       config.setPort(_serverPort);
-      
+
       _program.configure(config);
     } finally {
       Config.setProperty("rvar0", oldRvar0);

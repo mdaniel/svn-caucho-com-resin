@@ -12,6 +12,15 @@
 
 <s2 title="4.0.41 in progress">
 <ul>
+<li>jni: calculate_poll_result could return invalid value (#5632, rep by bean)</li>
+<li>session: check for NPE on shutdown (#5633, #5681 rep by M. Jindal)</li> 
+<li>configure: change ln -sfT to ln -sf for Mac install (#5717, rep by wileysaw)</li>
+<li>io: null source check on read (#5731)</li>
+<li>config: jvm-arg not properly picking up dynamic server.id (#5793, rep by daniel)</li>
+<li>jni: use _filelengthi64 for windows JniRandomAccessFile.getLength (#5733, rep by Mattias Lagerwall)</li>
+<li>config: ResinEnv exception declaration in init() (#5737, rep by matthiasblaesing)</li>
+<li>server: add NPE check for generateController (#5744, rep by Shinomiya Nobuaki)</li>
+<li>file: added TransmitFile for windows (#5784)</li>
 <li>servlet: error-page for 400-bad request NPE (#5749)</li>
 <li>servlet: loadOnStartup was incorrectly enabled for @WebServlet even when unset (#5778, rep by Marko Asplund)</li>
 <li>load-balance: utf-8 encoding in urls (#5785, rep by R Cohen)</li>

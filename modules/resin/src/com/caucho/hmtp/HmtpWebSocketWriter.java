@@ -260,7 +260,7 @@ public class HmtpWebSocketWriter extends AbstractBroker
   private void startWrite()
   {
     if (_useCount.incrementAndGet() > 1) {
-      Thread.dumpStack();
+      // Thread.dumpStack();
     }
   }
   

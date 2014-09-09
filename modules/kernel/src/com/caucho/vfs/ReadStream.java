@@ -463,13 +463,19 @@ public final class ReadStream extends InputStream
   {
     int readOffset = _readOffset;
     int readLength = _readLength;
-
+    
     if (readLength <= readOffset) {
       if (ZERO_COPY_SIZE <= length) {
         if (_sibling != null)
           _sibling.flush();
+        
+        StreamImpl source = _source;
+        
+        if (source == null) {
+          return -1;
+        }
 
-        int len = _source.read(buf, offset, length);
+        int len = source.read(buf, offset, length);
 
         if (len > 0) {
           _position += len;

@@ -188,6 +188,9 @@ class WatchdogManager implements AlarmListener {
     Config.setProperty("getenv", System.getenv());
     
     Config.setProperty("rvar0", serverId);
+    
+    System.out.println("SRV: " + elContext.getServerVar() + " " + elContext.getServerVar().getClass());
+    
 
     ResinConfigLibrary.configure(cdiManager);
     ResinServerConfigLibrary.configure(cdiManager);

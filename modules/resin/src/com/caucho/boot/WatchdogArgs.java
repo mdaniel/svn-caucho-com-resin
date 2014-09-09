@@ -50,6 +50,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.license.LicenseCheck;
 import com.caucho.loader.Environment;
@@ -1057,7 +1058,14 @@ class WatchdogArgs
     @Override
     public String getServerId()
     {
-      return WatchdogArgs.this.getServerId();
+      String serverId = (String) Config.getProperty("rvar0");
+      
+      if (serverId != null) {
+        return serverId;
+      }
+      else {
+        return WatchdogArgs.this.getServerId();
+      }
     }
 
     @Override

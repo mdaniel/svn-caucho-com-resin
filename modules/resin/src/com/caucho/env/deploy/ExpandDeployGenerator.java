@@ -699,15 +699,23 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
       thread.setContextClassLoader(getParentClassLoader());
       
       String key = nameToKey(name);
       
-      ExpandVersion version = _expandManager.getPrimaryVersion(key);
+      ExpandManager expandManager = _expandManager;
       
-      if (version == null)
-        version = _expandManager.getVersion(key);
+      if (expandManager == null) {
+        return;
+      }
+      
+      ExpandVersion version = expandManager.getPrimaryVersion(key);
+      
+      if (version == null) {
+        version = expandManager.getVersion(key);
+      }
       
       if (version == null)
         return;

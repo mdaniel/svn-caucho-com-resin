@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
 import com.caucho.cloud.topology.CloudServer;
-import com.caucho.util.Alarm;
+import com.caucho.config.Config;
 import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Path;
 
@@ -72,7 +72,14 @@ public class ResinVar {
    */
   public String getServerId()
   {
-    return _serverId;
+    String serverId = (String) Config.getProperty("rvar0");
+
+    if (serverId != null) {
+      return serverId;
+    }
+    else {
+      return _serverId;
+    }
   }
 
   /**

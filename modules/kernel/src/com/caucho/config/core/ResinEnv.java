@@ -78,12 +78,12 @@ public class ResinEnv extends ResinControl implements EnvironmentBean {
 
   @PostConstruct
   public void init()
-    throws Throwable
   {
     Object object = getObject();
     
-    if (object != null)
+    if (object != null) {
       _init.configure(object);
+    }
   }
 }
 

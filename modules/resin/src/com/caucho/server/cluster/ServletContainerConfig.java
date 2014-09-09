@@ -807,7 +807,14 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
 
     public String getId()
     {
-      return _server.getId();
+      String sid = (String) Config.getProperty("rvar0");
+      
+      if (sid != null) {
+        return sid;
+      }
+      else {
+        return _server.getId();
+      }
     }
 
     private int getPort(TcpPort port)
