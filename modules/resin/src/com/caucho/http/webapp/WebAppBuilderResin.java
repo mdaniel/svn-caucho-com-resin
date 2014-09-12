@@ -48,6 +48,8 @@ import com.caucho.config.types.ResourceRef;
 import com.caucho.env.jpa.PersistenceManager;
 import com.caucho.http.dispatch.ServletBuilder;
 import com.caucho.http.dispatch.ServletBuilderResin;
+import com.caucho.http.dispatch.ServletManager;
+import com.caucho.http.dispatch.ServletManagerResin;
 import com.caucho.http.rewrite.DispatchRuleBase;
 import com.caucho.http.rewrite.RewriteDispatch;
 import com.caucho.http.rewrite.RewriteFilter;
@@ -109,6 +111,11 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
   {
     super(controller);
   }
+  
+  protected ServletManager createServletManager()
+  {
+    return new ServletManagerResin();
+  }
 
   public RewriteDispatch getRequestRewriteDispatch()
   {
@@ -137,7 +144,7 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
     _earDeploy.add(deploy);
   }
   */
-  
+
   private void clearCache()
   {
   }
