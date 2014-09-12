@@ -847,7 +847,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     
     String charEncoding = getCharacterEncoding();
     
-    if (charEncoding != null && _contentType.startsWith("text/")) {
+    if (charEncoding != null
+        && (_contentType.startsWith("text/")
+            || _contentType.equals("application/json"))) {
       return _contentType + "; charset=" + charEncoding;
     }
     else {

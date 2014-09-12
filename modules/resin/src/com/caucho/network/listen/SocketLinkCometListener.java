@@ -36,8 +36,9 @@ public interface SocketLinkCometListener
 {
   /**
    * Called when the connection times out
+   * @return 
    */
-  public void onTimeout();
+  public boolean onTimeout();
   
   /**
    * Called when the connection closes

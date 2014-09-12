@@ -1084,9 +1084,10 @@ public class TcpSocketLink extends AbstractSocketLink
         // _state = _state.toCometDispatch();
       
         if (async.isTimeout()) {
-          async.timeout();
-          close();
-          return RequestState.EXIT;
+          if (async.timeout()) {
+            close();
+            return RequestState.EXIT;
+          }
         }
 
         async.toResume();
@@ -1099,6 +1100,7 @@ public class TcpSocketLink extends AbstractSocketLink
         // server/1lb5, #4697
         // if (! async.isCompleteRequested()) {
         getRequest().handleResume();
+
         // }
 
         if (_state.isComet()) {

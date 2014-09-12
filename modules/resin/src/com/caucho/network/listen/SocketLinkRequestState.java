@@ -98,6 +98,12 @@ enum SocketLinkRequestState {
       
       return true;
     }
+    
+    @Override
+    boolean toAsyncWake(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      return false;
+    }
   },
   
   /**

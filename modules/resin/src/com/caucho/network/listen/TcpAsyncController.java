@@ -136,20 +136,25 @@ class TcpAsyncController extends AsyncController {
 
   /**
    * Sets the timeout.
+   * @return 
    */
   @Override
-  public final void timeout()
+  public final boolean timeout()
   {
-    _cometHandler.onTimeout();
-
-    _isTimeout = true;
-    _isCompleteRequested = true;
+    if (_cometHandler.onTimeout()) {
+      _isTimeout = true;
+      _isCompleteRequested = true;
+      
+      return true;
+    }
 
     try {
       wake();
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
+    
+    return false;
   }
 
   void setTimeout()

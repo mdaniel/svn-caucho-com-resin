@@ -1623,7 +1623,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       if (! request.isAsyncStarted())
         return false;
         */
-
+      
       if (request == null) {
         return false;
       }
@@ -1633,9 +1633,11 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       ServletContext webApp = asyncContext.getDispatchContext();
       String url = asyncContext.getDispatchPath();
       
+      /* server/1lda
       if (_tcpConn != null && _tcpConn.isAsyncComplete()) {
         return false;
       }
+      */
 
       if (url != null) {
         if (webApp == null)

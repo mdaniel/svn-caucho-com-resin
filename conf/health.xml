@@ -129,6 +129,7 @@
     -->
   <health:HttpStatusHealthCheck>
     <url-list>${http_ping_urls}</url-list>
+    <ping-port>${http}</ping-port>
   </health:HttpStatusHealthCheck>
   
   <!--

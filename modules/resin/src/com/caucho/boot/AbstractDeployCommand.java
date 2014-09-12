@@ -46,6 +46,7 @@ abstract public class AbstractDeployCommand extends AbstractRepositoryCommand {
     addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
     addValueOption("m", "message", "commit message");
+    addValueOption("timeout", "timeout", "timeout for long deploys");
     
     super.initBootOptions();
   }
@@ -77,7 +78,13 @@ abstract public class AbstractDeployCommand extends AbstractRepositoryCommand {
 
     CommitBuilder commit = createCommitBuilder(args, path);
     
-    deploy(args, deployClient, path, commit);
+    long timeout = args.getArgInt("timeout", 120) * 1000;
+    
+    if (timeout <= 0) {
+      timeout = 120000;
+    }
+    
+    deploy(args, deployClient, path, commit, timeout);
     
     return 0;
   }
@@ -106,7 +113,8 @@ abstract public class AbstractDeployCommand extends AbstractRepositoryCommand {
   protected void deploy(WatchdogArgs args,
                         WebAppDeployClient deployClient,
                         Path path,
-                        CommitBuilder commit)
+                        CommitBuilder commit,
+                        long timeout)
   {
     if (! path.isFile() && ! path.isDirectory()) {
       throw new ConfigException(L.l("'{0}' is not a readable file.",
@@ -130,9 +138,9 @@ abstract public class AbstractDeployCommand extends AbstractRepositoryCommand {
       DeployClient.fillInVersion(commit, version);
 
     if (path.isDirectory())
-      deployClient.commitPath(commit, path);
+      deployClient.commitPath(commit, path, timeout);
     else
-      deployClient.commitArchive(commit, path);
+      deployClient.commitArchive(commit, path, timeout);
 
     System.out.println("Deployed " + commit.getId() + " from " + path + " to "
                        + deployClient.getUrl());

@@ -925,7 +925,8 @@ public class ManagedConnectionImpl
       if (driverConn != null)
         driverConn.close();
     } catch (SQLException e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.finer(e.toString());
+      log.log(Level.FINEST, e.toString(), e);
     }
   }
 

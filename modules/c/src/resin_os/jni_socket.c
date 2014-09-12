@@ -344,6 +344,12 @@ write_splice(connection_t *conn,
     return -1;
   }
 
+  if (conn->ssl_sock) {
+    return conn->ops->write(conn, 
+                            (void*) (PTR) (mmap_address), 
+                            sublen);
+  }
+
   io.iov_base = (void*) (mmap_address);
   io.iov_len = sublen;
 
@@ -512,6 +518,24 @@ jni_open_file(JNIEnv *env,
   return fd;
 }
 
+static jint
+caucho_sendfile_ssl(connection_t *conn, int file_fd)
+{
+  int len;
+  char buf[8192];
+  int result;
+
+  while ((len = read(file_fd, buf, sizeof(buf))) > 0) {
+    result = conn->ops->write(conn, buf, len);
+
+    if (result < 0) {
+      return result;
+    }
+  }
+
+  return 1;
+}
+
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
                                                       jobject obj,
@@ -555,7 +579,13 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   sendfile_offset = 0;
 
   if (conn->ssl_context) {
-    fprintf(stderr, "OpenSSL and sendfile are not allowed\n");
+    int result;
+
+    result = caucho_sendfile_ssl(conn, fd);
+
+    close(fd);
+
+    return result;
   }
 
   result = sendfile(conn->fd, fd, &sendfile_offset, file_length);

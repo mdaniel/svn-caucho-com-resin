@@ -77,13 +77,14 @@ public class RewriteDispatchFilterChain implements FilterChain {
     HttpServletResponse res = (HttpServletResponse) response;
 
     try {
-      String queryString = req.getQueryString();
-      
       // server/1u24
       String url = _url;
-      
+
+      /* server/1s61
+      String queryString = req.getQueryString();
       if (queryString != null)
         url = url + "?" + queryString;
+        */
       
       RequestDispatcherImpl disp
         = (RequestDispatcherImpl) req.getRequestDispatcher(url);

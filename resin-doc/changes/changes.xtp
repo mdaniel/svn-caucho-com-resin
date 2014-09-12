@@ -12,6 +12,16 @@
 
 <s2 title="4.0.41 in progress">
 <ul>
+<li>health: add "DISABLED" state to HealthStatus for disabled health checks (#5711, rep by Shinomiya Nobuaki)</li>
+<li>dbpool: reduce logging level for dbpool driver close, because exception are
+expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>
+<li>cli: added -timeout to deploy command (#5598, #5597)</li>
+<li>openssl: add +tlsv1.1 and +tlsv1.2 (#5682, rep by Sarah Gillespie)</li>
+<li>servlet: welcome-file processing with query string creates duplicate for getParameterValues (#5642)</li>
+<li>servlet: content-type and application/json (#5565, rep by 54chen)</li>
+<li>health: add ping-port attribute to HttpStatusHealthCheck in health.xml (#5572)</li>
+<li>async: allow dispatch() in onTimeout() (#5779, rep by azuo_lee)</li>
+<li>ssl: jni ssl mmap support must go through OpenSSL API (#5790, rep by N. Kikhia)</li>
 <li>jni: calculate_poll_result could return invalid value (#5632, rep by bean)</li>
 <li>session: check for NPE on shutdown (#5633, #5681 rep by M. Jindal)</li> 
 <li>configure: change ln -sfT to ln -sf for Mac install (#5717, rep by wileysaw)</li>

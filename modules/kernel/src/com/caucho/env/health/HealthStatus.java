@@ -17,6 +17,7 @@ package com.caucho.env.health;
 public enum HealthStatus
 {
   UNKNOWN,
+  DISABLED,
   OK,
   WARNING,
   CRITICAL,

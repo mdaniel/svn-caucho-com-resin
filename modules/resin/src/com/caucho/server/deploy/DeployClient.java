@@ -190,6 +190,13 @@ public class DeployClient implements Repository
   public String commitArchive(CommitBuilder commit,
                               Path jar)
   {
+    return commitArchive(commit, jar, DEPLOY_TIMEOUT);
+  }
+  
+  public String commitArchive(CommitBuilder commit,
+                              Path jar,
+                              long timeout)
+  {
     commit.validate();
     
     GitCommitJar gitCommit = null;
@@ -199,7 +206,7 @@ public class DeployClient implements Repository
       
       String tag = commit.getId();
       
-      return deployJar(tag, gitCommit, commit.getAttributes());
+      return deployJar(tag, gitCommit, commit.getAttributes(), timeout);
     }
     catch (IOException e) {
       throw new RepositoryException(e);
@@ -232,7 +239,9 @@ public class DeployClient implements Repository
       
       String tag = commit.getId();
       
-      return deployJar(tag, gitCommit, commit.getAttributes());
+      long timeout = DEPLOY_TIMEOUT;
+      
+      return deployJar(tag, gitCommit, commit.getAttributes(), timeout);
     }
     catch (IOException e) {
       throw new RepositoryException(e);
@@ -256,6 +265,13 @@ public class DeployClient implements Repository
   public String commitPath(CommitBuilder commit,
                            Path path)
   {
+    return commitPath(commit, path, DEPLOY_TIMEOUT);
+  }
+  
+  public String commitPath(CommitBuilder commit,
+                           Path path,
+                           long timeout)
+  {
     commit.validate();
     
     GitCommitJar gitCommit = null;
@@ -270,7 +286,7 @@ public class DeployClient implements Repository
       
       String tag = commit.getId();
       
-      return deployJar(tag, gitCommit, commit.getAttributes());
+      return deployJar(tag, gitCommit, commit.getAttributes(), timeout);
     }
     catch (IOException e) {
       throw new RepositoryException(e);
@@ -348,7 +364,8 @@ public class DeployClient implements Repository
 
   private String deployJar(String tag,
                            GitCommitJar commit,
-                           Map<String,String> attributes)
+                           Map<String,String> attributes,
+                           long timeout)
     throws IOException
   {
     String []files = getCommitList(commit.getCommitList());
@@ -359,7 +376,7 @@ public class DeployClient implements Repository
       cb.sendNext();
     }
     
-    cb.waitForDone(DEPLOY_TIMEOUT);
+    cb.waitForDone(timeout);
     
     putTag(tag, commit.getDigest(), attributes);
     

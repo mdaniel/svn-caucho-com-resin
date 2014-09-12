@@ -71,6 +71,7 @@ public class AsyncContextImpl
   private ArrayList<AsyncListenerNode> _listeners;
   private AtomicBoolean _isComplete = new AtomicBoolean();
 
+  private String _dispatchDefault;
   private WebApp _dispatchWebApp;
   private String _dispatchPath;
   
@@ -104,11 +105,11 @@ public class AsyncContextImpl
     String pathInfo = req.getPathInfo();
     
     if (pathInfo == null)
-      _dispatchPath = servletPath;
+      _dispatchDefault = servletPath;
     else if (servletPath == null)
-      _dispatchPath = pathInfo;
+      _dispatchDefault = pathInfo;
     else
-      _dispatchPath = servletPath + pathInfo;
+      _dispatchDefault = servletPath + pathInfo;
     
     /* XXX: tck
     if (_cometController == null)
@@ -241,6 +242,10 @@ public class AsyncContextImpl
       throw new IllegalStateException(L.l("dispatch is not valid when async cycle has not started, i.e. before startAsync."));
       */
      
+    if (_dispatchPath == null) {
+      _dispatchPath = _dispatchDefault;
+    }
+    
     cometController.wake();
   }
 
@@ -321,10 +326,10 @@ public class AsyncContextImpl
    * CometHandler callback when the connection times out.
    */
   @Override
-  public void onTimeout()
+  public boolean onTimeout()
   {
     if (_listeners == null)
-      return;
+      return true;
     
     AsyncEvent event = new AsyncEvent(this, _request, _response);
     
@@ -335,6 +340,8 @@ public class AsyncContextImpl
         log.log(Level.FINE, e.toString(), e);
       }
     }
+
+    return _dispatchPath == null;
   }
   
   /**

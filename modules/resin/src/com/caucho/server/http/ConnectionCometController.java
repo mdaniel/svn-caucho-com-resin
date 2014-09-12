@@ -141,8 +141,9 @@ public class ConnectionCometController
     _cometController.complete();
   }
   
-  public void onTimeout()
+  public boolean onTimeout()
   {
+    return true;
   }
   
   public void onComplete()

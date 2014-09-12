@@ -519,7 +519,7 @@ namespace Caucho.IIS
             if (hasStatus)
               return OK | EXIT;
             else {
-              Trace.TraceInformation("Hmux[{0}] <<w: unexpected end of file", traceId);
+              // Trace.TraceInformation("Hmux[{0}] <<w: unexpected end of file", traceId);
 
               return FAIL | EXIT;
             }
@@ -708,7 +708,7 @@ namespace Caucho.IIS
       if (hasStatus)
         return isBusy ? BUSY | EXIT : OK | EXIT;
       else {
-        Trace.TraceInformation("Hmux[{0}] unexpected end of file", traceId, code);
+        // Trace.TraceInformation("Hmux[{0}] unexpected end of file", traceId, code);
         return FAIL | EXIT;
       }
     }

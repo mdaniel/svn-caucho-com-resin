@@ -67,8 +67,9 @@ public class AsyncController {
     return false;
   }
   
-  public void timeout()
+  public boolean timeout()
   {
+    return true;
   }
 
   public void complete()
