@@ -7,6 +7,7 @@
 package com.caucho.admin.action;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.internet.InternetAddress;
@@ -26,8 +27,15 @@ import com.caucho.quercus.servlet.api.QuercusHttpServletResponseImpl;
 import com.caucho.server.http.StubServletRequest;
 import com.caucho.server.http.StubServletResponse;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempOutputStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 public class PdfReportAction implements AdminAction
 {
@@ -46,7 +54,7 @@ public class PdfReportAction implements AdminAction
   private String _report;
   private String _title;
 
-  private MailService _mailService = new MailService();
+  private MailService _mailService;
   private String _mailTo;
   private String _mailFrom;
 
@@ -279,22 +287,32 @@ public class PdfReportAction implements AdminAction
 
     if (_logPath == null)
       _logPath = Vfs.lookup(_logDirectory);
-
+    
+    if (_mailService == null) {
+      _mailService = new MailService();
+    }
+    
     if (_mailTo != null) {
       try {
         _mailService.addTo(new InternetAddress(_mailTo));
-        _mailService.init();
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
     if (_mailFrom != null) {
       try {
         _mailService.addFrom(new InternetAddress(_mailFrom));
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+    
+    if (_mailTo != null || _mailFrom != null) {
+      try {
         _mailService.init();
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

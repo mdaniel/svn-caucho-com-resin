@@ -3435,14 +3435,33 @@ public class WebApp extends ServletContextImpl
   private void callInitializers()
     throws Exception
   {
+    ArrayList<ListenerConfig> listeners = new ArrayList<ListenerConfig>(_listeners);
+    ArrayList<ServletContextListener> webAppListeners
+      = new ArrayList<ServletContextListener>(_webAppListeners);
+    
     for (ServletContainerInitializer init
           : _cdiManager.loadLocalServices(ServletContainerInitializer.class)) {
       callInitializer(init);
     }
     
     _classHierarchyScanListener = null;
+    
+    for (ListenerConfig listener : listeners) {
+      try {
+        addListenerObject(listener.createListenerObject(), false);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+
+    ServletContextEvent event = new ServletContextEvent(this);
+
+    for (ServletContextListener listener : webAppListeners) {
+      listener.contextInitialized(event);
+    }
   }
-  
+
+
   private void callInitializer(ServletContainerInitializer init)
     throws ServletException
   {
@@ -3667,8 +3686,6 @@ public class WebApp extends ServletContextImpl
 
       callInitializers();
 
-      fireContextInitializedEvent();
-
       //jsp/18n7
       _servletManager.initializeJspServlets();
 
@@ -3739,25 +3756,6 @@ public class WebApp extends ServletContextImpl
       setAttribute("caucho.login", _login);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
-    }
-  }
-
-  private void fireContextInitializedEvent()
-  {
-    for (ListenerConfig listener : _listeners) {
-      try {
-        addListenerObject(listener.createListenerObject(), false);
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      }
-    }
-
-    ServletContextEvent event = new ServletContextEvent(this);
-
-    for (int i = 0; i < _webAppListeners.size(); i++) {
-      ServletContextListener listener = _webAppListeners.get(i);
-
-      listener.contextInitialized(event);
     }
   }
 

@@ -470,6 +470,12 @@ public class AbstractRolloverLog implements Closeable {
       if (_zipOut != null)
         _zipOut.flush();
     }
+    
+    long now = CurrentTime.getCurrentTime();
+    
+    if (_nextPeriodEnd < now) {
+      _rolloverWorker.wake();
+    }
   }
 
   /**
@@ -478,8 +484,9 @@ public class AbstractRolloverLog implements Closeable {
   private void rolloverLogTask()
   {
     try {
-      if (_isInit)
+      if (_isInit) {
         flush();
+      }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

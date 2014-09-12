@@ -123,6 +123,7 @@ std_read_nonblock(connection_t *conn, char *buf, int len)
 {
   int fd;
   int result;
+  int retry = 16;
 
   if (! conn)
     return -1;
@@ -132,7 +133,9 @@ std_read_nonblock(connection_t *conn, char *buf, int len)
   if (fd < 0)
     return -1;
 
-  result = recv(fd, buf, len, 0);
+  do {
+    result = recv(fd, buf, len, 0);
+  } while (result < 0 && errno == EINTR && retry-- > 0);
 
   return result;
 }
@@ -144,6 +147,7 @@ poll_read(int fd, int ms)
   struct pollfd pollfd[1];
   int result;
   int rd_hup = 0;
+  int retry = 16;
 
 #ifdef POLLRDHUP
   /* the other end has hung up */
@@ -154,7 +158,9 @@ poll_read(int fd, int ms)
   pollfd[0].events = POLLIN|POLLPRI|rd_hup;
   pollfd[0].revents = 0;
 
-  result = poll(pollfd, 1, ms);
+  do {
+    result = poll(pollfd, 1, ms);
+  } while (result < 0 && errno == EINTR && retry-- > 0);
 
   if (result <= 0) {
     return result;
@@ -290,8 +296,9 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
       /* EAGAIN is returned by a timeout */
       poll_result = poll_read(fd, conn->socket_timeout);
 
-      if (poll_result <= 0)
+      if (poll_result <= 0) {
         return calculate_poll_result(conn, poll_result);
+      }
     }
     else {
       return read_exception_status(conn, errno);
@@ -364,6 +371,7 @@ std_write_nonblock(connection_t *conn, char *buf, int len)
 {
   int fd;
   int result;
+  int retry = 16;
 
   if (! conn)
     return -1;
@@ -379,7 +387,10 @@ std_write_nonblock(connection_t *conn, char *buf, int len)
     return 0;
 #endif  
 
-  result = send(fd, buf, len, 0);
+  do {
+    result = send(fd, buf, len, 0);
+  } while (result < 0 && errno == EINTR && retry-- > 0);
+  
 
   return result;
 }

@@ -12,6 +12,13 @@
 
 <s2 title="4.0.41 in progress">
 <ul>
+<li>health: update PdfReport on start to log warning messages for mail (#570, rep by D. Tapsell)</li>
+<li>servlet: ServletContextListener was called twice when registered from ServletContainerInitializer (#5611, rep by Gerrit Janssen)</li>
+<li>scheduled-task: check for early task call (#5709, rep by Daniel Jimenez)</li>
+<li>gzip: gzip response needs to filter out content-length (#5777, rep by wxiaoguang)</li>
+<li>jni: update EINTR processing for poll/nonblocking read (#5627, rep by bean)</li>
+<li>log: ensure rollover worker is called after flush (#5785, rep by mros2stf)</li>
+<li>log: missing timestamp due to buffer fill condition (#5794, rep by Daniel Jimenez)</li>
 <li>health: add "DISABLED" state to HealthStatus for disabled health checks (#5711, rep by Shinomiya Nobuaki)</li>
 <li>dbpool: reduce logging level for dbpool driver close, because exception are
 expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>

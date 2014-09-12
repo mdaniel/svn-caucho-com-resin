@@ -207,8 +207,9 @@ public class TimestampFilter extends StreamImpl {
       return;
     }
 
-    if (length == 0)
+    if (length == 0) {
       return;
+    }
     
     long now;
 
@@ -254,7 +255,7 @@ public class TimestampFilter extends StreamImpl {
       if (ch == '\n') {
         _isLineBegin = true;
 
-        if (i + 1 < length && buffer[offset + i + 1] == 0) {
+        if (length <= i + 1 || buffer[offset + i + 1] == 0) {
           _isRecordBegin = true;
         }
 
