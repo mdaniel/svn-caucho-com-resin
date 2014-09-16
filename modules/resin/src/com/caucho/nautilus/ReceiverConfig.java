@@ -29,7 +29,7 @@
 
 package com.caucho.nautilus;
 
-import com.caucho.jdkadapt.Supplier;
+import java.util.function.Supplier;
 
 
 /**

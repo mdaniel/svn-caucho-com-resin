@@ -29,7 +29,8 @@
 
 package com.caucho.nautilus.common;
 
-import com.caucho.jdkadapt.Supplier;
+import java.util.function.Supplier;
+
 import com.caucho.nautilus.EncoderMessage;
 import com.caucho.nautilus.SenderQueueConfig;
 import com.caucho.nautilus.SettleMode;

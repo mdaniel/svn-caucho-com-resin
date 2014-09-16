@@ -31,8 +31,8 @@ package com.caucho.nautilus.local;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Supplier;
 
-import com.caucho.jdkadapt.Supplier;
 import com.caucho.nautilus.EncoderMessage;
 import com.caucho.nautilus.MessageException;
 import com.caucho.nautilus.MessagePropertiesFactory;

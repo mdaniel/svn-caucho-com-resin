@@ -29,10 +29,11 @@
 
 package com.caucho.nautilus.common;
 
-import com.caucho.jdkadapt.Supplier;
+import java.util.function.Supplier;
+
 import com.caucho.nautilus.DecoderMessage;
-import com.caucho.nautilus.ReceiverMode;
 import com.caucho.nautilus.ReceiverConfig;
+import com.caucho.nautilus.ReceiverMode;
 import com.caucho.nautilus.SettleMode;
 import com.caucho.nautilus.SettleTime;
 

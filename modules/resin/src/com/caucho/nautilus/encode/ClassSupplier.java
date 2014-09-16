@@ -29,7 +29,7 @@
 
 package com.caucho.nautilus.encode;
 
-import com.caucho.jdkadapt.Supplier;
+import java.util.function.Supplier;
 
 /**
  * supplies object created from a class.

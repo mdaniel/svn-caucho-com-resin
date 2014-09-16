@@ -31,7 +31,8 @@ package com.caucho.nautilus;
 
 
 
-import com.caucho.jdkadapt.Supplier;
+import java.util.function.Supplier;
+
 import com.caucho.nautilus.encode.ClassSupplier;
 import com.caucho.nautilus.encode.StringEncoder;
 

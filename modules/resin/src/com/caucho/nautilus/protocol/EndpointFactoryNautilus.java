@@ -31,7 +31,8 @@ package com.caucho.nautilus.protocol;
 
 
 
-import com.caucho.jdkadapt.Supplier;
+import java.util.function.Supplier;
+
 import com.caucho.nautilus.broker.BrokerNautilus;
 
 /**

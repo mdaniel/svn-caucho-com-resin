@@ -35,15 +35,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.jdkadapt.Supplier;
-import com.caucho.nautilus.ReceiverMode;
 import com.caucho.nautilus.DecoderMessage;
 import com.caucho.nautilus.ReceiverConfig;
-import com.caucho.nautilus.broker.ReceiverBroker;
+import com.caucho.nautilus.ReceiverMode;
 import com.caucho.nautilus.broker.BrokerNautilus;
+import com.caucho.nautilus.broker.ReceiverBroker;
 import com.caucho.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.nautilus.common.ReceiverQueueBase;
 import com.caucho.nautilus.encode.NautilusDecoder;

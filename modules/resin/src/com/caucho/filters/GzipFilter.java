@@ -308,8 +308,11 @@ public class GzipFilter implements Filter {
         _allowGzip = false;
         super.setHeader(header, value);
       }
-      else
+      else if (header.equalsIgnoreCase("Content-Length")) {
+      }
+      else {
         super.setHeader(header, value);
+      }
     }
 
     /**
@@ -324,8 +327,24 @@ public class GzipFilter implements Filter {
         _allowGzip = false;
         super.addHeader(header, value);
       }
-      else
+      else if (header.equalsIgnoreCase("Content-Length")) {
+      }
+      else {
         super.addHeader(header, value);
+      }
+    }
+
+    /**
+     * Check for valid content type.
+     */
+    @Override
+    public void setIntHeader(String header, int value)
+    {
+      if (header.equalsIgnoreCase("Content-Length")) {
+      }
+      else {
+        super.setIntHeader(header, value);
+      }
     }
 
     /**

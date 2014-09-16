@@ -100,6 +100,7 @@ public class ScheduledTask
   private Alarm _alarm;
 
   private volatile boolean _isActive;
+  private long _nextTime;
 
   /**
    * Constructor.
@@ -267,14 +268,18 @@ public class ScheduledTask
     
     try {
       thread.setContextClassLoader(_loader);
-      
-      log.fine(this + " executing " + _task);
-
-      _threadPool.execute(_task);
 
       // XXX: needs QA
       long now = CurrentTime.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);
+
+      if (nextTime != _nextTime && _nextTime <= now) {
+        log.fine(this + " executing " + _task);
+
+        _threadPool.execute(_task);
+      }
+      
+      _nextTime = nextTime;
 
       if (_isActive) {
         alarm.queueAt(nextTime);
