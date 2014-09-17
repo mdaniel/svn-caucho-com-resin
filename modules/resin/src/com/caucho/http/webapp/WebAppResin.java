@@ -95,6 +95,9 @@ public class WebAppResin extends WebApp
   @Override
   public JspConfigDescriptor getJspConfigDescriptor()
   {
+    if (_isContextConfigUnsuppored)
+      throw new UnsupportedOperationException("Can't call getJspConfigDescriptor() from this context");
+
     return _builder.getJspConfigDescriptor();
   }
 
