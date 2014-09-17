@@ -1616,8 +1616,9 @@ public class TcpSocketLink extends AbstractSocketLink
     TcpAsyncController async = _async;
     
     // TCK
-    if (async != null && async.isCompleteRequested())
+    if (async != null && async.isCompleteRequested()) {
       throw new IllegalStateException(L.l("Comet cannot be requested after complete()."));
+    }
     
     _requestStateRef.get().toAsyncStart(_requestStateRef);
     

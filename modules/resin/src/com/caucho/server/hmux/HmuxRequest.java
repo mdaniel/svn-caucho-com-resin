@@ -1479,7 +1479,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _rawWrite.flush();
   }
 
-  protected boolean flushNextBuffer()
+  protected final boolean flushNextBuffer()
     throws IOException
   {
     WriteStream next = _rawWrite;
@@ -1490,6 +1490,10 @@ public class HmuxRequest extends AbstractHttpRequest
       _bufferStartOffset = 0;
       if (startOffset == next.getBufferOffset()) {
         next.setBufferOffset(startOffset - 3);
+        
+        if (startOffset == 3) {
+          return false;
+        }
       }
       else {
         // illegal state because the data isn't filled

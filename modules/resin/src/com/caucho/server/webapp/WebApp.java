@@ -2142,13 +2142,13 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds the listener object.
    */
-  private void addListenerObject(Object listenerObj, boolean start)
+  private void addListenerObject(Object listenerObj, boolean isStart)
   {
     if (listenerObj instanceof ServletContextListener) {
       ServletContextListener scListener = (ServletContextListener) listenerObj;
       _webAppListeners.add(scListener);
-
-      if (start) {
+      
+      if (isStart) {
         ServletContextEvent event = new ServletContextEvent(this);
 
         scListener.contextInitialized(event);
@@ -3448,7 +3448,9 @@ public class WebApp extends ServletContextImpl
     
     for (ListenerConfig listener : listeners) {
       try {
-        addListenerObject(listener.createListenerObject(), false);
+        // server/10g0
+        // addListenerObject(listener.createListenerObject(), false);
+        addListenerObject(listener.createListenerObject(), true);
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
