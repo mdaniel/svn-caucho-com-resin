@@ -39,7 +39,7 @@
      - Default configuration applied to all clusters, including
      - HTTP, HTTPS, and /resin-admin configuration.
     -->
-  <resin:import path="classpath:META-INF/caucho/cluster-default.xml"/>
+  <resin:import path="${__DIR__}/cluster-default.xml"/>
   
   <!--
      - health configuration
