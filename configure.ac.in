@@ -1156,6 +1156,7 @@ case "$target_os" in
   ;;
 
   *darwin*)
+  jni_os=darwin
   LD=gcc
   SO=jnilib
   ;;
