@@ -616,18 +616,19 @@ jni_open_file_win32(JNIEnv *env,
 {
   char buffer[8192];
   HANDLE fd;
+  OFSTRUCT openBuf;
   int flags;
   int offset = 0;
 
-  if (! name || length <= 0 || sizeof(buffer) <= length) {
+  if (! env || ! name || length <= 0 || sizeof(buffer) <= length) {
     return 0;
   }
 
   (*env)->GetByteArrayRegion(env, name, offset, length, (void*) buffer);
 
   buffer[length] = 0;
- 
-  fd = OpenFile(buffer, 0, OF_READ);
+
+  fd = OpenFile(buffer, &openBuf, OF_READ);
 
   return fd;
 }
@@ -660,26 +661,22 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
                                                   j_buf, offset, length);
   }
 
+  if (conn->ssl_context) {
+    fprintf(stderr, "OpenSSL and sendfile are not allowed\n");
+    return -1;
+  }
+
   conn->jni_env = env;
-
   hFile = jni_open_file_win32(env, name, name_length);
-
   if (hFile == 0) {
     /* file not found */
     return -1;
   }
 
   sendfile_offset = 0;
-
-  if (conn->ssl_context) {
-    fprintf(stderr, "OpenSSL and sendfile are not allowed\n");
-    return -1;
-  }
-
   result = TransmitFile(conn->fd, hFile, 0, 0, 0, 0, 0);
-
   CloseHandle(hFile);
-
+ 
   if (! result) {
     fprintf(stderr, "sendfile ERR\n");
   }
