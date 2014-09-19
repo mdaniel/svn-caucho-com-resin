@@ -663,7 +663,7 @@ apache_24=""
 
 echo $ECHO_N "checking if apache is 2.4 or later... "
 
-CC_conftest="${CC} -o conftest -I${APACHE_INC} ${apache_cflags} conftest.$ac_ext"
+CC_conftest="${CC} -o conftest ${APACHE_INC} ${apache_cflags} conftest.$ac_ext"
 $CC_conftest 1>/dev/null 2>/dev/null
 if test "$?" == 0; then
   apache_24=-DAPACHE_24
