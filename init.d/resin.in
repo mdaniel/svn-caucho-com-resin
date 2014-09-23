@@ -20,11 +20,12 @@
 # to /etc/rc.d/init.d as resin.  Then use "# /sbin/chkconfig resin reset"
 #
 
-JAVA_HOME="@JAVA_HOME@"
+#JAVA_HOME="@JAVA_HOME@"
 RESIN_HOME="@resin_home@"
 CONSOLE="@resin_log@/console.log"
 
-export JAVA_HOME RESIN_HOME
+#export JAVA_HOME RESIN_HOME
+export RESIN_HOME
 
 JAVA="@JAVA_EXE@"
 
