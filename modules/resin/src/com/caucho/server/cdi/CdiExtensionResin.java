@@ -29,6 +29,7 @@
 
 package com.caucho.server.cdi;
 
+import io.baratine.core.ChannelService;
 import io.baratine.core.ResourceService;
 import io.baratine.core.Service;
 
@@ -133,7 +134,8 @@ public class CdiExtensionResin implements Extension {
     }
     */
     else if (annotatedType.isAnnotationPresent(Service.class)
-             || annotatedType.isAnnotationPresent(ResourceService.class)) {
+        || annotatedType.isAnnotationPresent(ChannelService.class)
+        || annotatedType.isAnnotationPresent(ResourceService.class)) {
              // || annotatedType.isAnnotationPresent(AmpPublish.class)) {
       ActorManagerImpl actorManager = ActorManagerImpl.getCurrent();
       actorManager.addActor(annotatedType);
