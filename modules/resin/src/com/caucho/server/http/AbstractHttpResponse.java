@@ -63,7 +63,7 @@ abstract public class AbstractHttpResponse {
   private static final Logger log
     = Logger.getLogger(AbstractHttpResponse.class.getName());
   private static final L10N L = new L10N(AbstractHttpResponse.class);
-  
+
   private static final CountSensor _statusXxxSensor
     = MeterService.createCountMeter("Resin|Http|xxx");
   private static final CountSensor _status2xxSensor
@@ -94,7 +94,7 @@ abstract public class AbstractHttpResponse {
   private static final int HEADER_DATE = HEADER_CONTENT_LENGTH + 1;
   private static final int HEADER_SERVER = HEADER_DATE + 1;
   private static final int HEADER_CONNECTION = HEADER_SERVER + 1;
-  
+
   private static final CharBuffer CACHE_CONTROL
     = new CharBuffer("cache-control");
   private static final CharBuffer CONNECTION
@@ -107,7 +107,7 @@ abstract public class AbstractHttpResponse {
     = new CharBuffer("date");
   private static final CharBuffer SERVER
     = new CharBuffer("server");
-  
+
   private static final long MINUTE = 60 * 1000L;
   private static final long HOUR = 60 * MINUTE;
 
@@ -138,14 +138,14 @@ abstract public class AbstractHttpResponse {
 
   private int _dateBufferLength;
   private long _lastDate;
-  
+
   private final byte []_logDateBuffer = new byte[64];
   private final CharBuffer _logDateCharBuffer = new CharBuffer();
   private int _logMinutesOffset;
   private int _logSecondsOffset;
   private int _logDateBufferLength;
   private long _lastLogDate;
-  
+
   private final CharBuffer _cb = new CharBuffer();
   // private final char [] _headerBuffer = new char[256];
 
@@ -162,12 +162,12 @@ abstract public class AbstractHttpResponse {
     _request = request;
 
     _responseStream = createResponseStream();
-    
+
     int logSize = request.getServer().getAccessLogBufferSize();
-    
+
     _logBuffer = new LogBuffer(logSize, true);
   }
-  
+
   /*
   TempBuffer getBuffer()
   {
@@ -207,7 +207,7 @@ abstract public class AbstractHttpResponse {
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
-    
+
     _request.clientDisconnect();
   }
 
@@ -296,7 +296,7 @@ abstract public class AbstractHttpResponse {
   //
   // headers
   //
-  
+
   /**
    * Returns true if the response already contains the named header.
    *
@@ -384,7 +384,7 @@ abstract public class AbstractHttpResponse {
   {
     int i = 0;
     boolean hasHeader = false;
-    
+
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
 
@@ -465,19 +465,19 @@ abstract public class AbstractHttpResponse {
   protected boolean setSpecial(String key, String value)
   {
     int length = key.length();
-    
+
     if (length == 0) {
       return false;
     }
-    
+
     int ch = key.charAt(0);
-    
+
     if ('A' <= ch && ch <= 'Z') {
       ch += 'a' - 'A';
     }
-    
+
     int code = (length << 8) + ch;
-    
+
     /*
     if (256 <= length)
       return false;
@@ -553,37 +553,36 @@ abstract public class AbstractHttpResponse {
       return false;
     }
   }
-  
+
   private long parseLong(String string)
   {
     int length = string.length();
-   
+
     int i;
     int ch = 0;
     for (i = 0;
          i < length && Character.isWhitespace((ch = string.charAt(i)));
          i++) {
     }
-    
+
     int sign = 1;
     long value = 0;
-    
+
     if (ch == '-') {
       sign = -1;
-      
-      if (i < length)
-        ch = string.charAt(i++);
+
+      i++;
     }
     else if (ch == '+') {
-      if (i < length)
-        ch = string.charAt(i++);
+      i++;
     }
-    
-    if (! ('0' <= ch && ch <= '9')) {
+
+    if (length <= i
+        || ! ('0' <= (ch = string.charAt(i)) && ch <= '9')) {
       throw new IllegalArgumentException(L.l("'{0}' is an invalid content-length",
                                              string));
     }
-    
+
     for (;
          i < length && '0' <= (ch = string.charAt(i)) && ch <= '9';
          i++) {
@@ -724,7 +723,7 @@ abstract public class AbstractHttpResponse {
   {
     return _contentLength;
   }
-  
+
   public String getServerHeader()
   {
     return _serverHeader;
@@ -889,13 +888,13 @@ abstract public class AbstractHttpResponse {
   {
     if (isHeaderWritten())
       return false;
-    
+
     HttpServletRequestImpl req = _request.getRequestFacade();
     HttpServletResponseImpl res = _request.getResponseFacade();
 
     if (res == null)
       return false;
-    
+
     if (res.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
       res.handleNotModified();
       length = -1;
@@ -925,7 +924,7 @@ abstract public class AbstractHttpResponse {
 
     return writeHeadersInt(length, isHead);
   }
-  
+
   private void addSensorCount(int statusCode, WebApp webApp)
   {
     int majorCode = statusCode / 100;
@@ -969,9 +968,9 @@ abstract public class AbstractHttpResponse {
     case 5:
       if (webApp != null)
         webApp.addStatus500();
-      
+
       _status5xxSensor.start();
-      
+
       switch (statusCode) {
       case 500:
         _status500Sensor.start();
@@ -988,7 +987,7 @@ abstract public class AbstractHttpResponse {
       break;
     }
   }
-    
+
   abstract protected boolean writeHeadersInt(int length,
                                              boolean isHead)
     throws IOException;
@@ -1019,7 +1018,7 @@ abstract public class AbstractHttpResponse {
       cb.append("=");
       String v = cookie.getValue();
       int len = v != null ? v.length() : 0;
-      
+
       for (int i = 0; i < len; i++) {
         char ch = v.charAt(i);
         /*
@@ -1121,7 +1120,7 @@ abstract public class AbstractHttpResponse {
     if (cookie.isHttpOnly()) {
       cb.append("; HttpOnly");
     }
-    
+
     return true;
   }
 
@@ -1135,20 +1134,20 @@ abstract public class AbstractHttpResponse {
     if (_lastDate / 1000 != now / 1000) {
       fillDate(now);
     }
-    
+
     return _dateBuffer;
   }
-  
+
   public final int getDateBufferLength()
   {
     return _dateBufferLength;
   }
-  
+
   public final int getRawDateBufferOffset()
   {
     return 8; // "\r\nDate: "
   }
-  
+
   public final int getRawDateBufferLength()
   {
     return 24;
@@ -1198,22 +1197,22 @@ abstract public class AbstractHttpResponse {
     _dateBufferLength = len + 4;
   }
 
-  public final byte []fillLogDateBuffer(long now, 
+  public final byte []fillLogDateBuffer(long now,
                                         String timeFormat)
   {
     if (_lastLogDate / 1000 != now / 1000) {
       fillLogDate(now, timeFormat);
     }
-    
+
     return _logDateBuffer;
   }
-  
+
   public final int getLogDateBufferLength()
   {
     return _logDateBufferLength;
   }
 
-  private void fillLogDate(long now, 
+  private void fillLogDate(long now,
                            String timeFormat)
   {
     if (_lastLogDate / HOUR == now / HOUR) {
@@ -1242,7 +1241,7 @@ abstract public class AbstractHttpResponse {
     _logDateCharBuffer.clear();
 
     _localCalendar.format(_logDateCharBuffer, timeFormat);
-    
+
     _logSecondsOffset = _logDateCharBuffer.lastIndexOf(':') + 1;
     _logMinutesOffset = _logSecondsOffset - 3;
 
@@ -1319,14 +1318,14 @@ abstract public class AbstractHttpResponse {
       }
       else if (_request.getRequestFacade().isAsyncStarted()
                && _responseStream.getContentLength() == 0) {
-        
+
       }
       else {
         _responseStream.flush();
       }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive("client disconnect: " + e);
-      
+
       clientDisconnect();
 
       if (isIgnoreClientDisconnect())
@@ -1340,7 +1339,7 @@ abstract public class AbstractHttpResponse {
 
       throw e;
     }
-    
+
     // server/2600 - for _isClosed
   }
 
