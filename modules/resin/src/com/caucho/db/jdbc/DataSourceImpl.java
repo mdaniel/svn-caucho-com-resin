@@ -35,9 +35,11 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import javax.sql.DataSource;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -171,11 +173,16 @@ public class DataSourceImpl implements DataSource {
     _database.close();
   }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public Logger getParentLogger() throws SQLFeatureNotSupportedException
+  {
+    return null;
+  }
 }

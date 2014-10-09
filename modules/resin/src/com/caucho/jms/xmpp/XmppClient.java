@@ -29,17 +29,28 @@
 
 package com.caucho.jms.xmpp;
 
-import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import java.io.IOException;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
-import javax.xml.stream.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.HashSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+import com.caucho.util.ThreadPool;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * XMPP protocol

@@ -31,8 +31,11 @@ package com.caucho.tools.profiler;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 public final class ConnectionPoolDataSourceWrapper
   implements ConnectionPoolDataSource
@@ -91,5 +94,10 @@ public final class ConnectionPoolDataSourceWrapper
   public String toString()
   {
     return "ConnectionPoolDataSourceWrapper[" + _profilerPoint.getName() + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }

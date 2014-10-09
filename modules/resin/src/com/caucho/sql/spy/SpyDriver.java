@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
@@ -160,5 +161,10 @@ public class SpyDriver implements java.sql.Driver {
   public String toString()
   {
     return "SpyDriver[id=" + _id + ",driver=" + _driver + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }

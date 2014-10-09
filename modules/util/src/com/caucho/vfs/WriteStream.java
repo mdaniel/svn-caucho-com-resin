@@ -669,8 +669,10 @@ public class WriteStream extends OutputStreamWithBuffer
       if (length < sublen)
         sublen = length;
 
-      for (int i = sublen - 1; i >= 0; i--)
-        writeBuffer[writeLength + i] = (byte) buffer[offset + i];
+      for (int i = sublen - 1; i >= 0; i--) {
+        int ch = buffer[offset + i];
+        writeBuffer[writeLength + i] = (byte) (ch < 0x100 ? ch : 0x3f); 
+      }
 
       _writeLength = writeLength + sublen;
       offset += sublen;

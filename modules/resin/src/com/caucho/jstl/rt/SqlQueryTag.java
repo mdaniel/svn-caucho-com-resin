@@ -42,6 +42,7 @@ import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
+
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -460,6 +461,11 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
 
         public boolean isWrapperFor(Class<?> iface) throws SQLException {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Logger getParentLogger()
+        {
+          return null;
         }
   }
 }

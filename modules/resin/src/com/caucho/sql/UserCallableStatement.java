@@ -1135,4 +1135,15 @@ public class UserCallableStatement extends UserPreparedStatement
   {
     return this.getClass().getSimpleName() + "[" + _pstmt + "]";
   }
+
+  public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException
+  {
+    return null;
+  }
+
+  public <T> T getObject(String parameterName, Class<T> type)
+      throws SQLException
+  {
+    return null;
+  }
 }

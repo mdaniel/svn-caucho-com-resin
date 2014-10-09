@@ -49,11 +49,13 @@ import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -831,6 +833,11 @@ public class DBPool
   public String toString()
   {
     return "DBPool[" + getName() + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }
 

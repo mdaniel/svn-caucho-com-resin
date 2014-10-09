@@ -31,8 +31,11 @@ package com.caucho.tools.profiler;
 
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 public final class XADataSourceWrapper
   implements XADataSource
@@ -92,6 +95,11 @@ public final class XADataSourceWrapper
   public String toString()
   {
     return "XADataSourceWrapper[" + _profilerPoint.getName() + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }
 

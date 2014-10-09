@@ -33,8 +33,10 @@ import com.caucho.util.L10N;
 
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -141,5 +143,10 @@ public class SpyXADataSource implements XADataSource {
   public String toString()
   {
     return "SpyXADataSource[id=" + _id + ",data-source=" + _dataSource + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }

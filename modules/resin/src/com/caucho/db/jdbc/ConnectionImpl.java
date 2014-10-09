@@ -49,6 +49,7 @@ import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -430,55 +431,78 @@ public class ConnectionImpl implements java.sql.Connection {
       _pooledConnection.closeEvent(this);
   }
 
-    public Clob createClob() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Clob createClob() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public Blob createBlob() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Blob createBlob() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public NClob createNClob() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public NClob createNClob() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public SQLXML createSQLXML() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public SQLXML createSQLXML() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isValid(int timeout) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isValid(int timeout) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void setClientInfo(String name, String value) throws SQLClientInfoException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setClientInfo(String name, String value) throws SQLClientInfoException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setClientInfo(Properties properties) throws SQLClientInfoException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public String getClientInfo(String name) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public String getClientInfo(String name) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public Properties getClientInfo() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Properties getClientInfo() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public void setSchema(String schema) throws SQLException
+  {
+  }
+
+  public String getSchema() throws SQLException
+  {
+    return null;
+  }
+
+  public void abort(Executor executor) throws SQLException
+  {
+  }
+
+  public void setNetworkTimeout(Executor executor, int milliseconds)
+      throws SQLException
+  {
+  }
+
+  public int getNetworkTimeout() throws SQLException
+  {
+    return 0;
+  }
 }

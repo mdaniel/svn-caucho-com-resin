@@ -33,8 +33,10 @@ import com.caucho.util.L10N;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -141,5 +143,10 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   public String toString()
   {
     return "SpyConnectionPoolDataSource[id=" + _id + ",data-source=" + _dataSource + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }

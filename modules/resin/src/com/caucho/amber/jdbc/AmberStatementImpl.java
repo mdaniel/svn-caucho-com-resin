@@ -279,23 +279,32 @@ public class AmberStatementImpl implements java.sql.Statement {
     return _stmt.getResultSetHoldability();
   }
 
-    public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isClosed() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void setPoolable(boolean poolable) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setPoolable(boolean poolable) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isPoolable() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isPoolable() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public void closeOnCompletion() throws SQLException
+  {
+  }
+
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    return false;
+  }
 }

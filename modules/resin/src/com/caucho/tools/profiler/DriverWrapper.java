@@ -33,7 +33,9 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class DriverWrapper
   implements Driver
@@ -88,5 +90,10 @@ public class DriverWrapper
   public String toString()
   {
     return "DriverWrapper[" + _profilerPoint.getName() + "]";
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }

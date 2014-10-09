@@ -37,10 +37,12 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.sql.DataSource;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -219,6 +221,11 @@ public class SqlSetDataSourceTag extends TagSupport {
 
         public boolean isWrapperFor(Class<?> iface) throws SQLException {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Logger getParentLogger()
+        {
+          return null;
         }
   }
 }

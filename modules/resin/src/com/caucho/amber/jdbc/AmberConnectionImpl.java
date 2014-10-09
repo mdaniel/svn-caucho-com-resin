@@ -32,6 +32,7 @@ package com.caucho.amber.jdbc;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 /**
  * Wrapper of the JDBC Connection.
@@ -380,5 +381,23 @@ public class AmberConnectionImpl implements Connection {
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setSchema(String schema) throws SQLException {
+    }
+
+    public String getSchema() throws SQLException {
+      return null;
+    }
+
+    public void abort(Executor executor) throws SQLException {
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds)
+        throws SQLException {
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+      return 0;
     }
 }

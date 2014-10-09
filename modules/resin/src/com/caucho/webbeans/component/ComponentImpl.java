@@ -29,25 +29,36 @@
 
 package com.caucho.webbeans.component;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Hashtable;
+
+import javax.webbeans.Component;
+import javax.webbeans.ComponentFactory;
+import javax.webbeans.Named;
+import javax.webbeans.ScopeType;
+
+import com.caucho.config.ConfigContext;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.bytecode.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.context.*;
-
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
-import javax.webbeans.*;
+import com.caucho.config.program.FieldComponentProgram;
+import com.caucho.naming.ObjectProxy;
+import com.caucho.util.Base64;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.webbeans.cfg.Binding;
+import com.caucho.webbeans.cfg.WbBinding;
+import com.caucho.webbeans.cfg.WbComponentType;
+import com.caucho.webbeans.cfg.WbWebBeans;
+import com.caucho.webbeans.context.ApplicationScope;
+import com.caucho.webbeans.context.ScopeContext;
+import com.caucho.webbeans.context.SingletonScope;
 
 /**
  * Configuration for the xml web bean component.

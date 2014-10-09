@@ -36,8 +36,10 @@ import com.caucho.vfs.Vfs;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -165,5 +167,10 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
     super.finalize();
 
     _database.close();
+  }
+
+  public Logger getParentLogger()
+  {
+    return null;
   }
 }

@@ -29,16 +29,21 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Log;
+import com.caucho.vfs.PersistentDependency;
 
 /**
  * Representing a class that might change.

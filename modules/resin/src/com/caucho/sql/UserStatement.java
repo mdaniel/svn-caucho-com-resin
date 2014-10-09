@@ -765,4 +765,13 @@ public class UserStatement implements Statement {
   {
     return "UserStatement[" + _stmt + "]";
   }
+
+  public void closeOnCompletion() throws SQLException
+  {
+  }
+
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    return false;
+  }
 }

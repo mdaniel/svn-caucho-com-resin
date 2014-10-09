@@ -1229,39 +1229,52 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
     return "DatabaseMetaDataImpl[]";
   }
 
-    public RowIdLifetime getRowIdLifetime() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public RowIdLifetime getRowIdLifetime() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public ResultSet getClientInfoProperties() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public ResultSet getClientInfoProperties() throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public ResultSet getPseudoColumns(String catalog, String schemaPattern,
+                                    String tableNamePattern,
+                                    String columnNamePattern)
+                                        throws SQLException
+  {
+    return null;
+  }
+
+  public boolean generatedKeyAlwaysReturned() throws SQLException
+  {
+    return false;
+  }
 }

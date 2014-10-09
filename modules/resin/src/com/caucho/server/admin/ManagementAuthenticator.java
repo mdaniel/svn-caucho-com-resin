@@ -28,14 +28,14 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.config.*;
-import com.caucho.security.BasicPrincipal;
-import com.caucho.server.security.*;
-import com.caucho.util.*;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 
-import java.security.Principal;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.server.security.AbstractPasswordAuthenticator;
+import com.caucho.server.security.PasswordUser;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Crc64;
 
 /**
  * Special authenticator for management

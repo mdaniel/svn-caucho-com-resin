@@ -34,9 +34,11 @@ import com.caucho.util.L10N;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.sql.DataSource;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
@@ -146,6 +148,11 @@ public class DataSourceImpl implements DataSource {
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Logger getParentLogger()
+    {
+      return null;
     }
 }
 
