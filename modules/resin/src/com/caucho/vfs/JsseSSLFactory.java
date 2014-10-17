@@ -394,10 +394,10 @@ public class JsseSSLFactory implements SSLFactory {
     Path certDir = dataDir.lookup("certs");
     
     SelfSignedCert cert = null;
-    
+        
     try {
       Path certPath = certDir.lookup(name + ".cert");
-      
+            
       if (certPath.canRead()) {
         ReadStream is = certPath.openRead();
         
@@ -407,18 +407,18 @@ public class JsseSSLFactory implements SSLFactory {
           cert = (SelfSignedCert) hIn.readObject(SelfSignedCert.class);
           
           hIn.close();
-          
+                    
           return cert;
         } finally {
           IoUtil.close(is);
         }
       }
     } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);      
     }
       
     cert = SelfSignedCert.create(name, cipherSuites);
-    
+        
     try {
       certDir.mkdirs();
       
@@ -436,9 +436,9 @@ public class JsseSSLFactory implements SSLFactory {
         IoUtil.close(os);
       }
     } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);      
     }
-    
+        
     return cert;
   }
   

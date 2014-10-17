@@ -105,6 +105,11 @@
           <jsse-ssl self-signed-certificate-name="resin@localhost"/>
         </http>
       </resin:when>
+      <resin:when test="${class_exists('sun.security.tools.keytool.CertAndKeyGen')}">
+        <http address="${http_address?:'*'}" port="${https}">
+          <jsse-ssl self-signed-certificate-name="resin@localhost"/>
+        </http>
+      </resin:when>
       </resin:choose>
     </server-default>
 

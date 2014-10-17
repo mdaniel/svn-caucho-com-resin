@@ -30,13 +30,12 @@ package com.caucho.vfs;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +46,6 @@ import javax.net.ssl.KeyManagerFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;
 
 /**
@@ -180,5 +178,58 @@ public class SelfSignedCert implements Serializable {
   {
     return getClass().getSimpleName() + "[" + _cert.getSubjectX500Principal() + "]";
   }
+  
+  static class CertAndKeyGen {
+    private Class<?> _cls;
+    private Object _obj;
+    
+    public CertAndKeyGen(String keyAlgName, String sigAlgName, String providerName)
+      throws Exception
+    {
+      String clsName = "sun.security.x509.CertAndKeyGen";
+      String clsName2 = "sun.security.tools.keytool.CertAndKeyGen";
+            
+      try {
+        _cls = Class.forName(clsName);
+      }
+      catch (Exception e) {        
+        _cls = Class.forName(clsName2);
+      }
+      
+      if (_cls == null) {
+        throw new ConfigException(L.l("cannot find {0} nor {1}", clsName, clsName2));
+      }
+            
+      Constructor<?> cons = _cls.getConstructor(String.class, String.class, String.class);
+      _obj = cons.newInstance(keyAlgName, sigAlgName, providerName);
+    }
+    
+    public void generate(int keySize)
+      throws Exception
+    {
+      Method method = _cls.getMethod("generate", int.class);
+      
+      method.invoke(_obj, keySize);
+    }
+    
+    public PrivateKey getPrivateKey()
+      throws Exception
+    {
+      Method method = _cls.getMethod("getPrivateKey");
+      
+      Object result = method.invoke(_obj);
+      
+      return (PrivateKey) result;
+    }
+    
+    public X509Certificate getSelfCertificate(X500Name name, long days)
+      throws Exception
+    {
+      Method method = _cls.getMethod("getSelfCertificate", X500Name.class, long.class);
+      
+      Object result = method.invoke(_obj, name, days);
+      
+      return (X509Certificate) result;
+    }
+  }
 }
-
