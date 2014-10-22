@@ -247,7 +247,7 @@ public class DeployServiceImpl
         try {
           controller.toRestart();
         } finally {
-          cb.completed(new DeployControllerState(tag, controller.getState()));
+          cb.complete(new DeployControllerState(tag, controller.getState()));
         }
       }
     });

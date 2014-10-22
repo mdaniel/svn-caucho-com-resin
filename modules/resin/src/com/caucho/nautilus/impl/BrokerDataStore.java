@@ -179,7 +179,7 @@ class BrokerDataStore extends BrokerNautilusBase
 
   InputStream loadMessage(long qid, long mid)
   {
-    Cursor cursor = _loadMessage.findOne(qid, mid);
+    Cursor cursor = _loadMessage.findOneFuture(qid, mid);
     
     if (cursor != null) {
       return cursor.getInputStream(1);
@@ -192,7 +192,7 @@ class BrokerDataStore extends BrokerNautilusBase
 
   void deleteMessage(long qid, long mid)
   {
-    _deleteMessage.exec(qid, mid);
+    _deleteMessage.exec(null, qid, mid);
   }
 
   @SuppressWarnings("serial")
