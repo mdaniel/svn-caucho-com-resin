@@ -32,6 +32,7 @@ package com.caucho.server.cdi;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -499,6 +500,8 @@ public class ConversationContext extends ScopeContextBase
     
     public void put(String id, ContextContainer container)
     {
+      Objects.requireNonNull(container);
+
       if (_conversationMap == null)
         _conversationMap = new HashMap<String,ContextContainer>();
       
