@@ -111,6 +111,10 @@ r_cluster-Content =
   & (attribute server-header { string }
      | element server-header { string })?
 
+  & r_service-default*
+  
+  & r_service-deploy*
+
   & r_session-cookie?
 
   & r_session-url-prefix?
@@ -194,10 +198,6 @@ r_host-Content =
   & r_redeploy-check-interval?
 
   & r_redeploy-mode?
-
-  & r_service-default*
-  
-  & r_service-deploy*
   
   & r_startup-mode?
 
