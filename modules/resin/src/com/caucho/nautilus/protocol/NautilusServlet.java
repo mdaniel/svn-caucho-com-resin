@@ -48,19 +48,22 @@ public class NautilusServlet extends WebSocketServletImpl
     super(new EndpointConfigNautilus("/"));
   }
   
+  /*
   protected EndpointConfigNautilus getConfig(String pathInfo)
   {
-    return (EndpointConfigNautilus) super.getConfig(pathInfo);
+    return (EndpointConfigNautilus) super.getContextConfig(pathInfo);
   }
+  */
   
   public void setBroker(BrokerNautilus broker)
   {
-    getConfig("/").setBroker(broker);
+    //getConfig("/").setBroker(broker);
   }
   
   BrokerNautilus getBroker()
   {
-    return getConfig("/").getBroker();
+    //return getConfig("/").getBroker();
+    return null;
   }
   
   @PostConstruct
