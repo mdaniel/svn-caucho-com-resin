@@ -1763,7 +1763,7 @@ different object. Called after the @PostConstruct. </p>
   xmlns:resin="urn:java:com.caucho.resin"
   xmlns:example="urn:java:com.foo.example">
 
-&lt;example:MessageBean resin:JndiName="env/message"&gt;
+&lt;example:MessageBean resin:Jndi="env/message"&gt;
   &lt;message&gt;This is message 1&lt;/message&gt;
   &lt;message&gt;This is message 2&lt;/message&gt;
   &lt;message>

@@ -45,6 +45,12 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/chkconfig resin reset
 /usr/bin/resinctl start
 exit
+
+%postun
+/sbin/chkconfig --del resin
+/usr/bin/resinctl shutdown
+exit
+
 %doc
 
 

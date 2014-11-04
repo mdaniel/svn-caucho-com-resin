@@ -162,6 +162,8 @@ public final class ZipScanner
       if (ch == '\\')
         cbuf[i] = '/';
     }
+    
+    _nameLen = k;
 
     _name = null; // new String(cbuf, 0, k);
 

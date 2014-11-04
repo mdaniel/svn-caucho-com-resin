@@ -559,7 +559,7 @@ becomes &lt;mycom:FooBean xmlns:mycom="urn:com.mycom">.</p>
             xmlns:resin="urn:java:com.caucho.resin"
             xmlns:mypkg="urn:java:com.mycom.mypkg">
   ...
-  &lt;mypkg:MyBean resin:JndiName="java:comp/env/my-name">
+  &lt;mypkg:MyBean resin:Jndi="java:comp/env/my-name">
     &lt;my-attribute>my-value&lt;/my-attribute>
   &lt;/mypkg:MyBean>
   ...

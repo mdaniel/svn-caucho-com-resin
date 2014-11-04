@@ -35,10 +35,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.db.lock.DatabaseLock;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.SyncCacheListener;
@@ -116,8 +116,9 @@ public final class Block implements SyncCacheListener {
     ReadWriteLock lock = _freeLocks.allocate();
 
     if (lock == null) {
-      // lock = new ReentrantReadWriteLock();
-      lock = new DatabaseLock("block"); 
+      // #5624
+      lock = new ReentrantReadWriteLock();
+      // lock = new DatabaseLock("block"); 
     }
 
     return lock;

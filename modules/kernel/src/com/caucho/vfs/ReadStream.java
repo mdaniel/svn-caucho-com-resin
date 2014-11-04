@@ -984,10 +984,11 @@ public final class ReadStream extends InputStream
         readBuffer();
       }
 
-      int ch = _readBuffer[_readOffset++];
-
-      if (ch < 0x80)
+      int ch = _readBuffer[_readOffset++] & 0xff;
+      
+      if (ch < 0x80) {
         buffer[k++] = (char) ch;
+      }
       else if ((ch & 0xe0) == 0xc0) {
         int c2 = read();
         i += 1;

@@ -228,21 +228,21 @@ public class BlockWriter extends AbstractTaskWorker {
 
   boolean waitForComplete(long timeout)
   {
-    wake();
-
     long expire = CurrentTime.getCurrentTimeActual() + timeout;
+    
+    boolean isEmpty = false;
 
-    while (! isClosed()
-           && ! _blockWriteRing.isEmpty()
-           && CurrentTime.getCurrentTimeActual() < expire) {
+    do {
       wake();
       try {
         Thread.sleep(10);
       } catch (Exception e) {
       }
-    }
+    } while (! isClosed()
+             && ! (isEmpty = _blockWriteRing.isEmpty())
+             && CurrentTime.getCurrentTimeActual() < expire);
     
-    return _blockWriteRing.isEmpty();
+    return isClosed() || isEmpty;
   }
 
   @Override

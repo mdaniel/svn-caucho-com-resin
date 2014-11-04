@@ -29,6 +29,8 @@
 
 package com.caucho.vfs;
 
+import java.io.File;
+
 public class FileStatus {
   public static long S_IFMT = 00170000;
   public static long S_IFSOCK = 0140000;
@@ -94,6 +96,13 @@ public class FileStatus {
     _isFIFO = isFIFO;
     _isLink = isLink;
     _isSocket = isSocket;
+  }
+
+  public void updateWindowsTime(File file)
+  {
+    _st_mtime = file.lastModified();
+    _st_atime = _st_mtime; 
+    _st_ctime = _st_mtime; 
   }
 
   public long getDev()

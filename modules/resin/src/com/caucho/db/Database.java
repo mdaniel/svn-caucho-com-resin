@@ -32,6 +32,8 @@ package com.caucho.db;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,7 +69,8 @@ public class Database
 
   private LruCache<String,Query> _cachedQueries = new LruCache<String,Query>(128);
 
-  private DatabaseLock _databaseLock = new DatabaseLock("db");
+  //private DatabaseLock _databaseLock = new DatabaseLock("db");
+  private ReadWriteLock _databaseLock = new ReentrantReadWriteLock();
 
   private boolean _removeOnError;
   private boolean _isFlushDirtyBlocksOnCommit = true;
@@ -167,7 +170,7 @@ public class Database
   /**
    * Returns the database lock.
    */
-  public DatabaseLock getDatabaseLock()
+  public ReadWriteLock getDatabaseLock()
   {
     return _databaseLock;
   }

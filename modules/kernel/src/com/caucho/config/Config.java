@@ -547,9 +547,12 @@ public class Config {
     if (constructor == null)
       throw new ConfigException(L.l("Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must be have a zero-argument constructor.", beanClass.getName()));
 
+    // #5701, server/1768
+    /*
     if (! Modifier.isPublic(constructor.getModifiers())) {
       throw new ConfigException(L.l("The zero-argument constructor for '{0}' isn't public.  Bean classes must have a public zero-argument constructor.", beanClass.getName()));
     }
+    */
   }
 
   /**

@@ -12,6 +12,16 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>rpm: added %postun to shutdown resin (#5635, rep by S. Gillespie)</li>
+<li>i18n: classloading issues with utf-8 names (#5549, rep by konfetov)</li>
+<li>database: use JDK's ReentrantReadWriteLock instead of custom Resin lock (#5624, rep by Shinomiya Nobuaki)</li>
+<li>database: on close, fsync validation is does not allow for late writes (#5636, rep by Shinomiya Nobuaki)</li> 
+<li>servlet: relax checking of public for Filter constructor (#5701)</li>
+<li>log: limit log message database (#5802, rep by R. Murayama)</li>
+<li>database: force remove of old file when file is created (#5803, rep by R. Murayama)</li>
+<li>jni: only epoll is supported as select-manager (#5811, rep by qjian)</li>
+<li>jni: on windows use File.lastModified() instead of stat result to avoid windows DST bug (rep by Jason Barr)</li>
+<li>health: add &lt;mail> to PdfReport configuration (rep by Steffen Busch)</li>
 </ul>
 </s2>
 

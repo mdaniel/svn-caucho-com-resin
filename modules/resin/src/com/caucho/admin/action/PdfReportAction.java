@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,6 +72,7 @@ public class PdfReportAction implements AdminAction
   private Path _phpPath;
   private Path _logPath;
   private String _fileName;
+  private Session _session;
 
   public String getPath()
   {
@@ -187,6 +189,11 @@ public class PdfReportAction implements AdminAction
   {
     if (! "".equals(mailFrom))
       _mailFrom = mailFrom;
+  }
+
+  public void setMailSession(Session session)
+  {
+    _session = session;
   }
 
   public boolean isReturnPdf()
@@ -306,6 +313,10 @@ public class PdfReportAction implements AdminAction
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }
+    }
+    
+    if (_session != null) {
+      _mailService.setSession(_session);
     }
     
     if (_mailTo != null || _mailFrom != null) {

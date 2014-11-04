@@ -118,6 +118,7 @@ public class ClassEntry implements Dependency {
    * @param sourcePath path to the source Java file
    * @param classPath path to the compiled class file
    */
+  /*
   public ClassEntry(Loader loader,
                     String name, Path sourcePath,
                     Path classPath)
@@ -125,6 +126,7 @@ public class ClassEntry implements Dependency {
     this(loader.getClassLoader(), name, sourcePath, classPath,
          loader.getCodeSource(classPath));
   }
+  */
 
   public String getName()
   {

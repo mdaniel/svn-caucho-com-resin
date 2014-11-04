@@ -74,7 +74,7 @@ public class JarMap {
     int length = name.length();
     char []cbuf = new char[length];
     name.getChars(0, length, cbuf, 0);
-
+    
     return add(cbuf, length, entry);
   }
 
@@ -86,7 +86,7 @@ public class JarMap {
       key = new JarList();
     
     key.init(name);
-
+    
     int hash = key.hashCode() & _mask;
     
     for (JarList ptr = _entries[hash]; ptr != null; ptr = ptr._nextHash) {
@@ -195,7 +195,7 @@ public class JarMap {
     if (_entries.length <= _size) {
       resize();
     }
-    
+
     JarList key = new JarList();
 
     key.init(name, length);

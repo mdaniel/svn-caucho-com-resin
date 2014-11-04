@@ -72,6 +72,10 @@ public class LogSystem extends AbstractResinSubSystem
     return -1;
   }
   
+  public void setLogMax(int max)
+  {
+  }
+  
   public String createFullType(String name)
   {
     throw new UnsupportedOperationException(getClass().getName());

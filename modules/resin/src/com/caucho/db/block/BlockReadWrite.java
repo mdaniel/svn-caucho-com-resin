@@ -36,9 +36,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
 import com.caucho.vfs.Path;
@@ -114,13 +114,20 @@ public class BlockReadWrite {
   {
     _path.getParent().mkdirs();
 
-    if (_path.exists()) {
+    if (_path.getLength() > 0) {
       throw new SQLException(L.l("CREATE for path '{0}' failed, because the file already exists.  CREATE can not override an existing table.",
                                  _path.getNativePath()));
     }
 
-    WriteStream os = _path.openWrite();
-    os.close();
+    WriteStream os = null;
+    
+    try {
+      _path.remove();
+      
+      os = _path.openWrite();
+    } finally {
+      IoUtil.close(os);
+    }
   }
 
   boolean isFileExist()
