@@ -57,6 +57,7 @@ import com.caucho.http.webapp.WebApp;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Base64;
 import com.caucho.util.CauchoUtil;
+import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
@@ -801,10 +802,16 @@ public class FileServlet extends GenericServlet {
       _length = length;
       _canRead = _pathResolved.canRead();
       _isDirectory = _pathResolved.isDirectory();
+      
+      long etagHash = _pathResolved.getCrc64();
+      
+      if (_mimeType != null) {
+        etagHash = Crc64.generate(etagHash, _mimeType);
+      }
 
       StringBuilder sb = new StringBuilder();
       sb.append('"');
-      Base64.encode(sb, _pathResolved.getCrc64());
+      Base64.encode(sb, etagHash);
       sb.append('"');
       _etag = sb.toString();
 

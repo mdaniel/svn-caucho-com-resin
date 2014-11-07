@@ -737,6 +737,18 @@ public class DBPool
    * Initialize the pool.
    */
   @PostConstruct
+  public void postConstruct()
+    throws Exception
+  {
+    init();
+    
+    initNames();
+  }
+
+  /**
+   * Initialize the pool.
+   */
+  @PostConstruct
   public void init()
     throws Exception
   {
@@ -753,13 +765,19 @@ public class DBPool
 
     ManagedConnectionFactory mcf = _poolImpl.getManagedConnectionFactory();
 
-
     _dataSource = (DataSource) _connectionPool.init(mcf);
     _connectionPool.start();
 
     _localDataSourceImpl = new EnvironmentLocal<DataSource>("caucho.data-source." + getName());
     _localDataSourceImpl.set(_dataSource);
+  }
 
+  /**
+   * Initialize the pool.
+   */
+  private void initNames()
+    throws Exception
+  {
     if (_jndiName != null) {
       String name = _jndiName;
 
