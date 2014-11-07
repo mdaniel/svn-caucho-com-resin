@@ -260,4 +260,10 @@ public class ServletResponseWrapper implements ServletResponse {
     else
       return false;
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

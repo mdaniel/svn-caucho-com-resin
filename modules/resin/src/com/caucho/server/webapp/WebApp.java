@@ -196,6 +196,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
+import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -2873,12 +2874,14 @@ public class WebApp extends ServletContextImpl
 
     List<WebAppFragmentConfig> fragments = sortWebFragments();
 
+    _webFragments = fragments;
+
     _isApplyingWebFragments = true;
 
     for (WebAppConfig fragment : fragments) {
       fragment.getBuilderProgram().configure(this);
     }
-
+    
     _isApplyingWebFragments = false;
   }
 
@@ -2916,6 +2919,8 @@ public class WebApp extends ServletContextImpl
         }
 
         WebAppFragmentConfig fragmentConfig = new WebAppFragmentConfig();
+        fragmentConfig.setRootPath(getRootPath(Vfs.lookup(url.toString()),
+                                               "META-INF/web-fragment.xml"));
         config.configure(fragmentConfig, Vfs.lookup(url.toString()));
 
         _webFragments.add(fragmentConfig);
@@ -3439,8 +3444,12 @@ public class WebApp extends ServletContextImpl
     ArrayList<ServletContextListener> webAppListeners
       = new ArrayList<ServletContextListener>(_webAppListeners);
     
-    for (ServletContainerInitializer init
-          : _cdiManager.loadLocalServices(ServletContainerInitializer.class)) {
+    ArrayList<ServletContainerInitializer> initList
+      = new ArrayList<ServletContainerInitializer>(_cdiManager.loadLocalServices(ServletContainerInitializer.class));
+    
+    Collections.sort(initList, new InitComparator());
+    
+    for (ServletContainerInitializer init : initList) {
       callInitializer(init);
     }
     
@@ -3462,7 +3471,76 @@ public class WebApp extends ServletContextImpl
       listener.contextInitialized(event);
     }
   }
+  
+  private Path getRootPath(Path path, String name)
+  {
+    if (path instanceof JarPath) {
+      return ((JarPath) path).getContainer();
+    }
+    else {
+      String url = path.getURL();
+      
+      return path.lookup(url.substring(0, url.length() - name.length()));
+    }
+  }
 
+  private class InitComparator
+    implements Comparator<ServletContainerInitializer>
+  {
+    @Override
+    public int compare(ServletContainerInitializer a,
+                       ServletContainerInitializer b)
+    {
+      ClassLoader loader = getClassLoader();
+      
+      try {
+        String aName = a.getClass().getName().replace('.', '/') + ".class";
+        String bName = b.getClass().getName().replace('.', '/') + ".class";
+        
+        URL aUrl = loader.getResource(aName);
+        URL bUrl = loader.getResource(bName);
+        
+        if (aUrl == null && bUrl == null) {
+          return 0;
+        }
+        
+        if (aUrl == null && bUrl != null) {
+          return 1;
+        }
+        
+        if (aUrl != null && bUrl == null) {
+          return -1;
+        }
+        
+        Path aPath = Vfs.lookup(aUrl.toString());
+        Path bPath = Vfs.lookup(bUrl.toString());
+        
+        Path aRoot = getRootPath(aPath, aName);
+        Path bRoot = getRootPath(bPath, bName);
+        
+        int aIndex = fragmentIndexOf(aRoot);
+        int bIndex = fragmentIndexOf(bRoot);
+        
+        return Integer.signum(aIndex - bIndex);
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+        return 0;
+      }
+    }
+    
+    private int fragmentIndexOf(Path root)
+    {
+      for (int i = 0; i < _webFragments.size(); i++) {
+        WebAppFragmentConfig fragment = _webFragments.get(i);
+
+        if (root.equals(fragment.getRootPath())) {
+          return i;
+        }
+      }
+      
+      return -1;
+    }
+  }
 
   private void callInitializer(ServletContainerInitializer init)
     throws ServletException
@@ -4481,7 +4559,8 @@ public class WebApp extends ServletContextImpl
   public RequestDispatcher getNamedDispatcher(String servletName)
   {
     try {
-      Invocation invocation = null;
+      Invocation invocation = new Invocation();
+      invocation.setWebApp(this);
 
       FilterChain chain
         = _servletManager.createServletChain(servletName, null, invocation);
@@ -4491,7 +4570,8 @@ public class WebApp extends ServletContextImpl
       FilterChain forwardChain
         = _forwardFilterMapper.buildFilterChain(chain, servletName);
 
-      return new NamedDispatcherImpl(includeChain, forwardChain, null, this);
+      return new NamedDispatcherImpl(includeChain, forwardChain, invocation, 
+                                     null, this);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
 

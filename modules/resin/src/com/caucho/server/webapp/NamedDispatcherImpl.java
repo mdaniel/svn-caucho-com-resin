@@ -28,6 +28,8 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.SubInvocation;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.RequestAdapter;
 import com.caucho.util.L10N;
@@ -41,6 +43,7 @@ import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -56,12 +59,19 @@ class NamedDispatcherImpl implements RequestDispatcher {
   
   private String _queryString;
 
+  private Invocation _forwardInvocation;
+
   NamedDispatcherImpl(FilterChain includeFilterChain,
                       FilterChain forwardFilterChain,
-                      String queryString, WebApp webApp)
+                      Invocation invocation,
+                      String queryString, 
+                      WebApp webApp)
   {
     _includeFilterChain = includeFilterChain;
     _forwardFilterChain = forwardFilterChain;
+    
+    _forwardInvocation = invocation;
+
     _queryString = queryString;
     _webApp = webApp;
   }
@@ -176,8 +186,13 @@ class NamedDispatcherImpl implements RequestDispatcher {
     res.resetBuffer();
     
     res.setContentLength(-1);
+    
+    // server/1653
+    ForwardRequest subRequest = new ForwardRequest((HttpServletRequest) req,
+                                                   (HttpServletResponse) res,
+                                                   _forwardInvocation);
 
-    _forwardFilterChain.doFilter(req, res);
+    _forwardFilterChain.doFilter(subRequest, res);
 
     // this is not in a finally block so we can return a real error message
     // if it's not handled.

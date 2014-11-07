@@ -76,8 +76,9 @@ public class FilterWrapperResponseStream extends ToByteResponseStream {
 
     OutputStream os = getStream();
 
-    if (os != null)
+    if (os != null) {
       os.flush();
+    }
   }
 
   /**

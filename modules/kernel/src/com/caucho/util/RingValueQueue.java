@@ -171,6 +171,8 @@ public final class RingValueQueue<M>
       final long nextHead = head + 1;
 
       if (capacity <= nextHead - tail + reservedSpace) {
+        wake();
+        
         if (! _blocker.offerWait(tail, tailRef, reservedSpace, timeout, unit)) {
           return false;
         }

@@ -12,6 +12,13 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>cache: update FileServlet to generate ETag including mime-type to support mime-type updates (#5761, rep by M. Lowe)</li>
+<li>servlet: multipart parts were not supported for namedDispatcher forward (#5543, rep by Shinomiya Nobuaki)</li>
+<li>dbpool: on manual init(), do not register JNDI, CDI, or JMX (#5595, rep by Shinomiya Nobuaki)</li>
+<li>webapp: sort initializers by web-fragment (#5514, rep by beamerblvd)</li>
+<li>ring-queue: offer with no wait and full requires a wake before blocking (#5599)</li>
+<li>jsp: allow binary output stream with non text/ contentType (#5027)</li>
+<li>async/gzip: issues with async combined with gzip (#5033)</li>
 <li>rpm: added %postun to shutdown resin (#5635, rep by S. Gillespie)</li>
 <li>i18n: classloading issues with utf-8 names (#5549, rep by konfetov)</li>
 <li>database: use JDK's ReentrantReadWriteLock instead of custom Resin lock (#5624, rep by Shinomiya Nobuaki)</li>

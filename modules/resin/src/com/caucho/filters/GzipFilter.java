@@ -6,18 +6,26 @@
 
 package com.caucho.filters;
 
-import com.caucho.util.FreeList;
-import com.caucho.util.RuntimeExceptionWrapper;
-import com.caucho.vfs.GzipStream;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.util.FreeList;
+import com.caucho.util.RuntimeExceptionWrapper;
+import com.caucho.vfs.GzipStream;
 
 /**
  * Compresses the response output if the browser accepts compression.
@@ -137,13 +145,22 @@ public class GzipFilter implements Filter {
     int encoding = allowGzip(req, res);
     
     if (encoding != NONE) {
-      GzipResponse gzipResponse = _freeList.allocate();
+      GzipResponse gzipResponse = (GzipResponse) req.getAttribute("caucho.gzip");
+      
+      boolean isNew = gzipResponse == null;
+      
+      if (gzipResponse == null) {
+        gzipResponse = _freeList.allocate();
+      }
       
       if (gzipResponse == null)
         gzipResponse = new GzipResponse();
       
       gzipResponse.setUseDeflate(encoding == DEFLATE);
-      gzipResponse.init(res);
+      
+      if (isNew) {
+        gzipResponse.init(res);
+      }
 
       try {
         nextFilter.doFilter(req, gzipResponse);
@@ -151,9 +168,15 @@ public class GzipFilter implements Filter {
       catch (Exception e) {
         handleError(e, gzipResponse);
       }
-
-      gzipResponse.close();
-      _freeList.free(gzipResponse);
+      
+      if (isAsync(req)) {
+        req.setAttribute("caucho.gzip", gzipResponse);
+        gzipResponse.flush();
+      }
+      else {
+        gzipResponse.close();
+        _freeList.free(gzipResponse);
+      }
     }
     else {
       GzipPlainResponse plainRes = _plainFreeList.allocate();
@@ -170,6 +193,17 @@ public class GzipFilter implements Filter {
 
       _plainFreeList.free(plainRes);
     }
+  }
+  
+  private boolean isAsync(HttpServletRequest request)
+  {
+    if (! (request instanceof CauchoRequest)) {
+      return false;
+    }
+    
+    CauchoRequest cReq = (CauchoRequest) request;
+    
+    return cReq.isComet();
   }
 
   protected void addVaryHeader(HttpServletResponse response)
@@ -435,6 +469,12 @@ public class GzipFilter implements Filter {
       _gzipStream.init(os);
 
       return _gzipStream;
+    }
+
+    public void flush()
+      throws IOException
+    {
+      _gzipStream.flush();
     }
 
     @Override

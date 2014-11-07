@@ -737,6 +737,18 @@ public class DBPool
    * Initialize the pool.
    */
   @PostConstruct
+  public void postConstruct()
+    throws Exception
+  {
+    init();
+    
+    initNames();
+  }
+
+  /**
+   * Initialize the pool.
+   */
+  @PostConstruct
   public void init()
     throws Exception
   {
@@ -759,7 +771,11 @@ public class DBPool
 
     _localDataSourceImpl = new EnvironmentLocal<DataSource>("caucho.data-source." + getName());
     _localDataSourceImpl.set(_dataSource);
-
+  }
+  
+  private void initNames()
+    throws Exception
+  {
     if (_jndiName != null) {
       String name = _jndiName;
 
@@ -793,7 +809,6 @@ public class DBPool
     // factory.stereotype(CauchoDeployment.class);
 
     manager.addBean(factory.singleton(this));
-
 
     _queryAdmin.register();
     _databaseAdmin.register();

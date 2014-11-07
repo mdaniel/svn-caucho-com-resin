@@ -801,8 +801,12 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   @Override
   public void setContentType(String value)
   {
-    if (isCommitted())
+    if (isCommitted()) {
       return;
+    }
+    
+    // jsp/0511
+    _charEncoding = null;
 
     if (value == null) {
       _contentType = null;
@@ -877,6 +881,12 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       charEncoding = _setCharEncoding;
 
       if (charEncoding == null) {
+        String contentType = getContentTypeImpl();
+
+        if (contentType == null || ! contentType.startsWith("text/")) {
+          return null;
+        }
+        
         WebApp webApp = _request.getWebApp();
 
         if (webApp != null) {

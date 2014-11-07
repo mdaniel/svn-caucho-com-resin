@@ -29,11 +29,13 @@
 
 package com.caucho.server.http;
 
-import com.caucho.vfs.WriteStream;
-
-import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import javax.servlet.ServletOutputStream;
+
+import com.caucho.util.Hex;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Implementation of the ServletOutputStream.
@@ -57,6 +59,7 @@ public class ServletOutputStreamImpl extends ServletOutputStream {
   /**
    * Writes a byte to the output stream.
    */
+  @Override
   public final void write(int b) throws IOException
   {
     _out.write(b);
@@ -65,6 +68,7 @@ public class ServletOutputStreamImpl extends ServletOutputStream {
   /**
    * Writes a byte buffer to the output stream.
    */
+  @Override
   public final void write(byte []buf, int offset, int len) throws IOException
   {
     _out.write(buf, offset, len);

@@ -172,6 +172,7 @@ public class ResponseWriter extends AbstractPrintWriter {
   {
     try {
       _out.flushChar();
+      _out.flush();
     } catch (IOException e) {
       _hasError = true;
       log.log(Level.FINE, e.toString(), e);

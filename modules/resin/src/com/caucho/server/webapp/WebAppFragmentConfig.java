@@ -29,11 +29,12 @@
 
 package com.caucho.server.webapp;
 
+import java.util.logging.Logger;
+
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
 import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
+import com.caucho.vfs.Path;
 
 public class WebAppFragmentConfig extends WebAppConfig
   implements SchemaBean {
@@ -52,6 +53,12 @@ public class WebAppFragmentConfig extends WebAppConfig
   private String _jarPath;
 
   private Ordering _ordering;
+  
+  private Path _rootPath;
+  
+  public WebAppFragmentConfig()
+  {
+  }
 
   public String getName()
   {
@@ -114,6 +121,16 @@ public class WebAppFragmentConfig extends WebAppConfig
 
     return new Ordering();
   }
+  
+  public void setRootPath(Path path)
+  {
+    _rootPath = path; 
+  }
+  
+  public Path getRootPath()
+  {
+    return _rootPath;
+  }
 
   @Override
   public String getSchema()
@@ -123,7 +140,7 @@ public class WebAppFragmentConfig extends WebAppConfig
 
   public String toString()
   {
-    return "WebAppFragmentConfig [" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
   
   public static class NameConfig {

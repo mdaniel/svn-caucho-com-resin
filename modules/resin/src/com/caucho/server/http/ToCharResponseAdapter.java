@@ -34,6 +34,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.util.FreeList;
+import com.caucho.util.Hex;
 
 public class ToCharResponseAdapter extends ResponseAdapter {
   private static final FreeList<ToCharResponseAdapter> _freeList
