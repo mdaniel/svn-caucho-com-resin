@@ -41,6 +41,7 @@
     -->
   <health:ActionSequence>
     <health:IfHealthCritical time="2m"/>
+    <health:IfNotRecent time="30m"/>
 
     <health:FailSafeRestart timeout="10m"/>
     <health:DumpJmx/>

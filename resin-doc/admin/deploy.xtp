@@ -30,16 +30,6 @@ store to ensure consistency.</li>
 controlled independently, allowing applications to be deployed and verified
 on all servers, and then activated at once or on a rolling-server basis.</li>
 
-<li><b>archiving and rollback:</b> deployed web-applications can be archived
-and quickly rolled-back if a deployment needs to be reversed.</li>
-
-<li><b>staging:</b> an application can be deployed to the cluster as a 
-"preview" stage, which will be used only by a preview server.</li>
-
-<li><b>graceful version upgrading:</b> web-applications can be deployed
-with versions, letting current user continue with the old version and
-moving new users to the new version.</li>
-
 <li><b>command-line:</b> web-applications can be deployed to the cloud
 from the command-line for scriptable deployment.</li>
 
@@ -177,94 +167,6 @@ The system is reliable if servers crash or even if a server crash or network
 outage occurs during deployment. Since the deployment is transactional,
 the new version is only activated when every file has been copied
 and verified on the server.</p>
-
-</s1>
-
-<s1 title="Archiving and Rollback">
-
-<p>Resin's deployment supports archiving and rollback as part of
-the underlying system. Like the Subversion version-control-system,
-you can copy the tag for an application to a unique name. So you can
-permanently save your webapp as "archive/webapp/foo/2011-05-19" and later
-rollback to that version if it becomes necessary.</p>
-
-<p>The deployment system associates each .war archive with a tag. A deployed
-application might look like "production/webapp/my-host.com/my-app". The
-tag name is the same as the WebApp name in the Resin logs. To archive
-an application, you copy the tag to an archive
-name like "archive/webapp/my-app/2011-05-09".</p>
-
-<p>To rollback a version, just copy the archive tag
-back to the web-app tag.</p>
-
-<p>The following command-line example deploys a war first to the archive
-and then makes it live using a deploy-copy. The "-stage archive" selects
-the archive tag.</p>
-
-<example title="Example: archive deploy and update">
-unix> resinctl deploy -stage archive -version 1.2.13 foo.war
-Deployed archive/webapp/default/foo-1.2.13 from /tmp/caucho/qa/foo.war \
-  to http://127.0.0.1:8087/hmtp
-
-unix> resinctl deploy-copy \
-  -source-stage archive -source-version 1.2.13 -source foo \
-  -target foo
-</example>
-
-<p>Internally, the archived war files are stored with a different tag name.
-In the previous example, the repository might contain three tags: the
-archive foo-1.2.12, the archive foo-1.2.13, and the production webapp,
-which is a copy of foo-1.2.13.</p>
-
-<example title="Example: repository tags for archive">
-archive/webapp/default/foo-1.2.12   -- archived foo.war contents
-archive/webapp/default/foo-1.2.13   -- archived foo.war contents
-production/webapp/default/foo       -- production foo.war (a copy of 1.2.13)
-</example>
-
-<p>The current web-app <em>production/webapp-default/foo</em> can be
-rolled-back by copying it from a previous version.</p>
-
-<example title="Example: rolling back to foo.1.2.12">
-unix> resinctl deploy-copy \
-  -source-stage archive -source-version 1.2.12 -source foo \
-  -target foo
-</example>
-
-</s1>
-
-<s1 title="Staging">
-
-<p>As a final quality check before making a deployment live, you can
-deploy the application to a staging "preview" server in the deployment
-cluster. The preview version will only be visible on the preview server
-until you copy it to a live machine.</p>
-
-<example title="Example: deploying a preview stage">
-unix> resinctl deploy -stage preview foo.war
-
-unix> resinctl start -stage preview -elastic-server -server dyn1 -cluster app-tier
-</example>
-
-<p>Internally, Resin stores the preview stage as a repository tag
-<em>preview/webapp/default/foo</em>. When you deploy the .war with
-<em>-stage preview</em>, Resin save the deploy under the
-preview tag name.  When you start Resin with <em>-stage preview</em>,
-you ask it to look in the preview tag for the web-app.</p>
-
-<example title="Example: repository tags for staging">
-preview/webapp/default/foo        -- preview foo.war contents
-production/webapp/default/foo     -- production foo.war contents
-</example>
-
-<p>After you've verified that the previewed application works, you can
-deploy it to production using the deploy-copy.</p>
-
-<example title="Example: deploying a preview as production">
-unix> resinctl deploy-copy \
-  -source-stage preview -source foo \
-  -target foo
-</example>
 
 </s1>
 

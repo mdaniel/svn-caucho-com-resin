@@ -248,27 +248,7 @@ repository files.</p>
 <s2 title="Repository tag system">
 
 <p>Internally, the repository is organized by tags where each
-tag is an archive like a .war. The tag system enables versioning and
-archiving since each tag can point to an archive or two tags can point to
-the same archive.</p>
-
-<p>The current application for the "foo" web-app would have
-the tag <em>production/webapp/default/foo</em>. The tag points to a version
-of the archive, say the foo.war that was deployed on 2011-08-15 at 10:13:00.
-If you deploy a new foo.war, the same tag will point to the new foo.war that
-was deployed on 2011-08-16 13:43:15. The repository treats the two versions
-as entirely different archives and saves both of them.</p>
-
-<p>The tag system lets you copy a current deployment to an archive tag or
-copy a preview staged application to the production application. You can
-copy the <em>production/webapp/default/foo</em> tag
-to <em>archive/webapp/default/foo-20110815</em>, archiving it. If you're
-familiar with subversions tags and branches, this is a similar system.</p>
-
-<p>If you want to rollback to a previous version, you can copy the
-archived tag to the current production tag. Resin will run through the
-repository update system and ensure that all servers in the cloud
-see the updates.</p>
+tag is an archive like a .war.</p>
 
 </s2>
 

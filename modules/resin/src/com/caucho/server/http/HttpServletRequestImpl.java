@@ -1518,8 +1518,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       if (_asyncTimeout > 0)
         _asyncContext.setTimeout(_asyncTimeout);
     }
-    else
+    else {
       _asyncContext.restart();
+    }
     
     _asyncContext.init(request, response, isOriginal);
 

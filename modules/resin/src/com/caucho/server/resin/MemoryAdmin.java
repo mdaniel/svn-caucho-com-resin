@@ -29,14 +29,21 @@
 
 package com.caucho.server.resin;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.management.JMException;
 
-import com.caucho.management.server.*;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.MemoryMXBean;
 import com.caucho.util.MemoryPoolAdapter;
 
 public class MemoryAdmin extends AbstractManagedObject 
   implements MemoryMXBean
 {
+  private static final Logger log
+    = Logger.getLogger(MemoryAdmin.class.getName());
+  
   private MemoryPoolAdapter _memoryPoolAdapter;
   
   private MemoryAdmin()
@@ -133,7 +140,8 @@ public class MemoryAdmin extends AbstractManagedObject
     try {
       return _memoryPoolAdapter.getPermGenCommitted();
     } catch (JMException e) {
-      throw new RuntimeException(e);
+      log.log(Level.FINEST, e.toString(), e);
+      return -1;
     }
   }
 
@@ -142,7 +150,8 @@ public class MemoryAdmin extends AbstractManagedObject
     try {
       return _memoryPoolAdapter.getPermGenMax();
     } catch (JMException e) {
-      throw new RuntimeException(e);
+      log.log(Level.FINEST, e.toString(), e);
+      return -1;
     }
   }
 
@@ -151,7 +160,8 @@ public class MemoryAdmin extends AbstractManagedObject
     try {
       return _memoryPoolAdapter.getPermGenUsed();
     } catch (JMException e) {
-      throw new RuntimeException(e);
+      log.log(Level.FINEST, e.toString(), e);
+      return -1;
     }
   }
 
@@ -160,7 +170,8 @@ public class MemoryAdmin extends AbstractManagedObject
     try {
       return _memoryPoolAdapter.getPermGenFree();
     } catch (JMException e) {
-      throw new RuntimeException(e);
+      log.log(Level.FINEST, e.toString(), e);
+      return -1;
     }
   }
 

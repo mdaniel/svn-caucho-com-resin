@@ -351,11 +351,6 @@ corresponding resin argument.</p>
     <td>Password to use with the Service User (defaulted to an empty string)</td>
   </tr>
   <tr>
-    <td>Preview</td>
-    <td>-preview</td>
-    <td>Specifies if the Resin Service is a staging service</td>
-  </tr>
-  <tr>
     <td>Watchdog Port</td>
     <td>-watchdog-port</td>
     <td>Specifies port for communicating with Resin Watchdog</td>

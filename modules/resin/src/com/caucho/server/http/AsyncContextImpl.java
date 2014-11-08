@@ -69,7 +69,9 @@ public class AsyncContextImpl
   private boolean _isOriginal;
 
   private ArrayList<AsyncListenerNode> _listeners;
+  
   private AtomicBoolean _isComplete = new AtomicBoolean();
+  private boolean _isTimeout;
 
   private String _dispatchDefault;
   private WebApp _dispatchWebApp;
@@ -83,7 +85,7 @@ public class AsyncContextImpl
   
   public void restart()
   {
-    _cometController = _tcpConnection.toComet(this);
+    _cometController = _tcpConnection.toCometRestart(this);
   }
 
   public void init(ServletRequest request,
@@ -322,12 +324,18 @@ public class AsyncContextImpl
     }
   }
   
+  public boolean isTimeout()
+  {
+    return _isTimeout;
+  }
+  
   /**
    * CometHandler callback when the connection times out.
    */
   @Override
   public boolean onTimeout()
   {
+    _isTimeout = true;
     if (_listeners == null)
       return true;
     

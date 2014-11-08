@@ -154,6 +154,8 @@ public interface SocketLink {
    */
   public AsyncController toComet(SocketLinkCometListener cometHandler);
   
+  public AsyncController toCometRestart(SocketLinkCometListener cometHandler);
+  
   /**
    * Returns true for a comet connection
    */

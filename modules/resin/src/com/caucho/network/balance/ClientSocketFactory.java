@@ -867,11 +867,9 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   {
     _currentFailCount = 0;
     
-    long now = CurrentTime.getCurrentTime();
+    // long now = CurrentTime.getCurrentTime();
 
-    if (_firstSuccessTime <= 0) {
-      _firstSuccessTime = now;
-    }
+    onSuccess();
     
     // reset the connection fail recover time
     _dynamicFailRecoverTime = 1000L;
@@ -1156,19 +1154,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       if (log.isLoggable(Level.FINER))
         log.finer("connect " + stream);
 
-      if (_firstSuccessTime <= 0) {
-        if (_state.isStarting()) {
-          if (_loadBalanceWarmupTime > 0)
-            _state = State.WARMUP;
-          else
-            _state = State.ACTIVE;
-
-          _firstSuccessTime = CurrentTime.getCurrentTime();
-        }
-
-        if (_warmupState < 0)
-          _warmupState = 0;
-      }
+      onSuccess();
 
       return stream;
     } catch (IOException e) {
@@ -1182,6 +1168,24 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       return null;
     } finally {
       _startingCount.decrementAndGet();
+    }
+  }
+  
+  private void onSuccess()
+  {
+    if (_firstSuccessTime <= 0) {
+      if (_state.isStarting()) {
+        if (_loadBalanceWarmupTime > 0)
+          _state = State.WARMUP;
+        else
+          _state = State.ACTIVE;
+
+        _firstSuccessTime = CurrentTime.getCurrentTime();
+      }
+
+      if (_warmupState < 0) {
+        _warmupState = 0;
+      }
     }
   }
 

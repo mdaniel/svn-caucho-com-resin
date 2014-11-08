@@ -1085,6 +1085,7 @@ public class TcpSocketLink extends AbstractSocketLink
       
         if (async.isTimeout()) {
           if (async.timeout()) {
+            _request.handleResume();
             close();
             return RequestState.EXIT;
           }
@@ -1633,6 +1634,25 @@ public class TcpSocketLink extends AbstractSocketLink
       log.finer(this + " starting comet " + cometHandler);
     
     return async;
+  }
+  
+  /**
+   * Starts a comet connection.
+   * 
+   * Called by the socketLink thread only.
+   */
+  @Override
+  public AsyncController toCometRestart(SocketLinkCometListener cometHandler)
+  {
+    
+    TcpAsyncController async = _async;
+    
+    if (async != null && async.isCompleteRequested()) {
+      // #5684
+      return async;
+    }
+    
+    return toComet(cometHandler);
   }
 
   private boolean toSuspend()

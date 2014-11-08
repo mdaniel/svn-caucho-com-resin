@@ -12,6 +12,11 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>health: StartProfiler was saving data in text, not json (#5736, rep by S Nobuaki)</li>
+<li>admin: load-balance connection state could get stuck in "starting" on certain success cases (#5653)</li>
+<li>async: on comet restart, allow the previous state to be completed (#5684, rep by KC Baltz)</li>
+<li>async: send 500 on empty response with timeout (#5570, rep by Shinomiya Nobuaki)</li>
+<li>async: issues with starting async in forward (#5544, rep by Shinomiya Nobuaki)</li>
 <li>cache: update FileServlet to generate ETag including mime-type to support mime-type updates (#5761, rep by M. Lowe)</li>
 <li>servlet: multipart parts were not supported for namedDispatcher forward (#5543, rep by Shinomiya Nobuaki)</li>
 <li>dbpool: on manual init(), do not register JNDI, CDI, or JMX (#5595, rep by Shinomiya Nobuaki)</li>
