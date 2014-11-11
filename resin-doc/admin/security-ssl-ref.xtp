@@ -143,7 +143,20 @@ should bind to.</p>
 <defun title="&lt;protocol> (OpenSSL)" version="Resin 4.0">
 <parents>openssl</parents>
 
-<p>&lt;protocol> configures the SSL allowed protocols.</p>
+<p>&lt;protocol> configures the SSL allowed protocols. Disabling ssl3 is
+recommended because it is an older, weaker protocol with known attacks.</p>
+
+<example>
+    ...
+    &lt;http port="443">
+      &lt;openssl>
+        &lt;certificate-file>keys/mycert.crt&lt;/certificate-file>
+        &lt;certificate-key-file>keys/mycert.key&lt;/certificate-key-file>
+        &lt;password>mypassword&lt;/password>
+        &lt;protocol>-sslv3&/protocol>
+      &lt;/openssl>
+    &lt;/http>
+</example>
 
 </defun>
 

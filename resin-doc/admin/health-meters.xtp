@@ -117,6 +117,48 @@ changes like a spike in blocked threads can be detected.</p>
 
 </s2>
 
+<s2 title="Standard Anomaly detection">
+
+<p>The default health.xml configures some general anomaly analysis.
+In general, anomaly detection can tell you when something went wrong in the
+server. It looks for unusual spikes of behavior by recording an average baseline
+for a value and then looking for deviations.</p>
+
+<ul>
+<li>"File Descriptor Count" - counts open files and open TCP sockets. Examples include
+denial of service attacks (TCP) or open file leaks.</li>
+<li>"JVM Thread Count" - detects thread spawning. Examples include services that
+spawn too many threads, a likely application bug.</li>
+<li>"JVM Runnable Count" - detects active threads. Examples include CPU spikes or
+infinite looping code, a likely application bug.</li>
+<li>"JVM Waiting Count" - detects threads waiting for other threads. Examples include
+synchronization bottlenecks like deadlocks or livelocks, likely application or library
+bugs.</li>
+<li>"JVM Blocked Count" - detects threads waiting for other threads. Examples include
+synchronization bottlenecks like deadlocks or livelocks, likely application or library
+bugs.</li>
+<li>"Database|Connection Active" - detects database connection spikes. Examples include
+database problems.</li>
+<li>"HTTP|Request Time" - detects spikes in HTTP requests. Examples include
+problems in the application, e.g. blocking. Useful to take a thread dump to
+debug further.</li>
+<li>"HTTP|Ping Time" - detects spikes in HTTP requests. Examples include
+problems in the application, e.g. blocking. Useful to take a thread dump to
+debug further.</li>
+<li>"Port|Throttle Disconnect Count" - detects throttling of attempted TCP connections.
+Either DOS attacks or an overloaded system.</li>
+<li>"HTTP|400" - detects spikes in redirects.</li>
+<li>"HTTP|500" - detects spikes in server exceptions. Indication of application
+bugs.</li>
+<li>"Cluster|Message Read Count" - detects overloads in cluster messages. Indication
+of a Resin cluster issue.</li>
+<li>"Cluster|Message Write Count" - detects overloads in cluster messages. Indication
+of a Resin cluster issue.</li>
+</ul>
+
+
+</s2>
+
 <s2 title="Reacting to Anomalies">
 
 <p>The &lt;health-event> attribute of AnomalyAnalyzer allows us to tie health 

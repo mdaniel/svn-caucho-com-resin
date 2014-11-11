@@ -554,8 +554,8 @@ std_init(connection_t *conn)
 #endif
 
   conn->ssl_lock = &ss->ssl_lock;
-  conn->ssl_sock = 0;
   /*
+  conn->ssl_sock = 0;
   conn->ops = &std_ops;
   */
   

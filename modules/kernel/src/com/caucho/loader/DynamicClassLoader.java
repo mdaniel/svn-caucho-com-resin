@@ -2230,13 +2230,20 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (path != null && path.canRead()) {
         return path.getNativePath();
       }
+
+      path = loader.getPath("native/" + systemName);
+
+      if (path != null && path.canRead()) {
+        return path.getNativePath();
+      }
     }
 
     for (int i = 0; i < _nativePath.size(); i++) {
       Path path = _nativePath.get(i);
 
-      if (path.canRead())
+      if (path.canRead()) {
         return path.getNativePath();
+      }
     }
 
     return super.findLibrary(name);

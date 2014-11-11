@@ -28,25 +28,25 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.SubInvocation;
-import com.caucho.server.http.CauchoResponse;
-import com.caucho.server.http.RequestAdapter;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
 import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.RequestAdapter;
+import com.caucho.util.L10N;
 
 class NamedDispatcherImpl implements RequestDispatcher {
 
@@ -188,7 +188,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     res.setContentLength(-1);
     
     // server/1653
-    ForwardRequest subRequest = new ForwardRequest((HttpServletRequest) req,
+    CauchoRequest subRequest = new ForwardNamedRequest((HttpServletRequest) req,
                                                    (HttpServletResponse) res,
                                                    _forwardInvocation);
 

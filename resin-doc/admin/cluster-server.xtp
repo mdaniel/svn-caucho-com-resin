@@ -337,6 +337,7 @@ ports. The SSL configuration tags belong inside the &lt;http> tag.</p>
         &lt;certificate-file>keys/mycert.crt&lt;/certificate-file>
         &lt;certificate-key-file>keys/mycert.key&lt;/certificate-key-file>
         &lt;password>mypassword&lt;/password>
+        &lt;protocol>-sslv3&/protocol>
       &lt;/openssl>
     &lt;/http>
     

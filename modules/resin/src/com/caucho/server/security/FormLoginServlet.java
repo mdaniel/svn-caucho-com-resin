@@ -132,6 +132,7 @@ public class FormLoginServlet extends GenericServlet {
                                      uri));
 
     String uriPwd = req.getRequestURI();
+    
     int p = uriPwd.indexOf("/j_security_check");
     if (p >= 0)
       uriPwd = uriPwd.substring(0, p + 1);

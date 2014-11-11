@@ -425,6 +425,7 @@ $ cat your_domain.crt ComodoSecurityServicesCA.crt GTECyberTrustRoot.crt &gt; ch
     &lt;certificate-file&gt;keys/your_domain.crt&lt;/certificate-file&gt;        
     &lt;certificate-chain-file&gt;keys/chain.txt&lt;/certificate-chain-file&gt;
     &lt;password&gt;test123&lt;/password&gt;
+    &lt;protocol&gt;-sslv3&lt;/protocol&gt;
   &lt;/openssl&gt;
 &lt;/http&gt;
 </example>

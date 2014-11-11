@@ -813,6 +813,17 @@ com.caucho.env.thread.AbstractTaskWorker.run()
 
 </example>
 
+<ul>
+<li>% time - percentage of total profile time. The number can be larger than 100%
+because of multithreading. Methods that are 100%, or multiples, are generally
+blocking methods and can be ignored. If an active method is 100%, it might be a
+CPU spinning thread.</li>
+<li>time self(s) - time in seconds for the method.</li>
+<li>% sum - percentage of all methods time. All the method times are added, and
+this method's own time is computed as a percentage.</li>
+</li>
+</ul>
+
 <deftable title="profile options">
   <tr>
     <th>Argument/Option</th>

@@ -12,6 +12,9 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>jni: add loading of classes/native/*.so (or native/*.so in a jar) (#5760, rep by William Damage)</li>
+<li>openssl: SSL field (ssl_sock) value was being cleared by std.c (#5815, rep by Nick Stephens, Sarah Gillespie)</li>
+<li>openssl: SSLv3 is now disabled by default (#5819)</li>
 <li>health: StartProfiler was saving data in text, not json (#5736, rep by S Nobuaki)</li>
 <li>admin: load-balance connection state could get stuck in "starting" on certain success cases (#5653)</li>
 <li>async: on comet restart, allow the previous state to be completed (#5684, rep by KC Baltz)</li>
