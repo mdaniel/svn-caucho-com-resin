@@ -175,7 +175,7 @@ cse_unlock(void *vlock)
     apr_thread_mutex_unlock(lock);
 }
 
-static void
+void
 cse_proc_lock()
 {
   apr_proc_mutex_t *lock = g_proc_lock;
@@ -185,7 +185,7 @@ cse_proc_lock()
   }
 }
 
-static void
+void
 cse_proc_unlock()
 {
   apr_proc_mutex_t *lock = g_proc_lock;

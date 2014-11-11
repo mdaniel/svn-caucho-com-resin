@@ -644,7 +644,7 @@ fi
 # request_rec->remote_addr became client_addr
 #
 
-if test -n "${apache_dir}"; then
+if test -n "${apache}"; then
 
 cat >conftest.$ac_ext <<_ACEOF
 #include "httpd.h"
