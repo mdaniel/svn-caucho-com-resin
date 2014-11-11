@@ -742,6 +742,7 @@
     <report>Summary</report>
     <period>7D</period>
     <snapshot/>
+    <snapshot-jmx>${health_snapshot_jmx}</snapshot-jmx>
     <mail-to>${email}</mail-to>
     <mail-from>${email_from}</mail-from>
     <!-- <profile-time>60s</profile-time> -->

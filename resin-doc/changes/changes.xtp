@@ -12,6 +12,12 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>ejb: added scan-persistence-xml to &lt;ejb-server> to allow disabling of persistence-unit scanning (#4908)</li>
+<li>ssl: update openssl option processing. Update SSL_free/SSL_new</li>
+<li>health: add snapshot-jmx and snapshot-heap-dump to avoid issues on weekly reports (#5495, rep by ssbbartgroup)</li>
+<li>resin.sh: chdir to $RESIN_HOME before starting (#5668, rep by balaiitm)</li>
+<li>apache: NPE issues with Apache locking (#5747, #5744, rep by vicsanca, ssmax)</li>
+<li>apache: configure/make issues with Apache 24</li>
 <li>jni: add loading of classes/native/*.so (or native/*.so in a jar) (#5760, rep by William Damage)</li>
 <li>openssl: SSL field (ssl_sock) value was being cleared by std.c (#5815, rep by Nick Stephens, Sarah Gillespie)</li>
 <li>openssl: SSLv3 is now disabled by default (#5819)</li>

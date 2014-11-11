@@ -60,6 +60,7 @@ public class PdfReportAction implements AdminAction
   private String _mailFrom;
 
   private boolean _isSnapshot;
+  private boolean _isSnapshotHeapDump = true;
   private long _profileTime;
   private long _profileTick;
 
@@ -73,6 +74,7 @@ public class PdfReportAction implements AdminAction
   private Path _logPath;
   private String _fileName;
   private Session _session;
+  private boolean _isSnapshotJmx;
 
   public String getPath()
   {
@@ -122,6 +124,26 @@ public class PdfReportAction implements AdminAction
   public void setSnapshot(boolean isSnapshot)
   {
     _isSnapshot = isSnapshot;
+  }
+
+  public void setSnapshotHeapDump(boolean isHeapDump)
+  {
+    _isSnapshotHeapDump = isHeapDump;
+  }
+
+  public boolean isSnapshotHeapDump()
+  {
+    return _isSnapshotHeapDump;
+  }
+
+  public void setSnapshotJmx(boolean isJmx)
+  {
+    _isSnapshotJmx = isJmx;
+  }
+
+  public boolean isSnapshotJmx()
+  {
+    return _isSnapshotJmx;
   }
 
   public void setWatchdog(boolean isWatchdog)
@@ -385,6 +407,8 @@ public class PdfReportAction implements AdminAction
       env.setGlobalValue("period", env.wrapJava(calculatePeriod() / 1000));
 
       env.setGlobalValue("g_is_snapshot", env.wrapJava(isSnapshot()));
+      env.setGlobalValue("g_is_snapshot_heapdump", env.wrapJava(isSnapshotHeapDump()));
+      env.setGlobalValue("g_is_snapshot_jmx", env.wrapJava(isSnapshotJmx()));
       env.setGlobalValue("g_is_watchdog", env.wrapJava(isWatchdog()));
 
       if (getProfileTime() > 0) {

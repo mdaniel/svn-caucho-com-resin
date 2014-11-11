@@ -13,6 +13,8 @@ global $g_report;
 global $g_title;
 global $g_is_watchdog;
 global $g_is_snapshot;
+global $g_is_snapshot_heapdump;
+global $g_is_snapshot_jmx;
 global $profile_time;
 global $period;
 global $g_period;
@@ -50,8 +52,12 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   if ($snapshot) {
     $snapshot->snapshotThreadDump();
     $snapshot->snapshotScoreboards();
-    $snapshot->snapshotHeap();
-    $snapshot->snapshotJmx();
+    if ($g_is_snapshot_heapdump) {
+      $snapshot->snapshotHeap();
+    }
+    if ($g_is_snapshot_jms) {
+      $snapshot->snapshotJmx();
+    }
 
     if ($profile_time || $_REQUEST["profile_time"]) {
 

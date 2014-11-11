@@ -110,6 +110,7 @@ public class EJBServer
   private String _startupMode;
 
   private long _transactionTimeout = 0;
+  private boolean _isScanPersistenceXml = true;
 
   /**
    * Create a server with the given prefix name.
@@ -482,6 +483,16 @@ public class EJBServer
   {
     return _localServer.get();
   }
+  
+  private boolean isScanPersistenceXml()
+  {
+    return _isScanPersistenceXml;
+  }
+  
+  public void setScanPersistenceXml(boolean isScan)
+  {
+    _isScanPersistenceXml = isScan;
+  }
 
   /**
    * Initialize the container.
@@ -494,7 +505,11 @@ public class EJBServer
     
       // _ejbContainer.start();
       
-      PersistenceManager persistenceManager = PersistenceManager.create();
+      PersistenceManager persistenceManager = null;
+      
+      if (isScanPersistenceXml()) {
+        persistenceManager = PersistenceManager.create();
+      }
       
       if (persistenceManager != null)
         persistenceManager.addPersistenceUnitDefault(_jpaProgram);
