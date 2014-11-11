@@ -144,7 +144,7 @@ should bind to.</p>
 <parents>openssl</parents>
 
 <p>&lt;protocol> configures the SSL allowed protocols. SSLv2 and SSLv3
-are disabled by default in Resin 4.0.42 because they are vulnerable to
+are disabled by default in Resin 4.0.42+ because they are vulnerable to
 known attacks.</p>
 
 <p>Valid values are prefixed with a - or a + and space-separated:
