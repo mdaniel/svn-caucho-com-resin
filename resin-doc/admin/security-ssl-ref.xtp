@@ -143,8 +143,12 @@ should bind to.</p>
 <defun title="&lt;protocol> (OpenSSL)" version="Resin 4.0">
 <parents>openssl</parents>
 
-<p>&lt;protocol> configures the SSL allowed protocols. Disabling ssl3 is
-recommended because it is an older, weaker protocol with known attacks.</p>
+<p>&lt;protocol> configures the SSL allowed protocols. SSLv2 and SSLv3
+are disabled by default in Resin 4.0.42 because they are vulnerable to
+known attacks.</p>
+
+<p>Valid values are prefixed with a - or a + and space-separated:
+all, sslv2, sslv3, tlsv1, tlsv1.1, tlsv1.2.</p>
 
 <example>
     ...
