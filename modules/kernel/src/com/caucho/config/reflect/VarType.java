@@ -29,6 +29,7 @@
 
 package com.caucho.config.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -94,6 +95,13 @@ public class VarType<D extends GenericDeclaration> extends BaseType
 
     return bounds;
   }
+  
+  /*
+  public AnnotatedType []getAnnotatedBounds()
+  {
+    return null;
+  }
+  */
   
   @Override
   protected BaseType []getWildcardBounds()
@@ -184,6 +192,21 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   static class GenericDeclarationImpl implements GenericDeclaration {
     @Override
     public TypeVariable<?>[] getTypeParameters()
+    {
+      return null;
+    }
+    
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass)
+    {
+      return null;
+    }
+    
+    public Annotation []getAnnotations()
+    {
+      return null;
+    }
+    
+    public Annotation []getDeclaredAnnotations()
     {
       return null;
     }
