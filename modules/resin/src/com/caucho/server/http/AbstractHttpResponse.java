@@ -355,8 +355,11 @@ abstract public class AbstractHttpResponse {
    */
   public void setHeader(String key, String value)
   {
+    // #5824, server/1m15
+    /*
     if (value == null)
       throw new NullPointerException();
+      */
 
     if (setSpecial(key, value)) {
       return;
@@ -370,7 +373,12 @@ abstract public class AbstractHttpResponse {
       return;
     }
 
-    setHeaderImpl(key, value);
+    if (value != null) {
+      setHeaderImpl(key, value);
+    }
+    else {
+      removeHeader(key);
+    }
   }
 
 

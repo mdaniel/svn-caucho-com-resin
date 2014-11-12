@@ -37,8 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.sql.DataSource;
-
 import com.caucho.config.ConfigException;
 import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.env.distcache.CacheDataBacking;
@@ -46,6 +44,7 @@ import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.server.distcache.MnodeStore.ExpiredMnode;
+import com.caucho.server.distcache.MnodeStore.ExpiredState;
 import com.caucho.server.distcache.MnodeStore.Mnode;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -71,7 +70,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private final AtomicLong _createCount = new AtomicLong();
   private long _createReaperCount;
 
-  private Alarm _reaperAlarm = new Alarm(new ReaperListener());
+  private Alarm _reaperAlarm;
 
   private DataSourceImpl _dataSource;
   
@@ -455,7 +454,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       _dataStore.init();
 
       _removeActor = new DataRemoveActor(_dataStore);
-
+      
+      _reaperAlarm = new Alarm(new ReaperListener());
+      
       updateCreateReaperCount();
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -492,21 +493,18 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                              byte []cacheHash,
                              long dataId)
   {
-    CacheConfig config = null;
     DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key),
                                                       HashKey.create(cacheHash));
 
     distEntry.clear();
 
-    if (! _mnodeStore.remove(key)) {
-      return false;
-    }
+    boolean isRemove = _mnodeStore.remove(key);
 
     if (dataId > 0) {
       removeData(dataId);
     }
 
-    return true;
+    return isRemove;
   }
 
   private void updateCreateReaperCount()
@@ -555,6 +553,13 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   class ReaperListener implements AlarmListener {
+    private ExpiredState _expireState;
+    
+    ReaperListener()
+    {
+      _expireState = _mnodeStore.createExpiredState();
+    }
+    
     @Override
     public void handleAlarm(Alarm alarm)
     {
@@ -590,44 +595,38 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                             + ", reaperCycleIdleToActiveUtilizationRatio=" + _reaperCycleIdleToActiveUtilizationRatio);
       }
 
-      long oid = 0;
-      long mnodeCount = 0;
+      // long oid = 0;
+      // long mnodeCount = 0;
       long removeCount = 0;
 
-      ArrayList<Mnode> mnodeList;
+      ArrayList<Mnode> mnodeList = _expireState.selectExpiredData();
+      
+      // mnodeCount += mnodeList.size();
 
-      while ((mnodeList = _mnodeStore.selectExpiredData(oid)).size() > 0) {
-        mnodeCount += mnodeList.size();
-
-        for (Mnode mnode : mnodeList) {
-          if (oid < mnode.getOid()) {
-            oid = mnode.getOid();
-          }
-
-          if (! (mnode instanceof ExpiredMnode)) {
-            continue;
-          }
-
-          ExpiredMnode expiredMnode = (ExpiredMnode) mnode;
-
-          try {
-            if (removeData(expiredMnode.getKey(),
-                           expiredMnode.getCacheHash(),
-                           expiredMnode.getDataId())) {
-              removeCount++;
-            }
-
-            // throttle the deletions
-            throttle(throttler, mnodeCount, removeCount);
-
-          } catch (Exception e) {
-            log.log(Level.FINER, e.toString(), e);
-          }
+      for (Mnode mnode : mnodeList) {
+        if (! (mnode instanceof ExpiredMnode)) {
+          continue;
         }
 
-        // throttle the select query
-        throttle(throttler, mnodeCount, removeCount);
+        ExpiredMnode expiredMnode = (ExpiredMnode) mnode;
+
+        try {
+          if (removeData(expiredMnode.getKey(),
+                         expiredMnode.getCacheHash(),
+                         expiredMnode.getDataId())) {
+            removeCount++;
+          }
+
+          // throttle the deletions
+          // throttle(throttler, mnodeCount, removeCount);
+
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
+
+        // throttle the select query
+        // throttle(throttler, mnodeCount, removeCount);
 
       long endTime = CurrentTime.getCurrentTime();
 

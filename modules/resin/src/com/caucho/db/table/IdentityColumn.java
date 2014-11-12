@@ -98,13 +98,11 @@ class IdentityColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  /*
   @Override
   public boolean isNull(byte []block, int rowOffset)
   {
     return false;
   }
-  */
   
   /**
    * Sets a string value in the column.

@@ -243,7 +243,7 @@ abstract public class Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public final boolean isNull(byte []block, int rowOffset)
+  public boolean isNull(byte []block, int rowOffset)
   {
     return (block[rowOffset + _nullOffset] & _nullMask) == 0;
   }

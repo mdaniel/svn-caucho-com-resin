@@ -867,56 +867,73 @@ public class MnodeStore {
   {
     return new KeysIterator(cacheKey);
   }
-
-  /**
-   * Clears the expired data
-   */
-  public ArrayList<Mnode> selectExpiredData(long startOid)
+  
+  public ExpiredState createExpiredState()
   {
-    ArrayList<Mnode> expireList = new ArrayList<Mnode>();
+    return new ExpiredState();
+  }
 
-    CacheMapConnection conn = null;
+  public class ExpiredState {
+    private long _lastOid;
 
-    try {
-      conn = getConnection();
-      PreparedStatement pstmt = conn.prepareSelectExpire();
+    /**
+     * Clears the expired data
+     */
+    public ArrayList<Mnode> selectExpiredData()
+    {
+      ArrayList<Mnode> expireList = new ArrayList<Mnode>();
 
-      long now = CurrentTime.getCurrentTime();
+      CacheMapConnection conn = null;
 
-      pstmt.setLong(1, startOid);
-      pstmt.setLong(2, now);
-      pstmt.setLong(3, now);
+      try {
+        conn = getConnection();
+        PreparedStatement pstmt = conn.prepareSelectExpire();
 
-      ResultSet rs = pstmt.executeQuery();
+        long now = CurrentTime.getCurrentTime();
 
-      while (rs.next()) {
-        long oid = rs.getLong(1);
-        byte []key = rs.getBytes(2);
-        byte []cacheHash = rs.getBytes(3);
-        long dataId = rs.getLong(4);
+        pstmt.setLong(1, _lastOid);
+        pstmt.setLong(2, now);
+        pstmt.setLong(3, now);
 
-        long accessTime = rs.getLong(5);
-        long accessTimeout = rs.getLong(6);
+        ResultSet rs = pstmt.executeQuery();
+        
+        boolean isValue = false;
 
-        long modifiedTime = rs.getLong(7);
-        long modifiedTimeout = rs.getLong(8);
+        while (rs.next()) {
+          isValue = true;
 
-        if (accessTime + 1.25 * accessTimeout < now
-            || modifiedTime + modifiedTimeout < now) {
-          expireList.add(new ExpiredMnode(oid, key, cacheHash, dataId));
+          long oid = rs.getLong(1);
+          byte []key = rs.getBytes(2);
+          byte []cacheHash = rs.getBytes(3);
+          long dataId = rs.getLong(4);
+
+          long accessTime = rs.getLong(5);
+          long accessTimeout = rs.getLong(6);
+
+          long modifiedTime = rs.getLong(7);
+          long modifiedTimeout = rs.getLong(8);
+          
+          _lastOid = Math.max(_lastOid, oid);
+
+          if (accessTime + 1.25 * accessTimeout < now
+              || modifiedTime + modifiedTimeout < now) {
+            expireList.add(new ExpiredMnode(oid, key, cacheHash, dataId));
+          }
         }
-        else {
-          expireList.add(new Mnode(oid));
+        
+        if (! isValue) {
+          _lastOid = 0;
         }
+      } catch (Exception e) {
+        _lastOid = 0;
+        e.printStackTrace();
+        log.log(Level.FINE, e.toString(), e);
+      } finally {
+        conn.close();
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      conn.close();
-    }
 
-    return expireList;
+      return expireList;
+    }
   }
 
   //

@@ -134,6 +134,7 @@ class LeftOuterJoinExpr extends RowIterateExpr {
     rowIter.initRow();
 
     Expr expr = _expr;
+
     do {
       if (rowIter.nextRow()) {
       }
@@ -146,8 +147,8 @@ class LeftOuterJoinExpr extends RowIterateExpr {
       }
     } while (expr.evalBoolean(context) != TRUE);
     
-    TableIterator parentIter = context.getTableIterators()[1];
-    
+    // TableIterator parentIter = context.getTableIterators()[1];
+
     return true;
   }
 

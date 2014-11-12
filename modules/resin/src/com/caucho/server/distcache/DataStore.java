@@ -37,6 +37,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,13 +68,15 @@ public class DataStore {
   private FreeList<DataConnection> _freeConn
     = new FreeList<DataConnection>(32);
 
-  private final String _tableName;
+  private final String _dataTableName;
   private final String _mnodeTableName;
 
   // remove unused data after 15 minutes
   // server/60i0
   // private long _expireTimeout = 60 * 60L * 1000L;
-  private long _expireTimeout = 60 * 60L * 1000L;
+  //private long _expireOrphanTimeout = 24 * 60L * 60L * 1000L;
+  
+  private long _expireOrphanTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -99,9 +102,9 @@ public class DataStore {
     _dataSource = mnodeStore.getDataSource();
     _mnodeTableName = mnodeStore.getTableName();
 
-    _tableName = "data";
+    _dataTableName = "data";
 
-    if (_tableName == null)
+    if (_dataTableName == null)
       throw new NullPointerException();
 
     /*
@@ -110,27 +113,38 @@ public class DataStore {
                   + " WHERE id=?");
                   */
     _loadQuery = ("SELECT data"
-                  + " FROM " + _tableName
+                  + " FROM " + _dataTableName
                   + " WHERE id=?");
 
-    _insertQuery = ("INSERT into " + _tableName
+    _insertQuery = ("INSERT into " + _dataTableName
                     + " (data) "
                     + "VALUES(?)");
 
-    _selectOrphanQuery = ("SELECT m.value_data_id, d.id"
-                              + " FROM " + _mnodeTableName + " AS m"
-                              + " LEFT JOIN " + _tableName + " AS d"
-                              + " ON(m.value_data_id=d.id)");
+    _selectOrphanQuery = ("SELECT d.id, m.value_data_id"
+                              + " FROM " + _dataTableName + " AS d"
+                              + " LEFT OUTER JOIN " + _mnodeTableName + " AS m"
+                              + " ON(m.value_data_id=d.id)"
+                              + " WHERE d.resin_oid>?"
+                              + " LIMIT 1024");
+
+    /*
+    _selectOrphanQuery = ("SELECT d.id, m.value_data_id"
+        + " FROM " + _mnodeTableName + " AS m"
+        + " LEFT JOIN " + _dataTableName + " AS d"
+        + " ON(m.value_data_id=d.id)"
+        + " WHERE d.resin_oid>?"
+        + " LIMIT 1024");
+        */
     /*
     _deleteTimeoutQuery = ("DELETE FROM " + _tableName
                            + " WHERE expire_time < ?");
                            */
-    _deleteQuery = ("DELETE FROM " + _tableName
+    _deleteQuery = ("DELETE FROM " + _dataTableName
                     + " WHERE id = ?");
 
-    _validateQuery = ("VALIDATE " + _tableName);
+    _validateQuery = ("VALIDATE " + _dataTableName);
 
-    _countQuery = "SELECT count(*) FROM " + _tableName;
+    _countQuery = "SELECT count(*) FROM " + _dataTableName;
   }
 
   DataSource getDataSource()
@@ -150,7 +164,7 @@ public class DataStore {
     }
 
     _alarm = new Alarm(new DeleteAlarm());
-    // _alarm.queue(_expireTimeout);
+    _alarm.queue(_expireOrphanTimeout);
 
     //_alarm.queue(0);
   }
@@ -170,7 +184,7 @@ public class DataStore {
 
       try {
         String sql = ("SELECT expire_time"
-                      + " FROM " + _tableName + " WHERE 1=0");
+                      + " FROM " + _dataTableName + " WHERE 1=0");
 
         ResultSet rs = stmt.executeQuery(sql);
         rs.next();
@@ -185,7 +199,7 @@ public class DataStore {
       if (! isOld) {
         try {
           String sql = ("SELECT id, data"
-              + " FROM " + _tableName + " WHERE 1=0");
+              + " FROM " + _dataTableName + " WHERE 1=0");
 
           ResultSet rs = stmt.executeQuery(sql);
           rs.next();
@@ -199,12 +213,12 @@ public class DataStore {
       }
 
       try {
-        stmt.executeQuery("DROP TABLE " + _tableName);
+        stmt.executeQuery("DROP TABLE " + _dataTableName);
       } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
       }
 
-      String sql = ("CREATE TABLE " + _tableName + " (\n"
+      String sql = ("CREATE TABLE " + _dataTableName + " (\n"
                     + "  id IDENTITY,\n"
                     + "  data BLOB)");
 
@@ -631,17 +645,19 @@ public class DataStore {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() +  "[" + _tableName + "]";
+    return getClass().getSimpleName() +  "[" + _dataTableName + "]";
   }
 
-  class DeleteAlarm implements AlarmListener {
+  private class DeleteAlarm implements AlarmListener {
+    private long _lastOid;
+    
     public void handleAlarm(Alarm alarm)
     {
       if (_dataSource != null) {
         try {
           deleteOrphans();
         } finally {
-          _alarm.queue(_expireTimeout);
+          _alarm.queue(_expireOrphanTimeout);
         }
       }
     }
@@ -650,6 +666,8 @@ public class DataStore {
     {
       DataConnection conn = null;
       ResultSet rs = null;
+      
+      ArrayList<Long> orphanList = new ArrayList<Long>();
 
       boolean isValid = false;
 
@@ -657,24 +675,41 @@ public class DataStore {
         conn = getConnection();
 
         PreparedStatement pstmt = conn.prepareSelectOrphan();
+        pstmt.setLong(1, _lastOid);
 
         rs = pstmt.executeQuery();
 
         try {
+          boolean isValue = false;
+          
           while (rs.next()) {
-            long id = rs.getLong(1);
-            long oid = rs.getLong(2);
+            isValue = true;
+            long did = rs.getLong(1);
+            long mid = rs.getLong(2);
 
-            if (oid <= 0) {
+            _lastOid = Math.max(_lastOid, did);
+
+            if (did != mid) {
               if (log.isLoggable(Level.FINER)) {
-                log.finer(this + " delete orphan " + Long.toHexString(id));
+                log.finer(this + " delete orphan " + Long.toHexString(did));
               }
 
-              rs.deleteRow();
+              // rs.deleteRow();
+              orphanList.add(did);
             }
+          }
+          
+          if (! isValue) {
+            _lastOid = -1;
           }
         } finally {
           rs.close();
+        }
+        
+        for (Long did : orphanList) {
+          PreparedStatement pStmt = conn.prepareDelete();
+          pStmt.setLong(1, did);
+          pStmt.execute();
         }
 
         isValid = true;

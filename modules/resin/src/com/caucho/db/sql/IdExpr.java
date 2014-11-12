@@ -171,7 +171,7 @@ final class IdExpr extends Expr {
   {
     TableIterator []rows = context.getTableIterators();
     TableIterator row = rows[_tableIndex];
-
+    
     return row.isNull(_column);
   }
 
