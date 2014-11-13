@@ -1,5 +1,6 @@
 com.caucho.quercus.lib.date.DateInterval
 com.caucho.quercus.lib.date.DateTime
+com.caucho.quercus.lib.date.DateTimeInterface
 com.caucho.quercus.lib.date.DateTimeZone
 com.caucho.quercus.lib.db.Mysqli
 com.caucho.quercus.lib.db.OracleOciCollection

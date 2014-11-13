@@ -35,13 +35,16 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
 /**
  * Date functions.
  */
-public class DateTime implements Cloneable
+public class DateTime implements DateTimeInterface, Cloneable
 {
+  private static final L10N L = new L10N(DateTime.class);
+  
   public static final String ATOM = "Y-m-d\\TH:i:sP";
   public static final String COOKIE = "l, d-M-y H:i:s T";
   public static final String ISO8601 = "Y-m-d\\TH:i:sO";
@@ -159,6 +162,7 @@ public class DateTime implements Cloneable
     return new DateTime(qDate, dateTimeZone);
   }
 
+  @Override
   public StringValue format(Env env, StringValue format)
   {
     long time = _qDate.getGMTTime() / 1000;
@@ -174,7 +178,8 @@ public class DateTime implements Cloneable
 
     parser.parse();
   }
-
+  
+  @Override
   public long getTimestamp()
   {
     return getTime() / 1000;
@@ -187,6 +192,7 @@ public class DateTime implements Cloneable
     return this;
   }
 
+  @Override
   public DateTimeZone getTimeZone()
   {
     return _dateTimeZone;
@@ -204,6 +210,7 @@ public class DateTime implements Cloneable
     return this;
   }
 
+  @Override
   public long getOffset()
   {
     return _qDate.getZoneOffset() / 1000;
@@ -230,11 +237,19 @@ public class DateTime implements Cloneable
     throw new UnimplementedException("DateTime::setISODate()");
   }
 
-  public DateInterval diff(Env env, DateTime dateTime,
+  @Override
+  public DateInterval diff(Env env,
+                           DateTimeInterface dateTime2,
                            @Optional boolean isAbsolute)
   {
     DateInterval dateInterval = new DateInterval();
 
+    if (! (dateTime2 instanceof DateTime)) {
+      throw new UnimplementedException(L.l("custom DateTimeInterface classes"));
+    }
+    
+    DateTime dateTime = (DateTime) dateTime2;
+    
     QDate qDate0 = _qDate;
     QDate qDate1 = dateTime._qDate;
 
