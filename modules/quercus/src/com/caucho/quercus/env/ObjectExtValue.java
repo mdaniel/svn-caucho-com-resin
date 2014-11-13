@@ -443,7 +443,7 @@ public class ObjectExtValue extends ObjectValue
   public Value putThisField(Env env, StringValue name, Value value)
   {
     Entry entry = getThisEntry(name);
-
+    
     if (entry == null) {
       Value oldValue = putFieldExt(env, name, value);
 
@@ -471,9 +471,9 @@ public class ObjectExtValue extends ObjectValue
           return retValue;
         }
       }
+      
+      entry = createEntry(name);
     }
-
-    entry = createEntry(name);
 
     Value oldValue = entry._value;
 
@@ -629,7 +629,7 @@ public class ObjectExtValue extends ObjectValue
   private Entry getThisEntry(StringValue name)
   {
     Entry entry = _fieldMap.get(name);
-
+    
     if (entry == null) {
       entry = getThisProtectedEntry(name);
     }
