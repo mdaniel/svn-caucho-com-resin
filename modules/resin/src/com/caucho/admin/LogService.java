@@ -30,7 +30,7 @@ public class LogService
   
   public LogService()
   {
-    // _logSystem = Resin.getCurrent().createLogSystem();
+    _logSystem = LogSystem.getCurrent();
   }
   
   @PostConstruct

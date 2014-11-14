@@ -147,7 +147,7 @@ public class DBPool
   public DBPool()
   {
     _poolImpl = new DBPoolImpl();
-
+    
     // _resourceManager = ResourceManagerImpl.createLocalManager();
     _connectionPool = new ConnectionPool();
 
@@ -748,7 +748,6 @@ public class DBPool
   /**
    * Initialize the pool.
    */
-  @PostConstruct
   public void init()
     throws Exception
   {
@@ -923,7 +922,7 @@ public class DBPool
         _resinDataSource = null;
 
       if (_dataSource == null)
-        throw new IllegalStateException(L.l("DBPool `{0}' no longer exists.",
+        throw new IllegalStateException(L.l("DBPool '{0}' no longer exists.",
                                             getName()));
     }
 

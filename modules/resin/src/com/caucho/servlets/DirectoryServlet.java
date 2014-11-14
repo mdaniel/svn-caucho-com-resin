@@ -87,7 +87,6 @@ public class DirectoryServlet extends HttpServlet {
       cauchoReq = (RequestCaucho) req;
 
     String uri = req.getRequestURI();
-    boolean redirect = false;
  
     String encoding = CharacterEncoding.getLocalEncoding();
     if (encoding == null)
