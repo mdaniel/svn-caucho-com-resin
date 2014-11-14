@@ -37,7 +37,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.config.ConfigException;
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.profile.HeapDump;
 import com.caucho.server.container.ServerBase;
 import com.caucho.util.L10N;
@@ -86,7 +86,7 @@ public class HeapDumpAction implements AdminAction
     if (hprofPath.exists() && hprofPath.isFile())
       hprofPath.remove();
 
-    MBeanServer mBeanServer = Jmx.getMBeanServer();
+    MBeanServer mBeanServer = JmxUtil.getMBeanServer();
     mBeanServer.invoke(name,
                        "dumpHeap",
                        new Object[]{hprofPath.getPath(), Boolean.TRUE},

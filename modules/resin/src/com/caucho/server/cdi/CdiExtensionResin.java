@@ -57,7 +57,7 @@ import com.caucho.inject.Jndi;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.MBean;
 import com.caucho.inject.Module;
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.server.admin.AdminService;
 import com.caucho.util.L10N;
 
@@ -233,7 +233,7 @@ public class CdiExtensionResin implements Extension {
       AnnotatedType<?> annType = (AnnotatedType<?>) annotated;
       
       try {
-        Jmx.registerContext(new BeanMBean(_cdiManager, bean, annType), mbeanName);
+        JmxUtil.registerContext(new BeanMBean(_cdiManager, bean, annType), mbeanName);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

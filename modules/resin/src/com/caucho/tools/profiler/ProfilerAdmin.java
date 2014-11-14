@@ -29,7 +29,7 @@
 
 package com.caucho.tools.profiler;
 
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.util.L10N;
 
 import javax.management.ObjectName;
@@ -53,11 +53,11 @@ public class ProfilerAdmin
     ObjectName objectName;
 
     try {
-      objectName = Jmx.getObjectName("type=Profiler");
+      objectName = JmxUtil.getObjectName("type=Profiler");
 
       objectName = new ObjectName(objectName.getCanonicalName());
 
-      Jmx.register(this, objectName);
+      JmxUtil.register(this, objectName);
     }
     catch (Throwable e) {
       objectName = null;

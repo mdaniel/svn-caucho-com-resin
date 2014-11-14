@@ -48,7 +48,7 @@ import com.caucho.config.CauchoBean;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
 import com.caucho.http.security.SecurityContextException;
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.security.SecurityContext;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -95,7 +95,7 @@ public class CdiProducerResin
   @CauchoBean
   public MBeanServer getMBeanServer()
   {
-    return Jmx.getMBeanServer();
+    return JmxUtil.getMBeanServer();
   }
 
   /**

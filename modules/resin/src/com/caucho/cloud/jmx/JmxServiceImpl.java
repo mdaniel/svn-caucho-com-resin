@@ -12,7 +12,7 @@ import javax.management.MBeanServer;
 import com.caucho.amp.AmpSystem;
 import com.caucho.amp.ServiceManagerAmp;
 import com.caucho.config.ConfigException;
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
@@ -48,7 +48,7 @@ public class JmxServiceImpl
       return;
     }
 
-    _mbeanServer = Jmx.getMBeanServer();
+    _mbeanServer = JmxUtil.getMBeanServer();
     
     _actor = new JmxActor(_mbeanServer);
     

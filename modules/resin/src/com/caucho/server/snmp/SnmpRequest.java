@@ -42,7 +42,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.network.listen.ConnectionSocket;
 import com.caucho.network.listen.NextState;
 import com.caucho.network.listen.RequestProtocolBase;
@@ -330,7 +330,7 @@ public class SnmpRequest extends RequestProtocolBase
   //@In MBeanServer _jmx;
   protected MBeanServer getMBeanServer()
   {
-    return Jmx.getMBeanServer();
+    return JmxUtil.getMBeanServer();
   }
 
   /**

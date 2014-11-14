@@ -39,7 +39,7 @@ import javax.management.ObjectName;
 
 import com.caucho.config.Config;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.jmx.Jmx;
+import com.caucho.jmx.JmxUtil;
 import com.caucho.naming.JndiUtil;
 
 /**
@@ -78,7 +78,7 @@ public class ResinConfigLibrary {
   public static ObjectName mbean(String name)
   {
     try {
-      return Jmx.getObjectName(name);
+      return JmxUtil.getObjectName(name);
     } catch (MalformedObjectNameException e) {
       log().log(Level.FINEST, e.toString(), e);
       return null;

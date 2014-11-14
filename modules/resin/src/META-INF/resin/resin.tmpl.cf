@@ -67,22 +67,21 @@ cluster-default {
   #}
   
   import "classpath:META-INF/resin/app-default.cf";
+  
+  pod-default {
+    class-loader {
+      compiling-loader path="classes";
+      library-loader path="lib";
+    }
+
+    import "META-INF/pod.cf" optional="true";
+    # module-deploy "modules";
+  }
+    
+  # creates the baratine services directory for .bar expansion
+  pod-deploy "pods";
 
   host-default {
-    service-default {
-      class-loader {
-        compiling-loader path="classes";
-        library-loader path=".";
-      }
-
-      servlet-mapping "/*" "com.caucho.amp.jamp.JampServlet";
-
-      import "META-INF/service.cf" optional="true";
-      # module-deploy "modules";
-    }
-    
-    # creates the baratine services directory for .bar expansion
-    service-deploy "services";
 
     # creates the webapps directory for .war expansion
     web-app-deploy path="webapps"
