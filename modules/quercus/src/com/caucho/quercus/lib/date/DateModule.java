@@ -1139,6 +1139,14 @@ public class DateModule extends AbstractQuercusModule {
 
     return true;
   }
+  
+  public static DateInterval date_diff(Env env,
+                                       DateTimeInterface dateA,
+                                       DateTimeInterface dateB,
+                                       @Optional boolean isAbsolute)
+  {
+    return dateA.diff(env, dateB, isAbsolute);
+  }
 
   public static Value date_format(Env env,
                                   DateTime dateTime,
