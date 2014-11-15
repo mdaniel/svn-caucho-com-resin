@@ -12,6 +12,8 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>comet: cleanup of comet state machine (#5826, rep by S. Nobuaki)</li>
+<li>cxf: missing servlet config for CXFProtocolServletFactory (#5825, rep by balaiitm)</li>
 <li>servlet: setHeader("foo", null) now removes header value (#5824)</li>
 <li>db: fixed expires and orphan queries to remove expired sessions (#5748, rep by Thomas Rogan)</li>
 <li>ejb: added scan-persistence-xml to &lt;ejb-server> to allow disabling of persistence-unit scanning (#4908)</li>

@@ -365,7 +365,9 @@ public class HttpResponse extends AbstractHttpResponse
 
     if (contentType != null) {
       // server/1b5a
-      if (charEncoding == null && contentType.startsWith("text/")) {
+      if (charEncoding == null
+          && (contentType.startsWith("text/")
+              || contentType.startsWith("multipart/"))) {
         if (webApp != null)
           charEncoding = webApp.getCharacterEncoding();
 

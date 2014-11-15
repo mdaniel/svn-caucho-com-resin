@@ -1639,7 +1639,8 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       else if (_tcpConn.isAsyncComplete()) {
         return false;
       }
-      else if (asyncContext.isTimeout()) {
+      else if (asyncContext.isTimeout() && url == null) {
+        // server/1lda
         getResponseFacade().sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         return false;
       }

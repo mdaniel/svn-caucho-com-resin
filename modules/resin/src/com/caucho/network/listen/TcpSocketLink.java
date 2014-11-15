@@ -880,7 +880,7 @@ public class TcpSocketLink extends AbstractSocketLink
         return;
       }
       
-      if (! reqState.toAsyncSuspend(_requestStateRef)) {
+      if (! reqState.toAsyncSuspendThread(_requestStateRef)) {
         if (! getLauncher().offerResumeTask(getResumeTask())) {
           log.severe(L.l("Schedule resume failed for {0}", this));
         }
@@ -1665,7 +1665,7 @@ public class TcpSocketLink extends AbstractSocketLink
     
     _state = _state.toCometSuspend(this);
     
-    return ! _requestStateRef.get().toAsyncResume(_requestStateRef);
+    return _requestStateRef.get().toAsyncSuspendRequest(_requestStateRef);
   }
   
   //

@@ -806,7 +806,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     }
     
     // jsp/0511
-    _charEncoding = null;
+    if (_locale == null && _setCharEncoding == null) {
+      _charEncoding = null;
+    }
 
     if (value == null) {
       _contentType = null;
@@ -816,6 +818,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     ContentType item = AbstractHttpResponse.parseContentType(value);
 
     _contentType = item.getContentType();
+    
+    if (_charEncoding != null || _setCharEncoding != null) {
+      return;
+    }
 
     String encoding = item.getEncoding();
 
@@ -850,10 +856,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     }
     
     String charEncoding = getCharacterEncoding();
-    
+
     if (charEncoding != null
         && (_contentType.startsWith("text/")
-            || _contentType.equals("application/json"))) {
+            || _contentType.equals("application/json")
+            || _contentType.startsWith("multipart/"))) {
       return _contentType + "; charset=" + charEncoding;
     }
     else {
@@ -876,14 +883,15 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   public String getCharacterEncoding()
   {
     String charEncoding = _charEncoding;
-    
+
     if (charEncoding == null) {
       charEncoding = _setCharEncoding;
 
       if (charEncoding == null) {
         String contentType = getContentTypeImpl();
 
-        if (contentType == null || ! contentType.startsWith("text/")) {
+        if (contentType == null
+            || ! contentType.startsWith("text/")) {
           return null;
         }
         

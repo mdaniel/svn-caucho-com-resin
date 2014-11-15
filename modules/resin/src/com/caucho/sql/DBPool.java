@@ -748,7 +748,6 @@ public class DBPool
   /**
    * Initialize the pool.
    */
-  @PostConstruct
   public void init()
     throws Exception
   {

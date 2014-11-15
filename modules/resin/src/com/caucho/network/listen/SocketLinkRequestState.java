@@ -51,11 +51,12 @@ enum SocketLinkRequestState {
     @Override
     boolean toAccept(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(INIT, REQUEST)) {
-        throw new IllegalStateException(this + " to " + stateRef.get());
+      if (stateRef.compareAndSet(INIT, REQUEST)) {
+        return true;
       }
-      
-      return true;
+      else {
+        return stateRef.get().toAccept(stateRef);
+      }
     }
   },
   
@@ -72,38 +73,44 @@ enum SocketLinkRequestState {
     @Override
     boolean toIdle(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(REQUEST, INIT)) {
-        throw new IllegalStateException(this + " to " + stateRef.get());
+      if (stateRef.compareAndSet(REQUEST, INIT)) {
+        return true;
       }
-      
-      return true;
+      else {
+        return stateRef.get().toIdle(stateRef);
+      }
     }
     
     @Override
     boolean toStartKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(REQUEST, KEEPALIVE_START)) {
-        throw new IllegalStateException(this + " to " + stateRef.get());
+      if (stateRef.compareAndSet(REQUEST, KEEPALIVE_START)) {
+        return true;
       }
-      
-      return true;
+      else {
+        return stateRef.get().toStartKeepalive(stateRef);
+      }
     }
     
     @Override
     boolean toAsyncStart(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(REQUEST, ASYNC_START)) {
-        throw new IllegalStateException(this + " to " + stateRef.get());
+      if (stateRef.compareAndSet(REQUEST, ASYNC_START)) {
+        return true;
       }
-      
-      return true;
+      else {
+        return stateRef.get().toAsyncStart(stateRef);
+      }
     }
     
+    /*
     @Override
     boolean toAsyncWake(AtomicReference<SocketLinkRequestState> stateRef)
     {
+      // server/1lda
       return false;
     }
+    */
   },
   
   /**
@@ -113,50 +120,34 @@ enum SocketLinkRequestState {
     @Override
     boolean toWakeKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      while (true) {
-        if (stateRef.compareAndSet(KEEPALIVE_SUSPEND, REQUEST)) {
-          return true;
-        }
-      
-        if (stateRef.compareAndSet(KEEPALIVE_START, KEEPALIVE_WAKE)) {
-          return false;
-        }
-      
-        SocketLinkRequestState state = stateRef.get();
-        
-        if (state != KEEPALIVE_SUSPEND && state != KEEPALIVE_START) {
-          throw new IllegalStateException(this + " to " + stateRef.get());
-        }
+      if (stateRef.compareAndSet(KEEPALIVE_START, KEEPALIVE_WAKE)) {
+        return false;
+      }
+      else {
+        return stateRef.get().toWakeKeepalive(stateRef);
       }
     }
     
     @Override
     boolean toSuspendKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      while (true) {
-        if (stateRef.compareAndSet(KEEPALIVE_START, KEEPALIVE_SUSPEND)) {
-          return true;
-        }
-      
-        if (stateRef.compareAndSet(KEEPALIVE_WAKE, REQUEST)) {
-          return false;
-        }
-      
-        SocketLinkRequestState state = stateRef.get();
-        
-        if (state != KEEPALIVE_START && state != KEEPALIVE_WAKE) {
-          throw new IllegalStateException(this + " to " + stateRef.get());
-        }
+      if (stateRef.compareAndSet(KEEPALIVE_START, KEEPALIVE_SUSPEND)) {
+        return true;
+      }
+      else {
+        return stateRef.get().toSuspendKeepalive(stateRef);
       }
     }
     
     @Override
     boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (stateRef.compareAndSet(this, DESTROY))
+      if (stateRef.compareAndSet(this, DESTROY)) {
         return true;
-      else
+      }
+      else {
         return stateRef.get().toDestroy(stateRef);
+      }
     }
   },
   
@@ -170,8 +161,9 @@ enum SocketLinkRequestState {
       if (stateRef.compareAndSet(KEEPALIVE_WAKE, REQUEST)) {
         return false;
       }
-      
-      throw new IllegalStateException(this + " to " + stateRef.get());
+      else {
+        return stateRef.get().toSuspendKeepalive(stateRef);
+      }
     }
     
     @Override
@@ -194,8 +186,9 @@ enum SocketLinkRequestState {
       if (stateRef.compareAndSet(KEEPALIVE_SUSPEND, REQUEST)) {
         return true;
       }
-      
-      throw new IllegalStateException(this + " to " + stateRef.get());
+      else {
+        return stateRef.get().toWakeKeepalive(stateRef);
+      }
     }
     
     @Override
@@ -216,23 +209,20 @@ enum SocketLinkRequestState {
     }
     
     @Override
-    boolean toAsyncSuspend(AtomicReference<SocketLinkRequestState> stateRef)
+    boolean toAsyncSuspendThread(AtomicReference<SocketLinkRequestState> stateRef)
     {
       if (stateRef.compareAndSet(ASYNC_START, SUSPEND)) {
         return true;
       }
-      
-      if (stateRef.compareAndSet(ASYNC_WAKE, REQUEST)) {
-        return false;
+      else {
+        return stateRef.get().toAsyncSuspendThread(stateRef);
       }
-
-      throw new IllegalStateException(this + " to " + stateRef.get());
     }
     
     @Override
-    boolean toAsyncResume(AtomicReference<SocketLinkRequestState> stateRef)
+    boolean toAsyncSuspendRequest(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      return stateRef.compareAndSet(ASYNC_WAKE, REQUEST);
+      return true;
     }
     
     @Override
@@ -241,8 +231,9 @@ enum SocketLinkRequestState {
       if (stateRef.compareAndSet(ASYNC_START, ASYNC_WAKE)) {
         return false;
       }
-      
-      return stateRef.get().toAsyncWake(stateRef);
+      else {
+        return stateRef.get().toAsyncWake(stateRef);
+      }
     }
   },
   
@@ -254,19 +245,25 @@ enum SocketLinkRequestState {
     }
     
     @Override
-    boolean toAsyncSuspend(AtomicReference<SocketLinkRequestState> stateRef)
+    boolean toAsyncSuspendThread(AtomicReference<SocketLinkRequestState> stateRef)
     {
       if (stateRef.compareAndSet(ASYNC_WAKE, REQUEST)) {
         return false;
       }
-
-      throw new IllegalStateException(this + " to " + stateRef.get());
+      else {
+        return stateRef.get().toAsyncSuspendThread(stateRef);
+      }
     }
     
     @Override
-    boolean toAsyncResume(AtomicReference<SocketLinkRequestState> stateRef)
+    boolean toAsyncSuspendRequest(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      return stateRef.compareAndSet(ASYNC_WAKE, REQUEST);
+      if (stateRef.compareAndSet(ASYNC_WAKE, REQUEST)) {
+        return false;
+      }
+      else {
+        return stateRef.get().toAsyncSuspendRequest(stateRef);
+      }
     }
   },
   
@@ -283,11 +280,12 @@ enum SocketLinkRequestState {
     @Override
     boolean toAsyncWake(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(SUSPEND, REQUEST)) {
-        throw new IllegalStateException(this + " to " + stateRef.get());
+      if (stateRef.compareAndSet(SUSPEND, REQUEST)) {
+        return true;
       }
-      
-      return true;
+      else {
+        return stateRef.get().toAsyncWake(stateRef);
+      }
     }
     
     @Override
@@ -352,12 +350,12 @@ enum SocketLinkRequestState {
     throw new IllegalStateException(toString());
   }
 
-  boolean toAsyncSuspend(AtomicReference<SocketLinkRequestState> stateRef)
+  boolean toAsyncSuspendThread(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
   }
 
-  boolean toAsyncResume(AtomicReference<SocketLinkRequestState> stateRef)
+  boolean toAsyncSuspendRequest(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
   }
