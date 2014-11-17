@@ -922,7 +922,7 @@ public class CauchoDispatchRequest extends AbstractCauchoRequest {
       throw new UnsupportedOperationException(getClass().getName());
   }
 
-  private CauchoRequest getCauchoRequest()
+  protected CauchoRequest getCauchoRequest()
   {
     ServletRequest request = _request;
     

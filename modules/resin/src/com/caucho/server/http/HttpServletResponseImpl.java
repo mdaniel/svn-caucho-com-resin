@@ -819,10 +819,6 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     _contentType = item.getContentType();
     
-    if (_charEncoding != null || _setCharEncoding != null) {
-      return;
-    }
-
     String encoding = item.getEncoding();
 
     // server/172k
@@ -830,6 +826,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     if (encoding != null) {
       setCharacterEncoding(encoding);
+    }
+    else if (_charEncoding != null || _setCharEncoding != null) {
+      return;
     }
 
     // XXX: conflict with servlet exception throwing order?
@@ -961,8 +960,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   @Override
   public void setCharacterEncoding(String encoding)
   {
-    if (isCommitted())
+    if (isCommitted()) {
       return;
+    }
 
     if (_writer != null) {
       // server/172k

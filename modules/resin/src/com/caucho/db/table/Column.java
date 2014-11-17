@@ -50,7 +50,7 @@ abstract public class Column {
   private final String _name;
 
   protected final int _columnOffset;
-  protected final int _nullOffset;
+  private final int _nullOffset;
   protected final byte _nullMask;
 
   private Table _table;

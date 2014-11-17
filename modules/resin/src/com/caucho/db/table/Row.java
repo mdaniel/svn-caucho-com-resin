@@ -98,6 +98,10 @@ class Row {
   {
     if ((_columns.length + NULL_OFFSET) % 8 == 0) {
       _nullOffset = _rowLength;
+      
+      if (_nullOffset < 0) {
+        throw new IllegalStateException();
+      }
       _rowLength++;
     }
   }

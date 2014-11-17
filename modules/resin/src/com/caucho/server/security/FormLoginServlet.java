@@ -108,11 +108,13 @@ public class FormLoginServlet extends GenericServlet {
     boolean formURIPriority = login.getFormURIPriority();
 
     // The saved uri has priority.
-    if ((uri == null || formURIPriority) && req.getParameter("j_uri") != null)
+    if ((uri == null || formURIPriority) && req.getParameter("j_uri") != null) {
       uri = req.getParameter("j_uri");
-    else if (uri != null && query != null)
+    }
+    else if (uri != null && query != null) {
       uri = uri + "?" + query;
-
+    }
+    
     if (uri == null) {
       log.warning(L.l("FormLogin: session has timed out for session '{0}'",
                       req.getSession().getId()));

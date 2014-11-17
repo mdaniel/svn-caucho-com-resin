@@ -30,25 +30,20 @@
 package com.caucho.server.webapp;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.ServletInvocation;
-import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.CauchoDispatchRequest;
-import com.caucho.util.CharSegment;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.util.HashMapImpl;
-import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
 public class ForwardNamedRequest extends CauchoDispatchRequest {
@@ -128,6 +123,52 @@ public class ForwardNamedRequest extends CauchoDispatchRequest {
   //
   // HttpServletRequest
   //
+  
+  @Override
+  public HttpSession getSession()
+  {
+    CauchoRequest cRequest = getCauchoRequest();
+
+    if (cRequest != null)
+      return cRequest.getSession();
+    else
+      return null;
+  }
+  
+  @Override
+  public HttpSession getSession(boolean isNew)
+  {
+    CauchoRequest cRequest = getCauchoRequest();
+
+    if (cRequest != null)
+      return cRequest.getSession(isNew);
+    else
+      return null;
+  }
+ 
+  @Override
+  public String getParameter(String name)
+  {
+    return getRequest().getParameter(name);
+  }
+  
+  @Override
+  public Map<String,String[]> getParameterMap()
+  {
+    return getRequest().getParameterMap();
+  }
+  
+  @Override
+  public String []getParameterValues(String name)
+  {
+    return getRequest().getParameterValues(name);
+  }
+  
+  @Override
+  public Enumeration<String> getParameterNames()
+  {
+    return getRequest().getParameterNames();
+  }
 
   //
   // CauchoRequest
