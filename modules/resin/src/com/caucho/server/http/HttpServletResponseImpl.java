@@ -877,6 +877,16 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   }
 
   /**
+   * Gets the character encoding assigned by the developer. Used for JSP
+   * encoding.
+   */
+  @Override
+  public String getCharacterEncodingAssigned()
+  {
+    return _setCharEncoding;
+  }
+
+  /**
    * Gets the character encoding.
    */
   @Override
@@ -888,12 +898,14 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       charEncoding = _setCharEncoding;
 
       if (charEncoding == null) {
+        /*
         String contentType = getContentTypeImpl();
 
         if (contentType == null
             || ! contentType.startsWith("text/")) {
           return null;
         }
+        */
         
         WebApp webApp = _request.getWebApp();
 

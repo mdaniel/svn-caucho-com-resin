@@ -45,6 +45,11 @@ abstract public class AbstractCauchoResponse implements CauchoResponse {
     getResponseStream().completeCache();
   }
   
+  public String getCharacterEncodingAssigned()
+  {
+    return null;
+  }
+  
   @Override
   public String toString()
   {

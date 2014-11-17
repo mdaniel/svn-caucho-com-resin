@@ -431,4 +431,14 @@ public class CauchoResponseWrapper extends ResponseWrapper
   {
     return false;
   }
+
+  /* (non-Javadoc)
+   * @see com.caucho.server.http.CauchoResponse#getCharacterEncodingAssigned()
+   */
+  @Override
+  public String getCharacterEncodingAssigned()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

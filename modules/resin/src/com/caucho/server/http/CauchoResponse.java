@@ -88,4 +88,9 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setForwardEnclosed(boolean isForwardEnclosed);
 
   public boolean isForwardEnclosed();
+  
+  /**
+   * Assigned value of response encoding, not calculated/default.
+   */
+  public String getCharacterEncodingAssigned();
 }

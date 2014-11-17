@@ -36,6 +36,7 @@ import com.caucho.vfs.PrintWriterImpl;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+
 import java.io.*;
 import java.util.Collection;
 import java.util.Locale;
@@ -456,5 +457,15 @@ public class StubServletResponse implements CauchoResponse {
     public void write(byte []buffer, int offset, int length) {}
     public void flush() {}
     public void close() {}
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.server.http.CauchoResponse#getCharacterEncodingAssigned()
+   */
+  @Override
+  public String getCharacterEncodingAssigned()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
