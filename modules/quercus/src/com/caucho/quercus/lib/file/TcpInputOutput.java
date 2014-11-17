@@ -70,6 +70,7 @@ public class TcpInputOutput
     throws IOException
   {
     super(env);
+    
     env.addCleanup(this);
 
     if (isSecure) {
@@ -101,7 +102,7 @@ public class TcpInputOutput
   {
     Socket s = new Socket(host, port);
 
-    SSLContext context = SSLContext.getInstance("TLS");
+    SSLContext context = SSLContext.getInstance("TLSv1");
 
     javax.net.ssl.TrustManager tm =
       new javax.net.ssl.X509TrustManager() {

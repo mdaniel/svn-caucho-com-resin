@@ -1605,7 +1605,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     throws IOException
   {
     // tck - jsp include
-    _response.close();
+    AbstractHttpResponse response = _response;
+    
+    if (response != null) {
+      response.close();
+    }
   }
 
   /**

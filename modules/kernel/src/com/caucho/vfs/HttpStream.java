@@ -29,15 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,11 +36,20 @@ import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.L10N;
 
 /**
  * Underlying stream handling HTTP requests.
@@ -238,7 +238,7 @@ class HttpStream extends StreamImpl {
       s = new Socket(host, port);
       
       if (path instanceof HttpsPath) {
-        SSLContext context = SSLContext.getInstance("TLS");
+        SSLContext context = SSLContext.getInstance("TLSv1");
 
         javax.net.ssl.TrustManager tm =
           new javax.net.ssl.X509TrustManager() {
@@ -258,7 +258,9 @@ class HttpStream extends StreamImpl {
         context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
         SSLSocketFactory factory = context.getSocketFactory();
 
-        s = factory.createSocket(s, host, port, true);
+        SSLSocket sslSock = (SSLSocket) factory.createSocket(s, host, port, true);
+        
+        s = sslSock;
       }
     } catch (ConnectException e) {
       throw new ConnectException(path.getURL() + ": " + e.getMessage());
