@@ -83,6 +83,7 @@
           <openssl>
             <certificate-file>${file_lookup(openssl_file,__DIR__)}</certificate-file>
             <certificate-key-file>${file_lookup(openssl_key, __DIR__)}</certificate-key-file>
+	    <session-cache>${openssl_session_cache}</session-cache>
             <password>
               <resin:Password>${openssl_password}</resin:Password>
             </password>
