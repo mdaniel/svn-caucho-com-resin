@@ -29,30 +29,9 @@
 
 package com.caucho.server.host;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.el.EL;
-import com.caucho.env.deploy.DeployController;
-import com.caucho.env.deploy.DeployControllerAdmin;
-import com.caucho.env.deploy.EnvironmentDeployController;
-import com.caucho.management.server.HostMXBean;
-import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.caucho.vfs.Path;
 
 /**
  * A configuration entry for a host
@@ -68,7 +47,6 @@ public class HostVar
 
   public String getName()
   {
-    System.out.println("HN: " + _hostController.getName());
     return _hostController.getName();
   }
 

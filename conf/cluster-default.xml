@@ -87,6 +87,7 @@
             <password>
               <resin:Password>${openssl_password}</resin:Password>
             </password>
+            <protocols>${openssl_protocols}</protocols>
           </openssl>
         </http>
       </resin:when>

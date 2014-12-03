@@ -110,6 +110,7 @@ keepalive_select_enable : true
 # openssl_file : keys/test.crt
 # openssl_key : keys/test.key
 # openssl_password : changeme
+# openssl_protocols : -sslv2 -sslv3
 
 # JSSE certificate configuration
 # Keys are typically stored in the resin configuration directory.

@@ -302,7 +302,7 @@ public class L10N {
     while (i < length) {
       char ch = msg.charAt(i);
 
-      if (ch != '{' || i + 2 >= length) {
+      if (ch != '{' || length <= i + 1) {
         cb.append(ch);
         i++;
       }

@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamException;
+import com.caucho.bam.QueueFullException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
@@ -190,6 +191,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     try {
       enqueue(new Message(to, from, value));
+    } catch (QueueFullException e) {
+      log.finer(e.toString());
     } catch (RuntimeException e) {
       log.warning(this + ": message "
           + value + " {to:" + to + ", from:" + from + "}"
@@ -210,6 +213,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     try {
       enqueue(new MessageError(to, from, value, error));
+    } catch (QueueFullException e) {
+      log.finer(e.toString());
     } catch (RuntimeException e) {
       log.warning(this + ": messageError "
           + value + " {to:" + to + ", from:" + from + "}"
@@ -240,6 +245,10 @@ public class MultiworkerMailbox implements Mailbox, Closeable
 
     try {
       enqueue(new Query(id, to, from, query));
+    } catch (QueueFullException e) {
+      log.finer(e.toString());
+      
+      getBroker().queryError(id, from, to, query, BamError.create(e));
     } catch (RuntimeException e) {
       log.warning(this + ": query "
           + query + " {to:" + to + ", from:" + from + "}"
@@ -260,6 +269,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     try {
       enqueue(new QueryResult(id, to, from, value));
+    } catch (QueueFullException e) {
+      log.finer(e.toString());
     } catch (RuntimeException e) {
       log.warning(this + ": queryResult "
                   + value + " {to:" + to + ", from:" + from + "}"
@@ -281,6 +292,8 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     try {
       enqueue(new QueryError(id, to, from, query, error));
+    } catch (QueueFullException e) {
+      log.finer(e.toString());
     } catch (RuntimeException e) {
       log.warning(this + ": queryError "
           + error + " {to:" + to + ", from:" + from + "}"
@@ -323,17 +336,19 @@ public class MultiworkerMailbox implements Mailbox, Closeable
 
   private MailboxQueue2 findWorker()
   {
+    int minSize = Integer.MAX_VALUE;
+    MailboxQueue2 bestQueue = _queues[0];
+    
     for (MailboxQueue2 queue : _queues) {
-      if (queue.isEmpty()) {
-        return queue;
+      int size = queue.getSize();
+      
+      if (size < minSize) {
+        bestQueue = queue;
+        minSize = size;
       }
     }
     
-    int roundRobin = _roundRobin.incrementAndGet();
-    
-    int index = (roundRobin & 0x7fffffff) % _queues.length;
-    
-    return _queues[index];
+    return bestQueue;
   }
 
   @Override

@@ -60,6 +60,7 @@ public class BamQueueFullHandler // implements QueueFullHandler
   private final long _fatalTimeout = 180 * 1000L;
 
   private final AtomicLong _lastExceptionTime = new AtomicLong();
+  private final AtomicLong _lastWarningTime = new AtomicLong();
   private final AtomicLong _firstSequenceTime = new AtomicLong();
   private final AtomicInteger _repeatCount = new AtomicInteger();
 
@@ -85,7 +86,6 @@ public class BamQueueFullHandler // implements QueueFullHandler
 
     if (now - lastExceptionTime < _duplicateTimeout) {
       _repeatCount.incrementAndGet();
-
     }
     else {
       _repeatCount.set(0);
@@ -111,10 +111,11 @@ public class BamQueueFullHandler // implements QueueFullHandler
 
     if (_fatalTimeout < now - firstSequenceTime) {
       ShutdownSystem.shutdownActive(ExitCode.NETWORK, msg);
-    }
-
-    if (repeatCount % 100 == 0 || _repeatCount.get() == 0) {
       log.warning(msg);
+    }
+    else if (now - _lastWarningTime.get() > 5000L) {
+      log.warning(msg);
+      _lastWarningTime.set(now);
     }
 
     RuntimeException exn;

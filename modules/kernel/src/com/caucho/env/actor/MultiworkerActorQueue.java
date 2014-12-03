@@ -98,8 +98,8 @@ public class MultiworkerActorQueue<T> implements ActorQueueApi<T>
   
   public final boolean offer(T value, boolean isWait)
   {
-    boolean result =  _ringQueue.offer(value, isWait ? 600 * 1000L : 0, 
-                                       TimeUnit.MILLISECONDS);
+    boolean result = _ringQueue.offer(value, isWait ? 600 * 1000L : 0, 
+                                      TimeUnit.MILLISECONDS);
     
     wake();
     
