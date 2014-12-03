@@ -28,7 +28,7 @@ public class ProAdminServices extends AdminServices
 
     ServerBase resin = ServerBase.getCurrent();
    
-    if (resin != null && resin.isProfessional()) {
+    if (resin != null) {
       StatService statService = new StatService();
       statService.init();
       

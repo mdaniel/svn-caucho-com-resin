@@ -30,28 +30,6 @@
 package com.caucho.cli.resin;
 
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.core.ResinProperties;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.lib.ResinConfigLibrary;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.system.SystemManager;
-import com.caucho.loader.Environment;
-import com.caucho.loader.LibraryLoader;
-import com.caucho.server.cdi.ResinServerConfigLibrary;
-import com.caucho.server.resin.ResinELContext;
-import com.caucho.util.L10N;
-import com.caucho.util.Version;
-import com.caucho.vfs.NullPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 public class ResinCommandLineAgent
 {

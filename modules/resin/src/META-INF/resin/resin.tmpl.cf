@@ -79,7 +79,7 @@ cluster-default {
   }
     
   # creates the baratine services directory for .bar expansion
-  pod-deploy "pods";
+  pod-deploy "${resin.dataDir}/pods";
 
   host-default {
 
@@ -91,13 +91,13 @@ cluster-default {
   }
 
   # auto virtual host deployment in hosts/foo.example.com/webapps
-  host-deploy "hosts-${server_port}" {
+  host-deploy "${resin.dataDir}/hosts" {
     host-default {
       import path="host.xml" optional="true";
     }
   }
 
-  host root-directory="hosts-${server_port}/host" controller-type="DEFAULT" {
+  host root-directory="${resin.dataDir}/hosts/host" controller-type="DEFAULT" {
     import path="host.xml" optional="true";
 
     web-app id=""
