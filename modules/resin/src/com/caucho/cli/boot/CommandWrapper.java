@@ -94,9 +94,9 @@ abstract public class CommandWrapper<A extends ArgsWatchdog> implements BootComm
   }
 
   @Override
-  public boolean isTailArgsAccepted()
+  public int getTailArgsMinCount()
   {
-    return getDelegate().isTailArgsAccepted();
+    return getDelegate().getTailArgsMinCount();
   }
 
   @Override
