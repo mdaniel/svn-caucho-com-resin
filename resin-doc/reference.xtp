@@ -11669,6 +11669,9 @@ The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 <tr><td>port</td>
     <td>The cluster port</td>
     <td>6800</td></tr>
+<tr><td>allow-non-reserved-ip</td>
+    <td>allows non-private IP address be used for cluster port</td>
+    <td>false</td></tr>
 </attributes>
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
