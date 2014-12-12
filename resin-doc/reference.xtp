@@ -11787,6 +11787,51 @@ server instances and therefore belong in a server-default.</p>
 </example>
 </defun>
 
+<defun title="&lt;server-multi>" version="Resin 4.0" name="server-multi">
+<parents>cluster</parents>
+<description>
+<p>&lt;server-multi> allows to specify multiple servers in a single tag. The
+servers are named using id–prefix concatenated with position of server's ip in the
+address-list.
+
+</p></description>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>id-prefix</td>
+  <td>Prefix used to construct server name dynamically</td>
+</tr>
+<tr>
+  <td>address-list</td>
+  <td>List of addresses the corresponding servers will bind to</td>
+</tr>
+<tr>
+ <td>require-explicit-id</td>
+ <td>Requires passing -server &lt;id> to the CLI</td>
+</tr>
+<tr>
+ <td>port</td>
+ <td>cluster port</td>
+</tr>
+</attributes>
+
+<example title="server-multi">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app"&gt;
+    &lt;server-multi id-prefix="app-" address-list="192.168.1.2 192.168.1.3" port="6800"/>
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<p>In the example above server app-0 is bound to ip ending with 1.2, app-1 – 1.3</p>
+
+</defun>
+
 <defun title="&lt;server-header>" version="Resin 3.1" name="server-header">
 <parents>cluster</parents>
 <default>Resin/4.0.x</default>
