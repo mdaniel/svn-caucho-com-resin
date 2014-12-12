@@ -177,7 +177,7 @@ public class ArgsResinCli extends ArgsCli
 
     manager.addCommand(new ScoreboardCommand().hide());
     
-    manager.addCommand("deploy-service", new DeployCommandService().hide());
+    manager.addCommand("deploy-pod", new DeployCommandService().hide());
     
     manager.addCommand(new ShutdownCommand());
     manager.addCommand(new SleepCommand().hide());
