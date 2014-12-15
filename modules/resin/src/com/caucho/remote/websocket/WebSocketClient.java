@@ -80,6 +80,8 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   private WebSocketInputStream _wsIs;
   private WebSocketOutputStream _wsOs;
   
+  private WebSocketWriter _wsWriter;
+  
   public WebSocketClient(String url,
                          WebSocketListener listener)
   {
@@ -410,8 +412,19 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
 
   @Override
   public PrintWriter startTextMessage()
+    throws IOException
   {
-    throw new UnsupportedOperationException();
+    if (_wsWriter == null) {
+      OutputStream os = _os;
+      if (os == null)
+        throw new IllegalStateException(L.l("startTextMessage cannot be called with a closed context"));
+      
+      _wsWriter = new WebSocketWriter(os, new byte[4096]);
+    }
+    
+    _wsWriter.init();
+    
+    return new WebSocketPrintWriter(_wsWriter);
   }
 
   @Override
