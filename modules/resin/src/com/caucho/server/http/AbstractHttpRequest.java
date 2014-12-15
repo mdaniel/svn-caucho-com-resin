@@ -1310,6 +1310,12 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     return _readStream.getAvailable();
   }
 
+  public int getBufferAvailable()
+    throws IOException
+  {
+    return _readStream.getBufferAvailable();
+  }
+
   protected void skip()
     throws IOException
   {

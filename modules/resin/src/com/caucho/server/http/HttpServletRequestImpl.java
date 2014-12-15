@@ -1694,6 +1694,15 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       return -1;
   }
 
+  int getBufferAvailable()
+    throws IOException
+  {
+    if (_request != null)
+      return _request.getBufferAvailable();
+    else
+      return -1;
+  }
+
   public DispatcherType getDispatcherType()
   {
     return DispatcherType.REQUEST;

@@ -259,9 +259,10 @@ class WebSocketContextImpl
   throws IOException
   {
     do {
-      if (! readFrame())
+      if (! readFrame()) {
         return;
-    } while (_request.getAvailable() > 0);
+      }
+    } while (_request.getBufferAvailable() > 0);
   }
   
   private boolean readFrame()
