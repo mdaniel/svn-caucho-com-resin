@@ -12,6 +12,7 @@
 
 <s2 title="4.0.42 - in progress">
 <ul>
+<li>websocket: read loop needs to use getAvailableBuffer() (ep by Arun Durairaju)</li>
 <li>bam: too much logging for queue full (rep by Dan Stilts)</li>
 <li>bam: use smallest queue for remoting instead of round-robin to handle frozen connections (rep by Dan Stilts)</li>
 <li>comet: cleanup of comet state machine (#5826, rep by S. Nobuaki)</li>

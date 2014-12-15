@@ -66,21 +66,21 @@ class WebSocketContextImpl
   private static final L10N L = new L10N(WebSocketContextImpl.class);
   private static final Logger log
     = Logger.getLogger(WebSocketContextImpl.class.getName());
-  
+
   private final HttpServletRequestImpl _request;
   private final WebSocketListener _listener;
 
   private SocketLinkDuplexController _controller;
-  
+
   private FrameInputStream _is;
-  
+
   private WebSocketOutputStream _binaryOut;
   private WebSocketInputStream _binaryIn;
-  
+
   private WebSocketWriter _textOut;
   private PrintWriter _textWriter;
   // private WebSocketReader _textIn;
-  
+
   private boolean _isReadClosed;
   private AtomicBoolean _isWriteClosed = new AtomicBoolean();
 
@@ -88,7 +88,7 @@ class WebSocketContextImpl
                        HttpServletResponseImpl response,
                        WebSocketListener listener,
                        FrameInputStream is)
-  {     
+  {
     _request = request;
     _listener = listener;
     _is = is;
@@ -97,7 +97,7 @@ class WebSocketContextImpl
   public void setController(SocketLinkDuplexController controller)
   {
     _controller = controller;
-    
+
     _is.init(this, controller.getReadStream());
   }
 
@@ -137,13 +137,13 @@ class WebSocketContextImpl
     if (_isWriteClosed.get())
       throw new IllegalStateException(L.l("{0} is closed for writing.",
                                           this));
-    
+
     if (_binaryOut == null)
       _binaryOut = new WebSocketOutputStream(_controller.getWriteStream(),
                                              TempBuffer.allocate().getBuffer());
-    
+
     _binaryOut.init();
-    
+
     return _binaryOut;
   }
 
@@ -156,45 +156,45 @@ class WebSocketContextImpl
                                      TempBuffer.allocate().getBuffer());
       _textWriter = new WebSocketPrintWriter(_textOut);
     }
-    
+
     _textOut.init();
-    
+
     return _textWriter;
   }
-  
+
   @Override
   public void pong(byte []value)
     throws IOException
   {
     WriteStream out = _controller.getWriteStream();
-    
+
     byte []bytes = value;
-        
+
     out.write(0x8a);
     out.write(bytes.length);
     out.write(bytes);
     out.flush();
   }
-  
+
   public boolean isClosed()
   {
     return _isWriteClosed.get();
   }
-  
+
   @Override
   public void close()
   {
     close(1000, "ok");
   }
-    
+
   @Override
   public void close(int code, String message)
   {
     if (_isWriteClosed.getAndSet(true))
       return;
-    
+
     WriteStream out = _controller.getWriteStream();
-    
+
     try {
       if (code <= 0) {
         out.write(0x88);
@@ -202,7 +202,7 @@ class WebSocketContextImpl
       }
       else {
         byte []bytes = message.getBytes("utf-8");
-        
+
         out.write(0x88);
         out.write(0x02 + bytes.length);
         out.write((code >> 8) & 0xff);
@@ -221,35 +221,35 @@ class WebSocketContextImpl
   public void disconnect()
   {
     _isWriteClosed.set(true);
-    
+
     try {
       _controller.complete();
     } finally {
       IoUtil.close(_is);
     }
   }
-  
+
   //
   // duplex callbacks
   //
-  
+
   void onStart()
     throws IOException
   {
     _listener.onStart(this);
   }
-  
+
   @Override
   public void flush()
     throws IOException
   {
     WriteStream out = _controller.getWriteStream();
-    
+
     out.flush();
   }
 
   @Override
-  public void onStart(SocketLinkDuplexController context) 
+  public void onStart(SocketLinkDuplexController context)
     throws IOException
   {
   }
@@ -264,16 +264,16 @@ class WebSocketContextImpl
       }
     } while (_request.getBufferAvailable() > 0);
   }
-  
+
   private boolean readFrame()
     throws IOException
-  {  
+  {
     if (! _is.readFrameHeader()) {
       return false;
     }
 
     int opcode = _is.getOpcode();
-    
+
     switch (opcode) {
     case OP_BINARY:
       if (_binaryIn == null)
@@ -300,15 +300,15 @@ class WebSocketContextImpl
 
     default:
       log.fine(this + " unexpected opcode " + opcode);
-      
+
       // XXX:
       disconnect();
       return false;
     }
-    
+
     return true;
   }
-  
+
   protected WebSocketInputStream createWebSocketInputStream(FrameInputStream is)
     throws IOException
   {
