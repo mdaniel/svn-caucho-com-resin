@@ -283,8 +283,7 @@ public class WebSocketReader extends Reader
   public void close()
   throws IOException
   {
-    while (_length > 0 && !_isFinal) {
-      skip(_length);
+    while (read() >= 0) {
     }
   }
 }

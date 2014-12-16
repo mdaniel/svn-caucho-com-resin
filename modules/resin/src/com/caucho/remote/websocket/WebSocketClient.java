@@ -29,23 +29,28 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.websocket.WebSocketContext;
-import com.caucho.websocket.WebSocketEncoder;
-import com.caucho.websocket.WebSocketListener;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.websocket.WebSocketContext;
+import com.caucho.websocket.WebSocketEncoder;
+import com.caucho.websocket.WebSocketListener;
 
 /**
  * WebSocketClient
@@ -78,7 +83,9 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   
   private FrameInputStream _frameIs;
   private WebSocketInputStream _wsIs;
+  
   private WebSocketOutputStream _wsOs;
+  private WebSocketWriter _wsWriter;
   
   private WebSocketWriter _wsWriter;
   
@@ -426,6 +433,14 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     
     return new WebSocketPrintWriter(_wsWriter);
   }
+
+      _wsWriter = new WebSocketWriter(os, new byte[4096]);
+    }
+
+    _wsWriter.init();
+
+    return new WebSocketPrintWriter(_wsWriter);
+   }
 
   @Override
   public long getTimeout()
