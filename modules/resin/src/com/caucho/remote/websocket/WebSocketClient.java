@@ -434,14 +434,6 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     return new WebSocketPrintWriter(_wsWriter);
   }
 
-      _wsWriter = new WebSocketWriter(os, new byte[4096]);
-    }
-
-    _wsWriter.init();
-
-    return new WebSocketPrintWriter(_wsWriter);
-   }
-
   @Override
   public long getTimeout()
   {
