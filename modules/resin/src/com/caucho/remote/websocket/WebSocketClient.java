@@ -87,8 +87,6 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   private WebSocketOutputStream _wsOs;
   private WebSocketWriter _wsWriter;
   
-  private WebSocketWriter _wsWriter;
-  
   public WebSocketClient(String url,
                          WebSocketListener listener)
   {
