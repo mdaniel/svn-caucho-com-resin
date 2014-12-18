@@ -370,7 +370,7 @@ public final class BrokerServiceImpl
     
     String podName = name.substring(2, p);
     
-    PodBartender pod = _bartender.createPodStub(podName);
+    PodBartender pod = _bartender.findPod(podName);
     
     ServerBartender server = pod.getNode(0).getServer(0).getServer();
     
