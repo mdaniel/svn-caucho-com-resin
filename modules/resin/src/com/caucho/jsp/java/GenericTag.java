@@ -1007,6 +1007,14 @@ abstract public class GenericTag extends JspContainerNode
 
     return false;
   }
+  
+  /**
+   * Returns true if the tag instance can be reused
+   */
+  protected boolean isReuse()
+  {
+    return _gen.getRecycleTags();
+  }
 
   /**
    * Returns true if the tag instance has been declared

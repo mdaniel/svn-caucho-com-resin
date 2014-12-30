@@ -47,6 +47,7 @@ public class CustomSimpleTag extends GenericTag
   /**
    * Simple tags can't be reused.
    */
+  @Override
   public boolean isReuse()
   {
     return false;
@@ -157,7 +158,7 @@ public class CustomSimpleTag extends GenericTag
     throws Exception
   {
     String name = _tag.getId();
-
+    
     if (! isReuse()) {
       generateTagInit(out);
     }

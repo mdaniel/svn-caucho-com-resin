@@ -64,17 +64,25 @@ public class CustomTag extends GenericTag
       out.println(" get" + _tag.getId() + "(PageContext pageContext, javax.servlet.jsp.tagext.JspTag _jsp_parent_tag) throws Throwable");
       out.println("{");
       out.pushDepth();
-    
-      out.println("if (" + _tag.getId() + " == null) {");
-      out.pushDepth();
+      
+      if (! isReuse()) {
+        generateTagRelease(out);
+        
+        generateTagInit(out);
+      }
+      else {
+        out.println("if (" + _tag.getId() + " == null) {");
+        out.pushDepth();
 
-      generateTagInit(out);
-    
-      out.popDepth();
-      out.println("}");
+        generateTagInit(out);
+      
+        out.popDepth();
+        out.println("}");
+      }
+      
       out.println();
       out.println("return " + _tag.getId() + ";");
-    
+      
       out.popDepth();
       out.println("}");
     }
@@ -90,8 +98,14 @@ public class CustomTag extends GenericTag
     throws Exception
   {
     if (isDeclaringInstance()) {
-      out.println("if (" + _tag.getId() + " != null)");
-      out.println("  " + _tag.getId() + ".release();");
+      out.println("if (" + _tag.getId() + " != null) {");
+      out.pushDepth();
+      
+      out.println(_tag.getId() + ".release();");
+      out.println(_tag.getId() + " = null;");
+      
+      out.popDepth();
+      out.println("}");
     }
     
     super.generateTagRelease(out);
@@ -130,7 +144,7 @@ public class CustomTag extends GenericTag
       out.println("com.caucho.jsp.BodyContentImpl " + tagHackVar + " = null;");
     else
       tagHackVar = "out";
-
+    
     if (! isDeclared()) {
       out.println(name + " = _jsp_state.get" + name + "(pageContext, _jsp_parent_tag);");
     }
