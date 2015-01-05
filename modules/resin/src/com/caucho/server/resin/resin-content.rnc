@@ -710,6 +710,9 @@ r_server-Content =
   (attribute allow-non-reserved-ip { r_boolean-Type }
    | element allow-non-reserved-ip  { r_boolean-Type })?
    
+ & (attribute allow-foreign-ip { r_boolean-Type }
+   | element allow-foreign-ip  { r_boolean-Type })?
+   
  & (attribute backup { r_boolean-Type }
     | element backup { r_boolean-Type })?
 

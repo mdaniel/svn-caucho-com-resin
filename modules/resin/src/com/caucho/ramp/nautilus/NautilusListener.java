@@ -141,4 +141,11 @@ class NautilusListener
     // TODO Auto-generated method stub
     return null;
   }
+  
+  @Override
+  public ServiceRefAmp createGatewayRef(String address)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

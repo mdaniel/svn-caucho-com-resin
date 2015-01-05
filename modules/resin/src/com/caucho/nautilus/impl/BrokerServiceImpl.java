@@ -330,15 +330,15 @@ public final class BrokerServiceImpl
     if (name.startsWith("///")) {
       String tail = name.substring(2);
       
-      name = "//" + _pod.getId() + tail;
+      name = "//" + _pod.getName() + tail;
     }
     else if (name.startsWith("//")) {
     }
     else if (name.startsWith("/")) {
-      name = "//" + _pod.getId() + name;
+      name = "//" + _pod.getName() + name;
     }
     else {
-      name = "//" + _pod.getId() + "/" + name;
+      name = "//" + _pod.getName() + "/" + name;
     }
     
     QueueService queue = _queueNameMap.get(name);
