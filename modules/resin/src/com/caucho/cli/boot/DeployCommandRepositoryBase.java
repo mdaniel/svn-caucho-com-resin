@@ -155,17 +155,17 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
   { 
     StringBuilder sb = new StringBuilder();
     
-    sb.append("bfs:///system/webapp/deploy");
-    
+    sb.append("bfs:///system/webapps");
+
+    /*
     String cluster = server.getCluster(args);
-    
-    
     
     if (cluster == null) {
       cluster = ClusterConfigBoot.DEFAULT_NAME;
     }
     
     sb.append("/").append(cluster);
+    */
     
     String host = args.getArg("virtual-host");
     
@@ -176,6 +176,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
     sb.append("/").append(host);
     
     sb.append("/").append(name);
+    sb.append(".war");
     
     return sb.toString();
   }

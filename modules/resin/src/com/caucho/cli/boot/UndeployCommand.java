@@ -51,6 +51,12 @@ public class UndeployCommand extends DeployCommandRepositoryBase
     
     super.initBootOptions();
   }
+  
+  @Override
+  public int getTailArgsMinCount()
+  {
+    return 0;
+  }
 
   @Override
   public String getDescription()
