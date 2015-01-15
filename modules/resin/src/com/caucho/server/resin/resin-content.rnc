@@ -95,6 +95,10 @@ r_cluster-Content =
   & r_persistent-store?
 
   & r_ping*
+  
+  & r_pod-default*
+  
+  & r_pod-deploy*
 
   & r_proxy-cache?
 
@@ -590,6 +594,15 @@ r_pod = element pod {
   attribute id { string }?
 
   & r_server+
+}
+
+r_pod-deploy = element pod-deploy {
+  (attribute path { string }
+   | element path { string })
+}
+
+r_pod-default = element pod-default {
+  r_env-Basis
 }
 
 r_resin = element resin {

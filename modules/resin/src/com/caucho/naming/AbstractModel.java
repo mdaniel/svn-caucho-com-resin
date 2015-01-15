@@ -29,8 +29,9 @@
 
 package com.caucho.naming;
 
-import javax.naming.NamingException;
 import java.util.List;
+
+import javax.naming.NamingException;
 
 /**
  * Abstract data model behind Resin's JNDI.
