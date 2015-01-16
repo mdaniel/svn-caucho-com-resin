@@ -86,7 +86,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     super(injectManager, beanType.getBaseType(), beanType);
 
     _annotatedType = beanType;
-
+    
     /*
     if (beanType.getType() instanceof Class)
       validateType((Class) beanType.getType());

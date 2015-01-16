@@ -167,8 +167,11 @@ public class EjbConfigManager extends EjbConfig {
       AnnotatedType<X> annType = manager.createAnnotatedType(type);
       
       if (annType.isAnnotationPresent(ManagedBean.class)) {
-        // ioc/00b0
-        manager.discoverBean(annType);
+        // ioc/00b0 vs ioc/00b2
+        
+        if (manager.getBeans(annType.getBaseType()).size() == 0) {
+          manager.discoverBean(annType);
+        }
         return;
       }
       
