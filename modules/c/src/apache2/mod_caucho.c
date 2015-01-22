@@ -97,7 +97,7 @@ cse_log(char *fmt, ...)
   pid = (int) getpid();
 
   time(&t);
-  strftime(timestamp, sizeof(timestamp), "[%m/%b/%Y:%H:%M:%S %z]",
+  strftime(timestamp, sizeof(timestamp), "[%d/%b/%Y:%H:%M:%S %z]",
 	   localtime(&t));
 
 #ifdef WIN32
