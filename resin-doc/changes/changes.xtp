@@ -12,12 +12,13 @@
 
 <s2 title="4.0.43 - in progress">
 <ul>
+<li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
 </ul>
 </s2>
 
 <s2 title="4.0.42 - 2015-01-20">
 <ul>
-<li>websocket: read loop needs to use getAvailableBuffer() (ep by Arun Durairaju)</li>
+<li>websocket: read loop needs to use getAvailableBuffer() (rep by Arun Durairaju)</li>
 <li>bam: too much logging for queue full (rep by Dan Stilts)</li>
 <li>bam: use smallest queue for remoting instead of round-robin to handle frozen connections (rep by Dan Stilts)</li>
 <li>comet: cleanup of comet state machine (#5826, rep by S. Nobuaki)</li>
