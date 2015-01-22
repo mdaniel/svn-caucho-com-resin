@@ -41,6 +41,7 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netdb.h>
 #include <unistd.h>
 #ifdef SHM
@@ -307,6 +308,7 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
   int flags;
   int error = 0;
   unsigned int len = sizeof(error);
+  int nodelay_flag = 1;
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -315,6 +317,8 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
 	 __FILE__, __LINE__));
     return -1; /* bad socket */
   }
+  
+  setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void*) &nodelay_flag, sizeof(int));
 
   if (sock < FD_SETSIZE) {
     flags = fcntl(sock, F_GETFL);
