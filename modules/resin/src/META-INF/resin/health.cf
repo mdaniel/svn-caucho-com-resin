@@ -60,10 +60,6 @@ health:JvmDeadlockHealthCheck;
 health:MemoryTenuredHealthCheck {
   memory-free-min 1m;
 }
-  
-health:MemoryPermGenHealthCheck {
-  memory-free-min 1m;
-}
 
 #
 # Dump heap if memory pools are critically low 
@@ -71,7 +67,6 @@ health:MemoryPermGenHealthCheck {
 health:DumpHeap {
   health:Or {
     health:IfHealthCritical healthCheck="${memoryTenuredHealthCheck}";
-    health:IfHealthCritical healthCheck="${memoryPermGenHealthCheck}";
   }
   health:IfNotRecent time="30m";
 }
@@ -157,14 +152,6 @@ health:JmxMeter "JVM|Memory|Heap Memory Used"
 health:JmxMeter "JVM|Memory|Heap Memory Free"
                 "caucho:type=Server"
                 RuntimeMemoryFree;
-
-health:JmxMeter "JVM|Memory|PermGen Memory Used"
-                "caucho:type=Memory"
-                PermGenUsed;
-
-health:JmxMeter "JVM|Memory|PermGen Memory Free"
-                "caucho:type=Memory"
-                PermGenFree;
 
 health:JmxMeter "JVM|Memory|Tenured Memory Used"
                 "caucho:type=Memory"
@@ -485,8 +472,6 @@ health:MeterGraphPage Snapshot columns=3 {
       meter "JVM|Memory|Heap Memory Free";
       meter "JVM|Memory|Tenured Memory Used";
       meter "JVM|Memory|Tenured Memory Free";
-      meter "JVM|Memory|PermGen Memory Used";
-      meter "JVM|Memory|PermGen Memory Free";
     }
       
     graph "Physical Memory" {
