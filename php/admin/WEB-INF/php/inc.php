@@ -593,10 +593,11 @@ function display_header($script, $title, $server,
   }
 
   $g_next_url = $next_url;
-  $new_s = get_request_param("new_s");
+  $new_s = $_POST["new_s"];
   $s = get_request_param("s");
 
   if ($new_s !== NULL && $new_s != $s) {
+    $next_url = preg_replace('/([?|&]s=)\d+/', '${1}' . $new_s, $next_url);
     header("Location: ${next_url}");
     return false;
   }
