@@ -164,8 +164,9 @@ public class DataStore {
     }
 
     _alarm = new Alarm(new DeleteAlarm());
-    _alarm.queue(_expireOrphanTimeout);
-
+    //_alarm.queue(_expireOrphanTimeout);
+    _alarm.queue(60000);
+    
     //_alarm.queue(0);
   }
 
@@ -721,7 +722,7 @@ public class DataStore {
           pStmt.setLong(1, did);
           pStmt.execute();
         }
-
+        
         isValid = true;
       } catch (SQLException e) {
         e.printStackTrace();
