@@ -10,7 +10,14 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.43 - in progress">
+<s2 title="4.0.44 - in progress">
+<ul>
+<li>session: orphan deletion throttling needs faster retry time (rep by Thomas Rogan)</li>
+<li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.43 - 2015-02-10">
 <ul>
 <li>openssl: use SSL_free in connection close</li>
 <li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>

@@ -80,7 +80,7 @@ public class DataRemoveActor extends AbstractTaskWorker {
       if (dataStore.isClosed()) {
         return 0;
       }
-      
+
       if (item != null) {
         _dataStore.remove(item.getDataId());
       }
