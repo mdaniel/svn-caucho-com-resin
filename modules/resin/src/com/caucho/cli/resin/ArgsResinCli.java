@@ -54,7 +54,6 @@ import com.caucho.cli.boot.StartCommandGui;
 import com.caucho.cli.boot.StartWithForegroundCommand;
 import com.caucho.cli.boot.StatusCommand;
 import com.caucho.cli.boot.StoreLoadCommand;
-import com.caucho.cli.boot.StoreSaveCommand;
 import com.caucho.cli.boot.ThreadDumpCommand;
 import com.caucho.cli.boot.UndeployCommand;
 import com.caucho.cli.boot.WebAppDeployCommand;
@@ -75,6 +74,7 @@ import com.caucho.cli.server.ProgramInfoDaemon;
 import com.caucho.cli.server.ShutdownCommand;
 import com.caucho.cli.server.StartCommand;
 import com.caucho.cli.server.StopCommand;
+import com.caucho.cli.server.StoreSaveCommand;
 import com.caucho.cli.shell.EnvCli;
 import com.caucho.cli.spi.CommandManager;
 

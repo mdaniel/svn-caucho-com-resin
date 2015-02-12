@@ -66,7 +66,7 @@ public class ResinMain
       ServerBuilder.validateEnvironment();
       
       ArgsServerBase args = new ArgsServerBase(argv);
-      args.initLogging();
+      args.getEnv().initLogging();
       args.initHomeClassPath();
       args.doCommand();
       /*

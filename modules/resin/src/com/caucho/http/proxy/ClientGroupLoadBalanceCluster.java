@@ -29,13 +29,9 @@
 
 package com.caucho.http.proxy;
 
-import io.baratine.events.EventService;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.amp.AmpSystem;
-import com.caucho.bartender.BartenderSystem;
 import com.caucho.bartender.ServerBartender;
 import com.caucho.bartender.network.ServerNetwork;
 import com.caucho.bartender.pod.PodBartender;
@@ -70,7 +66,7 @@ class ClientGroupLoadBalanceCluster
     if (pod == null)
       throw new NullPointerException();
     
-    EventService eventService = AmpSystem.getCurrent().getEventService();
+    // EventService eventService = AmpSystem.getCurrent().getEventService();
     //eventService.subscribe(ServerBartenderTopologyEvents.class, this);
     // pod.addServerListener(this);
     
