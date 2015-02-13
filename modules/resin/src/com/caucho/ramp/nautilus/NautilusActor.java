@@ -41,6 +41,7 @@ import com.caucho.amp.actor.ActorAmpBase;
 import com.caucho.amp.jamp.OutJamp;
 import com.caucho.amp.message.HeadersNull;
 import com.caucho.amp.spi.ActorAmp;
+import com.caucho.amp.spi.ServiceRefAmp;
 import com.caucho.nautilus.Nautilus;
 import com.caucho.nautilus.ReceiverBuilder;
 import com.caucho.nautilus.SenderBuilder;
@@ -89,7 +90,7 @@ public class NautilusActor extends ActorAmpBase
   }
   
   @Override
-  public ActorAmp onLookup(String path)
+  public ActorAmp onLookup(String path, ServiceRefAmp parentRef)
   {
     BrokerNautilusImpl.getCurrent();
     
