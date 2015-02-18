@@ -125,7 +125,9 @@ public abstract class Section extends ContainerNode {
     for (int i = 0; i < href.length(); i++) {
       char ch = href.charAt(i);
       
-      if (Character.isLetterOrDigit(ch))
+      if (Character.isLetterOrDigit(ch)
+          || ch == ':'  // for tag links like <resin:Dispatch>
+          || ch == '-') // for tag links like <accept-listen-backlog>
         sb.append(ch);
     }
 

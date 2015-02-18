@@ -113,7 +113,10 @@ public class Anchor extends FormattedText {
       }
     }
 
-    setDefaultText(_configTag);
+    if (_configTag != null) {      
+      setDefaultText("<" + _configTag + ">");
+    }
+    
     super.writeHtml(out);
 
     if (isLinked)
