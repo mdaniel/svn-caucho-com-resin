@@ -433,6 +433,10 @@ div.not-selected {
   padding-bottom : 1px;
 }
 
+div.not-selected:hover {
+  background-color: yellow;
+}
+
 ul.none {
   list-style : none
 }
