@@ -125,9 +125,11 @@ public abstract class Section extends ContainerNode {
     for (int i = 0; i < href.length(); i++) {
       char ch = href.charAt(i);
       
+      // XXX: nam 2015-02-23: why clean href?
       if (Character.isLetterOrDigit(ch)
           || ch == ':'  // for tag links like <resin:Dispatch>
-          || ch == '-') // for tag links like <accept-listen-backlog>
+          || ch == '-'  // for tag links like <accept-listen-backlog>
+          || ch == '.') // for links like <a href="config-el.xtp#fmt.sprintf">...
         sb.append(ch);
     }
 
