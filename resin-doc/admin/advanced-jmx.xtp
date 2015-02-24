@@ -1,7 +1,7 @@
 <document>
 <header>
 <product>resin</product>
-<title>JMX Consoles</title>
+<title>JMX</title>
 <description>
 <p>
 JMX Consoles provide access to both the MBean's that Resin publishes for

@@ -193,7 +193,7 @@ in.</p>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a javadoc="com.caucho.http.log.AccessLog"/>.  
-<a href="admin/config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
+<a doc="admin/config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 
@@ -7403,17 +7403,47 @@ javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
 </example>
 
 <deftable title="log EL variable 'log' is a LogRecord">
-<tr><th>Accessor</th><th>Value
-</th></tr><tr><td>${log.level}</td><td>The level of the log record
-</td></tr><tr><td>${log.name}</td><td>The source loggers name
-</td></tr><tr><td>${log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
-</td></tr><tr><td>${log.message}</td><td>The message, with no formatting or localization
-</td></tr><tr><td>${log.millis}</td><td>event time in milliseconds since 1970
-</td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${log.thrown}</td><td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
-</td></tr></deftable>
+<tr>
+  <th>Accessor</th>
+  <th>Value</th>
+</tr>
+<tr>
+  <td>${log.level}</td>
+  <td>The level of the log record</td>
+</tr>
+<tr>
+  <td>${log.name}</td>
+  <td>The source loggers name</td>
+</tr>
+<tr>
+  <td>${log.shortName}</td>
+  <td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"</td>
+</tr>
+<tr>
+  <td>${log.message}</td>
+  <td>The message, with no formatting or localization</td>
+</tr>
+<tr>
+  <td>${log.millis}</td>
+  <td>event time in milliseconds since 1970</td>
+</tr>
+<tr>
+  <td>${log.sourceClassName}</td>
+  <td>Get the name of the class that issued the logging request (may not be available at runtime)</td>
+</tr>
+<tr>
+  <td>${log.sourceMethodName}</td>
+  <td>Get the name of the method that issued the logging request (may not be available at runtime)</td>
+</tr>
+<tr>
+  <td>${log.threadID}</td>
+  <td>Get an <var>int</var> identifier of the thread where the logging request originated</td>
+</tr>
+<tr>
+  <td>${log.thrown}</td>
+  <td>Get any <code>java.lang.Throwable</code> associated with the logging request</td>
+</tr>
+</deftable>
 
 <p>You can also use the <a href="admin/config-el.xtp">Environment EL variables</a> in your format string:</p>
 

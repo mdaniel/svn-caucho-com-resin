@@ -821,7 +821,6 @@ CPU spinning thread.</li>
 <li>time self(s) - time in seconds for the method.</li>
 <li>% sum - percentage of all methods time. All the method times are added, and
 this method's own time is computed as a percentage.</li>
-</li>
 </ul>
 
 <deftable title="profile options">

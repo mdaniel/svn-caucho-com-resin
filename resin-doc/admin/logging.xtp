@@ -38,11 +38,11 @@ to be output.</p>
 &lt;/resin>  
 </example>
 
-<p>The &lt;logger> configures the logging level for a named logger.
-Because a &lt;logger> will generally have several log-handlers, both
+<p>The <a config-tag="logger"/> configures the logging level for a named logger.
+Because a <a config-tag="logger"/> will generally have several log-handlers, both
 the logger level and the log-handler level must match for
 the log to output. Since the logger and log-handler names
-are hierarchical, a "com.foo" &lt;logger> will enable "com.foo.bar".</p>
+are hierarchical, a "com.foo" <a config-tag="logger"/> will enable "com.foo.bar".</p>
 
 <example title="Example: logging at the 'fine' level in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -128,7 +128,7 @@ intended for application/library users.
 
 <p>
 The logger levels match the values defined by
-the JDK <a javadoc="java.util.logging.Level"/>.
+the JDK <code>java.util.logging.Level</code>.
 </p>
 
 <deftable title="Logging Level values">
@@ -192,13 +192,13 @@ avoid completely swallowing, or Hessian or XML protocol parsing</td>
 
 <s2 title="&lt;log-handler>">
    
-<p>Configure a log handler for the JDK java.util.logging.* API.
-java.util.logging has two steps: configure a set of log handlers,
-and configure the levels for each logger.  The &lt;log-handler> creates
+<p>Configure a log handler for the JDK <code>java.util.logging</code> API.
+<code>java.util.logging</code> has two steps: configure a set of log handlers,
+and configure the levels for each logger.  The <a config-tag="log-handler"/> creates
 a destination for logs, sets a minimum logging level for the handler,
 and attaches the handler to a logging name.</p>
 
-<p>In addition to configuring custom handlers, &lt;log-handler> has the
+<p>In addition to configuring custom handlers, <a config-tag="log-handler"/> has the
 most common configuration built-in: logging to a rotating file.  Most of the
 configuration attributes are used for the rotating file and are shared
 with the other logging configuration.</p>
@@ -330,7 +330,7 @@ percent codes which are substituted with time and date values.</p>
 <s2 title='log-handler archiving'>
 
 <p>The following example is a standard log handler writing to a rollover
-file.  Because the handler's level is "all", the &lt;logger> configuration
+file.  Because the handler's level is "all", the <a config-tag="logger"/> configuration
 will set the actual logging level.</p>
 
 <example title="Example: logging to a rollover file">
@@ -356,7 +356,7 @@ will set the actual logging level.</p>
 
 <example title="Example: logging everything to System.err">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;log-handler name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
+  &lt;log-handler name="" level="all" path="stderr:" timestamp="[%H:%M:%S.%s]"/&gt;
   ...
 &lt;/resin&gt;
 </example>
@@ -368,9 +368,9 @@ will set the actual logging level.</p>
 
 &lt;resin&gt;
   ...
-  &lt;log-handler name='' level='finer' path='log/debug.log'
+  &lt;log-handler name="" level="finer" path="log/debug.log"
        timestamp="[%H:%M:%S.%s]"
-       rollover-period='1h' rollover-count='1'/&gt;
+       rollover-period="1h" rollover-count="1"/&gt;
   ...
 &lt;/resin&gt;
 </example>
@@ -379,15 +379,15 @@ will set the actual logging level.</p>
 
 <s2 title="log-handler EL formatting">
 
-<p>The <var>format</var> for Resin's log-handler tags specifies
+<p>The <code>format</code> for Resin's log-handler tags specifies
 a format string for each log message.  <code>format</code>
 recognizes EL-expressions. The EL variable <var>log</var> is a 
-<a javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
+<a javadoc="com.caucho.log.ELFormatter#ELFormatterLogRecord"/>
  object.</p>
 
 <example title="Example: log format string">
 
-&lt;log-handler name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+&lt;log-handler name="" level="all" path="stderr:" timestamp="[%H:%M:%S.%s]"
      format=" ${log.level} ${log.name} ${log.message}"/&gt;
 
 </example>
@@ -431,7 +431,7 @@ recognizes EL-expressions. The EL variable <var>log</var> is a
 </tr>
 <tr>
   <td>${log.thrown}</td>
-  <td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
+  <td>Get any <code>java.lang.Throwable</code> associated with the logging request
   </td>
 </tr>
 <tr>
@@ -481,7 +481,7 @@ recognizes EL-expressions. The EL variable <var>log</var> is a
 space pad the values and make the results look a little nicer:</p>
 
 <example title="fmt.sprintf() in log format string">
-&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+&lt;log name="" level="all" path="stderr:" timestamp="[%H:%M:%S.%s]"
      format=" ${fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}">
 </example>
 
@@ -497,7 +497,7 @@ space pad the values and make the results look a little nicer:</p>
 <p><a href="config-el.xtp#fmt.sprintf">fmt.sprintf()</a> and <a href="config-el.xtp#fmt.timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
 
 <example title="CSV log files">
-&lt;log name='' level='all' path='log/debug.csv' timestamp=""
+&lt;log name="" level="all" path="log/debug.csv" timestamp=""
      format="${fmt.sprintf('%vs,%d,%d,%vs,%vs',fmt.timestamp('%Y-%m-%d %H:%M:%S.%s'), 
                log.threadID, log.level.intLevel(), log.loggerName, log.message)}"/&gt;
 </example>
@@ -568,7 +568,7 @@ public class Foo {
 
 <p>Custom handlers and log handlers from libraries can be configured
 with Resin's logging system, using the CanDI XML configuration syntax.
-The custom handler is a child of &lt;log-handler> and configured with
+The custom handler is a child of <a config-tag="log-handler"/> and configured with
 any argument or setters necessary. Resin will install the handler just
 like one of its own handlers.</p>
 
@@ -618,7 +618,7 @@ public class MyHandler extends Handler
 
 <p>The formatting of a log message can be customized just like the
 log handler. The Formatter is a java.util.logging interface which Resin's
-logging understands and can be configured with &lt;log-handler>.</p>
+logging understands and can be configured with <a config-tag="log-handler"/>.</p>
 
 <p>Sites may wish to change the formatting of log messages to gather
 information more appropriate for the site.  The formatter can be
@@ -683,17 +683,17 @@ target service.</p>
 
 <s3 name="event" title="EventLogHandler">
 
-<p>The event handler publishes a <code>LogEvent</code> to the CanDI event
+<p>The event handler publishes a <code>java.util.logging.LogRecord</code> to the CanDI event
 system.  Any CanDI component with an <code>@Observes</code> method for
-<code>LogEvent</code> will receive the notifications.  The log handler
-classname is <code>com.caucho.log.EventLogHandler</code>.</p>
+<code>LogRecord</code> will receive the notifications.  The log handler
+classname is <a javadoc="com.caucho.log.EventHandler"/>.</p>
 
 <example title="Example: event handler configuration">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
    xmlns:resin="urn:java:com.caucho.resin">
 
   &lt;logger name="com.foo">
-    &lt;resin:EventLogHandler level="warning"/>
+    &lt;resin:EventHandler level="warning"/>
   &lt;/logger>
 
 &lt;/web-app>
@@ -724,7 +724,7 @@ classname is <code>com.caucho.log.EventLogHandler</code>.</p>
 
 </s3>
 
-<s3 name="mail" title="MailLogHandler (4.0.5)">
+<s3 name="mail" title="MailLogHandler (4.0.5+)">
 
 <p>The Mail handler sends log messages to an email address.  To keep the
 number of mails down, the handler will concatenate messages and only send
@@ -796,11 +796,11 @@ them after a period of time.
 &lt;/resin>
 </example>
 
-<p>The possible values for <var>facility</var> are user, mail, daemon, auth, lpr,
+<p>The possible values for <code>&lt;facility&gt;</code> are user, mail, daemon, auth, lpr,
 news, uucp, cron, authpriv, ftp, local0, local1, local2, local3, local4,
 local5, local6, local7. The default is <i>daemon</i>.</p>
 
-<p>The possible values for <var>severity</var> are emerg, alert, crit, err,
+<p>The possible values for <code>&lt;severity&gt;</code> are emerg, alert, crit, err,
 warning, notice, info, debug. The default is <i>info</i>.</p>
 
 <p>See also `<code>man 3 syslog</code>' and `<code>man syslog.conf</code>'.
@@ -849,7 +849,7 @@ log file is started.</p>
 can contain regular characters, <a href="config-el.xtp">EL Environment
 variables</a>, and % codes that capture the current date and time.  The % codes
 are the same as the ones used for <code>timestamp</code> 
-(see <a href="#timestamp">Timestamp format string)</a>.</p>
+(see <a href="#log-handlertimestamp">Timestamp format string)</a>.</p>
 
 <p>The default behaviour depends on the value of rollover-period.  If
 rollover-period is greater than one day, or is not being used because
@@ -897,8 +897,8 @@ extension of the archive-format determines the compression.</p>
 
 <p>Configure the destination for <var>System.out</var>.</p>
 
-<p>Usage of the <var>stdout-log</var> overrides a previous usage.  For
-example, specifying <var>stdout-log</var> as a child of a 
+<p>Usage of the <code>&lt;stdout-log&gt;</code> overrides a previous usage.  For
+example, specifying <code>&lt;stdout-log&gt;</code> as a child of a 
 <a config-tag="web-app"/> causes a redirection of <var>System.out</var> for
 that web application only, and will override the <var>System.out</var>
 location in the enclosing <a config-tag="host"/>.</p>
@@ -916,7 +916,7 @@ which process owns the file.</warn>
 <tr>
   <td>archive-format</td>
   <td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
+        see <a href="#Logrotationandarchiving">Rollovers</a>.
     </td>
   <td>see below</td>
 </tr>
@@ -933,14 +933,14 @@ which process owns the file.</warn>
 <tr>
   <td>rollover-count</td>
   <td>maximum number of rollover files before the oldest ones get overwritten.
-      See <a href="#rollover">Rollovers</a>. 
+      See <a href="#Logrotationandarchiving">Rollovers</a>. 
     </td>
  <td>none</td>
 </tr>
 <tr>
   <td>rollover-period</td>
   <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+        months (1M), or hours (1h). See <a href="#Logrotationandarchiving">Rollovers</a>. 
     </td>
  <td>none</td>
 </tr>
@@ -948,14 +948,14 @@ which process owns the file.</warn>
   <td>rollover-size</td>
   <td>maximum size of the file before a rollover occurs, in bytes (50000), 
         kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
+        See <a href="#Logrotationandarchiving">Rollovers</a>.
     </td>
   <td>1mb
   </td>
 </tr>
 <tr>
   <td>timestamp</td>
-  <td>a timestamp <a href="#timestamp">format string</a> to use at the beginning of each log line.</td>
+  <td>a timestamp <a href="#log-handlertimestamp">format string</a> to use at the beginning of each log line.</td>
   <td>no timestamp</td>
 </tr>
 </deftable-childtags>
@@ -967,7 +967,7 @@ which process owns the file.</warn>
 </pre>
 
 <p>The following example configures <var>System.out</var> for a 
-<a config-tag="host"/>.  Unless a <a config-tag="web-app">web-app</a> overrides
+<a config-tag="host"/>.  Unless a <a config-tag="web-app"/> overrides
 with it's own <code>stdout-log</code>, all web-apps in the host will write to
 the same output file.</p>
 
@@ -989,8 +989,8 @@ the same output file.</p>
 
 <p>Configure the destination for <var>System.err</var>.</p>
 
-<p>Usage of the <var>stderr-log</var> overrides a previous usage.  For
-example, specifying <var>stderr-log</var> as a child of a 
+<p>Usage of the <code>&lt;stderr-log&gt;</code> overrides a previous usage.  For
+example, specifying <code>&lt;stderr-log&gt;</code> as a child of a 
 <a config-tag="web-app"/> causes a redirection of <var>System.err</var> for
 that web application only, and will override the <var>System.err</var>
 location in the enclosing <a config-tag="host"/>.</p>
@@ -1005,37 +1005,48 @@ which process owns the file.</warn>
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>path
-    </td><td>Output path for the stream, see <a href="#path">"Log Paths"</a>.  
-    </td><td>required
-</td></tr>
+<tr>
+  <td>path</td>
+  <td>Output path for the stream, see <a href="#path">"Log Paths"</a>.</td>
+  <td>required</td>
+</tr>
 <tr>
   <td>path-format</td>
   <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
   <td>optional</td>
 </tr>
-<tr><td>timestamp
-    </td><td>a timestamp <a href="#timestamp">format string</a> 
-        to use at the beginning of each log line.
-    </td><td>no timestamp
-    </td></tr><tr><td>rollover-count
-    </td><td>maximum number of rollover files before the oldest ones get overwritten.
-        See <a href="#rollover">Rollovers</a>. 
-    </td><td>none
-</td></tr><tr><td>rollover-period
-    </td><td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
-    </td><td>none
-</td></tr><tr><td>rollover-size
-    </td><td>maximum size of the file before a rollover occurs, in bytes (50000), 
+<tr>
+  <td>timestamp</td>
+  <td>a timestamp <a href="#log-handlertimestamp">format string</a> 
+        to use at the beginning of each log line.</td>
+  <td>no timestamp</td>
+</tr>
+<tr>
+  <td>rollover-count</td>
+  <td>maximum number of rollover files before the oldest ones get overwritten.
+        See <a href="#Logrotationandarchiving">Rollovers</a>.</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>rollover-period</td>
+  <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#Logrotationandarchiving">Rollovers</a>.</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>rollover-size</td>
+  <td>maximum size of the file before a rollover occurs, in bytes (50000), 
         kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
-    </td><td>1mb
-</td></tr><tr><td>archive-format
-    </td><td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
-    </td><td>see below
-</td></tr></deftable-childtags>
+        See <a href="#Logrotationandarchiving">Rollovers</a>.</td>
+  <td>1mb</td>
+</tr>
+<tr>
+  <td>archive-format</td>
+  <td>the format for the archive filename when a rollover occurs,
+        see <a href="#Logrotationandarchiving">Rollovers</a>.</td>
+  <td>see below</td>
+</tr>
+</deftable-childtags>
 
 <p>The default archive format is
 </p><pre>
@@ -1044,7 +1055,7 @@ which process owns the file.</warn>
 </pre>
 
 <p>The following example configures <var>System.err</var> for a 
-<a config-tag="host"/>.  Unless a <a config-tag="web-app">web-app</a> overrides
+<a config-tag="host"/>.  Unless a <a config-tag="web-app"/> overrides
 with it's own <code>stderr-log</code>, all web-apps in the host will write to
 the same output file.</p>
 
@@ -1067,17 +1078,29 @@ the same output file.</p>
 <s1 name="path" title="Log Paths">
 
 <p><var>path</var> is used to configure a destination for the messages.  Typically,
-<code>access-log</code>, <code>stdout-log</code>, and <code>stderr-log</code> are configured
+<a config-tag="access-log"/>, <a config-tag="stdout-log"/>, and <a config-tag="stderr-log"/> are configured
 to go to files, and <code>log</code> is configured to go to a file or to
 <var>stderr</var> or <var>stdout</var> so that they show up on the console screen.
 </p>
 
 <deftable>
-<tr><th>Path</th><th>Result
-</th></tr><tr><td><var>filesystem path</var></td><td>output log entries to a file
-</td></tr><tr><td>stdout:</td><td>output log entries to stdout
-</td></tr><tr><td>stderr:</td><td>output log entries to stderr
-</td></tr></deftable>
+<tr>
+  <th>Path</th>
+  <th>Result</th>
+</tr>
+<tr>
+  <td><var>filesystem path</var></td>
+  <td>output log entries to a file</td>
+</tr>
+<tr>
+  <td>stdout:</td>
+  <td>output log entries to stdout</td>
+</tr>
+<tr>
+  <td>stderr:</td>
+  <td>output log entries to stderr</td>
+</tr>
+</deftable>
 
 <example title="Log messages to stdout">
   &lt;log name="" level="all" path="stdout:"/&gt;
@@ -1096,7 +1119,7 @@ of your filesystem path:</p>
 <s1 title="Custom Access Logs">
 
 <p>If you need to create a custom access log, you can create your
-own implementation extending com.caucho.http.log.AccessLog and
+own implementation extending <a javadoc="com.caucho.http.log.AccessLog"/> and
 configuring it.</p>
 
 <example title="Custom Configuration">
