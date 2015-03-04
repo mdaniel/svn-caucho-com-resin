@@ -29,8 +29,8 @@
 
 package com.caucho.server.cdi;
 
-import io.baratine.core.SessionService;
 import io.baratine.core.Service;
+import io.baratine.core.SessionService;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
