@@ -10,7 +10,7 @@ import io.baratine.core.Service;
 
 @Remote
 @ChannelScoped
-@Service("channel:///auth")
+@Service("session:///auth")
 public class ResinAuthService
 {
   private ChannelContext _ctx;

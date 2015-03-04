@@ -29,8 +29,7 @@
 
 package com.caucho.server.cdi;
 
-import io.baratine.core.ChannelService;
-import io.baratine.core.ResourceService;
+import io.baratine.core.SessionService;
 import io.baratine.core.Service;
 
 import java.lang.annotation.Annotation;
@@ -49,6 +48,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.amp.cdi.ActorManagerImpl;
+import com.caucho.amp.resource.ResourceService;
 import com.caucho.config.CauchoBean;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
@@ -134,7 +134,7 @@ public class CdiExtensionResin implements Extension {
     }
     */
     else if (annotatedType.isAnnotationPresent(Service.class)
-        || annotatedType.isAnnotationPresent(ChannelService.class)
+        || annotatedType.isAnnotationPresent(SessionService.class)
         || annotatedType.isAnnotationPresent(ResourceService.class)) {
              // || annotatedType.isAnnotationPresent(AmpPublish.class)) {
       ActorManagerImpl actorManager = ActorManagerImpl.getCurrent();
