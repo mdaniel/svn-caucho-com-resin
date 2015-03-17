@@ -42,6 +42,7 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
+import com.caucho.amp.Amp;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
@@ -339,6 +340,11 @@ public class ResinBeanContainer {
       
       if (_lifecycle.toActive()) {
         addCdiProducer();
+
+        Amp.setContextManager(Amp.newManagerBuilder()
+                                 .name("resin-bean-container")
+                                 .classLoader(_classLoader)
+                                 .build());
       }
 
       // env/0e81 vs env/0e3b
