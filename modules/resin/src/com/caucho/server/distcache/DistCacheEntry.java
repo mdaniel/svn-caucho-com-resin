@@ -38,7 +38,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 import com.caucho.cloud.topology.TriadOwner;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.LocalDataManager.DataItem;
+import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
@@ -442,8 +444,15 @@ public class DistCacheEntry {
     if (modifiedExpireTime < 0)
       modifiedExpireTime = config.getModifiedExpireTimeout();
     
-    if (valueHash == getMnodeEntry().getValueHash()
-        && flags == getMnodeEntry().getFlags()) {
+    long now = CurrentTime.getCurrentTime();
+    long delta = now - mnodeEntry.getLastAccessedTime();
+    
+    if (valueHash == mnodeEntry.getValueHash()
+        && flags == mnodeEntry.getFlags()
+        && delta < modifiedExpireTime
+        && delta < accessedExpireTime) {
+      // server/01nx
+      return;
     }
     
     int leaseOwner = getMnodeEntry().getLeaseOwner();

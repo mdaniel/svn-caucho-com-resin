@@ -71,6 +71,10 @@ abstract public class Column {
     _columnOffset = _row.getLength();
     _nullOffset = _row.getNullOffset();
     _nullMask = _row.getNullMask();
+    
+    if (_nullOffset < 0) {
+      throw new IllegalStateException();
+    }
   }
   
   /**
@@ -245,7 +249,12 @@ abstract public class Column {
    */
   public boolean isNull(byte []block, int rowOffset)
   {
-    return (block[rowOffset + _nullOffset] & _nullMask) == 0;
+    if (rowOffset < 0) {
+      return true;
+    }
+    else {
+      return (block[rowOffset + _nullOffset] & _nullMask) == 0;
+    }
   }
 
   /**

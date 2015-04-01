@@ -421,6 +421,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   {
     if (_wsWriter == null) {
       OutputStream os = _os;
+      
       if (os == null)
         throw new IllegalStateException(L.l("startTextMessage cannot be called with a closed context"));
       

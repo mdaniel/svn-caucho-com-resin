@@ -12,6 +12,18 @@
 
 <s2 title="4.0.44 - in progress">
 <ul>
+<li>class-loader: excessive reread of jar certificates (#5850, rep by konfetov)</li>
+<li>log: add sanity check for log rollover (#5845, rep by Keith F.)</li>
+<li>deploy (git): use utf-8 to store path names (#5874, rep by alpor9)</li>
+<li>websocket: setTimeout was being overridden by Port keepaliveTimeout (#5841, rep by A. Durairaju)</li>
+<li>jni: on windows, skip JNI for File metadata like length (#5865, rep by Mathias Lagerwall)</li>
+<li>db: isNull issues with left join (#5853, rep by Thomas Rogan)</li>
+<li>websocket: check for socket close on startTextMessage (#5837, rep by samadams)</li>
+<li>log: when log rollover fails, log to stderr (#5855, rep by Rock)</li>
+<li>filter: allow private instantiation (#5839, rep by V. Selvaggio)</li>
+<li>rewrite: added SetRequestCharacterEncoding (#5862, rep by Yoon)</li>
+<li>health: change health check timeout to critical instead of fatal to allow for development sleep (#5867)</li>
+<li>alarm: timing issue with warnings and alarm extraction (#4854, rep by SHinomiya Nobuaki)</li>
 <li>session: orphan deletion throttling needs faster retry time (rep by Thomas Rogan)</li>
 <li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
 </ul>

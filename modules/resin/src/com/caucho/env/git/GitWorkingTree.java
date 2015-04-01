@@ -41,6 +41,7 @@ import java.util.TreeMap;
 import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.util.ResinDeflaterOutputStream;
+import com.caucho.util.Utf8;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempOutputStream;
 
@@ -206,14 +207,22 @@ public class GitWorkingTree {
       String mode = String.format("%o", entry.getMode());
 
       int len = mode.length();
-      for (int i = 0; i < len; i++)
+      for (int i = 0; i < len; i++) {
         out.write(mode.charAt(i));
+      }
 
       out.write(' ');
       
+      Utf8.write(out, key);
+      /*
       len = key.length();
-      for (int i = 0; i < len; i++)
-        out.write(key.charAt(i));
+      for (int i = 0; i < len; i++) {
+        char ch = key.charAt(i);
+        
+        Utf8.write(out, key.charAt(i));
+        System.out.println("")
+      }
+      */
       
       out.write(0);
 

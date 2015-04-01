@@ -157,10 +157,10 @@ public class GitObjectStream extends InputStream {
 
       for (; ch == ' '; ch = _is.read()) {
       }
-
+      
       StringBuilder nameBuffer = new StringBuilder();
       for (; ch > 0; ch = _is.read()) {
-        nameBuffer.append((char) ch);
+        nameBuffer.append((char) Utf8.read(_is, ch));
       }
       String name = nameBuffer.toString();
 

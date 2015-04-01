@@ -34,6 +34,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.json.Json;
 import com.caucho.json.Transient;
 import com.caucho.security.Login;
+import com.caucho.server.cluster.ServletSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CacheListener;
 import com.caucho.util.CurrentTime;
@@ -50,6 +51,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
@@ -689,9 +691,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       if (entry != null && ! entry.isValueNull()) {
         // server/01a1, #4419
-        
+
         _idleTimeout = entry.getAccessedExpireTimeout();
-        
+
         long lastAccessTime = entry.getLastAccessedTime();
 
         if (lastAccessTime + _idleTimeout * 5 / 4 < now) {
@@ -700,31 +702,36 @@ public class SessionImpl implements HttpSession, CacheListener {
         // _idleTimeout = entry.getIdleTimeout() * 4 / 5;
         //_isIdleSet = true;
       }
- 
+
+      //if (entry != null && cacheEntry != null
+      //    && cacheEntry.getValueHash() == entry.getValueHash()) {
+      
       if (entry != null && cacheEntry != null
-          && cacheEntry.getValueHash() == entry.getValueHash()) {
+          && (entry.getValueHash() == cacheEntry.getValueHash()
+              || entry.getVersion() <= cacheEntry.getVersion())) {
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load-same valueHash="
-                   + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
+              + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
-        
+
         entry.updateAccessTime();
-        
+
         _isModified = false;
-        
+
         return true;
       }
 
       TempOutputStream os = new TempOutputStream();
 
       if (cache.get(_id, os)) {
+        String sid = ServletSystem.getCurrent().getServer().getServerId();
         InputStream is = os.getInputStream();
 
         SessionDeserializer in = _manager.createSessionDeserializer(is);
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load valueHash="
-                   + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
+              + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
 
         load(in);
@@ -843,8 +850,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public final void saveBeforeFlush()
   {
-    if (_manager == null || ! _manager.isSaveBeforeFlush())
+    if (_manager == null || ! _manager.isSaveBeforeFlush()) {
       return;
+    }
 
     save();
   }
@@ -878,8 +886,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public final void save()
   {
-    if (! isValid())
+    if (! isValid()) {
       return;
+    }
 
     try {
       if (! _isModified && ! _manager.getAlwaysSaveSession()) {

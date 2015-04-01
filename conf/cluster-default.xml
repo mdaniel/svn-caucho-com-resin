@@ -52,7 +52,6 @@
     <server-default>
       <jvm-arg-line>${jvm_args}</jvm-arg-line>
       <jvm-mode>${jvm_mode}</jvm-mode>
-      <jvm-classpath>${jvm_classpath}</jvm-classpath>
 
       <!--
          - If starting Resin as root on Unix, specify the user name

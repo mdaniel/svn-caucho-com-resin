@@ -24,40 +24,38 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.remote.websocket;
+package com.caucho.server.rewrite;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
-/**
- * WebSocketOutputStream writes a single WebSocket packet.
- *
- * <code><pre>
- * </pre></code>
- */
-public class WebSocketPrintWriter extends PrintWriter
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
+public class SetRequestCharacterEncodingFilterChain implements FilterChain
 {
-  private WebSocketWriter _out;
-  
-  public WebSocketPrintWriter(WebSocketWriter out)
-    throws IOException
+  private final String _value;
+  private final FilterChain _next;
+
+  public SetRequestCharacterEncodingFilterChain(FilterChain next,
+                              String value)
   {
-    super(out);
-    
-    _out = out;
+    _next = next;
+    _value = value;
   }
 
-  @Override
-  public void close()
+  public void doFilter(ServletRequest request, ServletResponse response)
+    throws ServletException, IOException
   {
-    WebSocketWriter out = _out;
-    _out = null;
-    
-    if (out != null) {
-      out.close();
-    }
+    HttpServletRequest req = (HttpServletRequest) request;
+
+    req.setCharacterEncoding(_value);
+
+    _next.doFilter(request, response);
   }
 }

@@ -933,7 +933,7 @@ public class BlockStore {
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
-    if (_allocationTable.length <= allocOffset) {
+    if (allocOffset < 0 || _allocationTable.length <= allocOffset) {
       return -1;
     }
 

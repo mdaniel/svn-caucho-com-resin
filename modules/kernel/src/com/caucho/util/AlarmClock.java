@@ -324,7 +324,10 @@ public class AlarmClock {
 
     long delta = now - wakeTime;
 
-    if (delta > 10000) {
+    if (wakeTime == 0) {
+      // #5854
+    }
+    else if (delta > 10000) {
       log.warning(this + " slow alarm " + alarm + " " + delta + "ms"
                   + " coordinator-delta " + (now - _lastTime) + "ms");
     }

@@ -29,7 +29,10 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Logger;
+
 import com.caucho.util.L10N;
 
 /**
@@ -37,6 +40,9 @@ import com.caucho.util.L10N;
  */
 public class StreamSource
 {
+  private static final Logger log
+    = Logger.getLogger(StreamSource.class.getName());
+  
   private static final L10N L = new L10N(StreamSource.class);
   
   private TempOutputStream _out;
@@ -75,9 +81,11 @@ public class StreamSource
       return _indirectSource.getInputStream();
     else if (_out != null)
       return _out.openInputStream();
-    else
-      throw new IllegalStateException(L.l("{0}: no input stream is available",
-                                          this));
+    else {
+      log.fine(L.l("{0}: no input stream is available", this));
+      
+      return null;
+    }
   }
 
   /**
@@ -90,9 +98,11 @@ public class StreamSource
       return _indirectSource.openInputStream();
     else if (_out != null)
       return _out.openInputStreamNoFree();
-    else
-      throw new IllegalStateException(L.l("{0}: no input stream is available",
-                                          this));
+    else {
+      log.fine(L.l("{0}: no input stream is available", this));
+      
+      return null;
+    }
   }
 
   /**

@@ -592,7 +592,9 @@ public class AbstractRolloverLog implements Closeable {
     String pathName = path.getPath();
 
     try {
-      if (pathName.endsWith(".gz")) {
+      if (_os == null) {
+      }
+      else if (pathName.endsWith(".gz")) {
         _zipOut = _os;
         _os = Vfs.openWrite(new GZIPOutputStream(_zipOut));
       }
@@ -623,8 +625,9 @@ public class AbstractRolloverLog implements Closeable {
     String savedName = savedPath.getTail();
 
     try {
-      if (! savedPath.getParent().isDirectory())
+      if (! savedPath.getParent().isDirectory()) {
         savedPath.getParent().mkdirs();
+      }
     } catch (Exception e) {
       logWarning(L.l("Can't open archive directory {0}",
                      savedPath.getParent()),
@@ -660,13 +663,16 @@ public class AbstractRolloverLog implements Closeable {
               out.close();
             } catch (Exception e) {
               // can't log in log rotation routines
+              logWarning(L.l("Error closing logs"), e);
             }
 
             try {
-              if (out != os)
+              if (out != os) {
                 os.close();
+              }
             } catch (Exception e) {
               // can't log in log rotation routines
+              logWarning(L.l("Error closing logs"), e);
             }
           }
         }
@@ -728,9 +734,11 @@ public class AbstractRolloverLog implements Closeable {
         try {
           parent.lookup(matchList.get(i)).remove();
         } catch (Throwable e) {
+          logWarning(L.l("Error removing logs"), e);
         }
       }
     } catch (Throwable e) {
+      logWarning(L.l("Error removing logs"), e);
     }
   }
 
@@ -901,6 +909,7 @@ public class AbstractRolloverLog implements Closeable {
         zipOut.close();
     } catch (Throwable e) {
       // can't log in log routines
+      logWarning(L.l("Error closing logStream"), e);
     }
   }
 
