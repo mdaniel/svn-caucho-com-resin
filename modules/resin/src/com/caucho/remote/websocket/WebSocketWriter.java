@@ -206,8 +206,9 @@ public class WebSocketWriter extends Writer
     
       _state = MessageState.IDLE;
     
-      if (_isAutoFlush)
+      if (_isAutoFlush) {
         _os.flush();
+      }
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

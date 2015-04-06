@@ -1439,7 +1439,6 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         else {
           // if the load failed, then the session died out from underneath
           if (! isNew) {
-            System.out.println("LOAD-FAIL: " + session);
             if (log.isLoggable(Level.FINER))
               log.fine(session + " load failed for existing session");
 
