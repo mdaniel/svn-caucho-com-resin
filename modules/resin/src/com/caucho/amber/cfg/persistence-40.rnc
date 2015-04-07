@@ -1,5 +1,4 @@
-
-default namespace j2ee = "http://java.sun.com/xml/ns/persistence"
+default namespace jpa_21 = "http://xmlns.jcp.org/xml/ns/persistence"
 namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
@@ -8,15 +7,15 @@ t_boolean = string
 t_class = string
 t_jndi = string
 
-pst31_persistence = element persistence {
+pst21_persistence = element persistence {
   attribute version { "2.0" },
 
   attribute xsi:schemaLocation { string }?,
 
-  pst31_persistence-unit*
+  pst21_persistence-unit*
 }
 
-pst31_persistence-unit = element persistence-unit {
+pst21_persistence-unit = element persistence-unit {
   attribute name { string },
 
   attribute transaction-type { "JTA" | "RESOURCE_LOCAL" }?,

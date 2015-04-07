@@ -291,7 +291,7 @@ public class PersistenceManager
       ConfigPersistence persistence = new ConfigPersistence(root);
 
       new Config().configure(persistence, is,
-          "com/caucho/amber/cfg/persistence-31.rnc");
+          "com/caucho/amber/cfg/persistence.rnc");
 
       for (ConfigPersistenceUnit unitConfig : persistence.getUnitList()) {
         PersistenceUnitManager pUnit

@@ -1,0 +1,7 @@
+default namespace r = "http://caucho.com/ns/resin"
+namespace l = ""
+
+include "persistence-31.rnc"
+include "persistence-40.rnc"
+
+start = pst31_persistence | pst21_persistence
