@@ -252,7 +252,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("small");
     out.writeCharacters("Copyright ");
     out.writeEntityRef("copy");
-    out.writeCharacters(" 1998-2012 Caucho Technology, Inc. All rights reserved.");
+    out.writeCharacters(" 1998-2015 Caucho Technology, Inc. All rights reserved.");
     //out.writeEmptyElement("br");
     out.writeEntityRef("nbsp");
     out.writeCharacters("Resin ");
@@ -340,10 +340,10 @@ public class Body extends ContainerNode {
     out.writeAttribute("href", "http://www.caucho.com/");
     out.writeAttribute("title", "Caucho maker of Resin Server | Application Server (Java EE Certified) and Web Server");
     out.writeStartElement("img");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-logo.png");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-white.jpg");
     out.writeAttribute("alt", "Caucho maker of Resin Server | Application Server (Java EE Certified) and Web Server");
-    out.writeAttribute("width", "300");
-    out.writeAttribute("height", "50");
+    //out.writeAttribute("width", "300");
+    //out.writeAttribute("height", "50");
     out.writeEndElement();//img
     out.writeEndElement();//a
 
@@ -454,13 +454,6 @@ public class Body extends ContainerNode {
     out.writeAttribute("href", "http://blog.caucho.com/");
     out.writeAttribute("title", "Blog to discuss Resin Server, a Java EE certified Java Application Server, Web Server and Querus PHP engine");
     out.writeCharacters("blog");
-    out.writeEndElement(); // a
-    out.writeEntityRef("nbsp");
-
-    out.writeStartElement("a");
-    out.writeAttribute("href", "http://wiki4.caucho.com/");
-    out.writeAttribute("title", "Wiki to cookbooks, tutorials for Resin Server (Application Server and Web Server)");
-    out.writeCharacters("wiki");
     out.writeEndElement(); // a
     out.writeEntityRef("nbsp");
 

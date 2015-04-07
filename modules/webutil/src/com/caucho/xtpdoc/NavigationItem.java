@@ -309,7 +309,7 @@ public class NavigationItem {
   protected void writeHtmlImpl(XMLStreamWriter out, String path,
                                int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
-  {
+  {    
     if (maxDepth <= depth)
       return;
 
@@ -424,7 +424,7 @@ public class NavigationItem {
 
   public void writeLeftNav(XMLStreamWriter out)
     throws XMLStreamException
-  {
+  {    
     if (_parent != null)
       _parent.writeLeftNavPre(out, this, 1);
 
@@ -448,7 +448,7 @@ public class NavigationItem {
                              NavigationItem caller, 
                              int padding)
     throws XMLStreamException
-  {
+  {    
     if (_parent != null)
       padding = _parent.writeLeftNavPre(out, this, padding);
 
@@ -474,7 +474,7 @@ public class NavigationItem {
 
   public void writeLeftNavPost(XMLStreamWriter out, NavigationItem caller)
     throws XMLStreamException
-  {
+  {    
     if (_items.size() > 0) {
       boolean found = false;
 
@@ -496,7 +496,7 @@ public class NavigationItem {
 
   public void writeLeftNavNoParent(XMLStreamWriter out, NavigationItem caller)
     throws XMLStreamException
-  {
+  {    
     writeLeftNavItem(out, caller);
 
     if (_items.size() > 0) {
@@ -524,7 +524,7 @@ public class NavigationItem {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
     out.writeAttribute("class", "leftnav");
-    out.writeCharacters(_title.toLowerCase(Locale.ENGLISH));
+    out.writeCharacters(_title);
     out.writeEndElement(); // a
 
     if (_refUri != null) {
@@ -550,7 +550,7 @@ public class NavigationItem {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
 
-    out.writeCharacters(_title.toLowerCase(Locale.ENGLISH));
+    out.writeCharacters(_title);
     out.writeEndElement(); // a
   }
 

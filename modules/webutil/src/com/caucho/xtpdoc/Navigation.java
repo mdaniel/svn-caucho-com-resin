@@ -204,9 +204,10 @@ public class Navigation {
   public void writeHtml(XMLStreamWriter out, String path,
                         int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
-  {
-    for (NavigationItem item : _items)
+  {    
+    for (NavigationItem item : _items) {      
       item.writeHtml(out, path, depth, styleDepth, maxDepth);
+    }
   }
 
   protected void initSummary()
@@ -222,8 +223,9 @@ public class Navigation {
       NavigationItem topItem = _items.get(0);
     }
     
-    for (NavigationItem item : _items)
+    for (NavigationItem item : _items) {      
       item.writeLeftNav(out);
+    }
   }
 
   public void writeLaTeX(PrintWriter writer)
