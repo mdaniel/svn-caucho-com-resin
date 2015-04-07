@@ -186,7 +186,7 @@ deployed on the server and controlling application lifecycle.</p>
 <p>Deploying an application is done with a <code>deploy</code> command</p>
 
 <def>
-resinctl deploy [options] &lt;war-file>
+resinctl deploy [options] &lt;war-file&gt;
 </def>
 
 <example title="deploying an application from a hello-world.war archive">
@@ -216,7 +216,7 @@ Deployed production/webapp/default/hello-world as hello-world.war to http://127.
   </tr>
   <tr>
     <td>-version</td>
-    <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
     <td>none</td>
   </tr>
 </deftable>
@@ -273,7 +273,7 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
   </tr>
   <tr>
     <td>-source-version</td>
-    <td>version of the source application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>version of the source application formatted as &lt;major.minor.micro.qualifier&gt;</td>
     <td>none</td>
   </tr>
   <tr>
@@ -293,7 +293,7 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
   </tr>
   <tr>
     <td>-target-version</td>
-    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier></td>
+    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier&gt;</td>
     <td>none</td>
   </tr>
 </deftable>
@@ -302,7 +302,7 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
 <p>Undeploying an application is done with an <code>undeploy</code> command</p>
 
 <def>
-resinctl undeploy [options] &lt;name></def>
+resinctl undeploy [options] &lt;name&gt;</def>
 
 <example title="">
 unix> resinctl undeploy undeploy foo
@@ -328,7 +328,7 @@ Undeployed foo from http://127.0.0.1:8080/hmtp
     </tr>
     <tr>
       <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
       <td>none</td>
     </tr>
   </deftable>
@@ -337,7 +337,7 @@ Undeployed foo from http://127.0.0.1:8080/hmtp
 <p>Starting an application is done with a <code>start-webapp</code> command</p>
 
 <def>
-unix> resinctl webapp-start [options] &lt;name>
+unix> resinctl webapp-start [options] &lt;name&gt;
 </def>
 
 <example title="start web application deployed at context '/foo'">
@@ -364,7 +364,7 @@ unix> resinctl webapp-start foo
     </tr>
     <tr>
       <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
       <td>none</td>
     </tr>
   </deftable>
@@ -373,7 +373,7 @@ unix> resinctl webapp-start foo
 <p>Stopping an application is done with an <code>stop-webapp</code> command</p>
 
 <def>
-resinctl webapp-stop [options] &lt;name>
+resinctl webapp-stop [options] &lt;name&gt;
 </def>
 
 <example title="stop web application deployed at context '/foo'">
@@ -400,7 +400,7 @@ unix> resinctl webapp-stop foo
     </tr>
     <tr>
       <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
       <td>none</td>
     </tr>
   </deftable>
@@ -408,7 +408,7 @@ unix> resinctl webapp-stop foo
 <s3 title="restarting application">
 <p>Restarting an application is done with an <code>restart-webapp</code> command</p>
 
-<def>resinctl webapp-restart [options] &lt;name>
+<def>resinctl webapp-restart [options] &lt;name&gt;
 </def>
 
 <example title="stop web application deployed at context '/foo'">
@@ -435,7 +435,7 @@ unix> resinctl webapp-restart foo
     </tr>
     <tr>
       <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
       <td>none</td>
     </tr>
   </deftable>

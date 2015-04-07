@@ -22,9 +22,6 @@ report 4.0.26 bugs at
 reduce the number of threads spawned. Applications with spiky load should
 see better performance and lower overall thread use.</p>
 
-<p>Resin's thread pool is described in
-<a href="http://wiki4.caucho.com/Application_Server:_Thread_Pool">Resin Application Server: Thread Pool</a>.</p>
-
 </s1>
 
 <s1 title="Static File Performance">
@@ -34,10 +31,6 @@ the operating system sendfile() support. Large files are sent directly
 from the file system to the HTTP socket by the operating system, minimizing
 Java overhead.</p>
 
-<p>Resin's static file serving is described in
-<a href="http://wiki4.caucho.com/Web_Server:_Static_Files">Resin Web Server:
-Static Files</a>.</p>
-
 </s1>
 
 <s1 title="jCache annotations: @CacheResult, @CachePut">
@@ -45,12 +38,6 @@ Static Files</a>.</p>
 <p>Resin's jCache implementation has been updated, adding the new
 @CacheResult, and @CachePut Java Dependency Injection (CDI) annotations,
 which enable caching for any CDI-enabled bean.</p>
-
-<p>A short tutorial is
-available at <a href="http://wiki4.caucho.com/Java_Cache_Tutorial_with_Method_Annotations_(CDI)">Java Cache Tutorial with Dependency Injection Method Annotations</a>.</p>
-
-<p>There is also a short tutorial on using the Java API for jCache at
-<a href="http://wiki4.caucho.com/Java_Cache_Tutorial_with_Cache_Dependency_Injection_(CDI)">Java Cache Tutorial with Cache Dependency Injection (CDI)</a>.</p>
 
 </s1>
 
@@ -71,10 +58,6 @@ available at <a href="http://wiki4.caucho.com/Java_Cache_Tutorial_with_Method_An
     resinctl pdf-report -local -local-dir /tmp
   </example>
 
-  <p>The PDF report is described in <a href="http://wiki4.caucho.com/Application_Server:_Health_System:_PDF_Report">Resin Health System: PDF Report</a>.</p>
-
-  <p>The command-line interface is described in <a href="http://wiki4.caucho.com/Application_Server:_Command_Line_Interface">Resin Application Server: Command Line Interface</a>.</p>
-
 </s1>
 
 <s1 title=".deb package distribution">
@@ -93,9 +76,6 @@ available at <a href="http://wiki4.caucho.com/Java_Cache_Tutorial_with_Method_An
   <example title="Example: Listing MBeans via REST">
     curl  --user admin:secret http://localhost:8080/resin-rest/jmx-list
   </example>
-
-  <p>An overview of the REST interface is available at
-  <a href="http://wiki4.caucho.com/Application Server: REST Interface">Resin Application Server: REST Interface</a>.</p>
 
 </s1>
 

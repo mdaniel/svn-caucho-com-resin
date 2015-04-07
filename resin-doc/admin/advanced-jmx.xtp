@@ -97,10 +97,11 @@ win&gt; jconsole.exe
 unix&gt; jconsole
 </example>
 
-<p>
-<i>Enter the host name and port number (9999) on the "Remote" tab</i>
-<i>Enter the username and password on the "Remote" tab</i>
-</p>
+<ol>
+  <li><i>Enter the host name and port number (9999) on the "Remote" tab</i></li>
+  <li><i>Enter the username and password on the "Remote" tab</i></li>
+</ol>
+
 </s1>
 
 <s1 title="Instrumenting Resources">
@@ -111,7 +112,7 @@ of the following steps:</p>
 <ol>
 <li>For a class <code>MyFoo</code>, create an interface <code>MyFooMBean</code> with
 the management interface.
-</li><li>Class <code>MyFoo</code> needs to <var>implement</var> the <code>MyFooMBean</code> interface.
+</li><li>Class <code>MyFoo</code> would implement the <code>MyFooMBean</code> interface.
 </li><li>Register <code>MyFoo</code> with the JMX server.
 </li></ol>
 
@@ -134,7 +135,7 @@ web-app:j2eeType=Servlet,name=<var>servlet-name</var>
 
 <p>The domain is <var>web-app</var>, the type property
 is javax.servlet.Servlet and the name property is the value
-of &lt;servlet-name&gt;.</p>
+of Servlet's <code>&lt;servlet-name&gt;</code>.</p>
 
 <p>JMX clients will use the name to manage the servlet.  For example,
 a client might use the pattern <var>web-app:type=javax.servlet.Servlet,*</var>
@@ -182,7 +183,7 @@ public class MyServlet extends GenericServlet implements MyServletMBean {
 <s1 title="Managing Resources">
 
 <p>Managing resources uses the JMX API, primarily using
-the <code>MBeanServer</code> object.  In Resin, each web-app has
+the <code>javax.management.MBeanServer</code> object.  In Resin, each web-app has
 its own <code>MBeanServer</code>.</p>
 
 <example title="Getting the Count attribute">

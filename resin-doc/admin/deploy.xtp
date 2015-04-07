@@ -54,15 +54,15 @@ tag in the resin.xml.</p>
 <example title="Example: web-app-deploy in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 
-&lt;cluster id="">
-  ...
-  &lt;host id="">
+  &lt;cluster id="">
+    ...
+    &lt;host id="">
   
-    <b>&lt;web-app-deploy path="webapps"
-                    expand-preserve-fileset="WEB-INF/work/**"/></b>
+      <b>&lt;web-app-deploy path="webapps"
+                      expand-preserve-fileset="WEB-INF/work/**"/></b>
     
-  &lt;/host>
-&lt;/cluster>
+    &lt;/host>
+  &lt;/cluster>
 &lt;/resin>
 </example>
 
@@ -108,7 +108,7 @@ unix> cp test.war webapps
 
 <s2 title="Deployment Expansion">
 
-<p>The &lt;web-app-deploy> controls the expansion based on web-app ids
+<p>The <a config-tag="web-app-deploy"/> controls the expansion based on web-app ids
 like "production/webapps/default/test" which is the same as the web-app
 identifier. The deployment expansion process looks like the following:</p>
 
@@ -254,14 +254,14 @@ will continue to receive old sessions, while the new version will get
 the new requests.  So any user will see a consistent version as the
 web site update occurs with no downtime required.</p>
 
-<p>The versioning requires &lt;web-app-deploy>, i.e. it works with
+<p>The versioning requires <a config-tag="web-app-deploy"/>, i.e. it works with
 the webapps directory.  The versioning is numerically-based, allowing
 dotted notation, to determine the most recent version.  A simple deployment
 process might use <var>foo-101</var> to upgrade from <var>foo-100</var>.
 A more complicated one might use <var>foo-10.3.14</var> to upgrade from
 <var>foo-10.3.13</var>.</p>
 
-<p>The <var>versioning</var> attribute of the &lt;web-app-deploy>
+<p>The <var>versioning</var> attribute of the <a config-tag="web-app-deploy"/>
 enables versioning:</p>
 
 <example title="Example: resin.xml for webapps versioning">
@@ -291,7 +291,7 @@ capability, gives sites more flexibility where their directories and
 archive files should be placed, beyond the standard webapps directory.</p>
 
 <p>The optional <code>archive-path</code> argument of the
-&lt;web-app> will point to the .war file to be expanded.</p>
+<a config-tag="web-app"/> will point to the .war file to be expanded.</p>
 
 <deftable title="web-app deployment options">
 <tr>
@@ -338,15 +338,15 @@ archive files should be placed, beyond the standard webapps directory.</p>
 
 <example title="Example: resin.xml for custom web-app">
 &lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;cluster id="">
-  &lt;host id="">
+  &lt;cluster id="">
+    &lt;host id="">
 
-    <b>&lt;web-app id="/foo" root-directory="/var/resin/foo"
-             expand-preserve-fileset="WEB-INF/work/**"
-             archive-path="/usr/local/stage/foo.war"/></b>
+      <b>&lt;web-app id="/foo" root-directory="/var/resin/foo"
+               expand-preserve-fileset="WEB-INF/work/**"
+               archive-path="/usr/local/stage/foo.war"/></b>
 
-  &lt;/host>
-&lt;/cluster>
+    &lt;/host>
+  &lt;/cluster>
 &lt;/resin>
 </example>
 
@@ -356,7 +356,7 @@ archive files should be placed, beyond the standard webapps directory.</p>
 
 <p>The "deploy" command deploys a .war file to the default virtual
 host. In a cloud environment, Resin will copy the deployed .war
-to all servers in the cluster. Since the AdminAuthenticator requires a user
+to all servers in the cluster. Since the <a javadoc="com.caucho.security.AdminAuthenticator"/> requires a user
 and password, you'll need to pass those arguments.</p>
 
 <example title="Example: deploy hello.war">
@@ -372,7 +372,7 @@ As of Resin 4.0.0, it is now possible to deploy web applications remotely
 to a shared repository that is distributed across the cluster.  This feature
 allows you to deploy once to any triad server and have the application
 be updated automatically across the entire cluster.  When a new 
-<a href="clustering-overview.xtp">dynamic server</a> joins the cluster, the
+<a href="clustering-overview.xtp#DynamicServers">dynamic server</a> joins the cluster, the
 triad will populate it with these applications as well.
 </p>
 <p>

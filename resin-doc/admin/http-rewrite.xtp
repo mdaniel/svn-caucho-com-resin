@@ -3,7 +3,7 @@
 <title>URL Rewriting and Dispatching</title>
 <description>
 
-<p>Resin comes with powerful and extensible rewrite capabilities that is just as
+<p>Resin comes with powerful and extensible rewrite capabilities that is as
 powerful as Apache's mod_rewrite.</p>
 
 </description>
@@ -164,10 +164,8 @@ successful and unsuccessful matches are logged.
 </s1>
 
 <s1 title="Examples">
-<s2 title="Redirect http:// requests to https:// requests">
-  <p>
-  The desired behaviour is to redirect plain connections to SSL connections.
-  </p>
+<s2 title="Redirect HTTP requests to HTTPS requests">
+<p>The desired behaviour is to redirect plain connections to SSL connections.</p>
 
 <example title="Desired behaviour">
   http://anything.com/anything.html
@@ -263,6 +261,28 @@ successful and unsuccessful matches are logged.
 &lt;/resin&gt;
   </example>
 </s2>
+
+<s2 title="Proxy requests to PHP/Ruby using FastCGI">
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"&gt;
+
+   &lt;resin:FastCgiProxy regexp="\.php$"&gt;
+     &lt;address>127.0.0.1:12345&lt;/address&gt;
+   &lt;/resin:FastCgiProxy&gt;
+   
+   &lt;resin:FastCgiProxy regexp="\.rb$"&gt;
+     &lt;address>127.0.0.1:67890&lt;/address&gt;
+   &lt;/resin:FastCgiProxy&gt;
+
+&lt;/web-app&gt;
+
+</example>
+
+</s2>
+
+
 </s1>
 
 <s1 title="Tag listing by function">
@@ -414,6 +434,10 @@ successful and unsuccessful matches are logged.
   <td>Sets a response header.</td>
 </tr>
 <tr>
+  <td><a config-tag="resin:SetRequestCharacterEncoding"/></td>
+  <td>Sets the character encoding of the request parameters.</td>
+</tr>
+<tr>
   <td><a config-tag="resin:SetRequestSecure"/></td>
   <td>Marks the request as secure.</td>
 </tr>
@@ -423,7 +447,7 @@ successful and unsuccessful matches are logged.
 </tr>
 <tr>
   <td>&lt;mypkg:MyFilter></td>
-  <td>Servlet filters.</td>
+  <td>Regular Servlet filters can be used as rewrite filters.</td>
 </tr>
 </deftable>
 

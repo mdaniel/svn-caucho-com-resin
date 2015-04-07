@@ -9,6 +9,25 @@
             title="Eclipse"
             description="Resin Eclipse Support"/>
     </item>
+    
+    <item link="config.xtp" title="Configuration"
+        description="Configuration principles for the Resin Server">
+
+      <item link="config-overview.xtp" title="Overview"
+            description="Overview of Resin configuration"/>
+
+      <item link="config-resin-properties.xtp" title="resin.properties"
+            description="Standard Resin properties for configuration"/>
+
+      <item link="config-resin-xml.xtp" title="resin.xml"
+            description="Custom resin.xml configuration"/>
+
+      <item link="config-candi.xtp" title="CanDI"
+            description="XML configuration for Dependency Injection services"/>
+
+      <item link="config-el.xtp" title="EL expressions"
+            description="EL expressions used in configuration"/>
+    </item>
 
     <item link="migration.xtp" title="Migrating"
           description="Migrating to Resin 4.0"/>
@@ -47,25 +66,6 @@
     <item link="resin-admin-rest.xtp" title="REST Interface"
           description="Resin REST administration interface"/>
 
-    <item link="config.xtp" title="Configuration"
-        description="Configuration principles for the Resin Server">
-
-      <item link="config-overview.xtp" title="Overview"
-            description="Overview of Resin configuration"/>
-
-      <item link="config-resin-properties.xtp" title="resin.properties"
-            description="Standard Resin properties for configuration"/>
-
-      <item link="config-resin-xml.xtp" title="resin.xml"
-            description="Custom resin.xml configuration"/>
-
-      <item link="config-candi.xtp" title="CanDI"
-            description="XML configuration for Dependency Injection services"/>
-
-      <item link="config-el.xtp" title="EL expressions"
-            description="EL expressions used in configuration"/>
-    </item>
-
     <item link="database.xtp" title="Database"
           description="Configuration of the Resin database pool"/>
 
@@ -93,6 +93,8 @@
       -->
     </item>
     
+    <item link="filters.xtp" title="Filters"
+          description="Built-in Filters"/>
     
     <item link="health.xtp" title="Health">
     
@@ -137,7 +139,7 @@
             description="Resin Pro Licenses"/>
       -->
       
-      <item link="resin-directory.xtp" title="directory"
+      <item link="resin-directory.xtp" title="directory layout"
             description="Resin directory layout"/>
       
     </item>
@@ -207,9 +209,17 @@
     
     <item link="advanced-classloaders.xtp" title="Classloaders"
           description="Resin classloader architecture"/>
-            
+    
+    <item link="hessian.xtp" title="Hessian"
+          description="Hessian protocol"/>
+    
+    <item link="websocket.xtp" title="WebSocket"
+          description="WebSocket support"/>
+       
     <item link="advanced-jmx.xtp" title="JMX (MXBeans)"
           description="JMX management"/>
+    
+    <item link="third-party-seam.xtp" title="Seam"/>
     
   </item>
     

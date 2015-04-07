@@ -1,0 +1,90 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Seam</title>
+  <type>contents</type>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Seam on Resin">
+
+<p>Steps required to run the seam-booking example.  Software Prerequisites:</p>
+<ul>
+  <li>Resin 4.0.29+</li>
+  <li>Seam 3.1.0+</li>
+</ul>
+
+<s2 title="Prepare seam-booking example">
+<ul>
+  <li>Unzip seam-3.1.0.Final.jar</li>
+  <li>Change into seam-3.1.0.Final/examples/seam-booking directory</li>
+  <li>Issue mvn install command</li>
+  <li>Copy expanded seam-booking directory into Resin's webapps directory</li>
+  <li>Edit WEB-INF/classes/META-INF/persistence.xml (see below)</li>
+  <li>Add "WEB-INF/resin-web.xml to add a datasource (see below)</li>
+  <li>Copy the required libraries into webapp-jars directory (see list of libraries below)</li>
+</ul>
+</s2>
+
+<s2 title="WEB-INF/classes/META-INF/persistence.xml">
+<example>
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+                     version="2.0">
+   &lt;persistence-unit name="booking">
+       &lt;jta-data-source>java:comp/env/jdbc/booking&lt;/jta-data-source>
+       &lt;properties>
+           &lt;property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+           &lt;property name="eclipselink.ddl-generation.output-mode" value="database"/>
+       &lt;/properties>
+   &lt;/persistence-unit>
+&lt;/persistence>
+</example>
+</s2>
+
+<s2 title="WEB-INF/resin-web.xml">
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;database>
+    &lt;jndi-name>jdbc/booking&lt;/jndi-name>
+    &lt;driver type="org.hsqldb.jdbc.JDBCDriver">
+      &lt;url>jdbc:hsqldb:file:/tmp/seambooking&lt;/url>
+      &lt;user>SA&lt;/user>
+      &lt;password>&lt;/password>
+    &lt;/driver>
+    &lt;prepared-statement-cache-size>8&lt;/prepared-statement-cache-size>
+    &lt;max-connections>8&lt;/max-connections>
+    &lt;max-idle-time>30s&lt;/max-idle-time>
+    &lt;spy/>
+  &lt;/database>
+&lt;/web-app>
+</example>
+</s2>
+
+<s2 title="Copy seam-3.1.0-Final/lib jar files to Resin's webapp-jars directory">
+
+<ul>
+  <li>drools-api.jar</li>
+  <li>drools-compiler.jar</li>
+  <li>drools-core.jar</li>
+  <li>hibernate-core-4.0.0.Final.jar</li>
+  <li>hibernate-validator-4.2.0.Final.jar</li>
+  <li>hsql.jar</li>
+  <li>javassist.jar</li>
+  <li>jtds.jar</li>
+  <li>portal-service.jar</li>
+  <li>portlet.jar</li>
+  <li>saxpath.jar</li>
+</ul>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

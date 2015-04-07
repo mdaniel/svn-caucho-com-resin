@@ -1,0 +1,138 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Websocket</title>
+  <type>contents</type>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="WebSocket">
+
+<p>Resin's WebSocket API follows the Servlet API's stream model, using
+InputStream/OutputStream for binary messages and a Reader/PrintWriter for text
+messages. HTTP browsers will use text messages, while custom clients like
+phone/pad applications may use binary messages for efficiency.</p>
+
+<s2 title="WebSocketServletRequest">
+
+<p>The servlet is responsible for detecting websocket requests and attaching
+a listener to that connection.</p>
+
+<example>
+import com.caucho.websocket.WebSocketListener;
+import com.caucho.websocket.WebSocketServletRequest;
+
+import java.io.IOException;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class MyServlet extends HttpServlet {
+
+  public void service(HttpServletRequest req, HttpServletResponse res)
+    throws IOException, ServletException
+  {
+    String protocol = req.getHeader("Sec-WebSocket-Protocol");
+
+    WebSocketListener listener;
+
+    if (! "my-protocol".equals(protocol)) {
+      res.sendError(404);
+      return;
+    }
+
+    listener = new MyListener();
+    res.setHeader("Sec-WebSocket-Protocol", "my-protocol");
+    
+    WebSocketServletRequest wsReq = (WebSocketServletRequest) req;
+
+    wsReq.startWebSocket(listener);
+  }
+}
+
+</example>
+
+</s2>
+
+<s2 title="WebSocketListener">
+
+<p>The listener is responsible for the communcation and stateful data.</p>
+
+<example>
+package example;
+
+import com.caucho.websocket.WebSocketListener
+
+import java.io.*;
+
+import java.util.logging.Logger;
+
+public class MyListener implements WebSocketListener
+{
+  private static final Logger log
+    = Logger.getLogger(MyListener.class.getName());
+
+  public void onStart(WebSocketContext context)
+    throws IOException
+  {
+    log.info("onStart");
+  }
+
+  public void onReadBinary(WebSocketContext context, InputStream is)
+    throws IOException
+  {
+    StringBuilder sb = new StringBuilder();
+    int ch;
+    
+    while ((ch = is.read()) >= 0) {
+      sb.append((char) ch);
+    }
+    
+    log.info("onReadBinary: " + sb);
+  }
+
+  public void onReadText(WebSocketContext context, Reader is)
+    throws IOException
+  {
+    StringBuilder sb = new StringBuilder();
+    int ch;
+    
+    while ((ch = is.read()) >= 0) {
+      sb.append((char) ch);
+    }
+    
+    log.info("onReadText: " + sb);
+  }
+
+  public void onClose(WebSocketContext context)
+    throws IOException
+  {
+    log.info("onClose");
+  }
+
+  public void onDisconnect(WebSocketContext context)
+    throws IOException
+  {
+    log.info("onDisconnect");
+  }
+
+  public void onTimeout(WebSocketContext context)
+    throws IOException
+  {
+    log.info("onTimeout");
+  }
+}
+
+
+</example>
+
+<p>See <a javadoc="com.caucho.websocket.WebSocketListener"/>.</p>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

@@ -157,7 +157,7 @@ a new server, Resin:
 <li>Updates the health system to monitor and administer the new server.</li>
 </ul>
 
-<s2 title="Enabling an dynamic servers in the resin.properties">
+<s2 title="Enabling dynamic servers in resin.properties">
 
 <p>To enable dynamic servers, you can modify the resin.properties with
 three values: the triad hub servers for the cluster, enabling the elastic
@@ -376,7 +376,7 @@ to use as the application-tier, define the servers in the web-tier,
 and select which requests are forwarded (proxied) to the backend
 app-tier servers. Since Resin's clustering configuration already
 defines the servers in a cluster, the only additional configuration
-is to use the &lt;resin:LoadBalance> tag to forward request to the backend.</p>
+is to use the <a config-tag="resin:LoadBalance"/> tag to forward request to the backend.</p>
 
 <figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
 
@@ -455,7 +455,7 @@ HTTP, and an app-tier to process the application:</p>
 <p>In the configuration above, the <var>web-tier</var> cluster server
 load balances across the <var>app-tier</var> cluster servers because
 of the <var>cluster</var> attribute specified in the
-&lt;resin:LoadBalance> tag.  The &lt;cache> tag enables proxy caching
+<a config-tag="resin:LoadBalance"/> tag.  The <a config-tag="proxy-cache"/> tag enables proxy caching
 at the web tier. The web-tier forwards requests evenly and skips any
 app-tier server that's down for maintenance/upgrade or restarting due
 to a crash. The load balancer also steers traffic from a single
@@ -688,7 +688,7 @@ wait for many connections at once.</p>
 </s2>
 <s2 title="resin:LoadBalance Dispatching">
 
-<p>&lt;resin:LoadBalance> is part of Resin's <a
+<p><a config-tag="resin:LoadBalance"/> is part of Resin's <a
 href="http-rewrite.xtp">rewrite</a> capabilities, Resin's equivalent
 of the Apache mod_rewrite module, providing powerful and detailed URL
 matching and decoding. More sophisticated sites might load-balance
@@ -702,8 +702,7 @@ cache</a>, the web-tier servers will serve static pages as
 fast as if they were local pages.</p>
 
 <p>In some cases, though, it may be important to send different
-requests to different backend clusters. The <a
-href="http://caucho.com/resin-javadoc/com/caucho/rewrite/LoadBalance.html">&lt;resin:LoadBalance></a>
+requests to different backend clusters. The &lt;resin:LoadBalance&gt;
 tag can choose clusters based on URL patterns when such capabilities
 are needed.</p>
 
@@ -836,14 +835,13 @@ you can set the <em>use-persistent-store</em> attribute of the
 &lt;/web-app&gt;
 </example>
 
-<p>The <a
-href="deploy-ref.xtp#session-config">&lt;use-persistent-store&gt;</a>
-tag under <a
+<p>The <code>use-persistent-store</code>
+attribute of <a
 href="deploy-ref.xtp#session-config">&lt;session-config&gt;</a> is
 used to enable clustering. Note, clustering is enabled on a
 per-web-application basis because not all web applications under a host
 need be clustered. If you want to cluster all web applications under a
-host, you can place &lt;use-persistent-store&gt; under <a
+host, you can place <code>use-persistent-store</code> under <a
 href="deploy-ref.xtp#web-app-default">&lt;web-app-default&gt;</a>. The
 following example shows how you can do this: </p>
 
@@ -959,44 +957,63 @@ For details on the tags used for clustering, please refer to
 
 <s1 title="Distributed Caching">
 
-<p>Distributed caching is a useful technique to reduce
-database load and increase application performance. Resin provides a
-JSR-107 JCache based distributed caching API. Distributed
-caching in Resin uses the underlying infrastructure
-used to support load balancing, clustering and session/state
-replication.</p>
+<include-defun name="resin:ClusterCache"/>
 
-<p>
-The first step to using Resin distributed caching is to configure a cache. 
-You configure a named distributed cache at the web application level like this:
-</p>
+<s2 title="@CacheResult">
 
-<example title="resin-web.xml: Configuring Resin Distributed Cache">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:distcache="urn:java:com.caucho.distcache">
-          
-  &lt;distcache:ClusterCache>
-    &lt;name>test&lt;/name>
-  &lt;/distcache:ClusterCache> 
+<p>@CacheResult enables caching for method results.  It uses
+   the method parameters as a cache key, and stores the method result in the
+   cache. On the next method call, the enhanced method will look for the saved
+   result in the cache, and return it, saving the effort of the method.</p>
 
-&lt;/web-app>
-</example>
+<ol>
+  <li>add a @CacheResult annotation to the method you want to cache</li>
+  <li>use Java Dependency Injection (CDI) to get the bean</li>
+</ol>
 
-<p>
-You may then inject the cache through CDI and use it in your application
-via the JCache API:
-</p>
+<example title="WEB-INF/beans.xml (to enable CDI scanning)">
 
-<example title="Using Resin Distributed Cache">
-import javax.cache.*;
-...
-@Inject
-private Cache _cache;
-...
-
-cache.putIfAbsent("discount_rate", discountRate);
+&lt;beans/&gt;
 
 </example>
+
+<example title="MyBean.java">
+package org.example.mypkg;
+
+import javax.cache.annotation.CacheResult;
+
+public class MyBean {
+  @CacheResult
+  public String doLongOperation(String key)
+  {
+    ...
+  }
+}
+
+</example>
+
+<example title="MyServlet.java">
+package org.example.mypkg;
+
+import javax.cache.annotation.CacheResult;
+
+public class MyServlet extends GenericServlet {
+  @Inject MyBean _bean;
+
+  public void service(ServletRequest req, ServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+ 
+    String result = _bean.doLongOperation("test");
+  
+    out.println("test: " + result);
+  }
+}
+
+</example>
+
+</s2>
 
 </s1>
 </body>
