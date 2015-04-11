@@ -40,7 +40,7 @@ import com.caucho.cli.server.ServerCommandBase;
 import com.caucho.config.ConfigException;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.config.ConfigBoot;
-import com.caucho.util.Base64;
+import com.caucho.util.Base64Util;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -119,7 +119,7 @@ public class PasswordGenerateCommand extends ServerCommandBase<ArgsCli>
     System.arraycopy(digest, 0, hash, 0, digest.length);
     System.arraycopy(salt, 0, hash, digest.length, salt.length);
     
-    Base64.encode(cb, hash);
+    Base64Util.encode(cb, hash);
     
     String sshaPassword = "{SSHA}" + cb;
 

@@ -19,7 +19,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.caucho.util.Base64;
+import com.caucho.util.Base64Util;
 import com.caucho.util.RandomUtil;
 
 public class PasswordImpl extends Password {
@@ -70,7 +70,7 @@ public class PasswordImpl extends Password {
   {
     Cipher cipher = Cipher.getInstance(ALGORITHM);
     
-    byte []keyBytes = Base64.decodeToByteArray(KEY);
+    byte []keyBytes = Base64Util.decodeToByteArray(KEY);
     
     Key key = new SecretKeySpec(keyBytes, "AES");
 
@@ -99,7 +99,7 @@ public class PasswordImpl extends Password {
     
     byte []cipherText = cipher.doFinal(paddedText);
 
-    return Base64.encode(cipherText);
+    return Base64Util.encode(cipherText);
   }
   
   private String decrypt(String value, String salt)
@@ -113,7 +113,7 @@ public class PasswordImpl extends Password {
   {
     Cipher cipher = Cipher.getInstance(ALGORITHM);
     
-    byte []keyBytes = Base64.decodeToByteArray(KEY);
+    byte []keyBytes = Base64Util.decodeToByteArray(KEY);
     
     Key key = new SecretKeySpec(keyBytes, "AES");
 
@@ -121,7 +121,7 @@ public class PasswordImpl extends Password {
     
     cipher.init(Cipher.DECRYPT_MODE, key, getIv(salt));
     
-    byte []rawCipherText = Base64.decodeToByteArray(value);
+    byte []rawCipherText = Base64Util.decodeToByteArray(value);
     
     int len = rawCipherText.length;
     

@@ -32,7 +32,7 @@ import java.util.TreeMap;
 
 import com.caucho.http.security.AbstractAuthenticator;
 import com.caucho.http.security.PasswordUser;
-import com.caucho.util.Base64;
+import com.caucho.util.Base64Util;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
 
@@ -95,7 +95,7 @@ public class ManagementAuthenticator extends AbstractAuthenticator
 
       if (crc64 != 0) {
         CharBuffer cb = new CharBuffer();
-        Base64.encode(cb, crc64);
+        Base64Util.encode(cb, crc64);
 
         _remoteCookie = cb.toString();
       }

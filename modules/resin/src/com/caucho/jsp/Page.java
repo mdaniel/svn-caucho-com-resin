@@ -49,7 +49,7 @@ import com.caucho.http.protocol.ResponseAdapterToChar;
 import com.caucho.http.webapp.WebAppResin;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.make.DependencyContainer;
-import com.caucho.util.Base64;
+import com.caucho.util.Base64Util;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
@@ -511,7 +511,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
       if (lastModified != _lastModified) {
         CharBuffer cb = new CharBuffer();
         cb.append('"');
-        Base64.encode(cb, lastModified);
+        Base64Util.encode(cb, lastModified);
         cb.append('"');
         etag = cb.close();
         _etag = etag;

@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 
-import com.caucho.util.Base64;
+import com.caucho.util.Base64Util;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -85,7 +85,7 @@ public class X509Parser {
       }
 
       reader.init(line);
-      Base64.decode(reader, os);
+      Base64Util.decode(reader, os);
     }
 
 

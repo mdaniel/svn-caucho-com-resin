@@ -176,7 +176,7 @@ public class MD5Filter implements Filter
       byte []bytes = _digest.digest();
 
       CharBuffer cb = new CharBuffer();
-      Base64.encode(cb, bytes, 0, bytes.length);
+      Base64Util.encode(cb, bytes, 0, bytes.length);
 
       return cb.toString();
     }
