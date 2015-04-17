@@ -407,8 +407,9 @@ public class JsseSSLFactory implements SSLFactory {
           cert = (SelfSignedCert) hIn.readObject(SelfSignedCert.class);
           
           hIn.close();
-                    
-          return cert;
+
+          if (! cert.isExpired())
+            return cert;
         } finally {
           IoUtil.close(is);
         }

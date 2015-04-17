@@ -12,6 +12,8 @@
 
 <s2 title="4.0.44 - in progress">
 <ul>
+<li>jsee: self signed cert should support Firefox and Chrome default cipher-suites(#5884)</li>
+<li>jsee: self signed cert should check expire (#5885)</li>
 <li>class-loader: excessive reread of jar certificates (#5850, rep by konfetov)</li>
 <li>log: add sanity check for log rollover (#5845, rep by Keith F.)</li>
 <li>deploy (git): use utf-8 to store path names (#5874, rep by alpor9)</li>
