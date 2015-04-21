@@ -377,10 +377,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    */
   ByteStreamCache getCache()
   {
-    if (_isPersistenceEnabled)
+    if (_isPersistenceEnabled) {
       return _sessionStore;
-    else
+    }
+    else {
       return null;
+    }
   }
 
   /**
@@ -624,8 +626,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    */
   public void addListener(HttpSessionListener listener)
   {
-    if (_listeners == null)
+    if (_listeners == null) {
       _listeners = new ArrayList<HttpSessionListener>();
+    }
 
     _listeners.add(listener);
   }
@@ -1397,13 +1400,21 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
                                    long now,
                                    boolean fromCookie)
   {
-    if (_sessions == null)
+    if (_sessions == null) {
       return null;
+    }
 
     SessionImpl session = _sessions.get(sessionId);
     
-    if (session != null && ! session.isValid()) {
-      session = null;
+    if (session != null) {
+      if (! session.isValid()) {
+        session = null;
+      }
+      else if (! session.getId().equals(sessionId)) {
+        log.warning("Session creation issue. Old session " + session.getId() + " " + sessionId);
+        
+        session = null;
+      }
     }
     
     boolean isNew = false;
@@ -1457,8 +1468,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       }
     }
 
-    if (! isCreate)
+    if (! isCreate) {
       return null;
+    }
 
     if (sessionId == null
         || sessionId.length() <= 6

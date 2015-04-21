@@ -89,6 +89,20 @@ public class HessianSessionSerializer extends SessionSerializer {
   }
 
   @Override
+  public void flush()
+  {
+    Hessian2Output out = _out;
+
+    if (out != null) {
+      try {
+        out.flush();
+      } catch (IOException e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+  }
+
+  @Override
   public void close()
   {
     Hessian2Output out = _out;

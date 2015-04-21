@@ -29,29 +29,6 @@
 
 package com.caucho.server.session;
 
-import com.caucho.distcache.ByteStreamCache;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.json.Json;
-import com.caucho.json.Transient;
-import com.caucho.security.Login;
-import com.caucho.server.cluster.ServletSystem;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.CacheListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.IOExceptionWrapper;
-import com.caucho.vfs.TempOutputStream;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionContext;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
@@ -65,6 +42,28 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionContext;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+import com.caucho.distcache.ByteStreamCache;
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.json.Json;
+import com.caucho.json.Transient;
+import com.caucho.security.Login;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CacheListener;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.L10N;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.TempOutputStream;
 
 /**
  * Implements a HTTP session.
@@ -724,25 +723,35 @@ public class SessionImpl implements HttpSession, CacheListener {
       TempOutputStream os = new TempOutputStream();
 
       if (cache.get(_id, os)) {
-        String sid = ServletSystem.getCurrent().getServer().getServerId();
         InputStream is = os.getInputStream();
+        
+        HashChunkInputStream crcIs = new HashChunkInputStream(is);
 
-        SessionDeserializer in = _manager.createSessionDeserializer(is);
+        SessionDeserializer in = _manager.createSessionDeserializer(crcIs);
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load valueHash="
               + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
 
-        load(in);
+        boolean isValid = load(in);
 
         in.close();
+        crcIs.close();
         is.close();
+        
+        if (isValid) {
+          _cacheEntry = entry;
+          _isModified = false;
 
-        _cacheEntry = entry;
-        _isModified = false;
-
-        return true;
+          return true;
+        }
+        else {
+          _cacheEntry = entry;
+          _isModified = true;
+          
+          return false;
+        }
       }
       else {
         _cacheEntry = null;
@@ -751,8 +760,9 @@ public class SessionImpl implements HttpSession, CacheListener {
           log.fine(this + " session remove");
         }
 
-        if (cacheEntry == null)
+        if (cacheEntry == null) {
           return true;
+        }
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -764,12 +774,14 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Loads the object from the input stream.
    */
-  public void load(SessionDeserializer in)
+  public boolean load(SessionDeserializer in)
     throws IOException
   {
     HttpSessionEvent event = null;
     ArrayList<HttpSessionActivationListener> listeners = null;
 
+    String id = null;
+    
     synchronized (this) {
       synchronized (_values) {
         // server/017u
@@ -777,6 +789,7 @@ public class SessionImpl implements HttpSession, CacheListener {
         // unbind();
 
         try {
+          id = (String) in.readObject();
           int size = in.readInt();
 
           // System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
@@ -825,6 +838,15 @@ public class SessionImpl implements HttpSession, CacheListener {
         event = new HttpSessionEvent(this);
 
       listener.sessionDidActivate(event);
+    }
+    
+    if (getId().equals(id)) {
+      return true;
+    }
+    else {
+      log.warning("Invalid session load id=" + getId() + ", but loaded id=" + id);
+      
+      return false;
     }
   }
 
@@ -902,11 +924,14 @@ public class SessionImpl implements HttpSession, CacheListener {
       _isModified = false;
 
       TempOutputStream os = new TempOutputStream();
-      SessionSerializer out = _manager.createSessionSerializer(os);
+      HashChunkOutputStream crcOs = new HashChunkOutputStream(os);
+      
+      SessionSerializer out = _manager.createSessionSerializer(crcOs);
 
       store(out);
-
+      
       out.close();
+      crcOs.close();
 
       final int length = os.getLength();
 
@@ -983,6 +1008,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     HttpSessionEvent event = null;
     ArrayList<HttpSessionActivationListener> listeners;
+    
+    out.writeObject(getId());
 
     synchronized (_values) {
       set = _values.entrySet();

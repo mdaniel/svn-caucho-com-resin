@@ -70,6 +70,21 @@ public class JavaSessionSerializer extends SessionSerializer {
     _out.writeObject(v);
   }
 
+  @Override
+  public void flush()
+  {
+    ObjectOutputStream out = _out;
+
+    if (out != null) {
+      try {
+        out.flush();
+      } catch (IOException e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+  }
+
+  @Override
   public void close()
   {
     ObjectOutputStream out = _out;

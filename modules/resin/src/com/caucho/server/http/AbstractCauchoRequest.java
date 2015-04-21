@@ -630,11 +630,13 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   @Override
   public HttpSession getSession(boolean create)
   {
-    if (_session != null) {
-      if (_session.isValid())
-        return _session;
+    HttpSession session = getLoadedSession();
+    
+    if (session != null) {
+      return session;
     }
-    else if (! create && _sessionIsLoaded) {
+    
+    if (! create && _sessionIsLoaded) {
       return null;
     }
 
@@ -652,10 +654,26 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    */
   public HttpSession getLoadedSession()
   {
-    if (_session != null && _session.isValid())
-      return _session;
-    else
+    SessionImpl session = _session;
+    
+    if (session == null) {
       return null;
+    }
+    else if (! session.isValid()) {
+      _session = null;
+      
+      return null;
+    }
+    else if (! session.getId().equals(getSessionId())) {
+      log.warning("get-session issue old-value: " + session.getId() + " sid=" + getSessionId());
+      
+      _session = null;
+      
+      return null;
+    }
+    else {
+      return session;
+    }
   }
 
   /**
@@ -691,8 +709,9 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   {
     SessionManager manager = getSessionManager();
 
-    if (manager == null)
+    if (manager == null) {
       return null;
+    }
 
     String id = getSessionId();
 
