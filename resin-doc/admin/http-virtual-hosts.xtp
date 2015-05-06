@@ -152,7 +152,7 @@ security.  Because all configuration is explicit, it's ultimately traceable
 to the <code>resin.xml</code> which makes debugging more reliable.</p>
 
 <p>Shared host configuration goes in the
-<a href="http-virtual-hosts-ref.xtp#host-default">&lt;host-default></a> tag.  In this
+<a href="http-virtual-hosts-ref.xtp#host-default">&lt;host-default&gt;</a> tag.  In this
 case, we've added an optional <code>host.xml</code> for configuration,
 an access log in <code>log/access.log</code> and a standard
 <code>webapps</code> directory.  The standard servlets and file handling
@@ -162,7 +162,7 @@ any requests.</p>
 
 <p>The example below is a complete, working <code>resin.xml</code> listening
 to HTTP at port 8080.  The <a href="clustering-overview.xtp">cluster</a>
-consists of a single server.  It includes a &lt;<a config-tag="development-mode-error-page"/>&gt; to help debugging
+consists of a single server.  It includes a <a config-tag="development-mode-error-page"/> to help debugging
 the configuration.  Many sites will omit the error-page to
 hide configuration details in case an error occurs on a live site.</p>
 
@@ -320,7 +320,7 @@ dispatch to back-end Resin server that correspond to the host name.</p>
 
 <p>Each host is placed in its own &lt;cluster> with a dedicated
 &lt;server>.  Since the server listens to a TCP port for load-balancing
-and clustering messages, each server on the maching needs a different
+and clustering messages, each server on the machine needs a different
 server port.</p>
 
 <p>In this example, the virtual hosts <code>www.gryffindor.com</code> and
