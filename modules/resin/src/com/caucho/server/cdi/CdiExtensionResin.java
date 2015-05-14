@@ -30,7 +30,6 @@
 package com.caucho.server.cdi;
 
 import io.baratine.core.Service;
-import io.baratine.core.SessionService;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -48,6 +47,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.amp.cdi.ActorManagerImpl;
+import com.caucho.amp.channel.SessionService;
 import com.caucho.amp.resource.ResourceService;
 import com.caucho.config.CauchoBean;
 import com.caucho.config.ConfigException;
