@@ -33,22 +33,21 @@ import io.baratine.core.ServiceRef;
 
 import java.io.StringReader;
 
-import com.caucho.amp.Amp;
 import com.caucho.amp.ServiceManagerAmp;
+import com.caucho.amp.inbox.OutboxAmpDirect;
 import com.caucho.amp.jamp.InJamp;
-import com.caucho.amp.manager.RegistryBase;
-import com.caucho.amp.remote.RegistryAmpInServer;
+import com.caucho.amp.remote.ChannelServer;
 import com.caucho.amp.remote.GatewayReply;
+import com.caucho.amp.spi.OutboxAmp;
 import com.caucho.amp.spi.ServiceRefAmp;
-import com.caucho.nautilus.ReceiverListener;
 import com.caucho.nautilus.ReceiverController;
+import com.caucho.nautilus.ReceiverListener;
 
 /**
  * Method ref for a nautilus queue.
  */
 class NautilusListener 
-  extends RegistryBase
-  implements ReceiverListener<String>, RegistryAmpInServer
+  implements ReceiverListener<String>, ChannelServer
 {
   private ServiceRefAmp _consumer;
   private ServiceManagerAmp _rampManager;
@@ -59,6 +58,11 @@ class NautilusListener
     _consumer = (ServiceRefAmp) consumer;
     _rampManager = (ServiceManagerAmp) consumer.getManager();
     _jIn = new InJamp(this);
+  }
+  
+  public ServiceManagerAmp getManager()
+  {
+    return _rampManager;
   }
 
   @Override
@@ -88,9 +92,13 @@ class NautilusListener
   */
 
   @Override
-  public ServiceRefAmp getServiceRefOut()
+  public OutboxAmp createOutbox()
   {
-    return _consumer;
+    OutboxAmpDirect outbox = new OutboxAmpDirect();
+    
+    outbox.setInbox(_consumer.getInbox());
+    
+    return outbox;
   }
 
   /*
