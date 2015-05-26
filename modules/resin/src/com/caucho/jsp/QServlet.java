@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2014 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2015 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R)
  *
@@ -69,7 +69,7 @@ import com.caucho.vfs.Vfs;
  */
 abstract public class QServlet implements Servlet {
   static final String COPYRIGHT =
-    "Copyright(c) 1998-2014 Caucho Technology.  All rights reserved.";
+    "Copyright(c) 1998-2015 Caucho Technology.  All rights reserved.";
 
   private static final Logger log
     = Logger.getLogger(QServlet.class.getName());
