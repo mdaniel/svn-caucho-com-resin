@@ -68,11 +68,9 @@ import com.caucho.cli.server.BfsLsCommand;
 import com.caucho.cli.server.BfsPutCommand;
 import com.caucho.cli.server.BfsRmCommand;
 import com.caucho.cli.server.BootConfigParser;
-import com.caucho.cli.server.DeployCommand;
 import com.caucho.cli.server.DeployCommandService;
 import com.caucho.cli.server.ProgramInfoDaemon;
 import com.caucho.cli.server.ShutdownCommand;
-import com.caucho.cli.server.StartCommand;
 import com.caucho.cli.server.StopCommand;
 import com.caucho.cli.server.StoreSaveCommand;
 import com.caucho.cli.shell.EnvCli;
@@ -145,7 +143,7 @@ public class ArgsResinCli extends ArgsCli
     //manager.addCommand(new ServerCommandConsole());
     //manager.addCommand(new ConsoleCommand());
     
-    manager.addCommand(new DeployCommand());
+    manager.addCommand(new DeployCommandResin());
     
     manager.addCommand(new DisableCommand().hide());
     manager.addCommand(new EnableCommand().hide());
