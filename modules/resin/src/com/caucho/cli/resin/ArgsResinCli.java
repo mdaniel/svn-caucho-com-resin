@@ -182,8 +182,8 @@ public class ArgsResinCli extends ArgsCli
     manager.addCommand(new ShutdownCommand());
     manager.addCommand(new SleepCommand().hide());
     // addCommand(new StartCloudCommand());
-    manager.addCommand(new StartCommand());
-    manager.addCommand("start-all", new StartCommand().hide());
+    manager.addCommand(new StartCommandResin());
+    manager.addCommand("start-all", new StartCommandResin().hide());
     manager.addCommand(new StartWithForegroundCommand().hide());
     manager.addCommand(new StatusCommand());
     manager.addCommand(new StopCommand());

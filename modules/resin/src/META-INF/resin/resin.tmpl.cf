@@ -27,6 +27,10 @@ logger level="${log_level?:info}" "";
 
 health_config = "${__DIR__}/health.cf";
 
+#class-loader {
+#  library-loader path="${server.home}/lib";
+#}
+
 #import path="${health_config}" optional="true";
 import path="${__DIR__}/health.cf";# optional="true";
 
@@ -53,6 +57,7 @@ import path="${__DIR__}/health.cf";# optional="true";
 # will also have a web cluster.
 
 cluster-default {
+
 #  resin:DeployService;
 
 #  if ${remote_admin_enable} {
@@ -75,29 +80,27 @@ cluster-default {
     }
 
     import "META-INF/pod.cf" optional="true";
-    # module-deploy "modules";
   }
     
   # creates the baratine services directory for .bar expansion
-  pod-deploy "${resin.dataDir}/pods";
+  pod-deploy path="${server.data}/pods";
 
   host-default {
 
     # creates the webapps directory for .war expansion
     web-app-deploy path="webapps"
-                   expand-preserve-fileset="WEB-INF/work/**"
-                   multiversion-routing="${webapp_multiversion_routing}" {
+                   expand-preserve-fileset="WEB-INF/work/**" {
     }
   }
 
   # auto virtual host deployment in hosts/foo.example.com/webapps
-  host-deploy "${resin.dataDir}/hosts" {
+  host-deploy "${server.data}/hosts" {
     host-default {
       import path="host.xml" optional="true";
     }
   }
 
-  host root-directory="${resin.dataDir}/hosts/host" controller-type="DEFAULT" {
+  host root-directory="${server.data}/hosts/host" controller-type="DEFAULT" {
     import path="host.xml" optional="true";
 
     web-app id=""
