@@ -13,7 +13,7 @@ import javax.management.ObjectName;
 
 import com.caucho.amp.AmpSystem;
 import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.amp.hamp.ClientHamp;
+import com.caucho.amp.hamp.BaratineClient;
 import com.caucho.amp.remote.ClientAmp;
 import com.caucho.bartender.BartenderSystem;
 import com.caucho.bartender.ServerBartender;
@@ -33,7 +33,7 @@ public class JmxClient
 
   private String _address;
 
-  private ClientHamp _rampClient;
+  private BaratineClient _rampClient;
 
   JmxClient(String serverId)
   {
@@ -49,17 +49,17 @@ public class JmxClient
     //_conn = broker.getConnection("admin.resin", cookie, "jmx");
     _client = rampManager.lookup(_address).as(JmxActorApi.class);
   }
-  
+
   JmxClient(String host, int port, String user, String password)
   {
     String url = "hamp://" + host + ":" + port + "/hamp";
     String selfHost = "localhost";
-    
-    _rampClient = new ClientHamp(url, user, password);
+
+    _rampClient = new BaratineClient(url, user, password);
     _rampClient.setVirtualHost("admin.resin");
     // client.connect(user, password);
     _rampClient.connect();
-    
+
     _client = _rampClient.lookup("remote:///jmx").as(JmxActorApi.class);
   }
 
@@ -93,12 +93,12 @@ public class JmxClient
   {
     return _client.invoke(objectName, methodName, args, sig);
   }
-  
+
   public void close()
   {
     ClientAmp client = _rampClient;
     _rampClient = null;
-    
+
     if (client != null) {
       client.close();
     }
