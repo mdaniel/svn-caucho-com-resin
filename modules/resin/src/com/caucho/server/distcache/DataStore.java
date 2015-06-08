@@ -667,8 +667,10 @@ public class DataStore {
           else {
             timeout = 60000L;
           }
-          
-          _alarm.queue(timeout);
+
+          if (_alarm != null) {
+            _alarm.queue(timeout);
+          }
         }
       }
     }

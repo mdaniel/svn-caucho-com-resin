@@ -561,8 +561,14 @@ public class Resin
         String serverName = getDisplayServerId();
 
         serverName = serverName.replace(':', '_');
+        
+        String dirPath = serverName;
+        if (getDynamicServerPort() > 0 && dirPath.equals("dyn")) {
+          dirPath = dirPath + "-" + getDynamicServerPort();
+        }
+        //port = getSelfServer().getPort();
   
-        _serverDataDirectory = dataDirectory.lookup("./" + serverName);
+        _serverDataDirectory = dataDirectory.lookup("./" + dirPath);
       }
     }
 

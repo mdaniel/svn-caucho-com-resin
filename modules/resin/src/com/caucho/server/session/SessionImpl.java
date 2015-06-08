@@ -724,21 +724,25 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       if (cache.get(_id, os)) {
         InputStream is = os.getInputStream();
-        
-        HashChunkInputStream crcIs = new HashChunkInputStream(is);
+        boolean isValid = false;
 
-        SessionDeserializer in = _manager.createSessionDeserializer(crcIs);
+        try {
+          HashChunkInputStream crcIs = new HashChunkInputStream(is);
 
-        if (log.isLoggable(Level.FINE)) {
-          log.fine(this + " session load valueHash="
-              + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
+          SessionDeserializer in = _manager.createSessionDeserializer(crcIs);
+
+          if (log.isLoggable(Level.FINE)) {
+            log.fine(this + " session load valueHash="
+                + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
+          }
+
+          isValid = load(in);
+
+          in.close();
+          crcIs.close();
+        } finally {
+          is.close();
         }
-
-        boolean isValid = load(in);
-
-        in.close();
-        crcIs.close();
-        is.close();
         
         if (isValid) {
           _cacheEntry = entry;

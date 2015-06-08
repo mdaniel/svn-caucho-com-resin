@@ -65,19 +65,12 @@
   <health:MemoryTenuredHealthCheck>
     <memory-free-min>1m</memory-free-min>
   </health:MemoryTenuredHealthCheck>
-  
-  <health:MemoryPermGenHealthCheck>
-    <memory-free-min>1m</memory-free-min>
-  </health:MemoryPermGenHealthCheck>
 
   <!--
      - Dump heap if memory pools are critically low 
     -->
   <health:DumpHeap>
-    <health:Or>
-      <health:IfHealthCritical healthCheck="${memoryTenuredHealthCheck}"/>
-      <health:IfHealthCritical healthCheck="${memoryPermGenHealthCheck}"/>
-    </health:Or>
+    <health:IfHealthCritical healthCheck="${memoryTenuredHealthCheck}"/>
     <health:IfNotRecent time="30m"/>
   </health:DumpHeap>
   
@@ -183,18 +176,6 @@
     <name>JVM|Memory|Heap Memory Free</name>
     <objectName>resin:type=Server</objectName>
     <attribute>RuntimeMemoryFree</attribute>
-  </health:JmxMeter>
-
-  <health:JmxMeter>
-    <name>JVM|Memory|PermGen Memory Used</name>
-    <objectName>resin:type=Memory</objectName>
-    <attribute>PermGenUsed</attribute>
-  </health:JmxMeter>
-
-  <health:JmxMeter>
-    <name>JVM|Memory|PermGen Memory Free</name>
-    <objectName>resin:type=Memory</objectName>
-    <attribute>PermGenFree</attribute>
   </health:JmxMeter>
 
   <health:JmxMeter>
@@ -607,8 +588,6 @@
       <meter>JVM|Memory|Heap Memory Free</meter>
       <meter>JVM|Memory|Tenured Memory Used</meter>
       <meter>JVM|Memory|Tenured Memory Free</meter>
-      <meter>JVM|Memory|PermGen Memory Used</meter>
-      <meter>JVM|Memory|PermGen Memory Free</meter>
     </graph>
       
     <graph name="Physical Memory">

@@ -30,6 +30,7 @@
 package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -211,5 +212,45 @@ public class VarType<D extends GenericDeclaration> extends BaseType
       return null;
     }
     
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.reflect.AnnotatedElement#getAnnotation(java.lang.Class)
+   */
+  @Override
+  public <T extends Annotation> T getAnnotation(Class<T> annotationClass)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.reflect.AnnotatedElement#getAnnotations()
+   */
+  @Override
+  public Annotation[] getAnnotations()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotations()
+   */
+  @Override
+  public Annotation[] getDeclaredAnnotations()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.reflect.TypeVariable#getAnnotatedBounds()
+   */
+  @Override
+  public AnnotatedType[] getAnnotatedBounds()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

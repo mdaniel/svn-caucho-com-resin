@@ -381,7 +381,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   {
     OwnerCreationalContext owner = new OwnerCreationalContext(null);
     
-    return getSessionContext(api).createProxy(owner);
+    return (T) getSessionContext(api).createProxy(owner);
   }
   
   protected <T> AbstractSessionContext<X,T>

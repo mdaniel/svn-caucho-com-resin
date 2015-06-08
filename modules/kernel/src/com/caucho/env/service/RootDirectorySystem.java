@@ -29,11 +29,18 @@
 
 package com.caucho.env.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
 import com.caucho.java.WorkDir;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.MemoryPath;
+import com.caucho.vfs.Path;
 
 /**
  * Root service for the root and data directories.
@@ -41,6 +48,9 @@ import com.caucho.vfs.*;
  */
 public class RootDirectorySystem extends AbstractResinSubSystem 
 {
+  private static final Logger log
+    = Logger.getLogger(RootDirectorySystem.class.getName());
+  
   public static final int START_PRIORITY_ROOT_DIRECTORY = 20;
 
   private static final L10N L = new L10N(RootDirectorySystem.class);
@@ -48,14 +58,20 @@ public class RootDirectorySystem extends AbstractResinSubSystem
   private final Path _rootDirectory;
   private final Path _dataDirectory;
 
+  private FileOutputStream _foutLock;
+
+  private FileLock _fileLock;
+
   public RootDirectorySystem(Path rootDirectory, Path dataDirectory) 
     throws IOException
   {
-    if (rootDirectory == null)
+    if (rootDirectory == null) {
       throw new NullPointerException();
+    }
     
-    if (dataDirectory == null)
+    if (dataDirectory == null) {
       throw new NullPointerException();
+    }
     
     if (dataDirectory instanceof MemoryPath) { // QA
       dataDirectory = 
@@ -128,5 +144,45 @@ public class RootDirectorySystem extends AbstractResinSubSystem
   public int getStartPriority()
   {
     return START_PRIORITY_ROOT_DIRECTORY;
+  }
+  
+  @Override
+  public void start() throws Exception
+  {
+    super.start();
+    
+    Path lockPath = getDataDirectory().lookup("resin.lock");
+    
+    try {
+      File file = new File(lockPath.getNativePath());
+      
+      _foutLock = new FileOutputStream(file);
+      try {
+        _fileLock = _foutLock.getChannel().lock();
+      } catch (IOException e) {
+        throw new ConfigException(L.l("Can't obtain unique lock to {0}. Check for other active Resin processes.",
+                                      lockPath.getNativePath()));
+      }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+  }
+  
+  @Override
+  public void stop() throws Exception
+  {
+    super.stop();
+    
+    try {
+      if (_fileLock != null) {
+        _fileLock.close();
+      }
+      
+      if (_foutLock != null) {
+        _foutLock.close();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 }

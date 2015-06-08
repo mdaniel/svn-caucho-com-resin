@@ -304,7 +304,7 @@ namespace Caucho.IIS
         long requestStartTime = Utils.CurrentTimeMillis();
 
         try {
-          result = HandleRequest(request, response, channel, rs, ws,
+          result = HandleRequest(context, request, response, channel, rs, ws,
                                  buf, len, isComplete, isComplete);
 
           if ((result & STATUS_MASK) == OK) {
@@ -359,7 +359,7 @@ namespace Caucho.IIS
           requestStartTime = Utils.CurrentTimeMillis();
 
           try {
-            result = HandleRequest(request, response, channel, rs, ws,
+            result = HandleRequest(context, request, response, channel, rs, ws,
                                    buf, len, isComplete, false);
 
             if ((result & STATUS_MASK) == OK) {
@@ -390,7 +390,8 @@ namespace Caucho.IIS
       }
     }
 
-    private int HandleRequest(HttpRequest request,
+    private int HandleRequest(HttpContext context,
+                            HttpRequest request,
                             HttpResponse response,
                             HmuxConnection hmuxChannel,
                             BufferedStream rs,
@@ -467,7 +468,10 @@ namespace Caucho.IIS
       }
 
       if (request.IsAuthenticated) {
+      /*
         String remoteUser = request.LogonUserIdentity.Name;
+        */
+        String remoteUser = context.Current.User.Identity.Name;
         WriteRequestString(ws, HmuxConnection.CSE_REMOTE_USER, remoteUser, traceId);
       }
 

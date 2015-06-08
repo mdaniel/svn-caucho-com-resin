@@ -112,7 +112,7 @@ public class ScheduleIntrospector {
       = new MethodTimeoutInvoker(caller, method);
 
     TimerTask timerTask 
-      = new TimerTask(timeoutInvoker, ejbTimer,
+      = new TimerTask(null, timeoutInvoker, ejbTimer,
                       cronExpression, trigger, schedule.info());
 
     ejbTimer.setScheduledTask(timerTask);

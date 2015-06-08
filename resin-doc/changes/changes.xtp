@@ -6,11 +6,20 @@
 
 <s1 title="Resin Change Log">
 
+<s2 title="4.0.45 in progress">
 <ul>
-<li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
+<li>dyn-server: on server restart, allow same address:port (#5903, rep by Tom Pohl)</li>
+<li>dyn-server: added lock in resin-data to ensure multiple servers cannot use same data (#5902, rep by Tom Pohl)</li>
+<li>ssl: allow OpenSSL ECC support for forward secrecy (#5906, rep by Nick Stephens)</li>
+<li>db: add validation and restart for corrupted BTree index (#5912, rep by wesleywu)</li>
+<li>build: allow for JDK 8 build (#5901, rep by dave)</li>
+<li>health: removed perm gen checks (#5910)</li>
+<li>ejb: ejbTimer.cancel() needs to remove timer from getTimers() (#5891, rep by bbik)</li>
+<li>servlet: FileService character-encoding should exclude images (#5907, rep by Mathias Lagerwall)</li>
 </ul>
+</s2>
 
-<s2 title="4.0.44 - in progress">
+<s2 title="4.0.44 - 2015-04-22">
 <ul>
 <li>jsee: self signed cert should support Firefox and Chrome default cipher-suites(#5884)</li>
 <li>jsee: self signed cert should check expire (#5885)</li>
@@ -1681,6 +1690,11 @@ expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>
 </s2>
 
 <p>
+
+<ul>
+<li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
+</ul>
+
 <a href="changes-3.xtp">Resin 3 changes</a>
 <a href="changes-31.xtp">Resin 3.1 changes</a>
 <a href="changes-2.xtp">Resin 1.2 changes</a>
