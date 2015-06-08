@@ -135,6 +135,7 @@ typedef struct ssl_config_t {
 
   char *cipher_suite;
   int is_honor_cipher_order;
+  int legacy_renegotiation;
 
   int is_compression;
 
