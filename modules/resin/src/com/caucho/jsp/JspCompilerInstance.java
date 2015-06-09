@@ -48,6 +48,7 @@ import org.xml.sax.SAXException;
 
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -407,24 +408,13 @@ public class JspCompilerInstance {
 
       _jspCompiler.compilePending();
 
-      boolean isAutoCompile = true;
-      if (_jspPropertyGroup != null)
-        isAutoCompile = _jspPropertyGroup.isAutoCompile();
-
-      Page page;
+      _generator = generator;
+      
       if (! generator.isStatic()) {
         compileJava(_jspPath, _className, lineMap, encoding);
-
-        page = _jspCompiler.loadPage(_className, isAutoCompile);
-      }
-      else {
-        page = _jspCompiler.loadStatic(_className,
-                                       _parseState.isOptionalSession());
-        page._caucho_addDepend(generator.getDependList());
-        page._caucho_setContentType(_parseState.getContentType());
       }
 
-      return page;
+      return load();
     } catch (JspParseException e) {
       e.setLineMap(lineMap);
       e.setErrorPage(_parseState.getErrorPage());
@@ -452,6 +442,39 @@ public class JspCompilerInstance {
       exn.setErrorPage(_parseState.getErrorPage());
 
       throw exn;
+    } catch (Throwable e) {
+      JspParseException exn = new JspParseException(e);
+      exn.setLineMap(lineMap);
+      exn.setErrorPage(_parseState.getErrorPage());
+
+      throw exn;
+    }
+  }
+  
+  public Page load()
+    throws Exception
+  {
+    LineMap lineMap = _generator.getLineMap();
+    
+    try {
+      boolean isAutoCompile = true;
+
+      if (_jspPropertyGroup != null) {
+        isAutoCompile = _jspPropertyGroup.isAutoCompile();
+      }
+
+      Page page;
+      if (! _generator.isStatic()) {
+        page = _jspCompiler.loadPage(_className, isAutoCompile);
+      }
+      else {
+        page = _jspCompiler.loadStatic(_className,
+                                       _parseState.isOptionalSession());
+        page._caucho_addDepend(_generator.getDependList());
+        page._caucho_setContentType(_parseState.getContentType());
+      }
+
+      return page;
     } catch (Throwable e) {
       JspParseException exn = new JspParseException(e);
       exn.setLineMap(lineMap);

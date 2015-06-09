@@ -2105,6 +2105,7 @@ public class JavaJspGenerator extends JspGenerator {
                     _requireSource + ");");
         // out.println("com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
         out.println("_caucho_depends.add(depend);");
+        out.println("loader.addDependency(depend);");
       }
       else {
         /*
@@ -2294,8 +2295,9 @@ public class JavaJspGenerator extends JspGenerator {
   private void generateConstantStrings(JspJavaWriter out)
     throws IOException
   {
-    if (_strings.size() == 0)
+    if (_strings.size() == 0) {
       return;
+    }
 
     out.println();
     Iterator<?> iter = _strings.iterator();

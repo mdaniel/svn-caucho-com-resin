@@ -243,16 +243,20 @@ public class SimpleLoader extends Loader {
   @Override
   public Path getPath(String name)
   {
-    if (_prefix != null && _pathPrefix == null)
+    if (_prefix != null && _pathPrefix == null) {
       _pathPrefix = _prefix.replace('.', '/');
-
-    if (_pathPrefix != null && ! name.startsWith(_pathPrefix))
+    }
+    
+    if (_pathPrefix != null && ! name.startsWith(_pathPrefix)) {
       return null;
-
-    if (name.startsWith("/"))
+    }
+    
+    if (name.startsWith("/")) {
       return _path.lookup("." + name);
-    else
+    }
+    else {
       return _path.lookup(name);
+    }
   }
 
   /**

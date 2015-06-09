@@ -479,6 +479,11 @@ public class JavaCompilerUtil {
    */
   public static String mangleName(String name)
   {
+    // canonicalize to lower case for the tag prefix loading
+    if (name.startsWith("jsp/WEB-INF")) {
+      name = "jsp/web-inf" + name.substring("jsp/WEB-INF".length());
+    }
+    
     boolean toLower = CauchoSystem.isCaseInsensitive();
 
     CharBuffer cb = new CharBuffer();
