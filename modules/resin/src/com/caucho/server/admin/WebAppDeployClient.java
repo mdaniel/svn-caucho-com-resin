@@ -28,7 +28,7 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.amp.remote.ClientAmp;
+import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.server.deploy.DeployClient;
 import com.caucho.util.QDate;
 
@@ -42,7 +42,7 @@ public class WebAppDeployClient extends DeployClient
     super();
   }
   
-  public WebAppDeployClient(ClientAmp hampClient)
+  public WebAppDeployClient(ServiceManagerClient hampClient)
   {
     super(hampClient);
   }

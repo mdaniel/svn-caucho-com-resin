@@ -41,8 +41,8 @@ import java.util.logging.Logger;
 
 import com.caucho.amp.AmpSystem;
 import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.amp.remote.ClientAmp;
 import com.caucho.amp.remote.ClientAmpLocal;
+import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.bartender.ServerBartender;
 import com.caucho.cli.boot.LogLevelCommand;
 import com.caucho.config.ConfigException;
@@ -74,6 +74,7 @@ import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
+
 import javax.management.ReflectionException;
 
 public class ManagementAdmin extends ManagedObjectBase
@@ -632,7 +633,7 @@ public class ManagementAdmin extends ManagedObjectBase
     
     // throw new UnsupportedOperationException(getClass().getName());
     
-    ClientAmp rampClient = new ClientAmpLocal(AmpSystem.getCurrentManager());
+    ServiceManagerClient rampClient = new ClientAmpLocal(AmpSystem.getCurrentManager());
     
     return new WebAppDeployClient(rampClient);
   }

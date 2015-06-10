@@ -14,7 +14,7 @@ import javax.management.ObjectName;
 import com.caucho.amp.AmpSystem;
 import com.caucho.amp.ServiceManagerAmp;
 import com.caucho.amp.hamp.ClientHamp;
-import com.caucho.amp.remote.ClientAmp;
+import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.bartender.BartenderSystem;
 import com.caucho.bartender.ServerBartender;
 import com.caucho.hessian.io.ExtSerializerFactory;
@@ -96,7 +96,7 @@ public class JmxClient
   
   public void close()
   {
-    ClientAmp client = _rampClient;
+    ServiceManagerClient client = _rampClient;
     _rampClient = null;
     
     if (client != null) {

@@ -39,8 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amp.AmpSystem;
-import com.caucho.amp.remote.ClientAmp;
 import com.caucho.amp.remote.ClientAmpLocal;
+import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.StreamSourceInputStream;
@@ -67,7 +67,7 @@ public class DeployClient implements AutoCloseable
   
   private String _url;
 
-  private ClientAmp _rampClient;
+  private ServiceManagerClient _rampClient;
 
   /*
   public DeployClient()
@@ -81,7 +81,7 @@ public class DeployClient implements AutoCloseable
     this(new ClientAmpLocal(AmpSystem.getCurrentManager()));
   }
   
-  public DeployClient(ClientAmp hampClient)
+  public DeployClient(ServiceManagerClient hampClient)
   {
     _rampClient = hampClient;
     
@@ -270,7 +270,7 @@ public class DeployClient implements AutoCloseable
 
   public void close()
   {
-    ClientAmp rampClient = _rampClient;
+    ServiceManagerClient rampClient = _rampClient;
     
     if (rampClient != null) {
       try {

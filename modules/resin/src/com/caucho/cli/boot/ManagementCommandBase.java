@@ -29,7 +29,7 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.amp.remote.ClientAmp;
+import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.cli.baratine.ArgsCli;
 import com.caucho.cli.server.BootArgumentException;
 import com.caucho.cli.server.RemoteCommandBase;
@@ -44,7 +44,7 @@ public abstract class ManagementCommandBase extends RemoteCommandBase
   @Override
   public ExitCode doCommand(ArgsCli args,
                             ServerConfigBoot server,
-                            ClientAmp client)
+                            ServiceManagerClient client)
     throws BootArgumentException
   {
     ManagerClientApi managerClient

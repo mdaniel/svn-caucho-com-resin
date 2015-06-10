@@ -29,7 +29,7 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.amp.remote.ClientAmp;
+import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.bartender.files.FilesDeployService;
 import com.caucho.cli.baratine.ArgsCli;
 import com.caucho.cli.server.BootArgumentException;
@@ -59,7 +59,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
   @Override
   public final ExitCode doCommand(ArgsCli args,
                                   ServerConfigBoot server,
-                                  ClientAmp client)
+                                  ServiceManagerClient client)
     throws BootArgumentException
   {
     FilesDeployService filesService
