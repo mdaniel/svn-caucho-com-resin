@@ -27,9 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.bartender.BartenderSystem;
 import com.caucho.bartender.ServerBartender;
+import com.caucho.bartender.pod.NodePodAmp;
 import com.caucho.bartender.pod.PodBartender;
 import com.caucho.bartender.pod.ServerPod;
-import com.caucho.bartender.pod.NodePod;
 import com.caucho.config.ConfigException;
 import com.caucho.http.container.HttpContainer;
 import com.caucho.http.protocol.RequestHttpBase;
@@ -384,7 +384,7 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
   {
     int index = (int) (hash % _pod.getNodeCount());
     
-    NodePod node = _pod.getNode(index);
+    NodePodAmp node = _pod.getNode(index);
   
     ServerPod serverPod = node.getServer(0);
   
