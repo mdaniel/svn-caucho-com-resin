@@ -43,7 +43,7 @@ public class JmxClient
     if (server == null)
       throw new IllegalArgumentException(L.l("'{0}' is an unknown remote server in the cluster",
                                              serverId));
-    _address = "champ://" + server.getId() + "/jmx";
+    _address = "bartender://" + server.getId() + "/jmx";
 
     ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
     //_conn = broker.getConnection("admin.resin", cookie, "jmx");

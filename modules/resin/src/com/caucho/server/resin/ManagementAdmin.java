@@ -627,7 +627,7 @@ public class ManagementAdmin extends ManagedObjectBase
     
     // RampManager rampManager = AmpSystem.getCurrentManager();
     
-    String url = "champ://" + server.getId() + "/resin/deploy";
+    // String url = "bartender://" + server.getId() + "/resin/deploy";
     
     // return new WebAppDeployClient(url, null, null);
     
