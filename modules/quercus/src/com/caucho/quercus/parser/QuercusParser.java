@@ -2591,6 +2591,9 @@ public class QuercusParser {
 
     _namespace = var;
 
+    // every namespace can set new USE clauses (therefore _namespaceUseMap must be reset to avoid naming conflicts).
+    _namespaceUseMap = new HashMap<StringValue, StringValue>();
+    
     if (token == '{') {
       ArrayList<Statement> statementList = parseStatementList();
 
