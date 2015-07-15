@@ -213,6 +213,53 @@ public class FunctionModule extends AbstractQuercusModule {
     return NullValue.NULL;
   }
 
+  /**
+   * (PHP 5 &gt;= 5.3.0)<br/>
+   * Call a static method
+   * @link http://php.net/manual/en/function.forward-static-call.php
+   * @param callback $function <p>
+   * The function or method to be called. This parameter may be an array,
+   * with the name of the class, and the method, or a string, with a function
+   * name.
+   * </p>
+   * @param mixed $parameter [optional] <p>
+   * Zero or more parameters to be passed to the function.
+   * </p>
+   * @param mixed $_ [optional] 
+   * @return mixed the function result, or false on error.
+   */
+  public static Value forward_static_call(Env env,
+                                     Callable function,
+                                     Value []args)
+  {
+  	// implementation doesn't differ for static calls
+    return call_user_func(env, function, args);
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.3.0)<br/>
+   * Call a static method and pass the arguments as array
+   * @link http://php.net/manual/en/function.forward-static-call-array.php
+   * @param callback $function <p>
+   * The function or method to be called. This parameter may be an &array;,
+   * with the name of the class, and the method, or a &string;, with a function
+   * name.
+   * </p>
+   * @param array $parameters [optional] 
+   * @return mixed the function result, or false on error.
+   */
+  public static Value forward_static_call_array(Env env,
+                                           Callable function,
+                                           Value arg)
+  {
+    if (function == null) {
+      env.warning("forward_static_call_array: first argument is not a valid function");
+      return NullValue.NULL;
+    }
+
+  	// implementation doesn't differ for static calls
+    return call_user_func_array(env, function, arg);
+  }
   // XXX: register_tick_function
   // XXX: unregister_tick_function
 }

@@ -2057,8 +2057,15 @@ public class QuercusClass extends NullValue {
     }
 
     AbstractFunction fun = _methodMap.getStatic(methodName, hash);
+    
+    QuercusClass replacedThis = this;
+    if (qThis != this && qThis instanceof QuercusClass) {
+    	// Static methods can be forwarded with FunctionModule.forward_static_call.
+    	// In that case we must replace "this" by "qThis".
+    	replacedThis = (QuercusClass) qThis;
+    }
 
-    return fun.callMethod(env, this, qThis, args);
+    return fun.callMethod(env, replacedThis, qThis, args);
   }
 
   /**
