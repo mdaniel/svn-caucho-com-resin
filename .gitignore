@@ -1,0 +1,11 @@
+*.class
+dist
+classes
+lib/cdi-16.jar
+lib/hessian.jar
+lib/javaee-16.jar
+lib/jaxstream-15.jar
+lib/jcache-16.jar
+modules/c/src/common/version.h
+modules/csharp/src/common/Version.cs
+modules/kernel/src/com/caucho/Version.java
