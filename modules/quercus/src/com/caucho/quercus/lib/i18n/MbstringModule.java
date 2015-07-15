@@ -40,6 +40,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
@@ -78,6 +79,8 @@ public class MbstringModule
   public static final int MB_CASE_UPPER = 0;
   public static final int MB_CASE_LOWER = 1;
   public static final int MB_CASE_TITLE = 2;
+  
+  private static Value MB_SUBSTITUTE_CHAR = NullValue.NULL;
 
   /**
    * Returns the extensions implemented by the module.
@@ -1160,9 +1163,18 @@ public class MbstringModule
   /**
    * Sets the character to use when decoding/encoding fails on a character.
    */
-  public static Value mb_substitute_character(Value substrchar)
+  public static Value mb_substitute_character(@Optional Value substrchar)
   {
-    throw new UnimplementedException("mb_substitute_character");
+  	Value result;
+  	if (substrchar != null) {
+  		// set new substitute character
+  		MB_SUBSTITUTE_CHAR = substrchar;
+  		result = BooleanValue.TRUE;
+  	} else {
+  		// return currently set substitute character
+  		result = MB_SUBSTITUTE_CHAR;
+  	}
+    return result;
   }
 
   public static LongValue mb_substr_count(Env env,
