@@ -119,7 +119,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
       <param name="module.jar" value="ejb-15.jar"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -127,7 +127,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jpa"/>
       <param name="module.jar" value="jpa-15.jar"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -151,7 +151,7 @@
       <param name="module.name" value="j2ee-management"/>
       <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="j2ee-management-10.jar"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -160,7 +160,7 @@
       <param name="module.name" value="jaxrpc"/>
       <param name="module.jar" value="jaxrpc-15.jar"/>
       <param name="module.dist" value="${lib}"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -169,7 +169,7 @@
       <param name="module.name" value="jaxstream"/>
       <param name="module.jar" value="jaxstream-15.jar"/>
       <param name="module.dist" value="${lib}"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -404,7 +404,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="experiment"/>
       <param name="module.jar" value="experiment.jar"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
@@ -600,7 +600,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ecmascript"/>
       <param name="module.dist" value="${lib}"/>
-      <!--param name="javac.source" value="1.5"/-->
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
