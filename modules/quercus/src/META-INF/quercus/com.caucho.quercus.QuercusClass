@@ -43,8 +43,10 @@ com.caucho.quercus.lib.spl.RecursiveIterator provides SPL
 com.caucho.quercus.lib.spl.RecursiveIteratorIterator provides SPL
 com.caucho.quercus.lib.spl.SeekableIterator provides SPL
 com.caucho.quercus.lib.spl.Serializable provides SPL
+com.caucho.quercus.lib.spl.SplDoublyLinkedList provides SPL
 com.caucho.quercus.lib.spl.SplFileInfo provides SPL
 com.caucho.quercus.lib.spl.SplObjectStorage provides SPL
+com.caucho.quercus.lib.spl.SplStack provides SPL
 com.caucho.quercus.lib.spl.Traversable provides SPL
 com.caucho.quercus.lib.dom.DOMAttr provides dom
 com.caucho.quercus.lib.dom.DOMComment provides dom
