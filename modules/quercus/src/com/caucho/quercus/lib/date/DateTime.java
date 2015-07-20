@@ -29,8 +29,14 @@
 
 package com.caucho.quercus.lib.date;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -118,16 +124,91 @@ public class DateTime implements DateTimeInterface, Cloneable
       return new DateTime(env, timeStr, timeZone);
   }
 
-  /*
   @ReturnNullAsFalse
   public static DateTime createFromFormat(Env env,
                                           String format,
                                           String timeStr,
                                           @Optional DateTimeZone timeZone)
   {
-
+  	long timestamp;
+  	if ("U.u".equals(format)) {
+  		String[] parts = timeStr.split("\\.");
+  		long seconds = Long.parseLong(parts[0]);
+  		long millis = Long.parseLong(parts[1]);
+  		timestamp = seconds * 1000 + millis;
+  	} else {
+  		StringBuilder javaFormat = new StringBuilder();
+    	for (int i = 0; i < format.length(); i++) {
+    		char c = format.charAt(i);
+    		switch (c) {
+    		case 'Y': // 4 digit year
+    			javaFormat.append("yyyy");
+    			break;
+    		case 'y': // 2 digit year
+    			javaFormat.append("yy");
+    			break;
+    		case 'd': // day of month, 2 digits with leading zero
+    			javaFormat.append("dd");
+    			break;
+    		case 'j': // day of month, 2 digits without leading zero
+    			javaFormat.append("d");
+    			break;
+    		case 'F': // textual representation of month, January through December
+    			javaFormat.append("MMMMM");
+    			break;
+    		case 'M': // textual representation of month, Jan through Dec
+    			javaFormat.append("MMM");
+    			break;
+    		case 'm': // numeric representation of month, with leading zeros 01 through 12
+    			javaFormat.append("MM");
+    			break;
+    		case 'n': // numeric representation of month, without leading zeros 1 through 12
+    			javaFormat.append("M");
+    			break;
+    		case 'G': // 24-hour format of an hour with leading zeros, 00 through 23
+    			javaFormat.append("HH");
+    			break;
+    		case 'H': // 24-hour format of an hour without leading zeros, 0 through 23
+    			javaFormat.append("H");
+    			break;
+    		case 'i': // minutes with leading zeros
+    			javaFormat.append("mm");
+    			break;
+    		case 'P': // timezone (-07:00)
+    			javaFormat.append("XXX");
+    			break;
+    		case 'O': // timezone (-0700)
+    			javaFormat.append("Z");
+    			break;
+    		case 'T': // timezone (e.g. UTC)
+    			javaFormat.append("z");
+    			break;
+    		case 's': // seconds with leading zeros
+    			javaFormat.append("ss");
+    			break;
+    		case 'D': // a textual representation of a day, Mon through Sun
+    			javaFormat.append("EEE");
+    			break;
+    		case 'l': // a textual representation of a day, Monday through Sunday
+    			javaFormat.append("EEEEE");
+    			break;
+    		default:
+    				javaFormat.append(c);
+    		}
+    	}
+    	try {
+    		
+    		System.out.println(new SimpleDateFormat(javaFormat.toString(), Locale.ENGLISH).format(new java.util.Date()));
+  	    timestamp = new SimpleDateFormat(javaFormat.toString(), Locale.ENGLISH).parse(timeStr).getTime();
+      } catch (ParseException e) {
+      	throw new QuercusRuntimeException("Could not parse date", e);
+      }  		
+  	}
+  	
+  	DateTime result = new DateTime(env, StringValue.EMPTY, timeZone);
+  	result._qDate.setGMTTime(timestamp);
+  	return result;
   }
-  */
 
   public DateTime add(DateInterval interval)
   {
