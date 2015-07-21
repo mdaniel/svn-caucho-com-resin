@@ -236,6 +236,7 @@ public class FilterModule extends AbstractQuercusModule
     _filterMap.put(FILTER_VALIDATE_BOOLEAN, new BooleanValidateFilter());
     _filterMap.put(FILTER_VALIDATE_FLOAT, new FloatValidateFilter());
     _filterMap.put(FILTER_VALIDATE_EMAIL, new EmailValidateFilter());
+    _filterMap.put(FILTER_VALIDATE_URL, new UrlValidateFilter());
     _filterMap.put(FILTER_VALIDATE_IP, new IpValidateFilter());
     _filterMap.put(FILTER_SANITIZE_STRING, new StringSanitizeFilter());
     _filterMap.put(FILTER_SANITIZE_EMAIL, new EmailSanitizeFilter());
