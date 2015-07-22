@@ -10,8 +10,12 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.QuercusProgram;
 
 /**
  * This class is used to implement DBGP (http://xdebug.org/docs-dbgp.php)
@@ -51,18 +55,22 @@ public class XdebugConnection
 	 * If this flag is set, debugger does not react to changes on stack (which are necessary for evaluation values)
 	 */
 	private boolean _isEvaluating;
+	private Integer _breakAtExpectedStackDepth;
 
 	private XdebugConnection() {
 		commandsMap = new HashMap<String, XdebugCommand>();
 		commandsMap.put("feature_set", new FeatureSetCommand());
 		commandsMap.put("status", new StatusCommand());
-		commandsMap.put("step_into", new StepIntoCommand());
+		commandsMap.put("step_into", new StepCommand());
+		commandsMap.put("step_over", new StepCommand());
+		commandsMap.put("step_out", new StepCommand());
 		commandsMap.put("eval", new EvalCommand());
 		commandsMap.put("run", new RunCommand());
 		commandsMap.put("stack_get", new StackGetCommand());
 		commandsMap.put("context_names", new ContextNamesCommand());
 		commandsMap.put("context_get", new ContextGetCommand());
 		commandsMap.put("breakpoint_set", new BreakpointSetCommand());
+		commandsMap.put("breakpoint_remove", new BreakpointRemoveCommand());
 		commandsMap.put("stop", new StopCommand());
 		try {
 			_socket = new Socket("localhost", 9000);
@@ -260,6 +268,10 @@ public class XdebugConnection
 					break;
 				}
 			case BREAK:
+				if (_breakAtExpectedStackDepth != null && _breakAtExpectedStackDepth < _env.getCallDepth()) {
+					// expected stack depth is not yet reached
+					break;
+				}
 				String fileName = call.getFileName();
 				int lineNumber = call.getLine();
 				String transactionId = _lastStateChangingResponse.transactionId;
@@ -303,7 +315,32 @@ public class XdebugConnection
 		return "file://" + result.substring(5);
 	}
 
-	public void setIsEvaluating(boolean isEvaluating) {
-		_isEvaluating = isEvaluating;
+	public void setBreakAtExpectedStackDepth(Integer stackDepth) {
+		_breakAtExpectedStackDepth = stackDepth;
   }
+
+	public void removeBreakpoint(String id) {
+		Breakpoint breakpoint = breakpointIdsMapping.get(id);
+		if (breakpoint != null) {
+			breakpointFileAndLineNumberMapping.remove(breakpoint.getFileAndLineNumber());
+		}
+  }
+	
+	public Object eval(String expr) {
+		_isEvaluating = true;
+    QuercusContext quercus = _env.getQuercus();
+
+    QuercusProgram program;
+    try {
+	    program = quercus.parseCode((StringValue) StringValue.create(expr));
+	    Value value = program.createExprReturn().execute(_env);
+
+	    return value != null ? value.toJavaObject() : null;
+    } catch (IOException e) {
+	    e.printStackTrace(System.err);
+	    return null;
+    } finally {
+  		_isEvaluating = false;
+    }
+	}
 }

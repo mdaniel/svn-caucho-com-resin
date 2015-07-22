@@ -1,12 +1,6 @@
 package com.caucho.quercus.env.xdebug;
 
-import java.io.IOException;
 import java.util.Map;
-
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.program.QuercusProgram;
 
 public class EvalCommand extends XdebugCommand
 {
@@ -16,7 +10,7 @@ public class EvalCommand extends XdebugCommand
       String transactionId, XdebugConnection conn) {
 		String data = getBase64DecodedData(parameters);
 		System.out.println("Requested eval expression: " + data);
-		Object value = eval(conn, data);
+		Object value = conn.eval(data);
 
 		String type = null;
 		String size = null;
@@ -28,6 +22,9 @@ public class EvalCommand extends XdebugCommand
 			type = "string";
 			size = "" + ((String) value).length();
 			serializedValue = javax.xml.bind.DatatypeConverter.printBase64Binary(((String) value).getBytes());
+		} else if (value == null) {
+			type ="null";
+			serializedValue = "";
 		} else {
 			System.err.println("unknown type: " + value.getClass());
 		}
@@ -37,22 +34,4 @@ public class EvalCommand extends XdebugCommand
 		
 	  return new XdebugResponse(null, response, transactionId);
   }
-
-	private Object eval(XdebugConnection conn, String expr) {
-		conn.setIsEvaluating(true);
-    QuercusContext quercus = conn.getEnv().getQuercus();
-
-    QuercusProgram program;
-    try {
-	    program = quercus.parseCode((StringValue) StringValue.create(expr));
-	    Value value = program.createExprReturn().execute(conn.getEnv());
-
-	    return value != null ? value.toJavaObject() : null;
-    } catch (IOException e) {
-	    e.printStackTrace(System.err);
-	    return null;
-    } finally {
-  		conn.setIsEvaluating(false);
-    }
-	}
 }
