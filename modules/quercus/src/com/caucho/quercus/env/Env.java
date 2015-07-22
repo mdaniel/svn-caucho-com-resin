@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -58,6 +59,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.xdebug.XdebugConnection;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ErrorModule;
@@ -437,6 +439,8 @@ public class Env
   private int _lastErrorType = -1;
   private String _lastErrorMessage = null;
   private Location _lastErrorLocation = null;
+  
+  private XdebugConnection _xdebugConnection = null;
 
   public Env(QuercusContext quercus,
              QuercusPage page,
@@ -3239,6 +3243,14 @@ public class Env
     _callStack[_callStackTop] = call;
     _callThisStack[_callStackTop] = obj;
     _callArgStack[_callStackTop] = args;
+    
+    if (_xdebugConnection == null) {
+    	_xdebugConnection = XdebugConnection.getInstance();
+    	_xdebugConnection.connect(this, call);
+    }
+    if (_xdebugConnection.isWaitingForUpdatesFromPhp()) {
+    	_xdebugConnection.notifyPushCall(call, obj, args);
+    }
 
     _callStackTop++;
   }
@@ -3506,6 +3518,18 @@ public class Env
         entry = _callStack[i].toString() + loc;
 
       trace.add(entry);
+    }
+
+    return trace;
+  }
+  
+  public List<Location> getStackTraceAsLocations()
+  {
+    ArrayList<Location> trace = new ArrayList<Location>();
+
+    for (int i = _callStackTop - 1; i >= 0; i--) {
+      Location location = _callStack[i].getLocation();
+      trace.add(location);
     }
 
     return trace;
@@ -7463,6 +7487,7 @@ public class Env
    */
   public void close()
   {
+  	stopXdebug();
     _quercus.completeEnv(this);
 
     /*
@@ -7695,6 +7720,12 @@ public class Env
       return entry._className.equals(_className)
              && entry._fieldName.equals(_fieldName);
     }
+  }
+  
+  private void stopXdebug() {
+  	if (_xdebugConnection != null) {
+  		_xdebugConnection.close();
+  	}
   }
 
   static class ClassKey {
