@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.lib.filter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -40,6 +43,12 @@ public class UrlValidateFilter
   @Override
   public Value filter(Env env, Value value, Value flagV)
   {
-    return value.toJavaURL(env) != null ? BooleanValue.TRUE : BooleanValue.FALSE;
+    try {
+      new URL(toString());
+      return BooleanValue.TRUE;
+    }
+    catch (MalformedURLException e) {
+      return BooleanValue.FALSE;
+    }
   }
 }
