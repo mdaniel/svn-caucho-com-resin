@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 /**
@@ -113,7 +112,7 @@ public class XdebugConnection
 		return INSTANCE;
 	}
 
-	public synchronized void connect(Env env, Expr call) {
+	public void connect(Env env, Expr call) {
 		if (!isConnected()) {
 			return;
 		}
@@ -123,13 +122,21 @@ public class XdebugConnection
 		breakpointIdsMapping = new HashMap<Integer, Breakpoint>();
 		breakpointFileAndLineNumberMapping = new HashMap<String, Breakpoint>();
 		String fileuri = getFileURI(call.getFileName());
-		String initMsg = "<init xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" fileuri=\""
+		final String initMsg = "<init xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" fileuri=\""
 		    + fileuri
 		    + "\" language=\"PHP\" protocol_version=\"1.0\" appid=\"15986\" idekey=\"XDEBUG_ECLIPSE\"><engine version=\"2.2.7\"><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2015 by Derick Rethans]]></copyright></init>";
 		try {
 			sendPacket(initMsg);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+
+		synchronized (this) {
+			try {
+				// give debugger time to prepare if he wants to break in first line
+				wait(1000);
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 
@@ -142,19 +149,21 @@ public class XdebugConnection
 			if (_state != State.STOPPED) {
 				// send packet to client that debugging ended
 				_state = State.STOPPED;
-				XdebugResponse response = new XdebugStatusResponse("run", _state,
-				    _lastStateChangingResponse.transactionId);
-				try {
-					sendPacket(response.responseToSend);
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (_lastStateChangingResponse != null) {
+					XdebugResponse response = new XdebugStatusResponse("run", _state,
+					    _lastStateChangingResponse.transactionId);
+					try {
+						sendPacket(response.responseToSend);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			// make sure that thread is not sleeping anymore
 			synchronized (this) {
 				notifyAll();
 			}
-			
+
 			try {
 				_socket.close();
 			} catch (IOException e) {
@@ -239,7 +248,7 @@ public class XdebugConnection
 		}
 	}
 
-	public synchronized void notifyPushCall(Expr call, Value obj, Value[] args) {
+	public synchronized void notifyPushCall(Expr call) {
 		try {
 			switch (_state) {
 			case BREAK:

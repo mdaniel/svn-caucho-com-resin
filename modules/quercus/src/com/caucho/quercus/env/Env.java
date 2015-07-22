@@ -3249,7 +3249,7 @@ public class Env
     	_xdebugConnection.connect(this, call);
     }
     if (_xdebugConnection.isWaitingForUpdatesFromPhp()) {
-    	_xdebugConnection.notifyPushCall(call, obj, args);
+    	_xdebugConnection.notifyPushCall(call);
     }
 
     _callStackTop++;
@@ -3527,7 +3527,7 @@ public class Env
   {
     ArrayList<Location> trace = new ArrayList<Location>();
 
-    for (int i = _callStackTop - 1; i >= 0; i--) {
+    for (int i = _callStackTop; i >= 0; i--) {
       Location location = _callStack[i].getLocation();
       trace.add(location);
     }
