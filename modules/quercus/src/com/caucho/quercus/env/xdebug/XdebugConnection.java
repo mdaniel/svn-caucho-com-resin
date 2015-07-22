@@ -42,10 +42,15 @@ public class XdebugConnection
 	private Socket _socket;
 	private Env _env;
 	private State _state = State.STARTING;
+	private String _lastCommand;
 	private XdebugResponse _lastStateChangingResponse;
 	private int nextBreakpointId = 1000000;
 	private Map<Integer, Breakpoint> breakpointIdsMapping = new HashMap<Integer, Breakpoint>();
 	private Map<String, Breakpoint> breakpointFileAndLineNumberMapping = new HashMap<String, Breakpoint>();
+	/**
+	 * If this flag is set, debugger does not react to changes on stack (which are necessary for evaluation values)
+	 */
+	private boolean _isEvaluating;
 
 	private XdebugConnection() {
 		commandsMap = new HashMap<String, XdebugCommand>();
@@ -84,16 +89,7 @@ public class XdebugConnection
 					} catch (IOException e) {
 					} finally {
 						System.out.println("xdebug connection has been closed");
-						synchronized (XdebugConnection.this) {
-							_state = XdebugConnection.State.STOPPED;
-						}
-						if (_socket != null) {
-							try {
-								_socket.close();
-							} catch (IOException e1) {
-							}
-							_socket = null;
-						}
+						close();
 					}
 				};
 			}.start();
@@ -119,6 +115,8 @@ public class XdebugConnection
 		_env = env;
 		_state = State.STARTING;
 		_lastStateChangingResponse = null;
+		_lastCommand = null;
+		_isEvaluating = false;
 		breakpointIdsMapping = new HashMap<Integer, Breakpoint>();
 		breakpointFileAndLineNumberMapping = new HashMap<String, Breakpoint>();
 		String fileuri = getFileURI(call.getFileName());
@@ -144,13 +142,13 @@ public class XdebugConnection
 		return _socket != null && _socket.isConnected() && _state != State.STOPPED;
 	}
 
-	public synchronized void close() {
+	public void close() {
 		if (isConnected()) {
 			if (_state != State.STOPPED) {
 				// send packet to client that debugging ended
 				_state = State.STOPPED;
 				if (_lastStateChangingResponse != null) {
-					XdebugResponse response = new XdebugStatusResponse("run", _state,
+					XdebugResponse response = new XdebugStatusResponse(_lastCommand, _state,
 					    _lastStateChangingResponse.transactionId);
 					try {
 						sendPacket(response.responseToSend);
@@ -175,7 +173,7 @@ public class XdebugConnection
 	}
 
 	public boolean isWaitingForUpdatesFromPhp() {
-		return _state == State.BREAK;
+		return (_state == State.BREAK || _state == State.RUNNING) && !_isEvaluating;
 	}
 
 	public Env getEnv() {
@@ -199,6 +197,9 @@ public class XdebugConnection
 	}
 
 	protected synchronized void sendPacket(String packet) throws IOException {
+		if (_socket == null) {
+			return;
+		}
 		String msg = XML_DECLARATION + packet;
 		System.out.println(msg);
 		OutputStream out = _socket.getOutputStream();
@@ -215,6 +216,7 @@ public class XdebugConnection
 		System.out.println(packet);
 		String[] parts = packet.split(" ");
 		XdebugCommand command = commandsMap.get(parts[0]);
+		_lastCommand = parts[0];
 		if (command == null) {
 			close();
 			throw new RuntimeException("unknown command: " + packet);
@@ -251,24 +253,35 @@ public class XdebugConnection
 	public synchronized void notifyPushCall(Expr call) {
 		try {
 			switch (_state) {
+			case RUNNING:
+				String filenameAndLineNumber = call.getFileName() + ":" + call.getLine();
+				Breakpoint breakpoint = breakpointFileAndLineNumberMapping.get(filenameAndLineNumber);
+				if (breakpoint == null) {
+					break;
+				}
 			case BREAK:
-				String fileuri = getFileURI(call.getFileName());
+				String fileName = call.getFileName();
 				int lineNumber = call.getLine();
 				String transactionId = _lastStateChangingResponse.transactionId;
 				_state = State.BREAK;
-				sendPacket("<response xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" command=\"step_into\" transaction_id=\""
-				    + transactionId
-				    + "\" status=\"break\" reason=\"ok\"><xdebug:message filename=\""
-				    + fileuri
+//				sendPacket("<response xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" command=\"step_into\" transaction_id=\""
+//				    + transactionId
+//				    + "\" status=\"break\" reason=\"ok\"><xdebug:message filename=\""
+				XdebugStatusResponse response = new XdebugStatusResponse(_lastCommand, _state, _state, transactionId, "<xdebug:message filename=\""
+				    + fileName
 				    + "\" lineno=\""
 				    + lineNumber
-				    + "\"></xdebug:message></response>");
-				synchronized (this) {
-					try {
+//				    + "\"></xdebug:message></response>");
+				    + "\"></xdebug:message>");
+				sendPacket(response.responseToSend);
+				_lastCommand = null;
+				_lastStateChangingResponse = null;
+				try {
+					if (_state != State.STOPPED) {
 						wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace(System.err);
 					}
+				} catch (InterruptedException e) {
+					e.printStackTrace(System.err);
 				}
 				break;
 			default:
@@ -289,4 +302,8 @@ public class XdebugConnection
 		// replace "file:/" with "file:///"
 		return "file://" + result.substring(5);
 	}
+
+	public void setIsEvaluating(boolean isEvaluating) {
+		_isEvaluating = isEvaluating;
+  }
 }
