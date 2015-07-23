@@ -223,14 +223,17 @@ public class ReflectionClass
     return new ReflectionMethod(_name, _cls.getFunction(name));
   }
 
-  public ArrayValue getMethods(Env env)
+  public ArrayValue getMethods(Env env, @Optional Integer filter)
   {
     ArrayValue array = new ArrayValueImpl();
 
     MethodMap<AbstractFunction> map = _cls.getMethodMap();
 
     for (AbstractFunction method : map.values()) {
-      array.put(env.wrapJava(new ReflectionMethod(_cls.getName(), method)));
+      ReflectionMethod reflectionMethod = new ReflectionMethod(_cls.getName(), method);
+      if (filter == null || (reflectionMethod.getModifiers() & filter) > 0) {
+        array.put(env.wrapJava(reflectionMethod));
+      }
     }
 
     return array;
