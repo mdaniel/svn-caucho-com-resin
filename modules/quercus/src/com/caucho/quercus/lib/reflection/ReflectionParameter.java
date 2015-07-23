@@ -146,7 +146,7 @@ public class ReflectionParameter
 
     ReflectionClass cls = new ReflectionClass(env, name);
 
-    return cls;
+    return cls.getQuercusClass() != null ? cls : null;
   }
 
   public boolean isArray()
