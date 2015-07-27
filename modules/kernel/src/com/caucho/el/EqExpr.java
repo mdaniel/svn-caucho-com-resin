@@ -86,6 +86,10 @@ public class EqExpr extends AbstractBooleanExpr {
 
     Class aType = aObj.getClass();
     Class bType = bObj.getClass();
+    
+    if (aType.equals(bType)) {
+      return aObj.equals(bObj);
+    }
 
     if (aType == Boolean.class || bType == Boolean.class) {
       boolean a = toBoolean(aObj, env);
@@ -129,7 +133,20 @@ public class EqExpr extends AbstractBooleanExpr {
       return false;
     }
 
-    // XXX: enum
+    if (aObj instanceof Enum && bObj instanceof String) {
+      Enum aEnum = (Enum) aObj;
+      
+      Enum bEnum = toEnum((String) bObj, aEnum);
+      
+      return aEnum.equals(bEnum);
+    }
+    else if (bObj instanceof Enum && aObj instanceof String) {
+      Enum<?> bEnum = (Enum<?>) bObj;
+      
+      Enum<?> aEnum = toEnum((String) aObj, bEnum);
+      
+      return bEnum.equals(aEnum);
+    }
 
     if (aObj instanceof String || bObj instanceof String) {
       String a = toString(aObj, env);
@@ -139,6 +156,15 @@ public class EqExpr extends AbstractBooleanExpr {
     }
 
     return aObj.equals(bObj);
+  }
+  
+  private Enum<?> toEnum(String v, Enum<?> e)
+  {
+    if (v == null || v.isEmpty()) {
+      return null;
+    }
+    
+    return Enum.valueOf(e.getClass(), v);
   }
 
   /**
