@@ -329,7 +329,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       DataStore dataStore = _dataStore;
       
       if (dataStore != null) {
-        return _dataStore.save(source, length);
+        return dataStore.save(source, length);
       }
       else {
         return -1;

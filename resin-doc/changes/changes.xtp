@@ -8,6 +8,11 @@
 
 <s2 title="4.0.45 in progress">
 <ul>
+<li>session: change shutdown state machine to allow getAttribute on invalidating session (#5919, rep by Shinomiya Nobuaki)</li>
+<li>build: remove LoadTimeWeaver (#5923, rep by M. Barker)</li>
+<li>watchdog: change default -Xss to 1m (#5927, rep by anupmondal)</li>
+<li>servlet: check for dual registration of ServletContextListener (#5893, rep by Matias Lagerwall)</li>
+<li>jsp: share classloading of .tag files (#5914, rep by nfedorov)</li>
 <li>dyn-server: on server restart, allow same address:port (#5903, rep by Tom Pohl)</li>
 <li>dyn-server: added lock in resin-data to ensure multiple servers cannot use same data (#5902, rep by Tom Pohl)</li>
 <li>ssl: allow OpenSSL ECC support for forward secrecy (#5906, rep by Nick Stephens)</li>

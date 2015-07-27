@@ -625,7 +625,7 @@ class WatchdogClient
     list.add("-Xrs");
 
     if (! _config.hasWatchdogXss())
-      list.add("-Xss256k");
+      list.add("-Xss1m");
     if (! _config.hasWatchdogXmx())
       list.add("-Xmx32m");
 
