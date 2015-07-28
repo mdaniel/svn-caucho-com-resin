@@ -217,7 +217,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   /* (non-Javadoc)
    * @see java.lang.reflect.AnnotatedElement#getAnnotation(java.lang.Class)
    */
-  @Override
+  //@Override
   public <T extends Annotation> T getAnnotation(Class<T> annotationClass)
   {
     // TODO Auto-generated method stub
@@ -227,7 +227,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   /* (non-Javadoc)
    * @see java.lang.reflect.AnnotatedElement#getAnnotations()
    */
-  @Override
+  //@Override
   public Annotation[] getAnnotations()
   {
     // TODO Auto-generated method stub
@@ -237,7 +237,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   /* (non-Javadoc)
    * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotations()
    */
-  @Override
+  //@Override
   public Annotation[] getDeclaredAnnotations()
   {
     // TODO Auto-generated method stub
@@ -247,7 +247,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   /* (non-Javadoc)
    * @see java.lang.reflect.TypeVariable#getAnnotatedBounds()
    */
-  @Override
+  //@Override
   public AnnotatedType[] getAnnotatedBounds()
   {
     // TODO Auto-generated method stub
