@@ -32,6 +32,7 @@ package com.caucho.env.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.channels.FileLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -175,7 +176,12 @@ public class RootDirectorySystem extends AbstractResinSubSystem
     
     try {
       if (_fileLock != null) {
-        _fileLock.close();
+        // Reflection is for JDK 6 compilation
+        Method closeMethod = _fileLock.getClass().getMethod("close");
+        
+        if (closeMethod != null) {
+          closeMethod.invoke(_fileLock);
+        }
       }
       
       if (_foutLock != null) {
