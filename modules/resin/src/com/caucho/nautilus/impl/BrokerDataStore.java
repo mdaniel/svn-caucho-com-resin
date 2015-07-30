@@ -29,6 +29,7 @@
 
 package com.caucho.nautilus.impl;
 
+import io.baratine.core.Result;
 import io.baratine.db.Cursor;
 
 import java.io.InputStream;
@@ -174,7 +175,7 @@ class BrokerDataStore extends BrokerNautilusBase
   }
   void saveMessage(long qid, long mid, InputStream is)
   {
-    _insertMessageQuery.exec(null, qid, mid, is);
+    _insertMessageQuery.exec(Result.ignore(), qid, mid, is);
   }
 
   InputStream loadMessage(long qid, long mid)

@@ -49,8 +49,8 @@
   <property name="javac.nowarn" value="on"/>
   <property name="javac.memoryMaximumSize" value="512m"/>
 
-  <property name="javac.source" value="1.7"/>
-  <property name="javac.target" value="1.7"/>
+  <property name="javac.source" value="1.8"/>
+  <property name="javac.target" value="1.8"/>
 
   <property name="jar.compress" value="false"/>
   <!--
