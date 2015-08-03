@@ -5321,6 +5321,11 @@ public class WebApp extends ServletContextImpl
       } catch (RuntimeException exn) {
         _future.complete(exn);
         isValid = true;
+      } catch (Error exn) {
+        log.log(Level.FINER, exn.toString(), exn);
+        
+        _future.complete(new IllegalStateException(exn));
+        isValid = true;
       } finally {
         if (! isValid) {
           _future.complete(new IllegalStateException());
