@@ -176,11 +176,15 @@ public class RootDirectorySystem extends AbstractResinSubSystem
     
     try {
       if (_fileLock != null) {
-        // Reflection is for JDK 6 compilation
-        Method closeMethod = _fileLock.getClass().getMethod("close");
+        try {
+          // Reflection is for JDK 6 compilation
+          Method closeMethod = _fileLock.getClass().getMethod("close");
         
-        if (closeMethod != null) {
-          closeMethod.invoke(_fileLock);
+          if (closeMethod != null) {
+            closeMethod.invoke(_fileLock);
+          }
+        } catch (Exception e) {
+          log.log(Level.FINEST, e.toString(), e);
         }
       }
       
