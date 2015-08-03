@@ -83,8 +83,6 @@
           <openssl>
             <certificate-file>${file_lookup(openssl_file,__DIR__)}</certificate-file>
             <certificate-key-file>${file_lookup(openssl_key, __DIR__)}</certificate-key-file>
-            <cipher-suite>${openssl_cipher_suite}</cipher-suite>
-            <honor-cipher-order>true</honor-cipher-order>
             <password>
               <resin:Password>${openssl_password}</resin:Password>
             </password>

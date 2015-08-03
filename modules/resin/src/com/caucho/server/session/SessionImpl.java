@@ -1112,6 +1112,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       log.fine(this + " invalidate");
 
     _state = _state.toInvalidating();
+
     invalidate(Logout.INVALIDATE);
   }
 
@@ -1150,8 +1151,9 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void removeEvent()
   {
     synchronized (this) {
-      if (_state.isInvalidating() || _useCount.get() <= 0)
-        _state = _state.toClosing();
+      if (_state.isInvalidating() || _useCount.get() <= 0) {
+        _state = _state.toLru();
+      }
     }
 
     if (! _state.isClosing()) {
@@ -1282,13 +1284,15 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   private void invalidateImpl(Logout logout)
   {
+    State state = _state;
+    
     boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
     if (! invalidateAfterListener) {
       _state = _state.toClosing();
     }
 
     try {
-      if (_state.isInvalidating() && _manager.getSessionStore() != null) {
+      if (state.isInvalidating() && _manager.getSessionStore() != null) {
         boolean isRemove = false;
 
         /*
@@ -1435,12 +1439,20 @@ public class SessionImpl implements HttpSession, CacheListener {
       boolean isClosing() { return true; }
       @Override
       boolean isInvalidating() { return true; }
+      @Override
+      State toLru() { return this; }
+    },
+    lru {
+      @Override
+      boolean isClosing() { return true; }
     },
     closing {
       @Override
       boolean isClosing() { return true; }
       @Override
       State toInvalidating() { return this; }
+      @Override
+      State toLru() { return this; }
     },
     closed {
       @Override
@@ -1449,6 +1461,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       State toClosing() { return this; }
       @Override
       State toInvalidating() { return this; }
+      @Override
+      State toLru() { return this; }
     };
     
     boolean isValid()
@@ -1484,6 +1498,11 @@ public class SessionImpl implements HttpSession, CacheListener {
     State toInvalidating()
     {
       return State.invalidating;
+    }
+    
+    State toLru()
+    {
+      return State.lru;
     }
   }
 }
