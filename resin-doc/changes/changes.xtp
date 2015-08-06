@@ -6,7 +6,7 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.45 in progress">
+<s2 title="4.0.45 - Aug 6, 2015">
 <ul>
 <li>session: change shutdown state machine to allow getAttribute on invalidating session (#5919, rep by Shinomiya Nobuaki)</li>
 <li>build: remove LoadTimeWeaver (#5923, rep by M. Barker)</li>
