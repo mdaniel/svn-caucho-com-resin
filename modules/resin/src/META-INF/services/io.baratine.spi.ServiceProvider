@@ -1,4 +1,4 @@
-com.caucho.amp.timer.ServiceBindingProviderTimer
+com.caucho.ramp.timer.ServiceProviderTimer
 com.caucho.amp.events.ServiceBindingProviderEvents
 com.caucho.ramp.files.FileBindingProviderRamp
 com.caucho.ramp.nautilus.NautilusBindingProvider
