@@ -43,12 +43,12 @@ import com.caucho.vfs.Path;
 @Module
 public class WebAppControllerResin extends WebAppController
 {
-  public WebAppControllerResin(String id, 
+  public WebAppControllerResin(WebAppHandle handle, 
                                Path rootDirectory, 
                                WebAppContainer container,
                                String urlPrefix)
   {
-    super(id, rootDirectory, container, urlPrefix);
+    super(handle, rootDirectory, container, urlPrefix);
   }
 
   /**

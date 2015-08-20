@@ -125,7 +125,9 @@ public class WebAppContainerResin extends WebAppContainer
                                                  Path rootDirectory,
                                                  String urlPrefix)
   {
-    return new WebAppControllerResin(id, rootDirectory, this, urlPrefix);
+    WebAppHandle handle = createHandle(id);
+    
+    return new WebAppControllerResin(handle, rootDirectory, this, urlPrefix);
   }
 
   public void add(DispatchRule dispatchRule)
