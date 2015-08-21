@@ -386,11 +386,9 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
     
     NodePodAmp node = _pod.getNode(index);
   
-    ServerPod serverPod = node.getServer(0);
+    ServerBartender server = node.getServer(0);
   
-    if (serverPod != null && serverPod.isUp()) {
-      ServerBartender server = serverPod.getServer();
-      
+    if (server != null && server.isUp()) {
       ClientHttp2 client = getClient(server);
     
       return client;

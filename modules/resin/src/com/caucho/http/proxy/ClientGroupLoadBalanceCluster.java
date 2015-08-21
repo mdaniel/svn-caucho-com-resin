@@ -128,7 +128,7 @@ class ClientGroupLoadBalanceCluster
     ClientSocketFactory []clientList = new ClientSocketFactory[length];
     
     for (int i = 0; i < length; i++) {
-      ServerBartender server = _pod.getNode(i).getServer(0).getServer();
+      ServerBartender server = _pod.getNode(i).getServer(0);
 
       if (server == null) {
         continue;

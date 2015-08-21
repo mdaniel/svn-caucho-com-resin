@@ -216,7 +216,7 @@ class QueueServiceRemote extends QueueServiceBase
   {
     if (_nautilusService == null) {
       
-      ServerBartender server = _pod.getNode(0).getServer(0).getServer();
+      ServerBartender server = _pod.getNode(0).getServer(0);
       
       if (server == null) {
         System.out.println("MISSING_NAUTILUS_SERVER: " + server + " " + _pod.getNode(0).getServer(0));

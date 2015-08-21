@@ -372,7 +372,7 @@ public final class BrokerServiceImpl
     
     PodBartender pod = _bartender.findPod(podName);
     
-    ServerBartender server = pod.getNode(0).getServer(0).getServer();
+    ServerBartender server = pod.getNode(0).getServer(0);
     
     if (server == _bartender.getServerSelf()) {
       QueueServiceLocal queueImpl = new QueueServiceLocal(this, name, qid);
