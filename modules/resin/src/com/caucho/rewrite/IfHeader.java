@@ -64,6 +64,8 @@ public class IfHeader implements RequestPredicateVary
   
   private String _name;
   private Pattern _regexp;
+  
+  private boolean _isSendVary = true;
 
   public IfHeader()
   {
@@ -92,6 +94,17 @@ public class IfHeader implements RequestPredicateVary
     setRegexp(regexp);
   }
 
+  @Configurable
+  public void setSendVary(boolean isVary)
+  {
+    _isSendVary = isVary;
+  }
+  
+  public boolean isSendVary()
+  {
+    return _isSendVary;
+  }
+  
   @PostConstruct
   public void init()
   {
@@ -119,6 +132,8 @@ public class IfHeader implements RequestPredicateVary
   @Override
   public void addVaryHeader(HttpServletResponse response)
   {
-    response.addHeader("Vary", _name);
+    if (_isSendVary) {
+      response.addHeader("Vary", _name);
+    }
   }
 }

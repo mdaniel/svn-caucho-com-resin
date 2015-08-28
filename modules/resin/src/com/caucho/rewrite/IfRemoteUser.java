@@ -48,10 +48,15 @@ public class IfRemoteUser implements RequestPredicate
   private static final L10N L = new L10N(IfRemoteUser.class);
 
   private String _remoteUser;
+  private boolean _isSendVary;
 
   public void setValue(String user)
   {
     _remoteUser = user;
+  }
+  
+  public void setSendVary(boolean isSendVary)
+  {
   }
 
   @PostConstruct

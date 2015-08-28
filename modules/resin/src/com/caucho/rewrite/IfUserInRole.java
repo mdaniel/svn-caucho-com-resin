@@ -58,6 +58,7 @@ public class IfUserInRole implements RequestPredicate
     = Logger.getLogger(IfUserInRole.class.getName());
 
   private String []_roles = new String[0];
+  private boolean _isSendVary = true;
 
   /**
    * Adds a role to check.  The user must match one of the roles.
@@ -69,6 +70,12 @@ public class IfUserInRole implements RequestPredicate
     System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
     newRoles[_roles.length] = role;
     _roles = newRoles;
+  }
+  
+  @Configurable
+  public void setSendVary(boolean isSendVary)
+  {
+    _isSendVary = isSendVary;
   }
 
   /**
@@ -96,8 +103,9 @@ public class IfUserInRole implements RequestPredicate
       }
     }
 
-    if (_roles.length == 0)
+    if (_roles.length == 0) {
       return true;
+    }
     
     if (log.isLoggable(Level.FINER))
       log.finer(this + " does not match " + user);
