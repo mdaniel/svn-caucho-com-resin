@@ -213,4 +213,34 @@ public class SplModule extends AbstractQuercusModule
   {
     return obj.getObjectHash(env);
   }
+  
+  /**
+   * (PHP 5 &gt;= 5.4.0)<br/>
+   * Return the traits used by the given class
+   * @param mixed $class An object (class instance) or a string (class name).
+   * @param bool $autoload Whether to allow this function to load the class automatically through the __autoload() magic method.
+   * @return array Array on success, or FALSE on error.
+   * @link http://php.net/manual/en/function.class-uses.php
+   * @see class_parents(), get_declared_traits()
+   */
+  public static Value class_uses(Env env, Value obj, @Optional boolean autoload) {
+    QuercusClass cls;
+
+    if (obj.isObject()) {
+      cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
+    } else {
+      cls = env.findClass(obj.toString(), autoload, true, true);
+    }
+
+    if (cls != null) {
+      ArrayValue result = new ArrayValueImpl();
+      for (String trait: cls.getClassDef().getTraits()) {
+        Value traitName = StringValue.create(trait);
+        result.append(traitName, traitName);
+      }
+      return result;
+    } else {
+      return BooleanValue.FALSE;
+    }
+  }
 }
