@@ -786,10 +786,11 @@ public class PDO implements EnvCleanup {
   private boolean setOracleNulls(Env env, int value)
   {
     switch (value) {
-      case NULL_NATURAL:
-      case NULL_EMPTY_STRING:
-      case NULL_TO_STRING:
-        throw new UnimplementedException();
+    // we don't care about oracle at the moment
+//      case NULL_NATURAL:
+//      case NULL_EMPTY_STRING:
+//      case NULL_TO_STRING:
+//        throw new UnimplementedException();
       default:
         _error.warning(env, L.l("unknown value `{0}'", value));
         _error.unsupportedAttributeValue(env, value);
