@@ -45,6 +45,7 @@ com.caucho.quercus.lib.session.SessionModule
 com.caucho.quercus.lib.simplexml.SimpleXMLModule
 com.caucho.quercus.lib.file.SocketModule
 com.caucho.quercus.lib.spl.SplModule
+com.caucho.quercus.lib.openssl.OpenSSLModule
 com.caucho.quercus.lib.file.StreamModule
 com.caucho.quercus.lib.string.StringModule
 com.caucho.quercus.lib.TokenModule
