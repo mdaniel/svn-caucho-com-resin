@@ -1129,6 +1129,9 @@ r_session-config = element session-config {
   & (attribute use-persistent-store { r_boolean-Type }
      | element use-persistent-store { r_boolean-Type })?
 
+  & (attribute save-wait-for-acknowledge { r_boolean-Type }
+     | element save-wait-for-acknowledge { r_boolean-Type })?
+
   & (attribute cluster-store { r_boolean-Type }
      | element cluster-store { empty })?
 
