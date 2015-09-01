@@ -52,7 +52,7 @@ public class DeployCommandResin extends DeployCommand
   @Override
   protected String getDeployType()
   {
-    return "webapp";
+    return "webapps";
   }
   
   @Override
