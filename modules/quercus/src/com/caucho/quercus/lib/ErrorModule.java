@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
@@ -42,7 +43,6 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileModule;
-
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
@@ -120,157 +120,20 @@ public class ErrorModule extends AbstractQuercusModule {
 
     ArrayValue result = new ArrayValueImpl();
 
-    StackTraceElement []stack = e.getStackTrace();
-    int depth = 0;
+    for (Location location : env.getStackTraceAsLocations()) {
+      ArrayValue call = new ArrayValueImpl();
+      result.put(call);
 
-    for (int i = 1; i < stack.length; i++) {
-      StackTraceElement elt = stack[i];
+      call.put(env.createString("file"), env.createString(location.getFileName()));
+      call.put(env.createString("line"),
+               LongValue.create(location.getLineNumber()));
 
-      String name = elt.getMethodName();
-      String className = elt.getClassName();
+      call.put(env.createString("function"), env.createString(location.getFunctionName()));
 
-      if (name.equals("executeTop")) {
-        return result;
-      }
-      else if (className.startsWith("_quercus._")
-               && name.equals("call")) {
-        String path = unmangleFile(className);
-        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
-
-        String fun = findFunction(stack, i);
-
-        if (fun == null || fun.equals("debug_backtrace"))
-          continue;
-
-        ArrayValue call = new ArrayValueImpl();
-        result.put(call);
-
-        call.put(env.createString("file"), env.createString(fileName));
-        call.put(env.createString("line"),
-                 LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
-
-        call.put(env.createString("function"), env.createString(fun));
-
-        if (isPrintArgs) {
-          call.put(env.createString("args"), new ArrayValueImpl());
-        }
-      }
-      else if (className.startsWith("_quercus._")
-               && name.equals("callMethod")) {
-        String path = unmangleFile(className);
-        String fileName = env
-            .getQuercus().getPwd().lookup("./" + path).getNativePath();
-
-        ArrayValue call = new ArrayValueImpl();
-        result.put(call);
-
-        call.put(env.createString("file"), env.createString(fileName));
-        call.put(env.createString("line"), LongValue.create(
-            env.getSourceLine(className, elt.getLineNumber())));
-
-        call.put(env.createString("function"), env.createString(unmangleFunction(className)));
-        call.put(env.createString("class"), env.createString(unmangleClass(className)));
-        call.put(env.createString("type"), env.createString("->"));
-
-        if (isPrintArgs) {
-          call.put(env.createString("args"), new ArrayValueImpl());
-        }
-      }
-      else if (className.startsWith("_quercus._")
-               && name.equals("execute")) {
-        String methodName = stack[i - 1].getMethodName();
-
-        String path = unmangleFile(className);
-
-        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
-
-        ArrayValue call = new ArrayValueImpl();
-
-        call.put(env.createString("file"), env.createString(fileName));
-        call.put(env.createString("line"), LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
-
-        if (methodName.equals("includeOnce")) {
-          call.put(env.createString("function"), env.createString("include_once"));
-
-          result.put(call);
-        }
-        else if (methodName.equals("include")) {
-          call.put(env.createString("function"), env.createString("include"));
-
-          result.put(call);
-        }
-        else if (methodName.equals("callNew")) {
-        }
-        else if (methodName.equals("createException")) {
-        }
-        else {
-          String fun = findFunction(stack, i);
-
-          if (fun == null || fun.equals("debug_backtrace")) {
-          }
-          else {
-            call.put(env.createString("function"), env.createString(fun));
-
-            result.put(call);
-          }
-        }
-      }
-      else if (className.equals("com.caucho.quercus.expr.FunctionExpr")
-               && name.equals("evalImpl")) {
-        if (stack[i - 1].getMethodName().equals("evalArguments")) {
-        }
-        else
-          addInterpreted(env, result, depth++, isPrintArgs);
-      }
-      else if (className.equals("com.caucho.quercus.expr.MethodCallExpr")
-               && name.equals("eval")) {
-        if (stack[i - 1].getMethodName().equals("evalArguments")) {
-        }
-        else
-          addInterpreted(env, result, depth++, isPrintArgs);
-      }
-      else if (className.equals("com.caucho.quercus.expr.NewExpr")
-               && name.equals("eval")) {
-        if (stack[i - 1].getMethodName().equals("evalArguments")) {
-        }
-        else
-          addInterpreted(env, result, depth++, isPrintArgs);
-      }
-      else if (className.equals("com.caucho.quercus.expr.IncludeExpr")
-               && name.equals("eval")) {
-        addInterpreted(env, result, depth++, isPrintArgs);
-      }
-      else if (className.equals("com.caucho.quercus.expr.IncludeOnceExpr")
-               && name.equals("eval")) {
-        addInterpreted(env, result, depth++, isPrintArgs);
-      }
-      else if (className.equals("com.caucho.quercus.expr.CallExpr")) {
-        addInterpreted(env, result, depth++, isPrintArgs);
-      }
-      else if (className.equals("com.caucho.quercus.env.Env")
-               && name.equals("close")) {
-        return result;
-      }
-      else if (className.startsWith("com.caucho.quercus")) {
-      }
-      else if (name.equals("invoke") || name.equals("invoke0")) {
-      }
-      else {
-        ArrayValue call = new ArrayValueImpl();
-        result.put(call);
-
-        call.put(env.createString("file"), env.createString(elt.getFileName()));
-        call.put(env.createString("line"), LongValue.create(elt.getLineNumber()));
-
-        call.put(env.createString("function"), env.createString(elt.getMethodName()));
-        call.put(env.createString("class"), env.createString(elt.getClassName()));
-
-        if (isPrintArgs) {
-          call.put(env.createString("args"), new ArrayValueImpl());
-        }
+      if (isPrintArgs) {
+        call.put(env.createString("args"), new ArrayValueImpl());
       }
     }
-
     return result;
   }
 

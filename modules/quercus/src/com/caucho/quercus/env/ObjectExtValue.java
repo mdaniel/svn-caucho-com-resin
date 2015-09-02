@@ -29,11 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.program.ClassField;
-import com.caucho.util.CurrentTime;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -45,6 +40,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.ClassField;
+import com.caucho.util.CurrentTime;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP object value.
@@ -1178,8 +1178,15 @@ public class ObjectExtValue extends ObjectValue
 
     if (toString != null)
       return toString.callMethod(env, _quercusClass, this).toStringValue();
-    else
-      return env.createString(_className + "[]");
+    else {
+      if (_quercusClass.isA(env, "Exception")) {
+         ArrayValue trace = (ArrayValue) getField(env, env.createString("trace"));
+         StringValue message = (StringValue) getField(env,  env.createString("message"));
+         return env.createString("exception  '" + _className + "' with message '" + message + "'" + env.getStackTraceAsString(trace, null));
+      } else {
+        return env.createString(_className + "[]");
+      }
+    }
   }
 
   /**
