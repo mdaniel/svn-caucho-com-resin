@@ -785,17 +785,18 @@ public class PDO implements EnvCleanup {
    */
   private boolean setOracleNulls(Env env, int value)
   {
-    switch (value) {
+//    switch (value) {
     // we don't care about oracle at the moment
 //      case NULL_NATURAL:
 //      case NULL_EMPTY_STRING:
 //      case NULL_TO_STRING:
 //        throw new UnimplementedException();
-      default:
-        _error.warning(env, L.l("unknown value `{0}'", value));
-        _error.unsupportedAttributeValue(env, value);
-        return false;
-    }
+//      default:
+//        _error.warning(env, L.l("unknown value `{0}'", value));
+//        _error.unsupportedAttributeValue(env, value);
+//        return false;
+//    }
+    return true;
   }
 
   private boolean setPersistent(boolean isPersistent)
@@ -862,7 +863,8 @@ public class PDO implements EnvCleanup {
    */
   private boolean setStringifyFetches(boolean stringifyFetches)
   {
-    throw new UnimplementedException();
+    // TODO: throw new UnimplementedException();
+    return true;
   }
 
   private boolean setTimeout(int timeoutSeconds)
