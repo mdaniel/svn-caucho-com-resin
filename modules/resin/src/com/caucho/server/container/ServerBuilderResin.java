@@ -93,7 +93,9 @@ public class ServerBuilderResin extends ServerBuilder
   /**
    * Configures the selected server from the boot config.
    */
-  protected HttpContainer initHttpSystem(ServerBartender selfServer)
+  @Override
+  protected HttpContainer initHttpSystem(SystemManager system,
+                                         ServerBartender selfServer)
     throws IOException
   {
     ServerBaseConfigResin resinConfig = new ServerBaseConfigResin(this);
@@ -102,7 +104,7 @@ public class ServerBuilderResin extends ServerBuilder
 
     rootConfig.getProgram().configure(resinConfig);
     
-    return super.initHttpSystem(selfServer);
+    return super.initHttpSystem(system, selfServer);
   }
 
 
