@@ -94,11 +94,14 @@ class NautilusListener
   @Override
   public OutboxAmp createOutbox()
   {
+    /*
     OutboxAmpDirect outbox = new OutboxAmpDirect();
     
     outbox.setInbox(_consumer.getInbox());
     
     return outbox;
+    */
+    throw new UnsupportedOperationException();
   }
 
   /*
