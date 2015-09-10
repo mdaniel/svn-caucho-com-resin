@@ -165,12 +165,15 @@ public class TagFileManager {
   public Class<?> loadClass(String className)
     throws Exception
   {
-    Path classDir = _jspCompiler.getClassDir();
+    /*
+     Path classDir = _jspCompiler.getClassDir();
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+
     ClassLoader jspLoader = SimpleLoader.create(parentLoader,
                                                 classDir,
                                                 null);
+    */
     
     ClassLoader loader = _jspCompiler.getParentLoader();
     

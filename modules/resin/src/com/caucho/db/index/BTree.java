@@ -161,6 +161,7 @@ public final class BTree {
   {
   }
 
+  synchronized
   public long lookup(byte []keyBuffer,
                      int keyOffset,
                      int keyLength)
@@ -175,6 +176,7 @@ public final class BTree {
     }
   }
 
+  synchronized
   private long lookup(byte []keyBuffer,
                      int keyOffset,
                      int keyLength,
@@ -225,6 +227,7 @@ public final class BTree {
    *
    * @return false if the block needs to be split
    */
+  synchronized
   public void insert(byte []keyBuffer,
                      int keyOffset,
                      int keyLength,
@@ -760,6 +763,7 @@ public final class BTree {
     }
   }
 
+  synchronized
   public void remove(byte []keyBuffer,
                       int keyOffset,
                       int keyLength)
@@ -1840,6 +1844,7 @@ public final class BTree {
   /**
    * Testing: returns the keys for a block
    */
+  synchronized
   public ArrayList<String> getBlockKeys(long blockIndex)
     throws IOException
   {
@@ -1939,6 +1944,7 @@ public final class BTree {
     throw e;
   }
 
+  synchronized
   public void close()
   {
     Block rootBlock = _rootBlock;

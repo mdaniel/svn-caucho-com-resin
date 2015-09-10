@@ -346,13 +346,16 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.print("public class ");
     out.print(_className);
 
-    if (hasScripting())
+    if (hasScripting()) {
       out.print(" extends com.caucho.jsp.java.JspTagSupport");
-    else
+    }
+    else {
       out.print(" extends com.caucho.jsp.java.JspTagFileSupport");
+    }
 
-    if (_dynamicAttributes != null)
+    if (_dynamicAttributes != null) {
       out.print(" implements javax.servlet.jsp.tagext.DynamicAttributes");
+    }
 
     out.println(" {");
     out.pushDepth();

@@ -414,7 +414,8 @@ public class BlockReadWrite {
       }
     }
 
-    while (file == null || ! file.allocate()) {
+    int count = 10;
+    for (; count > 0 && (file == null || ! file.allocate()); count--) {
       Path path = _path;
 
       file = null;
@@ -422,10 +423,10 @@ public class BlockReadWrite {
       if (path != null) {
         file = streamOpen(fileSize);
       }
-
-      if (file == null)
-        throw new IllegalStateException("Cannot open file");
     }
+
+    if (file == null)
+      throw new IllegalStateException("Cannot open file");
 
     return new RandomAccessWrapper(file);
   }
@@ -453,7 +454,7 @@ public class BlockReadWrite {
       synchronized (_mmapFile) {
         mmapFile = _mmapFile.get();
 
-        if (mmapFile != null && fileSize <= mmapFile.getLength()) {
+        if (mmapFile != null) { // && fileSize <= mmapFile.getLength()) {
           return mmapFile;
         }
 

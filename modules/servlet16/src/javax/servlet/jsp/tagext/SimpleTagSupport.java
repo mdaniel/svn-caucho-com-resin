@@ -50,6 +50,7 @@ public class SimpleTagSupport implements SimpleTag {
   /**
    * returns the parent
    */
+  @Override
   public JspTag getParent()
   {
     return _parent;
@@ -58,6 +59,7 @@ public class SimpleTagSupport implements SimpleTag {
   /**
    * Sets the parent
    */
+  @Override
   public void setParent(JspTag parent)
   {
     _parent = parent;
@@ -74,6 +76,7 @@ public class SimpleTagSupport implements SimpleTag {
   /**
    * Sets the body fragment.
    */
+  @Override
   public void setJspBody(JspFragment body)
   {
     _jspBody = body;
@@ -90,6 +93,7 @@ public class SimpleTagSupport implements SimpleTag {
   /**
    * Sets the context
    */
+  @Override
   public void setJspContext(JspContext context)
   {
     _jspContext = context;
@@ -98,6 +102,7 @@ public class SimpleTagSupport implements SimpleTag {
   /**
    * Does nothing.
    */
+  @Override
   public void doTag()
     throws IOException, JspException
   {

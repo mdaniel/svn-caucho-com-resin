@@ -28,14 +28,14 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.xml.QName;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.lang.reflect.Field;
+
+import com.caucho.xml.QName;
 
 /**
  * Represents a custom tag.
@@ -47,9 +47,14 @@ public class TagFileTag extends GenericTag {
   private String _contextVarName;
   private Boolean _hasCustomTag;
 
+  public TagFileTag()
+  {
+  }
+  
   /**
    * Called when the attributes end.
    */
+  @Override
   public void endAttributes()
   {
     _oldLocalScriptingInvalid = _parseState.isLocalScriptingInvalid();
@@ -59,6 +64,7 @@ public class TagFileTag extends GenericTag {
   /**
    * Adds a child node.
    */
+  @Override
   public void endElement()
     throws Exception
   {

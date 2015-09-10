@@ -46,6 +46,9 @@ import com.caucho.xml.QName;
  */
 public class CustomTag extends GenericTag
 {
+  CustomTag()
+  {
+  }
   /**
    * Generates code before the actual JSP.
    */

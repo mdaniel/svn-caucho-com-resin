@@ -35,14 +35,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
 import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.db.io.RandomAccessStreamNio;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -650,7 +652,25 @@ public class FilePath extends FilesystemPath {
 
     return new FileRandomAccessStream(new RandomAccessFile(getFile(), "rw"));
   }
+  
+  @Override
+  public RandomAccessStream openMemoryMappedFile(long fileSize)
+    throws IOException
+  {
+    return RandomAccessStreamNio.open(this, fileSize);
+  }
 
+  @Override
+  public FileChannel openFileChannel(OpenOption... options) throws IOException
+  {
+    return FileChannel.open(getJdkPath(), options);
+  }
+
+  private java.nio.file.Path getJdkPath()
+  {
+    return getFile().toPath();
+  }
+  
   @Override
   public Path copy()
   {
