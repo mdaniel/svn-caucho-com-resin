@@ -88,7 +88,7 @@ public class RandomAccessStreamNio extends RandomAccessStream
   public long getLength()
     throws IOException
   {
-    return _path.getLength();
+    return _store.getFileSize();
   }
 
   /**
