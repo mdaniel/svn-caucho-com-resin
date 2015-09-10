@@ -49,7 +49,9 @@ public class StoreBuilder
   
   public StoreBuilder(Path path)
   {
-    Objects.requireNonNull(path);
+    if (path == null) {
+      throw new NullPointerException();
+    }
     
     _path = path;
   }

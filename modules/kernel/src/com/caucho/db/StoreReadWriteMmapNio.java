@@ -36,7 +36,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.caucho.util.ConcurrentArrayList;
@@ -89,8 +88,10 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
     _path = builder.getPath();
     
     //_rampManager = builder.getRampManager();
-    
-    Objects.requireNonNull(_path);
+
+    if (_path == null) {
+      throw new NullPointerException();
+    }
     //Objects.requireNonNull(_rampManager);
     
     /*
