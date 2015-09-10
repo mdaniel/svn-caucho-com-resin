@@ -61,6 +61,8 @@ public class FilePath extends FilesystemPath {
   private static Method _isSymlink;
   private static Method _toPath;
 
+  private static Method _fileChannelOpen;
+
   private File _file;
   protected boolean _isWindows;
 
@@ -663,12 +665,16 @@ public class FilePath extends FilesystemPath {
   @Override
   public FileChannel openFileChannel(OpenOption... options) throws IOException
   {
-    return FileChannel.open(getJdkPath(), options);
-  }
-
-  private java.nio.file.Path getJdkPath()
-  {
-    return getFile().toPath();
+    try {
+      java.nio.file.Path jdkPath;
+      
+      jdkPath = (java.nio.file.Path) _toPath.invoke(getFile());
+      return (FileChannel) _fileChannelOpen.invoke(null, jdkPath, options);
+    } catch (Exception e) {
+      log.finer(e.toString());
+      
+      return null;
+    }
   }
   
   @Override
@@ -747,17 +753,20 @@ public class FilePath extends FilesystemPath {
   static {
     Method isSymlink = null;
     Method toPath = null;
+    Method fileChannelOpen = null;
     
     try {
       Class<?> path = Class.forName("java.nio.file.Path");
       Class<?> files = Class.forName("java.nio.file.Files");
-      
+            
       isSymlink = files.getMethod("isSymbolicLink", path);
       toPath = File.class.getMethod("toPath");
+      fileChannelOpen = FileChannel.class.getMethod("open", java.nio.file.Path.class, OpenOption[].class);
     } catch (Throwable e) {
     }
     
     _isSymlink = isSymlink;
     _toPath = toPath;
+    _fileChannelOpen = fileChannelOpen;
   }
 }
