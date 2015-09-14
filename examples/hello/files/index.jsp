@@ -1,1 +1,1 @@
-<p>Hello: <a href="/hello-servlet">/hello-servlet</a></p>
+<p>Hello: <a href="hello-servlet">/hello-servlet</a></p>

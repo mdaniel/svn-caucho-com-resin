@@ -39,22 +39,22 @@ import com.caucho.vfs.Path;
 public class HostControllerResin
   extends HostController
 {
-  HostControllerResin(HostHandle handle,
+  HostControllerResin(String id,
                  Path rootDirectory,
                  String hostName,
                  HostConfig config,
                  HostContainerResin container,
                  Map<String,Object> varMap)
   {
-    super(handle, rootDirectory, hostName, config, container, varMap);
+    super(id, rootDirectory, hostName, config, container, varMap);
   }
 
-  public HostControllerResin(HostHandle handle,
+  public HostControllerResin(String id,
                              Path rootDirectory,
                              String hostName,
                              HostContainerResin container)
   {
-    this(handle, rootDirectory, hostName, null, container, null);
+    this(id, rootDirectory, hostName, null, container, null);
   }
   
   @Override

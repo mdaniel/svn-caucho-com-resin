@@ -32,6 +32,7 @@ package com.caucho.http.webapp;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
+import com.caucho.deploy.DeployHandle;
 import com.caucho.http.container.HttpContainer;
 import com.caucho.http.dispatch.Invocation;
 import com.caucho.http.host.Host;
@@ -125,9 +126,9 @@ public class WebAppContainerResin extends WebAppContainer
                                                  Path rootDirectory,
                                                  String urlPrefix)
   {
-    WebAppHandle handle = createHandle(id);
+    // DeployHandle<WebApp> handle = createHandle(id);
     
-    return new WebAppControllerResin(handle, rootDirectory, this, urlPrefix);
+    return new WebAppControllerResin(id, rootDirectory, this, urlPrefix);
   }
 
   public void add(DispatchRule dispatchRule)

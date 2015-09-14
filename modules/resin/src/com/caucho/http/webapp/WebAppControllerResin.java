@@ -29,6 +29,7 @@
 
 package com.caucho.http.webapp;
 
+import com.caucho.deploy.DeployHandle;
 import com.caucho.inject.Module;
 import com.caucho.vfs.Path;
 
@@ -43,12 +44,12 @@ import com.caucho.vfs.Path;
 @Module
 public class WebAppControllerResin extends WebAppController
 {
-  public WebAppControllerResin(WebAppHandle handle, 
+  public WebAppControllerResin(String id,
                                Path rootDirectory, 
                                WebAppContainer container,
                                String urlPrefix)
   {
-    super(handle, rootDirectory, container, urlPrefix);
+    super(id, rootDirectory, container, urlPrefix);
   }
 
   /**

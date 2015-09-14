@@ -92,7 +92,7 @@ public class HostContainerResin extends HostContainer
                                             HostConfig config,
                                             HashMap<String, Object> varMap)
   {
-    return new HostControllerResin(createHandle(id), rootDir, hostName, config, this, varMap);
+    return new HostControllerResin(id, rootDir, hostName, config, this, varMap);
   }
 
   /**
