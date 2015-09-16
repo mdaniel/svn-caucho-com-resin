@@ -30,15 +30,11 @@
 package com.caucho.quercus.lib;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -78,6 +74,7 @@ public class HtmlModule extends AbstractQuercusModule {
   public static final int ENT_NOQUOTES = ENT_HTML_QUOTE_NONE;
 
   private static StringValue []HTML_SPECIALCHARS_MAP;
+  private static int MAX_HTML_ENTITY_LENGTH = 0;
 
   private static ArrayValue HTML_SPECIALCHARS_ARRAY;
   private static ArrayValue HTML_ENTITIES_ARRAY;
@@ -328,16 +325,24 @@ public class HtmlModule extends AbstractQuercusModule {
    * @param stringV the string to be trimmed
    * @param quoteStyleV optional quote style
    * @param charsetV optional charset style
+   * @param doubleEncode optional When double_encode is turned off PHP will not
+   *                    encode existing html entities. The default is to convert everything.
    * @return the trimmed string
    */
   public static Value htmlentities(Env env,
                                    StringValue string,
                                    @Optional("ENT_COMPAT") int quoteStyle,
-                                   @Optional String charset)
+                                   @Optional String charset,
+                                   @Optional Boolean doubleEncode)
   {
     if (charset == null || charset.length() == 0) {
       // php 5.4.0
       charset = "UTF-8";
+    }
+    
+    if (doubleEncode == null) {
+      // default is to convert everything
+      doubleEncode = true;
     }
 
     CharSequence unicodeStr;
@@ -368,9 +373,26 @@ public class HtmlModule extends AbstractQuercusModule {
 
     int len = unicodeStr.length();
 
+    outerloop:
     for (int i = 0; i < len; i++) {
       char ch = unicodeStr.charAt(i);
 
+      if (!doubleEncode && ch == '&') {
+        // we need to check whether this is the begin of a HTML entity 
+        // and skip it then to avoid double encoding
+        
+        for (int j = 1; j < MAX_HTML_ENTITY_LENGTH && j < len - i; j++) {
+          if (unicodeStr.charAt(i + j) == ';') {
+            CharSequence entityCandidate = unicodeStr.subSequence(i, i + j + 1);
+            if (HTML_ENTITIES_ARRAY_ENTITY_KEY.contains(StringValue.create(entityCandidate)) != null) {
+              // we found a HTML entity -> append it and skip rest of loop
+              sb.append(entityCandidate);
+              i+= j + 1;
+              break outerloop;
+            }
+          }
+        }
+      }
       StringValue entity = HTML_SPECIALCHARS_MAP[ch & 0xffff];
 
       if (ch == '"') {
@@ -539,6 +561,7 @@ public class HtmlModule extends AbstractQuercusModule {
     StringValue entityValue = new StringBuilderValue(entity);
     map[ch & 0xffff] = entityValue;
     revMap.put(entityValue, LongValue.create(ch));
+    MAX_HTML_ENTITY_LENGTH = Math.max(MAX_HTML_ENTITY_LENGTH, entity.length());
   }
 
   static {
