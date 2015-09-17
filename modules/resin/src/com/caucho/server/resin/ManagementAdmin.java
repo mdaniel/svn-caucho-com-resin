@@ -39,10 +39,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.ReflectionException;
+
 import com.caucho.amp.AmpSystem;
 import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.amp.remote.ClientAmpLocal;
-import com.caucho.baratine.client.ServiceManagerClient;
 import com.caucho.bartender.ServerBartender;
 import com.caucho.cli.boot.LogLevelCommand;
 import com.caucho.config.ConfigException;
@@ -66,16 +66,11 @@ import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StringQueryReply;
-import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.container.ServerBase;
-import com.caucho.server.deploy.DeployControllerState;
-import com.caucho.server.deploy.DeployTagResult;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
-
-import javax.management.ReflectionException;
 
 public class ManagementAdmin extends ManagedObjectBase
   implements ManagementMXBean
@@ -296,6 +291,7 @@ public class ManagementAdmin extends ManagedObjectBase
   // deploy
   //
 
+  /*
   @Override
   public DeployControllerState startWebApp(String serverId,
                                            String tag,
@@ -320,7 +316,9 @@ public class ManagementAdmin extends ManagedObjectBase
 
     return result;
   }
+  */
 
+  /*
   @Override
   public DeployControllerState stopWebApp(String serverId,
                                                      String tag,
@@ -345,7 +343,9 @@ public class ManagementAdmin extends ManagedObjectBase
 
     return result;
   }
+  */
 
+  /*
   @Override
   public DeployControllerState restartWebApp(String serverId,
                                                         String tag,
@@ -370,7 +370,9 @@ public class ManagementAdmin extends ManagedObjectBase
 
     return result;
   }
+  */
 
+  /*
   @Override
   public DeployTagResult []deployList(String serverId, String pattern)
     throws ReflectionException
@@ -381,6 +383,7 @@ public class ManagementAdmin extends ManagedObjectBase
 
     return result;
   }
+  */
 
   @Override
   public String enable(String serverId)
@@ -617,6 +620,7 @@ public class ManagementAdmin extends ManagedObjectBase
     return rampManager.lookup("/manager").as(ManagerServiceApi.class);
   }
 
+  /*
   private WebAppDeployClient getWebappDeployClient(String serverId)
   {
     ServerBartender server = getServer(serverId);
@@ -637,6 +641,7 @@ public class ManagementAdmin extends ManagedObjectBase
     
     return new WebAppDeployClient(rampClient);
   }
+  */
   
   public InputStream test(String value, InputStream is)
     throws IOException

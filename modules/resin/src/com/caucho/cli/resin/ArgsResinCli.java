@@ -57,10 +57,6 @@ import com.caucho.cli.boot.StoreLoadCommand;
 import com.caucho.cli.boot.ThreadDumpCommand;
 import com.caucho.cli.boot.UndeployCommand;
 import com.caucho.cli.boot.WebAppDeployCommand;
-import com.caucho.cli.boot.WebAppRestartClusterCommand;
-import com.caucho.cli.boot.WebAppRestartCommand;
-import com.caucho.cli.boot.WebAppStartCommand;
-import com.caucho.cli.boot.WebAppStopCommand;
 import com.caucho.cli.boot.WebAppUndeployCommand;
 import com.caucho.cli.server.BfsCatCommand;
 import com.caucho.cli.server.BfsGetCommand;
@@ -196,10 +192,10 @@ public class ArgsResinCli extends ArgsCli
     //addCommand(new UserRemoveCommand());
 
     manager.addCommand(new WebAppDeployCommand().hide());
-    manager.addCommand(new WebAppRestartCommand().hide());
-    manager.addCommand(new WebAppRestartClusterCommand().hide());
-    manager.addCommand(new WebAppStartCommand().hide());
-    manager.addCommand(new WebAppStopCommand().hide());
+    //manager.addCommand(new WebAppRestartCommand().hide());
+    //manager.addCommand(new WebAppRestartClusterCommand().hide());
+    //manager.addCommand(new WebAppStartCommand().hide());
+    //manager.addCommand(new WebAppStopCommand().hide());
     manager.addCommand(new WebAppUndeployCommand().hide());
 
     /*

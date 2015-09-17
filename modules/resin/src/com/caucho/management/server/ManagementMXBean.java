@@ -49,8 +49,6 @@ import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StringQueryReply;
-import com.caucho.server.deploy.DeployControllerState;
-import com.caucho.server.deploy.DeployTagResult;
 
 /**
  * Management facade for Resin, used for REST.
@@ -189,6 +187,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     @MXParam(value = "values") String values)
     throws ReflectionException;
 
+  /*
   @Description("starts a deployed application")
   @MXAction(value = "web-app-start", method = "POST")
   @MXContentType
@@ -234,6 +233,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     @MXParam(value = "host", defaultValue = "default") String host,
     @MXParam(value = "version") String version)
     throws ReflectionException;
+    */
 
   @Description("deploys an application")
   @MXAction(value = "web-app-deploy", method = "POST")
@@ -270,6 +270,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                            @MXParam(value = "message") String message)
     throws ReflectionException;
 
+  /*
   @Description("lists deployed applications")
   @MXAction("deploy-list")
   @MXContentType
@@ -277,6 +278,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                                 @MXParam(value = "pattern", defaultValue = ".*")
                                 String pattern)
     throws ReflectionException;
+    */
 
   @Description("undeploys an application")
   @MXAction(value = "web-app-undeploy", method = "POST")

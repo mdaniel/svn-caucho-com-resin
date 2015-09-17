@@ -29,7 +29,6 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.config.ServerConfigBoot;
 import com.caucho.server.watchdog.ArgsWatchdog;
 import com.caucho.util.L10N;
@@ -60,8 +59,8 @@ public class WebAppUndeployCommand extends DeployCommandRepositoryBase
   
   // @Override
   public int doCommand(ArgsWatchdog args,
-                       ServerConfigBoot server,
-                       WebAppDeployClient deployClient)
+                       ServerConfigBoot server)
+                       //WebAppDeployClient deployClient)
   {
     return 0;
     /*
