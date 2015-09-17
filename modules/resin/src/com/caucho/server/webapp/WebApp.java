@@ -1434,13 +1434,14 @@ public class WebApp extends ServletContextImpl
       config.setServletContext(this);
 
       config.setFilterName(filterName);
+
+      if (filter != null)
+        config.setFilter(filter);
+
       config.setFilterClass(className);
 
       if (filterClass != null)
         config.setFilterClass(filterClass);
-
-      if (filter != null)
-        config.setFilter(filter);
 
       addFilter(config);
 

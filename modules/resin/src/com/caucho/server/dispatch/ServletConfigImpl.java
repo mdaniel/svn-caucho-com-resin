@@ -997,7 +997,8 @@ public class ServletConfigImpl
         return;
       }
 
-      Config.checkCanInstantiate(_servletClass);
+      if (_singletonServlet == null)
+        Config.checkCanInstantiate(_servletClass);
 
       if (Servlet.class.isAssignableFrom(_servletClass)) {
       }
