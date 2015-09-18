@@ -29,6 +29,15 @@
 
 package com.caucho.quercus.lib.i18n;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Hide;
@@ -52,19 +61,10 @@ import com.caucho.quercus.lib.regexp.UnicodeEreg;
 import com.caucho.quercus.lib.regexp.UnicodeEregi;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MbstringModule
   extends AbstractQuercusModule
@@ -1052,10 +1052,15 @@ public class MbstringModule
                                     StringValue str,
                                     @Optional("") String encoding)
   {
+    if ("8bit".equals(encoding)) {
+      // According to http://php.net/manual/de/function.mb-strlen.php#77040
+      // "8bit" encoding is used to just count bytes (higher performance in PHP).
+      // Since 8bit is no encoding known to java we just use another single byte encoding.
+      encoding = "iso-8859-1";
+    }
     encoding = getEncoding(env, encoding);
 
     str = str.convertToUnicode(env, encoding);
-
     return LongValue.create(str.length());
   }
 
