@@ -3,6 +3,8 @@ package com.caucho.quercus.env.xdebug;
 import java.util.Map;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.function.AbstractFunction;
 
 public class StackGetCommand extends XdebugCommand
 {
@@ -15,7 +17,25 @@ public class StackGetCommand extends XdebugCommand
 		int level = 0;
 		for (Location location : conn.getEnv().getStackTraceAsLocations()) {
 			if (location != null) {
-				response.append("<stack where=\"{main}\" level=\"");
+			    String where = "{main}";
+			    if (location.getClassName() != null) {
+			      where = location.getClassName();
+			      if (location.getFunctionName() != null) {
+			        QuercusClass quercusClass = conn.getEnv().getClass(location.getClassName());
+			        if (quercusClass != null) {
+			          AbstractFunction function = quercusClass.getFunction(conn.getEnv().createString(location.getFunctionName()));
+			          if (function.isStatic()) {
+			            where += "::";
+			          } else {
+			            where += "->";
+			          }
+			        } else {
+			          where += "->";
+			        }
+			        where += location.getFunctionName();
+			      }
+			    }
+				response.append("<stack where=\"").append(where).append("\" level=\"");
 				response.append(level);
 				response.append("\" type=\"file\" filename=\"");
 				response.append(conn.getFileURI(location.getFileName()));
