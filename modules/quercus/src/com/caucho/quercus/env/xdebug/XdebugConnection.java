@@ -65,6 +65,7 @@ public class XdebugConnection
 		commandsMap.put("step_over", new StepCommand());
 		commandsMap.put("step_out", new StepCommand());
 		commandsMap.put("eval", new EvalCommand());
+		commandsMap.put("property_get", new PropertyGetCommand());
 		commandsMap.put("run", new RunCommand());
 		commandsMap.put("stack_get", new StackGetCommand());
 		commandsMap.put("context_names", new ContextNamesCommand());
