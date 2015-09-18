@@ -76,7 +76,7 @@ public class XdebugConnection
 		commandsMap.put("breakpoint_remove", new BreakpointRemoveCommand());
 		commandsMap.put("stop", new StopCommand());
 		try {
-			_socket = new Socket("localhost", 9000);
+			_socket = new Socket("localhost", 9001);
 
 			new Thread("xdebug reader") {
 				public void run() {
@@ -335,6 +335,7 @@ public class XdebugConnection
 
     QuercusProgram program;
     try {
+        _env.setCurrent();
 	    program = quercus.parseCode((StringValue) StringValue.create(expr));
 	    Value value = program.createExprReturn().execute(_env);
 

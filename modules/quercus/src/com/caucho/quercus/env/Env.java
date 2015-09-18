@@ -564,6 +564,13 @@ public class Env
   {
     return _threadEnv.get();
   }
+  
+  public Env setCurrent()
+  {
+    Env oldEnv = _threadEnv.get();
+    _threadEnv.set(this);
+    return oldEnv;
+  }
 
   public static Env getInstance()
   {
