@@ -813,6 +813,10 @@ abstract public class JavaInvoker
 
     Object result = invoke(obj, javaArgs);
 
+    if (result == obj) {
+      // if java method returns obj map back to qThis
+      result = qThis;
+    }
     return result;
   }
 
