@@ -253,11 +253,12 @@ public class DateTime implements DateTimeInterface, Cloneable
     return DateModule.dateImpl(env, format, time, calendar);
   }
 
-  public void modify(StringValue modify)
+  public DateTime modify(StringValue modify)
   {
     DateParser parser = new DateParser(modify, _qDate);
 
     parser.parse();
+    return this;
   }
   
   @Override
