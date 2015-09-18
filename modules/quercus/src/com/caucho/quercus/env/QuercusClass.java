@@ -1341,6 +1341,13 @@ public class QuercusClass extends NullValue {
       name = name.substring(1);
     }
 
+    if ("static".equals(name) || name.endsWith("\\static")) {
+      Value envThis = env.getThis();
+      if (envThis != null) {
+        name = envThis.getClassName();
+      }
+    }
+    
     boolean isA = _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));
 
     if (isA) {
