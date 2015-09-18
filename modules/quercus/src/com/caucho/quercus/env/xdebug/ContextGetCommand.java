@@ -29,12 +29,14 @@ public class ContextGetCommand extends XdebugCommand
     response.append("\" context=\"").append(contextId).append("\">");
 
     if (CONTEXT_ID_LOCALS.equals(contextId)) {
-      Map<StringValue, EnvVar> varEnv = conn.getVarEnvAtStackDepth(stackDepth);
-      for (Entry<StringValue, EnvVar> entry : varEnv.entrySet()) {
-        String name = "$" + entry.getKey().toString();
-        response.append(createPropertyElement(entry.getValue().get(), conn, name, name, null, true));
+      Map<StringValue, EnvVar> varEnv = stackDepth == 0 ? conn.getEnv().getEnv() : conn.getVarEnvAtStackDepth(stackDepth);
+      if (varEnv != null) {
+        for (Entry<StringValue, EnvVar> entry : varEnv.entrySet()) {
+          String name = "$" + entry.getKey().toString();
+          response.append(createPropertyElement(entry.getValue().get(), conn, name, name, null, true));
+        }
       }
-      Value thisValue = env.peekCallThis(stackDepth);
+      Value thisValue = stackDepth == 0 ? env.getThis() : env.peekCallThis(stackDepth);
       if (thisValue != null) {
         if (thisValue instanceof QuercusClass) {
           response.append(createPropertyElement(((QuercusClass)thisValue).getClassName(), conn, "::", "::", null, true));

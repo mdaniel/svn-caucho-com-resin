@@ -23,10 +23,14 @@ public class StackGetCommand extends XdebugCommand
 			      if (location.getFunctionName() != null) {
 			        QuercusClass quercusClass = conn.getEnv().getClass(location.getClassName());
 			        if (quercusClass != null) {
-			          AbstractFunction function = quercusClass.getFunction(conn.getEnv().createString(location.getFunctionName()));
-			          if (function.isStatic()) {
-			            where += "::";
-			          } else {
+			          try {
+			            AbstractFunction function = quercusClass.getFunction(conn.getEnv().createString(location.getFunctionName()));
+			            if (function.isStatic()) {
+			              where += "::";
+			            } else {
+			              where += "->";
+			            }
+			          } catch (Exception e) {
 			            where += "->";
 			          }
 			        } else {
