@@ -14,6 +14,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.program.ClassField;
 
 public abstract class XdebugCommand
@@ -63,6 +64,9 @@ public abstract class XdebugCommand
         String size = null;
         String serializedValue = null;
         String stringValue = null;
+        if (value instanceof Var) {
+          value = ((Var) value).toValue();
+        }
         if (value instanceof Boolean || value instanceof BooleanValue) {
           if (value instanceof BooleanValue) {
             value = ((BooleanValue) value).toBoolean();

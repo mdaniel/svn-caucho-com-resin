@@ -2315,6 +2315,9 @@ public class Env
     Map<StringValue,EnvVar> oldEnv = _map;
 
     _map = map;
+    if (_xdebugConnection.isConnected()) {
+      _xdebugConnection.notifyPushEnv(map, _callStackTop);
+    }
 
     return oldEnv;
   }
@@ -2325,6 +2328,9 @@ public class Env
   public void popEnv(Map<StringValue,EnvVar> oldEnv)
   {
     _map = oldEnv;
+    if (_xdebugConnection.isConnected()) {
+      _xdebugConnection.notifyPopEnv(_callStackTop);
+    }
   }
 
   /**

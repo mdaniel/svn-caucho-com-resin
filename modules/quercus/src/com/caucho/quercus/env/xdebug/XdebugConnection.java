@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvVar;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
@@ -56,6 +57,7 @@ public class XdebugConnection
 	 */
 	private boolean _isEvaluating;
 	private Integer _breakAtExpectedStackDepth;
+  private Map<StringValue, EnvVar>[] _envStack;
 
 	private XdebugConnection() {
 		commandsMap = new HashMap<String, XdebugCommand>();
@@ -210,7 +212,7 @@ public class XdebugConnection
 			return;
 		}
 		String msg = XML_DECLARATION + packet;
-		System.out.println(msg);
+		//System.out.println(msg);
 		OutputStream out = _socket.getOutputStream();
 		byte[] bytes = msg.getBytes();
 		String length = "" + bytes.length;
@@ -222,7 +224,7 @@ public class XdebugConnection
 	}
 
 	protected synchronized void receivedPacket(String packet) throws IOException {
-		System.out.println(packet);
+		//System.out.println(packet);
 		String[] parts = packet.split(" ");
 		XdebugCommand command = commandsMap.get(parts[0]);
 		_lastCommand = parts[0];
@@ -344,4 +346,28 @@ public class XdebugConnection
   		_isEvaluating = false;
     }
 	}
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public void notifyPushEnv(Map<StringValue, EnvVar> map, int callStackTop) {
+    if (_envStack == null) {
+      _envStack = new Map[256];
+    }
+
+    if (_envStack.length <= callStackTop) {
+      Map[] newStack = new Map[2 * _envStack.length];
+      System.arraycopy(_envStack, 0, newStack, 0, _envStack.length);
+      _envStack = newStack;
+    }
+    _envStack[callStackTop] = map;
+  }
+  
+  public Map<StringValue, EnvVar> getVarEnvAtStackDepth(int stackDepth) {
+    return _envStack[_env.getCallDepth() - stackDepth];
+  }
+
+  public void notifyPopEnv(int _callStackTop) {
+    if (_envStack != null) {
+      _envStack[_callStackTop + 1] = null;
+    }
+  }
 }
