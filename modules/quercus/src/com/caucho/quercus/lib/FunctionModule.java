@@ -264,7 +264,11 @@ public class FunctionModule extends AbstractQuercusModule {
     }
 
   	// implementation doesn't differ for static calls
-    return call_user_func_array(env, function, arg);
+    boolean previousValue = env.isInForwardStaticCall();
+    env.setIsInForwardStaticCall(true);
+    Value result = call_user_func_array(env, function, arg);
+    env.setIsInForwardStaticCall(previousValue);
+    return result;
   }
   // XXX: register_tick_function
   // XXX: unregister_tick_function
