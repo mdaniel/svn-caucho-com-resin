@@ -29,22 +29,24 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.VariableArguments;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.expr.CallExpr;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.quercus.annotation.VariableArguments;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.CallbackFunction;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
 
 /**
  * PHP function routines.
@@ -233,7 +235,11 @@ public class FunctionModule extends AbstractQuercusModule {
                                      Value []args)
   {
   	// implementation doesn't differ for static calls
-    return call_user_func(env, function, args);
+    boolean previousValue = env.isInForwardStaticCall();
+    env.setIsInForwardStaticCall(true);
+    Value result = call_user_func(env, function, args);
+    env.setIsInForwardStaticCall(previousValue);
+    return result;
   }
 
   /**

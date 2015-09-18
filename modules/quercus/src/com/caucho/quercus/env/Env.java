@@ -421,6 +421,7 @@ public class Env
   private Env _oldThreadEnv;
 
   private boolean _isTimeout;
+  private boolean _isInForwardStaticCall;
 
   private long _firstMicroTime;
   private long _firstNanoTime;
@@ -2019,6 +2020,22 @@ public class Env
     return oldThis;
   }
 
+  /**
+   * @param isInForwardStaticCall Will be set to <code>true</code> if "forward_static_call(...)" is used.
+   */
+  public void setIsInForwardStaticCall(boolean isInForwardStaticCall)
+  {
+    _isInForwardStaticCall = isInForwardStaticCall;
+  }
+
+  /**
+   * @return Will return <code>true</code> if stack contains "forward_static_call(...)". 
+   */
+  public boolean isInForwardStaticCall()
+  {
+    return _isInForwardStaticCall;
+  }
+  
   /**
    * Returns the current closure scope.
    */
