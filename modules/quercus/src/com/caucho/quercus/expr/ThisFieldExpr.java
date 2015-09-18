@@ -34,10 +34,11 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.ClassField;
 
 /**
@@ -79,14 +80,24 @@ public class ThisFieldExpr extends AbstractVarExpr {
                                     _qThis, _name, args);
   }
 
-  public void init()
+  public void init(Env env)
   {
     /// XXX: have this called by QuercusParser after class parsing
 
     if (! _isInit) {
       _isInit = true;
 
-      ClassField entry = _qThis.getClassDef().getField(_name);
+      ClassDef classDef = _qThis.getClassDef();
+      if (classDef == null) {
+        // try to resolve classDef from environment context
+        Value thisValue = env.getThis();
+        if (thisValue != null) {
+          classDef = thisValue.getQuercusClass().getClassDef();
+        } else {
+          throw new RuntimeException("Could not determine class definition of '$this'.");
+        }
+      }
+      ClassField entry = classDef.getField(_name);
 
       if (entry != null) {
         _name = entry.getCanonicalName();
@@ -103,7 +114,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -123,7 +134,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -144,7 +155,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -167,7 +178,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -188,7 +199,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignValue(Env env, Value value)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -211,7 +222,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignRef(Env env, Value value)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -230,7 +241,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalArrayAssign(Env env, Expr indexExpr, Expr valueExpr)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -253,7 +264,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalArrayAssignRef(Env env, Expr indexExpr, Expr valueExpr)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -279,7 +290,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
    */
   public Value evalArray(Env env)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -299,7 +310,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
    */
   public Value evalObject(Env env)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
@@ -319,7 +330,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    init();
+    init(env);
 
     Value obj = env.getThis();
 
