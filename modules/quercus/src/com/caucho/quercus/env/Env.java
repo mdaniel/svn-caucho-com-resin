@@ -5311,6 +5311,9 @@ public class Env
         _qClass[id] = qcl;
       }
       else {
+        if ("static".equals(name) && getThis() != null) {
+          return getThis().getQuercusClass();
+        }
         return null;
       }
 

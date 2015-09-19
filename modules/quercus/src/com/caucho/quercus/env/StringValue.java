@@ -938,7 +938,14 @@ abstract public class StringValue
       StringValue className = substring(0, p);
       StringValue methodName = substring(p + 2);
 
-      QuercusClass cl = env.findClass(className.toString());
+      QuercusClass cl;
+      String javaClassName = className.toString();
+      if ("parent".equals(javaClassName)) {
+        cl = env.getThis().getQuercusClass().getParent();
+        return new CallbackClassMethod(cl, methodName, env.getThis());
+      } else {
+        cl = env.findClass(javaClassName);
+      }
 
       if (cl == null) {
         env.warning(L.l("can't find class {0}", className));

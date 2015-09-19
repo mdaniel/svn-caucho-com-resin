@@ -847,6 +847,11 @@ public class StringModule extends AbstractQuercusModule {
     return env.getEmptyString();
   }
 
+  public static StringValue lcfirst(Env env, StringValue string)
+  {
+    return string.substring(0, 1).toLowerCase().append(string.substring(1));
+  }
+  
   /**
    * returns the md5 hash
    *
@@ -3031,8 +3036,16 @@ public class StringModule extends AbstractQuercusModule {
     return i;
   }
 
-  // XXX: str_getcsv
-
+  public static Value str_getcsv(Env env, String input)
+  {
+    String[] parts = input.split(",");
+    Value[] values = new Value[parts.length];
+    for (int i = 0; i < parts.length; i++) {
+      values[i] = env.createString(parts[i]);
+    }
+    return new ArrayValueImpl(values);
+  }
+  
   /**
    * replaces substrings.
    *

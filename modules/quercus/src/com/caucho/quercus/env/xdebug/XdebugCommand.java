@@ -60,6 +60,7 @@ public abstract class XdebugCommand
 
   protected String createPropertyElement(Object value, XdebugConnection conn,
       String name, String fullname, String facet, boolean includeChildren) {
+    try {
         String type = null;
         String size = null;
         String serializedValue = null;
@@ -144,6 +145,10 @@ public abstract class XdebugCommand
         } else {
           throw new IllegalStateException("could not handle " + value);
         }
+    } catch (Exception e) {
+      e.printStackTrace(System.err);
+      return "";
+    }
       }
 
   private String getFacet(ClassField classField) {
