@@ -90,19 +90,20 @@ class NautilusListener
     return null;
   }
   */
-
+  
+/*
   @Override
   public OutboxAmp createOutbox()
   {
-    /*
-    OutboxAmpDirect outbox = new OutboxAmpDirect();
+    //OutboxAmpDirect outbox = new OutboxAmpDirect();
     
-    outbox.setInbox(_consumer.getInbox());
+    //outbox.setInbox(_consumer.getInbox());
     
-    return outbox;
-    */
+    //return outbox;
+    
     throw new UnsupportedOperationException();
   }
+  */
 
   /*
   @Override
