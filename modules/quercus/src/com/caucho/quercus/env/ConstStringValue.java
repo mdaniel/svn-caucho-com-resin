@@ -245,7 +245,7 @@ public class ConstStringValue
   @Override
   public StringValue toLowerCase(Locale locale)
   {
-    if (_lowerCase == null) {
+    if (_lowerCase == null || _lowerCase.length() != length()) {
       _lowerCase = super.toLowerCase(locale);
     }
 
