@@ -29,14 +29,14 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.marshal.Marshal;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Locale;
+
+import com.caucho.quercus.marshal.Marshal;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP double value.
@@ -576,6 +576,10 @@ public class DoubleValue extends NumberValue
     out.print("float(" + toString() + ")");
   }
 
+  @Override
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb) {
+    sb.append(toString(QuercusLocale.getDefault()));
+  }
   //
   // Java Serialization
   //
