@@ -233,7 +233,10 @@ public class XdebugConnection
 			throw new RuntimeException("unknown command: " + packet);
 		}
 		try {
+		    boolean wasPreviouslyEvaluating = _isEvaluating;
+		    _isEvaluating = true;
 			XdebugResponse response = command.getResponse(this, parts);
+			_isEvaluating = wasPreviouslyEvaluating;
 			if (response.nextState != null) {
 				_state = response.nextState;
 				_lastStateChangingResponse = response;
@@ -330,6 +333,7 @@ public class XdebugConnection
   }
 	
 	public Object eval(String expr) {
+	  boolean wasPreviouslyEvaluating = _isEvaluating;
 		_isEvaluating = true;
     QuercusContext quercus = _env.getQuercus();
 
@@ -344,7 +348,7 @@ public class XdebugConnection
 	    e.printStackTrace(System.err);
 	    return null;
     } finally {
-  		_isEvaluating = false;
+  		_isEvaluating = wasPreviouslyEvaluating;
     }
 	}
 
