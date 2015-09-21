@@ -119,11 +119,26 @@ public class XdebugConnection
 		return INSTANCE;
 	}
 
+	private boolean isXdebugSessionActivated() {
+	  boolean isActive = false;
+      Object sessionStart = eval("isset($_GET['XDEBUG_SESSION_START']) ? $_GET['XDEBUG_SESSION_START'] : null");
+      if (sessionStart != null) {
+        eval("$_COOKIE['XDEBUG_SESSION'] = '" + sessionStart + "'");
+        isActive = true;
+      } else {
+        Object xdebugSession = eval("isset($_COOKIE['XDEBUG_SESSION']) ? $_COOKIE['XDEBUG_SESSION'] : null");
+        if (xdebugSession != null) {
+          isActive = true;
+        }
+      }
+      return isActive;
+	}
+	
 	public void connect(Env env, Expr call) {
-		if (!isConnected()) {
+	    _env = env;
+		if (!isConnected() || !isXdebugSessionActivated()) {
 			return;
 		}
-		_env = env;
 		_state = State.STARTING;
 		_lastStateChangingResponse = null;
 		_lastCommand = null;
