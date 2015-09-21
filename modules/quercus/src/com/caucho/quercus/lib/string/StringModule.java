@@ -849,7 +849,10 @@ public class StringModule extends AbstractQuercusModule {
 
   public static StringValue lcfirst(Env env, StringValue string)
   {
-    return string.substring(0, 1).toLowerCase().append(string.substring(1));
+    StringValue firstChar = string.substring(0, 1).toLowerCase();
+    StringValue rest = string.substring(1);
+    StringValue result = firstChar.append(rest);
+    return result;
   }
   
   /**
