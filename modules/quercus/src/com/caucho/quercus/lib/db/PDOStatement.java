@@ -624,11 +624,11 @@ public class PDOStatement
     String className;
     Value[] ctorArgs;
 
-    if (_fetchModeArgs.length == 0 || _fetchModeArgs.length > 2) {
+    if (_fetchModeArgs.length > 2) {
       return fetchBoth(env, rs);
     }
 
-    className = _fetchModeArgs[0].toString();
+    className = _fetchModeArgs.length == 0 ? "stdClass" : _fetchModeArgs[0].toString();
 
     if (_fetchModeArgs.length == 2) {
       if (_fetchModeArgs[1].isArray()) {
