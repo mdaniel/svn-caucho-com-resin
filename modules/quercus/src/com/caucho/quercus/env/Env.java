@@ -3275,16 +3275,20 @@ public class Env
     _callArgStack[_callStackTop] = args;
     
     if (_xdebugConnection == null) {
-    	_xdebugConnection = XdebugConnection.getInstance();
-    	_xdebugConnection.connect(this, call);
+      _xdebugConnection = XdebugConnection.getInstance();
+      _xdebugConnection.connect(this, call.getLocation());
     }
-    if (_xdebugConnection.isWaitingForUpdatesFromPhp()) {
-    	_xdebugConnection.notifyPushCall(call);
-    }
+    notifyNewDebugLocation(call.getLocation());
 
     _callStackTop++;
   }
 
+  public void notifyNewDebugLocation(Location location) {
+    if (_xdebugConnection != null && 
+        _xdebugConnection.isWaitingForUpdatesFromPhp()) {
+      _xdebugConnection.notifyNewLocation(location);
+    }
+  }
   /**
    * Pops the top call.
    */

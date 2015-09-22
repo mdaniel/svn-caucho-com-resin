@@ -111,7 +111,25 @@ public abstract class XdebugCommand
         } else if (value instanceof Value) {
           Value quercusValue = (Value) value;
           QuercusClass quercusClass = quercusValue.getQuercusClass();
-          if (quercusClass != null && !quercusClass.isArray()) {
+          if (quercusClass != null && quercusClass.getName().equals("stdClass")) {
+            StringBuilder childrenSb = new StringBuilder();
+            int childrenCount = 0;
+            Iterator<Entry<Value, Value>> iter = quercusValue.getBaseIterator(conn.getEnv());
+            while (iter.hasNext()) {
+              Entry<Value, Value> entry = iter.next();
+              childrenCount++;
+              String propName = entry.getKey().toString();
+              childrenSb.append(createPropertyElement(entry.getValue(), conn, propName, fullname == null ? null : fullname + "->" + propName, null, false));
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append(propertyPrefix + "type=\"object\" classname=\"" + quercusClass.getClassName() + "\" children=\"" + (childrenCount < 1 ? "0" : "1") 
+                + "\" numchildren=\"" + childrenCount + "\"" + (name == null ? " page=\"0\" pagesize=\"100\"" : "") + ">");
+            if (includeChildren) {
+              sb.append(childrenSb);
+            }
+            sb.append("</property>");
+            return sb.toString();
+          } else if (quercusClass != null && !quercusClass.isArray()) {
             HashMap<StringValue, ClassField> fields = quercusClass.getClassFields();
             StringBuilder sb = new StringBuilder();
             sb.append(propertyPrefix + "type=\"object\" classname=\"" + quercusClass.getClassName() + "\" children=\"" + (fields.isEmpty() ? "0" : "1") 

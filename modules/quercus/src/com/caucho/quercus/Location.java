@@ -121,4 +121,54 @@ public class Location {
   {
     return "Location[" + _fileName + ":" + _lineNumber + "]";
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result
+        + ((_className == null) ? 0 : _className.hashCode());
+    result = prime * result + ((_fileName == null) ? 0 : _fileName.hashCode());
+    result = prime * result
+        + ((_functionName == null) ? 0 : _functionName.hashCode());
+    result = prime * result + _lineNumber;
+    result = prime * result + ((_userPath == null) ? 0 : _userPath.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Location other = (Location) obj;
+    if (_className == null) {
+      if (other._className != null)
+        return false;
+    } else if (!_className.equals(other._className))
+      return false;
+    if (_fileName == null) {
+      if (other._fileName != null)
+        return false;
+    } else if (!_fileName.equals(other._fileName))
+      return false;
+    if (_functionName == null) {
+      if (other._functionName != null)
+        return false;
+    } else if (!_functionName.equals(other._functionName))
+      return false;
+    if (_lineNumber != other._lineNumber)
+      return false;
+    if (_userPath == null) {
+      if (other._userPath != null)
+        return false;
+    } else if (!_userPath.equals(other._userPath))
+      return false;
+    return true;
+  }
+  
+  
 }

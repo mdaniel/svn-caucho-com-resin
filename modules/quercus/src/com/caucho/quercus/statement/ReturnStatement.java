@@ -65,6 +65,7 @@ public class ReturnStatement extends Statement {
   @Override
   public Value execute(Env env)
   {
+    env.notifyNewDebugLocation(getLocation());
     if (_expr != null)
       return _expr.evalValue(env);
     else

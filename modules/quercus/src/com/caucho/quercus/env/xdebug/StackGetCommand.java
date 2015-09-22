@@ -1,5 +1,6 @@
 package com.caucho.quercus.env.xdebug;
 
+import java.util.List;
 import java.util.Map;
 
 import com.caucho.quercus.Location;
@@ -15,7 +16,10 @@ public class StackGetCommand extends XdebugCommand
 		StringBuilder response = new StringBuilder();
 		response.append("<response xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" command=\"stack_get\" transaction_id=\"" + transactionId + "\">");
 		int level = 0;
-		for (Location location : conn.getEnv().getStackTraceAsLocations()) {
+		List<Location> locations = conn.getEnv().getStackTraceAsLocations();
+		locations.remove(0);
+		locations.add(0, conn.getCurrentLocation());
+		for (Location location : locations) {
 			if (location != null) {
 			    String where = "{main}";
 			    if (location.getClassName() != null) {

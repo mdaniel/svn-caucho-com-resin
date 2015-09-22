@@ -10,12 +10,12 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvVar;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.QuercusProgram;
 
 /**
@@ -52,6 +52,8 @@ public class XdebugConnection
 	private int nextBreakpointId = 1000000;
 	private Map<Integer, Breakpoint> breakpointIdsMapping = new HashMap<Integer, Breakpoint>();
 	private Map<String, Breakpoint> breakpointFileAndLineNumberMapping = new HashMap<String, Breakpoint>();
+	private Location _locationToSkip;
+	private Location _currentLocation;
 	/**
 	 * If this flag is set, debugger does not react to changes on stack (which are necessary for evaluation values)
 	 */
@@ -134,7 +136,7 @@ public class XdebugConnection
       return isActive;
 	}
 	
-	public void connect(Env env, Expr call) {
+	public void connect(Env env, Location location) {
 	    _env = env;
 		if (!isConnected() || !isXdebugSessionActivated()) {
 			return;
@@ -145,7 +147,7 @@ public class XdebugConnection
 		_isEvaluating = false;
 		breakpointIdsMapping = new HashMap<Integer, Breakpoint>();
 		breakpointFileAndLineNumberMapping = new HashMap<String, Breakpoint>();
-		String fileuri = getFileURI(call.getFileName());
+		String fileuri = getFileURI(location.getFileName());
 		final String initMsg = "<init xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" fileuri=\""
 		    + fileuri
 		    + "\" language=\"PHP\" protocol_version=\"1.0\" appid=\"15986\" idekey=\"XDEBUG_ECLIPSE\"><engine version=\"2.2.7\"><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2015 by Derick Rethans]]></copyright></init>";
@@ -279,11 +281,12 @@ public class XdebugConnection
 		}
 	}
 
-	public synchronized void notifyPushCall(Expr call) {
+	public synchronized void notifyNewLocation(Location location) {
+	  _currentLocation = location;
 		try {
 			switch (_state) {
 			case RUNNING:
-				String filenameAndLineNumber = call.getFileName() + ":" + call.getLine();
+				String filenameAndLineNumber = location.getFileName() + ":" + location.getLineNumber();
 				Breakpoint breakpoint = breakpointFileAndLineNumberMapping.get(filenameAndLineNumber);
 				if (breakpoint == null) {
 					break;
@@ -293,8 +296,13 @@ public class XdebugConnection
 					// expected stack depth is not yet reached
 					break;
 				}
-				String fileName = call.getFileName();
-				int lineNumber = call.getLine();
+				if (_locationToSkip != null && _currentLocation.equals(_locationToSkip)) {
+				  // still at the same location
+				  break;
+				}
+				_locationToSkip = null;
+				String fileName = location.getFileName();
+				int lineNumber = location.getLineNumber();
 				String transactionId = _lastStateChangingResponse.transactionId;
 				_state = State.BREAK;
 //				sendPacket("<response xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" command=\"step_into\" transaction_id=\""
@@ -389,5 +397,28 @@ public class XdebugConnection
     if (_envStack != null) {
       _envStack[_callStackTop + 1] = null;
     }
+  }
+  
+  public Location getCurrentLocation() {
+    return _currentLocation;
+  }
+
+  public void stepOver() {
+    setBreakAtExpectedStackDepth(_env.getCallDepth());
+    skipCurrentLocationForNextBreak();
+  }
+
+  public void stepInto() {
+    setBreakAtExpectedStackDepth(null);    
+    skipCurrentLocationForNextBreak();
+  }
+
+  public void stepOut() {
+    setBreakAtExpectedStackDepth(_env.getCallDepth() - 1);
+    skipCurrentLocationForNextBreak();
+  }
+
+  public void skipCurrentLocationForNextBreak() {
+    _locationToSkip = _currentLocation;
   }
 }

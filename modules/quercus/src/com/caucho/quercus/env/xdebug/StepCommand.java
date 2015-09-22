@@ -11,11 +11,11 @@ public class StepCommand extends XdebugCommand
   protected XdebugResponse getInternalResponse(String commandName, Map<String, String> parameters,
       String transactionId, XdebugConnection conn) {
 		if ("step_over".equals(commandName)) {
-			conn.setBreakAtExpectedStackDepth(conn.getEnv().getCallDepth());
+		    conn.stepOver();
 		} else if ("step_into".equals(commandName)) {
-			conn.setBreakAtExpectedStackDepth(null);
+		    conn.stepInto();
 		} else if ("step_out".equals(commandName)) {
-			conn.setBreakAtExpectedStackDepth(conn.getEnv().getCallDepth() - 1);
+		    conn.stepOut();
 		}
 	  return new XdebugResponse(State.BREAK, null, transactionId);
   }

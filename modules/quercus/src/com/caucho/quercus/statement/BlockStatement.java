@@ -102,6 +102,7 @@ public class BlockStatement extends Statement {
     for (int i = 0; i < _statements.length; i++) {
       Statement statement = _statements[i];
 
+      env.notifyNewDebugLocation(statement.getLocation());
       Value value = statement.execute(env);
 
       if (value != null) {
