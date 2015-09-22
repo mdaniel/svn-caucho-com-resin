@@ -101,8 +101,8 @@ public abstract class XdebugCommand
           serializedValue = javax.xml.bind.DatatypeConverter
               .printBase64Binary(stringValue.getBytes());
         }
-        String propertyPrefix = "<property " + (name != null ? "name=\"" + name + "\" " : "")
-            + (fullname != null ? "fullname=\"" + fullname + "\" " : "") 
+        String propertyPrefix = "<property " + (name != null ? "name=\"" + safe(name) + "\" " : "")
+            + (fullname != null ? "fullname=\"" + safe(fullname) + "\" " : "") 
             + (facet != null ? "facet=\"" + facet + "\" " : "");
         if (serializedValue != null) {
           return propertyPrefix + "type=\"" + type + "\""
@@ -180,5 +180,9 @@ public abstract class XdebugCommand
       return "public";
     }
     return null;
+  }
+  
+  private String safe(String propValue) {
+    return propValue.replaceAll("<", "&lt;");
   }
 }
