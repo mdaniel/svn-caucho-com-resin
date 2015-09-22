@@ -402,15 +402,7 @@ public class DoubleValue extends NumberValue
   @Override
   public String toString()
   {
-    // XXX: pass in Env
-    Env env = Env.getInstance();
-
-    if (env != null) {
-      return toString(env.getLocaleInfo().getNumeric());
-    }
-    else {
-      return toString(LocaleInfo.getDefault().getNumeric());
-    }
+    return toString(QuercusLocale.getDefault());
   }
 
   /**
@@ -420,7 +412,7 @@ public class DoubleValue extends NumberValue
    */
   public StringValue toString(Env env)
   {
-    String str = toString(env.getLocaleInfo().getNumeric());
+    String str = toString();
 
     return env.createStringBuilder().append(str);
   }
