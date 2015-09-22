@@ -29,24 +29,33 @@
 
 package com.caucho.quercus.lib.regexp;
 
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.annotation.Hide;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.NotNull;
-import com.caucho.quercus.annotation.Reference;
-import com.caucho.quercus.annotation.UsesSymbolTable;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.i18n.MbstringModule;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.annotation.Hide;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.UsesSymbolTable;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.lib.i18n.MbstringModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 public class RegexpModule
   extends AbstractQuercusModule
@@ -696,7 +705,7 @@ public class RegexpModule
 
     int count = 0;
 
-    while (regexpState.find()) {
+    while (regexpState.find(env)) {
       count++;
 
       for (int j = 0; j < groupCount; j++) {
@@ -756,7 +765,7 @@ public class RegexpModule
                                                 int flags,
                                                 int offset)
   {
-    if (regexpState == null || ! regexpState.find()) {
+    if (regexpState == null || ! regexpState.find(env)) {
       return LongValue.ZERO;
     }
 
@@ -824,7 +833,7 @@ public class RegexpModule
 
         matchResult.put(result);
       }
-    } while (regexpState.find());
+    } while (regexpState.find(env));
 
     return LongValue.create(count);
   }
@@ -1123,7 +1132,7 @@ public class RegexpModule
     StringValue result = subject.createStringBuilder();
     int tail = 0;
 
-    while (regexpState.find() && numberOfMatches < limit) {
+    while (regexpState.find(env) && numberOfMatches < limit) {
       // Increment countV (note: if countV != null, then it should be a Var)
       if (countV != null && countV instanceof Var) {
         long count = countV.toValue().toLong();
@@ -1339,7 +1348,7 @@ public class RegexpModule
 
     int replacementLen = replacementProgram.size();
 
-    while (limit-- > 0 && regexpState.find()) {
+    while (limit-- > 0 && regexpState.find(env)) {
       isMatched = true;
 
       // Increment countV (note: if countV != null, then it should be a Var)
@@ -1622,7 +1631,7 @@ public class RegexpModule
     GroupNeighborMap neighborMap
       = new GroupNeighborMap(regexp.getPattern(), regexpState.groupCount());
 
-    while (regexpState.find()) {
+    while (regexpState.find(env)) {
       int startPosition = head;
       StringValue unmatched;
 
@@ -1822,7 +1831,7 @@ public class RegexpModule
     long count = 0;
     int head = 0;
 
-    while (regexpState.find() && count < limit) {
+    while (regexpState.find(env) && count < limit) {
       StringValue value;
       if (count == limit - 1) {
         value = regexpState.substring(env, head);

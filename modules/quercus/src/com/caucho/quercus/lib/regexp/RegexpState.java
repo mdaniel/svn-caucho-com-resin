@@ -138,7 +138,10 @@ public class RegexpState {
 
   public static RegexpState create(Env env, Regexp regexp)
   {
-    RegexpState state = env.allocateRegexpState();
+    RegexpState state = null;
+    if (env != null) {
+      state = env.allocateRegexpState();
+    }
 
     if (state == null)
       state = new RegexpState();
@@ -181,7 +184,7 @@ public class RegexpState {
     _start = first;
   }
 
-  public boolean find()
+  public boolean find(Env env)
   {
     try {
       if (log.isLoggable(Level.FINEST))
@@ -232,11 +235,12 @@ public class RegexpState {
       return false;
     }
     catch (StackOverflowError e) {
-      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-                      _regexp, _subject));
+      QuercusRuntimeException qre = new QuercusRuntimeException(
+          L.l("regexp '{0}' produces a StackOverflowError for\n{1}", _regexp, _subject), e);
+      log.log(Level.WARNING, qre.getMessage(), qre);
+      log.log(Level.WARNING, env.getStackTraceAsString());
 
-      throw new QuercusRuntimeException(
-          L.l("regexp '{0}' produces a StackOverflowError", _regexp), e);
+      throw qre;
     }
   }
 
@@ -252,13 +256,14 @@ public class RegexpState {
       _subjectLength = subject != null ? subject.length() : 0;
       _first = 0;
 
-      return find();
+      return find(env);
     } catch (StackOverflowError e) {
-      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-                      _regexp, subject));
+      QuercusRuntimeException qre = new QuercusRuntimeException(
+          L.l("regexp '{0}' produces a StackOverflowError for\n{1}", _regexp, _subject), e);
+      log.log(Level.WARNING, qre.getMessage(), qre);
+      log.log(Level.WARNING, env.getStackTraceAsString());
 
-      throw new QuercusRuntimeException(
-          L.l("regexp '{0}' produces a StackOverflowError", _regexp), e);
+      throw qre;
     }
   }
 
@@ -281,11 +286,12 @@ public class RegexpState {
 
       return _regexp._prog.match(_subject, _subjectLength, first, this);
     } catch (StackOverflowError e) {
-      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-                      _regexp, subject));
+      QuercusRuntimeException qre = new QuercusRuntimeException(
+          L.l("regexp '{0}' produces a StackOverflowError for\n{1}", _regexp, _subject), e);
+      log.log(Level.WARNING, qre.getMessage(), qre);
+      log.log(Level.WARNING, env.getStackTraceAsString());
 
-      throw new QuercusRuntimeException(
-          L.l("regexp '{0}' produces a StackOverflowError", _regexp), e);
+      throw qre;
     }
   }
 
@@ -344,11 +350,12 @@ public class RegexpState {
 
       return -1;
     } catch (StackOverflowError e) {
-      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-                      _regexp, subject));
+      QuercusRuntimeException qre = new QuercusRuntimeException(
+          L.l("regexp '{0}' produces a StackOverflowError for\n{1}", _regexp, _subject), e);
+      log.log(Level.WARNING, qre.getMessage(), qre);
+      log.log(Level.WARNING, env.getStackTraceAsString());
 
-      throw new QuercusRuntimeException(
-          L.l("regexp '{0}' produces a StackOverflowError", _regexp), e);
+      throw qre;
     }
   }
 
