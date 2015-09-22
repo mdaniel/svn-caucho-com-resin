@@ -84,7 +84,7 @@ public class PDOError
       env.warning("SQLSTATE[" + errorCode + "]: " + errorMessage);
     }
     else if (level == PDO.ERRMODE_EXCEPTION) {
-      throw new PDOException(env, errorCode, errorMessage);
+      throw new PDOException(env, errorCode, errorMessage, null);
     }
   }
   /**
@@ -199,7 +199,7 @@ public class PDOError
     _errorInfo.put(_errorCode);
 
     if (_errmode == PDO.ERRMODE_EXCEPTION) {
-      throw new PDOException(env, _errorCode, message);
+      throw new PDOException(env, _errorCode, message, null);
     }
     else {
       env.warning("SQLSTATE[" + _errorCode + "]: " + message);
