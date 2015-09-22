@@ -1286,32 +1286,12 @@ abstract public class StringValue
         sb.append('/');
         break;
       default:
-        if (c <= 0x1f) {
-          jsonEncodeUnicode(sb, c);
-        }
-        else if (c < 0x80) {
+        if (c > 0x1f && c < 0x80) {
+          // ASCII characters without control characters
           jsonEncodeAscii(context, sb, c);
         }
-        else if ((c & 0xe0) == 0xc0 && i + 1 < len) {
-          int c1 = charAt(i + 1);
-          i++;
-
-          int ch = ((c & 0x1f) << 6) + (c1 & 0x3f);
-
-          jsonEncodeUnicode(sb, ch);
-        }
-        else if ((c & 0xf0) == 0xe0 && i + 2 < len) {
-          int c1 = charAt(i + 1);
-          int c2 = charAt(i + 2);
-
-          i += 2;
-
-          int ch = ((c & 0x0f) << 12) + ((c1 & 0x3f) << 6) + (c2 & 0x3f);
-
-          jsonEncodeUnicode(sb, ch);
-        }
         else {
-          // technically illegal
+          // control characters or unicode characters
           jsonEncodeUnicode(sb, c);
         }
 
