@@ -2685,9 +2685,9 @@ abstract public class StringValue
 
     StringValue s = (StringValue) o;
 
-    if (s.isUnicode() != isUnicode()) {
-      return false;
-    }
+//    if (s.isUnicode() != isUnicode()) {
+//      return false;
+//    }
 
     int aLength = length();
     int bLength = s.length();
