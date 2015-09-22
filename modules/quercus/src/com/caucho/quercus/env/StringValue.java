@@ -1292,6 +1292,12 @@ abstract public class StringValue
         }
         else {
           // control characters or unicode characters
+          
+          /* Unicode characters needing more than two bytes (1 char) are not supported at the moment 
+           * (these are "supplementary characters", not being in the "Basic Multilingual Plane (BMP)" 
+           * containing characters from U+0000 to U+FFFF, 
+           * see http://docs.oracle.com/javase/7/docs/api/java/lang/Character.html).
+           */
           jsonEncodeUnicode(sb, c);
         }
 
