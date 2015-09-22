@@ -1179,10 +1179,14 @@ public class FileModule extends AbstractQuercusModule {
 
     BinaryStream s = fopen(env, filename, "rb", useIncludePath, context);
 
-    if (! (s instanceof InputStream))
-      return null;
-
-    InputStream is = (InputStream) s;
+    InputStream is;
+    if (s instanceof InputStream) {
+      is = (InputStream) s;
+    } else if (s instanceof BinaryInput) {
+      is = ((BinaryInput) s).getInputStream();
+    } else {
+      throw new IllegalStateException("Could not handle BinaryStream of type " + s.getClass());
+    }
 
     StringValue bb = env.createLargeBinaryBuilder();
     bb.appendReadAll(is, maxLen);
