@@ -44,12 +44,14 @@ import java.util.zip.CRC32;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.file.ReadStreamInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.util.ByteAppendable;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -1843,12 +1845,12 @@ abstract public class StringValue
    * Append from an input stream, reading from the input stream until
    * end of file or the length is reached.
    */
-  public int appendReadAll(InputStream is, long length)
+  public int appendReadAll(ReadStreamInput is, long length)
   {
-    TempBuffer tBuf = TempBuffer.allocate();
+    TempCharBuffer tBuf = TempCharBuffer.allocate();
 
     try {
-      byte []buffer = tBuf.getBuffer();
+      char []buffer = tBuf.getBuffer();
       int readLength = 0;
 
       while (length > 0) {
@@ -1871,7 +1873,7 @@ abstract public class StringValue
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     } finally {
-      TempBuffer.free(tBuf);
+      TempCharBuffer.free(tBuf);
     }
   }
 

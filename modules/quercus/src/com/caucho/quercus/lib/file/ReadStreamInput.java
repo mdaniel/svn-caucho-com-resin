@@ -29,17 +29,21 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.*;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.VfsStream;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
 
 /**
  * Represents a Quercus file open for reading
@@ -82,6 +86,13 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public void init(ReadStream is)
   {
     _is = is;
+    if (_env.isUnicodeSemantics()) {
+      try {
+        is.setEncoding("utf-8");
+      } catch (UnsupportedEncodingException e) {
+        throw new QuercusRuntimeException("could not set ReadStream encoding to UTF-8");
+      }
+    }
   }
 
   /**
