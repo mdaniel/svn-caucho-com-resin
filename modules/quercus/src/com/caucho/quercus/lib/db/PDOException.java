@@ -28,25 +28,29 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.env.QuercusLanguageException;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.Location;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusLanguageException;
+import com.caucho.quercus.env.Value;
 
 public class PDOException
   extends QuercusLanguageException
 {
   private final String _code;
   private final String _message;
+  private final ObjectValue _previous;
 
   private Location _location;
 
-  public PDOException(Env env, String code, String message)
+  public PDOException(Env env, String code, String message, @Optional ObjectValue previous)
   {
     super(env);
 
     _code = code;
     _message = "SQLSTATE[" + code + "]: " + message;
+    _previous = previous;
 
     _location = env.getLocation();
   }
@@ -70,6 +74,11 @@ public class PDOException
   public String getMessage(Env env)
   {
     return getMessage();
+  }
+  
+  public ObjectValue getPrevious(Env env)
+  {
+    return _previous;
   }
 
   /**
