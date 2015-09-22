@@ -490,7 +490,7 @@ class JsonDecoder {
                 return errorReturn(env, "invalid escaped hex character");
             }
 
-            if (hex < 0x80)
+            if (hex < 0x80 || env.isUnicodeSemantics())
               sb.append((char)hex);
             else if (hex < 0x800) {
               sb.append((char) (0xc0 + (hex >> 6)));
