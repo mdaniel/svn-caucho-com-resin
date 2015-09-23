@@ -893,6 +893,7 @@ abstract public class ObjectValue extends Callback {
 
       int length = 0;
 
+      boolean isStdClass = "stdClass".equals(getQuercusClass().getClassName());
       Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
 
       while (iter.hasNext()) {
@@ -901,7 +902,7 @@ abstract public class ObjectValue extends Callback {
         StringValue key = entry.getKey().toStringValue(env);
         Value value = entry.getValue();
 
-        if (! ClassField.isPublic(key)) {
+        if (!isStdClass && ! ClassField.isPublic(key)) {
           continue;
         }
 
