@@ -233,7 +233,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
     Value array = _expr.evalIssetValue(env);
     Value index = _index.evalIssetValue(env);
 
-    return array.isset(index);
+    return array.isArray() && array.isset(index);
   }
 
   /**
