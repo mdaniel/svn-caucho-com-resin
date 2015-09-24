@@ -1425,6 +1425,7 @@ abstract public class ArrayValue extends Value {
     }
 
     sb.append('[');
+    context.increaseIndentation();
 
     length = 0;
     for (Value value : values()) {
@@ -1432,10 +1433,13 @@ abstract public class ArrayValue extends Value {
         sb.append(',');
       }
 
+      context.appendIndentation(sb);
       value.jsonEncode(env, context, sb);
       length++;
     }
 
+    context.decreaseIndentation();
+    context.appendIndentation(sb);
     sb.append(']');
   }
 
@@ -1444,6 +1448,7 @@ abstract public class ArrayValue extends Value {
                                     StringValue sb)
   {
     sb.append('{');
+    context.increaseIndentation();
 
     int length = 0;
 
@@ -1455,12 +1460,15 @@ abstract public class ArrayValue extends Value {
       if (length > 0)
         sb.append(',');
 
+      context.appendIndentation(sb);
       entry.getKey().toStringValue(env).jsonEncode(env, context, sb);
       sb.append(':');
       entry.getValue().jsonEncode(env, context, sb);
       length++;
     }
 
+    context.decreaseIndentation();
+    context.appendIndentation(sb);
     sb.append('}');
   }
 

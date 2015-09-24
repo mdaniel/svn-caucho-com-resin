@@ -37,13 +37,17 @@ public class JsonEncodeContext
   private final boolean _isEscapeQuote;
   private final boolean _isCheckNumeric;
   private final boolean _isBigIntAsString;
+  private final boolean _isPrettyPrint;
+  private final static String _indentationString = "    ";
+  private int _prettyPrintIndentation = 0;
 
   public JsonEncodeContext(boolean isEscapeTag,
                            boolean isEscapeAmp,
                            boolean isEscapeApos,
                            boolean isEscapeQuote,
                            boolean isCheckNumeric,
-                           boolean isBigIntAsString)
+                           boolean isBigIntAsString,
+                           boolean isPrettyPrint)
   {
     _isEscapeTag = isEscapeTag;
     _isEscapeAmp = isEscapeAmp;
@@ -51,6 +55,7 @@ public class JsonEncodeContext
     _isEscapeQuote = isEscapeQuote;
     _isCheckNumeric = isCheckNumeric;
     _isBigIntAsString = isBigIntAsString;
+    _isPrettyPrint = isPrettyPrint;
   }
 
   public boolean isEscapeTag()
@@ -81,5 +86,35 @@ public class JsonEncodeContext
   public boolean isBigIntAsString()
   {
     return _isBigIntAsString;
+  }
+  
+  public boolean isPrettyPrint() {
+    return _isPrettyPrint;
+  }
+  
+  public void appendIndentation(StringValue sb) {
+    if (!_isPrettyPrint) {
+      return;
+    }
+    sb.append("\n");
+    for (int i = 0; i < _prettyPrintIndentation; i++) {
+      sb.append(_indentationString);
+    }
+  }
+  
+  public void appendSpace(StringValue sb) {
+    if (_isPrettyPrint) {
+      sb.append(" ");
+    }
+  }
+  public void increaseIndentation() {
+    _prettyPrintIndentation++;
+  }
+  
+  public void decreaseIndentation() {
+    _prettyPrintIndentation--;
+    if (_prettyPrintIndentation < 0) {
+      throw new IllegalStateException("inconsistent indentation caused by JSON_PRETTY_PRINT");
+    }
   }
 }

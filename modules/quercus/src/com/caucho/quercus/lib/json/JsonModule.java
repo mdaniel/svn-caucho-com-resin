@@ -82,13 +82,15 @@ public class JsonModule extends AbstractQuercusModule
     boolean isEscapeQuote = (options & JSON_HEX_QUOT) > 0;
     boolean isNumericCheck = (options & JSON_NUMERIC_CHECK) > 0;
     boolean isBigIntAsString = (options & JSON_BIGINT_AS_STRING) > 0;
+    boolean isPrettyPrint = (options & JSON_PRETTY_PRINT) > 0;
 
     JsonEncodeContext context = new JsonEncodeContext(isEscapeTag,
                                                       isEscapeAmp,
                                                       isEscapeApos,
                                                       isEscapeQuote,
                                                       isNumericCheck,
-                                                      isBigIntAsString);
+                                                      isBigIntAsString,
+                                                      isPrettyPrint);
 
     StringValue sb = env.createStringBuilder();
 

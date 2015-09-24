@@ -890,10 +890,11 @@ abstract public class ObjectValue extends Callback {
     }
     else {
       sb.append('{');
+      context.increaseIndentation();
 
       int length = 0;
 
-      boolean isStdClass = "stdClass".equals(getQuercusClass().getClassName());
+      boolean isStdClass = getQuercusClass() == env.getQuercus().getStdClass();
       Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
 
       while (iter.hasNext()) {
@@ -910,12 +911,16 @@ abstract public class ObjectValue extends Callback {
           sb.append(',');
         }
 
+        context.appendIndentation(sb);
         key.jsonEncode(env, context, sb);
         sb.append(':');
+        context.appendSpace(sb);
         value.jsonEncode(env, context, sb);
         length++;
       }
 
+      context.decreaseIndentation();
+      context.appendIndentation(sb);
       sb.append('}');
     }
   }
