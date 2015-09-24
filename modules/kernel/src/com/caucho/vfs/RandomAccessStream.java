@@ -159,15 +159,16 @@ abstract public class RandomAccessStream
 
   public final boolean allocate()
   {
+    AtomicLong useCount = _useCount;
     long count;
     
     do {
-      count = _useCount.get();
+      count = useCount.get();
       
       if (count <= 0) {
         return false;
       }
-    } while (! _useCount.compareAndSet(count, count + 1));
+    } while (! useCount.compareAndSet(count, count + 1));
     
     return true;
   }

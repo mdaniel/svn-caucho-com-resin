@@ -402,9 +402,11 @@ public class BlockReadWrite {
     RandomAccessStream file = _mmapFile.get();
 
     if (file != null) {
+      /*
       if (file.getLength() < fileSize) {
         file = null;
       }
+      */
     }
     else {
       RandomAccessWrapper wrapper = _cachedRowFile.allocate();
@@ -552,7 +554,8 @@ public class BlockReadWrite {
       _rowFileSemaphore.release();
     }
 
-    wrapper.closeFromException();
+    //wrapper.closeFromException();
+    wrapper.close();
   }
 
   /**
@@ -561,7 +564,7 @@ public class BlockReadWrite {
   void close()
   {
     _path = null;
-
+    
     RandomAccessStream mmap = _mmapFile.getAndSet(null);
 
     if (mmap != null) {
@@ -584,7 +587,7 @@ public class BlockReadWrite {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _store.getId() + "]";
+    return getClass().getSimpleName() + "[" + _store.getId() + "," + _store + "]";
   }
 
   static class RandomAccessWrapper {

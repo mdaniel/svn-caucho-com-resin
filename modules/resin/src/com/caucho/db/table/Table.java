@@ -433,7 +433,7 @@ public class Table extends BlockStore {
     throws IOException
   {
     int offset = SHUTDOWN_TIMESTAMP_OFFSET;
-
+    
     writeTimestamp(offset, _startupTimestamp);
   }
 
@@ -465,8 +465,6 @@ public class Table extends BlockStore {
 
     try {
       byte []buffer = metaBlock.getBuffer();
-
-      int startupOffset = STARTUP_TIMESTAMP_OFFSET;
 
       long startupTimestamp
         = BitsUtil.readLong(buffer, STARTUP_TIMESTAMP_OFFSET);
@@ -1177,10 +1175,12 @@ public class Table extends BlockStore {
     if (! _lifecycle.toDestroy()) {
       return;
     }
-    
+
     try {
       if (fsync()) {
         writeShutdownTimestamp();
+                
+        fsync();
       }
       else {
         log.warning(this + " fsync on close failed.");

@@ -838,26 +838,4 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
       return getClass().getSimpleName() + "[" + _path + "]";
     }
   }
-
-  /*
-  private static class ResultCount extends Wrapper<Boolean,Boolean>
-  {
-    private int _count;
-    
-    ResultCount(Result<Boolean> result, int count)
-    {
-      super(result);
-      
-      _count = count;
-    }
-    
-    @Override
-    public void complete(Boolean result)
-    {
-      if (--_count <= 0) {
-        getNext().complete(result);
-      }
-    }
-  }
-  */
 }

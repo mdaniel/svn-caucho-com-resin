@@ -9,17 +9,10 @@ package com.caucho.db.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.JniTroubleshoot;
-import com.caucho.util.JniUtil;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
-import com.caucho.vfs.SendfileOutputStream;
 
 /**
  * Stream using with JNI.
@@ -29,17 +22,10 @@ public class RandomAccessStreamNio extends RandomAccessStream
   private static final Logger log
     = Logger.getLogger(RandomAccessStreamNio.class.getName());
   
-  private static final Object _openLock = new Object();
-
-
-  private final AtomicLong _file = new AtomicLong();
-
   //private final long _fileLength;
   private final Path _path;
   private StoreReadWrite _store;
   
-  private final AtomicBoolean _isClosed = new AtomicBoolean();
-
   /**
    * Create a new JniStream based on the java.io.* stream.
    */
@@ -328,11 +314,9 @@ public class RandomAccessStreamNio extends RandomAccessStream
   protected void closeImpl()
     throws IOException
   {
-    long file = _file.getAndSet(0);
-    
     if (getUseCount() > 0) {
-      log.warning(this + " free with use " + file + " " + getUseCount());
-      System.err.println(this + " DOUBLE_CLOSE: " + Long.toHexString(file) + " " + getUseCount());
+      log.warning(this + " free with use " + getUseCount());
+      System.err.println(this + " DOUBLE_CLOSE: " + getUseCount());
     }
 
     /*
@@ -355,14 +339,12 @@ public class RandomAccessStreamNio extends RandomAccessStream
     
     super.closeImpl();
   }
-
-  @Override
-  protected void finalize()
-    throws IOException
+  
+  protected void finalize() throws Throwable
   {
-    if (_file.get() != 0) {
-      closeImpl();
-    }
+    super.finalize();
+
+    close();
   }
 
   /**

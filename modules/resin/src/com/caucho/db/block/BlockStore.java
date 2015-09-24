@@ -251,8 +251,9 @@ public class BlockStore {
 
     _writer = new BlockWriter(this);
 
-    if (rowLock == null)
+    if (rowLock == null) {
       rowLock = new ReentrantReadWriteLock();
+    }
 
     rowLock.readLock();
     _rowWriteLock = rowLock.writeLock();
@@ -2017,6 +2018,6 @@ public class BlockStore {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "]";
+    return getClass().getSimpleName() + "[" + _id + "," + _path + "]";
   }
 }
