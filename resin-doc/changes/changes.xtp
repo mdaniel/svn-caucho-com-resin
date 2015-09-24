@@ -8,6 +8,7 @@
 
 <s2 title="4.0.46 - in-progress">
 <ul>
+<li>jsp: tag loading issue due to WEB-INF case (#5936, rep by libor)</li>
 <li>table: improper early closing of file on shutdown (#5946)</li>
 <li>servlet: drop instantiation check for instances of servlets and filters (#5934, rep by msouthall)</li>
 <li>jsse-ssl: add support for honor-cipher-order (#5939)</li>

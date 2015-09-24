@@ -480,8 +480,11 @@ public class JavaCompilerUtil {
   public static String mangleName(String name)
   {
     // canonicalize to lower case for the tag prefix loading
-    if (name.startsWith("jsp/WEB-INF")) {
-      name = "jsp/web-inf" + name.substring("jsp/WEB-INF".length());
+    int p = name.toLowerCase().indexOf("web-inf");
+    if (p >= 0) {
+      int len = "web-inf".length();
+      
+      name = name.substring(0, p) + "web-inf" + name.substring(p + len);
     }
     
     boolean toLower = CauchoSystem.isCaseInsensitive();

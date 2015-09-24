@@ -239,9 +239,10 @@ public class JspCompilerInstance {
     
     _parseState.setUriPwd(uriPwd);
 
-    if (_className == null)
+    if (_className == null) {
       _className = JavaCompilerUtil.mangleName("jsp/" + _uri);
-
+    }
+    
     // default to true if ends with x
     if (_uri.endsWith("x"))
       _parseState.setXml(true);
@@ -683,8 +684,9 @@ public class JspCompilerInstance {
         xml.setDtdValidating(true);
         xml.parse(_jspPath);
       }
-      else
+      else {
         _parser.parseTag(_jspPath, _uri);
+      }
 
       _generator = _jspBuilder.getGenerator();
 
