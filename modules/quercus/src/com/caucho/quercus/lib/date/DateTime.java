@@ -35,9 +35,11 @@ import java.util.Locale;
 
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.JsonEncode;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JsonEncodeContext;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -410,6 +412,16 @@ public class DateTime implements DateTimeInterface, Cloneable
     _qDate.setGMTTime(time);
   }
 
+  @JsonEncode
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
+  {
+    Value obj = env.getQuercus().getStdClass().createObject(env);
+    obj.putField(env, env.createString("date"), format(env, env.createString("Y-m-d H:i:s")));
+    obj.putField(env, env.createString("timezone_type"), LongValue.create(3));
+    obj.putField(env, env.createString("timezone"), env.createString(_dateTimeZone.getName()));
+    obj.jsonEncode(env, context, sb);
+  }
+  
   @Override
   public String toString()
   {
