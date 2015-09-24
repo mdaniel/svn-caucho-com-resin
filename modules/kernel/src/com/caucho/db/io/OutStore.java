@@ -33,7 +33,7 @@ package com.caucho.db.io;
 /**
  * Write access to the random access filesystem.
  */
-public interface OutStore extends AutoCloseable
+public interface OutStore
 {
   /**
    * returns the allocated length of this store segment.
@@ -61,6 +61,5 @@ public interface OutStore extends AutoCloseable
 
   OutStore clone();
 
-  @Override
   void close();
 }

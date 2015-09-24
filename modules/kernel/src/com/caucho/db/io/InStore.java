@@ -32,12 +32,11 @@ package com.caucho.db.io;
 /**
  * Read access to the random access filesystem.
  */
-public interface InStore extends AutoCloseable
+public interface InStore
 {
   boolean read(long address, byte []buffer, int offset, int length);
   
   InStore clone();
 
-  @Override
   void close();
 }
