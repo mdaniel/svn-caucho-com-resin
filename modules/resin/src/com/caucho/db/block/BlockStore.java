@@ -45,6 +45,7 @@ import com.caucho.db.Database;
 import com.caucho.env.health.HealthSystemFacade;
 // import com.caucho.db.lock.Lock;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
@@ -181,7 +182,7 @@ public class BlockStore {
   private long _blockLockTimeout = 120000;
 
   private final Lifecycle _lifecycle = new Lifecycle();
-
+  
   public BlockStore(Database database,
                     String name,
                     ReadWriteLock tableLock)
@@ -257,6 +258,8 @@ public class BlockStore {
 
     rowLock.readLock();
     _rowWriteLock = rowLock.writeLock();
+    
+    Environment.addCloseListener(this);
   }
 
   /**
@@ -1893,8 +1896,9 @@ public class BlockStore {
    */
   public void close()
   {
-    if (! _lifecycle.toDestroy())
+    if (! _lifecycle.toDestroy()) {
       return;
+    }
 
     log.finer(this + " closing");
     BlockManager blockManager = _blockManager;

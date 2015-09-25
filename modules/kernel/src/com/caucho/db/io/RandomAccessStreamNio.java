@@ -340,6 +340,7 @@ public class RandomAccessStreamNio extends RandomAccessStream
     super.closeImpl();
   }
   
+  @Override
   protected void finalize() throws Throwable
   {
     super.finalize();

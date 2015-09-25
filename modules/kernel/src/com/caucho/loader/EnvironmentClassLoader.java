@@ -113,8 +113,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
   private Throwable _configException;
   
-  private static AtomicInteger _debugCounter = new AtomicInteger();
-  private int _debugId = _debugCounter.incrementAndGet();
+  //private static AtomicInteger _debugCounter = new AtomicInteger();
+  //private int _debugId = _debugCounter.incrementAndGet();
 
   /**
    * Creates a new environment class loader.
