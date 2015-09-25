@@ -29,13 +29,15 @@
 
 package com.caucho.quercus.lib.spl;
 
+import java.util.ArrayList;
+
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-
-import java.util.ArrayList;
 
 public class RecursiveIteratorIterator
   implements OuterIterator, Traversable, Iterator
@@ -47,13 +49,14 @@ public class RecursiveIteratorIterator
 
   private final ArrayList<RecursiveIterator> _iterStack;
   private final int _mode;
+  private int _maxDepth;
 
   public RecursiveIteratorIterator(Env env,
                                    Value value,
                                    @Optional int mode,  //0 == LEAVES_ONLY
                                    @Optional int flags)
   {
-    RecursiveIterator iter = RecursiveIteratorProxy.create(value);
+    RecursiveIterator iter = RecursiveIteratorProxy.create(env, value);
 
     _iterStack = new ArrayList<RecursiveIterator>();
     _iterStack.add(iter);
@@ -127,6 +130,47 @@ public class RecursiveIteratorIterator
     _iterStack.get(0).rewind(env);
   }
 
+  /**
+   * (PHP 5)<br/>
+   * Get the current depth of the recursive iteration
+   * @link http://php.net/manual/en/recursiveiteratoriterator.getdepth.php
+   * @return int The current depth of the recursive iteration.
+   */
+  public Value getDepth()
+  { 
+    return LongValue.create(_iterStack.size());
+  }
+  
+  /**
+   * (PHP 5 &gt;= 5.1.0)<br/>
+   * Set max depth
+   * @link http://php.net/manual/en/recursiveiteratoriterator.setmaxdepth.php
+   * @param string $max_depth [optional] <p>
+   * The maximum allowed depth. -1 is used
+   * for any depth.
+   * </p>
+   * @return void
+   */
+  public void setMaxDepth(Env env, @Optional(value="-1") Value maxDepth) 
+  { 
+    _maxDepth = maxDepth.toInt();
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.1.0)<br/>
+   * Get max depth
+   * @link http://php.net/manual/en/recursiveiteratoriterator.getmaxdepth.php
+   * @return mixed The maximum accepted depth, or false if any depth is allowed.
+   */
+  public Value getMaxDepth(Env env) 
+  { 
+    if (_maxDepth < 0) {
+      return BooleanValue.FALSE;
+    } else {
+      return LongValue.create(_maxDepth);
+    }
+  }
+  
   @Override
   public String toString()
   {
@@ -162,12 +206,11 @@ public class RecursiveIteratorIterator
       _obj = obj;
     }
 
-    public static RecursiveIterator create(Value value)
+    public static RecursiveIterator create(Env env, Value value)
     {
-      Object obj = value.toJavaObject();
-
-      if (obj instanceof RecursiveIterator) {
-        return (RecursiveIterator) obj;
+      
+      if (value.getQuercusClass() == env.getClass("RecursiveDirectoryIterator")) {
+        return (RecursiveIterator) value.toJavaObject();
       }
       else {
         return new RecursiveIteratorProxy(value);
@@ -185,7 +228,7 @@ public class RecursiveIteratorIterator
     {
       Value result = _obj.callMethod(env, GET_CHILDREN);
 
-      return create(result);
+      return create(env, result);
     }
 
     @Override
@@ -217,5 +260,6 @@ public class RecursiveIteratorIterator
     {
       _obj.callMethod(env, REWIND);
     }
+    
   }
 }
