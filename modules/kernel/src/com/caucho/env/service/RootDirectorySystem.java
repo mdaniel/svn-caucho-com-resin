@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
 import com.caucho.java.WorkDir;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
@@ -62,6 +63,8 @@ public class RootDirectorySystem extends AbstractResinSubSystem
   private FileOutputStream _foutLock;
 
   private FileLock _fileLock;
+  
+  private boolean _isIgnoreLock;
 
   public RootDirectorySystem(Path rootDirectory, Path dataDirectory) 
     throws IOException
@@ -141,6 +144,11 @@ public class RootDirectorySystem extends AbstractResinSubSystem
     return _dataDirectory;
   }
   
+  public void setIgnoreLock(boolean isIgnoreLock)
+  {
+    _isIgnoreLock = isIgnoreLock;
+  }
+  
   @Override
   public int getStartPriority()
   {
@@ -152,6 +160,10 @@ public class RootDirectorySystem extends AbstractResinSubSystem
   {
     super.start();
     
+    if (_isIgnoreLock) {
+      return;
+    }
+    
     Path lockPath = getDataDirectory().lookup("resin.lock");
     
     try {
@@ -159,7 +171,20 @@ public class RootDirectorySystem extends AbstractResinSubSystem
       
       _foutLock = new FileOutputStream(file);
       try {
-        _fileLock = _foutLock.getChannel().lock();
+        long timeout = 60000;
+        long expires = CurrentTime.getCurrentTimeActual() + timeout;
+        
+        while (CurrentTime.getCurrentTimeActual() < expires && _fileLock == null) {
+          _fileLock = _foutLock.getChannel().tryLock();
+          
+          try { Thread.sleep(10); } catch (Exception e) {}
+        }
+        
+        if (_fileLock == null) {
+          throw new ConfigException(L.l("Timeout trying to obtain unique lock to {0}. Check for other active Resin processes.",
+                                        lockPath.getNativePath()));
+          
+        }
       } catch (IOException e) {
         throw new ConfigException(L.l("Can't obtain unique lock to {0}. Check for other active Resin processes.",
                                       lockPath.getNativePath()));

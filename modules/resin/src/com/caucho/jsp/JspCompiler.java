@@ -370,6 +370,7 @@ public class JspCompiler implements EnvironmentBean {
 
       _resin = new ResinEmbed();
       _resin.setRootDirectory(rootDirectory.getURL());
+      _resin.setIgnoreLock(true);
 
       WebAppEmbed webAppEmbed = new WebAppEmbed();
       webAppEmbed.setRootDirectory(rootDirectory.getURL());
