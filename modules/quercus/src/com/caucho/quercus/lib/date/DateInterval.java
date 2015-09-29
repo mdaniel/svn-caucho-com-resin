@@ -73,7 +73,14 @@ public class DateInterval
 
   public String format(String format)
   {
-    throw new UnimplementedException("DateInterval::format()");
+    String result = format.replaceAll("%d", String.format("%d", d));
+    result = result.replaceAll("%D", String.format("%02d", d));
+    result = result.replaceAll("%m", String.format("%d", m));
+    result = result.replaceAll("%M", String.format("%02d", m));
+    if (days.isLong()) {
+      result = result.replaceAll("%a", String.format("%d", days.toJavaLong()));
+    }
+    return result;
   }
 
   static class IntervalParser {
