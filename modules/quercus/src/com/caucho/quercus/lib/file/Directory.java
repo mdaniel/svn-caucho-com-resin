@@ -38,7 +38,7 @@ import com.caucho.vfs.Path;
 import java.io.IOException;
 
 @ResourceType("stream")
-public class Directory
+public class Directory implements Stream
 {
   public Directory handle;
   public String path;

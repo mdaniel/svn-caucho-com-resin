@@ -36,7 +36,7 @@ import com.caucho.quercus.env.Value;
  * Interface for a Quercus stream
  */
 @ResourceType("stream")
-public interface BinaryStream {
+public interface BinaryStream extends Stream {
   public static final int SEEK_SET = 0;
   public static final int SEEK_CUR = 1;
   public static final int SEEK_END = 2;

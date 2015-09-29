@@ -340,7 +340,7 @@ public class StreamModule extends AbstractQuercusModule {
    * XXX: TODO
    */
   public static Value stream_get_meta_data(Env env,
-                                           BinaryStream stream)
+                                           Stream stream)
   {
     if (stream == null) {
       return BooleanValue.FALSE;
@@ -360,6 +360,16 @@ public class StreamModule extends AbstractQuercusModule {
       isSeekable = true;
 
       mode = env.createString("w+b");
+    }
+    
+    if (stream instanceof Directory) {
+      isSeekable = true;
+      mode = env.createString("r");
+      array.put(env.createString("wrapper_type"), env.createString("plainfile"));
+      array.put(env.createString("stream_type"), env.createString("dir"));
+      array.put(env.createString("unread_bytes"), LongValue.create(0));
+      array.put(env.createString("blocked"), BooleanValue.create(true));
+      array.put(env.createString("eof"), BooleanValue.create(false));
     }
 
     array.put(env.createString("timed_out"), BooleanValue.create(isTimeout));
