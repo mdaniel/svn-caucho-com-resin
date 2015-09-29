@@ -57,7 +57,7 @@ public class FilesystemIterator extends DirectoryIterator
                             StringValue fileName,
                             @Optional("-1") int flags)
   {
-    super(env, fileName);
+    super(env, fileName, (flags & SKIP_DOTS) == SKIP_DOTS);
 
     if (flags < 0) {
       flags = KEY_AS_PATHNAME | CURRENT_AS_FILEINFO | SKIP_DOTS;
@@ -68,7 +68,7 @@ public class FilesystemIterator extends DirectoryIterator
 
   protected FilesystemIterator(Path parent, Path path, String fileName, int flags)
   {
-    super(parent, path, fileName);
+    super(parent, path, fileName, (flags & SKIP_DOTS) == SKIP_DOTS);
 
     _flags = flags;
   }

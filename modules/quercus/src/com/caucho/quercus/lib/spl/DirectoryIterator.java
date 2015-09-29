@@ -52,10 +52,15 @@ public class DirectoryIterator
 
   public DirectoryIterator(Env env, StringValue fileName)
   {
+    this(env, fileName, false);
+  }
+  
+  public DirectoryIterator(Env env, StringValue fileName, boolean filterDots)
+  {
     super(env, fileName);
 
     try {
-      _list = getPathList(_path);
+      _list = getPathList(_path, filterDots);
     }
     catch (IOException e) {
       // XXX: throw the right exception class
@@ -63,12 +68,12 @@ public class DirectoryIterator
     }
   }
 
-  protected DirectoryIterator(Path parent, Path path, String fileName)
+  protected DirectoryIterator(Path parent, Path path, String fileName, boolean filterDots)
   {
     super(parent, path, fileName);
 
     try {
-      _list = getPathList(path);
+      _list = getPathList(path, filterDots);
     }
     catch (IOException e) {
       // XXX: throw new the right exception class
@@ -76,11 +81,14 @@ public class DirectoryIterator
     }
   }
 
-  private static String[] getPathList(Path path)
+  private static String[] getPathList(Path path, boolean filterDots)
     throws IOException
   {
     String[] list = path.list();
 
+    if (filterDots) {
+      return list;
+    }
     String[] newList = new String[list.length + 2];
 
     newList[0] = ".";
@@ -89,6 +97,11 @@ public class DirectoryIterator
     System.arraycopy(list, 0, newList, 2, list.length);
 
     return newList;
+  }
+
+  private static String[] getPathList(Path path) throws IOException 
+  {
+    return getPathList(path, false);
   }
 
   @Override

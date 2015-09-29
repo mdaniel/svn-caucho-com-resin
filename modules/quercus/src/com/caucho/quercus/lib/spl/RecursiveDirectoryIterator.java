@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.spl;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
 public class RecursiveDirectoryIterator
@@ -83,6 +84,30 @@ public class RecursiveDirectoryIterator
                                           getFlags());
   }
 
+  /**
+   * (PHP 5 &gt;= 5.1.0)<br/>
+   * Get sub path
+   * @link http://php.net/manual/en/recursivedirectoryiterator.getsubpath.php
+   * @return string The sub path (sub directory).
+   */
+  public String getSubPath (Env env) 
+  {
+    return "";
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.1.0)<br/>
+   * Get sub path and name
+   * @link http://php.net/manual/en/recursivedirectoryiterator.getsubpathname.php
+   * @return string The sub path (sub directory) and filename.
+   */
+  public String getSubPathname (Env env)
+  {
+    Value current = current(env);
+    Value result = current.callMethod(env, env.createString("getFilename"));
+    return result == null ? null : result.toString();
+  }
+  
   /*
   @Override
   protected SplFileInfo createCurrent(Env env, Path path)

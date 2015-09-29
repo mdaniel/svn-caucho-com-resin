@@ -53,7 +53,7 @@ public class SplFileInfo
 
     _parent = _path.getParent();
 
-    _fileName = fileName.toString();
+    _fileName = _path.getTail();
   }
 
   protected SplFileInfo(Path parent, Path path, String fileName)
