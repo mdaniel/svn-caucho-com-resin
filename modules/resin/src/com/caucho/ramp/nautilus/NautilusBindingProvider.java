@@ -43,6 +43,9 @@ public class NautilusBindingProvider implements ServiceProvider
   {
     NautilusActor nautilus = new NautilusActor("queue:");
     
-    manager.newService().service(nautilus).build().bind("queue:");
+    manager.newService()
+           .service(nautilus)
+           .address("queue:")
+           .build();
   }
 }
