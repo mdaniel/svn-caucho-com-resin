@@ -29,15 +29,8 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.env.Env;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.SocketStream;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.security.KeyManagementException;
@@ -48,6 +41,12 @@ import java.util.logging.Logger;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.env.Env;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents read/write stream
@@ -75,7 +74,7 @@ public class TcpInputOutput
 
     if (isSecure) {
       try {
-        _socket = createSSLSocket(host, port);
+        _socket = createSSLSocket(new Socket(host, port), "TLSv1");
       } catch (KeyManagementException e) {
         throw new QuercusException(e);
       } catch (NoSuchAlgorithmException e) {
@@ -97,12 +96,9 @@ public class TcpInputOutput
     _domain = domain;
   }
 
-  private Socket createSSLSocket(String host, int port)
-    throws IOException, NoSuchAlgorithmException, KeyManagementException
-  {
-    Socket s = new Socket(host, port);
-
-    SSLContext context = SSLContext.getInstance("TLSv1");
+  private Socket createSSLSocket(Socket s, String sslContextProtocol)
+      throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    SSLContext context = SSLContext.getInstance(sslContextProtocol);
 
     javax.net.ssl.TrustManager tm =
       new javax.net.ssl.X509TrustManager() {
@@ -124,9 +120,23 @@ public class TcpInputOutput
     context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
     SSLSocketFactory factory = context.getSocketFactory();
 
-    return factory.createSocket(s, host, port, true);
+    return factory.createSocket(s, s.getInetAddress().getHostName(), s.getPort(), true);
   }
 
+  boolean enableSSL(String sslContextProtocol) {
+    try {
+      init(createSSLSocket(_socket, sslContextProtocol));
+      return true;
+    } catch (Exception e) {
+      log.log(Level.FINE, "Could not activate SSL", e);
+      return false;
+    }
+  }
+  
+  public void disableSSL() {
+    init(_socket);
+  }
+  
   public void bind(SocketAddress address)
     throws IOException
   {
@@ -159,7 +169,12 @@ public class TcpInputOutput
 
   public void init()
   {
-    SocketStream sock = new SocketStream(_socket);
+    init(_socket);
+  }
+
+  private void init(Socket socket)
+  {
+    SocketStream sock = new SocketStream(socket);
     sock.setThrowReadInterrupts(true);
 
     WriteStream os = new WriteStream(sock);
@@ -167,7 +182,7 @@ public class TcpInputOutput
 
     init(is, os);
   }
-
+  
   public void setTimeout(long timeout)
   {
     try {

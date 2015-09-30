@@ -29,6 +29,13 @@
 
 package com.caucho.quercus.lib.file;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
@@ -50,12 +57,6 @@ import com.caucho.vfs.FilePath;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Handling the PHP Stream API
@@ -87,6 +88,11 @@ public class StreamModule extends AbstractQuercusModule {
   public static final int STREAM_URL_STAT_QUIET = 2;
 
   public static final int PHP_STREAM_META_TOUCH = 1;
+
+  public static final int STREAM_CRYPTO_METHOD_SSLv2_CLIENT = 0;
+  public static final int STREAM_CRYPTO_METHOD_SSLv3_CLIENT = 1;
+  public static final int STREAM_CRYPTO_METHOD_SSLv23_CLIENT = 2;
+  public static final int STREAM_CRYPTO_METHOD_TLS_CLIENT = 3;
 
   private static final HashMap<StringValue,Value> _constMap
     = new HashMap<StringValue,Value>();
@@ -597,6 +603,52 @@ public class StreamModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * (PHP 5 &gt;= 5.1.0)<br/>
+   * Turns encryption on/off on an already connected socket
+   * @link http://php.net/manual/en/function.stream-socket-enable-crypto.php
+   * @param resource $stream <p>
+   * The stream resource.
+   * </p>
+   * @param bool $enable <p>
+   * Enable/disable cryptography on the stream.
+   * </p>
+   * @param int $crypto_type [optional] <p>
+   * Setup encryption on the stream.
+   * Valid methods are
+   * STREAM_CRYPTO_METHOD_SSLv2_CLIENT
+   * @param resource $session_stream [optional] <p>
+   * Seed the stream with settings from session_stream.
+   * </p>
+   * @return mixed true on success, false if negotiation has failed or
+   * 0 if there isn't enough data and you should try again
+   * (only for non-blocking sockets).
+   */
+  public static Value stream_socket_enable_crypto (@NotNull TcpInputOutput stream, boolean enable, @Optional("STREAM_CRYPTO_METHOD_TLS_CLIENT") int cryptoType, @Optional Value sessionStream) {
+    String sslContextProtocol;
+      switch(cryptoType)
+      {
+      case STREAM_CRYPTO_METHOD_SSLv2_CLIENT:
+      case STREAM_CRYPTO_METHOD_SSLv23_CLIENT:
+        sslContextProtocol = "SSLv2";
+        break;
+      case STREAM_CRYPTO_METHOD_SSLv3_CLIENT:
+        sslContextProtocol = "SSLv3";
+        break;
+      case STREAM_CRYPTO_METHOD_TLS_CLIENT:
+        sslContextProtocol = "TLSv1.2";
+        break;
+      default:
+        throw new QuercusRuntimeException("unknown crypto_type " + cryptoType);
+      }
+    if (enable) {
+      return BooleanValue.create(stream.enableSSL(sslContextProtocol));
+    } else {
+      stream.disableSSL();
+      return BooleanValue.TRUE;
+    }
+  }
+  
   public static Value stream_select(Env env,
                                     @ReadOnly Value read,
                                     @ReadOnly Value write,
@@ -711,6 +763,15 @@ public class StreamModule extends AbstractQuercusModule {
                 STREAM_SERVER_BIND);
     addConstant(_constMap, "STREAM_SERVER_LISTEN",
                 STREAM_SERVER_LISTEN);
+
+    addConstant(_constMap, "STREAM_CRYPTO_METHOD_SSLv2_CLIENT",
+        STREAM_CRYPTO_METHOD_SSLv2_CLIENT);
+    addConstant(_constMap, "STREAM_CRYPTO_METHOD_SSLv3_CLIENT",
+        STREAM_CRYPTO_METHOD_SSLv3_CLIENT);
+    addConstant(_constMap, "STREAM_CRYPTO_METHOD_SSLv23_CLIENT",
+        STREAM_CRYPTO_METHOD_SSLv23_CLIENT);
+    addConstant(_constMap, "STREAM_CRYPTO_METHOD_TLS_CLIENT",
+        STREAM_CRYPTO_METHOD_TLS_CLIENT);
   }
 }
 
