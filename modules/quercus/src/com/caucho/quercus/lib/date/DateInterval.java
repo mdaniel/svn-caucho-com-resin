@@ -77,6 +77,8 @@ public class DateInterval
     result = result.replaceAll("%D", String.format("%02d", d));
     result = result.replaceAll("%m", String.format("%d", m));
     result = result.replaceAll("%M", String.format("%02d", m));
+    result = result.replaceAll("%y", String.format("%d", y));
+    result = result.replaceAll("%Y", String.format("%02d", y));
     if (days.isLong()) {
       result = result.replaceAll("%a", String.format("%d", days.toJavaLong()));
     }
