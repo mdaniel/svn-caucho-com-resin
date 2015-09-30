@@ -66,6 +66,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLocale;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnexpectedValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.lib.file.BinaryOutput;
@@ -3451,32 +3452,35 @@ public class StringModule extends AbstractQuercusModule {
   public static Value str_split(StringValue string,
                                 @Optional("1") int chunk)
   {
-    ArrayValue array = new ArrayValueImpl();
+    enableByteBasedIndices(string);
+    try {
+      ArrayValue array = new ArrayValueImpl();
 
-    if (string.length() == 0) {
-      array.put(string);
+      if (string.length() == 0) {
+        array.put(string);
+        return array;
+      }
+
+      int strLen = string.length();
+
+      for (int i = 0; i < strLen; i += chunk) {
+        Value value;
+
+        if (i + chunk <= strLen) {
+          value = string.substring(i, i + chunk);
+        } else if (i != 0) {
+          value = string.substring(i);
+        } else {
+          value = string;
+        }
+
+        array.put(value);
+      }
+
       return array;
+    } finally {
+      disableByteBasedIndices(string);
     }
-
-    int strLen = string.length();
-
-    for (int i = 0; i < strLen; i += chunk) {
-      Value value;
-
-      if (i + chunk <= strLen) {
-        value = string.substring(i, i + chunk);
-      }
-      else if (i != 0) {
-        value = string.substring(i);
-      }
-      else {
-        value = string;
-      }
-
-      array.put(value);
-    }
-
-    return array;
   }
 
   public static Value str_word_count(StringValue string,
@@ -4006,14 +4010,31 @@ public class StringModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
   }
 
+  private static void enableByteBasedIndices(Value value)
+  {
+    if (value instanceof UnicodeBuilderValue) {
+        ((UnicodeBuilderValue)value).setUseByteBasedIndices(true);
+    }
+  }
+  
+  private static void disableByteBasedIndices(Value value)
+  {
+    if (value instanceof UnicodeBuilderValue) {
+      ((UnicodeBuilderValue)value).setUseByteBasedIndices(false);
+    }
+  }
+  
   /**
    * Returns the length of a string.
    *
    * @param value the argument value
    */
-  public static Value strlen(Value value)
+  public static Value strlen(Env env, Value value)
   {
-    return LongValue.create(value.length());
+    enableByteBasedIndices(value);
+    Value result = LongValue.create(value.length());
+    disableByteBasedIndices(value);
+    return result;
   }
 
   /**
@@ -4776,31 +4797,36 @@ public class StringModule extends AbstractQuercusModule {
   {
     int len = lenV.toInt();
 
-    int strLen = string.length();
-    if (start < 0)
-      start = strLen + start;
+    enableByteBasedIndices(string);
+    try {
+      int strLen = string.length();
+      if (start < 0)
+        start = strLen + start;
 
-    if (start < 0 || start >= strLen)
-      return BooleanValue.FALSE;
-
-    if (lenV.isDefault())
-      return string.substring(start);
-    else if (len == 0)
-      return string.EMPTY;
-    else {
-      int end;
-
-      if (len < 0)
-        end = strLen + len;
-      else
-        end = (strLen < len) ? strLen : start + len;
-
-      if (end <= start)
+      if (start < 0 || start >= strLen)
         return BooleanValue.FALSE;
-      else if (strLen <= end)
+
+      if (lenV.isDefault())
         return string.substring(start);
-      else
-        return string.substring(start, end);
+      else if (len == 0)
+        return string.EMPTY;
+      else {
+        int end;
+
+        if (len < 0)
+          end = strLen + len;
+        else
+          end = (strLen < len) ? strLen : start + len;
+
+        if (end <= start)
+          return BooleanValue.FALSE;
+        else if (strLen <= end)
+          return string.substring(start);
+        else
+          return string.substring(start, end);
+      }
+    } finally {
+      disableByteBasedIndices(string);
     }
   }
 
@@ -4811,7 +4837,7 @@ public class StringModule extends AbstractQuercusModule {
                                      @Optional Value lenV,
                                      @Optional boolean isCaseInsensitive)
   {
-    int strLen = mainStr.length();
+    int strLen = strlen(env, mainStr).toInt();
     int len = lenV.toInt();
 
     if (! lenV.isDefault() && len == 0)

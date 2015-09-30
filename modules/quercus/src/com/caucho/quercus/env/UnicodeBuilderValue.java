@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.vfs.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Reader;
 import java.util.Locale;
+
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP string value.
@@ -50,6 +52,10 @@ public class UnicodeBuilderValue
 
   protected boolean _isCopy;
   private int _hashCode;
+
+  private byte[] _cachedByteArray;
+  
+  private boolean _useByteBasedIndices = false;
 
   public UnicodeBuilderValue()
   {
@@ -366,6 +372,7 @@ public class UnicodeBuilderValue
     s.getChars(0, len, _buffer, _length);
 
     _length += len;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -383,6 +390,7 @@ public class UnicodeBuilderValue
     s.getChars(start, start + len, _buffer, _length);
 
     _length += len;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -396,6 +404,7 @@ public class UnicodeBuilderValue
       ensureCapacity(_length + 1);
 
     _buffer[_length++] = v;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -411,6 +420,7 @@ public class UnicodeBuilderValue
     System.arraycopy(buf, offset, _buffer, _length, length);
 
     _length += length;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -441,6 +451,7 @@ public class UnicodeBuilderValue
     }
 
     _length = bufferLength;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -458,6 +469,7 @@ public class UnicodeBuilderValue
     System.arraycopy(sb._buffer, head, _buffer, _length, len);
 
     _length += len;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -511,6 +523,7 @@ public class UnicodeBuilderValue
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+    _cachedByteArray = null;
 
     return this;
   }
@@ -524,6 +537,7 @@ public class UnicodeBuilderValue
       ensureCapacity(_length + 1);
 
     _buffer[_length++] = (char) v;
+    _cachedByteArray = null;
 
     return this;
   }
@@ -599,7 +613,18 @@ public class UnicodeBuilderValue
    */
   public final Value get(Value key)
   {
-    return charValueAt(key.toLong());
+    byte[] bytes = getStringBytes();
+    int index = (int) key.toLong();
+    if (index < 0 || bytes.length <= index)
+      return UnsetUnicodeValue.UNSET;
+    else {
+      byte ch = bytes[index];
+
+      if (ch >= 0 && ch < CHAR_STRINGS.length)
+        return CHAR_STRINGS[ch];
+      else
+        return new UnicodeBuilderValue((char) (((char)ch) % 255));
+    }
   }
 
   /**
@@ -701,6 +726,9 @@ public class UnicodeBuilderValue
   @Override
   public Value charValueAt(long index)
   {
+    if (_useByteBasedIndices) {
+      return get(index);
+    }
     int len = _length;
 
     if (index < 0 || len <= index)
@@ -721,6 +749,7 @@ public class UnicodeBuilderValue
   @Override
   public Value setCharValueAt(long indexL, Value value)
   {
+    _cachedByteArray = null;
     int len = _length;
 
     if (indexL < 0)
@@ -773,7 +802,17 @@ public class UnicodeBuilderValue
    */
   public final int length()
   {
+    if (_useByteBasedIndices) {
+      return getStringBytes().length;
+    }
     return _length;
+  }
+  
+  public byte[] getStringBytes() {
+    if (_cachedByteArray == null) {
+      _cachedByteArray = toString().getBytes();
+    }
+    return _cachedByteArray;
   }
 
   /**
@@ -781,6 +820,9 @@ public class UnicodeBuilderValue
    */
   public char charAt(int index)
   {
+    if (_useByteBasedIndices) {
+      return charValueAt(index).toChar();
+    }
     return _buffer[index];
   }
 
@@ -790,6 +832,14 @@ public class UnicodeBuilderValue
   @Override
   public CharSequence subSequence(int start, int end)
   {
+    if (_useByteBasedIndices) {
+      if (end - start == 1) {
+        // we only return one character -> make sure that there is no overflow
+        return new UnicodeBuilderValue((char)(((char)getStringBytes()[start]) % 255));
+      } else {
+        return new UnicodeBuilderValue(new String(getStringBytes(), start, end - start));
+      }
+    }
     int len = end - start;
 
     if (len == 0)
@@ -1163,6 +1213,10 @@ public class UnicodeBuilderValue
     } catch (NumberFormatException e) {
       return 0;
     }
+  }
+  
+  public void setUseByteBasedIndices(boolean useByteBasedIndices) {
+    _useByteBasedIndices = useByteBasedIndices;
   }
 
   public void ensureAppendCapacity(int newCapacity)
