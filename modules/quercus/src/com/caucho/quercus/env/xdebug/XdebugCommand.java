@@ -1,15 +1,10 @@
 package com.caucho.quercus.env.xdebug;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
@@ -58,7 +53,7 @@ public abstract class XdebugCommand
 	
 	protected abstract XdebugResponse getInternalResponse(String commandName, Map<String, String> parameters, String transactionId, XdebugConnection conn);
 
-  protected String createPropertyElement(Object value, XdebugConnection conn,
+  protected String createPropertyElement(Value value, XdebugConnection conn,
       String name, String fullname, String facet, boolean includeChildren) {
     try {
         String type = null;
@@ -68,33 +63,24 @@ public abstract class XdebugCommand
         if (value instanceof Var) {
           value = ((Var) value).toValue();
         }
-        if (value instanceof Boolean || value instanceof BooleanValue) {
-          if (value instanceof BooleanValue) {
-            value = ((BooleanValue) value).toBoolean();
-          }
-          type = "bool";
-          serializedValue = ((Boolean) value) ? "1" : "0";
-        } else if (value instanceof String || value instanceof StringValue) {
-          type = "string";
-          stringValue = value.toString();
-        } else if (value instanceof Integer || value instanceof Long
-            || value instanceof BigDecimal || value instanceof LongValue) {
-          type = "int";
-          stringValue = value.toString();
-        } else if (value instanceof Double || value instanceof Float
-            || value instanceof DoubleValue) {
-          type = "float";
-          stringValue = value.toString();
-        } else if (value == null || value instanceof NullValue) {
-          type = "null";
-          serializedValue = "";
-        } else if (value instanceof UnsetValue) {
+        if (value instanceof UnsetValue) {
           type = "undefined";
           serializedValue = "";
-        } else if (!(value instanceof Value)) {
-          stringValue = "unknown type: " + value.getClass();
-          System.err.println(stringValue);
+        } else if (value == null || value.isNull()) {
+          type = "null";
+          serializedValue = "";
+        } else if (value.isBoolean()) {
+          type = "bool";
+          serializedValue = value.toBoolean() ? "1" : "0";
+        } else if (value.isString()) {
           type = "string";
+          stringValue = value.toString();
+        } else if (value.isLongConvertible()) {
+          type = "int";
+          stringValue = value.toString();
+        } else if (value.isDoubleConvertible()) {
+          type = "float";
+          stringValue = value.toString();
         }
         if (stringValue != null) {
           size = "" + stringValue.length();
@@ -108,13 +94,12 @@ public abstract class XdebugCommand
           return propertyPrefix + "type=\"" + type + "\""
             + (size == null ? "" : " size=\"" + size + "\" encoding=\"base64\"")
             + ">" + "<![CDATA[" + serializedValue + "]]></property>";
-        } else if (value instanceof Value) {
-          Value quercusValue = (Value) value;
-          QuercusClass quercusClass = quercusValue.getQuercusClass();
-          if (quercusClass != null && quercusClass.getName().equals("stdClass")) {
+        } else {
+          QuercusClass quercusClass = value.getQuercusClass();
+          if (quercusClass == conn.getEnv().getQuercus().getStdClass()) {
             StringBuilder childrenSb = new StringBuilder();
             int childrenCount = 0;
-            Iterator<Entry<Value, Value>> iter = quercusValue.getBaseIterator(conn.getEnv());
+            Iterator<Entry<Value, Value>> iter = value.getBaseIterator(conn.getEnv());
             while (iter.hasNext()) {
               Entry<Value, Value> entry = iter.next();
               childrenCount++;
@@ -137,18 +122,18 @@ public abstract class XdebugCommand
             if (includeChildren) {
               for (Entry<StringValue, ClassField> entry : fields.entrySet()) {
                 String propName = entry.getKey().toString();
-                sb.append(createPropertyElement(quercusValue.getField(conn.getEnv(), entry.getKey()), conn, propName, fullname == null ? null : fullname + "->" + propName, getFacet(entry.getValue()), false));
+                sb.append(createPropertyElement(getField(conn, value, entry.getKey()), conn, propName, fullname == null ? null : fullname + "->" + propName, getFacet(entry.getValue()), false));
               }
             }
             sb.append("</property>");
             return sb.toString();
-          } else if (quercusValue.isArray()) {
+          } else if (value.isArray()) {
             StringBuilder sb = new StringBuilder();
-            int count = quercusValue.getCount(conn.getEnv());
+            int count = value.getCount(conn.getEnv());
             sb.append(propertyPrefix + "type=\"array\" children=\"" + (count < 1 ? "0" : "1") 
                 + "\" numchildren=\"" + count + "\"" + (name == null ? " page=\"0\" pagesize=\"100\"" : "") + ">");
             if (includeChildren) {
-              Iterator<Entry<Value, Value>> iter = quercusValue.getBaseIterator(conn.getEnv());
+              Iterator<Entry<Value, Value>> iter = value.getBaseIterator(conn.getEnv());
               while (iter.hasNext()) {
                 Entry<Value, Value> entry = iter.next();
                 String indexName = entry.getKey().toString();
@@ -160,8 +145,6 @@ public abstract class XdebugCommand
           } else {
             throw new IllegalStateException("Could not handle value " + value);
           }
-        } else {
-          throw new IllegalStateException("could not handle " + value);
         }
     } catch (Exception e) {
       e.printStackTrace(System.err);
@@ -184,5 +167,19 @@ public abstract class XdebugCommand
   
   private String safe(String propValue) {
     return propValue.replaceAll("<", "&lt;");
+  }
+  
+  protected Value getField(XdebugConnection conn, Value value, StringValue fieldName) {
+    Value result = value.getField(conn.getEnv(), fieldName);
+    if (result.isNull()) {
+      result = value.getThisField(conn.getEnv(), fieldName);
+    }
+    if (result.isNull()) {
+      ClassField field = value.getQuercusClass().getClassField(fieldName);
+      if (field != null) {
+        result = value.getField(conn.getEnv(), field.getCanonicalName());
+      }
+    }
+    return result;
   }
 }

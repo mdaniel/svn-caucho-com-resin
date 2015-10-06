@@ -39,7 +39,7 @@ public class ContextGetCommand extends XdebugCommand
       Value thisValue = stackDepth == 0 ? env.getThis() : env.peekCallThis(stackDepth);
       if (thisValue != null) {
         if (thisValue instanceof QuercusClass) {
-          response.append(createPropertyElement(((QuercusClass)thisValue).getClassName(), conn, "::", "::", null, true));
+          response.append(createPropertyElement(conn.getEnv().createString(((QuercusClass)thisValue).getClassName()), conn, "::", "::", null, true));
         } else {
           response.append(createPropertyElement(thisValue, conn, "$this", "$this", null, true));
         }

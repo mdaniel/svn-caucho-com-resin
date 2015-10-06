@@ -1305,7 +1305,7 @@ public class Env
     if (_endTime < now)
       throw new QuercusRuntimeException(L.l("script timed out"));
       */
-    if (_isTimeout)
+    if (_isTimeout && !_xdebugConnection.isConnected())
       throw new QuercusRuntimeException(L.l("script timed out"));
   }
 
@@ -3562,8 +3562,11 @@ public class Env
     ArrayList<Location> trace = new ArrayList<Location>();
 
     for (int i = _callStackTop; i >= 0; i--) {
-      Location location = _callStack[i].getLocation();
-      trace.add(location);
+      Expr call = _callStack[i];
+      if (call != null) {
+        Location location = call.getLocation();
+        trace.add(location);
+      }
     }
 
     return trace;
