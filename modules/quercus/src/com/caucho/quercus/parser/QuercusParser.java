@@ -2649,7 +2649,16 @@ public class QuercusParser {
 
     _peekToken = token;
 
-    expect(';');
+    token = parseToken();
+    
+    if (token == ',') {
+      _namespaceUseMap.put(tail, name);
+      _namespaceUseMap.put(tail.toLowerCase(), name);
+      parseUse();
+    } else if (token != ';') {
+      throw error(L.l("expected , or ; at {1}",
+          tokenName(token)));
+    }
   }
 
   /**
