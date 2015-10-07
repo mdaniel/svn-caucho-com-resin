@@ -1052,12 +1052,6 @@ public class MbstringModule
                                     StringValue str,
                                     @Optional("") String encoding)
   {
-    if ("8bit".equals(encoding)) {
-      // According to http://php.net/manual/de/function.mb-strlen.php#77040
-      // "8bit" encoding is used to just count bytes (higher performance in PHP).
-      // Since 8bit is no encoding known to java we just use another single byte encoding.
-      encoding = "iso-8859-1";
-    }
     encoding = getEncoding(env, encoding);
 
     str = str.convertToUnicode(env, encoding);
@@ -1371,6 +1365,12 @@ public class MbstringModule
   {
     if (encoding == null || encoding.length() == 0)
       return getEncoding(env);
+    else if ("8bit".equals(encoding)) {
+      // According to http://php.net/manual/de/function.mb-strlen.php#77040
+      // "8bit" encoding is used to just count bytes (higher performance in PHP).
+      // Since 8bit is no encoding known to Java we just use another single byte encoding.
+      return "iso-8859-1";
+    }
     else
       return encoding;
   }
