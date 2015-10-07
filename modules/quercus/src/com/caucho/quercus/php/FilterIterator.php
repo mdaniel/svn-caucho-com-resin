@@ -26,4 +26,9 @@ abstract class FilterIterator extends IteratorIterator
     parent::rewind();
     $this->fetch();
   }
+  
+  function isDir()
+  {
+  	return $this->current()->isDir();
+  }
 }

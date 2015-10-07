@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
@@ -39,16 +41,19 @@ public class RecursiveDirectoryIterator
   extends FilesystemIterator
   implements RecursiveIterator
 {
+  private QuercusClass _quercusClass;
   public RecursiveDirectoryIterator(Env env,
                                     StringValue fileName,
                                     @Optional("-1") int flags)
   {
     super(env, fileName, flags);
+    _quercusClass = env.getThis().getQuercusClass();
   }
 
-  protected RecursiveDirectoryIterator(Path parent, Path path, String fileName, int flags)
+  protected RecursiveDirectoryIterator(QuercusClass quercusClass, Path parent, Path path, String fileName, int flags)
   {
     super(parent, path, fileName, flags);
+    _quercusClass = quercusClass;
   }
 
   //
@@ -74,16 +79,14 @@ public class RecursiveDirectoryIterator
   }
 
   @Override
-  public RecursiveDirectoryIterator getChildren(Env env)
+  public Value getChildren(Env env)
   {
     SplFileInfo info = getCurrent(env);
 
-    return new RecursiveDirectoryIterator(info.getRawParent(),
-                                          info.getRawPath(),
-                                          info.getFilename(env),
-                                          getFlags());
+    return _quercusClass.callNew(env,
+        env.createString(info.getRawPath().toString()), LongValue.create(getFlags()));
   }
-
+  
   /**
    * (PHP 5 &gt;= 5.1.0)<br/>
    * Get sub path

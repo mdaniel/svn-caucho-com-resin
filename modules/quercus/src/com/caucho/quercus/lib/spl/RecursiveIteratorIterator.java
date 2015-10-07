@@ -103,6 +103,13 @@ public class RecursiveIteratorIterator
   {
     RecursiveIterator currentIter = getInnerIterator();
 
+    if (currentIter.hasChildren(env)) {
+      Value recursiveIter = currentIter.getChildren(env);
+      _iterStack.add(RecursiveIteratorProxy.create(env, recursiveIter));
+      currentIter.next(env);
+      return;
+    }
+
     currentIter.next(env);
 
     if (! currentIter.valid(env) && _iterStack.size() > 1) {
@@ -111,12 +118,6 @@ public class RecursiveIteratorIterator
       next(env);
 
       return;
-    }
-
-    if (currentIter.hasChildren(env)) {
-      RecursiveIterator recursiveIter = currentIter.getChildren(env);
-
-      _iterStack.add(recursiveIter);
     }
   }
 
@@ -224,11 +225,9 @@ public class RecursiveIteratorIterator
     }
 
     @Override
-    public RecursiveIterator getChildren(Env env)
+    public Value getChildren(Env env)
     {
-      Value result = _obj.callMethod(env, GET_CHILDREN);
-
-      return create(env, result);
+      return _obj.callMethod(env, GET_CHILDREN);
     }
 
     @Override

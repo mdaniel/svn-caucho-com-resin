@@ -289,7 +289,7 @@ public class SplFileInfo
 
   public String __toString(Env env)
   {
-    return _path.getNativePath();
+    return _path.getUserPath();
   }
 
   public String toString()
