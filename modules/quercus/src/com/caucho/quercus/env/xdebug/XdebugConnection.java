@@ -66,7 +66,11 @@ public class XdebugConnection
   private Integer _breakAtExpectedStackDepth;
   private Map<StringValue, EnvVar>[] _envStack;
 
-  private XdebugConnection() {
+  private XdebugConnection(Env env) {
+    _env = env;
+    if (!isXdebugSessionActivated()) {
+      return;
+    }
     commandsMap = new HashMap<String, XdebugCommand>();
     commandsMap.put("feature_set", new FeatureSetCommand());
     commandsMap.put("status", new StatusCommand());
@@ -110,6 +114,10 @@ public class XdebugConnection
             }
           } catch (IOException e) {
           } finally {
+            // make sure that thread is not sleeping anymore
+            synchronized (XdebugConnection.this) {
+              XdebugConnection.this.notifyAll();
+            }
             close();
           }
         };
@@ -121,31 +129,34 @@ public class XdebugConnection
     }
   }
 
-  public static XdebugConnection getInstance() {
+  public static XdebugConnection getInstance(Env env) {
     if (INSTANCE != null && INSTANCE.isConnected()) {
       return INSTANCE;
     }
-    INSTANCE = new XdebugConnection();
+    INSTANCE = new XdebugConnection(env);
     return INSTANCE;
   }
 
   private boolean isXdebugSessionActivated() {
     boolean isActive = false;
-    Object sessionStart = eval("isset($_GET['XDEBUG_SESSION_START']) ? $_GET['XDEBUG_SESSION_START'] : null");
-    if (sessionStart != null) {
-      eval("$_COOKIE['XDEBUG_SESSION'] = '" + sessionStart + "'");
+    if (System.getenv("XDEBUG_CONFIG") != null) {
       isActive = true;
     } else {
-      Object xdebugSession = eval("isset($_COOKIE['XDEBUG_SESSION']) ? $_COOKIE['XDEBUG_SESSION'] : null");
-      if (xdebugSession != null) {
+      Value sessionStart = eval("isset($_GET['XDEBUG_SESSION_START']) ? $_GET['XDEBUG_SESSION_START'] : null");
+      if (sessionStart != null && !sessionStart.isNull()) {
+        eval("$_COOKIE['XDEBUG_SESSION'] = '" + sessionStart + "'");
         isActive = true;
+      } else {
+        Value xdebugSession = eval("isset($_COOKIE['XDEBUG_SESSION']) ? $_COOKIE['XDEBUG_SESSION'] : null");
+        if (xdebugSession != null && !xdebugSession.isNull() && xdebugSession.length() > 0) {
+          isActive = true;
+        }
       }
     }
     return isActive;
   }
 
-  public void connect(Env env, Location location) {
-    _env = env;
+  public void connect(Location location) {
     if (!isConnected() || !isXdebugSessionActivated()) {
       return;
     }

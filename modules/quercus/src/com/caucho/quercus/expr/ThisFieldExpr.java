@@ -91,7 +91,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
       if (classDef == null) {
         // try to resolve classDef from environment context
         Value thisValue = env.getThis();
-        if (thisValue != null) {
+        if (thisValue != null && !thisValue.isNull()) {
           classDef = thisValue.getQuercusClass().getClassDef();
         } else {
           throw new RuntimeException("Could not determine class definition of '$this'.");

@@ -3275,8 +3275,8 @@ public class Env
     _callArgStack[_callStackTop] = args;
     
     if (_xdebugConnection == null) {
-      _xdebugConnection = XdebugConnection.getInstance();
-      _xdebugConnection.connect(this, call.getLocation());
+      _xdebugConnection = XdebugConnection.getInstance(this);
+      _xdebugConnection.connect(call.getLocation());
     }
     notifyNewDebugLocation(call.getLocation());
 
