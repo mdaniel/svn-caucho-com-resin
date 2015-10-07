@@ -94,7 +94,7 @@ public class StringModule extends AbstractQuercusModule {
   public static final int CRYPT_STD_DES = 0;
   public static final int CRYPT_EXT_DES = 0;
   public static final int CRYPT_MD5 = 0;
-  public static final int CRYPT_BLOWFISH = 0;
+  public static final int CRYPT_BLOWFISH = 1;
 
   public static final int CHAR_MAX = 1;
 

@@ -5,12 +5,34 @@
 
 package com.caucho.quercus.lib.string;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 /**
  * Crypt.
  */
 public class Crypt {
   public static String crypt(String keyString, String salt)
   {
+    if (salt.matches("^\\$2.\\$.*")) {
+      // use blowfish
+      return cryptBlowfish(keyString, salt);
+    } else {
+      return cryptCustom(keyString, salt);
+    }
+  }
+  
+  private static String cryptBlowfish(String keyString, String salt) {
+    // interpret $2y$ in the same way as $2a$
+    String prefix = "$2a$";
+    if (!salt.startsWith(prefix)) {
+      prefix = salt.substring(0, 4);
+      salt = "$2a$" + salt.substring(4);
+    }
+    String result = BCrypt.hashpw(keyString, salt);
+    return prefix + result.substring(4);
+  }
+
+  private static String cryptCustom(String keyString, String salt) {
     int len = keyString.length();
 
     if (8 < len)
