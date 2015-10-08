@@ -96,7 +96,7 @@ public abstract class XdebugCommand
             + ">" + "<![CDATA[" + serializedValue + "]]></property>";
         } else {
           QuercusClass quercusClass = value.getQuercusClass();
-          if (quercusClass == conn.getEnv().getQuercus().getStdClass()) {
+          if (quercusClass.equals(conn.getEnv().getQuercus().getStdClass())) {
             StringBuilder childrenSb = new StringBuilder();
             int childrenCount = 0;
             Iterator<Entry<Value, Value>> iter = value.getBaseIterator(conn.getEnv());

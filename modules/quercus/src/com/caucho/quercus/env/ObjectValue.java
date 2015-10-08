@@ -29,20 +29,19 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.expr.LiteralNullExpr;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.lib.ArrayModule;
-import com.caucho.quercus.program.Arg;
-import com.caucho.quercus.program.ClassField;
-import com.caucho.util.CurrentTime;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.lib.ArrayModule;
+import com.caucho.quercus.program.Arg;
+import com.caucho.quercus.program.ClassField;
+import com.caucho.util.CurrentTime;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a Quercus object value.
@@ -894,7 +893,7 @@ abstract public class ObjectValue extends Callback {
 
       int length = 0;
 
-      boolean isStdClass = getQuercusClass() == env.getQuercus().getStdClass();
+      boolean isStdClass = env.getQuercus().getStdClass().equals(getQuercusClass());
       Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
 
       while (iter.hasNext()) {
