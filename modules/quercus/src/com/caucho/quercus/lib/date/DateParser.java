@@ -65,6 +65,7 @@ public class DateParser
   private int _peekToken;
 
   private int _value;
+  private int _previousValue;
   private int _digits;
   private int _unit;
   private int _weekday;
@@ -147,8 +148,12 @@ public class DateParser
         _value = NULL_VALUE;
       }
       else if (token == MONTH) {
-        parseMonthDate(_value);
-        _hasDate = true;
+        if (!_hasDate) {
+          parseMonthDate(_value);
+          _hasDate = true;
+        } else {
+          parseDayMonthDate(_previousValue);
+        }
       }
       else if (token == '@') {
         token = nextToken();
@@ -209,6 +214,7 @@ public class DateParser
       _value = NULL_VALUE;
     }
     else {
+      _previousValue = value1;
       _peekToken = token;
       return;
     }
