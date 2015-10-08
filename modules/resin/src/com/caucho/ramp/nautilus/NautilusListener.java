@@ -34,12 +34,12 @@ import io.baratine.core.ServiceRef;
 import java.io.StringReader;
 
 import com.caucho.amp.ServiceManagerAmp;
+import com.caucho.amp.ServiceRefAmp;
 import com.caucho.amp.inbox.OutboxAmpDirect;
 import com.caucho.amp.jamp.InJamp;
 import com.caucho.amp.remote.ChannelServer;
 import com.caucho.amp.remote.GatewayReply;
 import com.caucho.amp.spi.OutboxAmp;
-import com.caucho.amp.spi.ServiceRefAmp;
 import com.caucho.nautilus.ReceiverController;
 import com.caucho.nautilus.ReceiverListener;
 
