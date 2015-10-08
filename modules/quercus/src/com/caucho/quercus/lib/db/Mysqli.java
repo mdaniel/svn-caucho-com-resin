@@ -321,12 +321,19 @@ public class Mysqli extends JdbcConnectionResource
     {
       char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
 
-      if (encoding != null) {
+      if (encoding != null) 
+      {
         urlBuilder.append(sep);
         urlBuilder.append("characterEncoding=");
         urlBuilder.append(encoding);
       }
-      else if (!env.isUnicodeSemantics()){
+      else if (env.isUnicodeSemantics()) 
+      {
+        urlBuilder.append(sep);
+        urlBuilder.append("characterEncoding=utf8");
+      }
+      else if (!env.isUnicodeSemantics())
+      {
         // this sends a "SET character_set_results = latin1" query, thereby
         // telling the server to do all the result set encoding on the server-side
         // (e.g. the raw wire bytes will be in the character_set_client encoding)
