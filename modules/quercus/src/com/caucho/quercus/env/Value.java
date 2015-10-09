@@ -1942,6 +1942,8 @@ abstract public class Value implements java.io.Serializable
    */
   public Value neg()
   {
+    if (getValueType().isDoubleCmp()) 
+      return DoubleValue.create(- toDouble());
     return LongValue.create(- toLong());
   }
 
@@ -1950,6 +1952,8 @@ abstract public class Value implements java.io.Serializable
    */
   public Value pos()
   {
+    if (getValueType().isDoubleCmp()) 
+      return DoubleValue.create(toDouble());
     return LongValue.create(toLong());
   }
 
