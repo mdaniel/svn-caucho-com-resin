@@ -141,7 +141,7 @@ public class HttpModule extends AbstractQuercusModule {
         headers.add(header);
       }
       else {
-        res.addHeader(key, value);
+        res.setHeader(key, value);
         getHeaders(env).add(header);
       }
 
