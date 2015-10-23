@@ -43,6 +43,10 @@ import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValue.AbstractGet;
+import com.caucho.quercus.env.ArrayValue.GetKey;
+import com.caucho.quercus.env.ArrayValue.KeyComparator;
+import com.caucho.quercus.env.ArrayValue.ValueComparator;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Callable;
@@ -54,10 +58,6 @@ import com.caucho.quercus.env.NumberValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.ArrayValue.AbstractGet;
-import com.caucho.quercus.env.ArrayValue.GetKey;
-import com.caucho.quercus.env.ArrayValue.KeyComparator;
-import com.caucho.quercus.env.ArrayValue.ValueComparator;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -2432,12 +2432,22 @@ public class ArrayModule
    * @return an array without duplicates
    */
   public static Value array_unique(Env env,
-                                   ArrayValue array)
+                                   ArrayValue array, @Optional long sortFlag)
   {
     if (array == null)
       return BooleanValue.FALSE;
 
-    array.sort(CNO_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
+    switch ((int) sortFlag) {
+    case SORT_LOCALE_STRING:
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
+      array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
+                                   Collator.getInstance(locale)),
+                 NO_KEY_RESET, NOT_STRICT);
+      break;
+    default:
+      array.sort(CNO_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
+      break;
+    }
 
     Map.Entry<Value, Value> lastEntry = null;
 
