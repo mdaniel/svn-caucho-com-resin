@@ -199,8 +199,6 @@ public class DateTime implements DateTimeInterface, Cloneable
     		}
     	}
     	try {
-    		
-    		System.out.println(new SimpleDateFormat(javaFormat.toString(), Locale.ENGLISH).format(new java.util.Date()));
   	    timestamp = new SimpleDateFormat(javaFormat.toString(), Locale.ENGLISH).parse(timeStr).getTime();
       } catch (ParseException e) {
       	throw new QuercusRuntimeException("Could not parse date", e);
