@@ -47,7 +47,7 @@ public class RecursiveDirectoryIterator
                                     @Optional("-1") int flags)
   {
     super(env, fileName, flags);
-    _quercusClass = env.getThis().getQuercusClass();
+    _quercusClass = env.getCallingClass();
   }
 
   protected RecursiveDirectoryIterator(QuercusClass quercusClass, Path parent, Path path, String fileName, int flags)
