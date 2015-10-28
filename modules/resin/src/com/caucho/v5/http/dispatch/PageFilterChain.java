@@ -45,10 +45,10 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.jsp.Page;
-import com.caucho.jsp.QServlet;
 import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.protocol.RequestHttpBase;
+import com.caucho.v5.jsp.Page;
+import com.caucho.v5.jsp.QServlet;
 
 /**
  * Represents the final servlet in a filter chain.

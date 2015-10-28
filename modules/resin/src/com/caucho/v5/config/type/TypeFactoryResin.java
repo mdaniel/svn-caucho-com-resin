@@ -31,10 +31,10 @@ package com.caucho.v5.config.type;
 
 import java.util.HashMap;
 
-import com.caucho.config.resin.ConfigCustomBeanResin;
 import com.caucho.v5.config.cf.QName;
 import com.caucho.v5.config.custom.ConfigCustomBean;
 import com.caucho.v5.config.custom.TypeCustomBean;
+import com.caucho.v5.config.resin.ConfigCustomBeanResin;
 import com.caucho.v5.config.type.InlineBeanType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.loader.EnvironmentLocal;

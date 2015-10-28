@@ -28,13 +28,13 @@
 
 package com.caucho.vfs.memory;
 
-import com.caucho.v5.vfs.Vfs;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * URL memory handler.

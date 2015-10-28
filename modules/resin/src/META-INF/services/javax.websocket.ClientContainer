@@ -1,1 +1,1 @@
-com.caucho.websocket.client.ClientContainerImpl
+com.caucho.v5.websocket.client.ClientContainerImpl

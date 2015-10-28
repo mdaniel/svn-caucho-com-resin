@@ -1,6 +1,6 @@
 Class-Path: activation.jar javamail-141.jar
 Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: @VERSION@
-Main-Class: com.caucho.cli.resin.ResinCommandLine
-Premain-Class: com.caucho.cli.resin.ResinCommandLineAgent
-Agent-Class: com.caucho.cli.resin.ResinCommandLineAgent
+Main-Class: com.caucho.v5.cli.resin.ResinCommandLine
+Premain-Class: com.caucho.v5.cli.resin.ResinCommandLineAgent
+Agent-Class: com.caucho.v5.cli.resin.ResinCommandLineAgent

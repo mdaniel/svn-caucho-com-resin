@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.dispatch;
 
-import com.caucho.config.cfg.BeanConfig;
+import com.caucho.v5.config.cfg.BeanConfig;
 
 /**
  * Configuration for a servlet web-service protocol.

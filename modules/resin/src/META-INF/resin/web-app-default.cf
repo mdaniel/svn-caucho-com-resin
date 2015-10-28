@@ -6,9 +6,9 @@ class-loader {
   library-loader "WEB-INF/lib";
 }
 
-servlet resin-file com.caucho.servlets.FileServlet;
+servlet resin-file com.caucho.v5.servlets.FileServlet;
 
-servlet resin-jsp com.caucho.jsp.JspServlet {
+servlet resin-jsp com.caucho.v5.jsp.JspServlet {
   init {
     load-tld-on-init false;
     page-cache-max 1024;
@@ -16,7 +16,7 @@ servlet resin-jsp com.caucho.jsp.JspServlet {
   load-on-startup;
 }
 
-servlet resin-jspx com.caucho.jsp.JspServlet {
+servlet resin-jspx com.caucho.v5.jsp.JspServlet {
   init {
     load-tld-on-init false;
     page-cache-max 1024;
@@ -32,7 +32,7 @@ servlet-mapping url-pattern="*.jspx" servlet-name="resin-jspx" default="true";
 
 servlet-mapping url-pattern="/" servlet-name="resin-file" default="true";
 
-servlet "j_security_check" "com.caucho.http.security.FormLoginServlet";
+servlet "j_security_check" "com.caucho.v5.http.security.FormLoginServlet";
 
 # Configures the special index files to check for directory URLs
 welcome-file-list {

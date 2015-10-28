@@ -31,11 +31,11 @@ package com.caucho.v5.config.inject;
 
 import javax.annotation.sql.DataSourceDefinition;
 
-import com.caucho.inject.Jndi;
-import com.caucho.inject.MBean;
 import com.caucho.v5.config.inject.ScanClassInject;
 import com.caucho.v5.config.inject.ScanListenerInject;
 import com.caucho.v5.config.inject.ScanRootInject;
+import com.caucho.v5.inject.Jndi;
+import com.caucho.v5.inject.MBean;
 
 /**
  * The web beans container for a given environment.

@@ -29,12 +29,12 @@
 
 package com.caucho.v5.config.type;
 
-import com.caucho.naming.*;
 import com.caucho.v5.config.*;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.PathType;
 import com.caucho.v5.el.ELParser;
 import com.caucho.v5.el.Expr;
+import com.caucho.v5.naming.*;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.Vfs;

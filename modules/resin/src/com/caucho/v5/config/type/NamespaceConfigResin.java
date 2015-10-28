@@ -29,23 +29,18 @@
 
 package com.caucho.v5.config.type;
 
-import com.caucho.config.core.ResinChoose;
-import com.caucho.config.core.ResinIf;
-import com.caucho.config.core.ResinProperties;
-import com.caucho.config.core.ResinSet;
-import com.caucho.config.core.ResinSystemConfig;
-import com.caucho.config.types.DataSourceRef;
-import com.caucho.config.types.EnvEntry;
-import com.caucho.env.jpa.ConfigJpaPersistenceUnit;
-import com.caucho.env.jpa.ConfigJpaPersistenceUnitDefault;
-import com.caucho.naming.LinkProxy;
-import com.caucho.resources.ScheduledTaskConfig;
-import com.caucho.sql.DBPool;
-import com.caucho.sql.DatabaseConfig;
+import com.caucho.v5.config.cfg.BeanConfig;
 import com.caucho.v5.config.core.ImportConfigXml;
 import com.caucho.v5.config.core.MessageConfig;
-import com.caucho.v5.config.type.NamespaceConfig;
-import com.caucho.v5.config.type.ValueType;
+import com.caucho.v5.config.core.ResinChoose;
+import com.caucho.v5.config.core.ResinIf;
+import com.caucho.v5.config.core.ResinProperties;
+import com.caucho.v5.config.core.ResinSet;
+import com.caucho.v5.config.core.ResinSystemConfig;
+import com.caucho.v5.config.types.DataSourceRef;
+import com.caucho.v5.config.types.EnvEntry;
+import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnit;
+import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnitDefault;
 import com.caucho.v5.java.JavacConfig;
 import com.caucho.v5.loader.ClassLoaderConfig;
 import com.caucho.v5.loader.DependencyCheckInterval;
@@ -53,7 +48,12 @@ import com.caucho.v5.loader.SystemProperty;
 import com.caucho.v5.log.impl.LogConfig;
 import com.caucho.v5.log.impl.LogHandlerConfig;
 import com.caucho.v5.log.impl.LoggerConfig;
+import com.caucho.v5.log.impl.StderrLog;
 import com.caucho.v5.make.DependencyConfig;
+import com.caucho.v5.naming.LinkProxy;
+import com.caucho.v5.resources.ScheduledTaskConfig;
+import com.caucho.v5.sql.DBPool;
+import com.caucho.v5.sql.DatabaseConfig;
 
 // configuration types
 class NamespaceConfigResin extends NamespaceConfig
@@ -61,6 +61,7 @@ class NamespaceConfigResin extends NamespaceConfig
   static final NamespaceConfig NS_RESIN;
   static final NamespaceConfig NS_RESIN_CORE;
   static final NamespaceConfig URN_RESIN;
+  static final NamespaceConfig URN_RESIN_V5;
   static final NamespaceConfig NS_JAVAEE;
   static final NamespaceConfig NS_J2EE;
   
@@ -92,15 +93,15 @@ class NamespaceConfigResin extends NamespaceConfig
   {
     addBean("authenticator", "com.caucho.security.Authenticator");
     
-    addBean("bean", "com.caucho.config.cfg.BeanConfig");
+    addBean("bean", BeanConfig.class);
     
-    addBean("case-insensitive", "com.caucho.vfs.CaseInsensitive");
+    addBean("case-insensitive", "com.caucho.v5.vfs.CaseInsensitive");
     addBean("character-encoding", "com.caucho.i18n.CharacterEncoding");
     addBean("choose", ResinChoose.class);
     addBean("class-loader", ClassLoaderConfig.class);
     addBean("classpath", "com.caucho.loader.ClasspathConfig");
     addBean("class-update-interval", "com.caucho.loader.DependencyCheckInterval");
-    addBean("component", "com.caucho.config.cfg.WbComponentConfig");
+    addBean("component", "com.caucho.v5.config.cfg.WbComponentConfig");
     addBean("connection-factory", "com.caucho.jca.cfg.ConnectionFactoryConfig");
     addBean("connector", "com.caucho.jca.ra.ConnectorConfig");
     
@@ -111,9 +112,9 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("dependency-check-interval", DependencyCheckInterval.class);
     
     /*
-    addBean("ejb-local-ref", "com.caucho.config.types.EjbLocalRef");
+    addBean("ejb-local-ref", "com.caucho.v5.config.types.EjbLocalRef");
     addBean("ejb-message-bean", "com.caucho.ejb.cfg.MessageBeanConfig");
-    addBean("ejb-ref", "com.caucho.config.types.EjbRef");
+    addBean("ejb-ref", "com.caucho.v5.config.types.EjbRef");
     addBean("ejb-server", "com.caucho.ejb.EJBServer");
     addBean("ejb-stateless-bean", "com.caucho.ejb.cfg.StatelessBeanConfig");
     addBean("ejb-stateful-bean", "com.caucho.ejb.cfg.StatefulBeanConfig");
@@ -123,7 +124,7 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("if", ResinIf.class);
     addBean("import", ImportConfigXml.class);
     // addBean("include", ResinInclude.class);
-    // addBean("interceptor", "com.caucho.config.cfg.InterceptorConfig");
+    // addBean("interceptor", "com.caucho.v5.config.cfg.InterceptorConfig");
     
     addBean("java", JavacConfig.class);
     addBean("javac", JavacConfig.class);
@@ -135,46 +136,46 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("jpa-persistence-unit", ConfigJpaPersistenceUnit.class);
     addBean("jpa-persistence-unit-default", ConfigJpaPersistenceUnitDefault.class);
     
-    addBean("list", "com.caucho.config.type.ListType");
+    addBean("list", ListType.class);
     addBean("log", LogConfig.class);
     addBean("log-handler", LogHandlerConfig.class);
     addBean("logger", LoggerConfig.class);
     
     addBean("mail", "com.caucho.jca.cfg.JavaMailConfig");
-    addBean("map", "com.caucho.config.type.MapType");
+    addBean("map", "com.caucho.v5.config.type.MapType");
     addBean("mbean", "com.caucho.jmx.MBeanConfig");
     // addBean("message", ResinLog.class);
-    addBean("message-destination-ref", "com.caucho.config.types.MessageDestinationRef");
+    addBean("message-destination-ref", "com.caucho.v5.config.types.MessageDestinationRef");
     
-    addBean("null", "com.caucho.config.type.NullType");
+    addBean("null", NullType.class);
     
     // addBean("persistent-store", PersistentStoreConfig.class);
-    addBean("persistence-unit-ref", "com.caucho.config.types.PersistenceUnitRef");
+    addBean("persistence-unit-ref", "com.caucho.v5.config.types.PersistenceUnitRef");
     
     //addBean("rar-deploy", "com.caucho.jca.ra.ResourceDeploy");
-    addBean("reference", "com.caucho.config.types.ReferenceConfig");
+    addBean("reference", "com.caucho.v5.config.types.ReferenceConfig");
     addBean("remote-client", "com.caucho.remote.client.RemoteClient");
     //addBean("resource", "com.caucho.jca.cfg.Resource");
     //addBean("resource-adapter", "com.caucho.jca.cfg.ResourceAdapterBeanConfig");
     //addBean("resource-default", "com.caucho.jca.ra.ResourceDefault");
     //addBean("resource-deploy", "com.caucho.jca.ra.ResourceDeploy");
-    //addBean("resource-env-ref", "com.caucho.config.types.ResourceEnvRef");
+    //addBean("resource-env-ref", "com.caucho.v5.config.types.ResourceEnvRef");
     //addBean("resource-manager", "com.caucho.jca.ra.ResourceManagerConfig");
-    //addBean("resource-ref", "com.caucho.config.types.ResourceRef");
+    //addBean("resource-ref", "com.caucho.v5.config.types.ResourceRef");
     addBean("role-map", "com.caucho.security.RoleMap");
     
     addBean("scheduled-task", ScheduledTaskConfig.class);
-    addBean("security-role-ref", "com.caucho.config.types.SecurityRoleRef");
+    addBean("security-role-ref", "com.caucho.v5.config.types.SecurityRoleRef");
     addBean("servlet-classloader-hack", "com.caucho.loader.ServletClassloaderHack");
-    addBean("set", "com.caucho.config.core.ResinSet");
-    addBean("stderr-log", "com.caucho.log.impl.StderrLog");
+    addBean("set", "com.caucho.v5.config.core.ResinSet");
+    addBean("stderr-log", StderrLog.class);
     addBean("stdout-log", "com.caucho.log.impl.StdoutLog");
     addBean("system-property", SystemProperty.class);
     
     addBean("temp-dir", "com.caucho.java.TempDir");
     addBean("temporary-directory", "com.caucho.java.TempDir");
     
-    addBean("value", "com.caucho.config.type.ValueType");
+    addBean("value", "com.caucho.v5.config.type.ValueType");
     
     addBean("web-service-client", "com.caucho.remote.client.RemoteClient");
     addBean("work-dir", "com.caucho.java.WorkDir");
@@ -200,5 +201,9 @@ class NamespaceConfigResin extends NamespaceConfig
     URN_RESIN = new NamespaceConfigResin("urn:java:com.caucho.resin", false);
     URN_RESIN.initCore();
     URN_RESIN.initExtensions();
+    
+    URN_RESIN_V5 = new NamespaceConfigResin("urn:java:com.caucho.v5.resin", false);
+    URN_RESIN_V5.initCore();
+    URN_RESIN_V5.initExtensions();
   }
 }

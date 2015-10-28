@@ -33,9 +33,9 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 
-import com.caucho.resin.HttpEmbed;
-import com.caucho.resin.ResinEmbed;
-import com.caucho.resin.WebAppEmbed;
+import com.caucho.v5.resin.HttpEmbed;
+import com.caucho.v5.resin.ResinEmbed;
+import com.caucho.v5.resin.WebAppEmbed;
 
 /**
  * Resin runner runs a JUnit 4 test backed by a Resin context.

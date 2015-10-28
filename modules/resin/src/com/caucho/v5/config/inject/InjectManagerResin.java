@@ -40,27 +40,27 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.InitialContext;
 
-import com.caucho.config.event.EventManagerResin;
-import com.caucho.config.j2ee.DataSourceDefinitionHandler;
-import com.caucho.config.j2ee.ExtensionCustomBeanResin;
-import com.caucho.config.j2ee.PersistenceContextHandler;
-import com.caucho.config.j2ee.PersistenceUnitHandler;
-import com.caucho.config.j2ee.ResourceHandler;
-import com.caucho.config.program.ResourceProgramManager;
-import com.caucho.server.cdi.CdiExtensionResin;
-import com.caucho.server.cdi.ConversationContext;
-import com.caucho.server.cdi.SessionScopeImpl;
-import com.caucho.server.cdi.TransactionScope;
 import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ModulePrivate;
 import com.caucho.v5.config.custom.CookieCustomBean;
 import com.caucho.v5.config.custom.ExtensionCustomBean;
 import com.caucho.v5.config.event.EventManager;
+import com.caucho.v5.config.event.EventManagerResin;
 import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.inject.ObjectFactoryNamingCdi;
+import com.caucho.v5.config.j2ee.DataSourceDefinitionHandler;
+import com.caucho.v5.config.j2ee.ExtensionCustomBeanResin;
+import com.caucho.v5.config.j2ee.PersistenceContextHandler;
+import com.caucho.v5.config.j2ee.PersistenceUnitHandler;
+import com.caucho.v5.config.j2ee.ResourceHandler;
 import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ResourceProgramManager;
 import com.caucho.v5.config.scope.RequestContext;
 import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.server.cdi.CdiExtensionResin;
+import com.caucho.v5.server.cdi.ConversationContext;
+import com.caucho.v5.server.cdi.SessionScopeImpl;
+import com.caucho.v5.server.cdi.TransactionScope;
 
 /**
  * The CDI container for a given environment.

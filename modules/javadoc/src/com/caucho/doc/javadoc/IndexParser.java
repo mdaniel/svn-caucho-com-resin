@@ -37,10 +37,10 @@
 package com.caucho.doc.javadoc;
 
 import com.caucho.log.Log;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.vfs.IOExceptionWrapper;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.IOExceptionWrapper;
+import com.caucho.v5.vfs.ReadStream;
 
 import java.io.IOException;
 

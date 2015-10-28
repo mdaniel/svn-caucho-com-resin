@@ -32,12 +32,12 @@ package com.caucho.v5.http.webapp;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.http.rewrite.RewriteDispatch;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.rewrite.DispatchRule;
+import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.http.webapp.WebAppController;

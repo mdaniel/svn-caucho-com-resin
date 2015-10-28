@@ -29,7 +29,7 @@
 
 package com.caucho.v5.server.watchdog;
 
-import com.caucho.cli.resin.ProgramInfoResin;
+import com.caucho.v5.cli.resin.ProgramInfoResin;
 import com.caucho.v5.server.watchdog.ArgsWatchdog;
 import com.caucho.v5.server.watchdog.WatchdogMain;
 

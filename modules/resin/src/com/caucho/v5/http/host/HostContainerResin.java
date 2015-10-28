@@ -34,12 +34,12 @@ import java.util.HashMap;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.host.HostContainer;
 import com.caucho.v5.http.host.HostController;
+import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.webapp.AccessLogFilterChain;
 import com.caucho.v5.http.webapp.FilterChainWebApp;
 import com.caucho.v5.http.webapp.WebApp;

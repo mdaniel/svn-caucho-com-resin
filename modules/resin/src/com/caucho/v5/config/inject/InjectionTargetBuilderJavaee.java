@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.config.program.ResourceProgramManager;
 import com.caucho.v5.config.inject.InjectionTargetBuilder;
 import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ResourceProgramManager;
 import com.caucho.v5.inject.Module;
 
 /**

@@ -37,14 +37,14 @@ import java.util.logging.Logger;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
-import com.caucho.jsp.cfg.JspConfig;
-import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.jsp.cfg.JspTaglib;
-import com.caucho.jsp.el.JspApplicationContextImpl;
 import com.caucho.v5.config.el.CandiElResolver;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppDispatch;
+import com.caucho.v5.jsp.cfg.JspConfig;
+import com.caucho.v5.jsp.cfg.JspPropertyGroup;
+import com.caucho.v5.jsp.cfg.JspTaglib;
+import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 
 /**
  * Resin's webApp implementation.
@@ -182,7 +182,7 @@ public class WebAppResin extends WebApp
   private void initCdiJsfContext()
   {
     try {
-      String handler = "com.caucho.server.cdi.ConversationJsfViewHandler";
+      String handler = "com.caucho.v5.server.cdi.ConversationJsfViewHandler";
       
       Class<?> cl = Class.forName(handler, false, getClassLoader());
       

@@ -47,7 +47,7 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import com.caucho.env.dbpool.LocalTransaction;
+import com.caucho.v5.env.dbpool.LocalTransaction;
 import com.caucho.v5.transaction.xalog.AbstractXALogStream;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;

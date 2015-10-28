@@ -3,7 +3,7 @@ namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-include "classpath:com/caucho/config/cfg/j2ee.rnc"
+include "classpath:com/caucho/v5/config/cfg/j2ee.rnc"
 
 start = j2ee_application
 

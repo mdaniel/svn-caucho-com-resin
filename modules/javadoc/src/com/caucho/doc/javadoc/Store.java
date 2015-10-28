@@ -36,19 +36,19 @@
 
 package com.caucho.doc.javadoc;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.PathMapping;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Crc64;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.Crc64;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 

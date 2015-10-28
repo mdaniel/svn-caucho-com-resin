@@ -39,31 +39,31 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
-import com.caucho.config.j2ee.PersistenceContextRefConfig;
-import com.caucho.config.types.EjbLocalRef;
-import com.caucho.config.types.EjbRef;
-import com.caucho.config.types.ResourceRef;
-import com.caucho.env.jpa.PersistenceManager;
-import com.caucho.http.rewrite.RewriteDispatch;
-import com.caucho.jsp.JspServlet;
-import com.caucho.jsp.cfg.JspConfig;
-import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.jsp.cfg.JspTaglib;
-import com.caucho.jsp.el.JspApplicationContextImpl;
-import com.caucho.naming.JndiUtil;
-import com.caucho.security.RoleMapManager;
-import com.caucho.security.XmlRoleMap;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.j2ee.PersistenceContextRefConfig;
+import com.caucho.v5.config.types.EjbLocalRef;
+import com.caucho.v5.config.types.EjbRef;
+import com.caucho.v5.config.types.ResourceRef;
+import com.caucho.v5.env.jpa.PersistenceManager;
 import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.dispatch.ServletBuilderResin;
 import com.caucho.v5.http.dispatch.ServletManager;
 import com.caucho.v5.http.dispatch.ServletManagerResin;
 import com.caucho.v5.http.rewrite.DispatchRuleBase;
+import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.rewrite.RewriteFilter;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppController;
+import com.caucho.v5.jsp.JspServlet;
+import com.caucho.v5.jsp.cfg.JspConfig;
+import com.caucho.v5.jsp.cfg.JspPropertyGroup;
+import com.caucho.v5.jsp.cfg.JspTaglib;
+import com.caucho.v5.jsp.el.JspApplicationContextImpl;
+import com.caucho.v5.naming.JndiUtil;
+import com.caucho.v5.security.RoleMapManager;
+import com.caucho.v5.security.XmlRoleMap;
 
 
 /**

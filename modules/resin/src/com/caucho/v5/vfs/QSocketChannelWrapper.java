@@ -91,7 +91,7 @@ public class QSocketChannelWrapper extends QSocket {
   }
 
   /* (non-Javadoc)
-   * @see com.caucho.vfs.QSocket#acceptInitialRead(byte[], int, int)
+   * @see com.caucho.v5.vfs.QSocket#acceptInitialRead(byte[], int, int)
    */
   @Override
   public int acceptInitialRead(byte[] buffer, int offset, int length)

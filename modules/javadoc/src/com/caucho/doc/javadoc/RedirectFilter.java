@@ -37,7 +37,7 @@
 package com.caucho.doc.javadoc;
 
 import com.caucho.log.Log;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import java.io.IOException;
 
@@ -55,7 +55,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.caucho.util.CharBuffer;
+import com.caucho.v5.util.CharBuffer;
 
 /**
  * Redirect to the search servlet if the first component of the path

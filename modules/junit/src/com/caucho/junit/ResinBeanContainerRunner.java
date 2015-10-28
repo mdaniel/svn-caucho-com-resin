@@ -35,9 +35,9 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 
-import com.caucho.resin.BeanContainerRequest;
-import com.caucho.resin.ResinBeanContainer;
 import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.resin.BeanContainerRequest;
+import com.caucho.v5.resin.ResinBeanContainer;
 
 /**
  * Resin bean container runner runs a JUnit 4 test backed by a Resin context.

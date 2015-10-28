@@ -37,7 +37,7 @@
 package com.caucho.doc.javadoc;
 
 import com.caucho.log.Log;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import java.util.logging.Logger;
 

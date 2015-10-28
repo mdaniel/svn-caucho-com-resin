@@ -29,8 +29,8 @@
 
 package com.caucho.v5.transaction;
 
-import com.caucho.jmx.server.TransactionManagerMXBean;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
+import com.caucho.v5.jmx.server.TransactionManagerMXBean;
 
 /**
  * Implementation of the transaction manager.
