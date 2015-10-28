@@ -29,14 +29,15 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.PathPatternType;
-import com.caucho.config.types.Period;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.PathPatternType;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -31,7 +31,7 @@ package com.caucho.admin.action;
 import java.util.*;
 import java.util.logging.*;
 
-import com.caucho.util.*;
+import com.caucho.v5.util.*;
 
 public class SetLogLevelAction implements AdminAction
 {

@@ -28,9 +28,9 @@
 
 package com.caucho.filters;
 
-import com.caucho.config.types.Period;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -39,6 +39,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**

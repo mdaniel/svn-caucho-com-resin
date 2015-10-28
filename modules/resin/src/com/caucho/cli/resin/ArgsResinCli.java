@@ -29,12 +29,6 @@
 
 package com.caucho.cli.resin;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.cli.baratine.BenchHttpCommand;
-import com.caucho.cli.baratine.BenchJampCommand;
-import com.caucho.cli.baratine.HeapDumpCommandBaratine;
-import com.caucho.cli.baratine.ProfileCommandBaratine;
-import com.caucho.cli.baratine.SleepCommand;
 import com.caucho.cli.boot.DisableCommand;
 import com.caucho.cli.boot.EnableCommand;
 import com.caucho.cli.boot.JmxCallCommand;
@@ -58,19 +52,25 @@ import com.caucho.cli.boot.ThreadDumpCommand;
 import com.caucho.cli.boot.UndeployCommand;
 import com.caucho.cli.boot.WebAppDeployCommand;
 import com.caucho.cli.boot.WebAppUndeployCommand;
-import com.caucho.cli.server.BfsCatCommand;
-import com.caucho.cli.server.BfsGetCommand;
-import com.caucho.cli.server.BfsLsCommand;
-import com.caucho.cli.server.BfsPutCommand;
-import com.caucho.cli.server.BfsRmCommand;
-import com.caucho.cli.server.BootConfigParser;
-import com.caucho.cli.server.DeployCommandService;
-import com.caucho.cli.server.ProgramInfoDaemon;
-import com.caucho.cli.server.ShutdownCommand;
-import com.caucho.cli.server.StopCommand;
-import com.caucho.cli.server.StoreSaveCommand;
-import com.caucho.cli.shell.EnvCli;
-import com.caucho.cli.spi.CommandManager;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.cli.baratine.BenchHttpCommand;
+import com.caucho.v5.cli.baratine.BenchJampCommand;
+import com.caucho.v5.cli.baratine.HeapDumpCommandBaratine;
+import com.caucho.v5.cli.baratine.ProfileCommandBaratine;
+import com.caucho.v5.cli.baratine.SleepCommand;
+import com.caucho.v5.cli.server.BfsCatCommand;
+import com.caucho.v5.cli.server.BfsGetCommand;
+import com.caucho.v5.cli.server.BfsLsCommand;
+import com.caucho.v5.cli.server.BfsPutCommand;
+import com.caucho.v5.cli.server.BfsRmCommand;
+import com.caucho.v5.cli.server.BootConfigParser;
+import com.caucho.v5.cli.server.DeployCommandService;
+import com.caucho.v5.cli.server.ProgramInfoDaemon;
+import com.caucho.v5.cli.server.ShutdownCommand;
+import com.caucho.v5.cli.server.StopCommand;
+import com.caucho.v5.cli.server.StoreSaveCommand;
+import com.caucho.v5.cli.shell.EnvCli;
+import com.caucho.v5.cli.spi.CommandManager;
 
 
 public class ArgsResinCli extends ArgsCli

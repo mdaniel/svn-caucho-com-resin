@@ -53,8 +53,8 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.util.Version;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.util.Version;
 
 @SuppressWarnings("serial")
 public class ResinGUI extends JFrame implements WindowListener, ActionListener {

@@ -34,15 +34,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.config.types.Period;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.admin.ManagerClientApi;
 import com.caucho.server.admin.PdfReportQueryReply;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.StreamSource;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.util.IoUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.StreamSource;
 
 public class PdfReportCommand extends ManagementCommandBase
 {

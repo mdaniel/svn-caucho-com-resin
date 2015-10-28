@@ -39,14 +39,16 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.DefaultLiteral;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.el.Expr;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.inject.BeanBuilder;
+import com.caucho.v5.config.inject.DefaultLiteral;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.types.RawString;
+import com.caucho.v5.config.types.Validator;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.L10N;
 
 /**
  * Configuration for the env-entry pattern.

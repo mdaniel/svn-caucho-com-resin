@@ -30,9 +30,9 @@ package com.caucho.security;
 
 import java.security.Permission;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InstantiationConfig;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.InstantiationConfig;
+import com.caucho.v5.util.L10N;
 
 /**
  * Permission configuration.

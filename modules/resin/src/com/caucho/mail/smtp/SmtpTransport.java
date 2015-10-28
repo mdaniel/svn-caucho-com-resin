@@ -29,11 +29,11 @@
 
 package com.caucho.mail.smtp;
 
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.SocketStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.SocketStream;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -43,6 +43,7 @@ import javax.mail.Transport;
 import javax.mail.URLName;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;

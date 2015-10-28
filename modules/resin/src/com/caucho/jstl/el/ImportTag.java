@@ -28,16 +28,16 @@
 
 package com.caucho.jstl.el;
 
-import com.caucho.el.Expr;
-import com.caucho.http.protocol.ResponseCaucho;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.vfs.FlushBuffer;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.FlushBuffer;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -49,6 +49,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;

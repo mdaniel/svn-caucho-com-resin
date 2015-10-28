@@ -32,10 +32,10 @@ package com.caucho.server.resin;
 import java.net.URL;
 
 import com.caucho.cli.resin.ProgramInfoResin;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.server.container.ArgsServerBase;
-import com.caucho.server.container.ServerBase;
 import com.caucho.server.container.ServerBuilderResin;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.server.container.ArgsServerBase;
+import com.caucho.v5.server.container.ServerBase;
 
 /**
  * The parsed resin command-line arguments

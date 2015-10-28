@@ -31,12 +31,12 @@ package com.caucho.nautilus.impl;
 
 import java.util.Objects;
 
-import com.caucho.amp.AmpSystem;
-import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.env.shutdown.ShutdownMode;
-import com.caucho.env.system.SubSystemBase;
-import com.caucho.env.system.SystemManager;
-import com.caucho.kraken.KrakenSystem;
+import com.caucho.v5.amp.AmpSystem;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.env.shutdown.ShutdownMode;
+import com.caucho.v5.env.system.SubSystemBase;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.kraken.KrakenSystem;
 
 /**
  * The local cache repository.

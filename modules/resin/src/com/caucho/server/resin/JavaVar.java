@@ -31,8 +31,8 @@ package com.caucho.server.resin;
 
 import java.util.Properties;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Java variables in Resin configuration ${java}.

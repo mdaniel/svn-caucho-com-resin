@@ -35,14 +35,14 @@ import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.config.el.CandiExpr;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ReferenceFactory;
-import com.caucho.el.Expr;
-import com.caucho.el.MethodExpressionImpl;
-import com.caucho.inject.Module;
 import com.caucho.jsp.el.JspApplicationContextImpl;
 import com.caucho.jsp.el.JspELParser;
+import com.caucho.v5.config.el.CandiExpr;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.ReferenceFactory;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.el.MethodExpressionImpl;
+import com.caucho.v5.inject.Module;
 
 @Module
 public class JspUtil

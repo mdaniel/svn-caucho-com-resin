@@ -28,7 +28,7 @@
  */
 package com.caucho.server.resin;
 
-import com.caucho.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebApp;
 
 import java.io.IOException;
 import java.net.URL;

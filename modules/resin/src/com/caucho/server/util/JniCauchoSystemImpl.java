@@ -6,13 +6,13 @@
 
 package com.caucho.server.util;
 
-import com.caucho.config.ConfigException;
-import com.caucho.jni.JniCauchoSystem;
-import com.caucho.util.Alarm;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.JniTroubleshoot;
-import com.caucho.util.JniUtil;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.jni.JniCauchoSystem;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.JniTroubleshoot;
+import com.caucho.v5.util.JniUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

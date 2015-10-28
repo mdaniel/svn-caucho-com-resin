@@ -33,10 +33,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.amp.AmpSystem;
-import com.caucho.amp.ServiceManagerAmp;
 import com.caucho.config.ResinService;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.v5.amp.AmpSystem;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.loader.EnvironmentLocal;
 
 @ResinService
 public class ManagerService

@@ -44,18 +44,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.protocol.ResponseAdapterToChar;
-import com.caucho.http.webapp.WebAppResin;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.Base64Util;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.QDate;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.http.protocol.ResponseAdapterToChar;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.make.DependencyContainer;
+import com.caucho.v5.util.Base64Util;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.QDate;
+import com.caucho.v5.vfs.Depend;
+import com.caucho.v5.vfs.Dependency;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 /**
  * Represents a compiled JSP page.

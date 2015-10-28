@@ -29,9 +29,10 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.Config;
+import com.caucho.v5.config.Config;
 
 import javax.annotation.PostConstruct;
+
 import java.util.ArrayList;
 
 abstract public class AbstractConditions

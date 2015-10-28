@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 
-import com.caucho.config.ConfigException;
+import com.caucho.v5.config.ConfigException;
 
 public class RedirectRule
   extends AbstractRuleWithConditions

@@ -31,7 +31,7 @@ package com.caucho.filters;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.caucho.http.protocol.OutResponseToByte;
+import com.caucho.v5.http.protocol.OutResponseToByte;
 
 public class FilterWrapperResponseStream extends OutResponseToByte {
   private CauchoResponseWrapper _response;

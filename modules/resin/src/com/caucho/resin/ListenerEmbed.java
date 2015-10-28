@@ -32,11 +32,11 @@ package com.caucho.resin;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.http.dispatch.ServletBuilder;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.http.dispatch.ServletBuilder;
+import com.caucho.v5.util.L10N;
 
 /**
  * Embeddable version of a servlet

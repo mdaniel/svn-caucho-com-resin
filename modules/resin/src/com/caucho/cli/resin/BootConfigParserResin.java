@@ -29,11 +29,11 @@
 
 package com.caucho.cli.resin;
 
-import com.caucho.cli.server.BootConfigParser;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
-import com.caucho.config.xml.ConfigXml;
 import com.caucho.server.cdi.ResinServerConfigLibrary;
+import com.caucho.v5.cli.server.BootConfigParser;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.xml.ConfigXml;
 
 public class BootConfigParserResin extends BootConfigParser
 {

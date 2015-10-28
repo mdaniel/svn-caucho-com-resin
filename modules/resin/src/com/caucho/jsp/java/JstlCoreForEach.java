@@ -29,12 +29,13 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.TagInstance;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.jsp.tagext.TagInfo;
+
 import java.io.IOException;
 import java.util.ArrayList;
 

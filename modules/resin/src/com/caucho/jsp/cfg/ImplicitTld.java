@@ -29,12 +29,12 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.DependencyBean;
-import com.caucho.config.ConfigException;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.DependencyBean;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import java.util.ArrayList;
 

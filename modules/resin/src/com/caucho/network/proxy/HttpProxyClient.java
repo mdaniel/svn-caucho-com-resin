@@ -40,14 +40,14 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.RequestCaucho;
 import com.caucho.http.proxy.LoadBalanceManager;
-import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.proxy.ProxyResult.ProxyStatus;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.network.balance.ClientSocket;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.vfs.WriteStream;
 
 public class HttpProxyClient 
 {

@@ -36,11 +36,12 @@ import java.util.Hashtable;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.NamingException;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ObjectFactoryNaming;
 import com.caucho.config.types.ResourceGroupConfig;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.util.L10N;
 
 /**
  * Resource program

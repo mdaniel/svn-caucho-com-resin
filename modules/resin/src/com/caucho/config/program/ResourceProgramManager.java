@@ -32,6 +32,8 @@ package com.caucho.config.program;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.caucho.v5.config.program.ConfigProgram;
+
 /**
  * Resource program manager
  */

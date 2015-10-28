@@ -32,7 +32,7 @@ package com.caucho.nautilus.encode;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.caucho.util.Utf8;
+import com.caucho.v5.util.Utf8;
 
 /**
  * string encoder to utf-8

@@ -29,7 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -38,6 +38,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.HttpJspPage;
+
 import java.io.IOException;
 import java.util.ArrayList;
 

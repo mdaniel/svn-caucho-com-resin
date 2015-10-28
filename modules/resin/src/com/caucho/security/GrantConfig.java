@@ -32,8 +32,8 @@ import java.security.Permission;
 import java.security.Policy;
 import java.util.ArrayList;
 
-import com.caucho.loader.Environment;
-import com.caucho.util.L10N;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.util.L10N;
 
 /**
  * Grants permissions.

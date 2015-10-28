@@ -29,8 +29,8 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
 import com.caucho.jmx.server.ConnectionPoolMXBean;
+import com.caucho.v5.jmx.Description;
 
 /**
  * MBean API for the database connection pool.

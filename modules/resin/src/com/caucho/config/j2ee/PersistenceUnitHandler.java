@@ -40,15 +40,15 @@ import javax.enterprise.inject.spi.DefinitionException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.AnyLiteral;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.BeanValueGenerator;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.FieldGeneratorProgram;
-import com.caucho.config.program.MethodGeneratorProgram;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.AnyLiteral;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.BeanValueGenerator;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.FieldGeneratorProgram;
+import com.caucho.v5.config.program.MethodGeneratorProgram;
+import com.caucho.v5.util.L10N;
 
 /**
  * Handles the @PersistenceUnit annotation for JavaEE

@@ -54,9 +54,9 @@ import com.caucho.env.dbpool.NotSupportedException;
 import com.caucho.env.dbpool.ResourceException;
 import com.caucho.sql.spy.SpyConnection;
 import com.caucho.sql.spy.SpyXAResource;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.LruCache;
 
 /**
  * Represents a single pooled connection.  For the most part, it just

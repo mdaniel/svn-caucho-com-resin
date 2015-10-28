@@ -31,10 +31,10 @@ package com.caucho.config.core;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.Config;
-import com.caucho.config.type.EnvBean;
-import com.caucho.config.type.FlowBean;
 import com.caucho.naming.JndiUtil;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.type.EnvBean;
+import com.caucho.v5.config.type.FlowBean;
 
 /**
  * Sets an EL value.

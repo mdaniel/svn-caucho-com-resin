@@ -34,7 +34,7 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import com.caucho.util.*;
+import com.caucho.v5.util.*;
 
 /**
  * Calculates a HTTP Content-MD5 footer following RFC 1864

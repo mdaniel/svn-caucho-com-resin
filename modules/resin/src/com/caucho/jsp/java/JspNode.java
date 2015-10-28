@@ -29,21 +29,21 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
-import com.caucho.el.Expr;
 import com.caucho.jsp.JspLineParseException;
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.JspParser;
 import com.caucho.jsp.Namespace;
 import com.caucho.jsp.ParseState;
 import com.caucho.jsp.TagInstance;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CompileException;
-import com.caucho.util.L10N;
-import com.caucho.util.LineCompileException;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.xml.XmlChar;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.CompileException;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.LineCompileException;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.xml.XmlChar;
 import com.caucho.xpath.NamespaceContext;
 import com.caucho.xpath.XPath;
 
@@ -51,6 +51,7 @@ import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
+
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.IOException;
@@ -1379,7 +1380,7 @@ public abstract class JspNode {
         throw error(L.l("deferred expression '{0}' is not allowed here",
                         value));
       }
-      else if (com.caucho.el.Expr.class.equals(type)) {
+      else if (com.caucho.v5.el.Expr.class.equals(type)) {
         int exprIndex;
 
         if (isEmpty)
@@ -1496,7 +1497,7 @@ public abstract class JspNode {
   protected String generateELValue(Class<?> type, String value)
     throws Exception
   {
-    if (type.equals(com.caucho.el.Expr.class)) {
+    if (type.equals(com.caucho.v5.el.Expr.class)) {
       int exprIndex;
 
       exprIndex = _gen.addExpr(value);

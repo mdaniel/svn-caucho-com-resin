@@ -29,13 +29,13 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.admin.ManagerClientApi;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.util.L10N;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.util.L10N;
 
 public class EnableCommand extends ManagementCommandBase
 {

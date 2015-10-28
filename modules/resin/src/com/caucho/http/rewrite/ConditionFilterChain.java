@@ -40,7 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.ResponseServlet;
+import com.caucho.v5.http.protocol.ResponseServlet;
 
 class ConditionFilterChain
   implements FilterChain

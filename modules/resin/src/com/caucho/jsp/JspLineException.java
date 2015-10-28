@@ -28,11 +28,12 @@
 
 package com.caucho.jsp;
 
-import com.caucho.java.LineMap;
-import com.caucho.java.LineMapException;
-import com.caucho.util.ExceptionWrapper;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.java.LineMapException;
+import com.caucho.v5.util.ExceptionWrapper;
 
 import javax.servlet.ServletException;
+
 import java.io.Serializable;
 
 /**

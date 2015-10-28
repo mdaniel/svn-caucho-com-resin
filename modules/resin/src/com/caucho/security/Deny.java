@@ -37,13 +37,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.dispatch.UrlMap;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.security.ConstraintBase;
-import com.caucho.http.security.AuthorizationResult;
-import com.caucho.http.security.SecurityConstraint;
-import com.caucho.util.CauchoUtil;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.dispatch.UrlMap;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.http.security.AuthorizationResult;
+import com.caucho.v5.http.security.ConstraintBase;
+import com.caucho.v5.http.security.SecurityConstraint;
+import com.caucho.v5.util.CauchoUtil;
 
 /**
  * <code><pre>

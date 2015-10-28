@@ -28,11 +28,11 @@
 
 package com.caucho.xpath.pattern;
 
-import com.caucho.vfs.WriteStream;
-import com.caucho.xml.CauchoElement;
-import com.caucho.xml.CauchoNode;
-import com.caucho.xml.QAbstractNode;
-import com.caucho.xml.QAttr;
+import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.xml.CauchoElement;
+import com.caucho.v5.xml.CauchoNode;
+import com.caucho.v5.xml.QAbstractNode;
+import com.caucho.v5.xml.QAttr;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;

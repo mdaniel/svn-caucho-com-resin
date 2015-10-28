@@ -29,8 +29,8 @@
 
 package com.caucho.http.proxy;
 
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.v5.network.balance.ClientSocket;
+import com.caucho.v5.network.balance.ClientSocketFactory;
 
 /**
  * Manages a load balancer.

@@ -33,9 +33,9 @@ import java.util.logging.*;
 
 import javax.management.*;
 
-import com.caucho.config.ConfigException;
 import com.caucho.server.admin.JmxCallQueryReply;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.util.L10N;
 
 public class CallJmxAction extends AbstractJmxAction implements AdminAction
 {

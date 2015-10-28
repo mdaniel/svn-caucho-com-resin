@@ -16,13 +16,14 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import com.caucho.admin.action.CallJmxAction;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.env.health.HealthActionResult;
-import com.caucho.env.health.HealthActionResult.ResultStatus;
-import com.caucho.health.event.HealthEvent;
 import com.caucho.server.admin.JmxCallQueryReply;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.env.health.HealthActionResult;
+import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
+import com.caucho.v5.health.action.HealthActionBase;
+import com.caucho.v5.health.event.HealthEvent;
+import com.caucho.v5.util.L10N;
 
 /**
  * Health action to call a JMX MBean operation.

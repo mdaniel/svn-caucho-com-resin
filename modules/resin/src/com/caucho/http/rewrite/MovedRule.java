@@ -29,10 +29,11 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.dispatch.FilterChainMoved;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.dispatch.FilterChainMoved;
 
 import javax.servlet.FilterChain;
+
 import java.util.regex.Matcher;
 
 public class MovedRule

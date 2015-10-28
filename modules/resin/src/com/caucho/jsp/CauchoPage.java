@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.vfs.Dependency;
+import com.caucho.v5.vfs.Path;
 
 public interface CauchoPage
 {

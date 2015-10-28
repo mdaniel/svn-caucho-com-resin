@@ -28,15 +28,16 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.ServletException;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
+
 import java.util.ArrayList;
 
 /**

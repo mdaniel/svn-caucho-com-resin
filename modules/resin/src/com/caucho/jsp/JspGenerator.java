@@ -29,13 +29,14 @@
 
 package com.caucho.jsp;
 
-import com.caucho.java.LineMap;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 

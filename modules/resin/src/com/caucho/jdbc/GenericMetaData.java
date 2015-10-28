@@ -29,9 +29,10 @@
 
 package com.caucho.jdbc;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.sql.DataSource;
+
 import java.sql.DatabaseMetaData;
 import java.sql.Connection;
 import java.sql.Types;

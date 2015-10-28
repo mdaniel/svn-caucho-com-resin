@@ -11,16 +11,16 @@ import io.baratine.core.Startup;
 import javax.annotation.PostConstruct;
 import javax.mail.internet.AddressException;
 
-import com.caucho.config.Configurable;
 import com.caucho.config.Unbound;
-import com.caucho.health.action.SendMail;
-import com.caucho.health.predicate.IfHealthCritical;
-import com.caucho.health.predicate.IfRechecked;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.health.action.SendMail;
+import com.caucho.v5.health.predicate.IfHealthCritical;
+import com.caucho.v5.health.predicate.IfRechecked;
+import com.caucho.v5.util.L10N;
 
 /**
  * @Deprecated
- * @see com.caucho.health.check.HttpStatusHealthCheck
+ * @see com.caucho.v5.health.check.HttpStatusHealthCheck
  */
 @Unbound
 @Startup

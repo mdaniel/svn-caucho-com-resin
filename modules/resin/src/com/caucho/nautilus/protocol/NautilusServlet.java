@@ -35,7 +35,7 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import com.caucho.nautilus.broker.BrokerProviderEnvironment;
 import com.caucho.nautilus.broker.BrokerNautilus;
-import com.caucho.websocket.server.WebSocketServletImpl;
+import com.caucho.v5.websocket.server.WebSocketServletImpl;
 
 /**
  * Servlet for the nautilus protocol.

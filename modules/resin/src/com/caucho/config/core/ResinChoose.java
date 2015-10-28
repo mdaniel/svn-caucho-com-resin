@@ -32,8 +32,9 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.NoAspect;
-import com.caucho.config.type.FlowBean;
+import com.caucho.v5.config.NoAspect;
+import com.caucho.v5.config.core.ControlConfig;
+import com.caucho.v5.config.type.FlowBean;
 
 /**
  * Executes code when an expression is valid.

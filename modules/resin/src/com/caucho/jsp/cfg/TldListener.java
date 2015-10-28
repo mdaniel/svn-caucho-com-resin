@@ -29,9 +29,9 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.webapp.ListenerConfig;
-import com.caucho.http.webapp.WebAppResin;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.webapp.ListenerConfig;
+import com.caucho.v5.http.webapp.WebAppResin;
 
 /**
  * Configuration for the taglib listener in the .tld
@@ -51,7 +51,7 @@ public class TldListener {
   {
   }
 
-  public void setIcon(com.caucho.config.types.Icon icon)
+  public void setIcon(com.caucho.v5.config.types.Icon icon)
   {
   }
 

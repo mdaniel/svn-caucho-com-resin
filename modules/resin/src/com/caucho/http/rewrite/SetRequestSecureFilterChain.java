@@ -38,9 +38,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.RequestCaucho;
-import com.caucho.http.protocol.RequestServlet;
-import com.caucho.http.protocol.RequestAdapter;
+import com.caucho.v5.http.protocol.RequestAdapter;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.http.protocol.RequestServlet;
 
 public class SetRequestSecureFilterChain implements FilterChain
 {

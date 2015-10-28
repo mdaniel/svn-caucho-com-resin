@@ -32,16 +32,16 @@ package com.caucho.cli.boot;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.cli.daemon.ArgsDaemon;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.StartCommandBase;
-import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.server.config.ConfigBoot;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.server.watchdog.WatchdogService;
-import com.caucho.util.L10N;
-import com.caucho.util.Version;
+import com.caucho.v5.cli.daemon.ArgsDaemon;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.StartCommandBase;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ConfigBoot;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.server.watchdog.WatchdogService;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.Version;
 
 /**
  * Command to start Resin server in gui mode

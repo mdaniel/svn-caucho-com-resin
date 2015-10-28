@@ -28,9 +28,10 @@
 
 package com.caucho.jsp;
 
-import com.caucho.vfs.TempStream;
+import com.caucho.v5.vfs.TempStream;
 
 import javax.servlet.jsp.tagext.PageData;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;

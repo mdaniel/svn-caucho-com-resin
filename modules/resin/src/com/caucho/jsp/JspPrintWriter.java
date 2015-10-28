@@ -29,9 +29,10 @@
 
 package com.caucho.jsp;
 
-import com.caucho.vfs.FlushBuffer;
+import com.caucho.v5.vfs.FlushBuffer;
 
 import javax.servlet.jsp.JspWriter;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;

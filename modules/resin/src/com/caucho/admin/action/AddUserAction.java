@@ -31,9 +31,9 @@ package com.caucho.admin.action;
 
 import java.util.logging.Logger;
 
-import com.caucho.http.security.AuthenticatorRole;
-import com.caucho.http.security.PasswordUser2;
-import com.caucho.util.L10N;
+import com.caucho.v5.http.security.AuthenticatorRole;
+import com.caucho.v5.http.security.PasswordUser2;
+import com.caucho.v5.util.L10N;
 
 public class AddUserAction implements AdminAction
 {

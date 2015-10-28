@@ -28,8 +28,8 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.util.L10N;
-import com.caucho.util.SQLExceptionWrapper;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.SQLExceptionWrapper;
 
 import java.io.InputStream;
 import java.io.Reader;

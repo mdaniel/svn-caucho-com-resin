@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.server.snmp.types.*;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 public class SnmpParser
 {

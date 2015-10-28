@@ -35,16 +35,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import com.caucho.config.types.FileSetType;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
 import com.caucho.jsp.cfg.TldFunction;
 import com.caucho.jsp.cfg.TldTaglib;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.types.FileSetType;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Stores the entire information for a tag library.

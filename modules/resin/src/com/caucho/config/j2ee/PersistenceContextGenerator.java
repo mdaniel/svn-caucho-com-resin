@@ -29,10 +29,10 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ValueGenerator;
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.util.L10N;
 
 import javax.persistence.*;
 import javax.persistence.spi.PersistenceProperty;

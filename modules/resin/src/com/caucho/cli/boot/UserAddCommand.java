@@ -31,12 +31,12 @@ package com.caucho.cli.boot;
 
 import java.util.Arrays;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.admin.AddUserQueryReply;
 import com.caucho.server.admin.ManagerClientApi;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.util.L10N;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.util.L10N;
 
 public class UserAddCommand extends ManagementCommandBase
 {

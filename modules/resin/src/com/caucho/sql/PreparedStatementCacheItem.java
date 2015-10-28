@@ -28,7 +28,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.util.CacheListener;
+import com.caucho.v5.util.CacheListener;
 
 import java.lang.ref.SoftReference;
 import java.sql.PreparedStatement;

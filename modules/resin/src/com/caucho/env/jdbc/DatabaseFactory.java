@@ -29,14 +29,16 @@
 
 package com.caucho.env.jdbc;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.L10N;
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.*;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.*;
 
 import java.net.*;
 import java.sql.*;
+
 import javax.sql.*;
+
 import java.util.*;
 import java.util.logging.*;
 

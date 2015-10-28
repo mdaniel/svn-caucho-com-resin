@@ -47,15 +47,15 @@ import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.webapp.WebAppResin;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.ResinJspWriter;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
 
 public class CoreImportTag extends BodyTagSupport implements NameValueTag {
   private static L10N L = new L10N(CoreImportTag.class);

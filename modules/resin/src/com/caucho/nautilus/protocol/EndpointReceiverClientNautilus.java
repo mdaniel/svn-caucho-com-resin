@@ -32,8 +32,8 @@ package com.caucho.nautilus.protocol;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Custom serialization for the cache

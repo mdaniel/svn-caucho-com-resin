@@ -38,8 +38,8 @@ import java.util.logging.Logger;
 
 import com.caucho.nautilus.DecoderMessage;
 import com.caucho.nautilus.common.ReceiverQueueImpl;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
 
 /**
  * local connection to the message store

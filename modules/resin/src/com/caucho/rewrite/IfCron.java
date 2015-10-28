@@ -29,13 +29,13 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.types.CronType;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.CronType;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.annotation.PostConstruct;

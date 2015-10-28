@@ -31,11 +31,11 @@ package com.caucho.cli.resin;
 
 import java.util.ArrayList;
 
-import com.caucho.cli.daemon.ArgsDaemon;
-import com.caucho.cli.server.ClientDeploy;
-import com.caucho.cli.server.DeployCommand;
-import com.caucho.server.config.ConfigBoot;
-import com.caucho.vfs.Path;
+import com.caucho.v5.cli.daemon.ArgsDaemon;
+import com.caucho.v5.cli.server.ClientDeploy;
+import com.caucho.v5.cli.server.DeployCommand;
+import com.caucho.v5.server.config.ConfigBoot;
+import com.caucho.v5.vfs.Path;
 
 
 public class DeployCommandResin extends DeployCommand

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.CurrentTime;
+import com.caucho.v5.util.CurrentTime;
 
 
 /**

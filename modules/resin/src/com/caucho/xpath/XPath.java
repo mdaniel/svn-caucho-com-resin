@@ -28,8 +28,8 @@
 
 package com.caucho.xpath;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.LruCache;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.LruCache;
 import com.caucho.xpath.pattern.AbstractPattern;
 import com.caucho.xpath.pattern.FromContext;
 

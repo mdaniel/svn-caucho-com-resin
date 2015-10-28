@@ -36,8 +36,8 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.NamingException;
 
-import com.caucho.config.inject.ObjectFactoryNaming;
-import com.caucho.inject.Module;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.inject.Module;
 
 /**
  * Object proxy to create instance of a bean.

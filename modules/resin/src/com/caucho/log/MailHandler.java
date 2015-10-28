@@ -42,14 +42,14 @@ import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import com.caucho.amp.misc.MailService;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.log.impl.LogHandlerBase;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.amp.misc.MailService;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.log.impl.LogHandlerBase;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 /**
  * Sends formatted messages to mail

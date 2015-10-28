@@ -48,15 +48,14 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
-import com.caucho.bytecode.ByteCodeParser;
-import com.caucho.bytecode.CodeVisitor;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JavaClass;
-import com.caucho.bytecode.JavaMethod;
-import com.caucho.bytecode.attr.CodeAttribute;
-import com.caucho.bytecode.cpool.MethodRefConstant;
-import com.caucho.util.L10N;
-//import javax.xml.ws.WebServiceRef;
+import com.caucho.v5.bytecode.ByteCodeParser;
+import com.caucho.v5.bytecode.CodeVisitor;
+import com.caucho.v5.bytecode.JClass;
+import com.caucho.v5.bytecode.JavaClass;
+import com.caucho.v5.bytecode.JavaMethod;
+import com.caucho.v5.bytecode.attr.CodeAttribute;
+import com.caucho.v5.bytecode.cpool.MethodRefConstant;
+import com.caucho.v5.util.L10N;
 
 /**
  * Analyzes the class for tag.
@@ -443,7 +442,7 @@ public class TagAnalyzer
       return null;
   }
 
-  static class Analyzer extends com.caucho.bytecode.Analyzer {
+  static class Analyzer extends com.caucho.v5.bytecode.Analyzer {
     public void analyze(CodeVisitor visitor)
     {
     }

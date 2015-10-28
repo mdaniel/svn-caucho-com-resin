@@ -29,8 +29,9 @@
 
 package com.caucho.security.x509;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.v5.util.*;
+import com.caucho.v5.vfs.*;
+
 import java.io.*;
 
 /**

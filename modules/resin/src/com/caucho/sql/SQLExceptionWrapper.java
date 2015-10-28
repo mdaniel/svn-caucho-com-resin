@@ -28,7 +28,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.util.ExceptionWrapper;
+import com.caucho.v5.util.ExceptionWrapper;
 
 import java.sql.SQLException;
 

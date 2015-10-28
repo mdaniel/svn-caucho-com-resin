@@ -11,14 +11,14 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.ConfigException;
 import com.caucho.config.ResinService;
-import com.caucho.env.system.RootDirectorySystem;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.xalog.AbstractXALogManager;
-import com.caucho.transaction.xalog.XALogManager;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.system.RootDirectorySystem;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.transaction.xalog.AbstractXALogManager;
+import com.caucho.v5.transaction.xalog.XALogManager;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Remote administration service for log

@@ -30,9 +30,9 @@
 package com.caucho.jsp.java;
 
 import com.caucho.jsp.JspParseException;
-import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
-import com.caucho.xml.XmlChar;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.xml.XmlChar;
 
 import java.io.IOException;
 import java.util.HashMap;

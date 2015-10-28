@@ -29,14 +29,14 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.bartender.files.FilesDeployService;
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.config.ConfigException;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.server.watchdog.ArgsWatchdog;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.bartender.files.FilesDeployService;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.server.watchdog.ArgsWatchdog;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 public class UndeployCommand extends DeployCommandRepositoryBase
 {

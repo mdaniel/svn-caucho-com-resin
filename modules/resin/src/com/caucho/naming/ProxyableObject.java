@@ -30,7 +30,7 @@ package com.caucho.naming;
 
 import javax.naming.NamingException;
 
-import com.caucho.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
 
 /**
  * An object proxy for a foreign JNDI factory.

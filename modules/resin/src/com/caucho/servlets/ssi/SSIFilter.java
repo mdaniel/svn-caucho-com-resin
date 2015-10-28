@@ -29,11 +29,11 @@
 package com.caucho.servlets.ssi;
 
 import com.caucho.filters.CauchoResponseWrapper;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.TempStream;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -43,6 +43,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Logger;

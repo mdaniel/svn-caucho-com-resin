@@ -45,9 +45,9 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.tagext.BodyContent;
 
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.util.L10N;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.util.L10N;
 
 public class PageContextWrapper extends PageContextImpl {
   private static final Logger log

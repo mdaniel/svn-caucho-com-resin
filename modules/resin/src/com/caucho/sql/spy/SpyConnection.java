@@ -30,9 +30,9 @@
 package com.caucho.sql.spy;
 
 import com.caucho.sql.DriverConfig;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 import java.sql.*;
 import java.util.ArrayList;

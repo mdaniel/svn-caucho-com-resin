@@ -47,16 +47,16 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.amp.thread.ThreadPool;
-import com.caucho.config.inject.SingletonBindingHandle;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.amp.thread.ThreadPool;
+import com.caucho.v5.config.inject.SingletonBindingHandle;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 /**
  * Scheduler for custom services.

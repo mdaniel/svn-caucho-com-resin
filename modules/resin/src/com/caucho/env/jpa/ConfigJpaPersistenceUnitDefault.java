@@ -31,8 +31,8 @@ package com.caucho.env.jpa;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
 
 /**
  * <jpa-persistence-unit> tag in the resin-web.xml

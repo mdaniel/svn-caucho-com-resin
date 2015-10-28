@@ -28,8 +28,8 @@
 
 package com.caucho.security;
 
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.L10N;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.util.L10N;
 
 import java.security.*;
 import java.util.ArrayList;

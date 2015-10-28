@@ -36,17 +36,17 @@ import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.jmx.Description;
-import com.caucho.loader.Environment;
-import com.caucho.management.server.RewriteImportMXBean;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.management.server.RewriteImportMXBean;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Depend;
+import com.caucho.v5.vfs.Path;
 
 public class ImportRule
   extends AbstractRule

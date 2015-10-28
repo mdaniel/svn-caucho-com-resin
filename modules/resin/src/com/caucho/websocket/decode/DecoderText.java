@@ -32,7 +32,7 @@ package com.caucho.websocket.decode;
 import javax.websocket.Decoder;
 import javax.websocket.MessageHandler;
 
-import com.caucho.inject.Module;
+import com.caucho.v5.inject.Module;
 
 /**
  * Callback for a binary stream decoder

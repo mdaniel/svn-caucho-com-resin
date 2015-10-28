@@ -28,7 +28,7 @@
 
 package com.caucho.filters;
 
-import com.caucho.config.types.Period;
+import com.caucho.v5.config.types.Period;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -37,6 +37,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**

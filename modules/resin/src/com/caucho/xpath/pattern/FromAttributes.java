@@ -28,10 +28,10 @@
 
 package com.caucho.xpath.pattern;
 
-import com.caucho.xml.CauchoElement;
-import com.caucho.xml.CauchoNode;
-import com.caucho.xml.QAttr;
-import com.caucho.xml.QElement;
+import com.caucho.v5.xml.CauchoElement;
+import com.caucho.v5.xml.CauchoNode;
+import com.caucho.v5.xml.QAttr;
+import com.caucho.v5.xml.QElement;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;

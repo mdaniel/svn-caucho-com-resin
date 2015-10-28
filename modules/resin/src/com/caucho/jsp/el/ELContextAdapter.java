@@ -28,7 +28,7 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.VariableResolverBase;
+import com.caucho.v5.el.VariableResolverBase;
 
 import javax.el.ELContext;
 import javax.el.ELException;

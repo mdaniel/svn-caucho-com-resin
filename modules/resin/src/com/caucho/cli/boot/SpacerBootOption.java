@@ -29,8 +29,8 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.cli.spi.ArgsBase;
-import com.caucho.cli.spi.CommandArgumentException;
+import com.caucho.v5.cli.spi.ArgsBase;
+import com.caucho.v5.cli.spi.CommandArgumentException;
 
 public class SpacerBootOption extends InfoBootOption 
 {

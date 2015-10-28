@@ -36,10 +36,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.RequestPredicateVary;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.RequestPredicateVary;
+import com.caucho.v5.util.L10N;
 
 
 /**

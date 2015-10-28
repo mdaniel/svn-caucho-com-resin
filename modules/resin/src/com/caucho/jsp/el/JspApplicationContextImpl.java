@@ -36,14 +36,14 @@ import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.servlet.jsp.JspApplicationContext;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.http.webapp.WebApp;
 //import com.caucho.el.StreamELResolver;
 import com.caucho.jsp.PageManager;
 import com.caucho.jsp.TaglibManager;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.ConcurrentArrayList;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.ConcurrentArrayList;
+import com.caucho.v5.util.L10N;
 
 public class JspApplicationContextImpl implements JspApplicationContext
 {

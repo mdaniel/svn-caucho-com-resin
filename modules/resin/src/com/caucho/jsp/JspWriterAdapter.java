@@ -36,8 +36,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.ResponseCaucho;
 
 /**
  * A buffered JSP writer encapsulating a Writer.

@@ -37,9 +37,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.http.protocol.RequestCaucho;
-import com.caucho.http.protocol.ResponseHttpBase;
-import com.caucho.http.protocol.RequestServlet;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.http.protocol.RequestServlet;
+import com.caucho.v5.http.protocol.ResponseHttpBase;
 
 public class SetFilterChain
   extends ContinueMapFilterChain

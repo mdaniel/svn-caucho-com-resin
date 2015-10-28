@@ -31,9 +31,9 @@ package com.caucho.jstl.rt;
 
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.util.L10N;
-import com.caucho.vfs.TempCharReader;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.TempCharReader;
+import com.caucho.v5.vfs.Vfs;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -49,6 +49,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
+
 import java.io.Reader;
 
 public class XmlParseTag extends BodyTagSupport {

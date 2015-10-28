@@ -34,13 +34,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.admin.JsonQueryReply;
 import com.caucho.server.admin.ManagerClientApi;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.util.IoUtil;
+import com.caucho.v5.util.L10N;
 
 public class JmxDumpCommand extends JmxCommand
 {

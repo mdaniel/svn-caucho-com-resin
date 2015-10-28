@@ -40,18 +40,18 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspFactory;
 
-import com.caucho.http.protocol.RequestCaucho;
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.SimpleLoader;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.loader.SimpleLoader;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Manages JSP templates.

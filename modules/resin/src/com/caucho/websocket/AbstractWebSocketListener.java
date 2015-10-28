@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
-import com.caucho.websocket.io.WebSocketContext;
+import com.caucho.v5.websocket.io.WebSocketContext;
 
 
 /**

@@ -36,13 +36,13 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.make.DependencyContainer;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.PersistentDependency;
 
 public class MatchRule
   extends AbstractRuleWithConditions

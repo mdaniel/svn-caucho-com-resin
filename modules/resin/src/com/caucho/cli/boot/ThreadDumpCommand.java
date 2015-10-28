@@ -31,13 +31,13 @@ package com.caucho.cli.boot;
 
 import java.io.IOException;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.admin.ManagerClientApi;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
 
 public class ThreadDumpCommand extends ManagementCommandBase
 {

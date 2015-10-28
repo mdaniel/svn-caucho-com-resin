@@ -35,8 +35,8 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.cfg.BeanConfigBase;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.cfg.BeanConfigBase;
 
 /**
  * Configuration for a javamail.

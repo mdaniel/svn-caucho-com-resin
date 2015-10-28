@@ -31,8 +31,9 @@ package com.caucho.config.program;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.Config;
 import com.caucho.config.types.ResourceGroupConfig;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.program.ConfigProgram;
 
 /**
  * Resource program

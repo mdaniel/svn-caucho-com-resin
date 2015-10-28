@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Trigger;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Trigger;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.QDate;
 
 /**
  * Implements a cron-style trigger. This trigger is primarily intended for the

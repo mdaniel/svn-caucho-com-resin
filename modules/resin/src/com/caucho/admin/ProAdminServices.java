@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import com.caucho.server.admin.SnapshotService;
-import com.caucho.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBase;
 
 /**
  * Convenience collection of the standard administration services.

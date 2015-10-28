@@ -34,11 +34,11 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.PredicateCacheable;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.PredicateCacheable;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.util.L10N;
 
 /**
  * Passes if the named parameter exists and has a value

@@ -31,10 +31,10 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
-import com.caucho.config.DependencyBean;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.DependencyBean;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 /**
  * Configuration for the taglib in the .tld
@@ -94,7 +94,7 @@ public class TldTaglib implements DependencyBean
   /**
    * Sets the icon.
    */
-  public void setIcon(com.caucho.config.types.Icon icon)
+  public void setIcon(com.caucho.v5.config.types.Icon icon)
   {
   }
 

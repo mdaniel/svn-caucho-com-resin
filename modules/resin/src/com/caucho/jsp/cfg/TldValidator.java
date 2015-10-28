@@ -28,11 +28,12 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.types.InitParam;
-import com.caucho.util.BeanUtil;
-import com.caucho.util.RegistryException;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.util.BeanUtil;
+import com.caucho.v5.util.RegistryException;
 
 import javax.servlet.jsp.tagext.TagLibraryValidator;
+
 import java.util.HashMap;
 
 /**

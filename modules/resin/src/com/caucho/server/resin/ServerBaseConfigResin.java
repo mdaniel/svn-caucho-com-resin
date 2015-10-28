@@ -35,22 +35,22 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.cloud.security.SecuritySystem;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.Bytes;
-import com.caucho.config.types.Period;
-import com.caucho.env.system.RootDirectorySystem;
-import com.caucho.env.system.SystemManager;
-import com.caucho.http.cache.TempFileManager;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentProperties;
-import com.caucho.server.container.ServerBuilder;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.cloud.security.SecuritySystem;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.types.Bytes;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.system.RootDirectorySystem;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.http.cache.TempFileManager;
+import com.caucho.v5.loader.EnvironmentBean;
+import com.caucho.v5.loader.EnvironmentProperties;
+import com.caucho.v5.server.container.ServerBuilder;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 /**
  * The ResinConfig class represents configuration for 

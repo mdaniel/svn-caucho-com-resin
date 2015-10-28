@@ -29,9 +29,10 @@
 
 package com.caucho.config.types;
 
-import com.caucho.bytecode.*;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.bytecode.*;
+import com.caucho.v5.config.types.InjectionTarget;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 import java.lang.reflect.*;
 

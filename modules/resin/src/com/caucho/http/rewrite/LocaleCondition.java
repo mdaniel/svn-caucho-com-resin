@@ -29,10 +29,11 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.Locale;
 import java.util.regex.Pattern;
 

@@ -9,12 +9,12 @@ package com.caucho.cloud.jmx;
 import javax.annotation.PostConstruct;
 import javax.management.MBeanServer;
 
-import com.caucho.amp.AmpSystem;
-import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.JmxUtil;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.util.L10N;
+import com.caucho.v5.amp.AmpSystem;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.util.L10N;
 
 /**
  * Remote administration service for JMX

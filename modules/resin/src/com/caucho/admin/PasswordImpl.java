@@ -19,8 +19,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.caucho.util.Base64Util;
-import com.caucho.util.RandomUtil;
+import com.caucho.v5.util.Base64Util;
+import com.caucho.v5.util.RandomUtil;
 
 public class PasswordImpl extends Password {
   private static final String ALGORITHM = "AES/CBC/NoPadding";

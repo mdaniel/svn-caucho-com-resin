@@ -28,11 +28,11 @@
 
 package com.caucho.admin.action;
 
-import com.caucho.health.stat.StatSystem;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
-import com.caucho.util.L10N;
+import com.caucho.v5.health.stat.StatSystem;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.management.server.StatServiceValue;
+import com.caucho.v5.util.L10N;
 
 import java.util.ArrayList;
 import java.util.Arrays;

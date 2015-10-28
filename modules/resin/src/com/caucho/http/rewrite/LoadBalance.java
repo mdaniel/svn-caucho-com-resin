@@ -40,13 +40,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.InlineConfig;
-import com.caucho.http.dispatch.ServletBuilder;
 import com.caucho.http.proxy.HashGeneratorStickyRequest;
 import com.caucho.http.proxy.ProxyLoadBalanceServlet;
-import com.caucho.http.webapp.WebApp;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.InlineConfig;
+import com.caucho.v5.http.dispatch.ServletBuilder;
+import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
+import com.caucho.v5.http.webapp.WebApp;
 
 /**
  * Dispatches a request to the load balancer.

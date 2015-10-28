@@ -28,15 +28,17 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

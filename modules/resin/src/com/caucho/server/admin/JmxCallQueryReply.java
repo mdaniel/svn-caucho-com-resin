@@ -29,7 +29,7 @@ package com.caucho.server.admin;
 
 import java.beans.ConstructorProperties;
 
-import com.caucho.json.JsonName;
+import com.caucho.v5.json.JsonName;
 
 @SuppressWarnings("serial")
 public class JmxCallQueryReply extends ManagementQueryReply

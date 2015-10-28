@@ -31,8 +31,8 @@ package com.caucho.config.resin;
 
 import java.util.logging.Logger;
 
-import com.caucho.config.cf.QName;
-import com.caucho.config.custom.ConfigCustomBean;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.custom.ConfigCustomBean;
 
 /**
  * Custom bean configured by namespace

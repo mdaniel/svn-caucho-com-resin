@@ -42,10 +42,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import com.caucho.jmx.JmxUtil;
-import com.caucho.network.listen.ConnectionSocket;
-import com.caucho.network.listen.NextState;
-import com.caucho.network.listen.RequestProtocolBase;
 import com.caucho.server.snmp.types.GetResponsePduValue;
 import com.caucho.server.snmp.types.IntegerValue;
 import com.caucho.server.snmp.types.NullValue;
@@ -55,8 +51,12 @@ import com.caucho.server.snmp.types.SnmpMessageValue;
 import com.caucho.server.snmp.types.SnmpValue;
 import com.caucho.server.snmp.types.VarBindListValue;
 import com.caucho.server.snmp.types.VarBindValue;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.network.listen.ConnectionSocket;
+import com.caucho.v5.network.listen.NextState;
+import com.caucho.v5.network.listen.RequestProtocolBase;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
 
 /*
  * Responds to SNMP requests.

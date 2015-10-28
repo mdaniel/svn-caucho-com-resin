@@ -34,8 +34,8 @@ import java.util.regex.Matcher;
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.dispatch.FilterChainRewriteDispatch;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.dispatch.FilterChainRewriteDispatch;
 
 public class DispatchRuleBase2
   extends AbstractRuleWithConditions

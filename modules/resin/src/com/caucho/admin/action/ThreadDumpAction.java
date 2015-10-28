@@ -28,7 +28,7 @@
 
 package com.caucho.admin.action;
 
-import com.caucho.util.ThreadDump;
+import com.caucho.v5.util.ThreadDump;
 
 public class ThreadDumpAction implements AdminAction
 {

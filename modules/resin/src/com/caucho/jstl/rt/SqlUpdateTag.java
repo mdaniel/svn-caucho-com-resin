@@ -29,12 +29,13 @@
 package com.caucho.jstl.rt;
 
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

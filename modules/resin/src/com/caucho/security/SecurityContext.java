@@ -31,11 +31,11 @@ package com.caucho.security;
 
 import java.security.Principal;
 
-import com.caucho.http.security.SecurityContextException;
-import com.caucho.http.security.SecurityContextProvider;
-import com.caucho.network.listen.ConnectionTcp;
-import com.caucho.network.listen.RequestProtocol;
-import com.caucho.util.L10N;
+import com.caucho.v5.http.security.SecurityContextException;
+import com.caucho.v5.http.security.SecurityContextProvider;
+import com.caucho.v5.network.listen.ConnectionTcp;
+import com.caucho.v5.network.listen.RequestProtocol;
+import com.caucho.v5.util.L10N;
 
 /**
  * Defines a proxy for the current security context.

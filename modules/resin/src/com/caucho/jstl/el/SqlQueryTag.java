@@ -29,9 +29,9 @@
 
 package com.caucho.jstl.el;
 
-import com.caucho.el.Expr;
 import com.caucho.jstl.ResultImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.L10N;
 
 import javax.el.ELContext;
 import javax.naming.InitialContext;
@@ -43,6 +43,7 @@ import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -28,7 +28,7 @@
 
 package com.caucho.http.security;
 
-import com.caucho.config.InlineConfig;
+import com.caucho.v5.config.InlineConfig;
 
 
 /**

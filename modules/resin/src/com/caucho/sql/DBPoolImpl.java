@@ -44,21 +44,21 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitParam;
-import com.caucho.config.types.Period;
 import com.caucho.env.dbpool.ManagedConnectionFactory;
-import com.caucho.env.meter.ActiveTimeSensor;
-import com.caucho.env.meter.MeterService;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.sql.spy.SpyDataSource;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.util.SQLExceptionWrapper;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.meter.ActiveTimeSensor;
+import com.caucho.v5.env.meter.MeterService;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.SQLExceptionWrapper;
 
 /**
  * Manages a pool of database connections.  In addition, DBPool configures

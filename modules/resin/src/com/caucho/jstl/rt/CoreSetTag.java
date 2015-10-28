@@ -28,8 +28,8 @@
 
 package com.caucho.jstl.rt;
 
-import com.caucho.el.Expr;
-import com.caucho.util.L10N;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
@@ -40,6 +40,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
+
 import java.util.Locale;
 
 public class CoreSetTag extends BodyTagSupport {

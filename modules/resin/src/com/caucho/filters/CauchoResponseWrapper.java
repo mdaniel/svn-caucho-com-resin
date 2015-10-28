@@ -42,13 +42,13 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.cache.FilterChainHttpCacheBase;
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.protocol.OutResponseBase;
-import com.caucho.http.protocol.ResponseWrapper;
-import com.caucho.http.protocol.ResponseWriter;
-import com.caucho.http.protocol.ServletOutputStreamImpl;
-import com.caucho.vfs.FlushBuffer;
+import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
+import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.protocol.ResponseWrapper;
+import com.caucho.v5.http.protocol.ResponseWriter;
+import com.caucho.v5.http.protocol.ServletOutputStreamImpl;
+import com.caucho.v5.vfs.FlushBuffer;
 
 /**
  * Response wrapper that can take advantage of Resin's streams.

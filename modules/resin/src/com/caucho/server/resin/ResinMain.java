@@ -33,14 +33,14 @@ import java.net.BindException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.cli.spi.Command;
-import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.env.shutdown.ShutdownSystem;
-import com.caucho.loader.Environment;
-import com.caucho.server.container.ArgsServerBase;
-import com.caucho.server.container.ServerBuilder;
-import com.caucho.util.CompileException;
+import com.caucho.v5.cli.spi.Command;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.env.shutdown.ShutdownSystem;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.server.container.ArgsServerBase;
+import com.caucho.v5.server.container.ServerBuilder;
+import com.caucho.v5.util.CompileException;
 
 /**
  * The Resin class represents the top-level container for Resin.

@@ -45,21 +45,21 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.CurrentLiteral;
-import com.caucho.config.inject.HandleAware;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.InitParam;
-import com.caucho.config.types.Period;
 import com.caucho.env.dbpool.ConnectionPool;
 import com.caucho.env.dbpool.ManagedConnectionFactory;
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.naming.JndiUtil;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.inject.BeanBuilder;
+import com.caucho.v5.config.inject.CurrentLiteral;
+import com.caucho.v5.config.inject.HandleAware;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.util.L10N;
 
 /**
  * Manages a pool of database connections.  In addition, DBPool configures

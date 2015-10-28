@@ -33,7 +33,8 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.inject.Module;
+import com.caucho.v5.config.bytecode.ScopeAdapter;
+import com.caucho.v5.inject.Module;
 
 /**
  * Scope adapting

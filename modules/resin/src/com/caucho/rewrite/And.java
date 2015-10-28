@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.RequestPredicate;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.RequestPredicate;
 
 /**
  * Matches if all of the child predicates match.

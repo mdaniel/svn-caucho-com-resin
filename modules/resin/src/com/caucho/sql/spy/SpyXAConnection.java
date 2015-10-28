@@ -28,10 +28,11 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
+
 import java.sql.SQLException;
 import java.util.logging.Logger;
 

@@ -30,12 +30,12 @@ package com.caucho.server.admin;
 
 import java.util.logging.Logger;
 
-import com.caucho.config.ConfigException;
-import com.caucho.env.system.RootDirectorySystem;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.system.RootDirectorySystem;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Configures the transaction manager.

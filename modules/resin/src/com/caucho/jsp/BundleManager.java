@@ -29,14 +29,15 @@
 
 package com.caucho.jsp;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.L10N;
-import com.caucho.util.TimedCache;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.TimedCache;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
 
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
+
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Locale;

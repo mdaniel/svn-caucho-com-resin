@@ -28,7 +28,7 @@
 
 package com.caucho.xpath.pattern;
 
-import com.caucho.xml.XmlUtil;
+import com.caucho.v5.xml.XmlUtil;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.StylesheetEnv;
 import com.caucho.xpath.XPathException;

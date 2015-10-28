@@ -29,13 +29,14 @@
 
 package com.caucho.http.container;
 
-import com.caucho.bartender.ServerBartender;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.http.rewrite.DispatchRuleBase2;
 import com.caucho.http.rewrite.RewriteDispatch;
-import com.caucho.util.L10N;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.http.container.HttpContainerBuilder;
+import com.caucho.v5.util.L10N;
 
 /**
  * Configuration for the <cluster> and <server> tags.

@@ -33,8 +33,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import com.caucho.el.ExpressionFactoryImpl;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.inject.Module;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.inject.Module;
 
 import javax.el.*;
 

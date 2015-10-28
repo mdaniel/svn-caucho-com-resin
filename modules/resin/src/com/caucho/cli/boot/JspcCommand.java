@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.ServerCommandBase;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.jsp.JspCompiler;
-import com.caucho.server.config.ConfigBoot;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.ServerCommandBase;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ConfigBoot;
 
 public class JspcCommand extends ServerCommandBase<ArgsCli>
 {

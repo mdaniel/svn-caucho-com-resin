@@ -30,9 +30,9 @@ package com.caucho.security;
 
 import java.security.Principal;
 
-import com.caucho.http.security.AbstractAuthenticator;
-import com.caucho.http.security.BasicPrincipal;
-import com.caucho.http.security.PasswordCredentials;
+import com.caucho.v5.http.security.AbstractAuthenticator;
+import com.caucho.v5.http.security.BasicPrincipal;
+import com.caucho.v5.http.security.PasswordCredentials;
 
 /**
  * The anonymous authenticator always succeeds

@@ -33,9 +33,9 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
  * The configuration database-default.

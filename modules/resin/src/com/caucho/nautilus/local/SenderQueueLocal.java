@@ -41,9 +41,9 @@ import com.caucho.nautilus.broker.BrokerNautilus;
 import com.caucho.nautilus.broker.SenderBroker;
 import com.caucho.nautilus.common.SenderQueueBase;
 import com.caucho.nautilus.encode.StringEncoder;
-import com.caucho.util.L10N;
-import com.caucho.vfs.TempOutputStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.TempOutputStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * local connection to the message store

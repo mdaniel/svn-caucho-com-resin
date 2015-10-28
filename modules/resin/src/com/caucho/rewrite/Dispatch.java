@@ -32,9 +32,9 @@ package com.caucho.rewrite;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.config.Configurable;
-import com.caucho.http.dispatch.FilterChainRewriteDispatch;
-import com.caucho.http.rewrite.DispatchRuleTargetBase;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.dispatch.FilterChainRewriteDispatch;
+import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
 
 /**
  * Dispatch the request using the standard servlet and filter processing.

@@ -42,14 +42,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.http.dispatch.ServletConfigException;
-import com.caucho.http.security.BasicPrincipal;
-import com.caucho.http.security.CachingPrincipal;
-import com.caucho.http.security.PasswordCredentials;
-import com.caucho.http.security.PasswordUser;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.http.dispatch.ServletConfigException;
+import com.caucho.v5.http.security.BasicPrincipal;
+import com.caucho.v5.http.security.CachingPrincipal;
+import com.caucho.v5.http.security.PasswordCredentials;
+import com.caucho.v5.http.security.PasswordUser;
+import com.caucho.v5.util.L10N;
 
 /**
  * An authenticator using JDBC.

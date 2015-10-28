@@ -42,8 +42,8 @@
 
 package com.caucho.j2ee;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.util.L10N;
 
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;

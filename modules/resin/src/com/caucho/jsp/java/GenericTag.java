@@ -52,13 +52,13 @@ import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.ValidationMessage;
 import javax.servlet.jsp.tagext.VariableInfo;
 
-import com.caucho.config.cf.QName;
-import com.caucho.config.inject.ReferenceFactory;
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.JspUtil;
 import com.caucho.jsp.TagInstance;
-import com.caucho.util.BeanUtil;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.inject.ReferenceFactory;
+import com.caucho.v5.util.BeanUtil;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Represents a custom tag.

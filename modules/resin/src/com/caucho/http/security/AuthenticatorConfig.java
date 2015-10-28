@@ -30,8 +30,9 @@
 package com.caucho.http.security;
 
 import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.*;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.*;
+import com.caucho.v5.http.security.AuthenticatorRole;
+import com.caucho.v5.util.L10N;
 
 /**
  * The authenticator is the same as resource, but has a default.

@@ -28,16 +28,17 @@
 
 package com.caucho.naming;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ObjectFactoryNaming;
-import com.caucho.config.types.InitParam;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
+
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -29,10 +29,11 @@
 
 package com.caucho.jdbc;
 
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.Log;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;

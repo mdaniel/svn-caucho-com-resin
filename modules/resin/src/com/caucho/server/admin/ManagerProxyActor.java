@@ -29,10 +29,10 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.bartender.BartenderSystem;
-import com.caucho.bartender.ServerBartender;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.util.L10N;
+import com.caucho.v5.bartender.BartenderSystem;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.util.L10N;
 
 // @ActorFor(api = ManagerProxyApi.class)
 public class ManagerProxyActor

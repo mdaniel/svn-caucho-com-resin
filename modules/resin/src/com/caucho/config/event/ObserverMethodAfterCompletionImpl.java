@@ -40,9 +40,10 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.transaction.Synchronization;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.transaction.TransactionImpl;
-import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.v5.config.event.ObserverMethodImpl;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.transaction.TransactionImpl;
+import com.caucho.v5.transaction.TransactionManagerImpl;
 
 /**
  * Internal implementation for a producer Bean

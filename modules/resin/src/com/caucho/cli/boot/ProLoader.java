@@ -33,10 +33,10 @@ import java.io.IOException;
 import java.security.CodeSource;
 import java.security.SecureClassLoader;
 
-import com.caucho.util.CauchoUtil;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.vfs.JarPath;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
 
 /**
  * Class loader which checks for changes in class files and automatically

@@ -28,7 +28,7 @@
 
 package com.caucho.naming;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.Name;
 import javax.naming.NamingEnumeration;
@@ -36,6 +36,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
+
 import java.util.Hashtable;
 import java.util.logging.Logger;
 

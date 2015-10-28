@@ -36,14 +36,14 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.RawString;
-import com.caucho.deploy.DeployMode;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.http.host.HostConfig;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppConfig;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.RawString;
+import com.caucho.v5.deploy.DeployMode;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.host.HostConfig;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppConfig;
+import com.caucho.v5.util.L10N;
 
 /**
  * Enables remote administration

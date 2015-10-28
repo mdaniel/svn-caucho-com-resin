@@ -29,18 +29,19 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.NoAspect;
-import com.caucho.config.type.FlowBean;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.xml.XmlSchemaBean;
-import com.caucho.loader.Environment;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.NoAspect;
+import com.caucho.v5.config.core.ControlConfig;
+import com.caucho.v5.config.type.FlowBean;
+import com.caucho.v5.config.types.FileSetType;
+import com.caucho.v5.config.xml.XmlSchemaBean;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.util.IoUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Depend;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
 
 import javax.annotation.PostConstruct;
 

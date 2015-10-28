@@ -28,8 +28,8 @@
 
 package com.caucho.xpath.expr;
 
-import com.caucho.xml.NodeListImpl;
-import com.caucho.xml.XmlUtil;
+import com.caucho.v5.xml.NodeListImpl;
+import com.caucho.v5.xml.XmlUtil;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;

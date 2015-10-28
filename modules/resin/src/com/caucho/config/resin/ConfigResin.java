@@ -29,7 +29,7 @@
 
 package com.caucho.config.resin;
 
-import com.caucho.config.xml.ConfigXml;
+import com.caucho.v5.config.xml.ConfigXml;
 
 /**
  * Facade for Resin's configuration builder.

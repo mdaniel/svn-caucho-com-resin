@@ -34,9 +34,9 @@ import io.baratine.core.Startup;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import com.caucho.config.Configurable;
-import com.caucho.health.stat.StatSystem;
-import com.caucho.health.stat.StatSystem.JmxItem;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.health.stat.StatSystem;
+import com.caucho.v5.health.stat.StatSystem.JmxItem;
 
 @Startup
 @Singleton

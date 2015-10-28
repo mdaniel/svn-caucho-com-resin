@@ -30,7 +30,7 @@ package com.caucho.server.resin;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.amp.thread.ThreadPool;
+import com.caucho.v5.amp.thread.ThreadPool;
 
 public class ThreadPoolConfig {
   private int _threadMax = -1;

@@ -21,13 +21,15 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.env.health.HealthActionResult;
-import com.caucho.env.health.HealthActionResult.ResultStatus;
-import com.caucho.env.system.SystemManager;
-import com.caucho.health.event.HealthEvent;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.env.health.HealthActionResult;
+import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.health.action.HealthActionBase;
+import com.caucho.v5.health.action.JmxSetQueryReply;
+import com.caucho.v5.health.event.HealthEvent;
+import com.caucho.v5.util.L10N;
 
 /**
  * Health action to set a JMX MBean attribute value.

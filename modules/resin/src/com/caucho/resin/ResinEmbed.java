@@ -42,32 +42,32 @@ import java.util.logging.LogManager;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.types.RawString;
-import com.caucho.deploy.ConfigInstanceBuilder;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.http.host.Host;
-import com.caucho.http.host.HostConfig;
-import com.caucho.http.protocol.HttpProtocol;
-import com.caucho.http.protocol.RequestProtocolHttp;
-import com.caucho.http.webapp.DeployGeneratorWebAppSingle;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppBuilder;
-import com.caucho.http.webapp.WebAppConfig;
-import com.caucho.http.webapp.WebAppContainer;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.Environment;
-import com.caucho.network.listen.ConnectionSocketStream;
-import com.caucho.server.container.ArgsServerBase;
-import com.caucho.server.container.ServerBase;
 import com.caucho.server.container.ServerBuilderResin;
 import com.caucho.server.resin.EmbedArgs;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.VfsStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.types.RawString;
+import com.caucho.v5.deploy.ConfigInstanceBuilder;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.host.Host;
+import com.caucho.v5.http.host.HostConfig;
+import com.caucho.v5.http.protocol.HttpProtocol;
+import com.caucho.v5.http.protocol.RequestProtocolHttp;
+import com.caucho.v5.http.webapp.DeployGeneratorWebAppSingle;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppBuilder;
+import com.caucho.v5.http.webapp.WebAppConfig;
+import com.caucho.v5.http.webapp.WebAppContainer;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.network.listen.ConnectionSocketStream;
+import com.caucho.v5.server.container.ArgsServerBase;
+import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Embeddable version of the Resin server.

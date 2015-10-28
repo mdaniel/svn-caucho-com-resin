@@ -31,9 +31,9 @@ package com.caucho.jsp.cfg;
 
 import java.util.ArrayList;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Configuration for the taglib in the .tld

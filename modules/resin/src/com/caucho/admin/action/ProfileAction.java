@@ -34,9 +34,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
-import com.caucho.config.ConfigException;
-import com.caucho.profile.*;
-import com.caucho.util.*;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.profile.*;
+import com.caucho.v5.util.*;
 
 public class ProfileAction implements AdminAction
 {

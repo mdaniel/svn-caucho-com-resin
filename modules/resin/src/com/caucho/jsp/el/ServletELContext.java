@@ -29,13 +29,14 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
-import com.caucho.util.*;
+import com.caucho.v5.el.ELParser;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.*;
 
 import javax.el.ELContext;
 import javax.servlet.*;
 import javax.servlet.http.*;
+
 import java.util.*;
 
 /**

@@ -29,8 +29,8 @@
 
 package com.caucho.jsp;
 
-import com.caucho.util.L10N;
-import com.caucho.bytecode.JavaClass;
+import com.caucho.v5.bytecode.JavaClass;
+import com.caucho.v5.util.L10N;
 
 import java.util.logging.Logger;
 

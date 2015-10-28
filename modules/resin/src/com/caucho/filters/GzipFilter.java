@@ -22,10 +22,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.RequestCaucho;
-import com.caucho.util.FreeList;
-import com.caucho.util.RuntimeExceptionWrapper;
-import com.caucho.vfs.GzipStream;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.util.FreeList;
+import com.caucho.v5.util.RuntimeExceptionWrapper;
+import com.caucho.v5.vfs.GzipStream;
 
 /**
  * Compresses the response output if the browser accepts compression.

@@ -28,10 +28,10 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.JspParseException;
-import com.caucho.util.BeanUtil;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.util.BeanUtil;
+import com.caucho.v5.vfs.WriteStream;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;

@@ -31,13 +31,13 @@ package com.caucho.http.rewrite;
 
 import java.net.UnknownHostException;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.RawString;
-import com.caucho.util.InetNetwork;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.types.RawString;
+import com.caucho.v5.util.InetNetwork;
+import com.caucho.v5.util.L10N;
 
 public class ConditionConfig {
   private static final L10N L = new L10N(ConditionConfig.class);

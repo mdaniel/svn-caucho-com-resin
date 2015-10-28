@@ -28,11 +28,12 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
+import com.caucho.v5.config.cf.QName;
 
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.lang.reflect.Field;

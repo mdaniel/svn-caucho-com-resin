@@ -33,10 +33,10 @@ import java.lang.reflect.*;
 
 import javax.el.*;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Signature;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Signature;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.L10N;
 
 public class ELProcessorImpl extends ELProcessor
 {

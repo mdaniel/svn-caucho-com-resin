@@ -29,10 +29,10 @@
 
 package com.caucho.cli.resin;
 
-import com.caucho.cli.daemon.ArgsDaemon;
-import com.caucho.cli.server.ClientDeploy;
-import com.caucho.cli.server.StartCommand;
-import com.caucho.vfs.Path;
+import com.caucho.v5.cli.daemon.ArgsDaemon;
+import com.caucho.v5.cli.server.ClientDeploy;
+import com.caucho.v5.cli.server.StartCommand;
+import com.caucho.v5.vfs.Path;
 
 
 /**

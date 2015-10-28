@@ -34,16 +34,16 @@ import java.security.MessageDigest;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.ServerCommandBase;
-import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.server.config.ConfigBoot;
-import com.caucho.util.Base64Util;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.ServerCommandBase;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ConfigBoot;
+import com.caucho.v5.util.Base64Util;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.RandomUtil;
 
 /**
  * Command to stop Resin server

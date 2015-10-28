@@ -29,7 +29,7 @@ package com.caucho.server.admin;
 
 import java.beans.ConstructorProperties;
 
-import com.caucho.management.server.StatServiceValue;
+import com.caucho.v5.management.server.StatServiceValue;
 
 @SuppressWarnings("serial")
 public class StatServiceValuesQueryReply extends ManagementQueryReply

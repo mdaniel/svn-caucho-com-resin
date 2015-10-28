@@ -32,18 +32,18 @@ package com.caucho.server.embed;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.RawString;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.http.host.Host;
-import com.caucho.http.host.HostConfig;
-import com.caucho.http.webapp.WebAppConfig;
-import com.caucho.lifecycle.Lifecycle;
 import com.caucho.resin.HttpEmbed;
-import com.caucho.server.container.ArgsServerBase;
 import com.caucho.server.container.ServerBuilderResin;
 import com.caucho.server.resin.Resin;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.RawString;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.host.Host;
+import com.caucho.v5.http.host.HostConfig;
+import com.caucho.v5.http.webapp.WebAppConfig;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.server.container.ArgsServerBase;
 
 /**
  * Embeddable version of the Resin server.

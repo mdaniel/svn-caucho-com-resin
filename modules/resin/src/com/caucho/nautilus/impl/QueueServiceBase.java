@@ -34,9 +34,9 @@ import io.baratine.core.Direct;
 import java.io.InputStream;
 
 import com.caucho.nautilus.broker.SenderSettleHandler;
-import com.caucho.util.ConcurrentArrayList;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.v5.util.ConcurrentArrayList;
+import com.caucho.v5.vfs.StreamSource;
+import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * Service for an individual queue, managing its messages.

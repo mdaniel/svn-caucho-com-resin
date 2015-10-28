@@ -34,16 +34,16 @@ import java.util.ArrayList;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.config.CauchoBean;
 import com.caucho.config.ServiceStartup;
-import com.caucho.config.cfg.BeansConfig;
-import com.caucho.config.custom.ExtensionCustomBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ScheduleBean;
-import com.caucho.inject.Module;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.CauchoBean;
+import com.caucho.v5.config.cfg.BeansConfig;
+import com.caucho.v5.config.custom.ExtensionCustomBean;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.ScheduleBean;
+import com.caucho.v5.inject.Module;
+import com.caucho.v5.loader.EnvironmentBean;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Standard XML behavior for META-INF/beans.xml

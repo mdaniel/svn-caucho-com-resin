@@ -30,7 +30,7 @@ package com.caucho.jstl.el;
 
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jstl.ChooseTag;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.XPath;

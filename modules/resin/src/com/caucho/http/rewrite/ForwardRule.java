@@ -29,13 +29,14 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.dispatch.*;
-import com.caucho.http.webapp.*;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.dispatch.*;
+import com.caucho.v5.http.webapp.*;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

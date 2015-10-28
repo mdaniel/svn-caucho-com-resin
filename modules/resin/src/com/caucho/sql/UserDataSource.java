@@ -38,8 +38,8 @@ import javax.sql.DataSource;
 
 import com.caucho.env.dbpool.ConnectionManager;
 import com.caucho.env.dbpool.ResourceException;
-import com.caucho.util.L10N;
-import com.caucho.util.SQLExceptionWrapper;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.SQLExceptionWrapper;
 
 /**
  * The User DataSource returned from Resin's pool.

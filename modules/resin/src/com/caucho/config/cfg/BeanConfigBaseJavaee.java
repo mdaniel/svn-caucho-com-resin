@@ -32,8 +32,9 @@ package com.caucho.config.cfg;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.NamingException;
 
-import com.caucho.config.ConfigException;
 import com.caucho.naming.JndiUtil;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.cfg.BeanConfigBase;
 
 /**
  * Backwards compatibility class for 3.1-style &lt;jms-queue>, etc.

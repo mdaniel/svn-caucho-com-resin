@@ -29,17 +29,17 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.baratine.client.ServiceManagerClient;
-import com.caucho.bartender.files.FilesDeployService;
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.RemoteCommandBase;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.http.host.Host;
-import com.caucho.server.config.ClusterConfigBoot;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.server.watchdog.ArgsWatchdog;
-import com.caucho.vfs.Path;
+import com.caucho.v5.baratine.client.ServiceManagerClient;
+import com.caucho.v5.bartender.files.FilesDeployService;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.RemoteCommandBase;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.http.host.Host;
+import com.caucho.v5.server.config.ClusterConfigBoot;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.server.watchdog.ArgsWatchdog;
+import com.caucho.v5.vfs.Path;
 
 public abstract class DeployCommandRepositoryBase extends RemoteCommandBase 
 {

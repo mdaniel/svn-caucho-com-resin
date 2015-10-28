@@ -29,11 +29,12 @@
 
 package com.caucho.naming;
 
-import com.caucho.config.inject.ObjectFactoryNaming;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.*;
 import javax.naming.spi.NamingManager;
+
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.logging.Level;

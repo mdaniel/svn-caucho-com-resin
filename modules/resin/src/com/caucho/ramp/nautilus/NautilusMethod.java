@@ -29,9 +29,9 @@
 
 package com.caucho.ramp.nautilus;
 
-import com.caucho.amp.actor.MethodAmpBase;
-import com.caucho.amp.spi.ActorAmp;
-import com.caucho.amp.spi.HeadersAmp;
+import com.caucho.v5.amp.actor.MethodAmpBase;
+import com.caucho.v5.amp.spi.ActorAmp;
+import com.caucho.v5.amp.spi.HeadersAmp;
 
 /**
  * Method ref for a nautilus queue.

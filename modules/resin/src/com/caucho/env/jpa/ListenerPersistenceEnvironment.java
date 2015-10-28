@@ -29,8 +29,8 @@
 
 package com.caucho.env.jpa;
 
-import com.caucho.loader.AddLoaderListener;
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.v5.loader.AddLoaderListener;
+import com.caucho.v5.loader.EnvironmentClassLoader;
 
 /**
  * Listener for environment start to detect and load persistence.xml

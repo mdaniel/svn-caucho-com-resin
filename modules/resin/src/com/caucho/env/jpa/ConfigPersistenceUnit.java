@@ -38,10 +38,10 @@ import javax.annotation.PostConstruct;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.loader.DynamicClassLoader;
 import com.caucho.naming.JndiUtil;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.loader.DynamicClassLoader;
 
 /**
  * <persistence-unit> tag in the persistence.xml

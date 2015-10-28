@@ -32,12 +32,12 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.xalog.AbstractXALogManager;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.transaction.xalog.AbstractXALogManager;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Vfs;
 
 public class TransactionLog
 {

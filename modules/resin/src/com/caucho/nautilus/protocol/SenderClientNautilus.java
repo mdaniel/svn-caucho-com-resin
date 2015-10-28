@@ -33,7 +33,7 @@ import com.caucho.nautilus.EncoderMessage;
 import com.caucho.nautilus.MessagePropertiesFactory;
 import com.caucho.nautilus.broker.SenderBroker;
 import com.caucho.nautilus.common.SenderQueueBase;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * local connection to the message store

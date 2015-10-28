@@ -32,9 +32,9 @@ package com.caucho.management.server;
 import java.util.Date;
 import java.util.Properties;
 
-import com.caucho.jmx.Counter;
-import com.caucho.jmx.Description;
-import com.caucho.jmx.server.ManagedObjectMXBean;
+import com.caucho.v5.jmx.Counter;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.jmx.server.ManagedObjectMXBean;
 
 /**
  * MBean API for a JDBC driver.

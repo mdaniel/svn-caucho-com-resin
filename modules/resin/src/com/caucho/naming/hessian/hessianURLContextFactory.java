@@ -29,11 +29,13 @@
 
 package com.caucho.naming.hessian;
 
-import com.caucho.hessian.client.HessianProxyFactory;
+import com.caucho.v5.hessian.client.HessianProxyFactory;
+
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
+
 import java.util.Hashtable;
 
 /**

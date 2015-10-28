@@ -29,20 +29,21 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.Period;
-import com.caucho.http.dispatch.ServletMapping;
-import com.caucho.http.dispatch.UrlMap;
-import com.caucho.http.webapp.WebApp;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.JspXmlServlet;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.FileSetType;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.http.dispatch.ServletMapping;
+import com.caucho.v5.http.dispatch.UrlMap;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;

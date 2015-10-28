@@ -28,9 +28,10 @@
 
 package com.caucho.jdbc;
 
-import com.caucho.util.Log;
+import com.caucho.v5.util.Log;
 
 import javax.sql.DataSource;
+
 import java.sql.Types;
 import java.util.logging.Logger;
 

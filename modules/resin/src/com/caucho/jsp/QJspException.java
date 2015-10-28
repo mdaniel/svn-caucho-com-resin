@@ -28,7 +28,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.util.ExceptionWrapper;
+import com.caucho.v5.util.ExceptionWrapper;
 
 import javax.servlet.jsp.JspException;
 

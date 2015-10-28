@@ -29,16 +29,16 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.cf.QName;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.util.CharScanner;
-import com.caucho.util.L10N;
-import com.caucho.vfs.PersistentDependency;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.Path;
-import com.caucho.xml.Xml;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.util.CharScanner;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
+import com.caucho.v5.vfs.TempCharBuffer;
+import com.caucho.v5.xml.Xml;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;

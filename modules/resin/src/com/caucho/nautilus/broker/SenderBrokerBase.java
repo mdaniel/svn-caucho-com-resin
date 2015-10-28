@@ -29,7 +29,7 @@
 
 package com.caucho.nautilus.broker;
 
-import com.caucho.vfs.TempBuffer;
+import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache

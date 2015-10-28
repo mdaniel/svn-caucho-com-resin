@@ -42,22 +42,22 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.amp.Amp;
-import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
-import com.caucho.inject.ThreadContext;
-import com.caucho.java.WorkDir;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.CompilingLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.ResourceLoader;
 import com.caucho.server.cdi.CdiProducerResin;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.amp.Amp;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.inject.ThreadContext;
+import com.caucho.v5.java.WorkDir;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.loader.CompilingLoader;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.loader.ResourceLoader;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Embeddable Resin context for testing of bean container components (CDI

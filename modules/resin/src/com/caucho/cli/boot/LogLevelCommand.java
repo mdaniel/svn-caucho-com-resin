@@ -33,13 +33,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import com.caucho.cli.baratine.ArgsCli;
-import com.caucho.config.types.Period;
-import com.caucho.env.shutdown.ExitCode;
 import com.caucho.server.admin.ManagerClientApi;
 import com.caucho.server.admin.StringQueryReply;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.util.L10N;
+import com.caucho.v5.cli.baratine.ArgsCli;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.util.L10N;
 
 public class LogLevelCommand extends ManagementCommandBase
 {

@@ -7,7 +7,7 @@ package com.caucho.server.admin;
 
 /**
  * @Deprecated
- * @see com.caucho.health.check.HttpStatusHealthCheck
+ * @see com.caucho.v5.health.check.HttpStatusHealthCheck
  */
 @Deprecated
 public class PingMailer extends com.caucho.admin.PingMailer

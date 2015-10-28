@@ -40,11 +40,11 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.http.security.SecurityException;
-import com.caucho.util.L10N;
-import com.caucho.vfs.TempOutputStream;
+import com.caucho.v5.hessian.io.Hessian2Input;
+import com.caucho.v5.hessian.io.Hessian2Output;
+import com.caucho.v5.http.security.SecurityException;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.TempOutputStream;
 
 /**
  * Self-encrypted cookie for server to server authentication.

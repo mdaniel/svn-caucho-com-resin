@@ -28,9 +28,10 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.NoAspect;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
+import com.caucho.v5.config.NoAspect;
+import com.caucho.v5.config.core.ControlConfig;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
 
 /**
  * Executes code when an expression is valid.

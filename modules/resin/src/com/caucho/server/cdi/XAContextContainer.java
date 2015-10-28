@@ -31,8 +31,8 @@ package com.caucho.server.cdi;
 
 import javax.transaction.Synchronization;
 
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.inject.Module;
+import com.caucho.v5.config.scope.ContextContainer;
+import com.caucho.v5.inject.Module;
 
 /**
  * Container for an @TransactionScoped bean

@@ -28,8 +28,8 @@
 
 package com.caucho.xpath.expr;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.xml.XmlChar;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.xml.XmlChar;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;

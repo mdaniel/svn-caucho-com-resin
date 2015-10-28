@@ -28,7 +28,7 @@
 
 package com.caucho.xpath.expr;
 
-import com.caucho.util.CharBuffer;
+import com.caucho.v5.util.CharBuffer;
 
 /**
  * A variable containing a double

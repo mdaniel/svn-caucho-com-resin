@@ -29,11 +29,11 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.bartender.ServerBartender;
-import com.caucho.env.system.SystemManager;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.server.container.ServerBase;
-import com.caucho.server.container.ServerBuilder;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBuilder;
 
 
 /**

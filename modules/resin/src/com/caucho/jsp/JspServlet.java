@@ -33,7 +33,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.jsp.JspFactory;
 
-import com.caucho.http.webapp.WebAppResin;
+import com.caucho.v5.http.webapp.WebAppResin;
 
 /**
  * Handles JSP pages.  Most of the work is done in the JspManager and QServlet.

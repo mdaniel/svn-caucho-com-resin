@@ -44,11 +44,11 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeType;
 
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.JmxUtil;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.QDate;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.QDate;
 
 public class JmxDumpAction extends AbstractJmxAction implements AdminAction
 {

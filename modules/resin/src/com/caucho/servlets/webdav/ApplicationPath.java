@@ -28,12 +28,13 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.NullIterator;
-import com.caucho.vfs.Path;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.NullIterator;
+import com.caucho.v5.vfs.Path;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

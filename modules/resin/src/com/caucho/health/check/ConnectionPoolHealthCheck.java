@@ -10,9 +10,10 @@ import io.baratine.core.Startup;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.caucho.config.Configurable;
 import com.caucho.env.dbpool.ConnectionPoolHealthCheckImpl;
-import com.caucho.env.health.HealthSubSystem;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.env.health.HealthSubSystem;
+import com.caucho.v5.health.check.AbstractHealthCheck;
 
 /**
  * Monitors the health of Resin database connection pools (&lt;database&gt).  

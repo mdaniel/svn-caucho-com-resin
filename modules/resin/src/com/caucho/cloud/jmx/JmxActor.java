@@ -6,8 +6,6 @@
 
 package com.caucho.cloud.jmx;
 
-import com.caucho.baratine.Remote;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,8 +18,9 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import com.caucho.env.system.SystemManager;
-import com.caucho.util.L10N;
+import com.caucho.v5.baratine.Remote;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.util.L10N;
 
 /**
  * Remote administration service for JMX

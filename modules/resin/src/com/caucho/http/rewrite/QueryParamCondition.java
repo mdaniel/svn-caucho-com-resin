@@ -37,10 +37,10 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.Form;
-import com.caucho.i18n.CharacterEncoding;
-import com.caucho.util.HashMapImpl;
-import com.caucho.vfs.Encoding;
+import com.caucho.v5.http.protocol.Form;
+import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.util.HashMapImpl;
+import com.caucho.v5.vfs.Encoding;
 
 /**
 * A rewrite condition that passes if the value of a query parameter exists

@@ -29,20 +29,23 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ObjectFactoryNaming;
 import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.types.InjectionTarget;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
+
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.logging.Level;

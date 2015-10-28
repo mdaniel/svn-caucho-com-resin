@@ -30,9 +30,10 @@ package com.caucho.naming.hessian;
 
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.NamingException;
+
 import java.util.Hashtable;
 import java.util.logging.Logger;
 

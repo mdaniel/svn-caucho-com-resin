@@ -29,13 +29,14 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.util.L10N;
-
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.regex.Pattern;
-import com.caucho.vfs.*;
+
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.*;
 
 /**
 * A rewrite condition that passes if the target exists.

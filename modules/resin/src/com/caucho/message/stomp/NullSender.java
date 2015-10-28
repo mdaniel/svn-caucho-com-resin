@@ -31,7 +31,7 @@ package com.caucho.message.stomp;
 
 import com.caucho.nautilus.broker.SenderBrokerBase;
 import com.caucho.nautilus.broker.SenderSettleHandler;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache

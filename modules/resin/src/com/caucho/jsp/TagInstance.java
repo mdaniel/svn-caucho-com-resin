@@ -28,14 +28,15 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.java.JspTagFileSupport;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;

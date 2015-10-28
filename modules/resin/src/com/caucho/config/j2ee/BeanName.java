@@ -30,12 +30,13 @@
 package com.caucho.config.j2ee;
 
 import static java.lang.annotation.RetentionPolicy.*;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Qualifier;
 
-import com.caucho.inject.Module;
+import com.caucho.v5.inject.Module;
 
 /**
  * The @BeanName annotation for EJB names

@@ -49,22 +49,22 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.OwnerCreationalContext;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.java.JavaCompilerUtil;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.loader.Environment;
-import com.caucho.util.CacheListener;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.FreeRing;
-import com.caucho.util.LruCache;
-import com.caucho.vfs.MemoryPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.OwnerCreationalContext;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.java.JavaCompilerUtil;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.util.CacheListener;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.FreeRing;
+import com.caucho.v5.util.LruCache;
+import com.caucho.v5.vfs.MemoryPath;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 /**
  * Parent template manager for both JspManager and XtpManager.  PageManager

@@ -34,8 +34,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.util.L10N;
 
 public class OpenIdRelay
 {

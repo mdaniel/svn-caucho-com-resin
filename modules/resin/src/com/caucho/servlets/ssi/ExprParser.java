@@ -29,7 +29,7 @@
 
 package com.caucho.servlets.ssi;
 
-import com.caucho.vfs.Path;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Parses an SSI expression

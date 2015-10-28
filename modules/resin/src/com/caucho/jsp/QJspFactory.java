@@ -38,7 +38,7 @@ import javax.servlet.jsp.JspEngineInfo;
 import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.PageContext;
 
-import com.caucho.http.webapp.WebAppResin;
+import com.caucho.v5.http.webapp.WebAppResin;
 
 public class QJspFactory extends JspFactory {
   private static JspEngineInfo _engineInfo = new EngineInfo();

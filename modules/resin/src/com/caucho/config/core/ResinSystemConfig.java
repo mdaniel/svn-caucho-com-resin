@@ -28,7 +28,8 @@
 
 package com.caucho.config.core;
 
-import com.caucho.loader.EnvironmentBean;
+import com.caucho.v5.config.core.ControlConfig;
+import com.caucho.v5.loader.EnvironmentBean;
 
 /**
  * Separate environment for a bean

@@ -40,14 +40,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.types.Period;
-import com.caucho.http.dispatch.ServletBuilder;
 import com.caucho.http.proxy.LoadBalanceBackend;
-import com.caucho.http.rewrite.DispatchRuleTargetBase;
-import com.caucho.http.webapp.WebApp;
 import com.caucho.servlets.HttpProxyServlet;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.http.dispatch.ServletBuilder;
+import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
+import com.caucho.v5.http.webapp.WebApp;
 
 /**
  * Dispatches a request to a backend server using HTTP as the proxy

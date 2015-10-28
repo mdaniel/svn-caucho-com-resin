@@ -28,11 +28,12 @@
 
 package com.caucho.resources;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 

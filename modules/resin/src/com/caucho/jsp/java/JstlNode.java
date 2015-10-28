@@ -28,8 +28,8 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.JspParseException;
+import com.caucho.v5.config.cf.QName;
 
 abstract public class JstlNode extends JspContainerNode {
   protected static final String JSTL_CORE_NS

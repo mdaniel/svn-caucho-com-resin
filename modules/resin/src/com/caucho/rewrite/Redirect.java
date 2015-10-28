@@ -32,9 +32,9 @@ package com.caucho.rewrite;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.config.Configurable;
-import com.caucho.http.dispatch.FilterChainRedirect;
-import com.caucho.http.rewrite.DispatchRuleTargetBase;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.dispatch.FilterChainRedirect;
+import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
 
 /*
  * Redirect a request using a HTTP redirect.

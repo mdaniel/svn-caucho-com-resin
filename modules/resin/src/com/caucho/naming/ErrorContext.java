@@ -28,13 +28,14 @@
 
 package com.caucho.naming;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+
 import java.util.Hashtable;
 import java.util.logging.Logger;
 

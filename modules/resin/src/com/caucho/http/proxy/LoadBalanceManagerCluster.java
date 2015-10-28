@@ -32,9 +32,9 @@ package com.caucho.http.proxy;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.util.Crc64;
+import com.caucho.v5.network.balance.ClientSocket;
+import com.caucho.v5.network.balance.ClientSocketFactory;
+import com.caucho.v5.util.Crc64;
 
 /**
  * Manages a load balancer.

@@ -28,7 +28,7 @@
 
 package com.caucho.xpath.pattern;
 
-import com.caucho.util.CharBuffer;
+import com.caucho.v5.util.CharBuffer;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.ExprEnvironment;
 

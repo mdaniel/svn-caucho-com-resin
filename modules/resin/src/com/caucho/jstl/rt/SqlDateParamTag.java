@@ -28,7 +28,7 @@
 
 package com.caucho.jstl.rt;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;

@@ -29,14 +29,14 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.BootCommand;
-import com.caucho.cli.spi.ArgsBase;
-import com.caucho.cli.spi.CommandArgumentException;
-import com.caucho.cli.spi.OptionCommandLine;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.server.config.ConfigBoot;
-import com.caucho.server.watchdog.ArgsWatchdog;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.BootCommand;
+import com.caucho.v5.cli.spi.ArgsBase;
+import com.caucho.v5.cli.spi.CommandArgumentException;
+import com.caucho.v5.cli.spi.OptionCommandLine;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ConfigBoot;
+import com.caucho.v5.server.watchdog.ArgsWatchdog;
 
 /**
  * Command to start Resin server

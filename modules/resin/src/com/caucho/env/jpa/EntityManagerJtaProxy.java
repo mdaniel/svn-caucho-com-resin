@@ -48,13 +48,13 @@ import javax.transaction.SystemException;
 import javax.persistence.TransactionRequiredException;
 import javax.transaction.Transaction;
 
-import com.caucho.config.inject.HandleAware;
-import com.caucho.transaction.ManagedResource;
-import com.caucho.transaction.ManagedXAResource;
-import com.caucho.transaction.TransactionImpl;
-import com.caucho.transaction.UserTransactionProxy;
-import com.caucho.util.FreeList;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.inject.HandleAware;
+import com.caucho.v5.transaction.ManagedResource;
+import com.caucho.v5.transaction.ManagedXAResource;
+import com.caucho.v5.transaction.TransactionImpl;
+import com.caucho.v5.transaction.UserTransactionProxy;
+import com.caucho.v5.util.FreeList;
+import com.caucho.v5.util.L10N;
 
 /**
  * The @PersistenceContext, container managed entity manager proxy, used

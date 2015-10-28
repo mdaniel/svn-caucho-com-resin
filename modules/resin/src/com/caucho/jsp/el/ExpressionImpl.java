@@ -28,7 +28,7 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.Expr;
+import com.caucho.v5.el.Expr;
 
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.ELException;

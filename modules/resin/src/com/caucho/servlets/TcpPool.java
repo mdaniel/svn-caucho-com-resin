@@ -29,15 +29,15 @@
 
 package com.caucho.servlets;
 
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.ReadWritePair;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-import com.caucho.config.types.*;
+import com.caucho.v5.config.types.*;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.ReadWritePair;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
@@ -45,6 +45,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

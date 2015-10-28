@@ -32,13 +32,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.caucho.env.health.HealthCheckResult;
-import com.caucho.env.health.HealthSubSystem;
-import com.caucho.health.check.HealthCheck;
-import com.caucho.health.check.SystemHealthCheck;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.env.health.HealthCheckResult;
+import com.caucho.v5.env.health.HealthSubSystem;
+import com.caucho.v5.health.check.HealthCheck;
+import com.caucho.v5.health.check.SystemHealthCheck;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 public class HealthDumpAction implements AdminAction
 {

@@ -29,7 +29,7 @@
 
 package com.caucho.resin;
 
-import com.caucho.server.container.ServerBuilder;
+import com.caucho.v5.server.container.ServerBuilder;
 
 /**
  * Embeddable version of a Resin port

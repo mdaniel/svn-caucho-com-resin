@@ -29,21 +29,24 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.DefaultLiteral;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ObjectFactoryNaming;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-import com.caucho.config.Names;
-import com.caucho.el.Expr;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.inject.BeanBuilder;
+import com.caucho.v5.config.inject.DefaultLiteral;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.config.types.InjectionTarget;
+import com.caucho.v5.config.types.Validator;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.loader.ClassLoaderListener;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.Bean;

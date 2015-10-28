@@ -11,9 +11,10 @@ import io.baratine.core.Startup;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.caucho.config.Configurable;
-import com.caucho.env.health.HealthSubSystem;
-import com.caucho.transaction.TransactionHealthCheckImpl;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.env.health.HealthSubSystem;
+import com.caucho.v5.health.check.AbstractHealthCheck;
+import com.caucho.v5.transaction.TransactionHealthCheckImpl;
 
 /**
  * Monitors the transaction manager for commit failures.

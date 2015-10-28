@@ -29,13 +29,14 @@
 
 package com.caucho.jmx.remote;
 
-import com.caucho.hessian.client.HessianProxyFactory;
-import com.caucho.hessian.jmx.JMXSerializerFactory;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.v5.hessian.client.HessianProxyFactory;
+import com.caucho.v5.hessian.jmx.JMXSerializerFactory;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.Log;
+import com.caucho.v5.vfs.IOExceptionWrapper;
 
 import javax.management.*;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.logging.Logger;

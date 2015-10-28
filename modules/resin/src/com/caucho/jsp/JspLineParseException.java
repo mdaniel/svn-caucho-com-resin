@@ -30,8 +30,8 @@ package com.caucho.jsp;
 
 import java.io.*;
 
-import com.caucho.java.LineMapException;
-import com.caucho.util.*;
+import com.caucho.v5.java.LineMapException;
+import com.caucho.v5.util.*;
 
 public class JspLineParseException extends JspParseException
   implements LineCompileException, LineMapException, DisplayableException {

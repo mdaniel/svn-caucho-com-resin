@@ -35,8 +35,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import com.caucho.config.CauchoBean;
-import com.caucho.config.CauchoDeployment;
+import com.caucho.v5.config.CauchoBean;
+import com.caucho.v5.config.CauchoDeployment;
 
 /**
  * Resin CDI producer for the main singletons.

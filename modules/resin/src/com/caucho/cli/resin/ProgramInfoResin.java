@@ -29,7 +29,7 @@
 
 package com.caucho.cli.resin;
 
-import com.caucho.cli.server.ProgramInfoDaemon;
+import com.caucho.v5.cli.server.ProgramInfoDaemon;
 
 public class ProgramInfoResin extends ProgramInfoDaemon
 {

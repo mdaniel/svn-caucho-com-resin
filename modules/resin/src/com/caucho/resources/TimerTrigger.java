@@ -28,7 +28,7 @@
  */
 package com.caucho.resources;
 
-import com.caucho.config.types.Trigger;
+import com.caucho.v5.config.types.Trigger;
 
 /**
  * Trigger for delay, period

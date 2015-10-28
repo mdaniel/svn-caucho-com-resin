@@ -32,8 +32,8 @@ package com.caucho.resin;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.scope.ContextContainer;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.scope.ContextContainer;
 
 /**
  * Request context for an embedded Resin request.

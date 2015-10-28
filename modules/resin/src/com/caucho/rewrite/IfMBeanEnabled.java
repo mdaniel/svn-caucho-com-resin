@@ -29,12 +29,12 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.jmx.server.ManagedObjectBase;
-import com.caucho.management.server.IfMBeanEnabledMXBean;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
+import com.caucho.v5.management.server.IfMBeanEnabledMXBean;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;

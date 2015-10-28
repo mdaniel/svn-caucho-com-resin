@@ -28,8 +28,8 @@
 
 package com.caucho.jmx.stats;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
 
 /**
  * Statistics for a range of values.

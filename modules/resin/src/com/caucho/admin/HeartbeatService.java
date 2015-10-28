@@ -34,9 +34,9 @@ import io.baratine.core.Startup;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import com.caucho.bartender.BartenderSystem;
-import com.caucho.config.Configurable;
-import com.caucho.config.types.Period;
+import com.caucho.v5.bartender.BartenderSystem;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.Period;
 
 /**
  * Configures the heartbeat system.

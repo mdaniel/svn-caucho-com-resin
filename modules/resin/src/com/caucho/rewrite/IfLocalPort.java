@@ -29,10 +29,10 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.annotation.PostConstruct;

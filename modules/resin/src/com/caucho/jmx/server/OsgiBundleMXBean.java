@@ -29,7 +29,9 @@
 
 package com.caucho.jmx.server;
 
-import com.caucho.jmx.Description;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.jmx.server.ManagedObjectMXBean;
+
 import java.util.Date;
 
 /**

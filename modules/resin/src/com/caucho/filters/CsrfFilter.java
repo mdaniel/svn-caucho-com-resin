@@ -28,13 +28,13 @@
 
 package com.caucho.filters;
 
-import com.caucho.config.Configurable;
-import com.caucho.config.types.Period;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.RandomUtil;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.IntMap;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.LruCache;
+import com.caucho.v5.util.RandomUtil;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

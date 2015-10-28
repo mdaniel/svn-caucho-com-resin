@@ -33,13 +33,13 @@ import java.io.Console;
 import java.util.List;
 
 import com.caucho.admin.Password;
-import com.caucho.cli.daemon.ArgsDaemon;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.ServerCommandBase;
-import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.server.config.ConfigBoot;
-import com.caucho.util.L10N;
+import com.caucho.v5.cli.daemon.ArgsDaemon;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.ServerCommandBase;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ConfigBoot;
+import com.caucho.v5.util.L10N;
 
 /**
  * Command to encrypt a password for resin:Password

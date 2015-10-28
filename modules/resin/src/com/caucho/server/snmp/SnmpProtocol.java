@@ -29,11 +29,11 @@
 
 package com.caucho.server.snmp;
 
-import com.caucho.network.listen.ProtocolBase;
-import com.caucho.network.listen.RequestProtocol;
-import com.caucho.network.listen.ConnectionSocket;
 import com.caucho.server.snmp.types.OctetStringValue;
 import com.caucho.server.snmp.types.SnmpValue;
+import com.caucho.v5.network.listen.ConnectionSocket;
+import com.caucho.v5.network.listen.ProtocolBase;
+import com.caucho.v5.network.listen.RequestProtocol;
 
 import java.util.TreeMap;
 

@@ -29,7 +29,7 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.http.dispatch.FilterChainError;
+import com.caucho.v5.http.dispatch.FilterChainError;
 
 import javax.servlet.FilterChain;
 

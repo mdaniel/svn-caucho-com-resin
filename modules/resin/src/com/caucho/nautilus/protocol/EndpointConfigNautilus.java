@@ -30,7 +30,7 @@
 package com.caucho.nautilus.protocol;
 
 import com.caucho.nautilus.broker.BrokerNautilus;
-import com.caucho.websocket.common.EndpointConfigServerWebSocketBase;
+import com.caucho.v5.websocket.common.EndpointConfigServerWebSocketBase;
 
 /**
  * Custom serialization for the cache

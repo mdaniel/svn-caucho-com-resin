@@ -29,7 +29,7 @@
 
 package com.caucho.nautilus;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 /**
  * Selects how a created queue should handle the messages if no consumers exist.

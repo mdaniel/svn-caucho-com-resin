@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.caucho.loader.*;
+import com.caucho.v5.loader.*;
 
 /**
  * Environment based model for JNDI.

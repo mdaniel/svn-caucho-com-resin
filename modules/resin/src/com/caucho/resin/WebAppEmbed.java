@@ -33,15 +33,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitParam;
-import com.caucho.http.dispatch.FilterConfigImpl;
-import com.caucho.http.dispatch.FilterMapping;
-import com.caucho.http.dispatch.ServletBuilderResin;
-import com.caucho.http.dispatch.ServletMapping;
-import com.caucho.http.webapp.DeployGeneratorWebAppSingle;
-import com.caucho.http.webapp.ListenerConfig;
-import com.caucho.http.webapp.WebApp;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.http.dispatch.FilterConfigImpl;
+import com.caucho.v5.http.dispatch.FilterMapping;
+import com.caucho.v5.http.dispatch.ServletBuilderResin;
+import com.caucho.v5.http.dispatch.ServletMapping;
+import com.caucho.v5.http.webapp.DeployGeneratorWebAppSingle;
+import com.caucho.v5.http.webapp.ListenerConfig;
+import com.caucho.v5.http.webapp.WebApp;
 
 /**
  * Embeddable version of a Resin web-app.

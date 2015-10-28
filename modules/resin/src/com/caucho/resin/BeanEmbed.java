@@ -31,12 +31,12 @@ package com.caucho.resin;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.BeanBuilder;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.util.L10N;
 
 /**
  * Embeddable version of a singleton bean

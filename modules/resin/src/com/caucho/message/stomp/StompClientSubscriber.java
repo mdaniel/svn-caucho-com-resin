@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
 
 /**
  * Custom serialization for the cache

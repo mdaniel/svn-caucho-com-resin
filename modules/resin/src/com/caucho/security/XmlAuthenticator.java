@@ -38,15 +38,15 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.http.security.AbstractAuthenticator;
-import com.caucho.http.security.BasicPrincipal;
-import com.caucho.http.security.PasswordUser;
-import com.caucho.http.security.PasswordUser2;
-import com.caucho.util.CurrentTime;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.http.security.AbstractAuthenticator;
+import com.caucho.v5.http.security.BasicPrincipal;
+import com.caucho.v5.http.security.PasswordUser;
+import com.caucho.v5.http.security.PasswordUser2;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.vfs.Depend;
+import com.caucho.v5.vfs.Path;
 
 /**
  * The XML authenticator reads a static file for authentication.

@@ -28,13 +28,14 @@
 
 package com.caucho.jstl.el;
 
-import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
 
 import javax.el.ELContext;
 import javax.servlet.jsp.JspException;
+
 import java.util.Iterator;
 
 public class ForTokensTag extends ForEachTag {

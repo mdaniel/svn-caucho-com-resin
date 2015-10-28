@@ -44,17 +44,17 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.protocol.RequestCaucho;
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.protocol.RequestAdapter;
-import com.caucho.http.protocol.ResponseAdapter;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.http.protocol.RequestAdapter;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.http.protocol.ResponseAdapter;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ClientDisconnectException;
+import com.caucho.v5.vfs.JarPath;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Base servlet for both JSP and XTP.  It's primarily responsible for

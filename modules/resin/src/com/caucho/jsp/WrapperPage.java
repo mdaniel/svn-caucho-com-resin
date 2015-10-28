@@ -28,15 +28,16 @@
 
 package com.caucho.jsp;
 
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.vfs.Dependency;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.jsp.HttpJspPage;
+
 import java.io.IOException;
 import java.util.ArrayList;
 

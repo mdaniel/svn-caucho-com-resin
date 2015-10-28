@@ -35,11 +35,11 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.DispatchRuleRegexpBase;
-import com.caucho.http.rewrite.DispatchRuleBase;
 import com.caucho.http.rewrite.DispatchRuleBase2;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.DispatchRuleBase;
+import com.caucho.v5.http.rewrite.DispatchRuleRegexpBase;
 
 
 /**

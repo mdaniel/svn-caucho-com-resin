@@ -28,10 +28,11 @@
 
 package com.caucho.jsp;
 
-import com.caucho.vfs.FlushBuffer;
+import com.caucho.v5.vfs.FlushBuffer;
 
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyContent;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;

@@ -45,7 +45,7 @@ import com.caucho.nautilus.broker.ReceiverBroker;
 import com.caucho.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.nautilus.common.ReceiverQueueImpl;
 import com.caucho.nautilus.encode.NautilusDecoder;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 /**
  * basic message receiver includes a linked queue.

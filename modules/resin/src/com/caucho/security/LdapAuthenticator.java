@@ -42,11 +42,11 @@ import javax.naming.directory.InitialDirContext;
 import javax.servlet.ServletException;
 
 import com.caucho.config.ResinService;
-import com.caucho.config.types.InitParam;
-import com.caucho.http.security.AbstractAuthenticator;
-import com.caucho.http.security.BasicPrincipal;
-import com.caucho.http.security.PasswordUser;
-import com.caucho.http.security.PasswordUser2;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.http.security.AbstractAuthenticator;
+import com.caucho.v5.http.security.BasicPrincipal;
+import com.caucho.v5.http.security.PasswordUser;
+import com.caucho.v5.http.security.PasswordUser2;
 
 /**
  * The LDAP authenticator uses the underlying LDAP services

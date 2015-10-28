@@ -29,7 +29,7 @@
 
 package com.caucho.security;
 
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
  * Abstract single-signon

@@ -29,9 +29,9 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;

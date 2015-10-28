@@ -28,7 +28,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

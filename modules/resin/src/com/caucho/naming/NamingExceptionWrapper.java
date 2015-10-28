@@ -28,9 +28,10 @@
 
 package com.caucho.naming;
 
-import com.caucho.util.ExceptionWrapper;
+import com.caucho.v5.util.ExceptionWrapper;
 
 import javax.naming.NamingException;
+
 import java.io.PrintStream;
 import java.io.PrintWriter;
 

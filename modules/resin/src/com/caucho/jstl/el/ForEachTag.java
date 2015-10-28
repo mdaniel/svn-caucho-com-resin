@@ -28,12 +28,12 @@
 
 package com.caucho.jstl.el;
 
-import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.EnumIterator;
-import com.caucho.util.L10N;
-import com.caucho.util.NullIterator;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.EnumIterator;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.NullIterator;
 
 import javax.el.ELContext;
 import javax.servlet.jsp.JspException;
@@ -42,6 +42,7 @@ import javax.servlet.jsp.jstl.core.LoopTag;
 import javax.servlet.jsp.jstl.core.LoopTagStatus;
 import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.TagSupport;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Enumeration;

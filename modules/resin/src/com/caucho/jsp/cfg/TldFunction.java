@@ -28,12 +28,13 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Signature;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Signature;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.jsp.tagext.FunctionInfo;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 

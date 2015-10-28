@@ -10,9 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.util.L10N;
+import com.caucho.v5.network.balance.ClientSocket;
+import com.caucho.v5.network.balance.ClientSocketFactory;
+import com.caucho.v5.util.L10N;
 
 /**
  * Strategy for selecting the next server

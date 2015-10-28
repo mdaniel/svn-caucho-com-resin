@@ -31,8 +31,8 @@ package com.caucho.security;
 
 import java.security.Principal;
 
-import com.caucho.http.security.AbstractAuthenticator;
-import com.caucho.http.security.CookieAuthenticator;
+import com.caucho.v5.http.security.AbstractAuthenticator;
+import com.caucho.v5.http.security.CookieAuthenticator;
 
 /**
  * All applications should extend AbstractAuthenticator to implement

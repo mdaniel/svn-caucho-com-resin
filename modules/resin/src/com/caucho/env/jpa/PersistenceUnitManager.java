@@ -56,19 +56,19 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import com.caucho.cli.resin.ResinCommandLineAgent;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Manages a single persistence unit

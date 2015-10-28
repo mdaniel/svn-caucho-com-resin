@@ -29,9 +29,9 @@
 
 package com.caucho.admin.action;
 
-import com.caucho.http.security.PasswordUser2;
 import com.caucho.security.AdminAuthenticator;
-import com.caucho.util.L10N;
+import com.caucho.v5.http.security.PasswordUser2;
+import com.caucho.v5.util.L10N;
 
 import java.util.logging.Logger;
 

@@ -35,9 +35,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.security.ConstraintBase;
-import com.caucho.http.security.AuthorizationResult;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.http.security.AuthorizationResult;
+import com.caucho.v5.http.security.ConstraintBase;
 
 /**
  * The &lt;sec:Require> tag authorizes requests for a set of url-patterns.

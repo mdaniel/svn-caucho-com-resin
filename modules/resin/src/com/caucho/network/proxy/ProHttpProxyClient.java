@@ -33,8 +33,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.*;
 
 import com.caucho.http.proxy.LoadBalanceManager;
-import com.caucho.network.balance.*;
-import com.caucho.util.L10N;
+import com.caucho.v5.network.balance.*;
+import com.caucho.v5.util.L10N;
 
 public class ProHttpProxyClient extends HttpProxyClient
 {

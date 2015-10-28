@@ -33,9 +33,9 @@ import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.cfg.TldTagFile;
 import com.caucho.jsp.cfg.TldTaglib;
 import com.caucho.jsp.cfg.TldValidator;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.*;
 
 import javax.servlet.jsp.tagext.FunctionInfo;
 import javax.servlet.jsp.tagext.TagExtraInfo;
@@ -43,6 +43,7 @@ import javax.servlet.jsp.tagext.TagFileInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagLibraryValidator;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 

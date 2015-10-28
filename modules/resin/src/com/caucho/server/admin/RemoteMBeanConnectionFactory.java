@@ -32,11 +32,12 @@ package com.caucho.server.admin;
 import java.lang.reflect.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
+
 import javax.management.MBeanServerConnection;
 
-import com.caucho.config.*;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.*;
+import com.caucho.v5.config.*;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.*;
 
 /**
  * Proxy implementation for Hessian clients.  Applications will generally

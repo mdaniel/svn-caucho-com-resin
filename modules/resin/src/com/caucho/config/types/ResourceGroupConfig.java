@@ -39,16 +39,17 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.NamingException;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-import com.caucho.config.inject.InjectManagerResin;
-import com.caucho.config.inject.ObjectFactoryNaming;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ResourceInjectionTargetProgram;
 import com.caucho.config.program.ResourceProgram;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.inject.InjectManagerResin;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.types.InjectionTarget;
+import com.caucho.v5.util.L10N;
 
 /**
  * Configuration for the resource group

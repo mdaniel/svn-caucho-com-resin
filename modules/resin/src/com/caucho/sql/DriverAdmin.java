@@ -32,8 +32,8 @@ package com.caucho.sql;
 
 import javax.management.*;
 
-import com.caucho.jmx.server.ManagedObjectBase;
 import com.caucho.management.server.JdbcDriverMXBean;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
 
 import java.lang.reflect.Method;
 import java.util.Date;

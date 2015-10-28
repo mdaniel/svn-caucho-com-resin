@@ -34,7 +34,7 @@ import com.caucho.nautilus.SenderQueueFactory;
 import com.caucho.nautilus.MessageSettleListener;
 import com.caucho.nautilus.SettleMode;
 import com.caucho.nautilus.encode.StringEncoder;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 /**
  * local connection to the message store

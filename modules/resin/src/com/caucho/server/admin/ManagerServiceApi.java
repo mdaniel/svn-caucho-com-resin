@@ -32,8 +32,8 @@ package com.caucho.server.admin;
 import java.util.Date;
 import java.util.logging.Level;
 
-import com.caucho.health.action.JmxSetQueryReply;
-import com.caucho.vfs.StreamSource;
+import com.caucho.v5.health.action.JmxSetQueryReply;
+import com.caucho.v5.vfs.StreamSource;
 
 public interface ManagerServiceApi
 {

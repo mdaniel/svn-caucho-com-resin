@@ -28,8 +28,8 @@
 
 package com.caucho.xpath.functions;
 
-import com.caucho.util.L10N;
-import com.caucho.xml.XmlPrinter;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.xml.XmlPrinter;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;

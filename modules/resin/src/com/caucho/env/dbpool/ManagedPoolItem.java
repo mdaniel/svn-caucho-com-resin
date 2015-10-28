@@ -38,12 +38,12 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import com.caucho.sql.ManagedConnectionImpl;
-import com.caucho.transaction.ManagedResource;
-import com.caucho.transaction.ManagedXAResource;
-import com.caucho.transaction.UserTransactionImpl;
-import com.caucho.transaction.XAExceptionWrapper;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.transaction.ManagedResource;
+import com.caucho.v5.transaction.ManagedXAResource;
+import com.caucho.v5.transaction.UserTransactionImpl;
+import com.caucho.v5.transaction.XAExceptionWrapper;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 /**
  * Manages a ManagedConnection in the pool. Each ManagedPoolItem corresponds

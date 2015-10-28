@@ -28,8 +28,8 @@
 
 package com.caucho.xpath;
 
-import com.caucho.util.FreeList;
-import com.caucho.xml.XmlUtil;
+import com.caucho.v5.util.FreeList;
+import com.caucho.v5.xml.XmlUtil;
 import com.caucho.xpath.expr.ObjectVar;
 import com.caucho.xpath.expr.Var;
 import com.caucho.xpath.pattern.AbstractPattern;

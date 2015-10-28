@@ -28,7 +28,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.vfs.Path;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Configuration for the init-param pattern.

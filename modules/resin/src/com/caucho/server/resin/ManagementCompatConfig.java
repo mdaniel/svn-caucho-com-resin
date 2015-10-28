@@ -29,10 +29,11 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 import javax.annotation.PostConstruct;
+
 import java.util.logging.Logger;
 
 public class ManagementCompatConfig

@@ -28,15 +28,16 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Path;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.vfs.Path;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

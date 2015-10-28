@@ -50,21 +50,21 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.custom.ConfigCustomBean;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.DefaultLiteral;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.config.type.TypeFactoryConfig;
-import com.caucho.inject.Module;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.custom.ConfigCustomBean;
+import com.caucho.v5.config.inject.BeanBuilder;
+import com.caucho.v5.config.inject.DefaultLiteral;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.program.PropertyStringProgram;
+import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.config.type.TypeFactoryConfig;
+import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.L10N;
 
 /**
  * Backward-compat configuration for the xml web bean component.

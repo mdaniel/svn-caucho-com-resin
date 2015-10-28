@@ -28,15 +28,15 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.HTTPUtil;
-import com.caucho.util.QDate;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-import com.caucho.xml.XmlParser;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.HTTPUtil;
+import com.caucho.v5.util.QDate;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.xml.XmlParser;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -50,6 +50,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

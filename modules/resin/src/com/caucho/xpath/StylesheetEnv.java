@@ -28,7 +28,7 @@
 
 package com.caucho.xpath;
 
-import com.caucho.vfs.Path;
+import com.caucho.v5.vfs.Path;
 
 public class StylesheetEnv {
   private Path _path;

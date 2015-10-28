@@ -31,10 +31,11 @@ package com.caucho.config.core;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.NoAspect;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.type.FlowBean;
+import com.caucho.v5.config.NoAspect;
+import com.caucho.v5.config.core.ControlConfig;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.type.FlowBean;
 
 /**
  * Sets an EL value.

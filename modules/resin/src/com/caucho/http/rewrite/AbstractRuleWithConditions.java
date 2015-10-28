@@ -29,10 +29,10 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-import com.caucho.vfs.CaseInsensitive;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.CaseInsensitive;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

@@ -31,7 +31,7 @@ package com.caucho.jsp.java;
 
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.TagInstance;
-import com.caucho.util.CharBuffer;
+import com.caucho.v5.util.CharBuffer;
 
 /**
  * Represents the body for a fragment (jsp:attribute or jsp:body)

@@ -28,7 +28,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.vfs.*;
+import com.caucho.v5.vfs.*;
 
 /**
  * Configuration for the ejb-local-ref

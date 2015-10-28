@@ -36,11 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.amp.thread.ThreadPool;
-import com.caucho.util.IoUtil;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.amp.thread.ThreadPool;
+import com.caucho.v5.util.IoUtil;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache

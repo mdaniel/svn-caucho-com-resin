@@ -29,8 +29,8 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
-import com.caucho.jmx.server.ManagedObjectMXBean;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.jmx.server.ManagedObjectMXBean;
 
 import java.sql.SQLException;
 

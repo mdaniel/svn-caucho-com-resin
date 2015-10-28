@@ -34,7 +34,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
  * Returns the JNDI context for the current classloader.  Since each

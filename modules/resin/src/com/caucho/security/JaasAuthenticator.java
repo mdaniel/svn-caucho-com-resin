@@ -48,13 +48,13 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import javax.servlet.ServletException;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitParam;
-import com.caucho.http.security.AbstractAuthenticator;
-import com.caucho.http.security.PasswordCredentials;
-import com.caucho.http.security.RolePrincipal;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.http.security.AbstractAuthenticator;
+import com.caucho.v5.http.security.PasswordCredentials;
+import com.caucho.v5.http.security.RolePrincipal;
+import com.caucho.v5.util.L10N;
 
 /**
  * The JAAS authenticator uses an existing JAAS LoginModule.  Applications

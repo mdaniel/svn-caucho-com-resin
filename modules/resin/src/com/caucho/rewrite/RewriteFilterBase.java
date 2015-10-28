@@ -36,10 +36,10 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.http.rewrite.FilterChainMatch;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.rewrite.RewriteFilter;
-import com.caucho.http.rewrite.RewriteFilterAdapter;
+import com.caucho.v5.http.rewrite.FilterChainMatch;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.http.rewrite.RewriteFilter;
+import com.caucho.v5.http.rewrite.RewriteFilterAdapter;
 
 /**
  * Implements general extended behavior for rewrite filters like 

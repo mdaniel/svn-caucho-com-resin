@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
-import com.caucho.http.session.SessionImpl;
+import com.caucho.v5.http.session.SessionImpl;
 
 public class SingleSignonEntry {
   private static final Logger log

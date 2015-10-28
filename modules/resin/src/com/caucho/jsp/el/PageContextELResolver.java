@@ -38,9 +38,9 @@ import javax.el.*;
 import javax.servlet.jsp.el.ImplicitObjectELResolver;
 import javax.servlet.jsp.el.ScopedAttributeELResolver;
 
-import com.caucho.el.VariableResolverBase;
-import com.caucho.el.stream.StreamELResolver;
 import com.caucho.jsp.PageContextImpl;
+import com.caucho.v5.el.VariableResolverBase;
+import com.caucho.v5.el.stream.StreamELResolver;
 
 /**
  * Variable resolution for JSP variables

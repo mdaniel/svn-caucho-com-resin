@@ -33,9 +33,9 @@ import java.util.logging.Logger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ValueGenerator;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.util.L10N;
 
 public class JndiValueGenerator extends ValueGenerator {
   private static final Logger log = Logger.getLogger(JndiValueGenerator.class.getName());

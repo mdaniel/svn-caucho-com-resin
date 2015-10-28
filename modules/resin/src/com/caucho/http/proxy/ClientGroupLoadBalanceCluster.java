@@ -32,11 +32,11 @@ package com.caucho.http.proxy;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bartender.ServerBartender;
-import com.caucho.bartender.network.ServerNetwork;
-import com.caucho.bartender.pod.PodBartender;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.util.L10N;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.bartender.network.ServerNetwork;
+import com.caucho.v5.bartender.pod.PodBartender;
+import com.caucho.v5.network.balance.ClientSocketFactory;
+import com.caucho.v5.util.L10N;
 
 /**
  * Manages a load balancer.

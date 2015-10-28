@@ -38,7 +38,7 @@ import javax.websocket.RemoteEndpoint;
 
 import com.caucho.nautilus.EncoderMessage;
 import com.caucho.nautilus.MessagePropertiesFactory;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * nautilus websocket stream writer.

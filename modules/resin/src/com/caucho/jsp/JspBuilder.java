@@ -29,10 +29,10 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.java.JspNode;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Generates the nodes for JSP code.

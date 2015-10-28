@@ -30,10 +30,11 @@ package com.caucho.config.core;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.v5.config.core.ControlConfig;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.loader.EnvironmentBean;
+import com.caucho.v5.loader.EnvironmentClassLoader;
 
 /**
  * Separate environment for a bean

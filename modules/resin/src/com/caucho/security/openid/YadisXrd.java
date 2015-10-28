@@ -29,7 +29,7 @@
 
 package com.caucho.security.openid;
 
-import com.caucho.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ConfigProgram;
 
 import java.io.*;
 import java.util.*;

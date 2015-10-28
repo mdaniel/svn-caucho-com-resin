@@ -31,10 +31,10 @@ package com.caucho.rewrite;
 
 import javax.servlet.FilterChain;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
 import com.caucho.http.rewrite.AddHeaderFilterChain;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.util.L10N;
 
 /**
  * Sets a response Vary header to control caching based on input headers,

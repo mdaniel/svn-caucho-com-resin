@@ -41,19 +41,7 @@ import java.util.logging.Logger;
 
 import javax.management.ReflectionException;
 
-import com.caucho.amp.AmpSystem;
-import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.bartender.ServerBartender;
 import com.caucho.cli.boot.LogLevelCommand;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.health.action.JmxSetQueryReply;
-import com.caucho.jmx.AdminStream;
-import com.caucho.jmx.Description;
-import com.caucho.jmx.MXAction;
-import com.caucho.jmx.MXContentType;
-import com.caucho.jmx.MXParam;
-import com.caucho.jmx.server.ManagedObjectBase;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.server.admin.AddUserQueryReply;
 import com.caucho.server.admin.JmxCallQueryReply;
@@ -66,11 +54,23 @@ import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StringQueryReply;
-import com.caucho.server.container.ServerBase;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.amp.AmpSystem;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.health.action.JmxSetQueryReply;
+import com.caucho.v5.jmx.AdminStream;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.jmx.MXAction;
+import com.caucho.v5.jmx.MXContentType;
+import com.caucho.v5.jmx.MXParam;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
+import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
 
 public class ManagementAdmin extends ManagedObjectBase
   implements ManagementMXBean

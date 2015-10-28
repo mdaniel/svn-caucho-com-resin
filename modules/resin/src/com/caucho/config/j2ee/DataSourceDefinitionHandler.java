@@ -41,18 +41,18 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.sql.DataSource;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.FieldGeneratorProgram;
-import com.caucho.config.program.MethodGeneratorProgram;
-import com.caucho.config.program.NullProgram;
-import com.caucho.config.program.SingletonValueGenerator;
-import com.caucho.config.program.ValueGenerator;
 import com.caucho.env.jdbc.DatabaseFactory;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.FieldGeneratorProgram;
+import com.caucho.v5.config.program.MethodGeneratorProgram;
+import com.caucho.v5.config.program.NullProgram;
+import com.caucho.v5.config.program.SingletonValueGenerator;
+import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.util.L10N;
 
 /**
  * Handles the @EJB annotation for JavaEE

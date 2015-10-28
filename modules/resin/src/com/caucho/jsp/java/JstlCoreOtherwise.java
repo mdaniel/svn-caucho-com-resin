@@ -30,7 +30,7 @@
 package com.caucho.jsp.java;
 
 import com.caucho.jsp.JspParseException;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 

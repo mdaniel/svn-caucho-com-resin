@@ -40,26 +40,26 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.PathPatternType;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.TldPreload;
 import com.caucho.jsp.cfg.TldTaglib;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.ZipScanner;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.FileSetType;
+import com.caucho.v5.config.types.PathPatternType;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.JarPath;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.ZipScanner;
 
 /**
  * Stores the parsed tlds.

@@ -29,12 +29,13 @@
 package com.caucho.jstl.rt;
 
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.tagext.TagSupport;
+
 import java.util.Locale;
 
 /**

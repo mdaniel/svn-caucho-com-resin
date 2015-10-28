@@ -27,12 +27,12 @@
 
 package com.caucho.config.resin;
 
-import com.caucho.config.Config;
-import com.caucho.config.core.ContextConfig;
-import com.caucho.config.type.TypeFactoryConfig;
-import com.caucho.config.type.TypeFactoryResin;
-import com.caucho.config.xml.ContextConfigXml;
-import com.caucho.inject.Module;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.core.ContextConfig;
+import com.caucho.v5.config.type.TypeFactoryConfig;
+import com.caucho.v5.config.type.TypeFactoryResin;
+import com.caucho.v5.config.xml.ContextConfigXml;
+import com.caucho.v5.inject.Module;
 
 /**
  * The ConfigContext contains the state of the current configuration.

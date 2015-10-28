@@ -29,10 +29,10 @@
 
 package com.caucho.jsp;
 
-import com.caucho.http.protocol.OutResponseBase;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Encoding;
+import com.caucho.v5.vfs.TempBuffer;
 
 import java.io.IOException;
 import java.io.InputStream;

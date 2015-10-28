@@ -44,15 +44,15 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 
-import com.caucho.config.CauchoBean;
-import com.caucho.config.CauchoDeployment;
-import com.caucho.config.ContextDependent;
-import com.caucho.http.security.SecurityContextException;
-import com.caucho.jmx.JmxUtil;
 import com.caucho.security.SecurityContext;
 import com.caucho.server.util.ScheduledThreadPool;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.UserTransactionProxy;
+import com.caucho.v5.config.CauchoBean;
+import com.caucho.v5.config.CauchoDeployment;
+import com.caucho.v5.config.ContextDependent;
+import com.caucho.v5.http.security.SecurityContextException;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.transaction.UserTransactionProxy;
 
 /**
  * Resin CDI producer for the main singletons.

@@ -29,9 +29,24 @@
 
 package com.caucho.el;
 
-import com.caucho.el.stream.StreamELResolver;
 import com.caucho.jsp.el.JspELParser;
-import com.caucho.util.L10N;
+import com.caucho.v5.el.BigDecimalValueExpression;
+import com.caucho.v5.el.BigIntegerValueExpression;
+import com.caucho.v5.el.BooleanValueExpression;
+import com.caucho.v5.el.ByteValueExpression;
+import com.caucho.v5.el.CharacterValueExpression;
+import com.caucho.v5.el.DoubleValueExpression;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.el.FloatValueExpression;
+import com.caucho.v5.el.IntegerValueExpression;
+import com.caucho.v5.el.LongValueExpression;
+import com.caucho.v5.el.MethodExpressionImpl;
+import com.caucho.v5.el.ObjectLiteralValueExpression;
+import com.caucho.v5.el.ObjectValueExpression;
+import com.caucho.v5.el.ShortValueExpression;
+import com.caucho.v5.el.StringValueExpression;
+import com.caucho.v5.el.stream.StreamELResolver;
+import com.caucho.v5.util.L10N;
 
 import javax.el.*;
 

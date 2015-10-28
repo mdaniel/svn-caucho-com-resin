@@ -32,8 +32,8 @@ package com.caucho.message.stomp;
 import java.io.IOException;
 
 import com.caucho.nautilus.broker.SenderSettleHandler;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Unsubscribe from a stomp message destination.

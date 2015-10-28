@@ -30,13 +30,14 @@
 
 package com.caucho.config.manager;
 
-import com.caucho.jmx.server.*;
+import com.caucho.v5.jmx.server.*;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.enterprise.inject.spi.Bean;
 
 /**

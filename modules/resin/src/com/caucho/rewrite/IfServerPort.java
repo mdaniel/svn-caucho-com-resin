@@ -32,9 +32,9 @@ package com.caucho.rewrite;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.util.L10N;
 
 /**
  * A rewrite condition that passes if the request.getServerPort() matches.

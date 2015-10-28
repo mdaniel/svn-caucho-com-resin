@@ -29,11 +29,11 @@
 
 package com.caucho.env.dbpool;
 
-import com.caucho.env.health.HealthCheckResult;
-import com.caucho.env.health.HealthStatus;
-import com.caucho.env.health.HealthStatusListener;
-import com.caucho.health.check.AbstractHealthCheck;
-import com.caucho.util.L10N;
+import com.caucho.v5.env.health.HealthCheckResult;
+import com.caucho.v5.env.health.HealthStatus;
+import com.caucho.v5.env.health.HealthStatusListener;
+import com.caucho.v5.health.check.AbstractHealthCheck;
+import com.caucho.v5.util.L10N;
 
 /**
  * Health check for the connection pool.

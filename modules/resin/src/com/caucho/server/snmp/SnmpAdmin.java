@@ -33,8 +33,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.management.ObjectName;
-import com.caucho.jmx.JmxUtil;
-import com.caucho.jmx.server.ManagedObjectBase;
+
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
 
 public class SnmpAdmin extends ManagedObjectBase
 {

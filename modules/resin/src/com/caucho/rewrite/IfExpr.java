@@ -36,12 +36,12 @@ import javax.annotation.PostConstruct;
 import javax.el.ELException;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.el.ConfigELContext;
-import com.caucho.el.Expr;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.el.ConfigELContext;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.util.L10N;
 
 /**
  * Passes if the named header exists and has a value

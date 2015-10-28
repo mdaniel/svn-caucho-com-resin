@@ -29,10 +29,10 @@
 
 package com.caucho.http.proxy;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.network.balance.ClientSocket;
+import com.caucho.v5.network.balance.ClientSocketFactory;
+import com.caucho.v5.util.L10N;
 
 /**
  * Manages a load balancer.

@@ -28,17 +28,18 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.*;
 import com.caucho.jsp.cfg.*;
-import com.caucho.util.CompileException;
-import com.caucho.util.L10N;
-import com.caucho.util.LineCompileException;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.util.CompileException;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.LineCompileException;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagInfo;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;

@@ -34,13 +34,13 @@ import java.util.regex.Matcher;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.http.dispatch.FilterChainForwardAbsolute;
-import com.caucho.http.dispatch.FilterChainForward;
-import com.caucho.http.rewrite.DispatchRuleRegexpBase;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.dispatch.FilterChainForward;
+import com.caucho.v5.http.dispatch.FilterChainForwardAbsolute;
+import com.caucho.v5.http.rewrite.DispatchRuleRegexpBase;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
 
 /**
  * Forwards a requests using the servlet RequestDispatcher.forward call

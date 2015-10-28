@@ -29,12 +29,12 @@
 
 package com.caucho.jsp;
 
-import com.caucho.el.EL;
-import com.caucho.http.protocol.ResponseCaucho;
-import com.caucho.http.protocol.ResponseServlet;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.FreeList;
-import com.caucho.util.L10N;
+import com.caucho.v5.el.EL;
+import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.http.protocol.ResponseServlet;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.FreeList;
+import com.caucho.v5.util.L10N;
 
 import javax.el.ELContext;
 import javax.servlet.Servlet;
@@ -51,6 +51,7 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.tagext.BodyContent;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;

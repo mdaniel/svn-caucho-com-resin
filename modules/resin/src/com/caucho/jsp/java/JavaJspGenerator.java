@@ -49,15 +49,6 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryValidator;
 import javax.servlet.jsp.tagext.ValidationMessage;
 
-import com.caucho.config.cf.QName;
-import com.caucho.config.types.Signature;
-import com.caucho.el.Expr;
-import com.caucho.env.system.RootDirectorySystem;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.java.CompileClassNotFound;
-import com.caucho.java.LineMap;
-import com.caucho.java.LineMapWriter;
 import com.caucho.jsp.JspGenerator;
 import com.caucho.jsp.JspPageConfig;
 import com.caucho.jsp.JspParseException;
@@ -70,20 +61,29 @@ import com.caucho.jsp.TagInstance;
 import com.caucho.jsp.Taglib;
 import com.caucho.jsp.cfg.TldFunction;
 import com.caucho.jsp.el.JspELParser;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.make.ClassDependency;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.util.Version;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.types.Signature;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.env.system.RootDirectorySystem;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.java.CompileClassNotFound;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.java.LineMapWriter;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.make.ClassDependency;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.IntMap;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.Version;
+import com.caucho.v5.vfs.Depend;
+import com.caucho.v5.vfs.Encoding;
+import com.caucho.v5.vfs.MergePath;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.TempStream;
+import com.caucho.v5.vfs.WriteStream;
 import com.caucho.xpath.NamespaceContext;
 import com.caucho.xpath.XPath;
 import com.caucho.xpath.XPathParseException;
@@ -1317,7 +1317,7 @@ public class JavaJspGenerator extends JspGenerator {
     return _fragmentList.get(index);
   }
 
-  public com.caucho.el.Expr genExpr(String value)
+  public com.caucho.v5.el.Expr genExpr(String value)
     throws JspParseException, ELException
   {
     JspELParser parser = new JspELParser(_elContext, value);
@@ -1351,7 +1351,7 @@ public class JavaJspGenerator extends JspGenerator {
   {
     JspELParser parser = new JspELParser(_elContext, value);
 
-    com.caucho.el.Expr expr = parser.parse();
+    com.caucho.v5.el.Expr expr = parser.parse();
 
     int index = _valueExprList.indexOf(expr);
     if (index >= 0)
@@ -1385,7 +1385,7 @@ public class JavaJspGenerator extends JspGenerator {
   {
     JspELParser parser = new JspELParser(_elContext, value);
 
-    com.caucho.el.Expr expr = parser.parse();
+    com.caucho.v5.el.Expr expr = parser.parse();
 
     Class<?> retType = void.class;
     Class<?> []args = new Class[0];
@@ -2521,12 +2521,12 @@ public class JavaJspGenerator extends JspGenerator {
 
   static class MethodExpr {
     private String _exprString;
-    com.caucho.el.Expr _expr;
+    com.caucho.v5.el.Expr _expr;
     Class<?> []_args;
     Class<?> _retType;
 
     MethodExpr(String exprString,
-               com.caucho.el.Expr expr, Class<?> []args, Class<?> retType)
+               com.caucho.v5.el.Expr expr, Class<?> []args, Class<?> retType)
     {
       _exprString = exprString;
       _expr = expr;
@@ -2539,7 +2539,7 @@ public class JavaJspGenerator extends JspGenerator {
       return _exprString;
     }
 
-    com.caucho.el.Expr getExpr()
+    com.caucho.v5.el.Expr getExpr()
     {
       return _expr;
     }
@@ -2557,10 +2557,10 @@ public class JavaJspGenerator extends JspGenerator {
 
   static class ValueExpr {
     private String _exprString;
-    com.caucho.el.Expr _expr;
+    com.caucho.v5.el.Expr _expr;
     Class<?> _retType;
 
-    ValueExpr(String exprString, com.caucho.el.Expr expr, Class<?> retType)
+    ValueExpr(String exprString, com.caucho.v5.el.Expr expr, Class<?> retType)
     {
       _exprString = exprString;
       _expr = expr;
@@ -2572,7 +2572,7 @@ public class JavaJspGenerator extends JspGenerator {
       return _exprString;
     }
 
-    com.caucho.el.Expr getExpr()
+    com.caucho.v5.el.Expr getExpr()
     {
       return _expr;
     }

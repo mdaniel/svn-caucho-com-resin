@@ -39,25 +39,25 @@ import java.util.logging.Logger;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.env.health.HealthStatus;
-import com.caucho.env.health.HealthStatusService;
-import com.caucho.env.meter.MeterActiveTime;
-import com.caucho.env.meter.MeterService;
-import com.caucho.inject.Module;
 import com.caucho.jmx.server.ConnectionPoolMXBean;
-import com.caucho.jmx.server.ManagedObjectBase;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.transaction.ManagedXAResource;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.UserTransactionImpl;
-import com.caucho.transaction.UserTransactionProxy;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.util.WeakAlarm;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.health.HealthStatus;
+import com.caucho.v5.env.health.HealthStatusService;
+import com.caucho.v5.env.meter.MeterActiveTime;
+import com.caucho.v5.env.meter.MeterService;
+import com.caucho.v5.inject.Module;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.transaction.ManagedXAResource;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.transaction.UserTransactionImpl;
+import com.caucho.v5.transaction.UserTransactionProxy;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.WeakAlarm;
 
 /**
  * Implementation of the connection manager.

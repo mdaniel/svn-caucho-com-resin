@@ -29,7 +29,7 @@ package com.caucho.server.admin;
 
 import java.beans.ConstructorProperties;
 
-import com.caucho.vfs.StreamSource;
+import com.caucho.v5.vfs.StreamSource;
 
 @SuppressWarnings("serial")
 public class PdfReportQueryReply extends ManagementQueryReply

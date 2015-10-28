@@ -28,7 +28,7 @@
 
 package com.caucho.vfs.memory;
 
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.vfs.Vfs;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -28,8 +28,8 @@
 
 package com.caucho.jstl;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
 
 import java.lang.reflect.*;
 import java.util.*;

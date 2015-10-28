@@ -32,8 +32,8 @@ package com.caucho.env.jpa;
 import java.net.URL;
 import java.util.ArrayList;
 
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Top <persistence> tag for the persistence.xml

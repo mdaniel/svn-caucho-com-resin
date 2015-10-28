@@ -31,10 +31,11 @@ package com.caucho.jmx.server;
 
 import java.util.Date;
 
-import com.caucho.jmx.Counter;
-import com.caucho.jmx.Description;
-import com.caucho.jmx.Gauge;
-import com.caucho.jmx.Units;
+import com.caucho.v5.jmx.Counter;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.jmx.Gauge;
+import com.caucho.v5.jmx.Units;
+import com.caucho.v5.jmx.server.ManagedObjectMXBean;
 
 /**
  * MBean API for the JCA connection pool.

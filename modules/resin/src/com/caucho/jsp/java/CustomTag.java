@@ -38,8 +38,8 @@ import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 import javax.servlet.jsp.tagext.VariableInfo;
 
-import com.caucho.config.cf.QName;
 import com.caucho.jsp.AnalyzedTag;
+import com.caucho.v5.config.cf.QName;
 
 /**
  * Represents a custom tag.

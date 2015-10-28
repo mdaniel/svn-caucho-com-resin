@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 
 import javax.security.auth.Subject;
 
-import com.caucho.bartender.ServerBartender;
 import com.caucho.env.dbpool.ConnectionManager;
 import com.caucho.env.dbpool.ConnectionRequestInfo;
 import com.caucho.env.dbpool.IdlePoolSet;
@@ -46,8 +45,9 @@ import com.caucho.env.dbpool.ManagedConnection;
 import com.caucho.env.dbpool.ManagedConnectionFactory;
 import com.caucho.env.dbpool.ResourceException;
 import com.caucho.env.dbpool.ValidatingManagedConnectionFactory;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.util.L10N;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.util.L10N;
 
 /**
  * The managed factory implementation.

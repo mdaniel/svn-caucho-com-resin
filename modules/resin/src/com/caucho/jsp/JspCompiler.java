@@ -41,29 +41,29 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspPage;
 
-import com.caucho.config.Config;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.env.system.SystemManager;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.java.JavaCompilerUtil;
-import com.caucho.java.JavacConfig;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.JspTaglib;
-import com.caucho.loader.CompilingLoader;
-import com.caucho.loader.DirectoryLoader;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.SimpleLoader;
 import com.caucho.resin.ResinEmbed;
 import com.caucho.resin.WebAppEmbed;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.java.JavaCompilerUtil;
+import com.caucho.v5.java.JavacConfig;
+import com.caucho.v5.loader.CompilingLoader;
+import com.caucho.v5.loader.DirectoryLoader;
+import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.loader.EnvironmentBean;
+import com.caucho.v5.loader.SimpleLoader;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Compilation interface for JSP pages.

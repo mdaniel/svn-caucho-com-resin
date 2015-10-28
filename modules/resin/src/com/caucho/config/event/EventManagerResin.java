@@ -53,11 +53,13 @@ import javax.enterprise.inject.spi.WithAnnotations;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.reflect.BaseType;
-import com.caucho.config.reflect.ParamType;
-import com.caucho.inject.Module;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.event.EventManager;
+import com.caucho.v5.config.event.ObserverMethodImpl;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.reflect.BaseType;
+import com.caucho.v5.config.reflect.ParamType;
+import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.L10N;
 
 /**
  * Internal implementation for a Bean

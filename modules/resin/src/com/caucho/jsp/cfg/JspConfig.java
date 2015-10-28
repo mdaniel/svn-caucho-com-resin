@@ -28,7 +28,7 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebApp;
 
 import java.util.ArrayList;
 

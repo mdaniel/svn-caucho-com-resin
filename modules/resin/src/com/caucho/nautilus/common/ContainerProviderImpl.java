@@ -45,7 +45,7 @@ import com.caucho.nautilus.SenderQueue.Settler;
 import com.caucho.nautilus.SenderQueueConfig;
 import com.caucho.nautilus.spi.BrokerProvider;
 import com.caucho.nautilus.spi.ContainerProvider;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 /**
  * Container for the nautilus implementation.

@@ -28,8 +28,8 @@
 
 package com.caucho.naming;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.L10N;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -37,6 +37,7 @@ import javax.naming.Name;
 import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
+
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;

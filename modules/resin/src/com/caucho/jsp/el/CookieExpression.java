@@ -28,15 +28,16 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.*;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.el.*;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.el.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
+
 import java.io.IOException;
 import java.util.*;
 

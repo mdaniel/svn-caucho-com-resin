@@ -28,11 +28,12 @@
 
 package com.caucho.jstl.rt;
 
-import com.caucho.util.*;
+import com.caucho.v5.util.*;
 
 import javax.el.*;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.jstl.core.*;
+
 import java.lang.reflect.Array;
 import java.util.*;
 

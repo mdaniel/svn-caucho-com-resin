@@ -29,15 +29,15 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.cf.QName;
-import com.caucho.java.LineMap;
 import com.caucho.jsp.java.JspNode;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.util.LineCompileException;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.xml.XmlChar;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.LineCompileException;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.xml.XmlChar;
 
 import java.io.IOException;
 import java.util.ArrayList;

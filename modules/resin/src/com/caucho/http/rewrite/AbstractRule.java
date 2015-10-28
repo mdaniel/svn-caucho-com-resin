@@ -29,17 +29,18 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.CronType;
-import com.caucho.jmx.server.ManagedObjectBase;
-import com.caucho.management.server.RewriteRuleMXBean;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.CronType;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
+import com.caucho.v5.management.server.RewriteRuleMXBean;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.AlarmListener;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.util.logging.Logger;
 
 abstract public class AbstractRule

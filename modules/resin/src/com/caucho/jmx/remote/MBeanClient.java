@@ -29,8 +29,8 @@
 
 package com.caucho.jmx.remote;
 
-import com.caucho.hessian.client.HessianProxyFactory;
-import com.caucho.hessian.jmx.JMXSerializerFactory;
+import com.caucho.v5.hessian.client.HessianProxyFactory;
+import com.caucho.v5.hessian.jmx.JMXSerializerFactory;
 
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;

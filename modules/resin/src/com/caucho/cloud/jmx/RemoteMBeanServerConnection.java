@@ -36,8 +36,8 @@ import javax.management.ObjectName;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 
-import com.caucho.util.L10N;
-import com.caucho.util.TimedCache;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.TimedCache;
 
 /**
  * Remote administration API

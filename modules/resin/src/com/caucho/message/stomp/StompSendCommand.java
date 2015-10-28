@@ -33,9 +33,9 @@ import java.io.IOException;
 
 import com.caucho.nautilus.broker.SenderBroker;
 import com.caucho.nautilus.broker.SenderSettleHandler;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache

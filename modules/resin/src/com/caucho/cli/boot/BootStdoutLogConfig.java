@@ -29,7 +29,7 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.log.impl.RotateLog;
+import com.caucho.v5.log.impl.RotateLog;
 
 public class BootStdoutLogConfig extends RotateLog {
   @Override

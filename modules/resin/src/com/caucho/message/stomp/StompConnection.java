@@ -43,12 +43,12 @@ import com.caucho.nautilus.broker.ReceiverBroker;
 import com.caucho.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.nautilus.broker.SenderBroker;
 import com.caucho.nautilus.broker.SenderSettleHandler;
-import com.caucho.network.listen.ConnectionSocket;
-import com.caucho.network.listen.NextState;
-import com.caucho.network.listen.RequestProtocolBase;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.network.listen.ConnectionSocket;
+import com.caucho.v5.network.listen.NextState;
+import com.caucho.v5.network.listen.RequestProtocolBase;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache

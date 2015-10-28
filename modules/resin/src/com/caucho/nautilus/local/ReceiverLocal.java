@@ -47,7 +47,7 @@ import com.caucho.nautilus.broker.ReceiverBroker;
 import com.caucho.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.nautilus.common.ReceiverQueueBase;
 import com.caucho.nautilus.encode.NautilusDecoder;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 /**
  * local connection to the message store

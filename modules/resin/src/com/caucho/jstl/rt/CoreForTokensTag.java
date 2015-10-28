@@ -28,14 +28,15 @@
 
 package com.caucho.jstl.rt;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
 import com.caucho.jsp.JspUtil;
 
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.jstl.core.LoopTagSupport;
 import javax.el.ELContext;
 import javax.el.ValueExpression;
+
 import java.util.Iterator;
 
 public class CoreForTokensTag extends LoopTagSupport {

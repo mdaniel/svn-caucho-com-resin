@@ -33,7 +33,7 @@ import java.security.Principal;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.util.LruCache;
+import com.caucho.v5.util.LruCache;
 
 /**
  * Memory-based cache for single-signon.

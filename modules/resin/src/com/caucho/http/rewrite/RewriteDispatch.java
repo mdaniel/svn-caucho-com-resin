@@ -40,12 +40,14 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.rewrite.DispatchRule;
+import com.caucho.v5.http.rewrite.RewriteFilter;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
 
 /**
  * Configuration for a rewrite-dispatch

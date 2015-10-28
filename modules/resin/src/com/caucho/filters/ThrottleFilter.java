@@ -28,10 +28,10 @@
 
 package com.caucho.filters;
 
-import com.caucho.config.types.Period;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.IntMap;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -40,6 +40,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;

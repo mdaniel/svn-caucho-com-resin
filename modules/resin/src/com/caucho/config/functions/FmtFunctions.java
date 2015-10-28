@@ -28,12 +28,12 @@
 
 package com.caucho.config.functions;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-import com.caucho.util.Sprintf;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.QDate;
+import com.caucho.v5.util.Sprintf;
 
 import java.util.Calendar;
 import java.util.Date;

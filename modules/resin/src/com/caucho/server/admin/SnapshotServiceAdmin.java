@@ -10,11 +10,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.admin.action.*;
-import com.caucho.env.log.LogSystem;
-import com.caucho.health.action.*;
-import com.caucho.jmx.server.ManagedObjectBase;
-import com.caucho.management.server.SnapshotServiceMXBean;
-import com.caucho.util.L10N;
+import com.caucho.v5.env.log.LogSystem;
+import com.caucho.v5.health.action.*;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
+import com.caucho.v5.management.server.SnapshotServiceMXBean;
+import com.caucho.v5.util.L10N;
 
 /**
  * service for managing snapshots.

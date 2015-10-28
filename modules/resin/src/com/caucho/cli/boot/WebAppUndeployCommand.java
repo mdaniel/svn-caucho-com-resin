@@ -29,9 +29,9 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.server.watchdog.ArgsWatchdog;
-import com.caucho.util.L10N;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.server.watchdog.ArgsWatchdog;
+import com.caucho.v5.util.L10N;
 
 public class WebAppUndeployCommand extends DeployCommandRepositoryBase
 {

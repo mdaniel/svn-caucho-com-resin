@@ -36,13 +36,13 @@ import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.JmxUtil;
-import com.caucho.profile.HeapDump;
-import com.caucho.server.container.ServerBase;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.profile.HeapDump;
+import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 public class HeapDumpAction implements AdminAction
 {

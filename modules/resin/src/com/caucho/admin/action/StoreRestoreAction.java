@@ -28,7 +28,7 @@
 
 package com.caucho.admin.action;
 
-import com.caucho.vfs.StreamSource;
+import com.caucho.v5.vfs.StreamSource;
 
 public class StoreRestoreAction implements AdminAction
 {

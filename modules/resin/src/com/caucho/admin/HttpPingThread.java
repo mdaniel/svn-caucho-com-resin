@@ -9,19 +9,19 @@ import io.baratine.core.Startup;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.Configurable;
 import com.caucho.config.Unbound;
-import com.caucho.config.types.Period;
-import com.caucho.env.health.HealthSubSystem;
-import com.caucho.health.action.Restart;
-import com.caucho.health.check.HealthSystemHealthCheck;
-import com.caucho.health.check.HttpStatusHealthCheck;
-import com.caucho.health.predicate.IfCriticalRechecked;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.health.HealthSubSystem;
+import com.caucho.v5.health.action.Restart;
+import com.caucho.v5.health.check.HealthSystemHealthCheck;
+import com.caucho.v5.health.check.HttpStatusHealthCheck;
+import com.caucho.v5.health.predicate.IfCriticalRechecked;
+import com.caucho.v5.util.L10N;
 
 /**
  * @Deprecated
- * @see com.caucho.health.check.HttpStatusHealthCheck
+ * @see com.caucho.v5.health.check.HttpStatusHealthCheck
  */
 @Unbound
 @Startup

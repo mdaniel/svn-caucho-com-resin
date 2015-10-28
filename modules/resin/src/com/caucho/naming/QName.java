@@ -28,12 +28,13 @@
 
 package com.caucho.naming;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
 import javax.naming.Name;
 import javax.naming.NamingException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;

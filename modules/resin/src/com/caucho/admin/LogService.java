@@ -13,11 +13,11 @@ import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.types.Period;
-import com.caucho.env.log.LogSystem;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.env.log.LogSystem;
+import com.caucho.v5.util.L10N;
 
 @Startup
 @Singleton

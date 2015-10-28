@@ -30,8 +30,8 @@
 package com.caucho.jsp.java;
 
 import com.caucho.jsp.JspParseException;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 import java.util.ArrayList;

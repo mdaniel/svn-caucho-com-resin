@@ -31,13 +31,13 @@ package com.caucho.cli.boot;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.http.security.AuthenticatorRole;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.XmlAuthenticator;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.BeanBuilder;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.http.security.AuthenticatorRole;
 
 /**
  * Configuration for management.

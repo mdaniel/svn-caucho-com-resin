@@ -34,15 +34,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.listen.ControllerPollContext;
-import com.caucho.network.listen.PollTcpSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.network.listen.ControllerPollContext;
+import com.caucho.v5.network.listen.PollTcpSystem;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * http stress testing.

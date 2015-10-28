@@ -29,7 +29,7 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.server.container.ArgsServerBase;
+import com.caucho.v5.server.container.ArgsServerBase;
 
 
 /**

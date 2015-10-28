@@ -35,9 +35,9 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.NamingException;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ObjectFactoryNaming;
-import com.caucho.inject.Module;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.inject.Module;
 
 /**
  * Jndi proxy class for injection.

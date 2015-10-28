@@ -29,13 +29,13 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.cli.daemon.ArgsDaemon;
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.server.StartCommandBase;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.server.config.ConfigBoot;
-import com.caucho.server.config.ServerConfigBoot;
-import com.caucho.server.watchdog.WatchdogService;
+import com.caucho.v5.cli.daemon.ArgsDaemon;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.server.StartCommandBase;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.server.config.ConfigBoot;
+import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.server.watchdog.WatchdogService;
 
 /**
  * Command to start Resin server in gui mode

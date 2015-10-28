@@ -38,10 +38,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import com.caucho.jmx.server.ManagedObjectBase;
 import com.caucho.management.server.JdbcQueryMXBean;
 import com.caucho.management.server.JdbcQueryResult;
 import com.caucho.management.server.JdbcTableColumn;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
 
 public class QueryAdmin extends ManagedObjectBase
   implements JdbcQueryMXBean

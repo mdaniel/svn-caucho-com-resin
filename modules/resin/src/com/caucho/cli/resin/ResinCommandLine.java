@@ -32,11 +32,11 @@ package com.caucho.cli.resin;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.cli.server.BootArgumentException;
-import com.caucho.cli.spi.Command;
-import com.caucho.config.ConfigException;
-import com.caucho.env.shutdown.ExitCode;
-import com.caucho.util.L10N;
+import com.caucho.v5.cli.server.BootArgumentException;
+import com.caucho.v5.cli.spi.Command;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.util.L10N;
 
 /**
  * ResinBoot is the main bootstrap class for Resin.  It parses the

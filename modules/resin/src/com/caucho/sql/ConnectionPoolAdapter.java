@@ -40,7 +40,7 @@ import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.StatementEventListener;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 /**
  * Adapter for DataSource used as a Driver.

@@ -32,8 +32,8 @@ package com.caucho.security;
 import java.security.Principal;
 import java.util.ArrayList;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
  * Manages role mapping

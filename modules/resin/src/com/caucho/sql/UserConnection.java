@@ -29,8 +29,8 @@
 
 package com.caucho.sql;
 
-import com.caucho.env.meter.ActiveTimeSensor;
-import com.caucho.util.L10N;
+import com.caucho.v5.env.meter.ActiveTimeSensor;
+import com.caucho.v5.util.L10N;
 
 import java.sql.*;
 import java.util.ArrayList;

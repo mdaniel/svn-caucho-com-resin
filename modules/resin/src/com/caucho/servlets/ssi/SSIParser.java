@@ -29,9 +29,9 @@
 
 package com.caucho.servlets.ssi;
 
-import com.caucho.util.ByteArrayBuffer;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import com.caucho.v5.util.ByteArrayBuffer;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
 
 import java.io.IOException;
 import java.util.ArrayList;

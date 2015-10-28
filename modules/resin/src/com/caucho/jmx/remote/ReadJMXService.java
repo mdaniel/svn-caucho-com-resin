@@ -29,13 +29,14 @@
 
 package com.caucho.jmx.remote;
 
-import com.caucho.services.server.GenericService;
+import java.io.IOException;
 
 import javax.management.JMException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import java.io.IOException;
+
+import com.caucho.v5.hessian.server.GenericService;
 
 /**
  * JMX service.

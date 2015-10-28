@@ -33,10 +33,10 @@ import java.net.URL;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.util.L10N;
 
 /**
  * <jpa-persistence-unit> tag in the resin-web.xml

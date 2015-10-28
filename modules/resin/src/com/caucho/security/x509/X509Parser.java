@@ -33,11 +33,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 
-import com.caucho.util.Base64Util;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempOutputStream;
+import com.caucho.v5.util.Base64Util;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.TempOutputStream;
 
 /**
  * pkcs#10 is in PEM format, DER with base64  and --- BEGIN ---

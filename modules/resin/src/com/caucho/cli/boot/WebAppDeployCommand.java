@@ -29,7 +29,7 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.cli.server.DeployCommand;
+import com.caucho.v5.cli.server.DeployCommand;
 
 public class WebAppDeployCommand extends DeployCommand {
 }

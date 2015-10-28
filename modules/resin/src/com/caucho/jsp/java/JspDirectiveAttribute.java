@@ -29,14 +29,15 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
-import com.caucho.config.types.Signature;
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.cfg.TldAttribute;
-import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.types.Signature;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.jsp.tagext.JspFragment;
+
 import java.io.IOException;
 
 public class JspDirectiveAttribute extends JspNode {

@@ -28,9 +28,9 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.cf.QName;
-import com.caucho.vfs.WriteStream;
-import com.caucho.xml.XmlChar;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.xml.XmlChar;
 
 import java.io.IOException;
 

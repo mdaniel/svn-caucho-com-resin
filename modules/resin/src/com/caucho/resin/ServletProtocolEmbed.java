@@ -29,9 +29,9 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.http.dispatch.ServletProtocolConfig;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.http.dispatch.ServletProtocolConfig;
 
 /**
  * Embeddable version of a servlet remoting protocol like hessian or burlap.

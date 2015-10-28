@@ -31,12 +31,12 @@ package com.caucho.servlets.ssi;
 
 import java.util.Locale;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.IntMap;
-import com.caucho.util.QDate;
-import com.caucho.util.Version;
-import com.caucho.vfs.Path;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.IntMap;
+import com.caucho.v5.util.QDate;
+import com.caucho.v5.util.Version;
+import com.caucho.v5.vfs.Path;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

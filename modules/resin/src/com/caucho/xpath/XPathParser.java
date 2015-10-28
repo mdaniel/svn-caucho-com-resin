@@ -28,11 +28,11 @@
 
 package com.caucho.xpath;
 
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.xml.XmlChar;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.IntMap;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.xml.XmlChar;
 import com.caucho.xpath.expr.*;
 import com.caucho.xpath.functions.BaseURI;
 import com.caucho.xpath.functions.ResolveURI;

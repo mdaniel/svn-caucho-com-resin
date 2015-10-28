@@ -36,11 +36,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.caucho.config.scope.ScopeContextBase;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.http.dispatch.ServletInvocation;
-import com.caucho.http.session.SessionContextContainer;
-import com.caucho.inject.Module;
+import com.caucho.v5.config.scope.ContextContainer;
+import com.caucho.v5.config.scope.ScopeContextBase;
+import com.caucho.v5.http.dispatch.ServletInvocation;
+import com.caucho.v5.http.session.SessionContextContainer;
+import com.caucho.v5.inject.Module;
 
 /**
  * The session scope value

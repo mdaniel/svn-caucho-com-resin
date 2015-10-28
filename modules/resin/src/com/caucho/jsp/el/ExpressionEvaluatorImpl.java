@@ -29,13 +29,14 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.Expr;
+import com.caucho.v5.el.Expr;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.servlet.jsp.el.Expression;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.FunctionMapper;
+
 import java.lang.reflect.Method;
 
 /**
@@ -89,7 +90,7 @@ public class ExpressionEvaluatorImpl extends ExpressionEvaluator
       Expr expr = parser.parse();
 
       return new ExpressionImpl(expr);
-    } catch (com.caucho.el.ELParseException e) {
+    } catch (com.caucho.v5.el.ELParseException e) {
       throw new javax.servlet.jsp.el.ELParseException(e.getMessage());
     }
   }

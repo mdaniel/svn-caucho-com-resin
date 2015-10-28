@@ -28,10 +28,11 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.vfs.Path;
+import com.caucho.v5.vfs.Path;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.util.logging.Level;
 

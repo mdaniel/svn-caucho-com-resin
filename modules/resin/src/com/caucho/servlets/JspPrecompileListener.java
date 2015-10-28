@@ -29,7 +29,7 @@
 
 package com.caucho.servlets;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import java.util.logging.Logger;
 

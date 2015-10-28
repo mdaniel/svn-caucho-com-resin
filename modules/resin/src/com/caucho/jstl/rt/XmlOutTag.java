@@ -92,7 +92,7 @@ public class XmlOutTag extends TagSupport {
       env.free();
 
       if (_escapeXml)
-        com.caucho.el.Expr.toStreamEscaped(out, value);
+        com.caucho.v5.el.Expr.toStreamEscaped(out, value);
       else
         out.print(value);
     }

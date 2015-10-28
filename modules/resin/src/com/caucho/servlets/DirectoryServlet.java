@@ -29,19 +29,20 @@
 
 package com.caucho.servlets;
 
-import com.caucho.http.protocol.RequestCaucho;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.i18n.CharacterEncoding;
-import com.caucho.util.CauchoUtil;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.URLUtil;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.util.CauchoUtil;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.URLUtil;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;

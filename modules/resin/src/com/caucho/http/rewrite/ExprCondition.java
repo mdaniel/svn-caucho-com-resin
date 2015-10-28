@@ -29,9 +29,9 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
-import com.caucho.util.L10N;
+import com.caucho.v5.el.ELParser;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.util.L10N;
 
 import javax.el.ELContext;
 import javax.servlet.http.HttpServletRequest;

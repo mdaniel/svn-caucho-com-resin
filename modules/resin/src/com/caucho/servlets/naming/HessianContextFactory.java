@@ -35,7 +35,7 @@ import javax.naming.*;
 import javax.naming.spi.*;
 
 import com.caucho.naming.*;
-import com.caucho.hessian.client.*;
+import com.caucho.v5.hessian.client.*;
 
 public class HessianContextFactory implements InitialContextFactory {
   /**

@@ -11,8 +11,13 @@ import io.baratine.core.Startup;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import com.caucho.config.Configurable;
-import com.caucho.config.types.Period;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.types.Period;
+import com.caucho.v5.health.action.ActionSequence;
+import com.caucho.v5.health.action.DumpHeap;
+import com.caucho.v5.health.action.DumpJmx;
+import com.caucho.v5.health.action.DumpThreads;
+import com.caucho.v5.health.action.ReportScoreboard;
 
 /**
  * A specific sequence of health actions: thread dump, heap dump, jmx dump, 

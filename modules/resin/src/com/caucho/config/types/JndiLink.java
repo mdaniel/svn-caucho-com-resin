@@ -28,17 +28,18 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
 import com.caucho.naming.JndiUtil;
 import com.caucho.naming.LinkProxy;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.loader.ClassLoaderListener;
+import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.naming.spi.InitialContextFactory;
+
 import java.util.Hashtable;
 
 /**

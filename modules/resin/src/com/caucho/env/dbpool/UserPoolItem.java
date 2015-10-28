@@ -32,9 +32,9 @@ package com.caucho.env.dbpool;
 import javax.security.auth.Subject;
 import javax.transaction.RollbackException;
 
-import com.caucho.transaction.ManagedResource;
-import com.caucho.transaction.UserTransactionImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.transaction.ManagedResource;
+import com.caucho.v5.transaction.UserTransactionImpl;
+import com.caucho.v5.util.L10N;
 
 /**
  * Pool item representing the user connection, i.e. matching to a Connection

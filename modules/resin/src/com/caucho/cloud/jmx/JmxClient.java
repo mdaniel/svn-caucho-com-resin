@@ -11,16 +11,16 @@ import java.util.HashMap;
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 
-import com.caucho.amp.AmpSystem;
-import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.amp.hamp.BaratineClient;
-import com.caucho.baratine.client.ServiceManagerClient;
-import com.caucho.bartender.BartenderSystem;
-import com.caucho.bartender.ServerBartender;
-import com.caucho.hessian.io.ExtSerializerFactory;
-import com.caucho.hessian.io.StringValueDeserializer;
-import com.caucho.hessian.io.StringValueSerializer;
-import com.caucho.util.L10N;
+import com.caucho.v5.amp.AmpSystem;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.amp.hamp.BaratineClient;
+import com.caucho.v5.baratine.client.ServiceManagerClient;
+import com.caucho.v5.bartender.BartenderSystem;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.hessian.io.ExtSerializerFactory;
+import com.caucho.v5.hessian.io.StringValueDeserializer;
+import com.caucho.v5.hessian.io.StringValueSerializer;
+import com.caucho.v5.util.L10N;
 
 /**
  * JMX Service API

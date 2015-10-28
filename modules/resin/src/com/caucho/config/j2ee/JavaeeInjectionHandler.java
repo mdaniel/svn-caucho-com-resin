@@ -42,14 +42,14 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.naming.NamingException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Names;
-import com.caucho.config.inject.AnyLiteral;
-import com.caucho.config.inject.DefaultLiteral;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InjectionPointHandler;
-import com.caucho.config.program.ValueGenerator;
 import com.caucho.naming.JndiUtil;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Names;
+import com.caucho.v5.config.inject.AnyLiteral;
+import com.caucho.v5.config.inject.DefaultLiteral;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.InjectionPointHandler;
+import com.caucho.v5.config.program.ValueGenerator;
 
 /**
  * Common JavaEE injection handler

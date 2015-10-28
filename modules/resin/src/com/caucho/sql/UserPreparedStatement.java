@@ -50,8 +50,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-import com.caucho.env.meter.ActiveTimeSensor;
-import com.caucho.util.L10N;
+import com.caucho.v5.env.meter.ActiveTimeSensor;
+import com.caucho.v5.util.L10N;
 
 /**
  * User-view of prepared statements

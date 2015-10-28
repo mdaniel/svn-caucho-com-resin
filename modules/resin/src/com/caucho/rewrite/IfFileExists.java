@@ -31,11 +31,11 @@ package com.caucho.rewrite;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.PredicateCacheable;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.PredicateCacheable;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * Match if the file specified by getRealPath() exists in the filesystem.

@@ -46,20 +46,20 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
-import com.caucho.amp.cdi.ActorManagerImpl;
-import com.caucho.amp.channel.SessionService;
-import com.caucho.amp.resource.ResourceService;
-import com.caucho.config.CauchoBean;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.http.container.HttpContainer;
 import com.caucho.inject.Jndi;
-import com.caucho.inject.LazyExtension;
 import com.caucho.inject.MBean;
-import com.caucho.inject.Module;
-import com.caucho.jmx.JmxUtil;
 import com.caucho.server.admin.AdminService;
-import com.caucho.util.L10N;
+import com.caucho.v5.amp.cdi.ActorManagerImpl;
+import com.caucho.v5.amp.channel.SessionService;
+import com.caucho.v5.amp.resource.ResourceService;
+import com.caucho.v5.config.CauchoBean;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.inject.LazyExtension;
+import com.caucho.v5.inject.Module;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.util.L10N;
 
 /**
  * Standard XML behavior for META-INF/beans.xml

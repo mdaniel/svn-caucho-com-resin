@@ -30,9 +30,10 @@ package com.caucho.jsp.java;
 
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.TagInstance;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.jsp.tagext.VariableInfo;
+
 import java.io.IOException;
 
 /**

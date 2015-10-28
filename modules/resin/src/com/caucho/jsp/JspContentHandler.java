@@ -28,8 +28,8 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.cf.QName;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.vfs.Vfs;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;

@@ -33,12 +33,12 @@ import java.sql.Driver;
 
 import javax.sql.DataSource;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.cf.QName;
-import com.caucho.config.type.ConfigType;
-import com.caucho.config.type.TypeFactoryConfig;
 import com.caucho.sql.DBPool;
 import com.caucho.sql.DriverConfig;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.type.ConfigType;
+import com.caucho.v5.config.type.TypeFactoryConfig;
 
 
 /**

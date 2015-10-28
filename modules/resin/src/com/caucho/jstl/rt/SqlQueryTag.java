@@ -30,7 +30,7 @@
 package com.caucho.jstl.rt;
 
 import com.caucho.jstl.ResultImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -41,6 +41,7 @@ import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
+
 import java.io.*;
 import java.sql.*;
 import java.util.*;

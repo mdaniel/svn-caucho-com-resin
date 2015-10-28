@@ -41,12 +41,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.http.dispatch.ServletBuilder;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.http.dispatch.ServletBuilder;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
 
 public class ProxyRule
   extends AbstractRuleWithConditions

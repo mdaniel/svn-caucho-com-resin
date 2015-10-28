@@ -29,16 +29,17 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ObjectFactoryNaming;
 import com.caucho.naming.JndiUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.naming.*;
 import javax.persistence.*;
+
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -28,14 +28,14 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.DependencyBean;
 import com.caucho.jsp.JspLineParseException;
 import com.caucho.jsp.JspParseException;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.DependencyBean;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Dependency;
+import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.Tag;
@@ -43,6 +43,7 @@ import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagExtraInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -135,7 +136,7 @@ public class TldTag implements DependencyBean {
   /**
    * Sets the icon.
    */
-  public void setIcon(com.caucho.config.types.Icon icon)
+  public void setIcon(com.caucho.v5.config.types.Icon icon)
   {
     if (icon != null) {
       _smallIcon = icon.getSmallIcon();

@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.amp.thread.WorkerThreadPoolBase;
+import com.caucho.v5.amp.thread.WorkerThreadPoolBase;
 
 /**
  * Represents the @Asynchronous interception

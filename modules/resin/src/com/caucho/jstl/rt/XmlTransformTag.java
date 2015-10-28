@@ -28,11 +28,11 @@
 
 package com.caucho.jstl.rt;
 
-import com.caucho.http.webapp.WebApp;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.*;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -50,6 +50,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -225,7 +226,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
         result = (Result) _result;
       }
       else if (_var != null) {
-        top = new com.caucho.xml.QDocument();
+        top = new com.caucho.v5.xml.QDocument();
         
         result = new DOMResult(top);
       }

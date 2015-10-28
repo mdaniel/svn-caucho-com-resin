@@ -30,12 +30,13 @@
 package com.caucho.jstl.rt;
 
 import com.caucho.jstl.NameValueTag;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.L10N;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
+
 import java.io.IOException;
 
 public class CoreRedirectTag extends TagSupport implements NameValueTag {

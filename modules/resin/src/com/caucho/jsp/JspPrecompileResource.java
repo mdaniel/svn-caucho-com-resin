@@ -29,22 +29,23 @@
 
 package com.caucho.jsp;
 
-import com.caucho.amp.thread.ThreadPool;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.*;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.java.JavaCompilerUtil;
-import com.caucho.java.LineMap;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.util.Alarm;
-import com.caucho.util.CompileException;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.amp.thread.ThreadPool;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.types.*;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.java.JavaCompilerUtil;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CompileException;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.jsp.JspFactory;
+
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;

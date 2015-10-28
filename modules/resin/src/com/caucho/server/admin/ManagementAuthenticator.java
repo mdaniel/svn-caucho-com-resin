@@ -30,11 +30,11 @@ package com.caucho.server.admin;
 
 import java.util.TreeMap;
 
-import com.caucho.http.security.AbstractAuthenticator;
-import com.caucho.http.security.PasswordUser;
-import com.caucho.util.Base64Util;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Crc64;
+import com.caucho.v5.http.security.AbstractAuthenticator;
+import com.caucho.v5.http.security.PasswordUser;
+import com.caucho.v5.util.Base64Util;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.Crc64;
 
 /**
  * Special authenticator for management

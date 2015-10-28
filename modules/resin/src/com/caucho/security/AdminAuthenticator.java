@@ -32,9 +32,9 @@ package com.caucho.security;
 import javax.enterprise.inject.Default;
 import javax.inject.Named;
 
-import com.caucho.config.Admin;
-import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ResinService;
+import com.caucho.v5.config.Admin;
+import com.caucho.v5.config.CauchoDeployment;
 
 /**
  * The admin authenticator provides authentication for Resin admin/management

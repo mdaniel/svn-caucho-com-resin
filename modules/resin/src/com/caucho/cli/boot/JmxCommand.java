@@ -29,7 +29,7 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.util.L10N;
+import com.caucho.v5.util.L10N;
 
 public abstract class JmxCommand extends ManagementCommandBase
 {

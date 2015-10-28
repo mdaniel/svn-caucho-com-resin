@@ -36,11 +36,11 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.util.CurrentTime;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.vfs.Depend;
+import com.caucho.v5.vfs.Path;
 
 /**
  * The XML role-map reads a static file for authentication.

@@ -38,8 +38,8 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
-import com.caucho.amp.Amp;
-import com.caucho.amp.ServiceManagerAmp;
+import com.caucho.v5.amp.Amp;
+import com.caucho.v5.amp.ServiceManagerAmp;
 
 /**
  * Abstract websocket receive endpoint.

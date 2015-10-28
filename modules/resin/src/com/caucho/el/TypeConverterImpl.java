@@ -34,6 +34,8 @@ import java.util.Iterator;
 
 import javax.el.*;
 
+import com.caucho.v5.el.Expr;
+
 public class TypeConverterImpl extends ELResolver
 {
   public TypeConverterImpl()

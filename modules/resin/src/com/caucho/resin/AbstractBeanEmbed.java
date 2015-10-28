@@ -29,13 +29,13 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.config.xml.ContextConfigXml;
-import com.caucho.config.program.*;
-import com.caucho.http.container.*;
-import com.caucho.http.dispatch.*;
-import com.caucho.http.webapp.*;
+import com.caucho.v5.config.*;
+import com.caucho.v5.config.program.*;
+import com.caucho.v5.config.types.*;
+import com.caucho.v5.config.xml.ContextConfigXml;
+import com.caucho.v5.http.container.*;
+import com.caucho.v5.http.dispatch.*;
+import com.caucho.v5.http.webapp.*;
 
 import java.util.*;
 

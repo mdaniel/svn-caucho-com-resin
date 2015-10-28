@@ -29,10 +29,11 @@
 
 package com.caucho.http.container;
 
-import com.caucho.http.host.HostContainer;
-import com.caucho.http.host.HostContainerResin;
-import com.caucho.http.webapp.WebAppBuilderResin;
-import com.caucho.http.webapp.WebAppController;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.host.HostContainer;
+import com.caucho.v5.http.host.HostContainerResin;
+import com.caucho.v5.http.webapp.WebAppBuilderResin;
+import com.caucho.v5.http.webapp.WebAppController;
 
 
 public class HttpContainerResin extends HttpContainer

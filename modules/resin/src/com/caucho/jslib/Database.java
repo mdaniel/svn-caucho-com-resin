@@ -28,11 +28,12 @@
 
 package com.caucho.jslib;
 
-import com.caucho.util.Exit;
-import com.caucho.util.ExitListener;
+import com.caucho.v5.util.Exit;
+import com.caucho.v5.util.ExitListener;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

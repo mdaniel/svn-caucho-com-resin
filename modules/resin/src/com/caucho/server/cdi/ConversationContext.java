@@ -46,12 +46,12 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import com.caucho.config.scope.ScopeContextBase;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.config.scope.ScopeRemoveListener;
-import com.caucho.http.dispatch.ServletInvocation;
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
+import com.caucho.v5.config.scope.ContextContainer;
+import com.caucho.v5.config.scope.ScopeContextBase;
+import com.caucho.v5.config.scope.ScopeRemoveListener;
+import com.caucho.v5.http.dispatch.ServletInvocation;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.RandomUtil;
 
 /**
  * The conversation scope value

@@ -36,7 +36,7 @@ import java.util.Map;
 import com.caucho.nautilus.broker.SenderBroker;
 import com.caucho.nautilus.broker.BrokerNautilus;
 import com.caucho.nautilus.broker.SenderSettleHandler;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache

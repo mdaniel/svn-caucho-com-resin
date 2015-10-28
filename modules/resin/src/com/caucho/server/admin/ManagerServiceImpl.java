@@ -29,8 +29,6 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.baratine.Remote;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -55,21 +53,22 @@ import com.caucho.admin.action.SetLogLevelAction;
 import com.caucho.admin.action.StoreDumpAction;
 import com.caucho.admin.action.StoreRestoreAction;
 import com.caucho.admin.action.ThreadDumpAction;
-import com.caucho.amp.AmpSystem;
-import com.caucho.amp.ServiceManagerAmp;
-import com.caucho.bartender.BartenderSystem;
-import com.caucho.bartender.ServerBartender;
-import com.caucho.config.ConfigException;
-import com.caucho.env.system.SystemManager;
-import com.caucho.health.action.JmxSetQueryReply;
-import com.caucho.health.stat.StatSystem;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.http.security.AuthenticatorRole;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.Vfs;
+import com.caucho.v5.amp.AmpSystem;
+import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.baratine.Remote;
+import com.caucho.v5.bartender.BartenderSystem;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.health.action.JmxSetQueryReply;
+import com.caucho.v5.health.stat.StatSystem;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.security.AuthenticatorRole;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.StreamSource;
+import com.caucho.v5.vfs.Vfs;
 
 @Remote
 public class ManagerServiceImpl

@@ -33,10 +33,10 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.config.ConfigArg;
-import com.caucho.config.Configurable;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.util.InetNetwork;
+import com.caucho.v5.config.ConfigArg;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.util.InetNetwork;
 
 @Configurable
 public class IfRemoteAddr implements RequestPredicate

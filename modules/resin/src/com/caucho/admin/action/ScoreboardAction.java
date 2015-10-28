@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.health.action.ThreadActivityReportBase;
-import com.caucho.health.action.ThreadActivityReportDatabase;
-import com.caucho.health.action.ThreadActivityReportResin;
-import com.caucho.health.action.ThreadActivityGroup;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.health.action.ThreadActivityGroup;
+import com.caucho.v5.health.action.ThreadActivityReportBase;
+import com.caucho.v5.health.action.ThreadActivityReportDatabase;
+import com.caucho.v5.health.action.ThreadActivityReportResin;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 public class ScoreboardAction implements AdminAction
 {

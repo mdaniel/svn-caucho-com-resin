@@ -29,11 +29,12 @@
 
 package com.caucho.servlets.ssi;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**

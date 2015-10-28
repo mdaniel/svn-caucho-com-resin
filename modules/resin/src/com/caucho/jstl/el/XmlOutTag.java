@@ -48,7 +48,7 @@ public class XmlOutTag extends TagSupport {
     = Logger.getLogger(XmlOutTag.class.getName());
   
   private com.caucho.xpath.Expr _select;
-  private com.caucho.el.Expr _escapeXml;
+  private com.caucho.v5.el.Expr _escapeXml;
 
   /**
    * Sets the JSP-EL expression value.
@@ -61,7 +61,7 @@ public class XmlOutTag extends TagSupport {
   /**
    * Sets true if XML should be escaped.
    */
-  public void setEscapeXml(com.caucho.el.Expr escapeXml)
+  public void setEscapeXml(com.caucho.v5.el.Expr escapeXml)
   {
     _escapeXml = escapeXml;
   }
@@ -114,7 +114,7 @@ public class XmlOutTag extends TagSupport {
       env.free();
 
       if (doEscape)
-        com.caucho.el.Expr.toStreamEscaped(out, value);
+        com.caucho.v5.el.Expr.toStreamEscaped(out, value);
       else
         out.print(value);
     } catch (javax.el.ELException e) {

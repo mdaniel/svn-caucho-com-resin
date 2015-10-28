@@ -33,9 +33,9 @@ package com.caucho.sql;
 import java.util.Date;
 
 import com.caucho.env.dbpool.ConnectionPool;
-import com.caucho.jmx.server.ManagedObjectBase;
 import com.caucho.management.server.DatabaseMXBean;
 import com.caucho.management.server.JdbcDriverMXBean;
+import com.caucho.v5.jmx.server.ManagedObjectBase;
 
 public class DatabaseAdmin extends ManagedObjectBase
   implements DatabaseMXBean

@@ -37,12 +37,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.ConfigException;
-import com.caucho.http.dispatch.UrlMap;
-import com.caucho.http.rewrite.RequestPredicate;
-import com.caucho.http.security.ConstraintBase;
-import com.caucho.http.security.AuthorizationResult;
-import com.caucho.util.CauchoUtil;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.dispatch.UrlMap;
+import com.caucho.v5.http.rewrite.RequestPredicate;
+import com.caucho.v5.http.security.AuthorizationResult;
+import com.caucho.v5.http.security.ConstraintBase;
+import com.caucho.v5.util.CauchoUtil;
 
 /**
  * The &lt;sec:Allow> tag authorizes requests for a set of url-patterns.
@@ -72,7 +72,7 @@ import com.caucho.util.CauchoUtil;
  * &lt;/web-app>
  * </pre></code>
  */
-public class Allow extends com.caucho.http.security.SecurityConstraint
+public class Allow extends com.caucho.v5.http.security.SecurityConstraint
 {
   private ArrayList<Pattern> _patternList
     = new ArrayList<Pattern>();

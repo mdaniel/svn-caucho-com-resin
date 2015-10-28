@@ -29,15 +29,17 @@
 package com.caucho.sql.spy;
 
 import com.caucho.sql.DriverConfig;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
+import com.caucho.v5.util.L10N;
 
 import javax.sql.ConnectionEventListener;
 import javax.sql.PooledConnection;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.*;
+
 import javax.sql.StatementEventListener;
 
 /**

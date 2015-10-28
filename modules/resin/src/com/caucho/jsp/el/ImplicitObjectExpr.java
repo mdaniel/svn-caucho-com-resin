@@ -28,9 +28,9 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.el.Expr;
+import com.caucho.v5.vfs.WriteStream;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -38,6 +38,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
+
 import java.io.IOException;
 import java.util.*;
 

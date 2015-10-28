@@ -37,10 +37,10 @@ import java.util.logging.Logger;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import com.caucho.config.Config;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.jmx.JmxUtil;
 import com.caucho.naming.JndiUtil;
+import com.caucho.v5.config.Config;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.jmx.JmxUtil;
 
 /**
  * Library of static config functions.

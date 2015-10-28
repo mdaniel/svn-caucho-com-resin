@@ -29,11 +29,12 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.config.ConfigException;
+import com.caucho.v5.config.ConfigException;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+
 import java.util.regex.Matcher;
 
 public class RewriteRule

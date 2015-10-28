@@ -32,10 +32,10 @@ package com.caucho.resin;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.http.dispatch.FilterConfigImpl;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.http.dispatch.FilterConfigImpl;
 
 /**
  * Embeddable version of a filter

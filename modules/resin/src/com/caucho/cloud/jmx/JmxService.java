@@ -19,18 +19,18 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import com.caucho.config.ConfigException;
-import com.caucho.hessian.io.ExtSerializerFactory;
-import com.caucho.hessian.io.StringValueDeserializer;
-import com.caucho.hessian.io.StringValueSerializer;
-import com.caucho.jmx.JmxUtil;
-import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.admin.JmxInfoQuery;
 import com.caucho.server.admin.JmxInfoResult;
 import com.caucho.server.admin.JmxInvokeQuery;
 import com.caucho.server.admin.JmxLookupQuery;
 import com.caucho.server.admin.JmxQueryQuery;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.hessian.io.ExtSerializerFactory;
+import com.caucho.v5.hessian.io.StringValueDeserializer;
+import com.caucho.v5.hessian.io.StringValueSerializer;
+import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.util.L10N;
 
 /**
  * Remote administration service for JMX

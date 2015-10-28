@@ -32,13 +32,13 @@ package com.caucho.http.proxy;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import com.caucho.bartender.BartenderSystem;
-import com.caucho.bartender.ServerBartender;
-import com.caucho.bartender.pod.PodBartender;
-import com.caucho.config.ConfigException;
-import com.caucho.http.container.HttpContainer;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.util.L10N;
+import com.caucho.v5.bartender.BartenderSystem;
+import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.bartender.pod.PodBartender;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.network.balance.ClientSocketFactory;
+import com.caucho.v5.util.L10N;
 
 /**
  * LoadBalanceService distributes requests across a group of clients.

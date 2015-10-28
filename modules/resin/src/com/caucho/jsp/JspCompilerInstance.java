@@ -41,21 +41,21 @@ import javax.servlet.jsp.tagext.TagLibraryInfo;
 
 import org.xml.sax.SAXException;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.xml.ConfigXml;
-import com.caucho.http.webapp.WebApp;
-import com.caucho.http.webapp.WebAppResin;
-import com.caucho.java.JavaCompilerUtil;
-import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.ImplicitTld;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.java.JspTagSupport;
 import com.caucho.jsp.java.TagTaglib;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.PersistentDependency;
-import com.caucho.xml.Xml;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.xml.ConfigXml;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.java.JavaCompilerUtil;
+import com.caucho.v5.java.LineMap;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PersistentDependency;
+import com.caucho.v5.xml.Xml;
 
 /**
  * Compilation interface for JSP pages.

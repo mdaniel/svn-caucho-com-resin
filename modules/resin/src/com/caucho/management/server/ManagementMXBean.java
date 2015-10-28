@@ -33,13 +33,6 @@ import java.util.Date;
 
 import javax.management.ReflectionException;
 
-import com.caucho.health.action.JmxSetQueryReply;
-import com.caucho.jmx.AdminStream;
-import com.caucho.jmx.Description;
-import com.caucho.jmx.MXAction;
-import com.caucho.jmx.MXContentType;
-import com.caucho.jmx.MXParam;
-import com.caucho.jmx.server.ManagedObjectMXBean;
 import com.caucho.server.admin.AddUserQueryReply;
 import com.caucho.server.admin.JmxCallQueryReply;
 import com.caucho.server.admin.JsonQueryReply;
@@ -49,6 +42,13 @@ import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StringQueryReply;
+import com.caucho.v5.health.action.JmxSetQueryReply;
+import com.caucho.v5.jmx.AdminStream;
+import com.caucho.v5.jmx.Description;
+import com.caucho.v5.jmx.MXAction;
+import com.caucho.v5.jmx.MXContentType;
+import com.caucho.v5.jmx.MXParam;
+import com.caucho.v5.jmx.server.ManagedObjectMXBean;
 
 /**
  * Management facade for Resin, used for REST.

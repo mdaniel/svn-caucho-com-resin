@@ -28,18 +28,19 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.types.Signature;
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.ParseTagManager;
 import com.caucho.jsp.TempTagInfo;
 import com.caucho.jsp.cfg.TldAttribute;
 import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.cfg.TldVariable;
-import com.caucho.util.L10N;
-import com.caucho.util.Version;
+import com.caucho.v5.config.types.Signature;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.Version;
 
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;

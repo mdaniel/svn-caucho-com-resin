@@ -31,8 +31,8 @@ package com.caucho.server.resin;
 
 import com.caucho.naming.JndiUtil;
 import com.caucho.server.thread.ResinThreadPoolExecutor;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.UserTransactionProxy;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.transaction.UserTransactionProxy;
 
 /**
  * Initialization from EnvironmentLoader, split out of the kernel

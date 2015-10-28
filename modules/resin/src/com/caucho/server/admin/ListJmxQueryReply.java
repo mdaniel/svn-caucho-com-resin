@@ -28,8 +28,8 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.json.JsonTransient;
-import com.caucho.json.JsonName;
+import com.caucho.v5.json.JsonName;
+import com.caucho.v5.json.JsonTransient;
 
 import java.io.Serializable;
 import java.util.ArrayList;

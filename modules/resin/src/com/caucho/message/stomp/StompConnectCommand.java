@@ -31,8 +31,8 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache

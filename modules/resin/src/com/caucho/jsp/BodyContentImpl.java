@@ -29,14 +29,15 @@
 
 package com.caucho.jsp;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.util.FreeList;
-import com.caucho.util.L10N;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.TempCharReader;
-import com.caucho.vfs.TempCharStream;
+import com.caucho.v5.util.CharBuffer;
+import com.caucho.v5.util.FreeList;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.TempCharBuffer;
+import com.caucho.v5.vfs.TempCharReader;
+import com.caucho.v5.vfs.TempCharStream;
 
 import javax.servlet.jsp.JspWriter;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;

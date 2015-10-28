@@ -29,7 +29,7 @@
 
 package com.caucho.http.rewrite;
 
-import com.caucho.util.InetNetwork;
+import com.caucho.v5.util.InetNetwork;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

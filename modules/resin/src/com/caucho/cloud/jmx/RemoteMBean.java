@@ -6,8 +6,8 @@
 
 package com.caucho.cloud.jmx;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CurrentTime;
 
 import java.util.ArrayList;
 import java.util.Collections;

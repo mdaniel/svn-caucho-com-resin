@@ -37,12 +37,12 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.transaction.Synchronization;
 
 import com.caucho.inject.TransactionScoped;
-import com.caucho.config.scope.ScopeContextBase;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.inject.Module;
-import com.caucho.transaction.TransactionImpl;
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.util.L10N;
+import com.caucho.v5.config.scope.ContextContainer;
+import com.caucho.v5.config.scope.ScopeContextBase;
+import com.caucho.v5.inject.Module;
+import com.caucho.v5.transaction.TransactionImpl;
+import com.caucho.v5.transaction.TransactionManagerImpl;
+import com.caucho.v5.util.L10N;
 
 /**
  * Scope based on the current transaction.

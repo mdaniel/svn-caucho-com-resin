@@ -29,7 +29,7 @@
 
 package com.caucho.cli.boot;
 
-import com.caucho.cli.spi.ArgsBase;
+import com.caucho.v5.cli.spi.ArgsBase;
 
 public class SubsectionBootOption extends InfoBootOption 
 {

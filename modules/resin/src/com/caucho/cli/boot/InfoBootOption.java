@@ -31,8 +31,8 @@ package com.caucho.cli.boot;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.caucho.cli.server.BootOptionBase;
-import com.caucho.cli.spi.ArgsBase;
+import com.caucho.v5.cli.server.BootOptionBase;
+import com.caucho.v5.cli.spi.ArgsBase;
 
 public abstract class InfoBootOption extends BootOptionBase 
 {

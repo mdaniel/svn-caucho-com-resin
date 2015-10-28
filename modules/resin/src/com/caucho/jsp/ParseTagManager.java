@@ -29,11 +29,12 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.cf.QName;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 import javax.servlet.jsp.tagext.TagInfo;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;

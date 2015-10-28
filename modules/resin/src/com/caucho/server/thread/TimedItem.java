@@ -28,9 +28,9 @@
 
 package com.caucho.server.thread;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.CacheListener;
-import com.caucho.util.CurrentTime;
+import com.caucho.v5.util.Alarm;
+import com.caucho.v5.util.CacheListener;
+import com.caucho.v5.util.CurrentTime;
 
 /**
  * A single item timed cache.  The item will remain valid until it expires.

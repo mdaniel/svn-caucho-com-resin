@@ -33,9 +33,9 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.Configurable;
-import com.caucho.http.dispatch.FilterChainError;
-import com.caucho.http.rewrite.DispatchRuleTargetBase;
+import com.caucho.v5.config.Configurable;
+import com.caucho.v5.http.dispatch.FilterChainError;
+import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
 
 /**
  * Sends a HTTP Forbidden response using response.sendError(SC_FORBIDDEN).

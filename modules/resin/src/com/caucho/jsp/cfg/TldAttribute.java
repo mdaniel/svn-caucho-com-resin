@@ -28,7 +28,7 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.types.Signature;
+import com.caucho.v5.config.types.Signature;
 
 import javax.servlet.jsp.tagext.JspFragment;
 
