@@ -769,7 +769,8 @@ abstract public class Expr {
    */
   public boolean evalBoolean(Env env)
   {
-    return eval(env).toBoolean();
+    Value result = eval(env);
+    return result != null && result.toBoolean();
   }
 
   /**
