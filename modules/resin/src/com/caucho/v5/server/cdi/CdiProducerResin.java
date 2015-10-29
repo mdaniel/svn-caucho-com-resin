@@ -274,7 +274,7 @@ public class CdiProducerResin
   public static Class<?> createResinValidatorProducer()
   {
     try {
-      Class<?> cl = Class.forName("com.caucho.server.cdi.ResinValidatorProducer");
+      Class<?> cl = Class.forName("com.caucho.v5.server.cdi.ResinValidatorProducer");
       
       cl.getMethods();
       cl.getDeclaredFields();

@@ -134,11 +134,10 @@ public class CdiExtensionResin implements Extension {
     }
     */
     else if (annotatedType.isAnnotationPresent(Service.class)
-        || annotatedType.isAnnotationPresent(SessionService.class)
-        || annotatedType.isAnnotationPresent(ResourceService.class)) {
+             || annotatedType.isAnnotationPresent(SessionService.class)) {
              // || annotatedType.isAnnotationPresent(AmpPublish.class)) {
-      ActorManagerImpl actorManager = ActorManagerImpl.getCurrent();
-      actorManager.addActor(annotatedType);
+      //ActorManagerImpl actorManager = ActorManagerImpl.getCurrent();
+      //actorManager.addActor(annotatedType);
       
       event.veto();
     }
