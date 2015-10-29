@@ -29,11 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.WriteStream;
-import com.caucho.quercus.QuercusModuleException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -44,6 +39,11 @@ import java.io.Reader;
 import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.zip.CRC32;
+
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP 5 style string builder (unicode.semantics = off)
@@ -2076,6 +2076,13 @@ public class StringBuilderValue
       }
 
       return true;
+    } else if (o instanceof StringValue) {
+      StringValue value = (StringValue) o;
+      
+      if (_length != value.length()) {
+        return false;
+      }
+      return toString().equals(value.toString());
     }
     else
       return false;
