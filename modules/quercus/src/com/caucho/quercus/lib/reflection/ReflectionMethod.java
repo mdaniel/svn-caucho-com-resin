@@ -36,8 +36,8 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.CallExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
@@ -206,6 +206,23 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
   public void setAccessible(boolean isAccessible)
   {
     // XXX: always accessible from Reflection for quercus
+  }
+  
+  public ReflectionMethod getPrototype(Env env)
+  {
+    return this;
+  }
+  
+  public Value __getField(Env env, Value index)
+  {
+    String strIndex = index.toString();
+    if ("name".equals(strIndex)) {
+      return env.createString(getFunction().getName());
+    } else if ("class".equals(strIndex)) {
+      return env.createString(_clsName);
+    } else {
+      return null;
+    }
   }
 
   private AbstractFunction getFunction()

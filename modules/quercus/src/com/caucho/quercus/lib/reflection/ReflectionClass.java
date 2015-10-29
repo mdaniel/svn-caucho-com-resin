@@ -148,7 +148,7 @@ public class ReflectionClass
 
   public boolean isInternal()
   {
-    throw new UnimplementedException("ReflectionClass->isInternal()");
+    return false;
   }
 
   public boolean isUserDefined()
