@@ -29,26 +29,33 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.CallExpr;
-import com.caucho.quercus.expr.FunIncludeExpr;
-import com.caucho.quercus.expr.FunIncludeOnceExpr;
-import com.caucho.quercus.expr.ObjectMethodExpr;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.IniDefinitions;
-import com.caucho.quercus.module.IniDefinition;
-import com.caucho.quercus.lib.file.BinaryOutput;
-import com.caucho.quercus.lib.file.BinaryStream;
-import com.caucho.quercus.lib.file.FileModule;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.quercus.Location;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Callable;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.CallExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.FunIncludeExpr;
+import com.caucho.quercus.expr.FunIncludeOnceExpr;
+import com.caucho.quercus.expr.ObjectMethodExpr;
+import com.caucho.quercus.lib.file.BinaryOutput;
+import com.caucho.quercus.lib.file.BinaryStream;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
 /**
  * PHP error handling.
@@ -451,6 +458,9 @@ public class ErrorModule extends AbstractQuercusModule {
     long oldMask = env.getIni("error_reporting").toLong();
 
     if (! levelV.isDefault()) {
+      if (levelV.toInt() == -1) {
+        levelV = LongValue.create(0);
+      }
       env.setIni("error_reporting", levelV);
     }
 
