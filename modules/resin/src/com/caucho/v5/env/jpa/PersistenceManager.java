@@ -612,21 +612,6 @@ public class PersistenceManager
     return false;
   }
 
-  /**
-   * Callback to note the class matches
-   */
-  @Override
-  public void classMatchEvent(EnvironmentClassLoader loader, 
-                              Path root,
-                              String className)
-  {
-  }
-
-  @Override
-  public void completePath(Path root)
-  {
-  }
-
   //
   // EnvironmentListener
   //
