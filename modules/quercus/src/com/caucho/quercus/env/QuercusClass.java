@@ -1468,7 +1468,7 @@ public class QuercusClass extends NullValue {
       }
     }
 
-    if (_fieldGet != null) {
+    if (_fieldGet != null && !name.startsWith("_mockery_")) {
       if (! env.pushFieldGet(Env.OVERLOADING_TYPES.FIELDGET, qThis.getClassName(), name))
         return UnsetValue.UNSET;
 
