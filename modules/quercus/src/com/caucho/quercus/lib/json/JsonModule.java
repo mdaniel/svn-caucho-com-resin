@@ -110,7 +110,9 @@ public class JsonModule extends AbstractQuercusModule
    */
   public static Value json_decode(Env env,
                                   StringValue s,
-                                  @Optional("false") boolean assoc)
+                                  @Optional("false") boolean assoc, 
+                                  @Optional Integer depth, 
+                                  @Optional Integer options)
   {
     env.removeSpecialValue("json.last_error");
 
