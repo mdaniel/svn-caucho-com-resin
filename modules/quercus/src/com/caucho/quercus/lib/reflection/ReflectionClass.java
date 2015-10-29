@@ -231,7 +231,7 @@ public class ReflectionClass
 
     for (AbstractFunction method : map.values()) {
       ReflectionMethod reflectionMethod = new ReflectionMethod(_cls.getName(), method);
-      if (filter == null || (reflectionMethod.getModifiers() & filter) > 0) {
+      if (filter == null || filter == 0 || (reflectionMethod.getModifiers() & filter) > 0) {
         array.put(env.wrapJava(reflectionMethod));
       }
     }
