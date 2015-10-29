@@ -46,7 +46,7 @@ public class StackGetCommand extends XdebugCommand
 				response.append("<stack where=\"").append(where).append("\" level=\"");
 				response.append(level);
 				response.append("\" type=\"file\" filename=\"");
-				response.append(conn.getFileURI(location.getFileName()));
+				response.append(location.getFileName() == null ? "" : conn.getFileURI(location.getFileName()));
 				response.append("\" lineno=\"");
 				response.append(location.getLineNumber());
 				response.append("\"></stack>"); 
