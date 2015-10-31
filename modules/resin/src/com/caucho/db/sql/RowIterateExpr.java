@@ -85,14 +85,14 @@ class RowIterateExpr extends Expr {
     context.unlock();
 
     while (rowIter.nextBlock()) {
-      context.lock();
+      //context.lock();
 
       rowIter.initRow();
 
       if (rowIter.nextRow())
         return true;
 
-      context.unlock();
+      //context.unlock();
     }
 
     return false;

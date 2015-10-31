@@ -217,12 +217,20 @@ public class MnodeStore {
                           + " LIMIT 4096");
     */
 
+    /*
     _selectExpireQuery = ("SELECT resin_oid,id,cache_id,value_data_id,"
                           + "     access_time,access_timeout,"
                           + "     modified_time,modified_timeout"
                           + " FROM " + _tableName
                           + " WHERE ? < resin_oid"
                           + " LIMIT 4096");
+                          */
+    _selectExpireQuery = ("SELECT resin_oid,id,cache_id,value_data_id,"
+                          + "     access_time,access_timeout,"
+                          + "     modified_time,modified_timeout"
+                          + " FROM " + _tableName
+                          + " WHERE (access_time + 1.25 * access_timeout < ?"
+                          + "        OR modified_time + 1.25 * modified_timeout < ?)");
 
     _selectCacheKeysQuery = ("SELECT resin_oid,id FROM " + _tableName
                              + " WHERE cache_id=? AND ? < resin_oid"
@@ -891,9 +899,12 @@ public class MnodeStore {
 
         long now = CurrentTime.getCurrentTime();
 
-        pstmt.setLong(1, _lastOid);
+        //pstmt.setLong(1, _lastOid);
+        //pstmt.setLong(2, now);
+        //pstmt.setLong(3, now);
+        
+        pstmt.setLong(1, now);
         pstmt.setLong(2, now);
-        pstmt.setLong(3, now);
 
         ResultSet rs = pstmt.executeQuery();
         

@@ -629,8 +629,9 @@ public final class BTree {
       leftBlock.setDirty(0, BlockStore.BLOCK_SIZE);
       parentBlock.setDirty(0, BlockStore.BLOCK_SIZE);
     } finally {
-      if (leftBlock != null)
+      if (leftBlock != null) {
         leftBlock.free();
+      }
 
       block.setDirty(0, BlockStore.BLOCK_SIZE);
     }
@@ -890,6 +891,7 @@ public final class BTree {
             if (childBlock.getUseCount() > 2) {
               System.out.println("USE: " + childBlock.getUseCount() + " " + block);
             }
+            //log.info("BTree deallocate block: " + childBlock);
             childBlock.deallocate();
           }
 

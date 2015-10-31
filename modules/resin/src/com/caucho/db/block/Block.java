@@ -89,7 +89,7 @@ public final class Block implements SyncCacheListener {
   private boolean _isCopy;
   private boolean _isLoad;
   private boolean _isDirty;
-
+  
   Block(BlockStore store, long blockId)
   {
     store.validateBlockId(blockId);
@@ -160,11 +160,20 @@ public final class Block implements SyncCacheListener {
       exn = new IllegalStateException(L.l("block {0} is not an index code={1}",
                                           this, allocCode));
       exn.fillInStackTrace();
-      log.log(Level.WARNING, exn.toString(), exn);
       
-      ShutdownSystem.shutdownActive(ExitCode.HEALTH, 
-                                    L.l("Internal database issue: forcing restart {0}",
-                                        exn.toString()));
+      throw exn;
+      /*
+      if (_isValidation) {
+        log.warning(exn.toString()));
+      }
+      else {
+        log.log(Level.WARNING, exn.toString(), exn);
+        
+        ShutdownSystem.shutdownActive(ExitCode.HEALTH, 
+                                      L.l("Internal database issue: forcing restart {0}",
+                                          exn.toString()));
+      }
+      */
     }
   }
 

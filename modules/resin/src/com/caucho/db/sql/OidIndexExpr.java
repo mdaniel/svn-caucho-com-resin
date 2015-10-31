@@ -101,7 +101,7 @@ class OidIndexExpr extends RowIterateExpr {
     if (rowAddr == 0)
       return false;
 
-    context.unlock();
+    //context.unlock();
     
     if (! tableIter.isValidRow(rowAddr)) {
       return false;
@@ -109,7 +109,7 @@ class OidIndexExpr extends RowIterateExpr {
 
     tableIter.setRow(rowAddr);
 
-    context.lock();
+    //context.lock();
 
     return true;
   }

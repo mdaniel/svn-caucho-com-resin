@@ -32,6 +32,7 @@ package com.caucho.db.table;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1126,17 +1127,17 @@ public class Table extends BlockStore {
     }
   }
 
-  void delete(DbTransaction xa, Block block,
-              byte []buffer, int rowOffset,
-              boolean isDeleteIndex)
+  boolean delete(DbTransaction xa, Block block,
+                 byte []buffer, int rowOffset,
+                 boolean isDeleteIndex)
     throws SQLException
   {
     byte rowState = buffer[rowOffset];
 
-    /*
-    if ((rowState & ROW_MASK) == 0)
-      return;
-    */
+    //if ((rowState & ROW_MASK) == 0) {
+    if (rowState == 0) {
+      return false;
+    }
 
     buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
 
@@ -1156,9 +1157,12 @@ public class Table extends BlockStore {
       }
     }
 
+    Arrays.fill(buffer, rowOffset, rowOffset + _row.getLength(), (byte) 0); 
     buffer[rowOffset] = 0;
 
     _rowDeleteCount.incrementAndGet();
+    
+    return true;
   }
 
   /**

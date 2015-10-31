@@ -505,11 +505,11 @@ public class TableIterator {
     column.evalToResult(_blockId, _buffer, _rowOffset, result);
   }
 
-  public void delete()
+  public boolean delete()
     throws SQLException
   {
     setDirty();
-    _table.delete(_xa, _block, _buffer, _rowOffset, true);
+    return _table.delete(_xa, _block, _buffer, _rowOffset, true);
   }
   
   /**

@@ -601,6 +601,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
       ArrayList<Mnode> mnodeList = _expireState.selectExpiredData();
       
+      if (mnodeList.size() > 0) {
+        log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items");
+      }
+      
       // mnodeCount += mnodeList.size();
 
       for (Mnode mnode : mnodeList) {

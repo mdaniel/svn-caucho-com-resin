@@ -539,16 +539,19 @@ public class QueryContext {
   public void lock()
     throws SQLException
   {
-    if (_isNonLocking)
+    if (_isNonLocking) {
       return;
+    }
     
     if (_isLocked) {
       throw new IllegalStateException(L.l("blocks are already locked"));
     }
+    
     _isLocked = true;
 
-    if (_thread != Thread.currentThread())
+    if (_thread != Thread.currentThread()) {
       throw new IllegalStateException();
+    }
 
     int len = _tableIterators.length;
 

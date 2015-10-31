@@ -102,14 +102,24 @@ class UpdateQuery extends Query {
       }
 
       do {
-        TableIterator iter = rows[0];
+        context.lock();
+        
+        try {
+          if (! isSelect(context)) {
+            continue;
+          }
+        
+          TableIterator iter = rows[0];
         // iter.setDirty();
 
-        for (int i = 0; i < setItems.length; i++) {
-          Column column = setItems[i].getColumn();
-          Expr expr = setItems[i].getExpr();
+          for (int i = 0; i < setItems.length; i++) {
+            Column column = setItems[i].getColumn();
+            Expr expr = setItems[i].getExpr();
 
-          column.set(xa, iter, expr, context);
+            column.set(xa, iter, expr, context);
+          }
+        } finally {
+          context.unlock();
         }
 
         context.setRowUpdateCount(++count);

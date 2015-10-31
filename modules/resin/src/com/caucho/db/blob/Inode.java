@@ -723,6 +723,10 @@ public class Inode {
         Block block = store.allocateBlock();
         long blockAddr = BlockStore.blockIdToAddress(block.getBlockId());
         block.free();
+        
+        if (blockAddr == 0) {
+          corrupted(store, store + " inode: illegal block at " + currentLength);
+        }
 
         Block writeBlock = store.writeBlock(blockAddr, 0,
                                             buffer, offset, charSublen);
@@ -897,8 +901,9 @@ public class Inode {
       return false;
     }
     else if (_store.getAllocationByAddress(blockAddr) != allocCode) {
-      String msg = (_store + ": inode block "
-                    + Long.toHexString(length)
+      String msg = (_store + ": inode block 0x"
+                    + Long.toHexString(blockAddr)
+                    + " len=" + length
                     + " has invalid block code (" + _store.getAllocationByAddress(blockAddr) + ")"
                     + " expected (" + allocCode + ")");
 

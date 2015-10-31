@@ -6,7 +6,12 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.46 - in-progress">
+<s2 title="4.0.47 - in progress">
+<ul>
+</ul>
+</s2>
+
+<s2 title="4.0.46 - Oct 4, 2015-progress">
 <ul>
 <li>jsp: tag loading issue due to WEB-INF case (#5936, rep by libor)</li>
 <li>table: improper early closing of file on shutdown (#5946)</li>
