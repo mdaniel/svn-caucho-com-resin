@@ -33,7 +33,7 @@ import java.util.Objects;
 
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
-import com.caucho.v5.env.shutdown.ShutdownMode;
+import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.env.system.SubSystemBase;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.kraken.KrakenSystem;
@@ -100,7 +100,7 @@ public class NautilusSystem extends SubSystemBase
   }
   
   @Override
-  public void stop(ShutdownMode mode)
+  public void stop(ShutdownModeAmp mode)
   {
   }
 
