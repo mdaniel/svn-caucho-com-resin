@@ -141,35 +141,38 @@ namespace Caucho
       }
 
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
-      foreach (String name in services.GetSubKeyNames()) {
-        RegistryKey key = services.OpenSubKey(name);
-        Object imagePathObj = key.GetValue("ImagePath");
-        if (imagePathObj == null && !"".Equals(imagePathObj))
-          continue;
 
-        String imagePath = (String)imagePathObj;
-        String lowerCaseImagePath = imagePath.ToLower();
+      if (services != null) {
+        foreach (String name in services.GetSubKeyNames()) {
+          RegistryKey key = services.OpenSubKey(name);
+          Object imagePathObj = key.GetValue("ImagePath");
+          if (imagePathObj == null && !"".Equals(imagePathObj))
+            continue;
 
-        if (imagePath.IndexOf("resin.exe") != -1) {
-          ResinArgs resinArgs = new ResinArgs(imagePath);
-          Resin resin = null;
-          if (resinArgs.ResinHome != null) {
-            resin = new Resin(resinArgs.ResinHome);
-          } else if (resinArgs.Exe != null) {
-            String exe = resinArgs.Exe;
-            String home = exe.Substring(0, exe.Length - 10);
-            if (Util.IsResinHome(home))
-              resin = new Resin(home);
+          String imagePath = (String)imagePathObj;
+          String lowerCaseImagePath = imagePath.ToLower();
+
+          if (imagePath.IndexOf("resin.exe") != -1) {
+            ResinArgs resinArgs = new ResinArgs(imagePath);
+            Resin resin = null;
+            if (resinArgs.ResinHome != null) {
+              resin = new Resin(resinArgs.ResinHome);
+            } else if (resinArgs.Exe != null) {
+              String exe = resinArgs.Exe;
+              String home = exe.Substring(0, exe.Length - 10);
+              if (Util.IsResinHome(home))
+                resin = new Resin(home);
+            }
+
+            if (resin != null && !HasResin(resin))
+              AddResin(resin);
           }
 
-          if (resin != null && !HasResin(resin))
-            AddResin(resin);
+          key.Close();
         }
 
-        key.Close();
+        services.Close();
       }
-
-      services.Close();
 
       String resinHome = Util.GetResinHome(null, System.Reflection.Assembly.GetExecutingAssembly().Location);
 
@@ -197,6 +200,10 @@ namespace Caucho
     public void FindResinServices()
     {
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
+
+      if (services == null)
+        return;
+
       foreach (String name in services.GetSubKeyNames()) {
         RegistryKey key = services.OpenSubKey(name);
         Object imagePathObj = key.GetValue("ImagePath");
