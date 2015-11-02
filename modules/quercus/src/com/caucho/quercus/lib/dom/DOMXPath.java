@@ -92,7 +92,7 @@ public class DOMXPath
     else
       node = _document.getDelegate();
 
-    NodeList nodeList = (NodeList) query(env, expression.startsWith("/") ? expression : "//" + expression, node);
+    NodeList nodeList = (NodeList) query(env, (expression.startsWith("/") || expression.startsWith("(")) ? expression : "//" + expression, node);
 
     return _document.wrap(nodeList);
   }
