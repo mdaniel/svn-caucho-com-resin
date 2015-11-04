@@ -41,6 +41,7 @@ public class ArgGetValue extends ArgValue
 {
   private final Value _obj;
   private final Value _index;
+  private Value _arrayRef;
 
   public ArgGetValue(Value obj, Value index)
   {
@@ -132,7 +133,7 @@ public class ArgGetValue extends ArgValue
   @Override
   public Value toLocalValueReadOnly()
   {
-    return _obj.get(_index);
+    return getArrayRef();
   }
 
   /**
@@ -141,7 +142,7 @@ public class ArgGetValue extends ArgValue
   @Override
   public Value toLocalValue()
   {
-    return _obj.get(_index).copy();
+    return getArrayRef().copy();
   }
 
   /**
@@ -150,7 +151,7 @@ public class ArgGetValue extends ArgValue
   @Override
   public Value toLocalRef()
   {
-    return _obj.get(_index).copy(); // php/0d14, php/04b4
+    return getArrayRef().copy(); // php/0d14, php/04b4
   }
 
   //
@@ -160,6 +161,17 @@ public class ArgGetValue extends ArgValue
   public Object writeReplace()
   {
     return toValue();
+  }
+  
+  private Value getArrayRef() {
+    if (_arrayRef != null) {
+      return _arrayRef;
+    }
+    _arrayRef = _obj.get(_index);
+    if (_arrayRef == UnsetValue.UNSET && !Env.getCurrent().isSuppressNotices()) {
+      Env.getCurrent().notice("Undefined index: " + _index.toString());
+    }
+    return _arrayRef;
   }
 }
 

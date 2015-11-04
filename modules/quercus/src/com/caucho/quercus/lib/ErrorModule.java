@@ -458,9 +458,6 @@ public class ErrorModule extends AbstractQuercusModule {
     long oldMask = env.getIni("error_reporting").toLong();
 
     if (! levelV.isDefault()) {
-      if (levelV.toInt() == -1) {
-        levelV = LongValue.create(0);
-      }
       env.setIni("error_reporting", levelV);
     }
 

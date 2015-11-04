@@ -56,9 +56,9 @@ public class FunEmptyExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    int errorMask = env.setErrorMask(0);
+    boolean suppressNotices = env.setSuppressNotices(true);
     Value result = BooleanValue.create(_value.evalEmpty(env));
-    env.setErrorMask(errorMask);
+    env.setSuppressNotices(suppressNotices);
     return result;
   }
 }

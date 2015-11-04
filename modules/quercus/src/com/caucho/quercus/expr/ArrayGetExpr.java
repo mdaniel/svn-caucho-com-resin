@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 
@@ -83,7 +84,11 @@ public class ArrayGetExpr extends AbstractVarExpr {
     Value array = _expr.eval(env);
     Value index = _index.eval(env);
 
-    return array.get(index);
+    Value result = array.get(index);
+    if (result == UnsetValue.UNSET && !env.isSuppressNotices()) {
+      env.notice("Undefined index: " + index.toString());
+    }
+    return result;
   }
 
   /**

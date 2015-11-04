@@ -442,6 +442,7 @@ public class Env
   private Location _lastErrorLocation = null;
   
   private XdebugConnection _xdebugConnection = null;
+  private boolean _suppressNotices;
 
   public Env(QuercusContext quercus,
              QuercusPage page,
@@ -2034,6 +2035,17 @@ public class Env
   public boolean isInForwardStaticCall()
   {
     return _isInForwardStaticCall;
+  }
+  
+  public boolean setSuppressNotices(boolean suppressNotices)
+  {
+    boolean result = _suppressNotices;
+    _suppressNotices = suppressNotices;
+    return result;
+  }
+  
+  public boolean isSuppressNotices() {
+    return _suppressNotices;
   }
   
   /**
@@ -6769,6 +6781,9 @@ public class Env
    */
   public Value notice(String msg)
   {
+    if (_suppressNotices) {
+      return NullValue.NULL;
+    }
     return error(B_NOTICE, msg, getLocation());
   }
 
@@ -6948,6 +6963,10 @@ public class Env
     //System.err.println("Env.error0: " + code + " . " + msg + " . " + location);
     //Thread.dumpStack();
 
+    if (code == B_NOTICE && _suppressNotices) {
+      return NullValue.NULL;
+    }
+    
     if (location == null || location.isUnknown()) {
       location = getLocation();
     }

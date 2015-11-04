@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.expr;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
@@ -38,9 +41,6 @@ import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.statement.Statement;
 import com.caucho.util.L10N;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Represents a PHP expression.
@@ -810,7 +810,10 @@ abstract public class Expr {
    */
   public Value evalIssetValue(Env env)
   {
-    return eval(env);
+    boolean suppressNotices = env.setSuppressNotices(true);
+    Value result = eval(env);
+    env.setSuppressNotices(suppressNotices);
+    return result;
   }
 
   /**
