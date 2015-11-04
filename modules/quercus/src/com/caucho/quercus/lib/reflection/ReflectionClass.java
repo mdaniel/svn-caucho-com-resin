@@ -383,6 +383,11 @@ public class ReflectionClass
     return _cls.callNew(env, args);
   }
 
+  public Value newInstanceWithoutConstructor(Env env)
+  {
+    return _cls.callNew(env, false, new Value[]{});
+  }
+
   public Value newInstanceArgs(Env env, @Optional ArrayValue args)
   {
     if (args == null) {
