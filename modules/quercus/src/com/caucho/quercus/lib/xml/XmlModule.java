@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib.xml;
 
+import java.util.ArrayList;
+
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
@@ -42,8 +44,6 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
-
-import java.util.ArrayList;
 
 /**
  * PHP XML
@@ -566,6 +566,11 @@ public class XmlModule extends AbstractQuercusModule {
     return null;
   }
 
+  public static boolean libxml_disable_entity_loader(Env env, boolean disabled)
+  {
+    return true;
+  }
+  
   private static ArrayList<LibXmlError> getErrorList(Env env)
   {
     ArrayList<LibXmlError> errorList
