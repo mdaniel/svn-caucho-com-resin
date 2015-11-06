@@ -655,7 +655,11 @@ the command line, typically -X memory parameters and -D defines.</p>
 <defun title="&lt;jvm-classpath>" version="Resin 3.1.6">
 <parents>server</parents>
 
-<p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.</p>
+<p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.
+This classpath has priority over Resin's classpath (allowing you to use
+JPA 2.1+ instead of Reisn's JPA 2.0, for example).  To check the
+server's classpath order, do a <code>ps aux | grep Resin</code> on Linux
+or start Resin with the --verbose flag.</p>
 
 <example title="adding a classpath">
 &lt;resin xmlns="http://caucho.com/ns/resin">
