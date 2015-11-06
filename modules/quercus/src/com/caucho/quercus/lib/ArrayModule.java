@@ -80,6 +80,7 @@ public class ArrayModule
   public static final int SORT_REGULAR = 0;
   public static final int SORT_NUMERIC = 1;
   public static final int SORT_STRING = 2;
+  public static final int SORT_NATURAL = 6;
   public static final int SORT_LOCALE_STRING = 5;
   public static final int SORT_NORMAL = 1;
   public static final int SORT_REVERSE = -1;
@@ -3325,6 +3326,9 @@ public class ArrayModule
     case SORT_NUMERIC:
       array.sort(CN_VALUE_NORMAL, KEY_RESET, STRICT);
       break;
+    case SORT_NATURAL:
+      array.sort(CNA_VALUE_NORMAL_SENSITIVE, NO_KEY_RESET, NOT_STRICT);
+      break;
     case SORT_LOCALE_STRING:
       Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
@@ -3612,9 +3616,9 @@ public class ArrayModule
         }
 
         if (bParser.hasNext())
-          return 1;
-        else if (aParser.hasNext())
           return -1;
+        else if (aParser.hasNext())
+          return 1;
         else
           return 0;
 
