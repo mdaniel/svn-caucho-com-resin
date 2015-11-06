@@ -43,7 +43,7 @@ import javax.persistence.PersistenceUnit;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.inject.AnyLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
@@ -56,7 +56,7 @@ import com.caucho.v5.util.L10N;
 public class PersistenceUnitHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(PersistenceUnitHandler.class);
   
-  public PersistenceUnitHandler(InjectManager manager)
+  public PersistenceUnitHandler(CandiManager manager)
   {
     super(manager);
   }

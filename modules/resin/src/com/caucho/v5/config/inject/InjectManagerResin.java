@@ -46,7 +46,7 @@ import com.caucho.v5.config.custom.CookieCustomBean;
 import com.caucho.v5.config.custom.ExtensionCustomBean;
 import com.caucho.v5.config.event.EventManager;
 import com.caucho.v5.config.event.EventManagerResin;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.ObjectFactoryNamingCdi;
 import com.caucho.v5.config.j2ee.DataSourceDefinitionHandler;
 import com.caucho.v5.config.j2ee.ExtensionCustomBeanResin;
@@ -68,7 +68,7 @@ import com.caucho.v5.server.cdi.TransactionScope;
 @ModulePrivate
 @CauchoBean
 @SuppressWarnings("serial")
-public class InjectManagerResin extends InjectManager
+public class InjectManagerResin extends CandiManager
 {
   private static final Logger log
     = Logger.getLogger(InjectManagerResin.class.getName());
@@ -77,7 +77,7 @@ public class InjectManagerResin extends InjectManager
     = new ResourceProgramManager();
   
   public InjectManagerResin(String id,
-                             InjectManager parent,
+                             CandiManager parent,
                              EnvironmentClassLoader loader,
                              boolean isSetLocal)
   {
@@ -86,7 +86,7 @@ public class InjectManagerResin extends InjectManager
   
   public static InjectManagerResin getCurrent()
   {
-    return (InjectManagerResin) InjectManager.getCurrent();
+    return (InjectManagerResin) CandiManager.getCurrent();
   }
   
   public ResourceProgramManager getResourceManager()

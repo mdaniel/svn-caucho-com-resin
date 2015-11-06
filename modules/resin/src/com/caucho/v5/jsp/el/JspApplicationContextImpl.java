@@ -38,7 +38,7 @@ import javax.servlet.jsp.JspApplicationContext;
 
 //import com.caucho.el.StreamELResolver;
 
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.jsp.PageManager;
 import com.caucho.v5.jsp.TaglibManager;
@@ -72,7 +72,7 @@ public class JspApplicationContextImpl implements JspApplicationContext
   {
     _webApp = webApp;
 
-    InjectManager injectManager = _webApp.getBeanManager();
+    CandiManager injectManager = _webApp.getBeanManager();
     
     ExpressionFactory factory = new JspExpressionFactoryImpl(this);
     

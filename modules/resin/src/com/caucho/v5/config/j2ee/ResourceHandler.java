@@ -44,7 +44,7 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
@@ -66,7 +66,7 @@ public class ResourceHandler extends JavaeeInjectionHandler {
   
   private static final Method _lookupMethod;
   
-  public ResourceHandler(InjectManager manager)
+  public ResourceHandler(CandiManager manager)
   {
     super(manager);
   }

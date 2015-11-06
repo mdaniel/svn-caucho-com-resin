@@ -35,7 +35,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.NamingException;
 
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.ObjectFactoryNaming;
 import com.caucho.v5.inject.Module;
 
@@ -44,10 +44,10 @@ import com.caucho.v5.inject.Module;
  */
 @Module
 public class JndiBeanProxy<T> implements ObjectFactoryNaming {
-  private InjectManager _injectManager;
+  private CandiManager _injectManager;
   private Bean<T> _bean;
   
-  JndiBeanProxy(InjectManager manager, Bean<T> bean)
+  JndiBeanProxy(CandiManager manager, Bean<T> bean)
   {
     _injectManager = manager;
     _bean = bean;

@@ -55,7 +55,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
 
@@ -67,13 +67,13 @@ public class BeanMBean<T> implements DynamicMBean {
   private static final L10N L = new L10N(BeanMBean.class);
   private static final Logger log = Logger.getLogger(BeanMBean.class.getName());
   
-  private InjectManager _injectManager;
+  private CandiManager _injectManager;
   private Bean<T> _bean;
   private MBeanInfo _info;
   private HashMap<String,Method> _attrMap
     = new HashMap<String,Method>();
   
-  BeanMBean(InjectManager manager, Bean<T> bean, AnnotatedType<T> type)
+  BeanMBean(CandiManager manager, Bean<T> bean, AnnotatedType<T> type)
   {
     try {
       _injectManager = manager;

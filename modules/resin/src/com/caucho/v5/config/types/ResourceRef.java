@@ -35,7 +35,7 @@ import com.caucho.v5.config.LineConfigException;
 import com.caucho.v5.config.Names;
 import com.caucho.v5.config.inject.BeanBuilder;
 import com.caucho.v5.config.inject.DefaultLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.ObjectFactoryNaming;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.types.InitParam;
@@ -267,7 +267,7 @@ public class ResourceRef extends ResourceGroupConfig
     }
     
     if (_value == null && getLookupName() == null) {
-      InjectManager cdiManager = InjectManager.getCurrent();
+      CandiManager cdiManager = CandiManager.getCurrent();
       
       Set<Bean<?>> beans = cdiManager.getBeans(_type);
       
@@ -292,7 +292,7 @@ public class ResourceRef extends ResourceGroupConfig
     else if (getLookupName() != null)
       return JndiUtil.lookup(getLookupName());
     else {
-      InjectManager cdiManager = InjectManager.getCurrent();
+      CandiManager cdiManager = CandiManager.getCurrent();
       
       value = cdiManager.getReference(_bean);
     }

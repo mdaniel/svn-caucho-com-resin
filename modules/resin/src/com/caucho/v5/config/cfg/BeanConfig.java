@@ -56,7 +56,7 @@ import com.caucho.v5.config.Names;
 import com.caucho.v5.config.custom.ConfigCustomBean;
 import com.caucho.v5.config.inject.BeanBuilder;
 import com.caucho.v5.config.inject.DefaultLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyStringProgram;
@@ -86,7 +86,7 @@ public class BeanConfig
 
   private ConfigCustomBean _customBean;
 
-  private InjectManager _cdiManager;
+  private CandiManager _cdiManager;
 
   private Class<?> _cl;
 
@@ -112,7 +112,7 @@ public class BeanConfig
 
   public BeanConfig()
   {
-    _cdiManager = InjectManager.create();
+    _cdiManager = CandiManager.create();
 
     if (getDefaultScope() != null)
       setScope(getDefaultScope());
@@ -120,7 +120,7 @@ public class BeanConfig
     setService(isDefaultService());
   }
 
-  public InjectManager getBeanManager()
+  public CandiManager getBeanManager()
   {
     return _cdiManager;
   }
@@ -489,7 +489,7 @@ public class BeanConfig
 
     introspect();
 
-    InjectManager beanManager = InjectManager.create();
+    CandiManager beanManager = CandiManager.create();
     BeanBuilder builder =  beanManager.createBeanBuilder(_cl);
 
     if (builder == null)

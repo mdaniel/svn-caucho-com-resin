@@ -32,7 +32,7 @@ package com.caucho.v5.resin;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.scope.ContextContainer;
 
 /**
@@ -72,7 +72,7 @@ public class BeanContainerRequest implements AutoCloseable
   
   <T> T get(Contextual<T> bean,
             CreationalContext<T> env,
-            InjectManager manager)
+            CandiManager manager)
   {
     T value = _context.get(bean);
     

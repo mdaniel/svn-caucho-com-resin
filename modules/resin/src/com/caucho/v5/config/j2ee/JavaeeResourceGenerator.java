@@ -32,7 +32,7 @@ package com.caucho.v5.config.j2ee;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
 import com.caucho.v5.config.inject.AnyLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.config.xml.ContextConfigXml;
@@ -74,7 +74,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
   private final String _mappedName;
   private final String _beanName;
 
-  private InjectManager _beanManager;
+  private CandiManager _beanManager;
   private Bean<?> _bean;
 
   JavaeeResourceGenerator(String location,
@@ -84,7 +84,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
                           String mappedName,
                           String beanName)
   {
-    _beanManager = InjectManager.create();
+    _beanManager = CandiManager.create();
     
     if (! fieldType.isAssignableFrom(type))
       type = fieldType;
@@ -213,7 +213,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
 
   public Bean bind(String location, Class type, String name)
   {
-    InjectManager webBeans = _beanManager;
+    CandiManager webBeans = _beanManager;
 
     Set<Bean<?>> beans = null;
 

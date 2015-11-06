@@ -38,7 +38,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.Config;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.jmx.JmxUtil;
 import com.caucho.v5.naming.JndiUtil;
 
@@ -85,7 +85,7 @@ public class ResinConfigLibrary {
     }
   }
   
-  public static void configure(InjectManager webBeans)
+  public static void configure(CandiManager webBeans)
   {
     try {
       for (Method m : ResinConfigLibrary.class.getMethods()) {

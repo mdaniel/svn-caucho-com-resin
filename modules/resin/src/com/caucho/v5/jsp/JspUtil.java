@@ -36,7 +36,7 @@ import javax.el.ValueExpression;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.v5.config.el.CandiExpr;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.ReferenceFactory;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.MethodExpressionImpl;
@@ -71,7 +71,7 @@ public class JspUtil
   
   public static <T> ReferenceFactory<T> getInjectFactory(Class<T> cl)
   {
-    InjectManager cdiManager = InjectManager.create();
+    CandiManager cdiManager = CandiManager.create();
     
     Bean<T> bean = cdiManager.createManagedBean(cl);
     

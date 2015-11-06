@@ -36,7 +36,7 @@ import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.functions.FmtFunctions;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.lib.ResinConfigLibrary;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.http.container.HttpContainer;
@@ -136,7 +136,7 @@ public class ServerBuilderResin extends ServerBuilder
   {
     super.initCdiEnvironment();
     
-    InjectManager cdiManager = InjectManager.create();
+    CandiManager cdiManager = CandiManager.create();
 
     if (cdiManager.getBeans(CdiProducerResin.class).size() == 0) {
       Config.setProperty("fmt", new FmtFunctions());

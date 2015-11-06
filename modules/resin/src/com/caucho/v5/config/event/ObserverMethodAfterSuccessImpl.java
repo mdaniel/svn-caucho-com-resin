@@ -42,7 +42,7 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import com.caucho.v5.config.event.ObserverMethodImpl;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.transaction.TransactionImpl;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 
@@ -57,7 +57,7 @@ public class ObserverMethodAfterSuccessImpl<X,T>
   
   private TransactionManagerImpl _tm;
   
-  public ObserverMethodAfterSuccessImpl(InjectManager beanManager,
+  public ObserverMethodAfterSuccessImpl(CandiManager beanManager,
                                             Bean<X> bean,
                                             AnnotatedMethod<X> method,
                                             Type type,

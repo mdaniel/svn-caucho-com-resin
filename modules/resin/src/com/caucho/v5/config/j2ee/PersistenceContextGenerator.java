@@ -30,7 +30,7 @@
 package com.caucho.v5.config.j2ee;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.util.L10N;
 

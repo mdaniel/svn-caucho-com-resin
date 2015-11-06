@@ -31,7 +31,7 @@ package com.caucho.v5.config.types;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.ObjectFactoryNaming;
 import com.caucho.v5.config.j2ee.BeanNameLiteral;
 import com.caucho.v5.config.types.InjectionTarget;
@@ -306,7 +306,7 @@ public class EjbRef extends BaseRef {
     
     Class<?> type = calculateType();
     
-    InjectManager injectManager = InjectManager.getCurrent();
+    CandiManager injectManager = CandiManager.getCurrent();
     
     Set<Bean<?>> beans = null;
     

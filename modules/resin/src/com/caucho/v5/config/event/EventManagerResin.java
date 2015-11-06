@@ -55,7 +55,7 @@ import javax.inject.Qualifier;
 
 import com.caucho.v5.config.event.EventManager;
 import com.caucho.v5.config.event.ObserverMethodImpl;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.reflect.BaseType;
 import com.caucho.v5.config.reflect.ParamType;
 import com.caucho.v5.inject.Module;
@@ -67,7 +67,7 @@ import com.caucho.v5.util.L10N;
 @Module
 public class EventManagerResin extends EventManager
 {
-  public EventManagerResin(InjectManager cdiManager)
+  public EventManagerResin(CandiManager cdiManager)
   {
     super(cdiManager);
   }

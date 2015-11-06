@@ -48,7 +48,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.Unbound;
 import com.caucho.v5.config.inject.CandiELContext;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.types.CronType;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.types.Trigger;
@@ -328,7 +328,7 @@ public class ScheduledTask
     MethodTask(MethodExpression method)
     {
       _method = method;
-      _elContext = new CandiELContext(InjectManager.create());
+      _elContext = new CandiELContext(CandiManager.create());
     }
 
     public void run()

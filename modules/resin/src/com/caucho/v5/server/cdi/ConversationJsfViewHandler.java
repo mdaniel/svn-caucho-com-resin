@@ -38,7 +38,7 @@ import javax.faces.application.ViewHandlerWrapper;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 
 /**
  * The conversation scope value
@@ -46,14 +46,14 @@ import com.caucho.v5.config.inject.InjectManager;
 public class ConversationJsfViewHandler extends ViewHandlerWrapper
 {
   private ViewHandler _next;
-  private InjectManager _cdiManager;
+  private CandiManager _cdiManager;
   private ConversationContext _conversation;
 
   public ConversationJsfViewHandler(ViewHandler next)
   {
     _next = next;
     
-    _cdiManager = InjectManager.create();
+    _cdiManager = CandiManager.create();
     _conversation = (ConversationContext) _cdiManager.getContext(ConversationScoped.class);
   }
 

@@ -46,7 +46,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
 import com.caucho.v5.config.inject.AnyLiteral;
 import com.caucho.v5.config.inject.DefaultLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.InjectionPointHandler;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.naming.JndiUtil;
@@ -55,14 +55,14 @@ import com.caucho.v5.naming.JndiUtil;
  * Common JavaEE injection handler
  */
 abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
-  private InjectManager _manager;
+  private CandiManager _manager;
   
-  protected JavaeeInjectionHandler(InjectManager manager)
+  protected JavaeeInjectionHandler(CandiManager manager)
   {
     _manager = manager;
   }
 
-  protected InjectManager getManager()
+  protected CandiManager getManager()
   {
     return _manager;
   }
@@ -73,7 +73,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
                          Annotation ...bindings)
   {
     try {
-      InjectManager injectManager = getManager();
+      CandiManager injectManager = getManager();
       
       Set<Bean<?>> beans = null;
 
@@ -116,7 +116,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
                          Annotation ...qualifiers)
   {
     try {
-      InjectManager injectManager = getManager();
+      CandiManager injectManager = getManager();
 
       Set<Bean<?>> beans = null;
 

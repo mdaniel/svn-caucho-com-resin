@@ -43,7 +43,7 @@ import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Enhanced;
 import com.caucho.v5.config.extension.ProcessBeanImpl;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.http.dispatch.ServletMapping;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.inject.LazyExtension;
@@ -56,10 +56,10 @@ import com.caucho.v5.inject.Module;
 @CauchoBean
 public class WebAppInjectExtension implements Extension
 {
-  private InjectManager _beanManager;
+  private CandiManager _beanManager;
   private WebApp _webApp;
 
-  public WebAppInjectExtension(InjectManager manager,
+  public WebAppInjectExtension(CandiManager manager,
                                WebApp webApp)
   {
     _beanManager = manager;

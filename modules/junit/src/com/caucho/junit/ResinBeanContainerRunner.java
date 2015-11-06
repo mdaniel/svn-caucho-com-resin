@@ -35,7 +35,7 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.resin.BeanContainerRequest;
 import com.caucho.v5.resin.ResinBeanContainer;
 
@@ -65,7 +65,7 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
   @Override
   protected Object createTest() throws Exception
   {
-    InjectManager manager = getResinContext().getInstance(InjectManager.class);
+    CandiManager manager = getResinContext().getInstance(CandiManager.class);
 
     // Make the test class a CDI bean, but do not actually register it with CDI.
     return manager.createTransientObject(_testClass);

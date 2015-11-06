@@ -51,7 +51,7 @@ import com.caucho.v5.amp.channel.SessionService;
 import com.caucho.v5.amp.resource.ResourceService;
 import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.inject.Jndi;
 import com.caucho.v5.inject.LazyExtension;
@@ -74,9 +74,9 @@ public class CdiExtensionResin implements Extension {
   private static final HashSet<Class<? extends Annotation>> _ejbAnnotations
     = new HashSet<Class<? extends Annotation>>();
 
-  private InjectManager _cdiManager;
+  private CandiManager _cdiManager;
   
-  public CdiExtensionResin(InjectManager manager) 
+  public CdiExtensionResin(CandiManager manager) 
   {
     _cdiManager = manager;
   }

@@ -43,7 +43,7 @@ import javax.sql.DataSource;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
@@ -63,7 +63,7 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
   
   private static final L10N L = new L10N(DataSourceDefinitionHandler.class);
   
-  public DataSourceDefinitionHandler(InjectManager manager)
+  public DataSourceDefinitionHandler(CandiManager manager)
   {
     super(manager);
   }

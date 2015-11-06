@@ -36,7 +36,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.jsp.Page;
 import com.caucho.v5.jsp.QServlet;
@@ -199,7 +199,7 @@ public class ServletBuilderResin extends ServletBuilder
     }
 
     if (_var != null) {
-      InjectManager cdiManager = InjectManager.getCurrent();
+      CandiManager cdiManager = CandiManager.getCurrent();
       
       validateClass(true);
 

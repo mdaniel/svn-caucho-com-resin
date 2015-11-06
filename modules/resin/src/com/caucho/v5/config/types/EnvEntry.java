@@ -43,7 +43,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
 import com.caucho.v5.config.inject.BeanBuilder;
 import com.caucho.v5.config.inject.DefaultLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.config.types.Validator;
 import com.caucho.v5.el.Expr;
@@ -289,7 +289,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     if (value == null)
       return;
     
-    InjectManager cdiManager = InjectManager.create();
+    CandiManager cdiManager = CandiManager.create();
 
     // XXX: EJB TCK
     if (cdiManager.getBeans(_name).size() > 0)

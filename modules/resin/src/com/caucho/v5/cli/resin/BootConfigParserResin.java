@@ -30,7 +30,7 @@
 package com.caucho.v5.cli.resin;
 
 import com.caucho.v5.cli.server.BootConfigParser;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.lib.ResinConfigLibrary;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
@@ -42,7 +42,7 @@ public class BootConfigParserResin extends BootConfigParser
   {
     ConfigXml config = super.createConfig();
 
-    InjectManager cdiManager = InjectManager.create();
+    CandiManager cdiManager = CandiManager.create();
 
     ResinConfigLibrary.configure(cdiManager);
     ResinServerConfigLibrary.configure(cdiManager);

@@ -59,7 +59,7 @@ import com.caucho.v5.cli.resin.ResinCommandLineAgent;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DynamicClassLoader;
@@ -675,7 +675,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
       return null;
     
     Named named = Names.create(name);
-    InjectManager beanManager = InjectManager.create();
+    CandiManager beanManager = CandiManager.create();
     
     Set<Bean<?>> beans = beanManager.getBeans(DataSource.class, named);
     

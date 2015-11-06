@@ -33,7 +33,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.util.L10N;
@@ -153,7 +153,7 @@ public class BeanEmbed
   protected void configure()
   {
     try {
-      InjectManager cdiManager = InjectManager.create();
+      CandiManager cdiManager = CandiManager.create();
       
       if (_value != null) {
         BeanBuilder<?> factory = cdiManager.createBeanBuilder(_value.getClass());

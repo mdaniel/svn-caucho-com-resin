@@ -45,7 +45,7 @@ import javax.enterprise.inject.spi.Bean;
 import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.v5.inject.ThreadContext;
 import com.caucho.v5.java.WorkDir;
@@ -121,7 +121,7 @@ public class ResinBeanContainer {
   private static final L10N L = new L10N(ResinBeanContainer.class);
 
   private EnvironmentClassLoader _classLoader;
-  private InjectManager _cdiManager;
+  private CandiManager _cdiManager;
 
   private ThreadLocal<BeanContainerRequest> _localContext = new ThreadLocal<BeanContainerRequest>();
 
@@ -136,7 +136,7 @@ public class ResinBeanContainer {
   public ResinBeanContainer()
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
-    _cdiManager = InjectManager.create(_classLoader);
+    _cdiManager = CandiManager.create(_classLoader);
 
     // ioc/0b07
     _cdiManager.replaceContext(new RequestScope());
@@ -178,7 +178,7 @@ public class ResinBeanContainer {
     return this;
   }
 
-  public InjectManager getCdiManager()
+  public CandiManager getCdiManager()
   {
     return _cdiManager;
   }

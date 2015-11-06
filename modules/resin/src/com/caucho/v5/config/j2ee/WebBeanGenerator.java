@@ -30,7 +30,7 @@
 package com.caucho.v5.config.j2ee;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.naming.*;
 import com.caucho.v5.util.L10N;
@@ -50,7 +50,7 @@ import javax.enterprise.util.AnnotationLiteral;
 abstract public class WebBeanGenerator extends ValueGenerator {
   private static final L10N L = new L10N(WebBeanGenerator.class);
 
-  private InjectManager _beanManager = InjectManager.create();
+  private CandiManager _beanManager = CandiManager.create();
 
   /**
    * Creates the value.

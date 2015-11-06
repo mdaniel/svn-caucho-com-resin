@@ -48,7 +48,7 @@ import com.caucho.v5.config.LineConfigException;
 import com.caucho.v5.config.Names;
 import com.caucho.v5.config.inject.BeanBuilder;
 import com.caucho.v5.config.inject.CurrentLiteral;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.inject.Module;
@@ -350,7 +350,7 @@ public class PersistenceManager
       // jpa/1630
       thread.setContextClassLoader(_classLoader);
       
-      InjectManager cdiManager = InjectManager.getCurrent();
+      CandiManager cdiManager = CandiManager.getCurrent();
       
       cdiManager.updateResources();
 
@@ -408,7 +408,7 @@ public class PersistenceManager
   private void registerPersistenceUnit(PersistenceUnitManager pUnit)
   {
     try {
-      InjectManager beanManager = InjectManager.create(_classLoader);
+      CandiManager beanManager = CandiManager.create(_classLoader);
       
       BeanBuilder<EntityManagerFactory> emfFactory;
       emfFactory = beanManager.createBeanBuilder(EntityManagerFactory.class);

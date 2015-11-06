@@ -38,7 +38,7 @@ import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ServiceStartup;
 import com.caucho.v5.config.cfg.BeansConfig;
 import com.caucho.v5.config.custom.ExtensionCustomBean;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.inject.ScheduleBean;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.loader.EnvironmentBean;
@@ -56,7 +56,7 @@ public class ExtensionCustomBeanResin extends ExtensionCustomBean
 
   private static final String SCHEMA = "com/caucho/v5/config/cfg/resin-beans.rnc";
 
-  public ExtensionCustomBeanResin(InjectManager manager)
+  public ExtensionCustomBeanResin(CandiManager manager)
   {
     super(manager);
   }
@@ -193,7 +193,7 @@ public class ExtensionCustomBeanResin extends ExtensionCustomBean
   }
   
   private class ContextConfigJavaee extends BeansConfig implements EnvironmentBean {
-    ContextConfigJavaee(InjectManager manager, Path root)
+    ContextConfigJavaee(CandiManager manager, Path root)
     {
       super(manager, root);
     }

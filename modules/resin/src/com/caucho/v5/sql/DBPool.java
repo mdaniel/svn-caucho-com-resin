@@ -50,7 +50,7 @@ import com.caucho.v5.config.Names;
 import com.caucho.v5.config.inject.BeanBuilder;
 import com.caucho.v5.config.inject.CurrentLiteral;
 import com.caucho.v5.config.inject.HandleAware;
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.dbpool.ConnectionPool;
@@ -783,7 +783,7 @@ public class DBPool
       JndiUtil.bindDeepShort(name, this);
     }
 
-    InjectManager manager = InjectManager.create();
+    CandiManager manager = CandiManager.create();
     BeanBuilder<?> factory = manager.createBeanBuilder(DataSource.class);
 
     String name = _name;
