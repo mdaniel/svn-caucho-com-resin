@@ -547,6 +547,17 @@ public class Env
 
     String version = quercus.getPhpVersion();
     addConstant("PHP_VERSION", createString(version), true);
+    String[] versionParts = version.split("\\.");
+    int majorVersion = Integer.parseInt(versionParts[0]);
+    int minorVersion = Integer.parseInt(versionParts[1]);
+    int releaseVersion = Integer.parseInt(versionParts[2]);
+    addConstant("PHP_VERSION_ID", LongValue.create(10000 * majorVersion 
+        + 100 * minorVersion
+        + releaseVersion), true);
+    addConstant("PHP_MAJOR_VERSION", LongValue.create(majorVersion), true);
+    addConstant("PHP_MINOR_VERSION", LongValue.create(minorVersion), true);
+    addConstant("PHP_RELEASE_VERSION", LongValue.create(releaseVersion), true);
+    
 
     // STDIN, STDOUT, STDERR
     // php://stdin, php://stdout, php://stderr
@@ -1517,8 +1528,8 @@ public class Env
    */
   public void pushOutputBuffer(Callable callback, int chunkSize, boolean erase)
   {
-      _outputBuffer =
-        new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
+    _outputBuffer =
+      new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
 
     _out = _outputBuffer.getOut();
   }
