@@ -2199,7 +2199,7 @@ public class Env
    */
   public Var getRef(StringValue name, boolean isAutoCreate)
   {
-    EnvVar envVar = getEnvVar(name, isAutoCreate, true);
+    EnvVar envVar = getEnvVar(name, isAutoCreate, false);
 
     if (envVar != null)
       return envVar.getVar();
