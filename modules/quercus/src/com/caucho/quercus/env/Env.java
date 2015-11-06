@@ -2851,6 +2851,11 @@ public class Env
                           LongValue.create(argv.getSize()));
 
             serverEnv.put(createString("argv"), argv);
+            
+            if (!argv.isNull() && argv.length() > 0) {
+              serverEnv.put(createString("SCRIPT_FILENAME"), argv.get(0));
+              serverEnv.put(createString("SCRIPT_NAME"), argv.get(0));
+            }
           }
         }
         else {
