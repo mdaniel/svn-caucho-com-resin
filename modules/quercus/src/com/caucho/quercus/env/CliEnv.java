@@ -43,6 +43,7 @@ public class CliEnv extends Env {
   {
     super(quercus, page, out, null, null);
 
+    addConstant("PHP_SAPI", createString("cli"), true);
     _argv = argv;
   }
 
