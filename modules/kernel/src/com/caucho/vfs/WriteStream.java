@@ -266,6 +266,10 @@ public class WriteStream extends OutputStreamWithBuffer
     _implicitFlush = implicitFlush;
   }
 
+  public boolean isImplicitFlush() {
+    return _implicitFlush;
+  }
+  
   /**
    * Writes a byte.
    */
@@ -590,6 +594,8 @@ public class WriteStream extends OutputStreamWithBuffer
       _isDisableFlush = true;
       _writeEncoding.write(this, buffer, offset, length);
       _isDisableFlush = false;
+      if (_implicitFlush)
+        flush();
       return;
     }
 
@@ -643,6 +649,8 @@ public class WriteStream extends OutputStreamWithBuffer
     }
 
     _writeLength = writeLength;
+    if (_implicitFlush)
+      flush();
   }
 
   public final void printUtf8(String value, int offset, int length)

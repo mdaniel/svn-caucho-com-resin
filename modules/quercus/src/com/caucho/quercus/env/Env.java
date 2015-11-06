@@ -1517,11 +1517,6 @@ public class Env
    */
   public void pushOutputBuffer(Callable callback, int chunkSize, boolean erase)
   {
-    if (_outputBuffer == null) {
-      _outputBuffer =
-        new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
-    }
-    else
       _outputBuffer =
         new OutputBuffer(_outputBuffer, this, callback, chunkSize, erase);
 

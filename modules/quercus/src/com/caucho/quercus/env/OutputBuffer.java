@@ -29,13 +29,15 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.lib.OutputModule;
-import com.caucho.vfs.*;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.quercus.lib.OutputModule;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP output buffer
@@ -79,6 +81,7 @@ public class OutputBuffer {
     _out = new WriteStream(_tempStream);
     
     _out.setNewlineString("\n");
+    _out.setImplicitFlush(env.getOriginalOut().isImplicitFlush());
 
     String encoding = env.getOutputEncoding();
 

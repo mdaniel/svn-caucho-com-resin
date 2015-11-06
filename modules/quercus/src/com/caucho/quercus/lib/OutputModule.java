@@ -100,7 +100,7 @@ public class OutputModule extends AbstractQuercusModule
       ob_start(env, null, 0, true);
     }
 
-    ob_implicit_flush(env, isOutputBuffering);
+    ob_implicit_flush(env, !isOutputBuffering);
   }
 
   /**
