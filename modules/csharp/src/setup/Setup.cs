@@ -51,6 +51,8 @@ namespace Caucho
       log.Source = "caucho/Setup.cs";
 
       log.WriteEntry("Setup.exe using .NET Version: " + Environment.Version.ToString());
+
+      LogStartupError("starting Setup.exe version : " + Version.FULL_VERSION, null);
     }
 
     public static String REG_SERVICES = "SYSTEM\\CurrentControlSet\\Services";
@@ -226,17 +228,25 @@ namespace Caucho
     {
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
 
+      if (services == null)
+        return;
+
       foreach (String name in services.GetSubKeyNames())
       {
         RegistryKey key = services.OpenSubKey(name);
 
+        if (key == null) 
+          continue;
+
         try
         {
           Object imagePathObj = key.GetValue("ImagePath");
-          if (imagePathObj == null && !"".Equals(imagePathObj))
+
+          if (imagePathObj == null || "".Equals(imagePathObj))
             continue;
 
           String imagePath = (String)imagePathObj;
+
           String lowerCaseImagePath = imagePath.ToLower();
 
           if ((imagePath.IndexOf("resin.exe") > 0
@@ -280,6 +290,7 @@ namespace Caucho
             resin.JavaHome = resinArgs.JavaHome;
             resin.ElasticServerAddress = resinArgs.ElasticServerAddress;
             resin.ElasticServerPort = resinArgs.ElasticServerPort;
+
             if (resinArgs.JmxPort != null && !"".Equals(resinArgs.JmxPort))
               resin.JmxPort = int.Parse(resinArgs.JmxPort);
 
