@@ -172,14 +172,14 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("stdout-log", "com.caucho.log.impl.StdoutLog");
     addBean("system-property", SystemProperty.class);
     
-    addBean("temp-dir", "com.caucho.java.TempDir");
-    addBean("temporary-directory", "com.caucho.java.TempDir");
+    addBean("temp-dir", "com.caucho.v5.java.TempDir");
+    addBean("temporary-directory", "com.caucho.v5.java.TempDir");
     
     addBean("value", "com.caucho.v5.config.type.ValueType");
     
     addBean("web-service-client", "com.caucho.remote.client.RemoteClient");
-    addBean("work-dir", "com.caucho.java.WorkDir");
-    addBean("work-directory", "com.caucho.java.WorkDir");
+    addBean("work-dir", "com.caucho.v5.java.WorkDir");
+    addBean("work-directory", "com.caucho.v5.java.WorkDir");
   }
   
   static {

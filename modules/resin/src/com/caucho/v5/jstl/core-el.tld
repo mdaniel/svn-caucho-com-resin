@@ -6,7 +6,7 @@
 
   <tag>
     <name>out</name>
-    <tag-class>com.caucho.jstl.rt.OutTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.OutTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -30,7 +30,7 @@
 
   <tag>
     <name>set</name>
-    <tag-class>com.caucho.jstl.rt.CoreSetTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreSetTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -66,7 +66,7 @@
 
   <tag>
     <name>remove</name>
-    <tag-class>com.caucho.jstl.RemoveTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.RemoveTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -84,7 +84,7 @@
 
   <tag>
     <name>catch</name>
-    <tag-class>com.caucho.jstl.CatchTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.CatchTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -96,7 +96,7 @@
 
   <tag>
     <name>if</name>
-    <tag-class>com.caucho.jstl.rt.IfTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.IfTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -120,13 +120,13 @@
 
   <tag>
     <name>choose</name>
-    <tag-class>com.caucho.jstl.ChooseTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.ChooseTag</tag-class>
     <body-content>JSP</body-content>
   </tag>
 
   <tag>
     <name>when</name>
-    <tag-class>com.caucho.jstl.rt.CoreWhenTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreWhenTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -138,13 +138,13 @@
 
   <tag>
     <name>otherwise</name>
-    <tag-class>com.caucho.jstl.OtherwiseTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.OtherwiseTag</tag-class>
     <body-content>JSP</body-content>
   </tag>
 
   <tag>
     <name>forEach</name>
-    <tag-class>com.caucho.jstl.rt.CoreForEachTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreForEachTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -186,7 +186,7 @@
 
   <tag>
     <name>forTokens</name>
-    <tag-class>com.caucho.jstl.rt.CoreForTokensTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreForTokensTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -240,7 +240,7 @@
 
   <tag>
     <name>import</name>
-    <tag-class>com.caucho.jstl.rt.CoreImportTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreImportTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -282,7 +282,7 @@
 
   <tag>
     <name>url</name>
-    <tag-class>com.caucho.jstl.rt.CoreUrlTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreUrlTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -312,7 +312,7 @@
 
   <tag>
     <name>redirect</name>
-    <tag-class>com.caucho.jstl.rt.CoreRedirectTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreRedirectTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -330,7 +330,7 @@
 
   <tag>
     <name>param</name>
-    <tag-class>com.caucho.jstl.rt.CoreParamTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.CoreParamTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>

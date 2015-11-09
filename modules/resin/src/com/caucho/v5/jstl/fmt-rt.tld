@@ -5,7 +5,7 @@
 
   <tag>
     <name>message</name>
-    <tag-class>com.caucho.jstl.rt.MessageTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.MessageTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -35,7 +35,7 @@
 
   <tag>
     <name>param</name>
-    <tag-class>com.caucho.jstl.rt.FmtParamTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FmtParamTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -47,7 +47,7 @@
 
   <tag>
     <name>setBundle</name>
-    <tag-class>com.caucho.jstl.rt.SetBundleTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.SetBundleTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -71,7 +71,7 @@
 
   <tag>
     <name>bundle</name>
-    <tag-class>com.caucho.jstl.rt.BundleTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.BundleTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -89,7 +89,7 @@
 
   <tag>
     <name>setLocale</name>
-    <tag-class>com.caucho.jstl.rt.SetLocaleTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.SetLocaleTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -113,7 +113,7 @@
 
   <tag>
     <name>formatNumber</name>
-    <tag-class>com.caucho.jstl.rt.FormatNumberTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FormatNumberTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -191,7 +191,7 @@
 
   <tag>
     <name>parseNumber</name>
-    <tag-class>com.caucho.jstl.rt.FmtParseNumberTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FmtParseNumberTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -239,7 +239,7 @@
 
   <tag>
     <name>setTimeZone</name>
-    <tag-class>com.caucho.jstl.rt.FmtSetTimeZoneTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FmtSetTimeZoneTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -263,7 +263,7 @@
 
   <tag>
     <name>timeZone</name>
-    <tag-class>com.caucho.jstl.rt.FmtTimeZoneTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FmtTimeZoneTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -275,7 +275,7 @@
 
   <tag>
     <name>formatDate</name>
-    <tag-class>com.caucho.jstl.rt.FormatDateTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FormatDateTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -329,7 +329,7 @@
 
   <tag>
     <name>parseDate</name>
-    <tag-class>com.caucho.jstl.rt.FmtParseDateTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FmtParseDateTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -389,7 +389,7 @@
 
   <tag>
     <name>requestEncoding</name>
-    <tag-class>com.caucho.jstl.rt.FmtRequestEncodingTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.FmtRequestEncodingTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>

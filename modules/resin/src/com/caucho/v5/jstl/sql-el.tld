@@ -5,7 +5,7 @@
 
   <tag>
     <name>query</name>
-    <tag-class>com.caucho.jstl.el.SqlQueryTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.SqlQueryTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -47,7 +47,7 @@
 
   <tag>
     <name>update</name>
-    <tag-class>com.caucho.jstl.el.SqlUpdateTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.SqlUpdateTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -77,7 +77,7 @@
 
   <tag>
     <name>param</name>
-    <tag-class>com.caucho.jstl.rt.SqlParamTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.SqlParamTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -89,7 +89,7 @@
 
   <tag>
     <name>dateParam</name>
-    <tag-class>com.caucho.jstl.el.SqlDateParamTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.SqlDateParamTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -107,7 +107,7 @@
 
   <tag>
     <name>setDataSource</name>
-    <tag-class>com.caucho.jstl.el.SqlSetDataSourceTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.SqlSetDataSourceTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -155,7 +155,7 @@
 
   <tag>
     <name>transaction</name>
-    <tag-class>com.caucho.jstl.el.SqlTransactionTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.SqlTransactionTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>

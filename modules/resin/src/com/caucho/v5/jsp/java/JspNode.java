@@ -1202,7 +1202,7 @@ public abstract class JspNode {
       else if (outValue.startsWith("\""))
         out.print(" + (" + outValue + ")");
       else
-        out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
+        out.print(" + com.caucho.v5.el.Expr.toString(" + outValue + ", null)");
     }
   }
   
@@ -1262,7 +1262,7 @@ public abstract class JspNode {
       out.print(" + (" + outValue + ")");
     }
     else
-      out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
+      out.print(" + com.caucho.v5.el.Expr.toString(" + outValue + ", null)");
   }
 
   String generateJstlValue(Class<?> type, String value)

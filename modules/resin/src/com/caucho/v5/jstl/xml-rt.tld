@@ -6,7 +6,7 @@
 
   <tag>
     <name>parse</name>
-    <tag-class>com.caucho.jstl.rt.XmlParseTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.XmlParseTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -42,7 +42,7 @@
 
   <tag>
     <name>out</name>
-    <tag-class>com.caucho.jstl.rt.XmlOutTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.XmlOutTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -60,7 +60,7 @@
 
   <tag>
     <name>set</name>
-    <tag-class>com.caucho.jstl.el.XmlSetTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.XmlSetTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -84,7 +84,7 @@
 
   <tag>
     <name>if</name>
-    <tag-class>com.caucho.jstl.el.XmlIfTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.XmlIfTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -108,13 +108,13 @@
 
   <tag>
     <name>choose</name>
-    <tag-class>com.caucho.jstl.ChooseTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.ChooseTag</tag-class>
     <body-content>JSP</body-content>
   </tag>
 
   <tag>
     <name>when</name>
-    <tag-class>com.caucho.jstl.el.XmlWhenTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.XmlWhenTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -126,13 +126,13 @@
 
   <tag>
     <name>otherwise</name>
-    <tag-class>com.caucho.jstl.OtherwiseTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.OtherwiseTag</tag-class>
     <body-content>JSP</body-content>
   </tag>
 
   <tag>
     <name>forEach</name>
-    <tag-class>com.caucho.jstl.el.XmlForEachTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.el.XmlForEachTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -150,7 +150,7 @@
 
   <tag>
     <name>transform</name>
-    <tag-class>com.caucho.jstl.rt.XmlTransformTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.XmlTransformTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -204,7 +204,7 @@
 
   <tag>
     <name>param</name>
-    <tag-class>com.caucho.jstl.rt.XmlParamTag</tag-class>
+    <tag-class>com.caucho.v5.jstl.rt.XmlParamTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>

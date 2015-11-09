@@ -157,12 +157,12 @@ public class JstlCoreOut extends JstlNode {
       out.print("if (");
 
     if (_valueAttr != null) {
-      out.print("com.caucho.el.Expr.toStream(out, ");
+      out.print("com.caucho.v5.el.Expr.toStream(out, ");
       out.print(_valueAttr.generateValue(String.class));
       out.print(", " + escapeXml + ")");
     }
     else if (hasRuntimeAttribute(_value)) {
-      out.print("com.caucho.el.Expr.toStream(out, ");
+      out.print("com.caucho.v5.el.Expr.toStream(out, ");
       out.print(generateRTValue(String.class, _value));
       out.print(", " + escapeXml + ")");
     }
@@ -178,12 +178,12 @@ public class JstlCoreOut extends JstlNode {
       out.pushDepth();
 
       if (_defaultAttr != null) {
-        out.print("com.caucho.el.Expr.toStream(out, ");
+        out.print("com.caucho.v5.el.Expr.toStream(out, ");
         out.print(_defaultAttr.generateValue(String.class));
         out.println(", " + escapeXml + ");");
       }
       else if (hasRuntimeAttribute(_default)) {
-        out.print("com.caucho.el.Expr.toStream(out, ");
+        out.print("com.caucho.v5.el.Expr.toStream(out, ");
         out.print(generateRTValue(String.class, _default));
         out.println(", " + escapeXml + ");");
       }
@@ -195,7 +195,7 @@ public class JstlCoreOut extends JstlNode {
           String string = defaultExpr.evalString(null);
 
           if (string != null && ! string.equals("")) {
-            out.print("com.caucho.el.Expr.toStreamEscaped(out, \"");
+            out.print("com.caucho.v5.el.Expr.toStreamEscaped(out, \"");
             out.printJavaString(string);
             out.println("\");");
           }
@@ -224,7 +224,7 @@ public class JstlCoreOut extends JstlNode {
       out.println(") {");
       out.pushDepth();
       
-      out.print("com.caucho.el.Expr.toStream(out, ");
+      out.print("com.caucho.v5.el.Expr.toStream(out, ");
       out.print("\"" + escapeJavaString(getStaticText().trim()) + "\"");
       out.println(", " + escapeXml + ");");
       

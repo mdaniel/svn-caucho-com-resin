@@ -36,7 +36,7 @@ import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.servlet.jsp.JspApplicationContext;
 
-//import com.caucho.el.StreamELResolver;
+//import com.caucho.v5.el.StreamELResolver;
 
 import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.http.webapp.WebApp;

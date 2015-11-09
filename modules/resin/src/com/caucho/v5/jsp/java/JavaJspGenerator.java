@@ -1450,7 +1450,7 @@ public class JavaJspGenerator extends JspGenerator {
     for (int i = 0; i < _exprList.size(); i++) {
       // String expr = _exprList.get(i);
 
-      out.println("private static com.caucho.el.Expr _caucho_expr_" + i + ";");
+      out.println("private static com.caucho.v5.el.Expr _caucho_expr_" + i + ";");
       /*
       out.print("  ");
       expr.printCreate(out.getWriteStream());
@@ -1757,7 +1757,7 @@ public class JavaJspGenerator extends JspGenerator {
   private void generateDepends(JspJavaWriter out) throws IOException
   {
     out.println();
-    // out.println("private com.caucho.java.LineMap _caucho_line_map;");
+    // out.println("private com.caucho.v5.java.LineMap _caucho_line_map;");
     out.println("private com.caucho.v5.make.DependencyContainer _caucho_depends");
     out.println("  = new com.caucho.v5.make.DependencyContainer();");
     if (_isCacheable && ! _isUncacheable)
@@ -1888,7 +1888,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     /*
     out.println();
-    out.println("public com.caucho.java.LineMap _caucho_getLineMap()");
+    out.println("public com.caucho.v5.java.LineMap _caucho_getLineMap()");
     out.println("{");
     out.pushDepth();
     out.println("return _caucho_line_map;");

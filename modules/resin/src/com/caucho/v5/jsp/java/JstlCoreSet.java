@@ -192,7 +192,7 @@ public class JstlCoreSet extends JstlNode {
     if (_var != null)
       generateSetOrRemove(out, _var, _scope, value);
     else {
-      out.print("com.caucho.el.Expr.setProperty(");
+      out.print("com.caucho.v5.el.Expr.setProperty(");
       if (_targetAttr != null)
         out.print(_targetAttr.generateValue() + ", ");
       else
