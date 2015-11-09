@@ -82,6 +82,15 @@ public class DateInterval
     if (days.isLong()) {
       result = result.replaceAll("%a", String.format("%d", days.toJavaLong()));
     }
+    if (invert == 0) {
+      // positive sign
+      result = result.replaceAll("%R", "+");
+      result = result.replaceAll("%r", "");
+    } else if (invert == 1){
+      // negative sign
+      result = result.replaceAll("%R", "-");
+      result = result.replaceAll("%r", "-");
+    }
     return result;
   }
 

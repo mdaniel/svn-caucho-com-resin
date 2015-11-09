@@ -338,6 +338,9 @@ public class DateTime implements DateTimeInterface, Cloneable
     if (qDate0.getLocalTime() < qDate1.getLocalTime()) {
       qDate0 = dateTime._qDate;
       qDate1 = _qDate;
+    } else if (!isAbsolute) {
+      // negative interval  
+      dateInterval.invert = 1;
     }
 
     int year = qDate0.getYear() - qDate1.getYear();
