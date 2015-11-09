@@ -133,6 +133,9 @@ public class DateTime implements DateTimeInterface, Cloneable
                                           @Optional DateTimeZone timeZone)
   {
   	long timestamp;
+  	if (timeZone == null) {
+  	  timeZone = new DateTimeZone(env);
+  	}
   	if ("U.u".equals(format)) {
   		String[] parts = timeStr.split("\\.");
   		long seconds = Long.parseLong(parts[0]);
@@ -199,7 +202,9 @@ public class DateTime implements DateTimeInterface, Cloneable
     		}
     	}
     	try {
-  	    timestamp = new SimpleDateFormat(javaFormat.toString(), Locale.ENGLISH).parse(timeStr).getTime();
+  	    SimpleDateFormat sdf = new SimpleDateFormat(javaFormat.toString(), Locale.ENGLISH);
+  	    sdf.setTimeZone(timeZone.getTimeZone());
+  	    timestamp = sdf.parse(timeStr).getTime();
       } catch (ParseException e) {
       	throw new QuercusRuntimeException("Could not parse date", e);
       }  		
