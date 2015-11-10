@@ -5184,33 +5184,6 @@ public class QuercusParser {
       if (ch == '\\') {
         ch = read();
 
-        if (isUnicode) {
-          if (ch == 'u') {
-            int value = parseUnicodeEscape(false);
-
-            if (value < 0) {
-              _sb.append('\\');
-              _sb.append('u');
-            }
-            else
-              _sb.append((char) value); // Character.toChars(value));
-
-            continue;
-          }
-          else if (ch == 'U') {
-            int value = parseUnicodeEscape(true);
-
-            if (value < 0) {
-              _sb.append('\\');
-              _sb.append('U');
-            }
-            else
-              _sb.append((char) value); // Character.toChars(value));
-
-            continue;
-          }
-        }
-
         if (end == '"') {
           _sb.append('\\');
 
@@ -5665,36 +5638,9 @@ public class QuercusParser {
           break;
         }
         case 'u':
-          if (isUnicode) {
-            int result = parseUnicodeEscape(false);
-
-            if (result < 0) {
-              _sb.append('\\');
-              _sb.append('u');
-            }
-            else
-              _sb.append(Character.toChars(result));
-          }
-          else {
-            _sb.append('\\');
-            _sb.append((char) ch);
-          }
-          break;
         case 'U':
-          if (isUnicode) {
-            int result = parseUnicodeEscape(true);
-
-            if (result < 0) {
-              _sb.append('\\');
-              _sb.append('U');
-            }
-            else
-              _sb.append(Character.toChars(result));
-          }
-          else {
-            _sb.append('\\');
-            _sb.append((char) ch);
-          }
+          _sb.append('\\');
+          _sb.append((char) ch);
           break;
         case '{':
           ch = read();
