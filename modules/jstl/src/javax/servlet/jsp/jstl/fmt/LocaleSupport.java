@@ -29,7 +29,7 @@
 
 package javax.servlet.jsp.jstl.fmt;
 
-import com.caucho.jstl.JstlPageContext;
+import com.caucho.v5.jstl.JstlPageContext;
 
 import javax.servlet.jsp.PageContext;
 

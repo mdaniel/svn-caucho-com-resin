@@ -49,6 +49,7 @@ import com.caucho.v5.log.impl.LogConfig;
 import com.caucho.v5.log.impl.LogHandlerConfig;
 import com.caucho.v5.log.impl.LoggerConfig;
 import com.caucho.v5.log.impl.StderrLog;
+import com.caucho.v5.log.impl.StdoutLog;
 import com.caucho.v5.make.DependencyConfig;
 import com.caucho.v5.naming.LinkProxy;
 import com.caucho.v5.resources.ScheduledTaskConfig;
@@ -96,14 +97,14 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("bean", BeanConfig.class);
     
     addBean("case-insensitive", "com.caucho.v5.vfs.CaseInsensitive");
-    addBean("character-encoding", "com.caucho.i18n.CharacterEncoding");
+    addBean("character-encoding", "com.caucho.v5.i18n.CharacterEncoding");
     addBean("choose", ResinChoose.class);
     addBean("class-loader", ClassLoaderConfig.class);
-    addBean("classpath", "com.caucho.loader.ClasspathConfig");
-    addBean("class-update-interval", "com.caucho.loader.DependencyCheckInterval");
+    addBean("classpath", "com.caucho.v5.loader.ClasspathConfig");
+    addBean("class-update-interval", "com.caucho.v5.loader.DependencyCheckInterval");
     addBean("component", "com.caucho.v5.config.cfg.WbComponentConfig");
-    addBean("connection-factory", "com.caucho.jca.cfg.ConnectionFactoryConfig");
-    addBean("connector", "com.caucho.jca.ra.ConnectorConfig");
+    addBean("connection-factory", "com.caucho.v5.jca.cfg.ConnectionFactoryConfig");
+    addBean("connector", "com.caucho.v5.jca.ra.ConnectorConfig");
     
     addBean("database", DBPool.class);
     addBean("database-default", DatabaseConfig.class);
@@ -141,9 +142,9 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("log-handler", LogHandlerConfig.class);
     addBean("logger", LoggerConfig.class);
     
-    addBean("mail", "com.caucho.jca.cfg.JavaMailConfig");
+    addBean("mail", "com.caucho.v5.jca.cfg.JavaMailConfig");
     addBean("map", "com.caucho.v5.config.type.MapType");
-    addBean("mbean", "com.caucho.jmx.MBeanConfig");
+    addBean("mbean", "com.caucho.v5.jmx.MBeanConfig");
     // addBean("message", ResinLog.class);
     addBean("message-destination-ref", "com.caucho.v5.config.types.MessageDestinationRef");
     
@@ -154,7 +155,7 @@ class NamespaceConfigResin extends NamespaceConfig
     
     //addBean("rar-deploy", "com.caucho.jca.ra.ResourceDeploy");
     addBean("reference", "com.caucho.v5.config.types.ReferenceConfig");
-    addBean("remote-client", "com.caucho.remote.client.RemoteClient");
+    addBean("remote-client", "com.caucho.v5.remote.client.RemoteClient");
     //addBean("resource", "com.caucho.jca.cfg.Resource");
     //addBean("resource-adapter", "com.caucho.jca.cfg.ResourceAdapterBeanConfig");
     //addBean("resource-default", "com.caucho.jca.ra.ResourceDefault");
@@ -162,14 +163,14 @@ class NamespaceConfigResin extends NamespaceConfig
     //addBean("resource-env-ref", "com.caucho.v5.config.types.ResourceEnvRef");
     //addBean("resource-manager", "com.caucho.jca.ra.ResourceManagerConfig");
     //addBean("resource-ref", "com.caucho.v5.config.types.ResourceRef");
-    addBean("role-map", "com.caucho.security.RoleMap");
+    addBean("role-map", "com.caucho.v5.security.RoleMap");
     
     addBean("scheduled-task", ScheduledTaskConfig.class);
     addBean("security-role-ref", "com.caucho.v5.config.types.SecurityRoleRef");
-    addBean("servlet-classloader-hack", "com.caucho.loader.ServletClassloaderHack");
+    addBean("servlet-classloader-hack", "com.caucho.v5.loader.ServletClassloaderHack");
     addBean("set", "com.caucho.v5.config.core.ResinSet");
     addBean("stderr-log", StderrLog.class);
-    addBean("stdout-log", "com.caucho.log.impl.StdoutLog");
+    addBean("stdout-log", StdoutLog.class);
     addBean("system-property", SystemProperty.class);
     
     addBean("temp-dir", "com.caucho.v5.java.TempDir");
@@ -177,7 +178,7 @@ class NamespaceConfigResin extends NamespaceConfig
     
     addBean("value", "com.caucho.v5.config.type.ValueType");
     
-    addBean("web-service-client", "com.caucho.remote.client.RemoteClient");
+    addBean("web-service-client", "com.caucho.v5.remote.client.RemoteClient");
     addBean("work-dir", "com.caucho.v5.java.WorkDir");
     addBean("work-directory", "com.caucho.v5.java.WorkDir");
   }

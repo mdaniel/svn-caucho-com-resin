@@ -108,7 +108,7 @@ public class JstlXmlWhen extends JstlNode {
                       getTagName()));
 
 
-    String ifExpr = ("com.caucho.jstl.el.XmlIfTag.evalBoolean(pageContext, " +
+    String ifExpr = ("com.caucho.v5.jstl.el.XmlIfTag.evalBoolean(pageContext, " +
                      _gen.addXPathExpr(_select, getNamespaceContext()) + ")");
 
 

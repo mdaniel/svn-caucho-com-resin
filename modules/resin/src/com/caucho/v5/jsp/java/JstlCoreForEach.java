@@ -510,7 +510,7 @@ public class JstlCoreForEach extends JstlNode {
     String iterVar = "_jsp_iter_" + uniqueId;
     String iVar = "_jsp_i_" + uniqueId;
     out.println("java.util.Iterator " + iterVar
-                + " = com.caucho.jstl.rt.CoreForEachTag.getIterator("
+                + " = com.caucho.v5.jstl.rt.CoreForEachTag.getIterator("
                 + itemsVar + ");");
 
     String beginVar = null;
@@ -608,7 +608,7 @@ public class JstlCoreForEach extends JstlNode {
         out.print("_jsp_env.getVariableMapper().setVariable(\"");
         out.print(escapeJavaString(_var));
         out.print("\", ");
-        out.print("com.caucho.jstl.rt.CoreForEachTag.getExpr(");
+        out.print("com.caucho.v5.jstl.rt.CoreForEachTag.getExpr(");
         out.print(deferredValue + ", " + _tagVar + ".getIndex(), " + itemsVar);
         out.println(", \",\"));");
       } else {

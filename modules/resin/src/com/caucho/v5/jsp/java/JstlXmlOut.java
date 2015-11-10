@@ -110,6 +110,6 @@ public class JstlXmlOut extends JstlNode {
     else if (_escapeXmlAttr != null)
       escapeXml = _escapeXmlAttr.generateValue(String.class);
 
-    out.println("com.caucho.jstl.el.XmlOutTag.toStream(out, pageContext, " + select + ", " + escapeXml + ");");
+    out.println("com.caucho.v5.jstl.el.XmlOutTag.toStream(out, pageContext, " + select + ", " + escapeXml + ");");
   }
 }

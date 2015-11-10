@@ -289,7 +289,7 @@ public class JstlFmtMessage extends JstlNode {
     out.println("java.util.Locale " + localeVar + "= " + locCtxVar + ".getLocale();");
     out.println("if (" + localeVar + " != null)");
     out.pushDepth();
-    out.println("com.caucho.jstl.rt.I18NSupport.setResponseLocale(pageContext, " + localeVar + ");");
+    out.println("com.caucho.v5.jstl.rt.I18NSupport.setResponseLocale(pageContext, " + localeVar + ");");
     out.popDepth();
     out.println(messageVar + " = " + "pageContext.getLocalizedMessage(" +
                 locCtxVar + ", " + prefix + keyExpr + ", " + paramVar + ", null);");

@@ -139,7 +139,7 @@ public class JstlFmtSetBundle extends JstlNode {
     out.println("java.util.Locale " + localeVar + ";");
     out.println("if ((" + localeVar + " = " + locCtxVar + ".getLocale()) != null)");
     out.pushDepth();
-    out.println("com.caucho.jstl.rt.I18NSupport.setResponseLocale(pageContext, " + localeVar + ");");
+    out.println("com.caucho.v5.jstl.rt.I18NSupport.setResponseLocale(pageContext, " + localeVar + ");");
     out.popDepth();
 
 //    String value = "pageContext.getBundle(" + basenameExpr + ")";

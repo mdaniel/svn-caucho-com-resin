@@ -113,7 +113,7 @@ public class JstlXmlSet extends JstlNode {
       throw error(L.l("required attribute `var' missing from <{0}>",
                       getTagName()));
 
-    String select = ("com.caucho.jstl.el.XmlSetTag.evalObject(pageContext, " +
+    String select = ("com.caucho.v5.jstl.el.XmlSetTag.evalObject(pageContext, " +
                      _gen.addXPathExpr(_select, getNamespaceContext()) + ")");
       
     generateSetOrRemove(out, _var, _scope, select);

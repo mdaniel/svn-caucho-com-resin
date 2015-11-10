@@ -121,7 +121,7 @@ public class JstlXmlIf extends JstlNode {
       throw error(L.l("required attribute 'select' missing from <{0}>",
                       getTagName()));
 
-    String select = ("com.caucho.jstl.el.XmlIfTag.evalBoolean(pageContext, " +
+    String select = ("com.caucho.v5.jstl.el.XmlIfTag.evalBoolean(pageContext, " +
                      _gen.addXPathExpr(_select, getNamespaceContext()) + ")");
 
 

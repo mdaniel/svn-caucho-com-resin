@@ -78,7 +78,6 @@ import javax.servlet.jsp.tagext.JspFragment;
 
 import org.w3c.dom.Node;
 
-import com.caucho.jstl.JstlPageContext;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.ExprEnv;
 import com.caucho.v5.http.protocol.OutResponseBase;
@@ -96,6 +95,7 @@ import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 import com.caucho.v5.jsp.el.PageContextAttributeMap;
 import com.caucho.v5.jsp.el.PageContextELResolver;
 import com.caucho.v5.jsp.el.ServletELContext;
+import com.caucho.v5.jstl.JstlPageContext;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.DisplayableException;
 import com.caucho.v5.util.HashMapImpl;

@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jstl;
+package com.caucho.v5.jstl;
 
 public interface JstlPageContext {
   

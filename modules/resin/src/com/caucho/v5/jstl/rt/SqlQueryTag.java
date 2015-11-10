@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jstl.rt;
 
-import com.caucho.jstl.ResultImpl;
+import com.caucho.v5.jstl.ResultImpl;
 import com.caucho.v5.util.L10N;
 
 import javax.naming.InitialContext;

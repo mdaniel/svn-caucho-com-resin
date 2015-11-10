@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jstl;
+package com.caucho.v5.jstl;
 
 import javax.servlet.jsp.jstl.sql.Result;
 import java.sql.ResultSet;

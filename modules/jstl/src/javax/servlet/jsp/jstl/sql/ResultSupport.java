@@ -28,7 +28,7 @@
 
 package javax.servlet.jsp.jstl.sql;
 
-import com.caucho.jstl.ResultImpl;
+import com.caucho.v5.jstl.ResultImpl;
 
 import java.sql.ResultSet;
 
