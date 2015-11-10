@@ -3297,13 +3297,14 @@ public class Env
     _callThisStack[_callStackTop] = obj;
     _callArgStack[_callStackTop] = args;
     
+    _callStackTop++;
+    
     if (_xdebugConnection == null) {
       _xdebugConnection = XdebugConnection.getInstance(this);
       _xdebugConnection.connect(call.getLocation());
     }
     notifyNewDebugLocation(call.getLocation());
 
-    _callStackTop++;
   }
 
   public void notifyNewDebugLocation(Location location) {
@@ -3582,9 +3583,9 @@ public class Env
   
   public List<Location> getStackTraceAsLocations()
   {
-    ArrayList<Location> trace = new ArrayList<Location>();
+    ArrayList<Location> trace = new ArrayList<Location>(Math.min(_callStackTop - 1, 1));
 
-    for (int i = _callStackTop; i >= 0; i--) {
+    for (int i = _callStackTop - 1; i >= 0; i--) {
       Expr call = _callStack[i];
       if (call != null) {
         Location location = call.getLocation();

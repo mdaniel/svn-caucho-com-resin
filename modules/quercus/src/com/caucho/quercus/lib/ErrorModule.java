@@ -127,7 +127,12 @@ public class ErrorModule extends AbstractQuercusModule {
 
     ArrayValue result = new ArrayValueImpl();
 
+    Location previousLocation = null;
     for (Location location : env.getStackTraceAsLocations()) {
+      if (previousLocation == null) {
+        previousLocation = location;
+        continue;
+      }
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
 
@@ -135,11 +140,12 @@ public class ErrorModule extends AbstractQuercusModule {
       call.put(env.createString("line"),
                LongValue.create(location.getLineNumber()));
 
-      call.put(env.createString("function"), env.createString(location.getFunctionName()));
+      call.put(env.createString("function"), env.createString(previousLocation.getFunctionName()));
 
       if (isPrintArgs) {
         call.put(env.createString("args"), new ArrayValueImpl());
       }
+      previousLocation = location;
     }
     return result;
   }
