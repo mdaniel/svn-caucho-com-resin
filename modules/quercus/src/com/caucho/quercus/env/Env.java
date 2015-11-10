@@ -4098,10 +4098,21 @@ public class Env
       return fun;
     */
 
-    if (_anonymousFunMap != null)
+    if (_anonymousFunMap != null && _anonymousFunMap.containsKey(name))
       return _anonymousFunMap.get(name);
-    else
-      return null;
+    
+    if (name.indexOf("::") >= 0 && _this != null) {
+      String[] parts = name.toString().split("::");
+      if ("self".equals(parts[0])) {
+        return _this.getQuercusClass().findFunction(parts[1]);
+      } else if ("parent".equals(parts[0])) {
+        QuercusClass parent = _this.getQuercusClass().getParent();
+        if (parent != null) {
+          return parent.findFunction(parts[1]);
+        }
+      } 
+    }
+    return null;
   }
 
   public AbstractFunction getFunction(int id)
