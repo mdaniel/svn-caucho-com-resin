@@ -271,10 +271,9 @@ namespace Caucho
                 resin.Home = home;
               }
             }
-            else
-            {
+
+            if (resin == null)
               continue;
-            }
 
             resin.Exe = resinArgs.Exe;
 
