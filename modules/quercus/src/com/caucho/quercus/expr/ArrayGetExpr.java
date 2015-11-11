@@ -101,10 +101,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public Value evalCopy(Env env)
   {
-    Value array = _expr.eval(env);
-    Value index = _index.eval(env);
-
-    return array.get(index).copy();
+    return eval(env).copy();
   }
 
   /**
