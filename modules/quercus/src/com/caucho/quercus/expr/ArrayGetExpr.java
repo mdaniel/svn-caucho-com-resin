@@ -85,7 +85,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
     Value index = _index.eval(env);
 
     Value result = array.get(index);
-    if (result == UnsetValue.UNSET && array.isNull() && !env.isSuppressNotices()) {
+    if (result == UnsetValue.UNSET && !array.isNull() && !env.isSuppressNotices()) {
       env.notice("Undefined index: " + index.toString());
     }
     return result;
