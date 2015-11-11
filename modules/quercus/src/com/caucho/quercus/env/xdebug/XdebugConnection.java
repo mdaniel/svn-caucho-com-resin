@@ -73,7 +73,10 @@ public class XdebugConnection
     }
     commandsMap = new HashMap<String, XdebugCommand>();
     commandsMap.put("feature_set", new FeatureSetCommand());
+    commandsMap.put("feature_get", new FeatureGetCommand());
     commandsMap.put("status", new StatusCommand());
+    commandsMap.put("stdout", new StdoutCommand("stdout"));
+    commandsMap.put("stderr", new StdoutCommand("stderr"));
     commandsMap.put("step_into", new StepCommand());
     commandsMap.put("step_over", new StepCommand());
     commandsMap.put("step_out", new StepCommand());
@@ -87,7 +90,7 @@ public class XdebugConnection
     commandsMap.put("breakpoint_remove", new BreakpointRemoveCommand());
     commandsMap.put("stop", new StopCommand());
     try {
-      _socket = new Socket("localhost", 9001);
+      _socket = new Socket("localhost", 9000);
 
       new Thread("xdebug reader") {
         public void run() {
