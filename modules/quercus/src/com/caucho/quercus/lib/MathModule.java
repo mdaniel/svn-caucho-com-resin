@@ -65,6 +65,8 @@ public class MathModule extends AbstractQuercusModule {
   public static final double M_SQRT1_2 = 1 / Math.sqrt(2);
   public static final double M_LNPI = Math.log(Math.PI);
   public static final double M_EULER = 0.57721566490153286061;
+  public static final double INF = Double.POSITIVE_INFINITY;
+  public static final double NAN = Double.NaN;
 
   private static double log2(double v)
   {
