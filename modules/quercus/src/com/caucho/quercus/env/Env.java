@@ -3583,7 +3583,7 @@ public class Env
   
   public List<Location> getStackTraceAsLocations()
   {
-    ArrayList<Location> trace = new ArrayList<Location>(Math.min(_callStackTop - 1, 1));
+    ArrayList<Location> trace = new ArrayList<Location>(Math.max(_callStackTop - 1, 1));
 
     for (int i = _callStackTop - 1; i >= 0; i--) {
       Expr call = _callStack[i];
