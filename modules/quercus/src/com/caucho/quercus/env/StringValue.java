@@ -2467,6 +2467,9 @@ abstract public class StringValue
    */
   public boolean isset(Value indexV)
   {
+    if (!indexV.isNumberConvertible()) {
+      return false;
+    }
     int index = indexV.toInt();
     int len = length();
 
