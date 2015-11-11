@@ -168,7 +168,7 @@ public class ArgGetValue extends ArgValue
       return _arrayRef;
     }
     _arrayRef = _obj.get(_index);
-    if (_arrayRef == UnsetValue.UNSET && !Env.getCurrent().isSuppressNotices()) {
+    if (_arrayRef == UnsetValue.UNSET && !_obj.isNull() && !Env.getCurrent().isSuppressNotices()) {
       Env.getCurrent().notice("Undefined index: " + _index.toString());
     }
     return _arrayRef;
