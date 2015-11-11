@@ -1056,10 +1056,10 @@ public class ExprFactory {
   {
     Location loc = parser.getLocation();
 
-    StringValue systemName = parser.getSystemFunctionName(name);
+    StringValue reservedName = parser.getReservedFunctionName(name);
 
-    if (systemName != null) {
-      name = systemName;
+    if (reservedName != null) {
+      name = reservedName;
     }
 
     if (name.equalsString("isset") && args.size() == 1)

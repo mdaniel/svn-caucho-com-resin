@@ -3717,6 +3717,7 @@ public class QuercusParser {
     case EMPTY:
       return parseEmpty();
 
+    case ISSET:
     case IDENTIFIER:
     case NAMESPACE:
       {
@@ -4826,7 +4827,13 @@ public class QuercusParser {
       throw error(L.l("expected identifier at {0}.", tokenName(token)));
   }
 
-  public StringValue getSystemFunctionName(StringValue name)
+  /**
+   * Functions being named by a reserved keyword (like "empty()") should
+   * be rescued from their namespace.
+   * @param name
+   * @return
+   */
+  public StringValue getReservedFunctionName(StringValue name)
   {
     int p = name.lastIndexOf('\\');
 
@@ -4834,14 +4841,13 @@ public class QuercusParser {
       return name;
 
     StringValue systemName = name.substring(p + 1);
-
-    if (_quercus.findFunction(systemName) != null) {
+    if (_quercus.findFunction(systemName) != null
+        && _insensitiveReserved.get(systemName.toString()) != IntMap.NULL) {
       return systemName;
     }
-    else {
-      return null;
-    }
+    return null;
   }
+  
   private StringValue resolveIdentifier(StringValue id)
   {
     if (id.startsWith("\\")) {
@@ -6547,5 +6553,6 @@ public class QuercusParser {
     // backward compatibility issues
     _insensitiveReserved.put("namespace", NAMESPACE);
     _insensitiveReserved.put("use", USE);
+    _insensitiveReserved.put("isset", ISSET);
   }
 }
