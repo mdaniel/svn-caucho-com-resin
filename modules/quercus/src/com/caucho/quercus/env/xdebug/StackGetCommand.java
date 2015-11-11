@@ -17,7 +17,6 @@ public class StackGetCommand extends XdebugCommand
 		response.append("<response xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" command=\"stack_get\" transaction_id=\"" + transactionId + "\">");
 		int level = 0;
 		List<Location> locations = conn.getEnv().getStackTraceAsLocations();
-		locations.remove(0);
 		locations.add(0, conn.getCurrentLocation());
 		for (Location location : locations) {
 			if (location != null) {
