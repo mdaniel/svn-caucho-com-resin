@@ -640,7 +640,7 @@ public class QuercusParser {
 
     int token = parsePhpText();
 
-    if (_lexeme.length() > 0)
+    if (_lexeme.length() > 0 && !(location.getLineNumber() == 1 && _lexeme.startsWith("#!")))
       statements.add(_factory.createText(location, _lexeme));
 
     if (token == TEXT_ECHO) {
