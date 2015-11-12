@@ -28,6 +28,11 @@
 
 package com.caucho.quercus.lib.zip;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipFile;
+
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
@@ -37,15 +42,8 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.file.BinaryInput;
-import com.caucho.quercus.lib.file.BinaryStream;
-import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * PHP Zip
@@ -71,12 +69,11 @@ public class ZipModule extends AbstractQuercusModule {
     if (filename == null || filename.length() == 0)
       return null;
 
-    BinaryStream s = FileModule.fopen(env, filename, "rb", false, null);
-
-    if (s == null)
+    try {
+      return new ZipDirectory(new ZipFile(filename.toString()));
+    } catch (IOException e) {
       return null;
-
-    return new ZipDirectory((BinaryInput) s);
+    }
   }
 
   /**
@@ -152,7 +149,7 @@ public class ZipModule extends AbstractQuercusModule {
     if ((directory == null) || (entry == null))
       return false;
 
-    return entry.zip_entry_open(env, directory);
+    return entry.zip_entry_open(env);
   }
 
   /**

@@ -28,18 +28,17 @@
 
 package com.caucho.quercus.lib.zip;
 
-import com.caucho.quercus.*;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.lib.file.BinaryInput;
-import com.caucho.util.L10N;
-import com.caucho.vfs.TempBuffer;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.util.L10N;
 
 public class QuercusZipEntry {
   private static final Logger log =
@@ -47,18 +46,13 @@ public class QuercusZipEntry {
   private static final L10N L = new L10N(QuercusZipEntry.class);
 
   private final ZipEntry _entry;
-  private final BinaryInput _binaryInput;
-  private final long _position;
+  private ZipFile _zipFile;
+  private InputStream _in;
 
-  private ZipEntryInputStream _in;
-
-  public QuercusZipEntry(ZipEntry zipEntry,
-                         BinaryInput binaryInput,
-                         long position)
+  public QuercusZipEntry(ZipEntry zipEntry, ZipFile zipFile)
   {
     _entry = zipEntry;
-    _binaryInput = binaryInput;
-    _position = position;
+    _zipFile = zipFile;
   }
 
   /**
@@ -80,20 +74,12 @@ public class QuercusZipEntry {
   /**
    * Opens this zip entry for reading.
    */
-  public boolean zip_entry_open(Env env, ZipDirectory directory)
-  {
+  public boolean zip_entry_open(Env env)
+  {    
     try {
-      // php/1u07.qa
-      if (_in != null)
-        return true;
-
-      _in = new ZipEntryInputStream(_binaryInput.openCopy(), _position);
-
+      _in = _zipFile.getInputStream(_entry);
       return true;
-
     } catch (IOException e) {
-      env.warning(e.toString());
-
       return false;
     }
   }
@@ -104,14 +90,10 @@ public class QuercusZipEntry {
   public boolean zip_entry_close()
     throws IOException
   {
-    if (_in == null)
-      return false;
-
-    ZipEntryInputStream in = _in;
-    _in = null;
-
-    in.close();
-
+    if (_in != null) {
+      _in.close();
+      _in = null;
+    }
     return true;
   }
 
@@ -124,12 +106,12 @@ public class QuercusZipEntry {
     public StringValue zip_entry_read(Env env,
                                       @Optional("1024") int length)
   {
-    if (_in == null)
+    if (_zipFile == null)
       return null;
 
     StringValue bb = env.createBinaryBuilder();
 
-    bb.appendReadAll((InputStream) _in, length);
+    bb.appendReadAll(_in, length);
 
     return bb;
     /*

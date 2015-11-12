@@ -28,28 +28,37 @@
 
 package com.caucho.quercus.lib.zip;
 
-import com.caucho.quercus.lib.file.BinaryInput;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
 /**
  * Reads the zip header and prepares zip entries.
  */
 public class ZipDirectory
 {
-  private BinaryInput _in;
-  private byte[] _tmpBuf;
-  private ZipEntry _currentEntry;
+  private int _currentIndex = -1;
+  private ZipFile _in;
+  private List<QuercusZipEntry> _entries = new ArrayList<QuercusZipEntry>();
+  private Map<String, QuercusZipEntry> _nameToEntry = new HashMap<String, QuercusZipEntry>();
 
-  private boolean _eof;
-  private boolean _ddescriptor;
-
-  public ZipDirectory(BinaryInput in)
+  public ZipDirectory(ZipFile in)
   {
     _in = in;
-    _tmpBuf = new byte[32];
-    _eof = false;
+    for (Enumeration<? extends ZipEntry> i = _in.entries(); i.hasMoreElements();) {
+      QuercusZipEntry entry = new QuercusZipEntry(i.nextElement(), _in);
+      _entries.add(entry);
+      _nameToEntry.put(entry.zip_entry_name(), entry);
+    }
   }
 
   /**
@@ -58,135 +67,38 @@ public class ZipDirectory
   public QuercusZipEntry zip_read()
     throws IOException
   {
-    closeEntry();
+    _currentIndex++;
 
-    long position = _in.getPosition();
-    ZipEntry entry = readEntry();
-
-    if (entry == null)
+    if (_currentIndex >= _entries.size()) {
       return null;
-    else
-      return new QuercusZipEntry(entry, _in.openCopy(), position);
-  }
-
-  /**
-   * Reads the next entry's metadata from the current stream position.
-   */
-  protected ZipEntry readEntry()
-    throws IOException
-  {
-    if (_eof || _currentEntry != null)
-      return null;
-
-    int sublen = _in.read(_tmpBuf, 0, 30);
-    if (sublen < 30) {
-      _eof = true;
-      return null;
+    } else {
+      return _entries.get(_currentIndex);
     }
-
-    // Zip file signature check
-    if ((((_tmpBuf[3] & 0xff) << 24)
-        | ((_tmpBuf[2] & 0xff) << 16)
-        | ((_tmpBuf[1] & 0xff) << 8)
-        | (_tmpBuf[0] & 0xff)) != 0x04034b50) {
-      _eof = true;
-      return null;
-    }
-
-    // Extra data descriptors after the compressed data
-    if ((_tmpBuf[6] & 0x04) == 0x04)
-      _ddescriptor = true;
-    else 
-      _ddescriptor = false;
-
-    int compressionMethod = (_tmpBuf[8] & 0xff) | ((_tmpBuf[9] & 0xff) << 8);
-
-    //if (compressionMethod != 0 && compressionMethod != 8)
-//      throw new IOException(
-//          "Unsupported zip compression method (" + compressionMethod + ").");
-
-    long crc32 = _tmpBuf[14] & 0xff;
-    crc32 |= (_tmpBuf[15] & 0xff) << 8;
-    crc32 |= (_tmpBuf[16] & 0xff) << 16;
-    crc32 |= ((long)_tmpBuf[17] & 0xff) << 24;
-
-    long compressedSize = _tmpBuf[18] & 0xff;
-    compressedSize |= (_tmpBuf[19] & 0xff) << 8;
-    compressedSize |= (_tmpBuf[20] & 0xff) << 16;
-    compressedSize |= ((long)_tmpBuf[21] & 0xff) << 24;
-
-    long uncompressedSize = _tmpBuf[22] & 0xff;
-    uncompressedSize |= (_tmpBuf[23] & 0xff) << 8;
-    uncompressedSize |= (_tmpBuf[24] & 0xff) << 16;
-    uncompressedSize |= ((long)_tmpBuf[25] & 0xff) << 24;
-
-    int filenameLength = _tmpBuf[26] & 0xff;
-    filenameLength |= (_tmpBuf[27] & 0xff) << 8;
-
-    int extraLength = _tmpBuf[28] & 0xff;
-    extraLength |= (_tmpBuf[29] & 0xff) << 8;
-
-    // XXX: correct char encoding?
-    String name;
-    if (filenameLength <= _tmpBuf.length) {
-      sublen = _in.read(_tmpBuf, 0, filenameLength);
-      if (sublen < filenameLength)
-        return null;
-      name = new String(_tmpBuf, 0, sublen);
-    }
-    else {
-      byte[] buffer = new byte[filenameLength];
-      sublen = _in.read(buffer, 0, buffer.length);
-      if (sublen < filenameLength)
-        return null;
-      name = new String(buffer, 0, sublen);
-    }
-
-    if (extraLength > 0)
-      skip(extraLength);
-
-    ZipEntry entry = new ZipEntry(name);
-    entry.setMethod(compressionMethod);
-    entry.setCrc(crc32);
-    entry.setCompressedSize(compressedSize);
-    entry.setSize(uncompressedSize);
-
-    _currentEntry = entry;
-    return entry;
-  }
-
-  private void skip(long len)
-    throws IOException
-  {
-    while (len-- > 0 && _in.read() != -1) {
-    }
-  }
-
-  /**
-   * Positions stream to beginning of next entry
-   */
-  protected void closeEntry()
-    throws IOException
-  {
-    if (_currentEntry == null)
-      return;
-
-    long length = _currentEntry.getCompressedSize();
-
-    if (_ddescriptor)
-      length += 12;
-
-    skip(length);
-    _currentEntry = null;
   }
 
   public boolean zip_close()
   {
-    _in.close();
+    try {
+      _in.close();
+    } catch (IOException e) {
+    } finally {
+      _in = null;
+    }
 
     return true;
   }
 
+  public Value getFromName (Env env, String name, int length, Integer flags) {
+    if (_in == null) {
+      return BooleanValue.FALSE;
+    }
+    QuercusZipEntry entry = _nameToEntry.get(name);
+    if (entry == null) {
+      return BooleanValue.FALSE;
+    }
+    return entry.zip_entry_read(env, length == 0 ? Integer.MAX_VALUE : length);
+  }
+  
   public String toString()
   {
     return "ZipDirectory[]";
