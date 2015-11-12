@@ -29,13 +29,18 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.IdentityHashMap;
+import java.util.Locale;
 
-import com.caucho.vfs.*;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.marshal.Marshal;
-import com.caucho.util.*;
+import com.caucho.util.CurrentTime;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a 8-bit PHP 6 style binary builder (unicode.semantics = on)
@@ -138,6 +143,60 @@ public class BinaryBuilderValue
   public boolean isBinary()
   {
     return true;
+  }
+
+  /**
+   * Append from an input stream, reading from the input stream until
+   * end of file or the length is reached.
+   */
+  public int appendReadAll(InputStream is, long length)
+  {
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      byte []buffer = tBuf.getBuffer();
+      int readLength = 0;
+
+      while (length > 0) {
+        int sublen = buffer.length;
+        if (length < sublen)
+          sublen = (int) length;
+
+        sublen = is.read(buffer, 0, sublen);
+
+        if (sublen > 0) {
+          append(buffer, 0, sublen);
+          length -= sublen;
+          readLength += sublen;
+        }
+        else
+          return readLength > 0 ? readLength : -1;
+      }
+
+      return readLength;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+      try {
+        is.close();
+      } catch (IOException e) {
+      }
+    }
+  }
+  
+  @Override
+  public String toString() {
+    return new String(getBuffer(), 0, length());
+  }
+  
+  /**
+   * Returns a character array
+   */
+  @Override
+  public char []toCharArray()
+  {
+    return toString().toCharArray();
   }
 
   //

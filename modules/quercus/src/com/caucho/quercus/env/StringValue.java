@@ -1865,9 +1865,6 @@ abstract public class StringValue
       throw new QuercusModuleException(e);
     } finally {
       TempCharBuffer.free(tBuf);
-      if (readStreamInput != null) {
-        readStreamInput.close();
-      }
     }
   }
 

@@ -1333,16 +1333,16 @@ public class UnicodeBuilderValue
     else if (rValue instanceof StringValue) {
       StringValue value = (StringValue) rValue;
 
-      int length = _length;
+      byte[] bytes = getStringBytes();
+      int length = bytes.length;
 
       if (length != value.length()) {
         return false;
       }
 
-      char []buffer = _buffer;
-
+      byte[] otherBytes = value.toBytes();
       for (int i = length - 1; i >= 0; i--) {
-        if (buffer[i] != value.charAt(i)) {
+        if (bytes[i] != otherBytes[i]) {
           return false;
         }
       }
