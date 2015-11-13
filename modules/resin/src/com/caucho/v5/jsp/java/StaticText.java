@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.XmlChar;
@@ -40,7 +40,7 @@ import java.io.IOException;
  * Represents static text.
  */
 public class StaticText extends JspNode {
-  private static final QName TEXT = new QName("jsp", "text", JSP_NS);
+  private static final NameCfg TEXT = new NameCfg("jsp", "text", JSP_NS);
     
   private String _text;
   

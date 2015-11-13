@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -42,9 +42,9 @@ import java.io.IOException;
  * a <code>basename</code> and the current <code>pageContext</code>.
  */
 public class JstlFmtSetBundle extends JstlNode {
-  private static final QName BASENAME = new QName("basename");
-  private static final QName VAR = new QName("var");
-  private static final QName SCOPE = new QName("scope");
+  private static final NameCfg BASENAME = new NameCfg("basename");
+  private static final NameCfg VAR = new NameCfg("var");
+  private static final NameCfg SCOPE = new NameCfg("scope");
   
   private String _basename;
   private JspAttribute _basenameAttr;
@@ -55,7 +55,7 @@ public class JstlFmtSetBundle extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (BASENAME.equals(name))
@@ -72,7 +72,7 @@ public class JstlFmtSetBundle extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (BASENAME.equals(name))

@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.java.JspNode;
 import com.caucho.v5.vfs.Path;
@@ -219,7 +219,7 @@ abstract public class JspBuilder {
    *
    * @param qname the name of the element to start
    */
-  abstract public void startElement(QName qname)
+  abstract public void startElement(NameCfg qname)
     throws JspParseException;
 
   /**
@@ -237,7 +237,7 @@ abstract public class JspBuilder {
    * @param name the attribute name
    * @param value the attribute value
    */
-  abstract public void attribute(QName name, String value)
+  abstract public void attribute(NameCfg name, String value)
     throws JspParseException;
 
   /**

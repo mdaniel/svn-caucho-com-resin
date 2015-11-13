@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
@@ -45,7 +45,7 @@ import java.util.ArrayList;
 public abstract class JspContainerNode extends JspNode {
   static final L10N L = new L10N(JspContainerNode.class);
   
-  protected ArrayList<QName> _attributeNames = new ArrayList<QName>();
+  protected ArrayList<NameCfg> _attributeNames = new ArrayList<NameCfg>();
   protected ArrayList<Object> _attributeValues = new ArrayList<Object>();
   
   protected ArrayList<JspNode> _children = new ArrayList<JspNode>();
@@ -61,7 +61,7 @@ public abstract class JspContainerNode extends JspNode {
    * @param value the value of the attribute.
    */
   @Override
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (name == null)
@@ -81,7 +81,7 @@ public abstract class JspContainerNode extends JspNode {
    * @param value the value of the attribute.
    */
   @Override
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (name == null)
@@ -122,7 +122,7 @@ public abstract class JspContainerNode extends JspNode {
     if (node instanceof JspAttribute) {
       JspAttribute attr = (JspAttribute) node;
 
-      QName name = attr.getName();
+      NameCfg name = attr.getName();
 
       addAttribute(name, attr);
 

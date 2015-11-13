@@ -41,7 +41,7 @@ import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 
-import com.caucho.v5.config.inject.SingletonBindingHandle;
+import com.caucho.v5.config.candi.SingletonBindingHandle;
 
 /**
  * Implementation of the UserTransactionImpl for a thread instance.

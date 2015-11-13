@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.cfg.TldVariable;
 import com.caucho.v5.vfs.WriteStream;
@@ -41,9 +41,9 @@ import java.util.ArrayList;
  * Represents a custom tag.
  */
 public class JspDoBody extends JspNode {
-  private static final QName VAR = new QName("var");
-  private static final QName VAR_READER = new QName("varReader");
-  private static final QName SCOPE = new QName("scope");
+  private static final NameCfg VAR = new NameCfg("var");
+  private static final NameCfg VAR_READER = new NameCfg("varReader");
+  private static final NameCfg SCOPE = new NameCfg("scope");
   
   private String _var;
   private String _varReader;
@@ -52,7 +52,7 @@ public class JspDoBody extends JspNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VAR.equals(name))

@@ -36,18 +36,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
-import com.caucho.v5.config.inject.InjectManagerResin;
-import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.candi.InjectManagerResin;
+import com.caucho.v5.config.candi.ObjectFactoryNaming;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ResourceInjectionTargetProgram;
 import com.caucho.v5.config.program.ResourceProgram;
-import com.caucho.v5.config.types.InjectionTarget;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 
@@ -246,7 +245,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram
    * @param bean the bean to configure
    * @param env the Config environment
    */
-  public <T> void inject(T bean, CreationalContext<T> env)
+  public <T> void inject(T bean, InjectContext env)
   {
   }
 

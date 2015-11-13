@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.WriteStream;
@@ -40,12 +40,12 @@ import java.util.ArrayList;
 public class JspElement extends JspContainerNode {
   static final L10N L = new L10N(JspElement.class);
 
-  static final private QName NAME = new QName("name");
+  static final private NameCfg NAME = new NameCfg("name");
 
   private String _name;
   private JspAttribute _attrName;
 
-  private ArrayList<QName> _attrNames = new ArrayList<QName>();
+  private ArrayList<NameCfg> _attrNames = new ArrayList<NameCfg>();
   private ArrayList<JspAttribute> _attrValues = new ArrayList<JspAttribute>();
   
   /**
@@ -54,7 +54,7 @@ public class JspElement extends JspContainerNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (NAME.equals(name)) {
@@ -72,7 +72,7 @@ public class JspElement extends JspContainerNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (_name == null && NAME.equals(name)) {
@@ -168,7 +168,7 @@ public class JspElement extends JspContainerNode {
       out.addText("<" + _name);
 
     for (int i = 0; i < _attrNames.size(); i++) {
-      QName name = _attrNames.get(i);
+      NameCfg name = _attrNames.get(i);
       JspAttribute value = _attrValues.get(i);
 
       out.addText(" " + name.getName() + "=\"");

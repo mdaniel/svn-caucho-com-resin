@@ -50,8 +50,8 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.inject.OwnerCreationalContext;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.OwnerCreationalContext;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.java.JavaCompilerUtil;

@@ -29,27 +29,22 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.inject.ObjectFactoryNaming;
-import com.caucho.v5.config.j2ee.BeanNameLiteral;
-import com.caucho.v5.config.types.InjectionTarget;
-import com.caucho.v5.naming.JndiUtil;
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.j2ee.BeanNameLiteral;
+import com.caucho.v5.naming.JndiUtil;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Path;
 
 /**
  * Configuration for the ejb-ref.

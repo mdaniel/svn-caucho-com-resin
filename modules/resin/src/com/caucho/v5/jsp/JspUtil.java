@@ -35,9 +35,9 @@ import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.enterprise.inject.spi.Bean;
 
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.ReferenceFactory;
 import com.caucho.v5.config.el.CandiExpr;
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.inject.ReferenceFactory;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.MethodExpressionImpl;
 import com.caucho.v5.inject.Module;

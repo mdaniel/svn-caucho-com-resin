@@ -59,7 +59,7 @@ import com.caucho.v5.cli.resin.ResinCommandLineAgent;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DynamicClassLoader;

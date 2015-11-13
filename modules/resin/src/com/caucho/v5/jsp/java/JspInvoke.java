@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.cfg.TldVariable;
 import com.caucho.v5.vfs.WriteStream;
@@ -40,10 +40,10 @@ import java.util.ArrayList;
  * jsp:invoke invokes a fragment
  */
 public class JspInvoke extends JspNode {
-  private static final QName FRAGMENT = new QName("fragment");
-  private static final QName VAR = new QName("var");
-  private static final QName SCOPE = new QName("scope");
-  private static final QName VAR_READER = new QName("varReader");
+  private static final NameCfg FRAGMENT = new NameCfg("fragment");
+  private static final NameCfg VAR = new NameCfg("var");
+  private static final NameCfg SCOPE = new NameCfg("scope");
+  private static final NameCfg VAR_READER = new NameCfg("varReader");
   
   private String _name;
   private String _var;
@@ -53,7 +53,7 @@ public class JspInvoke extends JspNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (FRAGMENT.equals(name))

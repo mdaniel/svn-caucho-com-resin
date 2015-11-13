@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 
 abstract public class JstlNode extends JspContainerNode {
@@ -52,7 +52,7 @@ abstract public class JstlNode extends JspContainerNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     throw error(L.l("`{0}' is an unknown attribute for <{1}>.",

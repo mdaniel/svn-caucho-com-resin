@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -39,19 +39,19 @@ import java.util.ArrayList;
  * Represents a Java scriptlet.
  */
 public class JspPlugin extends JspNode {
-  private static final QName NAME = new QName("name");
-  private static final QName TYPE = new QName("type");
-  private static final QName CODE = new QName("code");
-  private static final QName CODEBASE = new QName("codebase");
-  private static final QName IEPLUGINURL = new QName("iepluginurl");
-  private static final QName JREVERSION = new QName("jreversion");
-  private static final QName NSPLUGINURL = new QName("nspluginurl");
-  private static final QName WIDTH = new QName("width");
-  private static final QName HEIGHT = new QName("height");
-  private static final QName ALIGN = new QName("align");
-  private static final QName VSPACE = new QName("vspace");
-  private static final QName HSPACE = new QName("hspace");
-  private static final QName ARCHIVE = new QName("archive");
+  private static final NameCfg NAME = new NameCfg("name");
+  private static final NameCfg TYPE = new NameCfg("type");
+  private static final NameCfg CODE = new NameCfg("code");
+  private static final NameCfg CODEBASE = new NameCfg("codebase");
+  private static final NameCfg IEPLUGINURL = new NameCfg("iepluginurl");
+  private static final NameCfg JREVERSION = new NameCfg("jreversion");
+  private static final NameCfg NSPLUGINURL = new NameCfg("nspluginurl");
+  private static final NameCfg WIDTH = new NameCfg("width");
+  private static final NameCfg HEIGHT = new NameCfg("height");
+  private static final NameCfg ALIGN = new NameCfg("align");
+  private static final NameCfg VSPACE = new NameCfg("vspace");
+  private static final NameCfg HSPACE = new NameCfg("hspace");
+  private static final NameCfg ARCHIVE = new NameCfg("archive");
   
   static final String IE_CLSID = "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93";
   static final String IE_URL = "http://java.sun.com/products/plugin/1.2.2/jinstall-1_2_2-win.cab#Version=1,2,2,0";
@@ -79,7 +79,7 @@ public class JspPlugin extends JspNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (NAME.equals(name)) {

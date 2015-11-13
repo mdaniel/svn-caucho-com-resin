@@ -35,8 +35,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.BeanBuilder;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.jsp.Page;
 import com.caucho.v5.jsp.QServlet;

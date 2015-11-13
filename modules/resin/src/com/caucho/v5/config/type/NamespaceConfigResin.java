@@ -30,7 +30,6 @@
 package com.caucho.v5.config.type;
 
 import com.caucho.v5.config.cfg.BeanConfig;
-import com.caucho.v5.config.core.ImportConfigXml;
 import com.caucho.v5.config.core.MessageConfig;
 import com.caucho.v5.config.core.ResinChoose;
 import com.caucho.v5.config.core.ResinIf;
@@ -39,6 +38,7 @@ import com.caucho.v5.config.core.ResinSet;
 import com.caucho.v5.config.core.ResinSystemConfig;
 import com.caucho.v5.config.types.DataSourceRef;
 import com.caucho.v5.config.types.EnvEntry;
+import com.caucho.v5.config.xml.ImportConfigXml;
 import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnit;
 import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnitDefault;
 import com.caucho.v5.java.JavacConfig;

@@ -1,0 +1,217 @@
+/*
+ * Copyright (c) 1998-2015 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Baratine(TM)(TM)
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Baratine is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Baratine is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Baratine; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.v5.el;
+
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.LambdaExpression;
+
+/**
+ * Marshalls an expression.
+ */
+public abstract  class Marshall 
+{
+  private static final Logger log = Logger.getLogger(Marshall.class.getName());
+  
+  private static final HashMap<Class<?>,Marshall> ARG_MAP = new HashMap<>();
+
+  public static Marshall create(Class<?> type)
+  {
+    Marshall marshall = ARG_MAP.get(type);
+
+    if (marshall != null) {
+      return marshall;
+    }
+    
+    if (type.isEnum()) {
+      return new EnumMarshall(type);
+    }
+    
+    return OBJECT;
+  }
+  
+  abstract public Object marshall(Expr expr, ELContext env)
+    throws ELException;
+
+  public static final Marshall BOOLEAN = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+        throws ELException
+    {
+      return new Boolean((boolean) expr.evalBoolean(env));
+    }
+  };
+
+  public static final Marshall BYTE = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Byte((byte) expr.evalLong(env));
+    }
+  };
+
+  public static final Marshall SHORT = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Short((short) expr.evalLong(env));
+    }
+  };
+
+  public static final Marshall INTEGER = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Integer((int) expr.evalLong(env));
+    }
+  };
+
+  public static final Marshall LONG = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Long(expr.evalLong(env));
+    }
+  };
+
+  public static final Marshall FLOAT = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Float((float) expr.evalDouble(env));
+    }
+  };
+
+  public static final Marshall DOUBLE = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return new Double(expr.evalDouble(env));
+    }
+  };
+
+  public static final Marshall STRING = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      return expr.evalString(env);
+    }
+  };
+
+  public static final Marshall CHARACTER = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+      throws ELException
+    {
+      String s = expr.evalString(env);
+
+      if (s == null || s.length() == 0)
+        return null;
+      else
+        return new Character(s.charAt(0));
+    }
+  };
+
+  public static final Marshall OBJECT = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+        throws ELException
+      {
+        return expr.getValue(env);
+      }
+  };
+
+  public static final Marshall LAMBDA = new Marshall() {
+    public Object marshall(Expr expr, ELContext env)
+        throws ELException
+      {
+        //Object value = ((LambdaExpr)expr).toExpression(env);
+        //return value;
+        return ((LambdaExpr)expr).getValue(env);
+      }
+  };
+  
+  static class EnumMarshall extends Marshall {
+    private Class _enumClass;
+    
+    EnumMarshall(Class<?> enumClass)
+    {
+      _enumClass = enumClass;
+    }
+    public Object marshall(Expr expr, ELContext env)
+        throws ELException
+    {
+      String name = expr.evalString(env);
+      
+      if (name == null)
+        return null;
+      else {
+        try {
+          return Enum.valueOf(_enumClass, name);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+          
+          return null;
+        }
+      }
+    }
+  }
+
+  static {
+    ARG_MAP.put(boolean.class, BOOLEAN);
+    ARG_MAP.put(Boolean.class, BOOLEAN);
+    
+    ARG_MAP.put(byte.class, BYTE);
+    ARG_MAP.put(Byte.class, BYTE);
+    
+    ARG_MAP.put(short.class, SHORT);
+    ARG_MAP.put(Short.class, SHORT);
+    
+    ARG_MAP.put(int.class, INTEGER);
+    ARG_MAP.put(Integer.class, INTEGER);
+    
+    ARG_MAP.put(long.class, LONG);
+    ARG_MAP.put(Long.class, LONG);
+    
+    ARG_MAP.put(float.class, FLOAT);
+    ARG_MAP.put(Float.class, FLOAT);
+    
+    ARG_MAP.put(double.class, DOUBLE);
+    ARG_MAP.put(Double.class, DOUBLE);
+    
+    ARG_MAP.put(char.class, CHARACTER);
+    ARG_MAP.put(Character.class, CHARACTER);
+    
+    ARG_MAP.put(String.class, STRING);
+    
+    ARG_MAP.put(LambdaExpression.class, LAMBDA);
+  }
+}

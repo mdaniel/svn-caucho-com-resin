@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.types.Signature;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.cfg.TldAttribute;
@@ -43,20 +43,20 @@ import java.io.IOException;
 public class JspDirectiveAttribute extends JspNode {
   static L10N L = new L10N(JspDirectiveAttribute.class);
 
-  private static final QName NAME = new QName("name");
-  private static final QName REQUIRED = new QName("required");
-  private static final QName FRAGMENT = new QName("fragment");
-  private static final QName RTEXPRVALUE = new QName("rtexprvalue");
-  private static final QName TYPE = new QName("type");
-  private static final QName DESCRIPTION = new QName("description");
-  private static final QName DEFERRED_VALUE
-    = new QName("deferredValue");
-  private static final QName DEFERRED_VALUE_TYPE
-    = new QName("deferredValueType");
-  private static final QName DEFERRED_METHOD
-    = new QName("deferredMethod");
-  private static final QName DEFERRED_METHOD_SIGNATURE
-    = new QName("deferredMethodSignature");
+  private static final NameCfg NAME = new NameCfg("name");
+  private static final NameCfg REQUIRED = new NameCfg("required");
+  private static final NameCfg FRAGMENT = new NameCfg("fragment");
+  private static final NameCfg RTEXPRVALUE = new NameCfg("rtexprvalue");
+  private static final NameCfg TYPE = new NameCfg("type");
+  private static final NameCfg DESCRIPTION = new NameCfg("description");
+  private static final NameCfg DEFERRED_VALUE
+    = new NameCfg("deferredValue");
+  private static final NameCfg DEFERRED_VALUE_TYPE
+    = new NameCfg("deferredValueType");
+  private static final NameCfg DEFERRED_METHOD
+    = new NameCfg("deferredMethod");
+  private static final NameCfg DEFERRED_METHOD_SIGNATURE
+    = new NameCfg("deferredMethodSignature");
 
   private String _name;
   private String _type;
@@ -76,7 +76,7 @@ public class JspDirectiveAttribute extends JspNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (! _gen.getParseState().isTag())

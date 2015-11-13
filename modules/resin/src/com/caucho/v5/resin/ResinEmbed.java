@@ -40,10 +40,9 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.logging.LogManager;
 
-import javax.enterprise.context.spi.CreationalContext;
-
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.ConfigInstanceBuilder;
@@ -759,7 +758,7 @@ public class ResinEmbed implements Closeable
      * Configures the object.
      */
     @Override
-    public <T> void inject(T bean, CreationalContext<T> env)
+    public <T> void inject(T bean, InjectContext env)
       throws ConfigException
     {
       if (bean instanceof ConfigInstanceBuilder) {

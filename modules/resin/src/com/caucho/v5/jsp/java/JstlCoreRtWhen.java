@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -38,13 +38,13 @@ import java.io.IOException;
  * Special generator for a JSTL c:when tag.
  */
 public class JstlCoreRtWhen extends JstlNode {
-  private static final QName TEST = new QName("test");
+  private static final NameCfg TEST = new NameCfg("test");
   private Object _test;
   
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (TEST.equals(name))

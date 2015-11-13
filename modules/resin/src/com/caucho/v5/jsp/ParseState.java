@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.java.LineMap;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
@@ -806,20 +806,20 @@ public class ParseState {
   /**
    * Returns the QName for the given name.
    */
-  public QName getQName(String name)
+  public NameCfg getQName(String name)
   {
     int p = name.indexOf(':');
 
     if (p < 0)
-      return new QName(name);
+      return new NameCfg(name);
     else {
       String prefix = name.substring(0, p);
       String uri = Namespace.find(_namespaces, prefix);
 
       if (uri != null)
-        return new QName(name, uri);
+        return new NameCfg(name, uri);
       else
-        return new QName(name);
+        return new NameCfg(name);
     }
   }
 

@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -36,10 +36,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class JstlFmtMessage extends JstlNode {
-  private static final QName KEY = new QName("key");
-  private static final QName BUNDLE = new QName("bundle");
-  private static final QName VAR = new QName("var");
-  private static final QName SCOPE = new QName("scope");
+  private static final NameCfg KEY = new NameCfg("key");
+  private static final NameCfg BUNDLE = new NameCfg("bundle");
+  private static final NameCfg VAR = new NameCfg("var");
+  private static final NameCfg SCOPE = new NameCfg("scope");
   
   private String _key;
   private JspAttribute _keyAttr;
@@ -55,7 +55,7 @@ public class JstlFmtMessage extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (KEY.equals(name))
@@ -74,7 +74,7 @@ public class JstlFmtMessage extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (KEY.equals(name))

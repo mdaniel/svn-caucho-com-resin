@@ -48,7 +48,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.amp.thread.ThreadPool;
-import com.caucho.v5.config.inject.SingletonBindingHandle;
+import com.caucho.v5.config.candi.SingletonBindingHandle;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentListener;

@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.WriteStream;
@@ -39,14 +39,14 @@ import java.io.IOException;
 public class JspOutput extends JspNode {
   static final L10N L = new L10N(JspOutput.class);
 
-  static final private QName OMIT_XML_DECLARATION =
-    new QName("omit-xml-declaration");
-  static final private QName DOCTYPE_SYSTEM =
-    new QName("doctype-system");
-  static final private QName DOCTYPE_PUBLIC =
-    new QName("doctype-public");
-  static final private QName DOCTYPE_ROOT_ELEMENT =
-    new QName("doctype-root-element");
+  static final private NameCfg OMIT_XML_DECLARATION =
+    new NameCfg("omit-xml-declaration");
+  static final private NameCfg DOCTYPE_SYSTEM =
+    new NameCfg("doctype-system");
+  static final private NameCfg DOCTYPE_PUBLIC =
+    new NameCfg("doctype-public");
+  static final private NameCfg DOCTYPE_ROOT_ELEMENT =
+    new NameCfg("doctype-root-element");
 
   private boolean _omitXmlDeclaration;
 
@@ -60,7 +60,7 @@ public class JspOutput extends JspNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (! _gen.isXml())

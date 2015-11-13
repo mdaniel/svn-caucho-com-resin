@@ -51,7 +51,7 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import com.caucho.v5.config.inject.SingletonBindingHandle;
+import com.caucho.v5.config.candi.SingletonBindingHandle;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.meter.MeterService;
 import com.caucho.v5.env.meter.TimeSensor;

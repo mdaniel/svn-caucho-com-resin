@@ -37,7 +37,8 @@ import java.util.logging.Logger;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigPropertiesResolver;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.Vfs;
@@ -90,7 +91,7 @@ public class ResinServerConfigLibrary {
   
   private static Object getProperty(String name)
   {
-    return Config.getElVar(name);
+    return ConfigXml.getElVar(name);
   }
   
   public static void configure(CandiManager webBeans)

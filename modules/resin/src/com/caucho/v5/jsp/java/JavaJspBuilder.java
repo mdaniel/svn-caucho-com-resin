@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.*;
 import com.caucho.v5.jsp.cfg.*;
 import com.caucho.v5.util.CompileException;
@@ -70,10 +70,10 @@ public class JavaJspBuilder extends JspBuilder {
   
   public static final String JSF_CORE_URI = "http://java.sun.com/jsf/core";
   
-  public static final QName JSP_BODY_NAME
-    = new QName("jsp", "body", JspNode.JSP_NS);
-  public static final QName JSP_ATTR_NAME
-    = new QName("jsp", "attribute", JspNode.JSP_NS);
+  public static final NameCfg JSP_BODY_NAME
+    = new NameCfg("jsp", "body", JspNode.JSP_NS);
+  public static final NameCfg JSP_ATTR_NAME
+    = new NameCfg("jsp", "attribute", JspNode.JSP_NS);
   
   private static L10N L = new L10N(JavaJspBuilder.class);
   private static Logger log = Logger.getLogger(JavaJspBuilder.class.getName());
@@ -103,10 +103,10 @@ public class JavaJspBuilder extends JspBuilder {
   static final int FOREACH = IF + 1;
   static final int EXPR_EL = FOREACH + 1;
 
-  static HashMap<QName,Class> _tagMap;
-  static HashMap<QName,Class> _fastTagMap;
-  static HashMap<QName,Class> _jsfTagMap;
-  static HashMap<QName, Class> _jstlTlvTagMap;
+  static HashMap<NameCfg,Class> _tagMap;
+  static HashMap<NameCfg,Class> _fastTagMap;
+  static HashMap<NameCfg,Class> _jsfTagMap;
+  static HashMap<NameCfg, Class> _jstlTlvTagMap;
 
   private JavaJspGenerator _gen;
   private JspNode _rootNode;
@@ -206,7 +206,7 @@ public class JavaJspBuilder extends JspBuilder {
    *
    * @param qname the name of the element to start
    */
-  public void startElement(QName qname)
+  public void startElement(NameCfg qname)
     throws JspParseException
   {
     Class<?> cl = null;
@@ -397,7 +397,7 @@ public class JavaJspBuilder extends JspBuilder {
     return _isTagDependent;
   }
 
-  protected void createElementNode(QName qname)
+  protected void createElementNode(NameCfg qname)
   {
     JspXmlElement elt = new JspXmlElement();
     elt.setGenerator(_gen);
@@ -429,7 +429,7 @@ public class JavaJspBuilder extends JspBuilder {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void attribute(QName name, String value)
+  public void attribute(NameCfg name, String value)
     throws JspParseException
   {
     _openNode.addAttribute(name, value);
@@ -549,18 +549,18 @@ public class JavaJspBuilder extends JspBuilder {
                                        e);
   }
 
-  private static void addMap(HashMap<QName,Class> map,
+  private static void addMap(HashMap<NameCfg,Class> map,
                              String prefix,
                              String localName,
                              String uri,
                              Class cl)
   {
-    map.put(new QName(prefix, localName, uri), cl);
-    map.put(new QName(prefix, localName, "urn:jsptld:" + uri), cl);
+    map.put(new NameCfg(prefix, localName, uri), cl);
+    map.put(new NameCfg(prefix, localName, "urn:jsptld:" + uri), cl);
   }
   
   static {
-    _tagMap = new HashMap<QName,Class>();
+    _tagMap = new HashMap<NameCfg,Class>();
 
     addMap(_tagMap, "jsp", "root", JspNode.JSP_NS, JspRoot.class);
 
@@ -619,7 +619,7 @@ public class JavaJspBuilder extends JspBuilder {
     addMap(_tagMap, "jsp", "output", JspNode.JSP_NS,
            JspOutput.class);
 
-    _fastTagMap = new HashMap<QName,Class>(_tagMap);
+    _fastTagMap = new HashMap<NameCfg,Class>(_tagMap);
 
     // shortcut
     addMap(_fastTagMap, "resin-c", "out", JSTL_CORE_URI, JstlCoreOut.class);
@@ -748,7 +748,7 @@ public class JavaJspBuilder extends JspBuilder {
            JsfPhaseListener.class);
            */
 
-    _jstlTlvTagMap = new HashMap<QName, Class>();
+    _jstlTlvTagMap = new HashMap<NameCfg, Class>();
 
     addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_CORE_URI,
            JstlTlvCoreChoose.class);

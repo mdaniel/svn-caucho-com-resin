@@ -30,7 +30,7 @@
 package com.caucho.v5.j2ee.appclient;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.candi.ObjectFactoryNaming;
 import com.caucho.v5.naming.*;
 import com.caucho.v5.util.L10N;
 

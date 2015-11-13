@@ -29,10 +29,8 @@
 
 package com.caucho.v5.config.program;
 
-import javax.enterprise.context.spi.CreationalContext;
-
 import com.caucho.v5.config.Config;
-import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.types.ResourceGroupConfig;
 
 /**
@@ -49,7 +47,7 @@ public class ResourceProgram extends ConfigProgram {
   }
   
   @Override
-  public <T> void inject(T bean, CreationalContext<T> env)
+  public <T> void inject(T bean, InjectContext env)
   {
     _resourceConfig.deploy();
   }

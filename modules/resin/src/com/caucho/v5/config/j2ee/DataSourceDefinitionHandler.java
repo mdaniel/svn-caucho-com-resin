@@ -43,7 +43,7 @@ import javax.sql.DataSource;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;

@@ -44,7 +44,7 @@ import javax.el.ValueExpression;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.jsp.JspLineParseException;
 import com.caucho.v5.jsp.JspParseException;
@@ -81,7 +81,7 @@ public abstract class JspNode {
   protected JavaJspGenerator _gen;
   protected ParseState _parseState;
 
-  protected QName _name;
+  protected NameCfg _name;
   protected JspNode _parent;
 
   protected JspNode()
@@ -112,7 +112,7 @@ public abstract class JspNode {
   /**
    * Returns the qname of the node.
    */
-  public QName getQName()
+  public NameCfg getQName()
   {
     return _name;
   }
@@ -120,7 +120,7 @@ public abstract class JspNode {
   /**
    * Sets the node's qname
    */
-  public void setQName(QName name)
+  public void setQName(NameCfg name)
   {
     _name = name;
   }
@@ -423,7 +423,7 @@ public abstract class JspNode {
   /**
    * Returns true if the namespace decl has been printed.
    */
-  public boolean hasNamespace(QName name)
+  public boolean hasNamespace(NameCfg name)
   {
     return hasNamespace(name.getPrefix(), name.getNamespaceURI());
   }
@@ -431,7 +431,7 @@ public abstract class JspNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     throw error(L.l("attribute '{0}' is not allowed in <{1}>.",
@@ -444,7 +444,7 @@ public abstract class JspNode {
    * @param name the name of the attribute.
    * @param value the value of the attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (value.isStatic()) {
@@ -508,7 +508,7 @@ public abstract class JspNode {
     if (node instanceof JspAttribute) {
       JspAttribute attr = (JspAttribute) node;
 
-      QName name = attr.getName();
+      NameCfg name = attr.getName();
 
       addAttribute(name, attr);
     }

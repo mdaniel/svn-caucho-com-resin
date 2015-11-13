@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
@@ -42,8 +42,8 @@ import java.util.ArrayList;
  */
 @Module
 public class JspInclude extends JspNode {
-  private static final QName PAGE = new QName("page");
-  private static final QName FLUSH = new QName("flush");
+  private static final NameCfg PAGE = new NameCfg("page");
+  private static final NameCfg FLUSH = new NameCfg("flush");
   
   private String _page;
   private boolean _flush = false; // jsp/15m4
@@ -54,7 +54,7 @@ public class JspInclude extends JspNode {
    * Adds an attribute.
    */
   @Override
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (PAGE.equals(name))

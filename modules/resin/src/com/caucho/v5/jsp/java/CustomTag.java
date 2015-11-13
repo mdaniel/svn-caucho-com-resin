@@ -38,7 +38,7 @@ import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 import javax.servlet.jsp.tagext.VariableInfo;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.AnalyzedTag;
 
 /**
@@ -415,9 +415,9 @@ public class CustomTag extends GenericTag
       out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) " + parentName + ");");
     }
 
-    ArrayList<QName> names = _tag.getAttributeNames();
+    ArrayList<NameCfg> names = _tag.getAttributeNames();
     for (int i = 0; i < names.size(); i++) {
-      QName name = names.get(i);
+      NameCfg name = names.get(i);
 
       String value = _tag.getAttribute(name);
       if (value == null)

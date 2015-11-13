@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -40,11 +40,11 @@ import java.lang.reflect.Modifier;
  * Represents a Java scriptlet.
  */
 public class JspUseBean extends JspContainerNode {
-  private static final QName ID = new QName("id");
-  private static final QName TYPE = new QName("type");
-  private static final QName CLASS = new QName("class");
-  private static final QName BEAN_NAME = new QName("beanName");
-  private static final QName SCOPE = new QName("scope");
+  private static final NameCfg ID = new NameCfg("id");
+  private static final NameCfg TYPE = new NameCfg("type");
+  private static final NameCfg CLASS = new NameCfg("class");
+  private static final NameCfg BEAN_NAME = new NameCfg("beanName");
+  private static final NameCfg SCOPE = new NameCfg("scope");
   
   private String _id;
   private String _typeName;
@@ -55,7 +55,7 @@ public class JspUseBean extends JspContainerNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (ID.equals(name))

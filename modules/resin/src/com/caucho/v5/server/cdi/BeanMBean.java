@@ -55,7 +55,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
 

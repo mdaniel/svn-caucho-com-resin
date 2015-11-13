@@ -49,7 +49,7 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryValidator;
 import javax.servlet.jsp.tagext.ValidationMessage;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.types.Signature;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.env.system.RootDirectorySystem;
@@ -2444,7 +2444,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Returns the tag with the given qname.
    */
-  public TagInfo getTag(QName qname)
+  public TagInfo getTag(NameCfg qname)
     throws JspParseException
   {
     return _tagManager.getTag(qname);
@@ -2453,13 +2453,13 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Returns the tag with the given qname.
    */
-  public Class<?> getTagClass(QName qname)
+  public Class<?> getTagClass(NameCfg qname)
     throws Exception
   {
     return _tagManager.getTagClass(qname);
   }
 
-  public Taglib addTaglib(QName qname)
+  public Taglib addTaglib(NameCfg qname)
     throws JspParseException
   {
     return _tagManager.addTaglib(qname);

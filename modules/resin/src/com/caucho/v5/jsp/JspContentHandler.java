@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.vfs.Vfs;
 
 import org.xml.sax.Attributes;
@@ -152,11 +152,11 @@ public class JspContentHandler extends DefaultHandler {
 
         String value = new String(buf, begin, offset - begin);
 
-        QName qname = new QName("resin-c", "out", JspParser.JSTL_CORE_URI);
+        NameCfg qname = new NameCfg("resin-c", "out", JspParser.JSTL_CORE_URI);
 
         _builder.startElement(qname);
-        _builder.attribute(new QName("value"), value);
-        _builder.attribute(new QName("escapeXml"), "false");
+        _builder.attribute(new NameCfg("value"), value);
+        _builder.attribute(new NameCfg("escapeXml"), "false");
         _builder.endAttributes();
         _builder.endElement("resin-c:out");
 
@@ -221,11 +221,11 @@ public class JspContentHandler extends DefaultHandler {
   {
     try {
       setLocation();
-      _builder.startElement(new QName(qName, uri));
+      _builder.startElement(new NameCfg(qName, uri));
 
       for (int i = 0; i < atts.getLength(); i++) {
         setLocation();
-        _builder.attribute(new QName(atts.getQName(i), atts.getURI(i)),
+        _builder.attribute(new NameCfg(atts.getQName(i), atts.getURI(i)),
                            atts.getValue(i));
       }
       

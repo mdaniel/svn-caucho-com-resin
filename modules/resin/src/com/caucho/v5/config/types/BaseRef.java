@@ -29,12 +29,13 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.bytecode.*;
-import com.caucho.v5.config.types.InjectionTarget;
+import java.lang.reflect.AccessibleObject;
+
+import com.caucho.v5.bytecode.JClass;
+import com.caucho.v5.bytecode.JClassLoader;
+import com.caucho.v5.bytecode.JClassLoaderWrapper;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.Vfs;
-
-import java.lang.reflect.*;
 
 /**
  * Base configuration for ejb-ref and resource-env-ref.

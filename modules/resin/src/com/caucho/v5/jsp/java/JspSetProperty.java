@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.BeanUtil;
 import com.caucho.v5.vfs.WriteStream;
@@ -49,10 +49,10 @@ import java.util.logging.Logger;
 public class JspSetProperty extends JspContainerNode {
   private static final Logger log
     = Logger.getLogger(JspSetProperty.class.getName());
-  private static final QName NAME = new QName("name");
-  private static final QName PROPERTY = new QName("property");
-  private static final QName PARAM = new QName("param");
-  private static final QName VALUE = new QName("value");
+  private static final NameCfg NAME = new NameCfg("name");
+  private static final NameCfg PROPERTY = new NameCfg("property");
+  private static final NameCfg PARAM = new NameCfg("param");
+  private static final NameCfg VALUE = new NameCfg("value");
   
   private String _name;
   private String _property;
@@ -61,7 +61,7 @@ public class JspSetProperty extends JspContainerNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (NAME.equals(name))

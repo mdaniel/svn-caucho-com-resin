@@ -35,17 +35,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.DefaultLiteral;
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.types.RawString;
-import com.caucho.v5.config.types.Validator;
+import com.caucho.v5.config.candi.BeanBuilder;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.DefaultLiteral;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
@@ -153,7 +151,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
    * @param env the Config environment
    */
   @Override
-  public <T> void inject(T bean, CreationalContext<T> env)
+  public <T> void inject(T bean, InjectContext env)
   {
     
   }

@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspContentHandler;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.Namespace;
@@ -45,7 +45,7 @@ import java.io.IOException;
 public class JspDirectiveInclude extends JspNode {
   static L10N L = new L10N(JspDirectiveInclude.class);
 
-  static private final QName FILE = new QName("file");
+  static private final NameCfg FILE = new NameCfg("file");
 
   private String _file;
   
@@ -55,7 +55,7 @@ public class JspDirectiveInclude extends JspNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (FILE.equals(name))

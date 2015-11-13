@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -41,7 +41,7 @@ import java.util.HashSet;
  * Represents a JSP implicit element
  */
 public class JspXmlElement extends JspContainerNode {
-  private ArrayList<QName> _attrNames = new ArrayList<QName>();
+  private ArrayList<NameCfg> _attrNames = new ArrayList<NameCfg>();
   private ArrayList<String> _attrValues = new ArrayList<String>();
 
   public JspXmlElement()
@@ -51,7 +51,7 @@ public class JspXmlElement extends JspContainerNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     _attrNames.add(name);
@@ -61,7 +61,7 @@ public class JspXmlElement extends JspContainerNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     // jsp/10j0
@@ -77,7 +77,7 @@ public class JspXmlElement extends JspContainerNode {
    */
   public boolean hasNamespace(String prefix, String uri)
   {
-    QName name = getQName();
+    NameCfg name = getQName();
 
     if (prefix == null || uri == null)
       return true;
@@ -99,7 +99,7 @@ public class JspXmlElement extends JspContainerNode {
     os.print("<" + getTagName());
 
     for (int i = 0; i < _attrNames.size(); i++) {
-      QName name = _attrNames.get(i);
+      NameCfg name = _attrNames.get(i);
       String value = _attrValues.get(i);
       
       os.print(" " + name.getName() + "=\"");
@@ -127,7 +127,7 @@ public class JspXmlElement extends JspContainerNode {
     out.addText("<");
     out.addText(getTagName());
 
-    QName qName = getQName();
+    NameCfg qName = getQName();
 
     HashSet<String> prefixes = new HashSet<String>();
     
@@ -145,7 +145,7 @@ public class JspXmlElement extends JspContainerNode {
     }
 
     for (int i = 0; i < _attrNames.size(); i++) {
-      QName name = _attrNames.get(i);
+      NameCfg name = _attrNames.get(i);
       String value = _attrValues.get(i);
 
       if (name.getNamespaceURI() != null &&

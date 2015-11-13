@@ -32,10 +32,10 @@ package com.caucho.v5.config.types;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.env.jdbc.DatabaseFactory;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
@@ -199,7 +199,7 @@ public class DataSourceRef extends ResourceGroupConfig {
    * @param env the Config environment
    */
   @Override
-  public <T> void inject(T bean, CreationalContext<T> env)
+  public <T> void inject(T bean, InjectContext env)
   {
     
   }

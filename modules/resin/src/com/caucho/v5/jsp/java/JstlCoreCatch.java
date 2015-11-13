@@ -28,21 +28,21 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 
 public class JstlCoreCatch extends JstlNode {
-  private static final QName VAR = new QName("var");
+  private static final NameCfg VAR = new NameCfg("var");
   
   private String _var;
   
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VAR.equals(name))

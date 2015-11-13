@@ -47,10 +47,10 @@ import javax.sql.XADataSource;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.CurrentLiteral;
-import com.caucho.v5.config.inject.HandleAware;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.BeanBuilder;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.CurrentLiteral;
+import com.caucho.v5.config.candi.HandleAware;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.dbpool.ConnectionPool;

@@ -48,7 +48,7 @@ import javax.transaction.SystemException;
 import javax.persistence.TransactionRequiredException;
 import javax.transaction.Transaction;
 
-import com.caucho.v5.config.inject.HandleAware;
+import com.caucho.v5.config.candi.HandleAware;
 import com.caucho.v5.transaction.ManagedResource;
 import com.caucho.v5.transaction.ManagedXAResource;
 import com.caucho.v5.transaction.TransactionImpl;

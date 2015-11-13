@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.TagInstance;
 
@@ -240,9 +240,9 @@ public class CustomSimpleTag extends GenericTag
       out.println(var + "_adapter = new javax.servlet.jsp.tagext.TagAdapter(" + var + ");");
     }
 
-    ArrayList<QName> names = _tag.getAttributeNames();
+    ArrayList<NameCfg> names = _tag.getAttributeNames();
     for (int i = 0; i < names.size(); i++) {
-      QName name = names.get(i);
+      NameCfg name = names.get(i);
 
       String value = _tag.getAttribute(name);
       if (value == null)

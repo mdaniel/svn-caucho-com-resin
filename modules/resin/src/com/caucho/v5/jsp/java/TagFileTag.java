@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
@@ -326,7 +326,7 @@ public class TagFileTag extends GenericTag {
     
     // fill all mentioned attributes
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName attrName = _attributeNames.get(i);
+      NameCfg attrName = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
       
       TagAttributeInfo attribute = null;
@@ -422,7 +422,7 @@ public class TagFileTag extends GenericTag {
   {
   }
 
-  private int indexOf(ArrayList<QName> names, String name)
+  private int indexOf(ArrayList<NameCfg> names, String name)
   {
     for (int i = 0; i < names.size(); i++) {
       if (names.get(i).getName().equals(name))

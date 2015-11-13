@@ -37,10 +37,8 @@ import java.util.logging.Logger;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.el.CandiElResolver;
-import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.http.webapp.WebAppBuilder;
-import com.caucho.v5.http.webapp.WebAppDispatch;
 import com.caucho.v5.jsp.cfg.JspConfig;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.cfg.JspTaglib;
@@ -160,6 +158,11 @@ public class WebAppResin extends WebApp
         log.log(Level.FINEST, e.toString(), e);
       }
     }
+  }
+  
+  private CandiManager getBeanManager()
+  {
+    return CandiManager.getCurrent(getClassLoader());
   }
 
   public JspApplicationContextImpl getJspApplicationContext()

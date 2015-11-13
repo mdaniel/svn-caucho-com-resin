@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.BeanUtil;
 import com.caucho.v5.vfs.WriteStream;
@@ -40,8 +40,8 @@ import java.lang.reflect.Method;
  * Represents a Java scriptlet.
  */
 public class JspGetProperty extends JspContainerNode {
-  private static final QName NAME = new QName("name");
-  private static final QName PROPERTY = new QName("property");
+  private static final NameCfg NAME = new NameCfg("name");
+  private static final NameCfg PROPERTY = new NameCfg("property");
   
   private String _name;
   private String _property;
@@ -51,7 +51,7 @@ public class JspGetProperty extends JspContainerNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (NAME.equals(name))

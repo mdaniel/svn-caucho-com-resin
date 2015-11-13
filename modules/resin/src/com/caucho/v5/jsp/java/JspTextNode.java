@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.XmlChar;
 
@@ -46,7 +46,7 @@ public class JspTextNode extends JspNode {
       throw new NullPointerException();
     
     setGenerator(gen);
-    setQName(new QName("jsp", "text", JSP_NS));
+    setQName(new NameCfg("jsp", "text", JSP_NS));
     setParent(parent);
 
     _text = text;

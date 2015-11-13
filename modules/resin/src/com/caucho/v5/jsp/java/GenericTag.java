@@ -52,8 +52,8 @@ import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.ValidationMessage;
 import javax.servlet.jsp.tagext.VariableInfo;
 
-import com.caucho.v5.config.cf.QName;
-import com.caucho.v5.config.inject.ReferenceFactory;
+import com.caucho.v5.config.candi.ReferenceFactory;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.JspUtil;
 import com.caucho.v5.jsp.TagInstance;
@@ -203,7 +203,7 @@ abstract public class GenericTag extends JspContainerNode
     Hashtable<String,Object> tags = new Hashtable<String,Object>();
 
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName qName = _attributeNames.get(i);
+      NameCfg qName = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
       String name = qName.getName();
 
@@ -302,7 +302,7 @@ abstract public class GenericTag extends JspContainerNode
 
     // Any conflicting values must be set each time.
     for (int i = 0; i < _attributeValues.size(); i++) {
-      QName name = _attributeNames.get(i);
+      NameCfg name = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
 
       try {
@@ -381,7 +381,7 @@ abstract public class GenericTag extends JspContainerNode
     throws Exception
   {
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName name = _attributeNames.get(i);
+      NameCfg name = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
       
       if (! (value instanceof JspFragmentNode))
@@ -442,7 +442,7 @@ abstract public class GenericTag extends JspContainerNode
     else {
       // Any conflicting values must be set each time.
       for (int i = 0; i < _attributeNames.size(); i++) {
-        QName name = _attributeNames.get(i);
+        NameCfg name = _attributeNames.get(i);
         Object value = _attributeValues.get(i);
         
         _tag.addAttribute(name, value);
@@ -529,7 +529,7 @@ abstract public class GenericTag extends JspContainerNode
     printJspId(os);
 
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName attrName = _attributeNames.get(i);
+      NameCfg attrName = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
 
       if (value instanceof String) {
@@ -574,7 +574,7 @@ abstract public class GenericTag extends JspContainerNode
     
     // fill all mentioned attributes
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName attrName = _attributeNames.get(i);
+      NameCfg attrName = _attributeNames.get(i);
       Object value = _attributeValues.get(i);
       
       TagAttributeInfo attribute = getAttributeInfo(attrName);
@@ -603,7 +603,7 @@ abstract public class GenericTag extends JspContainerNode
     }
   }
 
-  private TagAttributeInfo getAttributeInfo(QName attrName)
+  private TagAttributeInfo getAttributeInfo(NameCfg attrName)
   {
     TagAttributeInfo attrs[] = _tagInfo.getAttributes();
 
@@ -619,7 +619,7 @@ abstract public class GenericTag extends JspContainerNode
   private int getAttributeIndex(String name)
   {
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName attrName = _attributeNames.get(i);
+      NameCfg attrName = _attributeNames.get(i);
 
       if (isNameMatch(name, attrName))
         return i;
@@ -628,7 +628,7 @@ abstract public class GenericTag extends JspContainerNode
     return -1;
   }
 
-  private boolean isNameMatch(String defName, QName attrName)
+  private boolean isNameMatch(String defName, NameCfg attrName)
   {
     if (defName.equals(attrName.getName())) {
       return true;
@@ -650,7 +650,7 @@ abstract public class GenericTag extends JspContainerNode
    * @param value the new value of the tag.
    */
   void generateSetAttribute(JspJavaWriter out,
-                            String name, QName attrName, Object value,
+                            String name, NameCfg attrName, Object value,
                             boolean allowRtexpr, boolean isFragment,
                             TagAttributeInfo attrInfo)
     throws Exception
@@ -705,7 +705,7 @@ abstract public class GenericTag extends JspContainerNode
     }
   }
 
-  private Method getAttributeMethod(QName attrName)
+  private Method getAttributeMethod(NameCfg attrName)
     throws Exception
   {
     Method method = null;

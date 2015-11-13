@@ -40,8 +40,8 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.transaction.Synchronization;
 
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.event.ObserverMethodImpl;
-import com.caucho.v5.config.inject.CandiManager;
 import com.caucho.v5.transaction.TransactionImpl;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 

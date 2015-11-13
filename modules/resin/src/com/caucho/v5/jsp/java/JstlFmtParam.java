@@ -29,21 +29,21 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 
 public class JstlFmtParam extends JstlNode {
-  private static final QName VALUE = new QName("value");
+  private static final NameCfg VALUE = new NameCfg("value");
   
   private String _value;
   private JspAttribute _valueAttr;
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VALUE.equals(name)) {

@@ -38,7 +38,7 @@ import javax.faces.application.ViewHandlerWrapper;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 
 /**
  * The conversation scope value

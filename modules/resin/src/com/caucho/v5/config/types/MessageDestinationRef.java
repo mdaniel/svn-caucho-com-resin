@@ -28,7 +28,7 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.candi.ObjectFactoryNaming;
 import com.caucho.v5.config.types.InjectionTarget;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;

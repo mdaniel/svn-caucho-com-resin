@@ -29,17 +29,11 @@
 
 package com.caucho.v5.resin;
 
-import com.caucho.v5.config.*;
-import com.caucho.v5.config.program.*;
-import com.caucho.v5.config.types.*;
-import com.caucho.v5.config.xml.ContextConfigXml;
-import com.caucho.v5.http.container.*;
-import com.caucho.v5.http.dispatch.*;
-import com.caucho.v5.http.webapp.*;
+import java.util.ArrayList;
 
-import java.util.*;
-
-import javax.enterprise.context.spi.CreationalContext;
+import com.caucho.v5.config.inject.InjectContext;
+import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.PropertyValueProgram;
 
 /**
  * Abstract base class for bean-like embedding objects.
@@ -60,7 +54,7 @@ abstract class AbstractBeanEmbed
   /**
    * Configures the object
    */
-  protected <T> void configure(T bean, CreationalContext<T> env)
+  protected <T> void configure(T bean, InjectContext env)
   {
     for (ConfigProgram program : _propertyList) {
       program.inject(bean, env);

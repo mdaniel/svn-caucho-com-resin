@@ -51,7 +51,7 @@ import javax.sql.XADataSource;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyStringProgram;
@@ -104,9 +104,9 @@ public class DriverConfig
    */
   public static final String PROPERTY_PASSWORD = "password" ;
 
-  private static final QName URL = new QName("url");
-  private static final QName USER = new QName("user");
-  private static final QName PASSWORD = new QName("password");
+  private static final NameCfg URL = new NameCfg("url");
+  private static final NameCfg USER = new NameCfg("user");
+  private static final NameCfg PASSWORD = new NameCfg("password");
 
   private DBPoolImpl _dbPool;
 

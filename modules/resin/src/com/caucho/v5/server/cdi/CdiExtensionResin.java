@@ -46,12 +46,10 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
-import com.caucho.v5.amp.cdi.ActorManagerImpl;
 import com.caucho.v5.amp.channel.SessionService;
-import com.caucho.v5.amp.resource.ResourceService;
 import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.inject.Jndi;
 import com.caucho.v5.inject.LazyExtension;

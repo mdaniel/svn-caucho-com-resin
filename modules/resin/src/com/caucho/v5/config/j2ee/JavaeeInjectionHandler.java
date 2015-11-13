@@ -44,10 +44,10 @@ import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.AnyLiteral;
-import com.caucho.v5.config.inject.DefaultLiteral;
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.inject.InjectionPointHandler;
+import com.caucho.v5.config.candi.AnyLiteral;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.DefaultLiteral;
+import com.caucho.v5.config.candi.InjectionPointHandler;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.naming.JndiUtil;
 

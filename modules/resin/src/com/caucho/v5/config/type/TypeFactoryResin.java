@@ -31,12 +31,9 @@ package com.caucho.v5.config.type;
 
 import java.util.HashMap;
 
-import com.caucho.v5.config.cf.QName;
-import com.caucho.v5.config.custom.ConfigCustomBean;
+import com.caucho.v5.config.cf.NameCfg;
+import com.caucho.v5.config.custom.CustomBean;
 import com.caucho.v5.config.custom.TypeCustomBean;
-import com.caucho.v5.config.resin.ConfigCustomBeanResin;
-import com.caucho.v5.config.type.InlineBeanType;
-import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
@@ -97,10 +94,11 @@ public class TypeFactoryResin extends TypeFactoryConfig
   }
   
   @Override
-  protected ConfigCustomBean<?> createCustomBeanImpl(QName qName,
+  protected CustomBean<?> createCustomBeanImpl(NameCfg qName,
                                                   Class<?> cl,
                                                   Object parent)
   {
-    return new ConfigCustomBeanResin(qName, cl, parent);
+    throw new UnsupportedOperationException(getClass().getName());
+    // return new ConfigCustomBeanResin(qName, cl, parent);
   }
 }

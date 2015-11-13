@@ -34,7 +34,7 @@ import java.sql.Driver;
 import javax.sql.DataSource;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.sql.DBPool;
@@ -46,7 +46,7 @@ import com.caucho.v5.sql.DriverConfig;
  * database lookup.
  */
 public class DatabaseFactoryImpl extends DatabaseFactory {
-  private static final QName URL = new QName("url");
+  private static final NameCfg URL = new NameCfg("url");
   
   @Override
   public DataSource create()

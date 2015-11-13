@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -43,8 +43,8 @@ import java.util.logging.Logger;
 public class JspParam extends JspNode {
   private static final Logger log
     = Logger.getLogger(JspParam.class.getName());
-  private static final QName NAME = new QName("name");
-  private static final QName VALUE = new QName("value");
+  private static final NameCfg NAME = new NameCfg("name");
+  private static final NameCfg VALUE = new NameCfg("value");
   
   private String _name;
   private String _value;
@@ -53,7 +53,7 @@ public class JspParam extends JspNode {
    * Adds an attribute.
    */
   @Override
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (NAME.equals(name)) {

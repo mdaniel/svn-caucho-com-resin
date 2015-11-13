@@ -32,8 +32,8 @@ package com.caucho.v5.cli.boot;
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.BeanBuilder;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.security.AdminAuthenticator;

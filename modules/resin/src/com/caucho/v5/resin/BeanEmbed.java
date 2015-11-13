@@ -32,8 +32,8 @@ package com.caucho.v5.resin;
 import javax.enterprise.context.ApplicationScoped;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.BeanBuilder;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.BeanBuilder;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.util.L10N;

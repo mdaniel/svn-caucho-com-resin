@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.el.JspELParser;
@@ -37,9 +37,9 @@ import com.caucho.v5.vfs.WriteStream;
 import java.io.IOException;
 
 public class JstlCoreOut extends JstlNode {
-  private static final QName VALUE = new QName("value");
-  private static final QName ESCAPE_XML = new QName("escapeXml");
-  private static final QName DEFAULT = new QName("default");
+  private static final NameCfg VALUE = new NameCfg("value");
+  private static final NameCfg ESCAPE_XML = new NameCfg("escapeXml");
+  private static final NameCfg DEFAULT = new NameCfg("default");
   
   private String _value;
   private String _escapeXml = "true";
@@ -53,7 +53,7 @@ public class JstlCoreOut extends JstlNode {
    * Adds an attribute.
    */
   @Override
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VALUE.equals(name))
@@ -71,7 +71,7 @@ public class JstlCoreOut extends JstlNode {
    * Adds an attribute.
    */
   @Override
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (VALUE.equals(name))

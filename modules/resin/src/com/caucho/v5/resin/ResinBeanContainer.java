@@ -45,7 +45,7 @@ import javax.enterprise.inject.spi.Bean;
 import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.v5.inject.ThreadContext;
 import com.caucho.v5.java.WorkDir;

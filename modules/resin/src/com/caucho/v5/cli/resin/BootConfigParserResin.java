@@ -30,7 +30,7 @@
 package com.caucho.v5.cli.resin;
 
 import com.caucho.v5.cli.server.BootConfigParser;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.lib.ResinConfigLibrary;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
@@ -40,7 +40,7 @@ public class BootConfigParserResin extends BootConfigParser
   @Override
   protected ConfigXml createConfig()
   {
-    ConfigXml config = super.createConfig();
+    ConfigXml config = new ConfigXml();
 
     CandiManager cdiManager = CandiManager.create();
 

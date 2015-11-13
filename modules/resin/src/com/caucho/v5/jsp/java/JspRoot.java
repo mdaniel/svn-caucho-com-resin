@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.WriteStream;
@@ -44,7 +44,7 @@ import java.util.Map;
 public class JspRoot extends JspContainerNode {
   static final L10N L = new L10N(JspRoot.class);
 
-  static final private QName VERSION = new QName("version");
+  static final private NameCfg VERSION = new NameCfg("version");
 
   private String _version;
 
@@ -68,7 +68,7 @@ public class JspRoot extends JspContainerNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VERSION.equals(name)) {

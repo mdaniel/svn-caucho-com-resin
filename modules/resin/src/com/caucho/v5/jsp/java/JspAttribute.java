@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.TagInstance;
 import com.caucho.v5.vfs.WriteStream;
@@ -41,10 +41,10 @@ import java.io.IOException;
  * Represents a jsp:attribute node
  */
 public class JspAttribute extends JspFragmentNode {
-  private static final QName NAME = new QName("name");
-  private static final QName TRIM = new QName("trim");
+  private static final NameCfg NAME = new NameCfg("name");
+  private static final NameCfg TRIM = new NameCfg("trim");
   
-  private QName _name;
+  private NameCfg _name;
   private boolean _trim = true;
   private TagInstance _tag;
 
@@ -57,7 +57,7 @@ public class JspAttribute extends JspFragmentNode {
   /**
    * Returns the attribute name.
    */
-  public QName getName()
+  public NameCfg getName()
   {
     return _name;
   }
@@ -73,7 +73,7 @@ public class JspAttribute extends JspFragmentNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (NAME.equals(name))

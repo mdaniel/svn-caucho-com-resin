@@ -40,7 +40,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 
 /**
  * The @PersistenceUnit, container managed entity manager proxy, used

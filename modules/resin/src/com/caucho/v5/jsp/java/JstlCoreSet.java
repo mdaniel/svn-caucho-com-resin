@@ -29,18 +29,18 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 
 public class JstlCoreSet extends JstlNode {
-  private static final QName VALUE = new QName("value");
-  private static final QName VAR = new QName("var");
-  private static final QName SCOPE = new QName("scope");
-  private static final QName TARGET = new QName("target");
-  private static final QName PROPERTY = new QName("property");
+  private static final NameCfg VALUE = new NameCfg("value");
+  private static final NameCfg VAR = new NameCfg("var");
+  private static final NameCfg SCOPE = new NameCfg("scope");
+  private static final NameCfg TARGET = new NameCfg("target");
+  private static final NameCfg PROPERTY = new NameCfg("property");
   
   private String _value;
   private JspAttribute _valueAttr;
@@ -57,7 +57,7 @@ public class JstlCoreSet extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VALUE.equals(name))
@@ -78,7 +78,7 @@ public class JstlCoreSet extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (VALUE.equals(name))

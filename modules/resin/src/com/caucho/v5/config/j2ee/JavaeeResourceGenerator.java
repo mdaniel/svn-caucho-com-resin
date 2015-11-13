@@ -31,8 +31,8 @@ package com.caucho.v5.config.j2ee;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.inject.AnyLiteral;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.AnyLiteral;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.config.xml.ContextConfigXml;

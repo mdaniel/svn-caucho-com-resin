@@ -36,10 +36,10 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ServiceStartup;
-import com.caucho.v5.config.cfg.BeansConfig;
+import com.caucho.v5.config.candi.BeansConfig;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.ScheduleBean;
 import com.caucho.v5.config.custom.ExtensionCustomBean;
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.inject.ScheduleBean;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.util.L10N;

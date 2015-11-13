@@ -32,7 +32,7 @@ package com.caucho.v5.resin;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.scope.ContextContainer;
 
 /**

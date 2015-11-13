@@ -28,15 +28,15 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 
 public class JstlXmlOut extends JstlNode {
-  private static final QName SELECT = new QName("select");
-  private static final QName ESCAPE_XML = new QName("escapeXml");
+  private static final NameCfg SELECT = new NameCfg("select");
+  private static final NameCfg ESCAPE_XML = new NameCfg("escapeXml");
   
   private String _select;
   
@@ -46,7 +46,7 @@ public class JstlXmlOut extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (SELECT.equals(name))
@@ -61,7 +61,7 @@ public class JstlXmlOut extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (ESCAPE_XML.equals(name))

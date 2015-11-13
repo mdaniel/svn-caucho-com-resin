@@ -35,8 +35,8 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.NamingException;
 
-import com.caucho.v5.config.inject.CandiManager;
-import com.caucho.v5.config.inject.ObjectFactoryNaming;
+import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.candi.ObjectFactoryNaming;
 import com.caucho.v5.inject.Module;
 
 /**

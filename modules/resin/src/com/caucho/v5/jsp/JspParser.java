@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.java.LineMap;
 import com.caucho.v5.jsp.java.JspNode;
 import com.caucho.v5.util.CharBuffer;
@@ -59,55 +59,55 @@ public class JspParser {
   public static final String JSTL_CORE_URI = "http://java.sun.com/jsp/jstl/core";
   public static final String JSTL_FMT_URI = "http://java.sun.com/jsp/jstl/fmt";
 
-  public static final QName PREFIX = new QName("prefix");
-  public static final QName TAGLIB = new QName("taglib");
-  public static final QName TAGDIR = new QName("tagdir");
-  public static final QName URI = new QName("uri");
+  public static final NameCfg PREFIX = new NameCfg("prefix");
+  public static final NameCfg TAGLIB = new NameCfg("taglib");
+  public static final NameCfg TAGDIR = new NameCfg("tagdir");
+  public static final NameCfg URI = new NameCfg("uri");
 
-  public static final QName JSP_DECLARATION =
-    new QName("jsp", "declaration", JSP_NS);
+  public static final NameCfg JSP_DECLARATION =
+    new NameCfg("jsp", "declaration", JSP_NS);
 
-  public static final QName JSP_SCRIPTLET =
-    new QName("jsp", "scriptlet", JSP_NS);
+  public static final NameCfg JSP_SCRIPTLET =
+    new NameCfg("jsp", "scriptlet", JSP_NS);
 
-  public static final QName JSP_EXPRESSION =
-    new QName("jsp", "expression", JSP_NS);
+  public static final NameCfg JSP_EXPRESSION =
+    new NameCfg("jsp", "expression", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_PAGE =
-    new QName("jsp", "directive.page", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_PAGE =
+    new NameCfg("jsp", "directive.page", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_INCLUDE =
-    new QName("jsp", "directive.include", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_INCLUDE =
+    new NameCfg("jsp", "directive.include", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_CACHE =
-    new QName("jsp", "directive.cache", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_CACHE =
+    new NameCfg("jsp", "directive.cache", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_TAGLIB =
-    new QName("jsp", "directive.taglib", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_TAGLIB =
+    new NameCfg("jsp", "directive.taglib", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_ATTRIBUTE =
-    new QName("jsp", "directive.attribute", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_ATTRIBUTE =
+    new NameCfg("jsp", "directive.attribute", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_VARIABLE =
-    new QName("jsp", "directive.variable", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_VARIABLE =
+    new NameCfg("jsp", "directive.variable", JSP_NS);
 
-  public static final QName JSP_DIRECTIVE_TAG =
-    new QName("jsp", "directive.tag", JSP_NS);
+  public static final NameCfg JSP_DIRECTIVE_TAG =
+    new NameCfg("jsp", "directive.tag", JSP_NS);
 
-  public static final QName JSTL_CORE_OUT =
-    new QName("resin-c", "out", "urn:jsptld:" + JSTL_CORE_URI);
+  public static final NameCfg JSTL_CORE_OUT =
+    new NameCfg("resin-c", "out", "urn:jsptld:" + JSTL_CORE_URI);
 
-  public static final QName JSTL_CORE_CHOOSE =
-    new QName("resin-c", "choose", "urn:jsptld:" + JSTL_CORE_URI);
+  public static final NameCfg JSTL_CORE_CHOOSE =
+    new NameCfg("resin-c", "choose", "urn:jsptld:" + JSTL_CORE_URI);
 
-  public static final QName JSTL_CORE_WHEN =
-    new QName("resin-c", "when", "urn:jsptld:" + JSTL_CORE_URI);
+  public static final NameCfg JSTL_CORE_WHEN =
+    new NameCfg("resin-c", "when", "urn:jsptld:" + JSTL_CORE_URI);
 
-  public static final QName JSTL_CORE_OTHERWISE =
-    new QName("resin-c", "otherwise", "urn:jsptld:" + JSTL_CORE_URI);
+  public static final NameCfg JSTL_CORE_OTHERWISE =
+    new NameCfg("resin-c", "otherwise", "urn:jsptld:" + JSTL_CORE_URI);
 
-  public static final QName JSTL_CORE_FOREACH =
-    new QName("resin-c", "forEach", "urn:jsptld:" + JSTL_CORE_URI);
+  public static final NameCfg JSTL_CORE_FOREACH =
+    new NameCfg("resin-c", "forEach", "urn:jsptld:" + JSTL_CORE_URI);
 
   private static final int TAG_UNKNOWN = 0;
   private static final int TAG_JSP = 1;
@@ -708,8 +708,8 @@ public class JspParser {
 
     setLocation(jspPath, filename, line);
     _jspBuilder.startElement(JSTL_CORE_OUT);
-    _jspBuilder.attribute(new QName("value"), cb.close());
-    _jspBuilder.attribute(new QName("escapeXml"), "false");
+    _jspBuilder.attribute(new NameCfg("value"), cb.close());
+    _jspBuilder.attribute(new NameCfg("escapeXml"), "false");
     _jspBuilder.endAttributes();
     _jspBuilder.endElement(JSTL_CORE_OUT.getName());
 
@@ -900,7 +900,7 @@ public class JspParser {
     if (name.startsWith("$"))
       name = name.substring(1);
 
-    _jspBuilder.attribute(new QName("var"), name);
+    _jspBuilder.attribute(new NameCfg("var"), name);
 
     cb.clear();
     parseVelocityExpr(cb, ')');
@@ -928,11 +928,11 @@ public class JspParser {
       String min = expr.substring(h + 1, p);
       String max = expr.substring(p + 2, t);
 
-      _jspBuilder.attribute(new QName("begin"), "${" + min + "}");
-      _jspBuilder.attribute(new QName("end"), "${" + max + "}");
+      _jspBuilder.attribute(new NameCfg("begin"), "${" + min + "}");
+      _jspBuilder.attribute(new NameCfg("end"), "${" + max + "}");
     }
     else {
-      _jspBuilder.attribute(new QName("items"), "${" + expr + "}");
+      _jspBuilder.attribute(new NameCfg("items"), "${" + expr + "}");
     }
     _jspBuilder.endAttributes();
 
@@ -968,7 +968,7 @@ public class JspParser {
 
     CharBuffer cb = CharBuffer.allocate();
     parseVelocityExpr(cb, ')');
-    _jspBuilder.attribute(new QName("test"), "${" + cb.close() + "}");
+    _jspBuilder.attribute(new NameCfg("test"), "${" + cb.close() + "}");
     _jspBuilder.endAttributes();
 
     return skipWhitespaceToEndOfLine(read());
@@ -1121,7 +1121,7 @@ public class JspParser {
     int ch = read();
 
     // probably should be a qname
-    QName eltName = null;
+    NameCfg eltName = null;
 
     switch (ch) {
     case '=':
@@ -1218,7 +1218,7 @@ public class JspParser {
       throw error(L.l("Expected jsp directive name at '{0}'.  JSP directive syntax is <%@ name attr1='value1' ... %>",
                       badChar(ch)));
 
-    QName qname;
+    NameCfg qname;
 
     if (directive.equals("page"))
       qname = JSP_DIRECTIVE_PAGE;
@@ -1239,7 +1239,7 @@ public class JspParser {
 
     unread(ch);
 
-    ArrayList<QName> keys = new ArrayList<QName>();
+    ArrayList<NameCfg> keys = new ArrayList<NameCfg>();
     ArrayList<String> values = new ArrayList<String>();
     ArrayList<String> prefixes = new ArrayList<String>();
     ArrayList<String> uris = new ArrayList<String>();
@@ -1341,7 +1341,7 @@ public class JspParser {
 
     ch = skipWhitespace(ch);
 
-    ArrayList<QName> keys = new ArrayList<QName>();
+    ArrayList<NameCfg> keys = new ArrayList<NameCfg>();
     ArrayList<String> values = new ArrayList<String>();
     ArrayList<String> prefixes = new ArrayList<String>();
     ArrayList<String> uris = new ArrayList<String>();
@@ -1350,7 +1350,7 @@ public class JspParser {
 
     parseAttributes(keys, values, prefixes, uris);
 
-    QName qname = getElementQName(name);
+    NameCfg qname = getElementQName(name);
 
     setLocation(_jspPath, _filename, _lineStart);
     _lineStart = _line;
@@ -1359,7 +1359,7 @@ public class JspParser {
 
 
     for (int i = 0; i < keys.size(); i++) {
-      QName key = keys.get(i);
+      NameCfg key = keys.get(i);
       String value = values.get(i);
 
       _jspBuilder.attribute(key, value);
@@ -1412,7 +1412,7 @@ public class JspParser {
   /**
    * Returns the full QName for the JSP page's name.
    */
-  private QName getElementQName(String name)
+  private NameCfg getElementQName(String name)
   {
     int p = name.lastIndexOf(':');
 
@@ -1423,24 +1423,24 @@ public class JspParser {
       _prefixes.add(prefix);
 
       if (url != null)
-        return new QName(prefix, name.substring(p + 1), url);
+        return new NameCfg(prefix, name.substring(p + 1), url);
       else
-        return new QName("", name, "");
+        return new NameCfg("", name, "");
     }
     else {
       String url = Namespace.find(_namespaces, "");
 
       if (url != null)
-        return new QName("", name, url);
+        return new NameCfg("", name, url);
       else
-        return new QName("", name, "");
+        return new NameCfg("", name, "");
     }
   }
 
   /**
    * Returns the full QName for the JSP page's name.
    */
-  private QName getAttributeQName(String name)
+  private NameCfg getAttributeQName(String name)
   {
     int p = name.lastIndexOf(':');
 
@@ -1449,18 +1449,18 @@ public class JspParser {
       String url = Namespace.find(_namespaces, prefix);
 
       if (url != null)
-        return new QName(prefix, name.substring(p + 1), url);
+        return new NameCfg(prefix, name.substring(p + 1), url);
       else
-        return new QName("", name, "");
+        return new NameCfg("", name, "");
     }
     else
-      return new QName("", name, "");
+      return new NameCfg("", name, "");
   }
 
   /**
    * Parses the attributes of an element.
    */
-  private void parseAttributes(ArrayList<QName> names,
+  private void parseAttributes(ArrayList<NameCfg> names,
                                ArrayList<String> values,
                                ArrayList<String> prefixes,
                                ArrayList<String> uris)
@@ -1729,7 +1729,7 @@ public class JspParser {
     return read();
   }
 
-  private void processTaglibDirective(ArrayList<QName> keys,
+  private void processTaglibDirective(ArrayList<NameCfg> keys,
                                       ArrayList<String> values)
     throws IOException, JspParseException
   {

@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.WriteStream;
@@ -39,9 +39,9 @@ import java.io.IOException;
 public class JspDirectiveTaglib extends JspNode {
   final static L10N L = new L10N(JspDirectiveTaglib.class);
 
-  private static final QName PREFIX = new QName("prefix");
-  private static final QName URI = new QName("uri");
-  private static final QName TAGDIR = new QName("tagdir");
+  private static final NameCfg PREFIX = new NameCfg("prefix");
+  private static final NameCfg URI = new NameCfg("uri");
+  private static final NameCfg TAGDIR = new NameCfg("tagdir");
 
   private String _prefix;
   private String _uri;
@@ -53,7 +53,7 @@ public class JspDirectiveTaglib extends JspNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (PREFIX.equals(name))

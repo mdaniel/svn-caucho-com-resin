@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.cfg.TldAttribute;
 import com.caucho.v5.jsp.cfg.TldVariable;
@@ -41,14 +41,14 @@ import java.util.ArrayList;
 
 public class JspDirectiveVariable extends JspNode
 {
-  private static final QName NAME_GIVEN = new QName("name-given");
-  private static final QName NAME_FROM_ATTRIBUTE =
-    new QName("name-from-attribute");
-  private static final QName ALIAS = new QName("alias");
-  private static final QName VARIABLE_CLASS = new QName("variable-class");
-  private static final QName DECLARE = new QName("declare");
-  private static final QName SCOPE = new QName("scope");
-  private static final QName DESCRIPTION = new QName("description");
+  private static final NameCfg NAME_GIVEN = new NameCfg("name-given");
+  private static final NameCfg NAME_FROM_ATTRIBUTE =
+    new NameCfg("name-from-attribute");
+  private static final NameCfg ALIAS = new NameCfg("alias");
+  private static final NameCfg VARIABLE_CLASS = new NameCfg("variable-class");
+  private static final NameCfg DECLARE = new NameCfg("declare");
+  private static final NameCfg SCOPE = new NameCfg("scope");
+  private static final NameCfg DESCRIPTION = new NameCfg("description");
   
   static final L10N L = new L10N(JspDirectiveVariable.class);
 
@@ -66,7 +66,7 @@ public class JspDirectiveVariable extends JspNode
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (! _gen.getParseState().isTag())

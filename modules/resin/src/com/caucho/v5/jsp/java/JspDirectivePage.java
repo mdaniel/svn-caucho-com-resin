@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
@@ -46,23 +46,23 @@ public class JspDirectivePage extends JspNode {
     = Logger.getLogger(JspDirectivePage.class.getName());
   static L10N L = new L10N(JspDirectivePage.class);
   
-  private static final QName IS_EL_IGNORED = new QName("isELIgnored");
-  private static final QName IS_VELOCITY_ENABLED =
-    new QName("isVelocityEnabled");
-  private static final QName INFO = new QName("info");
-  private static final QName CONTENT_TYPE = new QName("contentType");
-  private static final QName PAGE_ENCODING = new QName("pageEncoding");
-  private static final QName LANGUAGE = new QName("language");
-  private static final QName IMPORT = new QName("import");
-  private static final QName SESSION = new QName("session");
-  private static final QName BUFFER = new QName("buffer");
-  private static final QName ERROR_PAGE = new QName("errorPage");
-  private static final QName IS_ERROR_PAGE = new QName("isErrorPage");
-  private static final QName AUTO_FLUSH = new QName("autoFlush");
-  private static final QName IS_THREAD_SAFE = new QName("isThreadSafe");
-  private static final QName EXTENDS = new QName("extends");
-  private static final QName TRIM_WS = new QName("trimDirectiveWhitespaces");
-  private static final QName DEFER = new QName("deferredSyntaxAllowedAsLiteral");
+  private static final NameCfg IS_EL_IGNORED = new NameCfg("isELIgnored");
+  private static final NameCfg IS_VELOCITY_ENABLED =
+    new NameCfg("isVelocityEnabled");
+  private static final NameCfg INFO = new NameCfg("info");
+  private static final NameCfg CONTENT_TYPE = new NameCfg("contentType");
+  private static final NameCfg PAGE_ENCODING = new NameCfg("pageEncoding");
+  private static final NameCfg LANGUAGE = new NameCfg("language");
+  private static final NameCfg IMPORT = new NameCfg("import");
+  private static final NameCfg SESSION = new NameCfg("session");
+  private static final NameCfg BUFFER = new NameCfg("buffer");
+  private static final NameCfg ERROR_PAGE = new NameCfg("errorPage");
+  private static final NameCfg IS_ERROR_PAGE = new NameCfg("isErrorPage");
+  private static final NameCfg AUTO_FLUSH = new NameCfg("autoFlush");
+  private static final NameCfg IS_THREAD_SAFE = new NameCfg("isThreadSafe");
+  private static final NameCfg EXTENDS = new NameCfg("extends");
+  private static final NameCfg TRIM_WS = new NameCfg("trimDirectiveWhitespaces");
+  private static final NameCfg DEFER = new NameCfg("deferredSyntaxAllowedAsLiteral");
 
   
   /**
@@ -71,7 +71,7 @@ public class JspDirectivePage extends JspNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (IS_EL_IGNORED.equals(name)) {

@@ -31,7 +31,7 @@ package com.caucho.v5.config.resin;
 
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.custom.ConfigCustomBean;
 
 /**
@@ -42,7 +42,7 @@ public class ConfigCustomBeanResin<T> extends ConfigCustomBean<T>
   private static final Logger log
     = Logger.getLogger(ConfigCustomBeanResin.class.getName());
   
-  public ConfigCustomBeanResin(QName name,
+  public ConfigCustomBeanResin(NameCfg name,
                                Class<T> cl,
                                Object parent)
   {

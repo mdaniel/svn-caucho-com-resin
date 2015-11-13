@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.TagInstance;
 import com.caucho.v5.vfs.WriteStream;
@@ -43,13 +43,13 @@ import java.util.ArrayList;
  * Special generator for a JSTL c:forEach tag.
  */
 public class JstlCoreForEach extends JstlNode {
-  private static final QName VAR = new QName("var");
-  private static final QName VAR_STATUS = new QName("varStatus");
+  private static final NameCfg VAR = new NameCfg("var");
+  private static final NameCfg VAR_STATUS = new NameCfg("varStatus");
   
-  private static final QName ITEMS = new QName("items");
-  private static final QName BEGIN = new QName("begin");
-  private static final QName END = new QName("end");
-  private static final QName STEP = new QName("step");
+  private static final NameCfg ITEMS = new NameCfg("items");
+  private static final NameCfg BEGIN = new NameCfg("begin");
+  private static final NameCfg END = new NameCfg("end");
+  private static final NameCfg STEP = new NameCfg("step");
   
   private String _var;
   private String _varStatus;
@@ -76,7 +76,7 @@ public class JstlCoreForEach extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VAR.equals(name))
@@ -102,7 +102,7 @@ public class JstlCoreForEach extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, JspAttribute value)
+  public void addAttribute(NameCfg name, JspAttribute value)
     throws JspParseException
   {
     if (ITEMS.equals(name))

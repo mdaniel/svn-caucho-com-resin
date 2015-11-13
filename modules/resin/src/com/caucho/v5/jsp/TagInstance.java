@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.java.JspTagFileSupport;
 import com.caucho.v5.util.L10N;
 
@@ -68,7 +68,7 @@ public class TagInstance {
 
   private JspGenerator _gen;
   private String _tagId = null;
-  private QName _qname;
+  private NameCfg _qname;
   private Class _cl;
   private VariableInfo []_varInfo;
   private boolean _needsAdapter;
@@ -76,7 +76,7 @@ public class TagInstance {
 
   private AnalyzedTag _analyzedTag;
 
-  private ArrayList<QName> _attributeNames = new ArrayList<QName>();
+  private ArrayList<NameCfg> _attributeNames = new ArrayList<NameCfg>();
   private ArrayList<Object> _attributeValues = new ArrayList<Object>();
 
   private boolean _hasBodyContent;
@@ -101,7 +101,7 @@ public class TagInstance {
   TagInstance(JspGenerator gen,
               TagInstance parent,
               TagInfo tagInfo,
-              QName qname,
+              NameCfg qname,
               Class cl)
   {
     _gen = gen;
@@ -129,7 +129,7 @@ public class TagInstance {
   /**
    * Returns the tag name
    */
-  public QName getQName()
+  public NameCfg getQName()
   {
     return _qname;
   }
@@ -272,7 +272,7 @@ public class TagInstance {
   /**
    * Returns the tag's attribute names.
    */
-  public ArrayList<QName> getAttributeNames()
+  public ArrayList<NameCfg> getAttributeNames()
   {
     return _attributeNames;
   }
@@ -303,10 +303,10 @@ public class TagInstance {
    * @param values the array of attribute values
    */
   public TagInstance addTag(JspGenerator gen,
-                            QName tagName,
+                            NameCfg tagName,
                             TagInfo tagInfo,
                             Class cl,
-                            ArrayList<QName> names,
+                            ArrayList<NameCfg> names,
                             ArrayList<Object> values,
                             boolean hasBodyContent)
   {
@@ -317,7 +317,7 @@ public class TagInstance {
     child.setBodyContent(hasBodyContent);
 
     for (int i = 0; i < names.size(); i++) {
-      QName name = names.get(i);
+      NameCfg name = names.get(i);
       Object value = values.get(i);
       
       if (value instanceof String) {
@@ -346,10 +346,10 @@ public class TagInstance {
    * Adds a new tag.  Always create a new tag.
    */
   public TagInstance addNewTag(JspGenerator gen,
-                               QName tagName,
+                               NameCfg tagName,
                                TagInfo tagInfo,
                                Class cl,
-                               ArrayList<QName> names,
+                               ArrayList<NameCfg> names,
                                ArrayList<String> values,
                                boolean hasBodyContent)
   {
@@ -360,7 +360,7 @@ public class TagInstance {
     child.setBodyContent(hasBodyContent);
 
     for (int i = 0; i < names.size(); i++) {
-      QName name = names.get(i);
+      NameCfg name = names.get(i);
       String value = values.get(i);
 
       if (value.startsWith("<%=") || value.startsWith("%="))
@@ -375,10 +375,10 @@ public class TagInstance {
   /**
    * Sets the attribute.  Null values can't be pre-cached.
    */
-  public void addAttribute(QName name, Object value)
+  public void addAttribute(NameCfg name, Object value)
   {
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName attrName = _attributeNames.get(i);
+      NameCfg attrName = _attributeNames.get(i);
       
       if (attrName.equals(name)) {
         Object oldValue = _attributeValues.get(i);
@@ -396,7 +396,7 @@ public class TagInstance {
     _attributeValues.add(value);
   }
 
-  public String getAttribute(QName name)
+  public String getAttribute(NameCfg name)
   {
     for (int i = 0; i < _attributeNames.size(); i++) {
       if (name.equals(_attributeNames.get(i)))
@@ -442,8 +442,8 @@ public class TagInstance {
   /**
    * Finds the matching tag.
    */
-  public TagInstance findTag(QName tagName,
-                             ArrayList<QName> names,
+  public TagInstance findTag(NameCfg tagName,
+                             ArrayList<NameCfg> names,
                              boolean hasBodyContent)
   {
     for (int i = 0; i < _children.size(); i++) {
@@ -459,7 +459,7 @@ public class TagInstance {
   /**
    * Returns true for matching instances.
    */
-  boolean match(QName tagName, ArrayList<QName> names, boolean hasBodyContent)
+  boolean match(NameCfg tagName, ArrayList<NameCfg> names, boolean hasBodyContent)
   {
     if (! _qname.equals(tagName))
       return false;
@@ -471,14 +471,14 @@ public class TagInstance {
       return false;
     
     for (int i = 0; i < _attributeNames.size(); i++) {
-      QName attrName = _attributeNames.get(i);
+      NameCfg attrName = _attributeNames.get(i);
 
       if (names.indexOf(attrName) < 0)
         return false;
     }
 
     for (int i = 0; i < names.size(); i++) {
-      QName name = names.get(i);
+      NameCfg name = names.get(i);
 
       if (_attributeNames.indexOf(name) < 0)
         return false;

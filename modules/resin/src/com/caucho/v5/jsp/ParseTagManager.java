@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;
 
@@ -51,7 +51,7 @@ public class ParseTagManager {
   private TaglibManager _taglibManager;
   private TagFileManager _tagFileManager;
 
-  private HashMap<QName,TagInfo> _tagMap = new HashMap<QName,TagInfo>();
+  private HashMap<NameCfg,TagInfo> _tagMap = new HashMap<NameCfg,TagInfo>();
   private HashMap<String,Taglib> _taglibMap = new HashMap<String,Taglib>();
 
   public ParseTagManager(JspResourceManager resourceManager,
@@ -76,7 +76,7 @@ public class ParseTagManager {
   /**
    * Returns the tag with the given qname.
    */
-  public synchronized TagInfo getTag(QName qname)
+  public synchronized TagInfo getTag(NameCfg qname)
     throws JspParseException
   {
     TagInfo tag = getTagImpl(qname);
@@ -90,7 +90,7 @@ public class ParseTagManager {
   /**
    * Temporary tag info for recursive tags
    */
-  TagInfo addTempTagInfo(QName qname, TagInfo info)
+  TagInfo addTempTagInfo(NameCfg qname, TagInfo info)
   {
     if (_tagMap.get(qname) == null)
       _tagMap.put(qname, info);
@@ -101,7 +101,7 @@ public class ParseTagManager {
   /**
    * Returns the tag with the given qname.
    */
-  private TagInfo getTagImpl(QName qname)
+  private TagInfo getTagImpl(NameCfg qname)
     throws JspParseException
   {
     TagInfo tag = _tagMap.get(qname);
@@ -171,7 +171,7 @@ public class ParseTagManager {
   /**
    * Returns the tag with the given qname.
    */
-  public synchronized Class getTagClass(QName qname)
+  public synchronized Class getTagClass(NameCfg qname)
     throws Exception
   {
     TagInfo tagInfo = getTag(qname);
@@ -187,7 +187,7 @@ public class ParseTagManager {
       return null;
   }
 
-  public synchronized Taglib addTaglib(QName qname)
+  public synchronized Taglib addTaglib(NameCfg qname)
     throws JspParseException
   {
     String prefix = qname.getPrefix();

@@ -38,7 +38,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.Config;
-import com.caucho.v5.config.inject.CandiManager;
+import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.jmx.JmxUtil;
 import com.caucho.v5.naming.JndiUtil;
 

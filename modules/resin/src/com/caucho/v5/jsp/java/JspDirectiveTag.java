@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.WriteStream;
@@ -38,25 +38,25 @@ import java.io.IOException;
 import java.util.Locale;
 
 public class JspDirectiveTag extends JspNode {
-  private static final QName IMPORT = new QName("import");
-  private static final QName DISPLAY_NAME = new QName("display-name");
-  private static final QName BODY_CONTENT = new QName("body-content");
-  private static final QName DYNAMIC_ATTRIBUTES
-    = new QName("dynamic-attributes");
-  private static final QName SMALL_ICON = new QName("small-icon");
-  private static final QName LARGE_ICON = new QName("large-icon");
-  private static final QName DESCRIPTION = new QName("description");
-  private static final QName EXAMPLE = new QName("example");
-  private static final QName LANGUAGE = new QName("language");
-  private static final QName PAGE_ENCODING = new QName("pageEncoding");
-  private static final QName IS_EL_IGNORED = new QName("isELIgnored");
-  private static final QName DEFERRED_AS_LITERAL
-    = new QName("deferredSyntaxAllowedAsLiteral");
-  private static final QName TRIM_WHITESPACES
-    = new QName("trimDirectiveWhitespaces");
+  private static final NameCfg IMPORT = new NameCfg("import");
+  private static final NameCfg DISPLAY_NAME = new NameCfg("display-name");
+  private static final NameCfg BODY_CONTENT = new NameCfg("body-content");
+  private static final NameCfg DYNAMIC_ATTRIBUTES
+    = new NameCfg("dynamic-attributes");
+  private static final NameCfg SMALL_ICON = new NameCfg("small-icon");
+  private static final NameCfg LARGE_ICON = new NameCfg("large-icon");
+  private static final NameCfg DESCRIPTION = new NameCfg("description");
+  private static final NameCfg EXAMPLE = new NameCfg("example");
+  private static final NameCfg LANGUAGE = new NameCfg("language");
+  private static final NameCfg PAGE_ENCODING = new NameCfg("pageEncoding");
+  private static final NameCfg IS_EL_IGNORED = new NameCfg("isELIgnored");
+  private static final NameCfg DEFERRED_AS_LITERAL
+    = new NameCfg("deferredSyntaxAllowedAsLiteral");
+  private static final NameCfg TRIM_WHITESPACES
+    = new NameCfg("trimDirectiveWhitespaces");
   
-  private static final QName IS_VELOCITY_ENABLED =
-    new QName("isVelocityEnabled");
+  private static final NameCfg IS_VELOCITY_ENABLED =
+    new NameCfg("isVelocityEnabled");
   
   static final L10N L = new L10N(JspDirectiveTag.class);
 
@@ -68,7 +68,7 @@ public class JspDirectiveTag extends JspNode {
    * @param name the attribute name
    * @param value the attribute value
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (! _gen.isTag())

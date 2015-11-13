@@ -33,13 +33,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
-import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.ObjectFactoryNaming;
-import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.candi.ObjectFactoryNaming;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.types.ResourceGroupConfig;
 import com.caucho.v5.util.L10N;
 
@@ -119,7 +118,7 @@ public class ResourceInjectionTargetProgram extends ConfigProgram
   }
   
   @Override
-  public <T> void inject(T bean, CreationalContext<T> env)
+  public <T> void inject(T bean, InjectContext env)
   {
     Object value = _resourceConfig.getValue();
     

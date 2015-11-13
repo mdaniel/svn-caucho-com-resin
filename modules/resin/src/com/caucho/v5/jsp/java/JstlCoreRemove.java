@@ -28,15 +28,15 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.cf.QName;
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
 
 public class JstlCoreRemove extends JstlNode {
-  private static final QName VAR = new QName("var"); 
-  private static final QName SCOPE = new QName("scope");
+  private static final NameCfg VAR = new NameCfg("var"); 
+  private static final NameCfg SCOPE = new NameCfg("scope");
   
   private String _var;
   private String _scope;
@@ -44,7 +44,7 @@ public class JstlCoreRemove extends JstlNode {
   /**
    * Adds an attribute.
    */
-  public void addAttribute(QName name, String value)
+  public void addAttribute(NameCfg name, String value)
     throws JspParseException
   {
     if (VAR.equals(name))
