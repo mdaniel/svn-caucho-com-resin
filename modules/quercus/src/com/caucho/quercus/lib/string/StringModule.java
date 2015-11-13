@@ -2556,7 +2556,8 @@ public class StringModule extends AbstractQuercusModule {
             }
 
             IntSet set = new IntSet();
-
+            char previousChar = 0;
+            boolean foundRangeChar = false;
             while (true) {
               if (fIndex == fmtLen) {
                 env.warning(L.l("expected ']', saw end of string"));
@@ -2568,9 +2569,31 @@ public class StringModule extends AbstractQuercusModule {
               if (ch2 == ']') {
                 break;
               }
+              else if (foundRangeChar) {
+                // we need to add range between current and previous character
+                if (ch2 > previousChar) {
+                  for (int i = ch2; i > previousChar; i--) {
+                    set.union(i);
+                  }
+                } else {
+                  for (int i = previousChar - 1; i >= ch2; i--) {
+                    set.union(i);
+                  }
+                }
+                foundRangeChar = false;
+                previousChar = 0;
+              }
+              else if (ch2 == '-' && previousChar > 0) {
+                foundRangeChar = true;
+              }
               else {
+                previousChar = ch2;
                 set.union(ch2);
               }
+            }
+            if (foundRangeChar) {
+              // '-' was the last character and needs to be added
+              set.union('-');
             }
 
             if (isNegated)
