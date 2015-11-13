@@ -29,14 +29,23 @@
 
 package com.caucho.v5.cli.resin;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.v5.cli.server.BootConfigParser;
+import com.caucho.v5.config.Config;
 import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.lib.ResinConfigLibrary;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
+import com.caucho.v5.server.config.RootConfigBoot;
+import com.caucho.v5.vfs.Path;
 
 public class BootConfigParserResin extends BootConfigParser
 {
+  private static final Logger log
+    = Logger.getLogger(BootConfigParserResin.class.getName());
+  
   @Override
   protected ConfigXml createConfig()
   {
@@ -48,5 +57,29 @@ public class BootConfigParserResin extends BootConfigParser
     ResinServerConfigLibrary.configure(cdiManager);
     
     return config;
+  }
+  
+  @Override
+  protected void configure(Config config, RootConfigBoot bean, Path path)
+  {
+    if (path == null) {
+      return;
+    }
+    
+    ConfigXml configXml = (ConfigXml) config;
+
+    if (log.isLoggable(Level.FINER)) {
+      log.fine("CLI parsing " + path.getNativePath());
+    }
+    
+    if (path.getTail().endsWith(".cf")) {
+      config.configure2(bean, path);
+    }
+    else {
+      bean.setConfigTemplate(null);
+      
+      configXml.configure(bean, path, 
+                       "com/caucho/v5/server/resin/resin.rnc");
+    }
   }
 }

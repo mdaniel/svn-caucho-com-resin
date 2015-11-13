@@ -27,11 +27,14 @@
 
 package com.caucho.v5.config.candi;
 
+import java.util.function.Function;
+
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.caucho.v5.config.Config;
 import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.inject.Module;
 
@@ -87,6 +90,12 @@ public class CreationalContextImpl<T>
   
   public void setInjectionPoint(InjectionPoint ip)
   {
+  }
+  
+  @Override
+  public Function<String,Object> getVarMap()
+  {
+    return x->Config.getProperty(x);
   }
   
   public T getValue()

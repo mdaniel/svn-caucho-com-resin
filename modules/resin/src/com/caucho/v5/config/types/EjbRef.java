@@ -52,7 +52,8 @@ import com.caucho.v5.vfs.Path;
  * An ejb-ref is used to make an ejb available within the environment
  * in which the ejb-ref is declared.
  */
-public class EjbRef extends BaseRef {
+public class EjbRef extends BaseRef
+{
   private static final L10N L = new L10N(EjbRef.class);
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());

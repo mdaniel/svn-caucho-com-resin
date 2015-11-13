@@ -33,15 +33,15 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.cf.ProgramCommand;
 import com.caucho.v5.config.cf.ProgramCommandClassName;
 import com.caucho.v5.config.cf.ProgramPropertyExpr;
 import com.caucho.v5.config.cf.ProgramPropertyString;
-import com.caucho.v5.config.cf.NameCfg;
+import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.el.ELParser;
-import com.caucho.v5.el.Expr;
 import com.caucho.v5.xml.QAbstractNode;
 import com.caucho.v5.xml.QAttr;
 import com.caucho.v5.xml.QElement;
@@ -189,7 +189,7 @@ public class ConfigProgramBuilderXml
     else if (value.indexOf("${") >= 0) {
       ProgramPropertyExpr program;
       
-      Expr expr = new ELParser(_config.getELEnvironment(), value).parse();
+      ExprCfg expr = ExprCfg.newParser(value).parse();
       
       program = new ProgramPropertyExpr(_config, qName, expr, value);
       

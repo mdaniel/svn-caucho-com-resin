@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import com.caucho.v5.bartender.ServerBartender;
+import com.caucho.v5.cli.resin.BootConfigParserResin;
+import com.caucho.v5.cli.server.BootConfigParser;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.candi.CandiManager;
@@ -48,8 +50,6 @@ import com.caucho.v5.server.cdi.CdiProducerResin;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
-import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.server.container.ServerBuilder;
 import com.caucho.v5.server.resin.Resin;
 import com.caucho.v5.server.resin.ServerBaseConfigResin;
 
@@ -91,7 +91,13 @@ public class ServerBuilderResin extends ServerBuilder
   {
     return new ServerBuilderResin(args, serverConfig);
   }
-
+  
+  @Override
+  protected BootConfigParser createConfigParser()
+  {
+    return new BootConfigParserResin();
+  }
+ 
   /**
    * Configures the selected server from the boot config.
    */

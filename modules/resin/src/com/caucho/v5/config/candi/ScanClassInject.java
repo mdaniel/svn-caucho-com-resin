@@ -52,8 +52,8 @@ import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 
+import com.caucho.v5.bytecode.scan.ScanClassBase;
 import com.caucho.v5.config.candi.ScanListenerInject.AnnType;
-import com.caucho.v5.loader.enhancer.ScanClassBase;
 
 /**
  * The web beans container for a given environment.

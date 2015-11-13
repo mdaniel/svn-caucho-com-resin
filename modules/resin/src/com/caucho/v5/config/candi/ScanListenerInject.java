@@ -44,13 +44,13 @@ import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.v5.bytecode.scan.ScanClass;
+import com.caucho.v5.bytecode.scan.ScanListener;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.loader.enhancer.ScanClass;
-import com.caucho.v5.loader.enhancer.ScanListener;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Jar;

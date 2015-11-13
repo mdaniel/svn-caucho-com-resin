@@ -43,6 +43,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
+import com.caucho.v5.bytecode.scan.ScanClass;
+import com.caucho.v5.bytecode.scan.ScanListener;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
 import com.caucho.v5.config.Names;
@@ -57,8 +59,6 @@ import com.caucho.v5.loader.Environment;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentEnhancerListener;
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.loader.enhancer.ScanClass;
-import com.caucho.v5.loader.enhancer.ScanListener;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
