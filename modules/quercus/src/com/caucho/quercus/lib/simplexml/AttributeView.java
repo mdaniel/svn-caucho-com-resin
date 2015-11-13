@@ -59,7 +59,13 @@ public class AttributeView extends SimpleView
   @Override
   public String getNodeName()
   {
-    return _attr.getNodeName();
+    String name = _attr.getLocalName() != null ? _attr.getLocalName() : _attr.getNodeName();
+    int colon = name.indexOf(':');
+    if (colon != -1) {
+      return name.substring(colon + 1);
+    } else {
+      return name;
+    }
   }
 
   @Override

@@ -2436,7 +2436,7 @@ abstract public class Value implements java.io.Serializable
    */
   public boolean issetField(Env env, StringValue name)
   {
-    return false;
+    return getThisField(env, name).isset();
   }
 
   /**

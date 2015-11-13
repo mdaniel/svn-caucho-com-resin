@@ -452,7 +452,7 @@ public class ElementView extends SimpleView
 
     while (child != null) {
       if (child.getNodeType() == Node.ELEMENT_NODE) {
-        String childName = child.getNodeName();
+        String childName = child.getLocalName();
 
         if (nodeName.equals(childName)) {
           ElementView view = new ElementView(child);
@@ -464,6 +464,9 @@ public class ElementView extends SimpleView
       child = child.getNextSibling();
     }
 
+    if (childList.isEmpty()) {
+      return null;
+    }
     ArrayList<AttributeView> attrList = new ArrayList<AttributeView>();
 
     SelectedView view

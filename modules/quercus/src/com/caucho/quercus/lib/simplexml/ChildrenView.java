@@ -158,22 +158,15 @@ public class ChildrenView extends SimpleView
   {
     String nodeName = indexV.toStringValue(env).toString();
 
-    ArrayList<SimpleView> childList = new ArrayList<SimpleView>();
-
     for (SimpleView view : _childList) {
       String childName = view.getNodeName();
 
       if (nodeName.equals(childName)) {
-        childList.add(view);
+        return view;
       }
     }
 
-    ArrayList<AttributeView> attrList = new ArrayList<AttributeView>();
-
-    SelectedView view
-      = new SelectedView(this, nodeName, childList, attrList);
-
-    return view;
+    return null;
   }
 
   @Override
