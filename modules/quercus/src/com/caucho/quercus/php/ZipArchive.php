@@ -716,7 +716,7 @@ class ZipArchive  {
 	 * @return int the index of the entry on success or <b>FALSE</b> on failure.
 	 */
 	public function locateName ($name, $flags = null) {
-		throw new ErrorException("Not implemented");
+		return $this->zipDirectory->locateName($name, $flags);
 	}
 
 	/**

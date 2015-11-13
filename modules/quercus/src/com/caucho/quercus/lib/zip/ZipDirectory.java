@@ -39,6 +39,7 @@ import java.util.zip.ZipFile;
 
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 /**
@@ -96,7 +97,21 @@ public class ZipDirectory
     if (entry == null) {
       return BooleanValue.FALSE;
     }
-    return entry.zip_entry_read(env, length == 0 ? Integer.MAX_VALUE : length);
+    entry.zip_entry_open(env);
+    Value result = entry.zip_entry_read(env, length == 0 ? Integer.MAX_VALUE : length);
+    try {
+      entry.zip_entry_close();
+    } catch (IOException e) {
+    }
+    return result;
+  }
+  
+  public Value locateName (Env env, String name, Integer flags) {
+    QuercusZipEntry entry = _nameToEntry.get(name);
+    if (entry == null) {
+      return BooleanValue.FALSE;
+    }
+    return LongValue.create(_entries.indexOf(entry));
   }
   
   public String toString()
