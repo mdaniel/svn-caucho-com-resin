@@ -139,7 +139,7 @@ public class ResponseWriter extends AbstractPrintWriter {
       while (off < end) {
         int sublen = end - off;
 
-        if (size - writeLength < sublen) {          
+        if (size - writeLength < sublen) {
           if (size == writeLength) {
             writeBuffer = _out.nextCharBuffer(writeLength);
             writeLength = _out.getCharOffset();

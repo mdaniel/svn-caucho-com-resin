@@ -408,7 +408,13 @@ public class ESIntrospector {
 
     int modifiers = cl.getModifiers();
     if (Modifier.isPublic(modifiers)) {
-      Method []methods = cl.getDeclaredMethods();
+      Method []methods = null;
+      
+      try {
+        methods = cl.getDeclaredMethods();
+      } catch (Throwable e) {
+      }
+      
       int len = methods == null ? 0 : methods.length;
       for (int i = 0; i < len; i++) {
         ESMethodDescriptor md = info.createMethodDescriptor(methods[i], false);

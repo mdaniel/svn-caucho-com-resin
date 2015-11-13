@@ -100,7 +100,7 @@
           </jsse-ssl>
         </http>
       </resin:when>
-      <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
+      <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen') || class_exists('sun.security.tools.keytool.CertAndKeyGen')}">
         <http address="${http_address?:'*'}" port="${https}">
           <jsse-ssl self-signed-certificate-name="resin@localhost"/>
         </http>
@@ -136,8 +136,6 @@
 
         <session-config>
           <use-persistent-store>${session_store}</use-persistent-store>
-          <session-max>1024</session-max>
-          <session-timeout>10</session-timeout>
           
           <enable-url-rewriting>false</enable-url-rewriting>
         </session-config>

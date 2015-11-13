@@ -73,6 +73,8 @@ public class CauchoSystem {
   static boolean _hasJni;
   static boolean _isResin;
   
+  private static boolean _isJdk7;
+  
   static String _resinVersion;
   static String _resinFullVersion;
   
@@ -487,5 +489,23 @@ public class CauchoSystem {
     }
     
     return false;
+  }
+  
+  public static boolean isJdk7()
+  {
+    return _isJdk7;
+  }
+  
+  static {
+    boolean isJdk7 = false;
+    
+    try {
+      Class<?> pathClass = Class.forName("java.nio.file");
+      
+      isJdk7 = true;
+    } catch (Throwable e) {
+    }
+    
+    _isJdk7 = isJdk7;
   }
 }

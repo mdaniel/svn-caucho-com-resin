@@ -779,14 +779,17 @@ public class BlockStore {
       if (_freeAllocIndex < _blockCount)
         return;
 
-      if (_blockCount < 256)
+      if (_blockCount < 256) {
         newBlockCount = _blockCount + 1;
-      else
+      }
+      else {
         newBlockCount = _blockCount + 256;
+      }
 
-      if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize())
+      if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize()) {
         newBlockCount = _readWrite.getFileSize() / BLOCK_SIZE;
-
+      }
+      
       while (_allocationTable.length / ALLOC_BYTES_PER_BLOCK
              < newBlockCount) {
         // expand the allocation table

@@ -29,6 +29,7 @@
 
 package com.caucho.db.io;
 
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 
 /**
@@ -109,7 +110,7 @@ public class StoreBuilder
     
     StoreReadWrite store;
     
-    if (isMmap()) {
+    if (isMmap() && CauchoSystem.isJdk7()) {
       store = new StoreReadWriteMmapNio(this);
     }
     else {

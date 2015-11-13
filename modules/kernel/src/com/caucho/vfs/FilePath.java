@@ -45,6 +45,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.db.io.RandomAccessStreamNio;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -659,7 +660,12 @@ public class FilePath extends FilesystemPath {
   public RandomAccessStream openMemoryMappedFile(long fileSize)
     throws IOException
   {
-    return RandomAccessStreamNio.open(this, fileSize);
+    if (CauchoSystem.isJdk7()) {
+      return RandomAccessStreamNio.open(this, fileSize);
+    }
+    else {
+      return null;
+    }
   }
 
   @Override
