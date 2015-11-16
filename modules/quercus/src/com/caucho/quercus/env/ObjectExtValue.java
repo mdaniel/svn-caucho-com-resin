@@ -413,7 +413,12 @@ public class ObjectExtValue extends ObjectValue
         }
       }
 
-      entry = createEntry(name);
+      ClassField classField = _quercusClass.getClassDef().getField(name);
+      if (classField != null) {
+        entry = createEntry(classField.getCanonicalName());
+      } else {
+        entry = createEntry(name);
+      }
     }
 
     Value oldValue = entry._value;
