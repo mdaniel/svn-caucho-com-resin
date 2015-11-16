@@ -8,10 +8,16 @@
 
 <s2 title="4.0.47 - in progress">
 <ul>
+<li>session: fixes related to Java deserialization (#5947, rep by Shinomiya Nobuaki)</li>
+<li>distcache: locking overhead reduced (#5962, rep by snicolai)</li>
+<li>distcache: update remove query and locking (#5952)</li>
+<li>session: fixes related to session removal/timeout (#5952, rep by S. Catna)</li>
+<li>compile: jdk5 compile issues (#6940, rep by anton_kg)</li>
+<li>cache/mmap: jdk6 compatibility issues (#5959, #5960, rep by S. Gavandi)</li>
 </ul>
 </s2>
 
-<s2 title="4.0.46 - Oct 4, 2015-progress">
+<s2 title="4.0.46 - Oct 4, 2015">
 <ul>
 <li>jsp: tag loading issue due to WEB-INF case (#5936, rep by libor)</li>
 <li>table: improper early closing of file on shutdown (#5946)</li>

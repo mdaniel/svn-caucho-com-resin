@@ -49,21 +49,26 @@ public class JavaSessionDeserializer extends SessionDeserializer {
                                  ClassLoader loader)
     throws IOException
   {
+    // is = new DebugInputStream(is);
+    
     _in = new ContextObjectInputStream(is, loader);
   }
   
+  @Override
   public int readInt()
     throws IOException
   {
     return _in.readInt();
   }
 
+  @Override
   public Object readObject()
     throws IOException, ClassNotFoundException
   {
     return _in.readObject();
   }
 
+  @Override
   public void close()
   {
     ObjectInputStream in = _in;
@@ -90,7 +95,7 @@ public class JavaSessionDeserializer extends SessionDeserializer {
     }
 
     @Override
-    protected Class resolveClass(ObjectStreamClass v)
+    protected Class<?> resolveClass(ObjectStreamClass v)
       throws IOException, ClassNotFoundException
     {
       String name = v.getName();

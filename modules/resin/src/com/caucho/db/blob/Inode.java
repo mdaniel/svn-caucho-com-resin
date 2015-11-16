@@ -29,15 +29,6 @@
 
 package com.caucho.db.blob;
 
-import com.caucho.db.block.Block;
-import com.caucho.db.block.BlockStore;
-import com.caucho.db.xa.RawTransaction;
-import com.caucho.db.xa.StoreTransaction;
-import com.caucho.util.L10N;
-import com.caucho.util.FreeList;
-import com.caucho.vfs.OutputStreamWithBuffer;
-import com.caucho.vfs.TempCharBuffer;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,6 +36,15 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
+import com.caucho.db.xa.RawTransaction;
+import com.caucho.db.xa.StoreTransaction;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
+import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.vfs.TempCharBuffer;
 
 /**
  * Represents the indexes for a BLOB or CLOB.
@@ -387,11 +387,11 @@ public class Inode {
   {
     long fileLength = readLong(inode, inodeOffset);
 
-    if (fileLength - fileOffset < sublen)
-      sublen = (int) (fileLength - fileOffset);
+    sublen = Math.min(sublen, (int) (fileLength - fileOffset));
     
-    if (sublen <= 0)
+    if (sublen <= 0) {
       return -1;
+    }
 
     if (fileLength <= INLINE_MAX) {
       os.write(inode, inodeOffset + 8 + (int) fileOffset, sublen);
@@ -402,8 +402,7 @@ public class Inode {
       long fragAddr = readMiniFragAddr(inode, inodeOffset, store, fileOffset);
       int fragOffset = (int) (fileOffset % MINI_FRAG_SIZE);
 
-      if (MINI_FRAG_SIZE - fragOffset < sublen)
-        sublen = MINI_FRAG_SIZE - fragOffset;
+      sublen = Math.min(sublen, MINI_FRAG_SIZE - fragOffset);
 
       store.readMiniFragmentNoLock(fragAddr, fragOffset, sublen, os);
 
@@ -413,8 +412,7 @@ public class Inode {
       long addr = readBlockAddr(inode, inodeOffset, store, fileOffset);
       int offset = (int) (fileOffset % BLOCK_SIZE);
 
-      if (BLOCK_SIZE - offset < sublen)
-        sublen = BLOCK_SIZE - offset;
+      sublen = Math.min(sublen, BLOCK_SIZE - offset);
 
       store.readBlockNoLock(addr, offset, os, sublen);
 

@@ -29,75 +29,56 @@
 
 package com.caucho.server.session;
 
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.OutputStream;
 
 /**
  * Serializer for session data
  */
-public class JavaSessionSerializer extends SessionSerializer {
-  private static final Logger log
-    = Logger.getLogger(JavaSessionSerializer.class.getName());
-  
-  private ObjectOutputStream _out;
+public class DebugOutputStream extends OutputStream
+{
+  private OutputStream _os;
+  private int _offset;
 
-  public JavaSessionSerializer(OutputStream os)
-    throws IOException
+  public DebugOutputStream(OutputStream os)
   {
-    this(os, Thread.currentThread().getContextClassLoader());
-  }
-
-  public JavaSessionSerializer(OutputStream os,
-                               ClassLoader loader)
-    throws IOException
-  {
-    // os = new DebugOutputStream(os);
+    _os = os;
     
-    _out = new ObjectOutputStream(os);
+    System.out.print("{{{");
   }
   
   @Override
-  public void writeInt(int v)
+  public void write(int ch)
     throws IOException
   {
-    _out.writeInt(v);
+    _os.write(ch);
+    
+    System.out.print(Integer.toHexString((ch >> 4) & 0xf)); 
+    System.out.print(Integer.toHexString((ch) & 0xf));
+    
+    _offset++;
+      
+    if (_offset % 32 == 0) {
+      System.out.println();
+    }
+    else if (_offset % 8 == 0) {
+      System.out.print(" ");
+    }
   }
-
-  public void writeObject(Object v)
-    throws IOException
-  {
-    _out.writeObject(v);
-  }
-
+  
   @Override
   public void flush()
+    throws IOException
   {
-    ObjectOutputStream out = _out;
-
-    if (out != null) {
-      try {
-        out.flush();
-      } catch (IOException e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
-    }
+    _os.flush();
   }
-
+  
   @Override
   public void close()
+    throws IOException
   {
-    ObjectOutputStream out = _out;
-    _out = null;
-
-    if (out != null) {
-      try {
-        out.close();
-      } catch (IOException e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
-    }
+    _os.close();
+    
+    System.out.println("}}}");
   }
 }

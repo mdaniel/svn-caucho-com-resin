@@ -79,7 +79,7 @@ public class DataStore {
   //private long _expireOrphanTimeout = 24 * 60L * 60L * 1000L;
   
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
-  private long _expireOrphanTimeout = 3 * 60L * 1000L;
+  private long _expireOrphanTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -455,6 +455,7 @@ public class DataStore {
 
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBinaryStream(1, is, length);
+
       stmt.setLong(2, CurrentTime.getCurrentTime());
 
       int count = stmt.executeUpdate();
@@ -804,6 +805,12 @@ public class DataStore {
 
       if (conn != null)
         conn.close();
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _is + "]";
     }
   }
 

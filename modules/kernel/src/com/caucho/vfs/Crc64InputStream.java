@@ -107,4 +107,10 @@ public class Crc64InputStream extends InputStream {
   {
     _next.close();
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
+  }
 }

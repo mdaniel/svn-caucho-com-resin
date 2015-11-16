@@ -44,10 +44,12 @@ public class TempOutputStream extends OutputStream
   @Override
   public void write(int ch)
   {
-    if (_tail == null)
+    if (_tail == null) {
       addBuffer(TempBuffer.allocate());
-    else if (_tail._buf.length <= _tail._length)
+    }
+    else if (_tail._buf.length <= _tail._length) {
       addBuffer(TempBuffer.allocate());
+    }
 
     _tail.getBuffer()[_tail._length++] = (byte) ch;
   }
@@ -61,10 +63,12 @@ public class TempOutputStream extends OutputStream
     int bufferSize = TempBuffer.SIZE;
     int tailLength;
 
-    if (tail != null)
+    if (tail != null) {
       tailLength = tail._length;
-    else
+    }
+    else {
       tailLength = 0;
+    }
 
     while (index < length) {
       if (tail == null) {

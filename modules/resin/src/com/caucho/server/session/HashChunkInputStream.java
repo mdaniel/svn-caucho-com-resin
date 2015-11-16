@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.CRC32;
 
+import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
@@ -62,7 +63,7 @@ public class HashChunkInputStream extends InputStream
   public int read()
     throws IOException
   {
-    if (_length < _offset && ! fillBuffer()) {
+    if (_length <= _offset && ! fillBuffer()) {
       return -1;
     }
 
@@ -173,5 +174,11 @@ public class HashChunkInputStream extends InputStream
     }
     
     return true;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
   }
 }

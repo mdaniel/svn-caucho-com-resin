@@ -400,7 +400,7 @@ public final class LocalDataManager
 
     try {
       Crc64InputStream mIn = new Crc64InputStream(is);
-      
+
       long valueDataId = getDataBacking().saveData(mIn, -1);
 
       long valueHash = mIn.getDigest();

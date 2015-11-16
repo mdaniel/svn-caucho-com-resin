@@ -1238,10 +1238,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public SessionDeserializer createSessionDeserializer(InputStream is)
     throws IOException
   {
-    if (_isHessianSerialization)
+    if (_isHessianSerialization) {
       return new HessianSessionDeserializer(is, getClassLoader());
-    else
+    }
+    else {
       return new JavaSessionDeserializer(is, getClassLoader());
+    }
   }
 
   /**

@@ -38,9 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 import com.caucho.cloud.topology.TriadOwner;
-import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.LocalDataManager.DataItem;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
@@ -1214,8 +1212,9 @@ public class DistCacheEntry {
     
     MnodeEntry mnodeValue = loadMnodeValue(); // , false);
 
-    if (mnodeValue == null)
+    if (mnodeValue == null) {
       return false;
+    }
 
     updateAccessTime(mnodeValue, now);
 
