@@ -552,7 +552,7 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Find out the number of colors in an image's palette
    */
-  public static Value imagecolorstotal()
+  public static Value imagecolorstotal(QuercusImage image)
   {
     return LongValue.create(0);
   }
