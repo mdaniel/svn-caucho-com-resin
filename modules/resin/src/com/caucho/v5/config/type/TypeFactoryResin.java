@@ -92,7 +92,8 @@ public class TypeFactoryResin extends TypeFactoryConfig
   {
     return new InlineBeanTypeResin(this, type);
   }
-  
+
+  /*
   @Override
   protected CustomBean<?> createCustomBeanImpl(NameCfg qName,
                                                   Class<?> cl,
@@ -101,4 +102,5 @@ public class TypeFactoryResin extends TypeFactoryConfig
     throw new UnsupportedOperationException(getClass().getName());
     // return new ConfigCustomBeanResin(qName, cl, parent);
   }
+  */
 }

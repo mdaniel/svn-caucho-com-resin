@@ -89,7 +89,10 @@ abstract public class QServlet implements Servlet {
   public void init(ServletConfig config) throws ServletException
   {
     ServletContext cxt = config.getServletContext();
-    _webApp = (WebAppResin) cxt;
+    
+    if (cxt instanceof WebAppResin) {
+      _webApp = (WebAppResin) cxt;
+    }
 
     _config = config;
 

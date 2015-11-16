@@ -51,10 +51,10 @@ public class BootConfigParserResin extends BootConfigParser
   {
     ConfigXml config = new ConfigXml();
 
-    CandiManager cdiManager = CandiManager.create();
+    //CandiManager cdiManager = CandiManager.create();
 
-    ResinConfigLibrary.configure(cdiManager);
-    ResinServerConfigLibrary.configure(cdiManager);
+    ResinConfigLibrary.configure();
+    ResinServerConfigLibrary.configure();
     
     return config;
   }

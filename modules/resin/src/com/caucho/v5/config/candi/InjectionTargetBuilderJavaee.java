@@ -45,22 +45,22 @@ import com.caucho.v5.inject.Module;
 @Module
 public class InjectionTargetBuilderJavaee<X> extends InjectionTargetBuilder<X>
 {
-  public InjectionTargetBuilderJavaee(InjectManagerResin cdiManager,
+  public InjectionTargetBuilderJavaee(CandiManagerResin cdiManager,
                                       AnnotatedType<X> beanType,
                                       Bean<X> bean)
   {
     super(cdiManager, beanType, bean);
   }
   
-  public InjectionTargetBuilderJavaee(InjectManagerResin cdiManager,
+  public InjectionTargetBuilderJavaee(CandiManagerResin cdiManager,
                                       AnnotatedType<X> beanType)
   {
     super(cdiManager, beanType);
   }
   
-  protected InjectManagerResin getInjectManager()
+  protected CandiManagerResin getInjectManager()
   {
-    return (InjectManagerResin) super.getInjectManager();
+    return (CandiManagerResin) super.getInjectManager();
   }
   
   protected void introspectInject(ArrayList<ConfigProgram> injectProgramList)

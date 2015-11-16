@@ -43,6 +43,7 @@ import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnit;
 import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnitDefault;
 import com.caucho.v5.java.JavacConfig;
 import com.caucho.v5.loader.ClassLoaderConfig;
+import com.caucho.v5.loader.ClasspathConfig;
 import com.caucho.v5.loader.DependencyCheckInterval;
 import com.caucho.v5.loader.SystemProperty;
 import com.caucho.v5.log.impl.LogConfig;
@@ -100,7 +101,7 @@ class NamespaceConfigResin extends NamespaceConfig
     addBean("character-encoding", "com.caucho.v5.i18n.CharacterEncoding");
     addBean("choose", ResinChoose.class);
     addBean("class-loader", ClassLoaderConfig.class);
-    addBean("classpath", "com.caucho.v5.loader.ClasspathConfig");
+    addBean("classpath", ClasspathConfig.class);
     addBean("class-update-interval", "com.caucho.v5.loader.DependencyCheckInterval");
     addBean("component", "com.caucho.v5.config.cfg.WbComponentConfig");
     addBean("connection-factory", "com.caucho.v5.jca.cfg.ConnectionFactoryConfig");

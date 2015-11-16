@@ -85,7 +85,7 @@ public class ResinConfigLibrary {
     }
   }
   
-  public static void configure(CandiManager webBeans)
+  public static void configure()
   {
     try {
       for (Method m : ResinConfigLibrary.class.getMethods()) {

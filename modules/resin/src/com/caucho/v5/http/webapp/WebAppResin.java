@@ -58,6 +58,8 @@ public class WebAppResin extends WebApp
   // private RestContainer _restContainer;
   private WebAppBuilderResin _builder;
 
+  private CandiManager _cdiManager;
+
   /**
    * Creates the webApp with its environment loader.
    */
@@ -142,6 +144,8 @@ public class WebAppResin extends WebApp
     
     _jspApplicationContext = new JspApplicationContextImpl(this);
     _jspApplicationContext.addELResolver(getBeanManager().getELResolver());
+
+    _cdiManager = CandiManager.create(getClassLoader());
   }
   
   @Override

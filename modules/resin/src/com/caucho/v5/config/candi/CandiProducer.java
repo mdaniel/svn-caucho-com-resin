@@ -233,34 +233,37 @@ public class CandiProducer<X> implements InjectionTarget<X>
       _staticInterceptorIndex[i] = i;
     }
 
-    Annotation []annotations = _beanCtor.getJavaMember().getAnnotations();
     List<Annotation> annotationList = new ArrayList<>();
-    for (Annotation annotation : annotations) {
-      if (_injectManager.isInterceptorBinding(annotation.annotationType()))
-        annotationList.add(annotation);
-    }
-
-    Set<Annotation> classAnnotations
-      = _beanCtor.getDeclaringType().getAnnotations();
-
-    for (Annotation annotation : classAnnotations) {
-      Class<? extends Annotation> annotationType = annotation.annotationType();
-
-      if (! _injectManager.isInterceptorBinding(annotationType))
-        continue;
-
-      boolean isAdd = true;
-      for (Annotation ann : annotationList) {
-        Class<? extends Annotation> annType = ann.annotationType();
-        if (annType.equals(annotationType))
-          isAdd = false;
-
-        if (isAdd)
-          break;
+    
+    if (_beanCtor != null) {
+      Annotation []annotations = _beanCtor.getJavaMember().getAnnotations();
+      for (Annotation annotation : annotations) {
+        if (_injectManager.isInterceptorBinding(annotation.annotationType()))
+          annotationList.add(annotation);
       }
 
-      if (isAdd)
-        annotationList.add(annotation);
+      Set<Annotation> classAnnotations
+      = _beanCtor.getDeclaringType().getAnnotations();
+
+      for (Annotation annotation : classAnnotations) {
+        Class<? extends Annotation> annotationType = annotation.annotationType();
+
+        if (! _injectManager.isInterceptorBinding(annotationType))
+          continue;
+
+        boolean isAdd = true;
+        for (Annotation ann : annotationList) {
+          Class<? extends Annotation> annType = ann.annotationType();
+          if (annType.equals(annotationType))
+            isAdd = false;
+
+          if (isAdd)
+            break;
+        }
+
+        if (isAdd)
+          annotationList.add(annotation);
+      }
     }
 
     _cntrInterceptorBindings = new Annotation[annotationList.size()];

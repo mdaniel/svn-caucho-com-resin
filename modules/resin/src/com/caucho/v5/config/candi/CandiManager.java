@@ -133,6 +133,7 @@ import com.caucho.v5.config.el.CandiElResolver;
 import com.caucho.v5.config.el.CandiExpressionFactory;
 import com.caucho.v5.config.event.EventManager;
 import com.caucho.v5.config.extension.ExtensionManager;
+import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.reflect.AnnotatedTypeImpl;
@@ -166,7 +167,7 @@ import com.caucho.v5.vfs.Vfs;
 @CauchoBean
 @SuppressWarnings("serial")
 public class CandiManager
-  implements InjectManager, BeanManager, EnvironmentListener,
+  implements BeanManager, EnvironmentListener,
              Serializable, HandleAware
 {
   private static final L10N L = new L10N(CandiManager.class);
@@ -478,7 +479,7 @@ public class CandiManager
   {
     addExtension(_extCustomBean);
     
-    // getExtensionManager().addExtension(new CdiExtensionBaratine(this));
+    // getExtensionManager().addExtension(new CdiExtensionBaratine());
     addManagedBeanDiscover(createManagedBean(CdiProducerBaratine.class));
   }
 
@@ -639,7 +640,7 @@ public class CandiManager
                                                 boolean isSetLocal)
   {
     try {
-      Class<?> cl = Class.forName("com.caucho.v5.config.inject.InjectManagerResin");
+      Class<?> cl = Class.forName("com.caucho.v5.config.candi.CandiManagerResin");
       
       Constructor<?> ctor = cl.getConstructor(String.class,
                                               CandiManager.class,
@@ -2557,24 +2558,6 @@ public class CandiManager
     }
 
     return getReference(bean);
-  }
-  
-  @Override
-  public <T> T lookup(Class<T> type, Annotation... qualifiers)
-  {
-    return getReference(type, qualifiers);
-  }
-  
-  @Override
-  public <T> Supplier<T> createSupplier(Class<T> type, Annotation... qualifiers)
-  {
-    return createBeanSupplier(type); // , qualifiers);
-  }
-
-  @Override
-  public void introspectInject(List<ConfigProgram> program, Class<?> type)
-  {
-    // XXX:
   }
 
   /**

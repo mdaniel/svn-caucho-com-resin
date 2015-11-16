@@ -147,7 +147,7 @@ public class ServerBuilderResin extends ServerBuilder
     if (cdiManager.getBeans(CdiProducerResin.class).size() == 0) {
       Config.setProperty("fmt", new FmtFunctions());
 
-      ResinConfigLibrary.configure(cdiManager);
+      ResinConfigLibrary.configure();
       //ResinServerConfigLibrary.configure(cdiManager);
 
       try {
@@ -167,7 +167,7 @@ public class ServerBuilderResin extends ServerBuilder
       cdiManager.update();
     }
 
-    ResinServerConfigLibrary.configure(null);
+    ResinServerConfigLibrary.configure();
   }
 
   @Override

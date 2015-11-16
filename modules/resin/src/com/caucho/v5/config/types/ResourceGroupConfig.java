@@ -41,7 +41,7 @@ import javax.naming.NamingException;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
-import com.caucho.v5.config.candi.InjectManagerResin;
+import com.caucho.v5.config.candi.CandiManagerResin;
 import com.caucho.v5.config.candi.ObjectFactoryNaming;
 import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.program.ConfigProgram;
@@ -159,7 +159,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    InjectManagerResin cdiManager = InjectManagerResin.getCurrent();
+    CandiManagerResin cdiManager = CandiManagerResin.getCurrent();
     
     for (InjectionTarget target : _injectionTargets) {
       String targetClassName = target.getInjectionTargetClass();

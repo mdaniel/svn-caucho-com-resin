@@ -85,6 +85,10 @@ public class JspServlet extends QServlet {
     JspManager manager = new JspManager();
 
     WebAppResin webApp = (WebAppResin) getServletContext();
+    
+    if (webApp == null) {
+      return;
+    }
 
     manager.setXml(_isXml);
     manager.setLoadTldOnInit(_loadTldOnInit

@@ -94,7 +94,7 @@ public class ResinServerConfigLibrary {
     return ConfigXml.getElVar(name);
   }
   
-  public static void configure(CandiManager webBeans)
+  public static void configure()
   {
     try {
       ClassLoader loader = ClassLoader.getSystemClassLoader();
