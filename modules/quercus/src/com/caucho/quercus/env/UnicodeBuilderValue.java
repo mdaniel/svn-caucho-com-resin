@@ -1310,44 +1310,8 @@ public class UnicodeBuilderValue
 
       return l == r;
     }
-    else if (rValue instanceof UnicodeBuilderValue) {
-      UnicodeBuilderValue value = (UnicodeBuilderValue) rValue;
-
-      int length = _length;
-
-      if (length != value._length) {
-        return false;
-      }
-
-      char []bufferA = _buffer;
-      char []bufferB = value._buffer;
-
-      for (int i = length - 1; i >= 0; i--) {
-        if (bufferA[i] != bufferB[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-    else if (rValue instanceof StringValue) {
-      StringValue value = (StringValue) rValue;
-
-      byte[] bytes = getStringBytes();
-      int length = bytes.length;
-
-      if (length != value.length()) {
-        return false;
-      }
-
-      byte[] otherBytes = value.toBytes();
-      for (int i = length - 1; i >= 0; i--) {
-        if (bytes[i] != otherBytes[i]) {
-          return false;
-        }
-      }
-
-      return true;
+    else if (rValue instanceof UnicodeBuilderValue || rValue instanceof StringValue) {
+      return eql(rValue);
     }
     else if (rValue.isObject()) {
       return super.eq(rValue);
@@ -1376,54 +1340,11 @@ public class UnicodeBuilderValue
       return true;
     }
 
-    if (o instanceof UnicodeBuilderValue) {
-      UnicodeBuilderValue value = (UnicodeBuilderValue) o;
-
-      int length = _length;
-
-      if (length != value._length) {
-        return false;
-      }
-
-      char []bufferA = _buffer;
-      char []bufferB = value._buffer;
-
-      for (int i = length - 1; i >= 0; i--) {
-        if (bufferA[i] != bufferB[i])
-          return false;
-      }
-
-      return true;
+    if (o instanceof Value) {
+      return eql((Value) o);
     }
-    else if (o instanceof StringValue) {
-      StringValue str = (StringValue) o;
-
-      int len = _length;
-
-      if (len != str.length()) {
-        return false;
-      }
-
-      char []buffer = _buffer;
-
-      for (int i = len - 1; i >= 0; i--) {
-        if (buffer[i] != str.charAt(i)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-    /*
-    else if (o instanceof UnicodeValue) {
-      UnicodeValue value = (UnicodeValue)o;
-
-      return value.equals(this);
-    }
-    */
-    else {
-      return false;
-    }
+    
+    return false;
   }
 
   @Override
@@ -1456,18 +1377,18 @@ public class UnicodeBuilderValue
       return true;
     }
     else if (o instanceof StringValue) {
-      StringValue str = (StringValue) o;
+      StringValue value = (StringValue) o;
 
-      int length = _length;
+      byte[] bytes = getStringBytes();
+      int length = bytes.length;
 
-      if (length != str.length()) {
+      if (length != value.length()) {
         return false;
       }
 
-      char []buffer = _buffer;
-
+      byte[] otherBytes = value.toBytes();
       for (int i = length - 1; i >= 0; i--) {
-        if (buffer[i] != str.charAt(i)) {
+        if (bytes[i] != otherBytes[i]) {
           return false;
         }
       }
