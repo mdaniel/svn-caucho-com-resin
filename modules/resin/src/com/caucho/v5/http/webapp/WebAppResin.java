@@ -189,6 +189,10 @@ public class WebAppResin extends WebApp
   private void initCdiJsfContext()
   {
     try {
+      String jsf = "javax.faces.application.ViewHandlerWrapper";
+      
+      Class<?> jsfCl = Class.forName(jsf, false, getClassLoader());
+      
       String handler = "com.caucho.v5.server.cdi.ConversationJsfViewHandler";
       
       Class<?> cl = Class.forName(handler, false, getClassLoader());

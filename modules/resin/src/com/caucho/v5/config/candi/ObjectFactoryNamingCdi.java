@@ -51,7 +51,11 @@ public class ObjectFactoryNamingCdi implements ObjectFactoryNaming, java.io.Seri
   public Object createObject(Hashtable<?,?> env)
     throws NamingException
   {
-    CandiManager manager = CandiManager.create();
+    CandiManager manager = CandiManager.getCurrent();
+    
+    if (manager == null) {
+      return null;
+    }
 
     Class<?> applicationClass = findApplicationClass();
 

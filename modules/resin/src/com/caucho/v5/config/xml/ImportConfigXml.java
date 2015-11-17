@@ -49,7 +49,7 @@ public class ImportConfigXml extends ImportConfig
     // config.setResinInclude(true);
     
     String tail = path.getTail();
-
+    
     if (tail.endsWith(".cf")) {
       config.configure2(bean, path);
     }

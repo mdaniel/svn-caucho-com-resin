@@ -377,7 +377,7 @@ public class CandiManager
     _classLoader = loader;
 
     _parent = parent;
-
+    
     _extensionManager = new ExtensionManager(this);
     _scanManager = new ScanListenerInject(this);
     // _xmlExtension = new XmlStandardPlugin(this);

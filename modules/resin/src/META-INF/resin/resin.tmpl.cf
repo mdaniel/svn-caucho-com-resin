@@ -21,7 +21,7 @@ log-handler name="" level="all" path="stdout:" pattern="${log_pattern}";
 
 logger config "com.caucho.java";
 logger config "com.caucho.loader";
-logger level="${log_level?:info}" "";
+logger level="${log_level?:info}";
 
 #import "${__DIR__}/cluster-default.cf";
 
