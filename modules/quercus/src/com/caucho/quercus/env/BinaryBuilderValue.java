@@ -185,11 +185,6 @@ public class BinaryBuilderValue
     }
   }
   
-  @Override
-  public String toString() {
-    return new String(getBuffer(), 0, length());
-  }
-  
   /**
    * Returns a character array
    */
