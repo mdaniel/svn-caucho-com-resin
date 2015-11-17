@@ -441,29 +441,11 @@ public class ZlibModule extends AbstractQuercusModule {
     Deflater deflater = null;
 
     try {
-      deflater = new Deflater(level, true);
-      Adler32 crc = new Adler32();
+      deflater = new Deflater(level, false);
 
       boolean isFinished = false;
 
       StringValue out = env.createLargeBinaryBuilder();
-
-      inputBuffer[0] = (byte) 0x78;
-
-      if (level <= 1) {
-        inputBuffer[1] = (byte) 0x01;
-      }
-      else if (level < 6) {
-        inputBuffer[1] = (byte) 0x5e;
-      }
-      else if (level == 6) {
-        inputBuffer[1] = (byte) 0x9c;
-      }
-      else {
-        inputBuffer[1] = (byte) 0xda;
-      }
-
-      out.append(inputBuffer, 0, 2);
 
       int len;
       while (! isFinished) {
@@ -471,7 +453,6 @@ public class ZlibModule extends AbstractQuercusModule {
           len = data.read(inputBuffer, 0, inputBuffer.length);
 
           if (len > 0) {
-            crc.update(inputBuffer, 0, len);
             deflater.setInput(inputBuffer, 0, len);
           }
           else {
@@ -484,15 +465,6 @@ public class ZlibModule extends AbstractQuercusModule {
           out.append(outputBuffer, 0, len);
         }
       }
-
-      long value = crc.getValue();
-
-      inputBuffer[0] = (byte) (value >> 24);
-      inputBuffer[1] = (byte) (value >> 16);
-      inputBuffer[2] = (byte) (value >> 8);
-      inputBuffer[3] = (byte) (value >> 0);
-
-      out.append(inputBuffer, 0, 4);
 
       return out;
     }
