@@ -199,9 +199,7 @@ public class JdbcPreparedStatementResource
         _preparedStmt.setDouble(i + 1, value.toDouble());
       }
       else if (type == ColumnType.BLOB) {
-        // XXX: blob needs to be redone
-        // Currently treated as a string
-        _preparedStmt.setString(i + 1, value.toString());
+        _preparedStmt.setBinaryStream(i + 1, value.toInputStream());
       }
       else if (type == ColumnType.STRING) {
         _preparedStmt.setString(i + 1, value.toString());

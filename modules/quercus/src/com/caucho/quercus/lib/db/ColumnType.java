@@ -51,7 +51,9 @@ public enum ColumnType {
 
   public static ColumnType getColumnType(Value value)
   {
-    if (value.isString()) {
+    if (value.isBinary()) {
+      return BLOB;
+    } else if (value.isString()) {
       return STRING;
     }
     else if (value.isBoolean()) {
