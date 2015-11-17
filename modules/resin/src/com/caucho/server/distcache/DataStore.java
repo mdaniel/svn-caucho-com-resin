@@ -386,8 +386,11 @@ public class DataStore {
         InputStream is = rs.getBinaryStream(1);
 
         if (is == null) {
-          System.err.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: " + Long.toHexString(id));
-          Thread.dumpStack();
+          System.err.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: 0x" + Long.toHexString(id));
+          
+          if (log.isLoggable(Level.FINE)) { 
+            Thread.dumpStack();
+          }
 
           return null;
         }
@@ -460,7 +463,6 @@ public class DataStore {
 
       int count = stmt.executeUpdate();
 
-
       // System.out.println("INSERT: " + id);
 
       if (count > 0) {
@@ -469,7 +471,7 @@ public class DataStore {
         ResultSet keys = stmt.getGeneratedKeys();
         if (keys.next()) {
           long id = keys.getLong("id");
-
+          
           return id;
         }
 
@@ -629,8 +631,9 @@ public class DataStore {
     Alarm alarm = _alarm;
     _alarm = null;
 
-    if (alarm != null)
+    if (alarm != null) {
       alarm.dequeue();
+    }
   }
 
   private DataConnection getConnection()
