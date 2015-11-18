@@ -449,7 +449,11 @@ abstract public class QServlet implements Servlet {
 
   public void destroy()
   {
-    _manager.destroy();
+    PageManager manager = _manager;
+    
+    if (manager != null) {
+      manager.destroy();
+    }
 
     log.finest("destroy " + _config.getServletName());
   }

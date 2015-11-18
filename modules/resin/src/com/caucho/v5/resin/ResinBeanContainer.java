@@ -46,7 +46,7 @@ import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.inject.ThreadContext;
 import com.caucho.v5.java.WorkDir;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -156,7 +156,7 @@ public class ResinBeanContainer {
 
       Environment.init();
 
-      Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
+      //Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       //Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
       Environment.addCloseListener(this);
@@ -351,11 +351,15 @@ public class ResinBeanContainer {
                         .build();
         
         Amp.setContextManager(ampManager);
-                              
+        
+        Environment.addCloseListener(ampManager);
       }
 
       // env/0e81 vs env/0e3b
       // _cdiManager.update();
+      
+      // baratine/1182
+      InjectManager.create();
       
       _classLoader.start();
       
