@@ -24,24 +24,10 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Alex Rojkov
  */
+package com.caucho.v5.config;
 
-package com.caucho.v5.config.candi;
-
-import javax.enterprise.context.spi.CreationalContext;
-
-/**
- * A saved program for creating a constructor argument
- */
-public class InjectionPointArg<T> extends Arg<T> {
-  public InjectionPointArg()
-  {
-  }
-  
-  @Override
-  public T eval(CreationalContext<T> env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+public interface AbstractClassPadding
+{
 }

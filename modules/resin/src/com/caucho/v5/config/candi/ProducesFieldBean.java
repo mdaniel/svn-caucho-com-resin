@@ -51,7 +51,6 @@ import javax.enterprise.inject.spi.ProducerFactory;
 import javax.inject.Inject;
 
 import com.caucho.v5.config.bytecode.ScopeProxy;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.reflect.BaseType;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;

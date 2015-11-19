@@ -36,10 +36,10 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 
+import com.caucho.v5.config.candi.Arg;
 import com.caucho.v5.config.candi.DisplayableInjectionTarget;
 import com.caucho.v5.config.candi.ManagedBeanImpl;
 import com.caucho.v5.config.inject.InjectContext;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.inject.Module;
 

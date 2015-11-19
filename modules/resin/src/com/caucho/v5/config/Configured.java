@@ -19,29 +19,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Baratine; if not, write to the
- *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.v5.config.candi;
+package com.caucho.v5.config;
 
-import javax.enterprise.context.spi.CreationalContext;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
+
+import javax.enterprise.inject.Stereotype;
 
 /**
- * A saved program for creating a constructor argument
+ * Alternative for an XML file, with higher priority than
+ * Production.
  */
-public class InjectionPointArg<T> extends Arg<T> {
-  public InjectionPointArg()
-  {
-  }
-  
-  @Override
-  public T eval(CreationalContext<T> env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+@Stereotype
+@Documented
+@Retention(RUNTIME)
+@Target({METHOD, TYPE})
+public @interface Configured {
 }

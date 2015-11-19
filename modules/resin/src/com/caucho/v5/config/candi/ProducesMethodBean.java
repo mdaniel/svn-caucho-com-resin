@@ -61,7 +61,6 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.annotation.ProxyProduces;
 import com.caucho.v5.config.bytecode.ScopeAdapter;
 import com.caucho.v5.config.bytecode.ScopeProxy;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.reflect.AnnotatedElementImpl;
 import com.caucho.v5.config.reflect.AnnotatedTypeUtil;
 import com.caucho.v5.inject.Module;

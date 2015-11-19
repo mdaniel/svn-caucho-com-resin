@@ -38,7 +38,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Producer;
 
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.inject.Module;
 
 /*

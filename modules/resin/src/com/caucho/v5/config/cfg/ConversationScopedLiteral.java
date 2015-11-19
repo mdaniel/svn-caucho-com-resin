@@ -24,24 +24,28 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.v5.config.candi;
+package com.caucho.v5.config.cfg;
 
-import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * A saved program for creating a constructor argument
+ * Represents the @RequestScoped annotation
  */
-public class InjectionPointArg<T> extends Arg<T> {
-  public InjectionPointArg()
+public class ConversationScopedLiteral extends AnnotationLiteral<ConversationScoped>
+  implements ConversationScoped {
+  public static final ConversationScoped ANN = new ConversationScopedLiteral();
+  
+  private ConversationScopedLiteral()
   {
   }
-  
+      
   @Override
-  public T eval(CreationalContext<T> env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+  public String toString()
+  { 
+    return "@ConversationScoped()"; 
   }
 }

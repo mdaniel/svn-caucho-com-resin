@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1998-2015 Caucho Technology -- all rights reserved
  *
- * This file is part of Baratine(TM)(TM)
+ * This file is part of Baratine(TM)
  *
  * Each copy or derived work must preserve the copyright notice and this
  * notice unmodified.
@@ -24,24 +24,35 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.v5.config.candi;
+package com.caucho.v5.inject;
 
-import javax.enterprise.context.spi.CreationalContext;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.enterprise.context.NormalScope;
+import javax.inject.Scope;
 
 /**
- * A saved program for creating a constructor argument
+ * @ThreadScoped marks a bean as scoped to the current thread, under control
+ * of the application using the ThreadContext class.
+ * 
+ * <pre><code>
+ * ThreadContext.begin();
+ * ...
+ * ThreadContext.complete();
+ * </clode></pre>
  */
-public class InjectionPointArg<T> extends Arg<T> {
-  public InjectionPointArg()
-  {
-  }
-  
-  @Override
-  public T eval(CreationalContext<T> env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+
+@Scope
+@NormalScope
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+public @interface ThreadScoped {
 }

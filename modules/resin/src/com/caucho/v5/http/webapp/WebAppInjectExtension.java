@@ -155,7 +155,7 @@ public class WebAppInjectExtension implements Extension
             mapping.addURLPattern(value);
           }
           
-          mapping.setBean(bean);
+          //mapping.setBean(bean);
         
           mapping.init();
 

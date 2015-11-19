@@ -54,12 +54,12 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ObserverMethod;
 
 import com.caucho.v5.config.bytecode.ScopeProxy;
+import com.caucho.v5.config.candi.Arg;
 import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.candi.CreationalContextImpl;
 import com.caucho.v5.config.candi.EventMetadataImpl;
 import com.caucho.v5.config.candi.InjectionPointImpl;
 import com.caucho.v5.config.candi.OwnerCreationalContext;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.program.BeanArg;
 import com.caucho.v5.util.L10N;
 

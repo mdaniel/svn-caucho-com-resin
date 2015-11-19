@@ -84,7 +84,6 @@ import com.caucho.v5.config.bytecode.DecoratorAdapter;
 import com.caucho.v5.config.bytecode.SerializationAdapter;
 import com.caucho.v5.config.gen.BeanGeneratorCandi;
 import com.caucho.v5.config.inject.InjectContext;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.program.BeanArg;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.PostConstructProgram;

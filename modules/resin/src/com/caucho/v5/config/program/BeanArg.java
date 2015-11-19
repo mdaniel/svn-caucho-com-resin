@@ -38,6 +38,7 @@ import javax.enterprise.inject.TransientReference;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.caucho.v5.config.candi.Arg;
 import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.candi.CreationalContextImpl;
 import com.caucho.v5.config.candi.ReferenceFactory;

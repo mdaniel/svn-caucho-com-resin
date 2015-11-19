@@ -53,7 +53,6 @@ import javax.inject.Named;
 import javax.inject.Qualifier;
 
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.program.BeanArg;
 import com.caucho.v5.config.reflect.AnnotatedTypeUtil;
 import com.caucho.v5.config.reflect.BaseType;

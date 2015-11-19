@@ -62,7 +62,6 @@ import com.caucho.v5.config.gen.CandiEnhancedBean;
 import com.caucho.v5.config.gen.CandiUtil;
 import com.caucho.v5.config.gen.InterceptorException;
 import com.caucho.v5.config.inject.InjectContext;
-import com.caucho.v5.config.program.Arg;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.util.ObjectFactory;
 import com.caucho.v5.config.util.ObjectFactoryBuilder;

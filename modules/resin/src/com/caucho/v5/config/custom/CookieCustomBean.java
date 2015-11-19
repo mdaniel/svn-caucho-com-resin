@@ -24,24 +24,26 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.v5.config.candi;
+package com.caucho.v5.config.custom;
 
-import javax.enterprise.context.spi.CreationalContext;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * A saved program for creating a constructor argument
+ * An annotation cookie for matching AnnotatedTypes to InjectionTargets.
  */
-public class InjectionPointArg<T> extends Arg<T> {
-  public InjectionPointArg()
-  {
-  }
-  
-  @Override
-  public T eval(CreationalContext<T> env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+
+@Documented
+@Retention(RUNTIME)
+@Target({TYPE})
+public @interface CookieCustomBean 
+{
+  public long value();
 }
