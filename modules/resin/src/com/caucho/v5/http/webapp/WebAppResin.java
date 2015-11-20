@@ -60,6 +60,8 @@ public class WebAppResin extends WebApp
 
   private CandiManager _cdiManager;
 
+  private boolean _isContainerInit;
+
   /**
    * Creates the webApp with its environment loader.
    */
@@ -98,15 +100,16 @@ public class WebAppResin extends WebApp
   @Override
   public JspConfigDescriptor getJspConfigDescriptor()
   {
-    if (_isContextConfigUnsuppored)
+    if (_isContextConfigUnsuppored) {
       throw new UnsupportedOperationException("Can't call getJspConfigDescriptor() from this context");
+    }
 
-    return _builder.getJspConfigDescriptor();
+    return getBuilder().getJspConfigDescriptor();
   }
 
   public Collection<JspPropertyGroupDescriptor> getJspPropertyGroups()
   {
-    return _builder.getJspPropertyGroups();
+    return getBuilder().getJspPropertyGroups();
   }
 
   public boolean isFacesServletConfigured()
@@ -116,7 +119,7 @@ public class WebAppResin extends WebApp
 
   public JspConfig getJspConfig()
   {
-    return _builder.getJspConfig();
+    return getBuilder().getJspConfig();
   }
 
   /**
@@ -125,6 +128,12 @@ public class WebAppResin extends WebApp
   public boolean hasPre23Config()
   {
     return getBuilder().hasPre23Config();
+  }
+  
+  @Override
+  public WebAppBuilderResin getBuilder()
+  {
+    return _builder;
   }
 
   @Override
@@ -206,6 +215,33 @@ public class WebAppResin extends WebApp
       }
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
+    }
+  }
+
+  @Override
+  protected boolean isContainerInit()
+  {
+    return _isContainerInit;
+  }
+
+  @Override
+  protected void callInitializers() throws Exception
+  {
+    try {
+      assert _isContainerInit == false;
+
+      _isContainerInit = true;
+      getBuilder().getScanner().callInitializers();
+    } finally {
+      _isContainerInit = false;
+    }
+  }
+
+  @Override
+  protected void initWebFragments()
+  {
+    if (! getBuilder().isMetadataComplete()) {
+      getBuilder().initWebFragments();
     }
   }
 }

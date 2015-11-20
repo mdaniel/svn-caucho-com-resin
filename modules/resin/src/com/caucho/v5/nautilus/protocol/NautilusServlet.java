@@ -35,13 +35,13 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import com.caucho.v5.nautilus.broker.BrokerNautilus;
 import com.caucho.v5.nautilus.broker.BrokerProviderEnvironment;
-import com.caucho.v5.websocket.server.WebSocketServletImpl;
+import com.caucho.v5.websocket.server.WebSocketServletDispatch;
 
 /**
  * Servlet for the nautilus protocol.
  */
 @SuppressWarnings("serial")
-public class NautilusServlet extends WebSocketServletImpl
+public class NautilusServlet extends WebSocketServletDispatch
 {
   public NautilusServlet()
   {
@@ -68,7 +68,6 @@ public class NautilusServlet extends WebSocketServletImpl
   
   @PostConstruct
   public void init() 
-    throws ServletException
   {
     super.init();
     
