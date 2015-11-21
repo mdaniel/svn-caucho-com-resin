@@ -29,14 +29,14 @@
 
 package com.caucho.v5.ramp.nautilus;
 
+import io.baratine.core.ServiceInitializer;
 import io.baratine.core.ServiceManager;
-import io.baratine.spi.ServiceProvider;
 
 
 /**
  * Entry to the filesystem.
  */
-public class NautilusBindingProvider implements ServiceProvider
+public class NautilusBindingProvider implements ServiceInitializer
 {
   @Override
   public void init(ServiceManager manager)

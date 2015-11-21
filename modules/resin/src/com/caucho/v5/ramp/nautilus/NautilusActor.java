@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.amp.ServiceRefAmp;
 import com.caucho.v5.amp.actor.ActorAmpBase;
-import com.caucho.v5.amp.jamp.OutJamp;
 import com.caucho.v5.amp.message.HeadersNull;
 import com.caucho.v5.amp.spi.ActorAmp;
 import com.caucho.v5.nautilus.Nautilus;
@@ -48,6 +47,7 @@ import com.caucho.v5.nautilus.SenderBuilder;
 import com.caucho.v5.nautilus.SenderQueue;
 import com.caucho.v5.nautilus.impl.BrokerNautilusImpl;
 import com.caucho.v5.nautilus.impl.NautilusSystem;
+import com.caucho.v5.ramp.jamp.OutJamp;
 import com.caucho.v5.util.L10N;
 
 /**

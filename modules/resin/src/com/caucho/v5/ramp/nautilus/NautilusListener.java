@@ -36,12 +36,12 @@ import java.io.StringReader;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.amp.ServiceRefAmp;
 import com.caucho.v5.amp.inbox.OutboxAmpDirect;
-import com.caucho.v5.amp.jamp.InJamp;
 import com.caucho.v5.amp.remote.ChannelServer;
 import com.caucho.v5.amp.remote.GatewayReply;
 import com.caucho.v5.amp.spi.OutboxAmp;
 import com.caucho.v5.nautilus.ReceiverController;
 import com.caucho.v5.nautilus.ReceiverListener;
+import com.caucho.v5.ramp.jamp.InJamp;
 
 /**
  * Method ref for a nautilus queue.

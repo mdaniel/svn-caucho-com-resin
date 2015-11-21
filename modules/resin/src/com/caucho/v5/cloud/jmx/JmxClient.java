@@ -13,13 +13,13 @@ import javax.management.ObjectName;
 
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
-import com.caucho.v5.amp.hamp.BaratineClient;
 import com.caucho.v5.baratine.client.ServiceManagerClient;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.hessian.io.ExtSerializerFactory;
 import com.caucho.v5.hessian.io.StringValueDeserializer;
 import com.caucho.v5.hessian.io.StringValueSerializer;
+import com.caucho.v5.ramp.hamp.BaratineClient;
 import com.caucho.v5.util.L10N;
 
 /**

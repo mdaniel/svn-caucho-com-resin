@@ -1,9 +1,0 @@
-com.caucho.v5.ramp.timer.ServiceProviderTimer
-com.caucho.v5.amp.events.ServiceBindingProviderEvents
-com.caucho.v5.ramp.files.FileBindingProviderRamp
-com.caucho.v5.ramp.nautilus.NautilusBindingProvider
-com.caucho.v5.bartender.pod.ServiceProviderPod
-com.caucho.v5.ramp.db.DatabaseBindingProvider
-
-
-

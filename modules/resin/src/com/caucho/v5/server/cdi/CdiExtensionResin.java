@@ -46,7 +46,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
-import com.caucho.v5.amp.channel.SessionService;
+import com.caucho.v5.amp.remote.SessionService;
 import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.candi.CandiManager;
