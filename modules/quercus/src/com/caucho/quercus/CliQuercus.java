@@ -29,14 +29,14 @@
 
 package com.caucho.quercus;
 
+import java.io.IOException;
+
 import com.caucho.quercus.env.CliEnv;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.servlet.api.QuercusHttpServletRequest;
 import com.caucho.quercus.servlet.api.QuercusHttpServletResponse;
 import com.caucho.vfs.WriteStream;
-
-import java.io.IOException;
 
 public class CliQuercus extends Quercus
 {
@@ -54,6 +54,7 @@ public class CliQuercus extends Quercus
   {
     CliQuercus quercus = new CliQuercus();
 
+    quercus.setUnicodeSemantics(true);
     startMain(args, quercus);
   }
 
