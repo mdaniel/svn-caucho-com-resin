@@ -4999,6 +4999,24 @@ public class Env
     QuercusClass cls = findClass("Exception");
 
     StringValue message = createString(e.getMessage());
+    
+    if ((e instanceof QuercusException) && e.getCause() != null) {
+      for (StackTraceElement element : e.getCause().getStackTrace()) {
+        if (element.getClassName().startsWith("com.caucho.quercus")) {
+          break;
+        }
+        message.append("\n  at ");
+        message.append(element.getClassName());
+        message.append(".");
+        message.append(element.getMethodName());
+        message.append("(");
+        message.append(element.getFileName());
+        message.append(":");
+        message.append(element.getLineNumber());
+        message.append(")");
+      }
+    }
+
     Value []args = { message };
 
     Value value = cls.callNew(this, args);
