@@ -250,7 +250,7 @@ public class XdebugConnection
     if (_socket == null) {
       return;
     }
-    String msg = XML_DECLARATION + packet;
+    String msg = XML_DECLARATION + packet.replaceAll("&", "&amp;");
     // System.out.println(msg);
     OutputStream out = _socket.getOutputStream();
     byte[] bytes = msg.getBytes();

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
@@ -169,17 +170,22 @@ public abstract class XdebugCommand
     return propValue.replaceAll("<", "&lt;");
   }
   
-  protected Value getField(XdebugConnection conn, Value value, StringValue fieldName) {
-    Value result = value.getField(conn.getEnv(), fieldName);
-    if (result.isNull()) {
-      result = value.getThisField(conn.getEnv(), fieldName);
-    }
-    if (result.isNull()) {
-      ClassField field = value.getQuercusClass().getClassField(fieldName);
-      if (field != null) {
-        result = value.getField(conn.getEnv(), field.getCanonicalName());
+  protected Value getField(XdebugConnection conn, Value value,
+      StringValue fieldName) {
+    try {
+      Value result = value.getField(conn.getEnv(), fieldName);
+      if (result.isNull()) {
+        result = value.getThisField(conn.getEnv(), fieldName);
       }
+      if (result.isNull()) {
+        ClassField field = value.getQuercusClass().getClassField(fieldName);
+        if (field != null) {
+          result = value.getField(conn.getEnv(), field.getCanonicalName());
+        }
+      }
+      return result;
+    } catch (Exception e) {
+      return NullValue.NULL;
     }
-    return result;
   }
 }

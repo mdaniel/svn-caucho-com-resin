@@ -1,6 +1,8 @@
 package com.caucho.quercus.env.xdebug;
 
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import com.caucho.quercus.env.ArrayValue;
@@ -27,21 +29,22 @@ public class ContextGetCommand extends XdebugCommand
         "<response xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" command=\"context_get\" transaction_id=\"");
     response.append(transactionId);
     response.append("\" context=\"").append(contextId).append("\">");
+    SortedMap<String, String> sortedProperties = new TreeMap<String, String>();
 
     if (CONTEXT_ID_LOCALS.equals(contextId)) {
       Map<StringValue, EnvVar> varEnv = stackDepth == 0 ? conn.getEnv().getEnv() : conn.getVarEnvAtStackDepth(stackDepth);
       if (varEnv != null) {
         for (Entry<StringValue, EnvVar> entry : varEnv.entrySet()) {
           String name = "$" + entry.getKey().toString();
-          response.append(createPropertyElement(entry.getValue().get(), conn, name, name, null, true));
+          sortedProperties.put(name, createPropertyElement(entry.getValue().get(), conn, name, name, null, true));
         }
       }
       Value thisValue = stackDepth == 0 ? env.getThis() : env.peekCallThis(stackDepth);
       if (thisValue != null) {
         if (thisValue instanceof QuercusClass) {
-          response.append(createPropertyElement(conn.getEnv().createString(((QuercusClass)thisValue).getClassName()), conn, "::", "::", null, true));
+          sortedProperties.put("::", createPropertyElement(conn.getEnv().createString(((QuercusClass)thisValue).getClassName()), conn, "::", "::", null, true));
         } else {
-          response.append(createPropertyElement(thisValue, conn, "$this", "$this", null, true));
+          sortedProperties.put("$this", createPropertyElement(thisValue, conn, "$this", "$this", null, true));
         }
       }
     } else if (CONTEXT_ID_GLOBALS.equals(contextId)) {
@@ -52,11 +55,14 @@ public class ContextGetCommand extends XdebugCommand
         if (name.startsWith("_")) {
           // add variables like $_GET parallel to $GLOBALS
           name = "$" + name;
-          response.append(createPropertyElement(value, conn, name, name, null, true));
+          sortedProperties.put(name, createPropertyElement(value, conn, name, name, null, true));
         }
         arrayValue.put(entry.getKey(), value);
       }
-      response.append(createPropertyElement(arrayValue, conn, "$GLOBALS", "$GLOBALS", null, true));
+      sortedProperties.put("$GLOBALS", createPropertyElement(arrayValue, conn, "$GLOBALS", "$GLOBALS", null, true));
+    }
+    for (String property : sortedProperties.values()) {
+      response.append(property);
     }
     response.append("</response>");
     return new XdebugResponse(null, response.toString(), transactionId);
