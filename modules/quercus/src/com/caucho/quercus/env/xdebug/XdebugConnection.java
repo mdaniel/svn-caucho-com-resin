@@ -314,7 +314,7 @@ public class XdebugConnection
         String filenameAndLineNumber = location.getFileName() + ":"
             + location.getLineNumber();
         Breakpoint breakpoint = breakpointFileAndLineNumberMapping
-            .get(filenameAndLineNumber);
+            .get(filenameAndLineNumber.toLowerCase());
         if (breakpoint == null) {
           break;
         }

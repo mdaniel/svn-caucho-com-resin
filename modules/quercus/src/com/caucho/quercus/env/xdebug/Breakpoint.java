@@ -8,17 +8,15 @@ public class Breakpoint
 
 	private final int _id;
 
-	private String _fileName;
-
-	private String _lineNumber;
+	private String _fileAndLineNumber;
 	
 	public Breakpoint(XdebugConnection connection, String type, String state,
 	    String filename, String lineno, String function, String exception,
 	    String hitValue, String hitCondition, String isTemporary,
 	    String expression) {
 		_conn = connection;
-    _fileName = new File(filename.replace("file://", "").replace("file:/",  "")).getAbsolutePath();
-		_lineNumber = lineno;
+        String fileName = new File(filename.replace("file://", "").replace("file:/",  "")).getAbsolutePath();
+		_fileAndLineNumber = (fileName + ":" + lineno).toLowerCase();
 		_id = _conn.addBreakpoint(this);
   }
 	
@@ -27,6 +25,6 @@ public class Breakpoint
   }
 
 	public String getFileAndLineNumber() {
-	  return _fileName + ":" + _lineNumber;
+	  return _fileAndLineNumber;
   }
 }
