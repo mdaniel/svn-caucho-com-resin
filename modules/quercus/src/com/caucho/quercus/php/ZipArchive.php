@@ -407,7 +407,7 @@ class ZipArchive  {
 	 * @return string a string with the status message on success or <b>FALSE</b> on failure.
 	 * @since 5.2.7
 	 */
-	public function getStatusString () { throw new ErrorException("Not implemented"); }
+	public function getStatusString () { throw new ErrorException("Not implemented - ZipArchive::getStatusString()"); }
 
 
 	/**
@@ -419,7 +419,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function addEmptyDir ($dirname) { throw new ErrorException("Not implemented"); }
+	public function addEmptyDir ($dirname) { throw new ErrorException("Not implemented - ZipArchive::addEmptyDir"); }
 
 
 	/**
@@ -435,7 +435,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function addFromString ($localname, $contents) { throw new ErrorException("Not implemented"); }
+	public function addFromString ($localname, $contents) { throw new ErrorException("Not implemented - ZipArchive::addFromString"); }
 
 
 	/**
@@ -456,7 +456,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function addFile ($filename, $localname = null, $start = 0, $length = 0) { throw new ErrorException("Not implemented"); }
+	public function addFile ($filename, $localname = null, $start = 0, $length = 0) { throw new ErrorException("Not implemented - ZipArchive::addFile"); }
 
 
 	/**
@@ -482,7 +482,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function addGlob ($pattern, $flags = 0, array $options = array()) { throw new ErrorException("Not implemented"); }
+	public function addGlob ($pattern, $flags = 0, array $options = array()) { throw new ErrorException("Not implemented - ZipArchive::addGlob"); }
 
 
 	/**
@@ -500,7 +500,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function addPattern ($pattern, $path = '.', array $options = array()) { throw new ErrorException("Not implemented"); }
+	public function addPattern ($pattern, $path = '.', array $options = array()) { throw new ErrorException("Not implemented - ZipArchive::addPattern"); }
 
 
 	/**
@@ -515,7 +515,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function renameIndex ($index, $newname) { throw new ErrorException("Not implemented"); }
+	public function renameIndex ($index, $newname) { throw new ErrorException("Not implemented - ZipArchive::renameIndex"); }
 
 
 	/**
@@ -530,7 +530,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function renameName ($name, $newname) { throw new ErrorException("Not implemented"); }
+	public function renameName ($name, $newname) { throw new ErrorException("Not implemented - ZipArchive::renameName"); }
 
 
 	/**
@@ -543,7 +543,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function setArchiveComment ($comment) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::setArchiveComment");
 	}
 
 	/**
@@ -557,7 +557,7 @@ class ZipArchive  {
 	 * @return string the Zip archive comment or <b>FALSE</b> on failure.
 	 */
 	public function getArchiveComment ($flags = null) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::getArchiveComment");
 	}
 
 	/**
@@ -573,7 +573,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function setCommentIndex ($index, $comment) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::setCommentIndex");
 	}
 
 	/**
@@ -589,7 +589,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function setCommentName ($name, $comment) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::setCommentName");
 	}
 
     /**
@@ -598,7 +598,7 @@ class ZipArchive  {
      * @return boolean
      */
     public function setPassword($password) {
-    	throw new ErrorException("Not implemented");
+    	throw new ErrorException("Not implemented - ZipArchive::setPassword");
     }
 
 	/**
@@ -615,7 +615,7 @@ class ZipArchive  {
 	 * @return string the comment on success or <b>FALSE</b> on failure.
 	 */
 	public function getCommentIndex ($index, $flags = null) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::getCommentIndex");
 	}
 
 	/**
@@ -632,7 +632,7 @@ class ZipArchive  {
 	 * @return string the comment on success or <b>FALSE</b> on failure.
 	 */
 	public function getCommentName ($name, $flags = null) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::getCommentName");
 	}
 
 	/**
@@ -645,7 +645,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function deleteIndex ($index) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::deleteIndex");
 	}
 
 	/**
@@ -658,7 +658,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function deleteName ($name) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::deleteName");
 	}
 
 	/**
@@ -679,7 +679,7 @@ class ZipArchive  {
 	 * @return array an array containing the entry details or <b>FALSE</b> on failure.
 	 */
 	public function statName ($name, $flags = null) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::statName");
 	}
 
 	/**
@@ -697,7 +697,7 @@ class ZipArchive  {
 	 * @return array an array containing the entry details or <b>FALSE</b> on failure.
 	 */
 	public function statIndex ($index, $flags = null) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::statIndex");
 	}
 
 	/**
@@ -733,7 +733,7 @@ class ZipArchive  {
 	 * @return string the name on success or <b>FALSE</b> on failure.
 	 */
 	public function getNameIndex ($index, $flags = null) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::getNameIndex");
 	}
 
 	/**
@@ -743,7 +743,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function unchangeArchive () {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::unchangeArchive");
 	}
 
 	/**
@@ -753,7 +753,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function unchangeAll () {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::unchangeAll");
 	}
 
 	/**
@@ -766,7 +766,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function unchangeIndex ($index) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::unchangeIndex");
 	}
 
 	/**
@@ -779,7 +779,7 @@ class ZipArchive  {
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
 	public function unchangeName ($name) {
-		throw new ErrorException("Not implemented");
+		throw new ErrorException("Not implemented - ZipArchive::unchangeName");
 	}
 
 	/**
@@ -795,7 +795,12 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function extractTo ($destination, $entries = null) { throw new ErrorException("Not implemented"); }
+	public function extractTo ($destination, $entries = null) {
+		if ($entries != null) {
+			throw new ErrorException("ZipArchive::extractTo(): Usage of \$entries not yet implemented");
+		}
+		return $this->zipDirectory->extractTo($destination, $entries);
+	}
 
 
 	/**
@@ -840,7 +845,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return string the contents of the entry on success or <b>FALSE</b> on failure.
 	 */
-	public function getFromIndex ($index, $length = 0, $flags = null) { throw new ErrorException("Not implemented"); }
+	public function getFromIndex ($index, $length = 0, $flags = null) { throw new ErrorException("Not implemented - ZipArchive::getFromIndex"); }
 
 
 	/**
@@ -852,7 +857,7 @@ class ZipArchive  {
 	 * </p>
 	 * @return resource a file pointer (resource) on success or <b>FALSE</b> on failure.
 	 */
-	public function getStream ($name) { throw new ErrorException("Not implemented"); }
+	public function getStream ($name) { throw new ErrorException("Not implemented - ZipArchive::getStream"); }
 
 
 }

@@ -28,7 +28,11 @@
 
 package com.caucho.quercus.lib.zip;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -112,6 +116,60 @@ public class ZipDirectory
       return BooleanValue.FALSE;
     }
     return LongValue.create(_entries.indexOf(entry));
+  }
+  
+  public boolean extractTo( Env env, String destination, Value entries) {
+    File destinationFile = new File(destination);
+    if (!destinationFile.isDirectory()) {
+      if (!destinationFile.mkdirs()) {
+        return false;
+      }
+    }
+    for (QuercusZipEntry entry : _entries) {
+      ZipEntry zipEntry = entry.getZipEntry();
+      if (zipEntry.isDirectory()) {
+        File directory = new File(destinationFile, zipEntry.getName());
+        if (!directory.isDirectory()) {
+          if (!directory.mkdirs()) {
+            return false;
+          }
+        }
+      } else {
+        File file = new File(destinationFile, zipEntry.getName());
+        if (!file.getParentFile().isDirectory()) {
+          if (!file.getParentFile().mkdirs()) {
+            return false;
+          }
+        }
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+          byte[] buffer = new byte[1024];
+          is = _in.getInputStream(zipEntry);
+          os = new FileOutputStream(file);
+          int bytesRead;
+          while (-1 != (bytesRead = is.read(buffer))) {
+            os.write(buffer, 0, bytesRead);
+          }
+        } catch (IOException e) {
+          return false;
+        } finally {
+          if (is != null) {
+            try {
+              is.close();
+            } catch (IOException e) {
+            }
+          }
+          if (os != null) {
+            try {
+              os.close();
+            } catch (IOException e) {
+            }
+          }
+        }
+      }
+    }
+    return true;
   }
   
   public String toString()

@@ -161,4 +161,8 @@ public class QuercusZipEntry {
   {
     return "QuercusZipEntry[" + _entry.getName() + "]";
   }
+  
+  protected ZipEntry getZipEntry() {
+    return _entry;
+  }
 }
