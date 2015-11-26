@@ -1170,6 +1170,7 @@ public class MiscModule extends AbstractQuercusModule {
         segments.add(new LittleEndianPackSegment(name, count, 4));
         break;
       case 'i':
+        segments.add(new LittleEndianPackSegment(name, count, 8));
       case 'I':
         segments.add(new BigEndianPackSegment(name, count, 8, false));
         break;
@@ -1739,8 +1740,10 @@ public class MiscModule extends AbstractQuercusModule {
         long v = 0;
 
         for (int k = 0; k < _bytes; k++) {
-          if (offset >= strLen)
+          if (offset >= strLen) {
+            result.put(key, LongValue.create(v));
             break outer;
+          }
 
           char ch = s.charAt(offset++);
 
@@ -1831,7 +1834,7 @@ public class MiscModule extends AbstractQuercusModule {
 
           long d = ch & 0xff;
 
-          v = 256 * v + d;
+          v |= d << 8 * k;
         }
 
         result.put(key, new DoubleValue(Double.longBitsToDouble(v)));
