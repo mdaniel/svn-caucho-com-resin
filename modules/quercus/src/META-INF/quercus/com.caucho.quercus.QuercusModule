@@ -33,6 +33,7 @@ com.caucho.quercus.lib.db.MysqlModule
 com.caucho.quercus.lib.db.MysqliModule
 com.caucho.quercus.lib.NetworkModule
 com.caucho.quercus.lib.db.OracleModule
+com.caucho.quercus.lib.db.DbaseModule
 com.caucho.quercus.lib.OptionsModule
 com.caucho.quercus.lib.OutputModule
 com.caucho.quercus.lib.pdf.PDFModule

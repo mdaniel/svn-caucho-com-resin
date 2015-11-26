@@ -9,7 +9,7 @@ lib/jcache-16.jar
 modules/c/src/common/version.h
 modules/csharp/src/common/Version.cs
 modules/kernel/src/com/caucho/Version.java
-lib
+/lib
 conf/app-default.xml
 conf/resin.properties
 modules/resin/src/manifest
