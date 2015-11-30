@@ -811,7 +811,7 @@ public class BeanManagerBase implements BeanManager, Serializable
     }
 
     for (Annotation ann : qualifiers) {
-      if (! ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+      if (! isQualifier(ann.annotationType())) {
         throw new IllegalArgumentException(L.l("'{0}' is an invalid binding annotation because it does not have a @Qualifier meta-annotation",
                                                ann));
       }

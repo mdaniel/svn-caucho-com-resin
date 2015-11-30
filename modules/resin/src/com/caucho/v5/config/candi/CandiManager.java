@@ -1165,6 +1165,7 @@ public class CandiManager
   @Module
   public void addQualifier(Class<? extends Annotation> qualifier)
   {
+    System.out.println("ADDQ: " + qualifier);
     _qualifierSet.add(qualifier);
   }
 

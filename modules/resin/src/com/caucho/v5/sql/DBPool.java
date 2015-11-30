@@ -783,33 +783,40 @@ public class DBPool
       JndiUtil.bindDeepShort(name, this);
     }
 
-    CandiManager manager = CandiManager.create();
-    BeanBuilder<?> factory = manager.createBeanBuilder(DataSource.class);
+    CandiManager manager = CandiManager.getCurrent();
+    
+    if (manager != null) {
+      BeanBuilder<?> factory = manager.createBeanBuilder(DataSource.class);
 
-    String name = _name;
+      String name = _name;
 
-    if (name == null)
-      name = _jndiName;
+      if (name == null) {
+        name = _jndiName;
+      }
 
-    if (name == null)
-      name = _var;
+      if (name == null) {
+        name = _var;
+      }
 
-    if (_bindingList.size() > 0) {
-      factory.binding(_bindingList);
-    }
-    else {
-      if (name != null)
-        factory.qualifier(Names.create(name));
+      if (_bindingList.size() > 0) {
+        factory.binding(_bindingList);
+      }
+      else {
+        if (name != null) {
+          factory.qualifier(Names.create(name));
+        }
 
-      factory.qualifier(CurrentLiteral.CURRENT);
-    }
+        factory.qualifier(CurrentLiteral.CURRENT);
+      }
 
-    if (name != null)
+      if (name != null) {
       factory.name(name);
+      }
 
-    // factory.stereotype(CauchoDeployment.class);
+      // factory.stereotype(CauchoDeployment.class);
 
-    manager.addBean(factory.singleton(this));
+      manager.addBean(factory.singleton(this));
+    }
 
     _queryAdmin.register();
     _databaseAdmin.register();
