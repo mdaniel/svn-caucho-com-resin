@@ -146,9 +146,13 @@ public class ReflectionAnnotatedFactory
       annType = typeRef.get();
 
     if (annType == null) {
-      CandiManager inject = CandiManager.create();
+      BaseTypeFactory factory = BaseTypeFactory.current();
+      //CandiManager inject = CandiManager.create();
       
-      BaseType baseType = inject.createSourceBaseType(type);
+      //BaseType baseType = inject.createSourceBaseType(type);
+      BaseType baseType = factory.createForSource(type);
+      
+      CandiManager inject = CandiManager.getCurrent();
       
       annType = new ReflectionAnnotatedType<X>(inject, baseType);
 

@@ -393,9 +393,11 @@ public class CandiManager
       if (isSetLocal) {
         _localContainer.set(this, _classLoader);
 
+        /*
         if (_parent == null) {
           _localContainer.setGlobal(this);
         }
+        */
       }
 
       if (_classLoader != null) {
@@ -579,8 +581,9 @@ public class CandiManager
    */
   public static CandiManager create(ClassLoader loader)
   {
-    if (loader == null)
+    if (loader == null) {
       loader = _systemClassLoader;
+    }
 
     CandiManager manager = null;
 
@@ -617,14 +620,16 @@ public class CandiManager
     CandiManager parent = null;
 
     if (envLoader != null && envLoader != _systemClassLoader) {
-      parent = create(envLoader.getParent());
+      // parent = create(envLoader.getParent());
+      parent = _localContainer.getLevel(envLoader.getParent());
     }
 
     synchronized (_localContainer) {
       manager = _localContainer.getLevel(envLoader);
 
-      if (manager != null)
+      if (manager != null) {
         return manager;
+      }
 
       manager = newInjectManager(id, parent, envLoader, true);
     }
@@ -1165,7 +1170,6 @@ public class CandiManager
   @Module
   public void addQualifier(Class<? extends Annotation> qualifier)
   {
-    System.out.println("ADDQ: " + qualifier);
     _qualifierSet.add(qualifier);
   }
 

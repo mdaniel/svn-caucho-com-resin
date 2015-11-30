@@ -751,7 +751,7 @@ public class DBPool
   public void init()
     throws Exception
   {
-    _localPoolImpl = new EnvironmentLocal<DBPoolImpl>("caucho.db-pool." + getName());
+    _localPoolImpl = new EnvironmentLocal<>("caucho.db-pool." + getName());
     _localPoolImpl.set(_poolImpl);
 
     _poolImpl.init();
@@ -810,10 +810,13 @@ public class DBPool
       }
 
       if (name != null) {
-      factory.name(name);
+        factory.name(name);
       }
 
       // factory.stereotype(CauchoDeployment.class);
+      System.out.println("MGR: " + name + " " + manager
+                         + " " + System.identityHashCode(manager)
+                         + " " + Thread.currentThread().getContextClassLoader());
 
       manager.addBean(factory.singleton(this));
     }
