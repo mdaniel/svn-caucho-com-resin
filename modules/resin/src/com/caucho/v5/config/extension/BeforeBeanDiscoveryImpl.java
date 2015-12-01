@@ -63,7 +63,7 @@ public class BeforeBeanDiscoveryImpl implements BeforeBeanDiscovery
   @Override
   public void addQualifier(AnnotatedType<? extends Annotation> qualifier)
   {
-    throw new AbstractMethodError();
+    _cdiManager.addQualifier(qualifier);
   }
 
   @Override

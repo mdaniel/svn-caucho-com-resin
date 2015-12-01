@@ -1173,6 +1173,12 @@ public class CandiManager
     _qualifierSet.add(qualifier);
   }
 
+  @Module
+  public void addQualifier(AnnotatedType<? extends Annotation> qualifier)
+  {
+    _qualifierSet.add(qualifier.getJavaClass());
+  }
+
   /**
    * Tests if an annotation is an enabled binding type
    */
