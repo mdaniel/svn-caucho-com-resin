@@ -31,6 +31,7 @@ package com.caucho.quercus;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -486,6 +487,11 @@ public class QuercusContext
 
   public void setUnicodeSemantics(boolean isUnicode)
   {
+    if (isUnicode && !Charset.defaultCharset().name().equalsIgnoreCase("utf-8")) {
+      throw new IllegalStateException(
+          "For using 'unicode.semantics=on' you need to call Java with '-Dfile.encoding=UTF-8' to set default character encoding to UTF-8 (currently it is set to '"
+              + Charset.defaultCharset().name() + "')");
+    }
     _isUnicodeSemantics = Boolean.valueOf(isUnicode);
   }
 
