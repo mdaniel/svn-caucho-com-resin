@@ -57,7 +57,7 @@ class JsonDecoder {
                           StringValue s,
                           boolean assoc)
   {
-    _str = s;
+    _str = s.isBinary() ? env.createString(s.toString()) : s;
     _len = _str.length();
     _offset = 0;
 
