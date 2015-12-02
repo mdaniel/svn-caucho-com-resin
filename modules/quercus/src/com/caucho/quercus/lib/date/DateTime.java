@@ -141,6 +141,8 @@ public class DateTime implements DateTimeInterface, Cloneable
   		long seconds = Long.parseLong(parts[0]);
   		long millis = Long.parseLong(parts[1]);
   		timestamp = seconds * 1000 + millis;
+  	} else if ("U".equals(format)) {
+  	    timestamp = Long.parseLong(timeStr);
   	} else {
   		StringBuilder javaFormat = new StringBuilder();
     	for (int i = 0; i < format.length(); i++) {
