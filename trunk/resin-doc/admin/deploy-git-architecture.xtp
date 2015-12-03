@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<document>
+  <header>
+    <product>resin</product>
+    <title>Cluster Application Deployment</title>
+    <type>contents</type>
+    <description>
+      <p/>
+    </description>
+  </header>
+  <body>
+    <localtoc/> 
+
+    <s1 title="Comparison to File Based Deployment">
+      <p> Like other lightweight servlet containers
+      and Java EE application servers, Resin supports
+      <a href="deploy.xtp">file-system based
+      deployment</a>. In order to deploy an application, all you need
+      to do is copy your file to the Resin deployment directory. As
+      you might also know, Resin has supported hot deployment for
+      quite a while, which is a great feature for agile development
+      that often results in frequent incremental deployments.  </p>
+
+      <p>
+      This deployment model is very simple, effective and popular. However,
+      file-system based deployment has a few weaknesses that can arise
+      in environments with very stringent availability and reliability
+      requirements. It is very difficult to do deployment in a clustered
+      environment because the same file must be deployed simultaneously to
+      all servers in the cluster. Often this can result in some down-time
+      that must be announced beforehand. No back-up facility is provided
+      by the file system, so you must often save a backup copy of the
+      old deployment somewhere yourself. File system based deployment
+      also makes it very difficult to use the same server environment for
+      different stages of development such as QA, user acceptance testing
+      and production without following complicated deployment procedures.
+      </p>
+
+      <p>
+      The remote deployment model introduced in Resin 4.0 goes a long
+      way in solving these particular problems by supporting clustered,
+      versioned and staged deployment.
+      </p>
+    </s1>
+
+    <s1 title="Remote Clustered Deployment">
+
+      <p>
+        Instead of using the file system, you will need to use
+        either the Resin Ant or Maven plug-ins to do remote
+        deployment. There are a few simple steps to do this, the
+        first of which is to enable remote deployment on the server,
+        which is disabled by default. You do this using the following
+        Resin configuration:
+      </p>
+
+      <example title="Cluster deployment configuration">
+&lt;resin xmlns=http://caucho.com/ns/resin
+       xmlns:resin="urn:java:com.caucho.resin">
+  &lt;cluster id="">
+    &lt;resin:AdminAuthenticator password-digest="none">
+      &lt;resin:user name="admin" password="myadminpass"/>
+    &lt;/resin:AdminAuthenticator>
+    &lt;resin:RemoteAdminService/>
+    &lt;resin:DeployService/>
+  ...
+&lt;/resin>
+      </example>
+
+      <p>
+        In the example above, both the remote admin service and the
+        deployment service is enabled. Note, the admin authenticator most be
+        enabled for any remote administration and deployment for obvious
+        security reasons. To keep things simple, we used a clear-text
+        password above, but you should likely use a password hash instead.
+      </p>
+
+      <p>
+        Once you start Resin, you can use the Ant snippet below to
+        do a remote deployment:
+      </p>
+
+      <example title="Ant build.xml upload deploy configuration">
+&lt;?xml version="1.0"?>
+&lt;project name="test" default="test" basedir="."
+         xmlns:resin="antlib:com.caucho.ant">
+  &lt;target name="test">
+    &lt;resin:upload-war server="localhost"
+                      port="8080"
+                      user="admin"
+                      password="myadminpass"
+                      warFile="foo.war"/>
+  &lt;/target>
+&lt;/project>
+      </example>
+
+      <p>
+        After you run the Ant script above, you will see output like this:
+      </p>
+
+      <results>
+[resin:upload-war] Deployed foo.war to tag wars/default/default/foo
+      </results>
+
+      <p>
+        The output exposes a few important things about the
+        underlying remote deployment implementation for Resin. Remote
+        deployment for Resin uses Git under the hood. In case you
+        are not familiar with it, Git is a newish version control
+        system similar to Subversion. A great feature of Git is
+        that it is really clever about avoiding redundancy and
+        synchronizing data across a network, which comes in very
+        handy for Resin. Under the hood, Resin stores deployed files
+        as nodes in Git with tags representing the type of file,
+        development stage, virtual server, web application context
+        root name and version. The format used is this:
+      </p>
+
+      <def>
+&lt;type>/&lt;stage>/&lt;virtual host>/&lt;context root>[-&lt;version>]
+      </def>
+
+      <p>
+        In our example, all web applications are stored under wars, we
+        didn’t specify a stage or virtual host in the Ant task so the
+        default is used, the web application root is foo and no version
+        is used since one was not specified. This format is key to the
+        versioning and staging featured we will discuss shortly.
+      </p>
+
+      <p>
+        As soon as your web application is uploaded to the Resin
+        deployment repository, it is propagated to all the servers in
+        the cluster - including dynamic nodes that are added to the
+        cluster at a later point in time after initial propagation
+        happens. This means that you can eliminate complicated
+        scripts to deploy your application throughout each cluster
+        member manually. Remember too that we’re using Git under
+        the hood, which is pretty intelligent about the way it stores
+        files. If you upload a new version of your application to
+        one Resin instance, only the files that changed need to
+        be retransmitted across to the other instances in order
+        to bring them up to date. In other words, you only end up
+        using as much network traffic as you have new material,
+        which is a great performance boost.
+      </p>
+
+      <p>
+        Doing remote deployment with the Resin Maven plug-in is
+        just as simple. You’ll need to setup the plug-in like this:
+      </p>
+
+      <example title="Maven pom.xml upload deploy configuration">
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/maven-v4_0_0.xsd">
+  &lt;modelVersion>4.0.0&lt;/modelVersion>
+  &lt;groupId>com.test&lt;/groupId>
+  &lt;artifactId>test&lt;/artifactId>
+  &lt;packaging>war&lt;/packaging>
+  &lt;version>1.0-SNAPSHOT&lt;/version>
+  &lt;name>Test Maven Web Application&lt;/name>
+  &lt;url>http://maven.apache.org&lt;/url>
+
+  &lt;dependencies>
+  &lt;/dependencies>
+
+  &lt;pluginRepositories>
+    &lt;pluginRepository>
+      &lt;snapshots>
+        &lt;enabled>true&lt;/enabled>
+        &lt;updatePolicy>always&lt;/updatePolicy>
+        &lt;checksumPolicy>ignore&lt;/checksumPolicy>
+      &lt;/snapshots>
+      &lt;id>caucho&lt;/id>
+      &lt;name>Caucho&lt;/name>
+      &lt;url>http://caucho.com/m2-snapshot&lt;/url>
+    &lt;/pluginRepository>
+  &lt;/pluginRepositories>
+
+  &lt;build>
+    &lt;finalName>foo&lt;/finalName>
+
+    &lt;plugins>
+      &lt;plugin>
+        &lt;groupId>com.caucho&lt;/groupId>
+        &lt;artifactId>resin-maven-plugin&lt;/artifactId>
+        &lt;version>4.0-SNAPSHOT&lt;/version>
+        &lt;configuration>
+          &lt;server>127.0.0.1&lt;/server>
+          &lt;port>8086&lt;/port>
+          &lt;user>admin&lt;/user>
+          &lt;password>myadminpass&lt;/password>
+        &lt;/configuration>
+      &lt;/plugin>
+    &lt;/plugins>
+  &lt;/build>
+&lt;/project>
+      </example>
+
+      <p>
+        You can then remote deploy your application from the command
+        line like so:
+      </p>
+
+      <def>
+mvn resin:upload-war
+      </def>
+    </s1>
+  </body>
+</document>

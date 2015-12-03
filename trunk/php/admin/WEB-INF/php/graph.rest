@@ -1,0 +1,111 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+require_once "WEB-INF/php/graph_flot.php";
+
+if (!admin_init("",false,true)) {
+  return;
+}
+
+#
+# load graph
+# 
+$checks = $_REQUEST['checks'];
+$servers = $_REQUEST['servers'];
+
+if (isset($_REQUEST["width"])) {
+  $width = htmlspecialchars($_REQUEST["width"]);
+} else {
+  $width = "640"
+} 
+
+if (isset($_REQUEST["height"])) {
+  $height = htmlspecialchars($_REQUEST["height"]);
+} else {
+  $height = "480";
+}
+
+if (! isset($servers)) {
+  $servers = "00";
+}
+
+if (! isset($checks)) {
+  $style .= "text-align: center;";
+  $style .= "border: 1px solid black;";
+  
+  if ($width)
+    $style .= "width: {$width}px;";
+
+  if ($height)
+    $style .= "height: {$height}px;";
+
+  echo "<div style='$style'><strong>No meters specified</strong></div>";
+  return;
+}
+
+$checks_array = explode(",", $checks);
+$servers_array = explode(",", $servers);
+$names = array(); 
+
+foreach ($checks_array as $check) {
+  foreach ($servers_array as $server) {
+    array_push($names, htmlspecialchars("$server|$check"));
+  }
+}
+
+#
+# formatting parameters
+# 
+
+$canvas = "graph-rest";
+$period = 60;
+
+if (isset($_REQUEST["canvas"])) {
+  $canvas = htmlspecialchars($_REQUEST["canvas"]);
+}
+
+if (isset($_REQUEST["period"])) {
+  $period = htmlspecialchars($_REQUEST["period"]);
+}
+
+# 
+# compute time bounds
+# 
+
+$end = time();
+
+# 
+# output graph
+# 
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title><?= $graph ?></title>
+  <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
+  <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" media="screen" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
+
+<?php
+$params = new GraphParams($canvas, $width, $height);
+$params->period = $period;
+$params->title = "Interactive Graph";
+$params->alt = "A interactive line graph representing the selected meters.";
+
+stat_graph($params, $names);
+?>
+
+<script type="text/javascript" src="jquery-ui.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.selection.js"></script>
+
+</body>
+</html>
+
+<?php
+display_tail();
+?>

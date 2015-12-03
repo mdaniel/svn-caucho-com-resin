@@ -1,0 +1,1353 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Command Line Resin Administration</title>
+    <type>contents</type>
+    <description>
+      <p>Starting with version 4.0.17 Resin provides extended set of
+        commands that allow administrators and programmers perform debugging
+        and monitoring tasks on remote Resin server using command line.
+      </p>
+
+      <p>All Resin users should familiarize themselves with the thread dump,
+        profile, and heap capabilities.
+      </p>
+
+    </description>
+  </header>
+  <body>
+<localtoc/>
+
+<s1 title="enabling the commands">
+
+<p>By default these commands are disabled. Enabling the command
+requires ManagerService be registered in resin.xml file.</p>
+
+<p>Since the default resin.xml already includes a &lt;resin:AdminAuthenticator>
+with a &lt;resin:import>, you can just reuse the admin configuration from
+the /resin-admin page.</p>
+
+<example title="Example: enabling Resin ManagerService">
+  &lt;resin xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+  ...
+  &lt;cluster id=''>
+
+    &lt;resin:AdminAuthenticator>
+      &lt;user name="admin" password="{SSHA}h5QdSulQyqIgYP7B1J3YfnRSo56kD847"/>
+    &lt;/resin:AdminAuthenticator>
+
+    &lt;resin:RemoteAdminService/>
+
+    &lt;resin:ManagerService/>
+
+    ...
+  &lt;/cluster>
+    ...
+  &lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="available commands">
+  <deftable title="commands">
+    <tr>
+      <th>Command</th>
+      <th>Description</th>
+    </tr>
+  <tr>
+    <td>deploy</td>
+    <td>deploys an application archive</td>
+  </tr>
+  <tr>
+    <td>undeploy</td>
+    <td>un-deploys an application specified by a context</td>
+  </tr>
+  <tr>
+    <td>deploy-list</td>
+    <td>lists all applications deployed on a server</td>
+  </tr>
+  <tr>
+    <td>deploy-copy</td>
+    <td>copies an application from one context to another</td>
+  </tr>
+  <tr>
+    <td>start-webapp</td>
+    <td>starts web application context</td>
+  </tr>
+  <tr>
+    <td>stop-webapp</td>
+    <td>stops web application context</td>
+  </tr>
+  <tr>
+    <td>restart-webapp</td>
+    <td>restarts web application context</td>
+  </tr>
+    <tr>
+      <td>heap-dump</td>
+      <td>produces heap dump</td>
+    </tr>
+    <tr>
+      <td>thread-dump</td>
+      <td>produces thread dump</td>
+    </tr>
+    <tr>
+      <td>profile</td>
+      <td>turn profiling and displays results after sampling completes</td>
+    </tr>
+    <tr>
+      <td>jmx-list</td>
+      <td>lists MBeans, attributes and operations</td>
+    </tr>
+    <tr>
+      <td>jmx-dump</td>
+      <td>dump all MBean attributes and values</td>
+    </tr>
+    <tr>
+      <td>jmx-set</td>
+      <td>sets value of a jmx attribute</td>
+    </tr>
+    <tr>
+      <td>jmx-call</td>
+      <td>calls MBean's method</td>
+    </tr>
+    <tr>
+      <td>log-level</td>
+      <td>changes log-level</td>
+    </tr>
+    <tr>
+      <td>pdf-report</td>
+      <td>generates pdf report</td>
+    </tr>
+  </deftable>
+  <p>
+    Since all commands require connecting to Resin server remotely list of
+    required parameters includes authentication and remote connection options
+    such as IP and Port.
+  </p>
+  <deftable title="common options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-conf</td>
+    <td>configuration file</td>
+    <td>conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-address</td>
+    <td>ip or host name of the server</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-port</td>
+    <td>server http port</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-user</td>
+    <td>user name used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>-password</td>
+    <td>password used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+</deftable>
+</s1>
+
+<defun title="console: starting in console mode">
+
+<p>Start Resin in console mode with <code>log-level</code>.
+Console mode is useful for development or debugging. For production,
+use <code>start</code> or <code>start-all</code> instead. Resin will start under
+control of the control. Log output will go
+to the console.</p>
+  
+<def>
+resinctl console [options]
+</def>
+
+<example title="Example: starting in console">
+unix> resinctl console
+Resin Professional 4.0.s120731 (built Tue, 31 Jul 2012 03:03:37 PDT)
+Copyright(c) 1998-2012 Caucho Technology.  All rights reserved.
+
+  1999999.license -- 1 Resin server Caucho
+  ...
+[12-08-03 16:04:42.670] {main} 
+[12-08-03 16:04:42.670] {main} http listening to *:8080
+[12-08-03 16:04:42.671] {main} 
+[12-08-03 16:04:42.672] {main} Resin[id=app-0] started in 1438ms
+</example>
+
+<deftable title="console options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--cluster</td>
+    <td>cluster to join when using --elastic-server</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-dns</td>
+    <td>lazy local DNS address binding: retry until succeed</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-server</td>
+    <td>start as a dynamic server joining a cluster</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--server</td>
+    <td>the server name to start</td>
+    <td>"default" or local IP</td>
+  </tr>
+  <tr>
+    <td>--verbose</td>
+    <td>start with extra debugging</td>
+    <td></td>
+  </tr>
+</deftable>
+</defun> <!-- console -->
+
+<defun title="deploy: deploying a web application">
+<p>Deploying an application is done with a <code>deploy</code> command</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] deploy [options] &lt;war-file>
+</def>
+
+<example title="Example: deploying an application from a hello-world.war archive">
+unix> bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
+
+Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp
+</example>
+
+<deftable title="deploy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-host</td>
+    <td>virtual host to make application available on</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-name</td>
+    <td>name of the context to deploy to, defaults to war-file name</td>
+    <td>[/foo].war</td>
+  </tr>
+  <tr>
+    <td>-stage</td>
+    <td>specifies stage for staging an application</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-version</td>
+    <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+</deftable>
+</defun> <!-- defun -->
+
+<defun title="deploy-copy: copy application from '/mysource' to '/mytarget'">
+<p>Copy a deployed application to a new deployment tag with <code>deploy-copy</code>.</p>
+
+<def>
+resinctl deploy-copy [options]
+</def>
+
+<example title="Example: deploy-copy">
+unix> resinctl deploy-copy --source mysource --target mytarget
+
+copied production/webapp/default/mysource to production/webapp/default/mytarget
+</example>
+
+<deftable title="deploy-copy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-source</td>
+    <td>context to copy application from</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-source host</td>
+    <td>host to copy application from</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-source-stage</td>
+    <td>source stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-source-version</td>
+    <td>version of the source application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target</td>
+    <td>context to copy application to</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target-host</td>
+    <td>host to copy an application to</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-target-stage</td>
+    <td>target stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-target-version</td>
+    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+</deftable>
+</defun> <!-- deploy-copy -->
+
+<defun title="deploy-list: list deployed applications">
+  <p>List deployed applications with <code>deploy-list</code>.</p>
+  
+<def>
+resinctl deploy-list [options]
+</def>
+
+<example title="Example: deploy-list">
+unix> resinctl deploy-list
+
+production/webapp/default/hello-world
+</example>
+
+</defun>  <!-- deploy-list -->
+
+<defun title="heap-dump: producing JVM memory heap dump">
+<p>To produce a heap dump resin provides <code>heap-dump</code> command. With
+Resin Open Source, <code>heap-dump</code> will produce a standard heap dump
+file and put it into the Resin log directory on the remote machine.</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] heap-dump [options] [-raw]
+</def>
+
+<example title="Example: producing a heap dump on Resin Open Source">
+unix> bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test -raw
+
+Heap dump is written to `/var/log/resin/heap.hprof'.
+To view the file on the target machine use
+jvisualvm --openfile /var/log/resin/heap.hprof
+</example>
+
+<p>
+Resin Pro, when heap-dump is given no <code>-raw</code> option is capable of
+producing a readable summary report.
+</p>
+
+<example title="Example: heap-dump">
+unix: bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test
+
+Heap Dump generated Fri May 08 02:51:31 PDT 1998
+   count   |  self size | child size | class name
+        68 |       6528 |    3142736 | com.caucho.util.LruCache
+     28768 |     920576 |    2674000 | java.lang.String
+     29403 |    2066488 |    2066488 | char[]
+        68 |    1927360 |    1927360 | com.caucho.util.LruCache$CacheItem[]
+      7346 |     715416 |    1796320 | java.lang.Object[]
+      5710 |     594200 |    1768624 | java.util.HashMap$Entry[]
+      2827 |     135696 |    1606264 | java.util.HashMap
+     20787 |     665184 |    1489024 | java.util.HashMap$Entry
+      9682 |     852016 |    1235984 | java.lang.reflect.Method
+     61507 |     984112 |     984400 | java.lang.Object
+       337 |      16176 |     889192 | java.util.concurrent.ConcurrentHashMap
+      2881 |     161336 |     883584 | java.util.LinkedHashMap
+      1596 |     178752 |     702296 | com.caucho.quercus.program.ProStaticFunction
+
+</example>
+
+<deftable title="heap-dump options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-raw</td>
+    <td>produces a standard .hprof file</td>
+    <td></td>
+  </tr>
+</deftable>
+  <note>since raw heap dump can be on the order of gigabytes the resulting file
+  is always left on the machine where Resin server is running. </note>
+</defun> <!-- heap-dump -->
+
+<s1 title="jmx-list: listing JMX MBeans, attributes and operations">
+<p>Command<code>jmx-list</code> prints out JMX MBeans, attributes and operations
+registered in a JVM that is running Resin. As its last argument the command
+accepts &lt;pattern>. The &lt;pattern> follows convention defined for
+<code>javax.management.ObjectName</code>, defaulting to resin:*, which matches any
+MBean in resin domain.</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-list [options] [&lt;pattern>]
+</def>
+
+<example title="Example: listing MBeans">
+unix> bin/resin.sh -conf conf/resin.conf jmx-list -user foo -password test com.acme:*
+
+com.acme:type=Foo
+com.acme:type=Bar
+</example>
+
+<deftable title="jmx-list options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>-attributes</td>
+    <td>outputs a list of attributes for each MBean</td>
+  </tr>
+  <tr>
+    <td>-values</td>
+    <td>outputs a list of attributes and values for each MBean</td>
+  </tr>
+  <tr>
+    <td>-operations</td>
+    <td>outputs a list of operations each MBean</td>
+  </tr>
+  <tr>
+    <td>-operations</td>
+    <td>outputs a list of operations each MBean</td>
+  </tr>
+  <tr>
+    <td>-platform</td>
+    <td>only queries MBeans in java.lang domain(unless pattern is specified)</td>
+  </tr>
+  <tr>
+    <td>-all</td>
+    <td>queries MBeans in any domain(unless pattern is specified)</td>
+  </tr>
+</deftable>
+<example title="Example: listing MBeans with values">bin/resin.sh -conf conf/resin.conf jmx-list -user foo -password test -values com.acme:*
+
+com.acme:type=Foo
+  attributes:
+    javax.management.MBeanAttributeInfo[description=,
+            name=Boolean, type=boolean, read-only, descriptor={}]==false
+
+</example>
+</s1>
+
+<s1 title="jmx-dump: dump all MBean attributes and values">
+<p>Command<code>jmx-dump</code> produces a complete listing of a MBeans with
+current attribute values.  The output is usually lengthy and can be directed to 
+a file rather than stdout using the -file parameter.</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-dump [options] [-file &lt;file>]
+</def>
+
+<deftable title="jmx-list options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-file</td>
+    <td>if specified, writes output to file</td>
+    <td></td>
+  </tr>
+</deftable>
+
+<example title="Example: dumping JMX">bin/resin.sh -conf conf/resin.conf jmx-dump -user foo -password test
+JMX Dump:
+java.lang:type=MemoryPool,name=CMS Old Gen {
+  Name=CMS Old Gen
+  Type=HEAP
+...
+
+</example>
+
+</s1>
+
+<s1 title="jmx-set: setting attribute value on MBeans">
+<p>Command<code>jmx-set</code> sets a value on an attribute belonging to a particular
+JMX MBean.</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-set [options] -pattern &lt;pattern> -attribute &lt;attribute> value
+</def>
+
+<example title="Example: setting attribute value">
+unix> bin/resin.sh -conf conf/resin.conf jmx-set -user foo -password test \
+                   -pattern com.acme:type=Foo -attribute Foo foo-value
+
+value for attribute `Foo' on bean `com.acme:type=Foo' is changed from `null' to `foo-value'
+</example>
+
+<deftable title="jmx-set options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>-pattern</td>
+    <td>specifies pattern to match target MBean</td>
+  </tr>
+  <tr>
+    <td>-attribute</td>
+    <td>sets name of the attribute</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>String representation of the value (primitive types and String are
+      supported)
+    </td>
+  </tr>
+</deftable>
+</s1>
+
+<s1 title="jmx-call: invoking method on a MBean">
+<p>Command<code>jmx-call</code> calls a method on a specified with &lt; pattern> MBean.</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-call [options] -pattern &lt;pattern> -operation &lt;operation> value...
+</def>
+
+<example title="Example: invoking method on MBean">
+unix> bin/resin.sh -conf conf/resin.conf jmx-call \
+                   -user foo -password test \
+                   -pattern com.acme:type=Foo -pattern com.acme:type=Foo \
+                   -operation echo hello
+
+method `echo(java.lang.String)' called on `com.acme:type=Foo' returned `hello'.
+
+</example>
+
+<deftable title="jmx-call options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>-pattern</td>
+    <td>specifies pattern to match target MBean</td>
+  </tr>
+  <tr>
+    <td>-operation</td>
+    <td>sets name of the operation to invoke</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>space separated list of parameters that will be passed to the method (primitive types and String are
+      supported)
+    </td>
+  </tr>
+</deftable>
+</s1>
+
+<defun title="license-add: copy a license to the license directory">
+<p>The <code>license-add</code> is a convenient way to remotely add a license 
+to the correct license directory</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] license-add -license &lt;license file> [options]
+</def>
+
+<example title="Example: copy test.license to the license directory as test.license, overwrite if exists">
+unix> bin/resin.sh license-add -user admin -password secret -license test.license -overwrite
+
+add-license wrote test.license successfully
+</example>
+
+  <deftable title="license-add options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-license</td>
+      <td>Path to license file to add</td>
+      <td>none, required</td>
+    </tr>
+    <tr>
+      <td>-to</td>
+      <td>File name license will be written to</td>
+      <td>name of license file</td>
+    </tr>
+    <tr>
+      <td>-overwrite</td>
+      <td>Overwrite existing license file if exists</td>
+      <td>false, true if set</td>
+    </tr>
+    <tr>
+      <td>-restart</td>
+      <td>Restart Resin after license is added</td>
+      <td>false, true if set</td>
+    </tr>
+  </deftable>
+</defun> <!-- license-add -->
+
+<defun title="log-level: setting log level">
+  <p>Change the logging level temporarily with <code>log-level</code>.
+The java.util.logging level will change to the new value.</p>
+  
+<def>
+resinctl log-level [options] \
+            -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off \
+            [-active-time &lt;time-period>] [names...]
+</def>
+
+<example title="Example: setting log level">
+unix> resinctl log-level --finer --active-time 5s com.mycom.mypkg
+
+Log level is set to 'FINER', active time 5 seconds: {root}, com.caucho
+</example>
+
+<deftable title="log-level options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-active-time</td>
+    <td>specifies temporary level active time. e.g. 5s</td>
+    <td>permanent</td>
+  </tr>
+  <tr>
+    <td>-&lt;level></td>
+    <td>specifies new log level</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>name of the logger(s). Defaults to root and `com.caucho' loggers.</td>
+    <td></td>
+  </tr>
+</deftable>
+</defun> <!-- log-level -->
+
+<defun title="password-encrypt: encrypts a configuration password">
+
+<p>Encrypt a configuration password with <code>password-encrypt</code>.
+For a configuration password, you can use the &lt;resin:Password> tag
+with the password to avoid plaintext.</p>
+  
+<def>
+resinctl password-encrypt [options] plaintext
+</def>
+
+<p>The <code>password-encrypt</code> encrypts plaintext for a
+configuration password. See the &lt;resin:Password> for use.</p>
+
+<example title="Example: password-encrypt">
+unix> resinctl password-generate mypassword
+password: {RESIN}bjuNvBjEDN2m6ynQU8SqQA==
+</example>
+
+<example title="Example: resin-web.xml with database">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;database jndi-name='jdbc/test_mysql'&gt;
+    &lt;driver type="com.mysql.jdbc.Driver"&gt;
+      &lt;url&gt;jdbc:mysql://localhost:3306/test&lt;/url&gt;
+      &lt;user&gt;myuser&lt;/user&gt;
+      &lt;password&gt;
+        &lt;resin:Password>{RESIN}bjuNvBjEDN2m6ynQU8SqQA==&lt;/resin:Password>
+      &lt;/password&gt;
+    &lt;/driver&gt;
+  &lt;/database&gt;
+   
+
+&lt;/web-app>
+</example>
+
+<example title="Example: resin.properties openssl_password">
+openssl_password: {RESIN}bjuNvBjEDN2m6ynQU8SqQA==
+</example>
+
+<deftable title="password-encrypt options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+</deftable>
+</defun> <!-- password-encrypt -->
+
+<defun title="password-generate: generates an admin password">
+
+<p>Generate an admin password with <code>password-generate</code>.
+You can paste the output into the resin.properties file.
+The admin password is used for /resin-admin, remote deployment and
+REST administration.</p>
+  
+<def>
+resinctl password-generate [options] name password
+</def>
+
+<example title="Example: password-generate">
+unix> resinctl password-generate myuser mypassword
+admin_user : myuser
+admin_password : {SSHA}yAKopu5id740xAoePKZOGyAtu78DpZck
+</example>
+
+<deftable title="password-generate options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+</deftable>
+</defun> <!-- password-generate -->
+
+<defun title="pdf-report: pdf report generation">
+
+<p>Generate a PDF report for the server with <code>pdf-report</code>.</p>
+
+<def>
+resinctl pdf-report [options]
+</def>
+
+<example title="Example: generate the default watchdog PDF report">
+unix> bin/resin.sh pdf-report -user admin -password secret -watchdog
+
+generated /usr/local/share/resin/log/default-Watchdog-20110801T0251.pdf
+</example>
+
+  <deftable title="pdf-report options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-logdir</td>
+      <td>PDF output directory</td>
+      <td>Resin log directory</td>
+    </tr>
+    <tr>
+      <td>-path</td>
+      <td>Path to a PDF generating .php file</td>
+      <td>${resin.home}/doc/admin/pdf-gen.php</td>
+    </tr>
+    <tr>
+      <td>-period</td>
+      <td>Report look back period of time</td>
+      <td>7D</td>
+    </tr>
+    <tr>
+      <td>-snapshot</td>
+      <td>Take a snapshot of the server before reporting</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td>-watchdog</td>
+      <td>Report on server period to the last restart</td>
+      <td>false</td>
+    </tr>
+  </deftable>
+</defun> <!-- pdf-report -->
+
+<defun title="profile: CPU profiling application">
+
+<p>Profile an applications to find bottlenecks and CPU spikes. Resin's
+<code>profile</code> command turn on sampling for requested period
+of time and prints out profiling resutls.
+</p>
+  
+<def>
+resinctl profile [options]
+</def>
+
+<example title="Example: profiling an application">
+unix> resinctl profile
+
+Profile started at 1998-05-08 02:51:31.001. Active for a total of 5000ms.
+Sampling rate 10ms. Depth 16.
+   % time  |time self(s)|   % sum    | Method Call
+   800.000 |     40.080 |     28.407 | com.caucho.env.thread.AbstractTaskWorker.run()
+   300.000 |     15.030 |     39.060 | com.caucho.env.thread.ResinThread.waitForTask()
+   200.000 |     10.020 |     46.162 | com.caucho.vfs.JniSocketImpl.nativeAccept()
+   116.168 |      5.820 |     50.287 | _jsp._test__jsp$1.run()
+   100.000 |      5.010 |     53.838 | com.caucho.env.thread.AbstractTaskWorker.run()
+   100.000 |      5.010 |     57.389 | java.lang.ref.ReferenceQueue.remove()
+   100.000 |      5.010 |     60.940 | com.caucho.server.admin.ManagerActor.profile()
+   100.000 |      5.010 |     64.491 | java.lang.ref.Reference$ReferenceHandler.run()
+   100.000 |      5.010 |     68.042 | java.lang.UNIXProcess.waitForProcessExit()
+   100.000 |      5.010 |     71.593 | java.io.FileInputStream.readBytes()
+   100.000 |      5.010 |     75.144 | com.caucho.util.Alarm$AlarmThread.run()
+   100.000 |      5.010 |     78.694 | com.caucho.env.shutdown.ShutdownSystem$ShutdownThread.run()
+   100.000 |      5.010 |     82.245 | com.caucho.network.listen.JniSelectManager.selectNative()
+   100.000 |      5.010 |     85.796 | unknown
+   100.000 |      5.010 |     89.347 | com.caucho.vfs.JniSocketImpl.readNative()
+   100.000 |      5.010 |     92.898 | com.caucho.test.Test$Timeout.run()
+   100.000 |      5.010 |     96.449 | com.caucho.profile.ProProfile.nativeProfile()
+   100.000 |      5.010 |    100.000 | java.lang.Thread.sleep()
+com.caucho.env.thread.AbstractTaskWorker.run()
+  sun.misc.Unsafe.park()
+  java.util.concurrent.locks.LockSupport.parkUntil()
+  com.caucho.env.thread.AbstractTaskWorker.run()
+  com.caucho.env.thread.ResinThread.runTasks()
+  com.caucho.env.thread.ResinThread.run()
+
+</example>
+
+<ul>
+<li>% time - percentage of total profile time. The number can be larger than 100%
+because of multithreading. Methods that are 100%, or multiples, are generally
+blocking methods and can be ignored. If an active method is 100%, it might be a
+CPU spinning thread.</li>
+<li>time self(s) - time in seconds for the method.</li>
+<li>% sum - percentage of all methods time. All the method times are added, and
+this method's own time is computed as a percentage.</li>
+</ul>
+
+<deftable title="profile options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-active-time</td>
+    <td>specifies profiling time span in ms (defaults to 5000 - 5 sec.)</td>
+    <td>5s</td>
+  </tr>
+  <tr>
+    <td>-sampling-rate</td>
+    <td>specifies sampling rate (defaults to 10ms)</td>
+    <td>10ms</td>
+  </tr>
+</deftable>
+
+</defun> <!-- profile -->
+
+<defun title="restart: restart a daemon server">
+
+<p>Restart a Resin daemon server with <code>restart</code>.</p>
+  
+<def>
+resinctl restart [options]
+</def>
+
+<p>The <code>restart</code> command will select the matching
+server and restart it.
+If the --server attribute is specified, the matching server will restart.
+Otherwise, <code>restart</code> will look for all configured servers
+with a matching local IP address. If none match, it will use the
+default server.</p>
+
+<example title="Example: restart a daemon">
+unix> resinctl restart
+Resin/4.0.30 restarted -server 'app-0' for watchdog at 127.0.0.1:6600
+</example>
+
+<deftable title="restart options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--server</td>
+    <td>the server name to restart</td>
+    <td>"default" or local IP</td>
+  </tr>
+</deftable>
+</defun> <!-- restart -->
+
+
+<defun title="scoreboard: thread activity summary">
+
+<p><code>scoreboard</code> produces a concise thread activity report for 
+groups of related threads.</p>
+  
+<def>
+resinctl scoreboard [options]
+</def>
+
+<example title="Example: scoreboard">
+unix> resinctl scoreboard
+[Port 127.0.0.1:6800 Threads]
+____R
+
+[Port *:8080 Threads]
+____RRRRR
+
+[Resin Threads]
+ww.....w......RwR.Rwwww....w.....wwwww..www
+
+[Other Threads]
+wRww
+
+[Scoreboard Key]
+w   WAITING
+b   BLOCKED
+R   RUNNING
+_   ACCEPT
+N   NATIVE
+.   IDLE
+
+</example>
+
+<deftable title="scoreboard options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--type</td>
+    <td>Scoreboard report type</td>
+    <td>resin</td>
+  </tr>
+  <tr>
+    <td>--greedy</td>
+    <td>If false threads can be categoried into more than one group</td>
+    <td>true</td>
+  </tr>
+</deftable>
+</defun> <!-- scoreboard -->
+
+<defun title="shutdown: shutdown all daemon servers">
+
+<p>Shutdown all Resin daemon servers and watchdog with <code>shutdown</code>.</p>
+  
+<def>
+resinctl shutdown [options]
+</def>
+
+<p>The <code>shutdown</code> command shuts down the watchdog manager, and
+all servers managed by the watchdog.</p>
+
+<example title="Example: shutdown watchdog">
+unix> resinctl shutdown
+Resin/4.0.30 shutdown watchdog at 127.0.0.1:6600
+</example>
+
+<deftable title="shutdown options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+</deftable>
+</defun> <!-- shutdown -->
+
+<defun title="start: starting as a daemon">
+
+<p>Start Resin as a daemon with <code>start</code>. You can also
+use <code>start-all</code> which will start all local servers.</p>
+  
+<def>
+resinctl start [options]
+</def>
+
+<p>The <code>start</code> command will select a single server.
+If the --server
+attribute is specified, the matching server will start. Otherwise,
+<code>start</code> will look for a configured server with a matching
+local IP address. To start multiple servers on the same machine,
+use <code>start-all</code> If none match, it will use the default server.</p>
+
+<example title="Example: starting as a daemon">
+unix> resinctl start
+Resin/4.0.30 launching watchdog at 127.0.0.1:6600
+Resin/4.0.30 started -server 'app-0' with watchdog at 127.0.0.1:6600
+</example>
+
+<p>To debug any start problems, see the log directory which contains a
+watchdog-manager.log and jvm-default.log.</p>
+
+<deftable title="start options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--cluster</td>
+    <td>cluster to join when using --elastic-server</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-dns</td>
+    <td>lazy local DNS address binding: retry until succeed</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-server</td>
+    <td>start as a dynamic server joining a cluster</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--server</td>
+    <td>the server name to start</td>
+    <td>"default" or local IP</td>
+  </tr>
+  <tr>
+    <td>--verbose</td>
+    <td>start with extra debugging</td>
+    <td></td>
+  </tr>
+</deftable>
+</defun> <!-- start -->
+
+<defun title="start-all: starting multiple servers as a daemon">
+
+<p>Start Resin servers as a daemon with <code>start-all</code>.
+All servers listening to the local IP address will be started.</p>
+  
+<def>
+resinctl start-all [options]
+</def>
+
+<p>The <code>start-all</code> command will select all matching servers.
+If the --server attribute is specified, the matching server will start.
+Otherwise, <code>start-all</code> will look for all configured servers
+with a matching local IP address. If none match, it will use the
+default server. If none match, and dynamic servers are enabled,
+<code>start-all</code> will start a dynamic server.</p>
+
+<example title="Example: starting as a daemon">
+unix> resinctl start-all
+Resin/4.0.30 launching watchdog at 127.0.0.1:6600
+Resin/4.0.30 started -server 'app-0' with watchdog at 127.0.0.1:6600
+</example>
+
+<p>To debug any <code>start-all</code> problems, see the log directory
+which contains a watchdog-manager.log and jvm-default.log.</p>
+
+<deftable title="start-all options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--cluster</td>
+    <td>cluster to join when using --elastic-server</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-dns</td>
+    <td>lazy local DNS address binding: retry until succeed</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--elastic-server</td>
+    <td>start as a dynamic server joining a cluster</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>--server</td>
+    <td>the server name to start</td>
+    <td>"default" or local IP</td>
+  </tr>
+  <tr>
+    <td>--verbose</td>
+    <td>start with extra debugging</td>
+    <td></td>
+  </tr>
+</deftable>
+</defun> <!-- start-all -->
+
+<defun title="status: status of daemon server">
+
+<p>View the status of Resin daemon server with <code>status</code>.</p>
+  
+<def>
+resinctl status [options]
+</def>
+
+<p>The <code>status</code> command prints a status summary for each
+server managed by the local watchdog.</p>
+
+<example title="Example: server status">
+unix> resinctl status
+Resin/4.0.30 status for watchdog at 127.0.0.1:6600
+
+watchdog:
+  watchdog-pid: 6551
+
+server 'app-0' : ACTIVE
+  password: missing
+  watchdog-user: caucho
+  user: caucho
+  root: /var/resin/
+  conf: /etc/resin/resin.xml
+  pid: 6598
+  uptime: 0 days 00h00
+</example>
+
+<deftable title="status options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+</deftable>
+</defun> <!-- status -->
+
+<defun title="stop: stop a daemon server">
+
+<p>Stop a Resin daemon server with <code>stop</code>.</p>
+  
+<def>
+resinctl stop [options]
+</def>
+
+<p>The <code>stop</code> command will select the matching.
+If the --server attribute is specified, the matching server will stop
+Otherwise, <code>stop</code> will look for all configured servers
+with a matching local IP address. If none match, it will use the
+default server.</p>
+
+<example title="Example: stop a daemon">
+unix> resinctl stop
+Resin/4.0.30 stopped for watchdog at 127.0.0.1:6600
+</example>
+
+<deftable title="stop options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>--server</td>
+    <td>the server name to stop</td>
+    <td>"default" or local IP</td>
+  </tr>
+</deftable>
+</defun> <!-- stop -->
+
+<defun title="thread-dump: producing a thread dump">
+<p>Dump the JVM's threads with <code>thread-dump</code>.
+The thread dump is produced on a remote sever and printed out locally.</p>
+
+<def>
+resinctl thread-dump [options] [-raw]
+</def>
+
+<example title="Example: producing a thread dump">
+unix> resinctl thread-dump -raw
+
+  Thread Dump:
+
+  "MailboxWorker[manager@resin.caucho]-8" id=31 RUNNABLE
+    at sun.management.ThreadImpl.getThreadInfo0 (ThreadImpl.java) (native)
+    at sun.management.ThreadImpl.getThreadInfo (ThreadImpl.java:147)
+    at com.caucho.util.ThreadDump.threadDumpImpl (ThreadDump.java:88)
+    at com.caucho.util.ThreadDump.getThreadDump (ThreadDump.java:62)
+    at com.caucho.server.admin.ManagerActor.doThreadDump (ManagerActor.java:148)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java) (native)
+    at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:39)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:25)
+    at java.lang.reflect.Method.invoke (Method.java:597)
+    at com.caucho.bam.actor.BamSkeleton$QueryMethodInvoker.invoke (BamSkeleton.java:501)
+    at com.caucho.bam.actor.BamSkeleton.query (BamSkeleton.java:215)
+    at com.caucho.bam.actor.SkeletonActorFilter.query (SkeletonActorFilter.java:187)
+    at com.caucho.bam.query.QueryActorFilter.query (QueryActorFilter.java:95)
+    at com.caucho.bam.packet.Query.dispatch (Query.java:86)
+    at com.caucho.bam.mailbox.MultiworkerMailbox.dispatch (MultiworkerMailbox.java:268)
+    at com.caucho.bam.mailbox.MailboxWorker.runTask (MailboxWorker.java:73)
+    at com.caucho.env.thread.AbstractTaskWorker.run (AbstractTaskWorker.java:160)
+    at com.caucho.env.thread.ResinThread.runTasks (ResinThread.java:164)
+    at com.caucho.env.thread.ResinThread.run (ResinThread.java:130)
+
+  "Signal Dispatcher" id=5 RUNNABLE
+
+  "http://*:8087-1" id=26 RUNNABLE (in native)
+    at com.caucho.vfs.JniSocketImpl.readNative (JniSocketImpl.java) (native)
+    at com.caucho.vfs.JniSocketImpl.read (JniSocketImpl.java:337)
+    at com.caucho.vfs.JniStream.readTimeout (JniStream.java:90)
+    at com.caucho.vfs.ReadStream.fillWithTimeout (ReadStream.java:1135)
+    at com.caucho.network.listen.TcpSocketLinkListener.keepaliveThreadRead (TcpSocketLinkListener.java:1345)
+    at com.caucho.network.listen.TcpSocketLink.processKeepalive (TcpSocketLink.java:767)
+    at com.caucho.network.listen.DuplexReadTask.doTask (DuplexReadTask.java:91)
+    at com.caucho.network.listen.TcpSocketLink.handleRequests (TcpSocketLink.java:646)
+    at com.caucho.network.listen.AcceptTask.doTask (AcceptTask.java:104)
+    at com.caucho.network.listen.ConnectionReadTask.runThread (ConnectionReadTask.java:98)
+    at com.caucho.network.listen.ConnectionReadTask.run (ConnectionReadTask.java:81)
+    at com.caucho.network.listen.AcceptTask.run (AcceptTask.java:67)
+    at com.caucho.env.thread.ResinThread.runTasks (ResinThread.java:164)
+    at com.caucho.env.thread.ResinThread.run (ResinThread.java:130)
+
+...
+</example>
+</defun> <!-- thread dump -->
+
+<defun title="undeploy: undeploying application">
+<p>Undeploy an application with <code>undeploy</code>.
+After the undeploy, the application is stopped, removed from the repository
+and no longer responds to requests.</p>
+
+<def>
+resinctl undeploy [options] &lt;name>
+</def>
+
+<example title="Example: undeploy">
+unix> resinctl undeploy undeploy foo
+
+Undeployed foo from http://127.0.0.1:8080/hmtp
+</example>
+
+  <deftable title="undeploy options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host of the application</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>deployment stage of the application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of the application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</defun> <!-- undeploy -->
+
+<defun title="webapp-restart: restarting application">
+
+<p>Start an application with <code>webapp-restart</code>.</p>
+
+<def>
+resinctl restart-webapp [options] &lt;name>
+</def>
+
+<example title="Example: stop web application deployed at context '/myapp'">
+unix> resinctl webapp-restart myapp
+
+'production/webapp/default/myapp' is restarted
+</example>
+  <deftable title="webapp-restart options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</defun>
+
+<defun title="webapp-start: starting application">
+
+<p>Start an application with <code>webapp-start</code></p>
+<def>
+resinctl webapp-start [options] &lt;name>
+</def>
+
+<example title="Example: start web application deployed at context '/myapp'">
+unix> resinctl webapp-start myapp
+
+'production/webapp/default/myapp' is started
+</example>
+
+  <deftable title="webapp-start options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host of the application</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>deployment stage of the application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</defun>  <!-- webapp-start -->
+
+<defun title="webapp-stop: stopping application">
+<p>Stop an application with <code>webapp-stop</code>.</p>
+
+<def>
+resinctl webapp-stop [options] &lt;name>
+</def>
+
+<example title="Example: stop web application '/myapp'">
+unix> resinctl webapp-stop myapp
+
+'production/webapp/default/myapp' is stopped
+</example>
+
+  <deftable title="webapp-stop options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</defun> <!-- webapp-stop -->
+
+  </body>
+</document>

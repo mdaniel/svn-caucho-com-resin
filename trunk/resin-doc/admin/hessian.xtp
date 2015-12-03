@@ -1,0 +1,171 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Hessian</title>
+  <type>contents</type>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Hessian Protocol">
+
+<p>Hessian is a binary serialization protocol with support for RPC.  It
+provides cross-language binary object serialization with efficiencies better
+than java.io serialization</p>
+
+<p>See <a href="http://hessian.caucho.com/">hessian.caucho.com</a> and
+<a href="http://en.wikipedia.org/wiki/Hessian_(Web_service_protocol)">Hessian on Wikipedia</a></p>
+</s1>
+
+
+<s1 title="Hessian Serialization">
+
+<p>The Hessian serialization API resembles java.io ObjectOutputStream
+serialization. The general steps are to create a Hessian2Output around any
+OutputStream and write data to the stream.</p>
+
+<example title="Serialization">
+
+ByteArrayOutputStream bos = new ByteArrayOutputStream();
+Hessian2Output out = new Hessian2Output(bos);
+
+out.startMessage();
+out.writeInt(2);
+
+Car car1 = new Car(Model.EDSEL, Color.GREEN, 1954);
+out.writeObject(car1);
+
+Car car2 = new Car(Model.MODEL_T, Color.BLACK, 1937);
+out.writeObject(car2);
+
+out.completeMessage();
+out.close();
+
+byte []data = bos.toByteArray();
+
+</example>
+
+<example title="Deserialization">
+
+ByteArrayInputStream bin = new ByteArrayInputStream(data);
+Hessian2Input in = new Hessian2Input(bin);
+
+in.startMessage();
+
+ArrayList list = new ArrayList();
+
+int length = in.readInt();
+
+for (int i = 0; i &lt; length; i++) {
+  list.add(in.readObject());
+}
+
+in.completeMessage();
+
+in.close();
+bin.close();
+
+</example>
+
+<s2 title="Compression">
+
+<example title="Deflation">
+Deflation envelope = new Deflation();
+
+ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+HessianFactory factory = new HessianFactory();
+Hessian2Output out = factory.createHessian2Output(bos);
+
+out = envelope.wrap(out);
+out.startMessage();
+
+Car car1 = new Car(Model.EDSEL, Color.GREEN, 1954);
+out.writeObject(car1);
+
+out.completeMessage();
+out.close();
+
+byte []data = bos.toByteArray();
+</example>
+
+<example title="Inflation">
+Deflation envelope = new Deflation();
+
+ByteArrayInputStream bin = new ByteArrayInputStream(data);
+
+HessianFactory factory = new HessianFactory();
+Hessian2Input in = factory.createHessian2Input(bin);
+
+in = envelope.unwrap(in);
+
+in.startMessage();
+
+Object value = in.readObject();
+
+in.completeMessage();
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Hessian Web Service">
+
+<example title="MathService.java (remote interface)">
+package example;
+
+public interface MathService {
+  public int add(int a, int b);
+}
+</example>
+
+<example title="MathServiceImpl.java">
+package example;
+
+public class MathServiceImpl implements MathService {
+  public int add(int a, int b)
+  {
+    return a + b;
+  }
+}
+</example>
+
+<example title="Server configuration resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="/math/*"
+                   servlet-class="example.MathService">
+    &lt;protocol uri="hessian:"/>
+  &lt;/servlet-mapping>
+
+  &lt;remote-client name="math">
+    &lt;uri>hessian:url=${webApp.url}/math/&lt;/uri>
+    &lt;interface>example.MathService&lt;/interface>
+  &lt;/remote-client>
+
+&lt;/web-app>
+</example>
+
+<example title="JSP Java client">
+&lt;%@ page import="javax.inject.Inject" %>
+&lt;%@ page import="example.MathService" %>
+&lt;%!
+@Inject MathService math;
+%>
+&lt;pre>
+3 + 2 = &lt;%= math.add(3, 2) %>
+3 - 2 = &lt;%= math.sub(3, 2) %>
+3 * 2 = &lt;%= math.mul(3, 2) %>
+3 / 2 = &lt;%= math.div(3, 2) %>
+&lt;/pre>
+</example>
+
+</s1>
+
+
+</body>
+</document>
+

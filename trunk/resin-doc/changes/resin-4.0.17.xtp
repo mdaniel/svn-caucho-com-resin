@@ -1,0 +1,170 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.17 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.17 includes Web Profile TCK, JMS, cloud, health,
+eclipse plugin, and command-line work</p>
+
+<ul>
+<li>Web Profile TCK - now passing all Web Profile TCK sections</li>
+<li>JMS - now passing JMS TCK</li>
+<li>cloud - dynamic -join-cluster added</li>
+<li>health - configurable JMX meters for graphing, and many added health predicates.</li>
+
+<li>command-line - added support for log-level, profile, heap-dump and thread-dump.</li>
+
+</ul>
+
+</s1>
+
+<s1 title="Web Profile TCK">
+
+<ul>
+<li>EL - pass</li>
+<li>EJB - pass</li>
+<li>JDBC - pass</li>
+<li>JMS - pass</li>
+<li>JPA - pass</li>
+<li>JSF - pass</li>
+<li>JSP - pass</li>
+<li>JSR-299 (CDI) - pass</li>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSTL - pass</li>
+<li>JTA - pass</li>
+<li>Servlet - pass</li>
+</ul>
+
+</s1>
+
+<s1 title="Dynamic Server Cloud Support">
+
+<p>Resin 4.0.17 finishes up our dynamic cloud support, putting the
+final piece together. You can now add and remove a new dynamic server to
+the cluster, and Resin's cloud will update to support the new server
+automatically.</p>
+
+<ul>
+<li>Resin load balancing automatically uses the new server.</li>
+<li>The new server gets the latest application .war.</li>
+<li>JMS Queue sender/receivers work with the new server.</li>
+<li>JMX clustered management works with the new server.</li>
+<li>Clustered caching data is shared with the new server.</li>
+</ul>
+
+<example title="Example: starting new server">
+unix> java -jar lib/resin.jar -join-cluster app-tier -server dyn1 start
+</example>
+
+</s1>
+
+<s1 title="Health Check Updates">
+
+<p>Enhancements to the health check system continue with the following new
+command available.</p>
+
+<ul>
+ <li>&lt;health:IfFlapping> - predicate that qualifies an action to match on 
+ frequent state changes.</li>
+ 
+ <li>&lt;health:IfCron> - predicate that qualifies an action to match if the 
+ current time is in an active range configured using cron-style syntax.</li>
+ 
+ <li>&lt;health:IfExpr> - predicate that qualifies an action to match on the 
+ evaluation of a JSP EL expression.</li>
+ 
+ <li>&lt;health:ExprHealthCheck> - check that evaluates one or more JSP EL 
+ expressions to a health status.</li>
+ 
+ <li>&lt;health:ExecCommand> - action that executes a shell command.</li>
+</ul>
+
+<p>&lt;health:IfExpr> and &lt;health:ExprHealthCheck> work well in combination 
+with enhancements made to EL syntax that enables JMX access and regular 
+expression evaluation.</p>
+
+<example title="Example: JMX access and regular expressions in EL">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:SendMail>
+   &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:Not>
+      &lt;health:IfExpr test="${mbean('java.lang:type=Runtime').BootClassPath =~ '.*resource-16.jar.*'}"/>
+    &lt;/health:Not>
+  &lt;/health:SendMail>
+ 
+&lt;/cluster>
+</example>
+
+<p>In this example, the mbean('java.lang:type=Runtime') function looks up an 
+MBean in JMX, and '.BootClassPath' retrieves the attribute value.  The 
+=~ operator matches the value to a regular expression.  &lt;health:Not> 
+qualifies the predicate to match on a failure.  This is a useful check to 
+alert if a required jar is not present in the boot classpath.</p>
+
+</s1>
+
+<s1 title="JMX Meter Updates">
+
+<p>A number of previously hard-coded JMX meters are now setup in health.xml.  
+Meters provide graphing in /resin-admin.  Any numeric MBean attribute can be 
+graphed using the new &lt;health:JmxMeter> or &lt;health:JmxDeltaMeter> 
+elements.</p>
+
+<example title="Example: JMX meters in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:JmxMeter>
+    &lt;name>JVM|Thread|JVM Thread Count&lt;/name>
+    &lt;objectName>java.lang:type=Threading&lt;/objectName>
+    &lt;attribute>ThreadCount&lt;/attribute>
+  &lt;/health:JmxMeter>
+
+  &lt;health:JmxDeltaMeter>
+    &lt;name>JVM|Compilation|Compilation Time&lt;/name>
+    &lt;objectName>java.lang:type=Compilation&lt;/objectName>
+    &lt;attribute>TotalCompilationTime&lt;/attribute>
+  &lt;/health:JmxDeltaMeter>
+
+&lt;/cluster>
+</example>
+
+<p>JmxMeter graphs the current value, while JmxDelta meter graphs 
+the different between the current and previous values.  /resin-admin uses the 
+pipe | character in the &lt;name> attribute to enhance the UI by 
+categorizing meters into drill-downs.</p>
+
+</s1>
+
+<s1 title="(CLI) Resin command line updates">
+<p>Resin 4.0.17 introduces commands to produce thread and heap dumps, change log
+levels and profile applications. Documentation for an updated CLI interface
+can be viewed with <code>java -jar lib/resin.jar help</code>. Documentation for
+a particular command can be viewed with <code>java -jar lib/resin.jar help &lt;command></code>
+</p>
+<p>Commands added in release 4.0.17 are <code>thread-dump, heap-dump, log-level, profile</code></p>
+</s1>
+
+<s1 title="Eclipse plugin updates">
+<p>Eclipse plugin has undergone significant updates, with configuration, deployment
+and debugging reworked. Added option for remote deployment. Bugs #4417, #4418 are resolved.</p>
+<p>Removing the older version of plugin is necessary for a smooth update. Procedure
+for complete removal of the plugin is outlined at http://bugs.caucho.com/view.php?id=4417</p>
+</s1>
+
+<s1 title="NetBeans plugin updates">
+<p>Updates to NetBeans plugin resolve bug #3936 and changes deployment option to
+exploded web-app directory deploy.</p>
+</s1>
+
+</body>
+</document>

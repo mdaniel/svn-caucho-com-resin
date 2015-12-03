@@ -1,0 +1,48 @@
+<project name="windows" default="rebuild">
+  <property name="configuration" value="Release"/>
+
+  <target name="rebuild" depends="rebuild.resin, rebuild.setup, rebuild.iis"/>
+
+  <target name="rebuild.resin">
+    <property name="module" value="resin"/>
+    <property name="module.proj" value="Resind.csproj"/>
+    <call target="rebuild.module"/>
+  </target>
+
+  <target name="rebuild.setup">
+    <property name="module" value="setup"/>
+    <property name="module.proj" value="Setup.csproj"/>
+    <call target="rebuild.module"/>
+  </target>
+
+  <target name="rebuild.iis">
+    <property name="module" value="iis"/>
+    <property name="module.proj" value="plugin.csproj"/>
+    <call target="rebuild.module"/>
+  </target>
+
+  <target name="rebuild.module">
+    <call target="clean.module"/>
+    <call target="build.module"/>
+  </target>
+
+  <target name="clean.module" description="Delete all previously compiled binaries.">
+    <delete>
+      <fileset>
+        <include name="${module}/bin/**"/>
+        <include name="${module}/obj/**"/>
+        <include name="${module}/Release/**"/>
+        <include name="${module}/*.suo"/>
+        <include name="${module}/*.user"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="build.module">
+    <solution configuration="${configuration}">
+      <projects>
+        <include name="${module}/${module.proj}"/>
+      </projects>
+    </solution>
+  </target>
+</project>

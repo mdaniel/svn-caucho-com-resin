@@ -1,0 +1,41 @@
+<?php
+
+header("Content-type: application/json");
+
+mbean_init();
+
+$query = $_GET['mbean_query'];
+$mbeans = $g_mbean_server->query($query);
+
+echo "[\n";
+
+for ($i = 0; $i < count($mbeans); $i++) {
+  $mbean = $mbeans[$i];
+
+  if ($i > 0)
+    echo ",\n";
+
+  echo "  {\n";
+  echo "    name: '" . $mbean->mbean_name . "',\n";
+  echo "    id: '" . mbean_id($mbean) . "',\n";
+  echo "    attrs: {n";
+
+  $attr_list = $mbean->mbean_info->attributes;
+
+  if (count($attr_list) > 0) {
+    for ($j = 0; $j < count($attr_list); $j++) {
+      if ($j > 0)
+        echo ",\n";
+
+      $attr_name = $attr_list[$j]->name;
+
+      echo "      '{$attr_name}': '{$mbean->$attr_name}'";
+    }
+  }
+
+  echo "\n  }";
+}
+
+echo "\n]";
+
+?>

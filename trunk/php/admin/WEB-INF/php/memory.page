@@ -1,0 +1,331 @@
+<?php
+/**
+ * Summary of heap
+ */
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+print_title("memory", "JVM Memory");
+
+echo "<div id='memory-tabs'>";
+echo "<ul>";
+echo "<li><a href='#graphs'>" . gettext('Graphs') . "</a></li>\n";
+echo "<li><a href='#dump'>" . gettext('Heap Dump') . "</a></li>\n";
+echo "</ul>";
+
+echo "<div id='graphs'>\n";
+
+$stat_service = $g_mbean_server->getStatService();
+
+if ($stat_service) {
+
+  enable_graph_controls();
+  
+  $memory_params = new GraphParams("memory", 600, 200);
+  $memory_params->title = gettext("Memory Free");
+  $memory_params->alt = gettext('A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
+
+  stat_graph($memory_params, array("$g_si|JVM|Memory|Heap Memory Free",
+                                  "$g_si|JVM|Memory|Tenured Memory Free",
+                                  "$g_si|JVM|Memory|PermGen Memory Free"));
+
+  $gc_params = new GraphParams("gc", 600, 200);
+  $gc_params->title = gettext('GC Time');
+  $gc_params->alt = gettext('A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.');
+  
+  stat_graph_regexp($gc_params, "/^$g_si\|JVM\|Memory\|GC Time/");
+}
+
+$memoryBean = $g_mbean_server->lookup("resin:type=Memory");
+
+$memory = array(
+  array(name => "CodeCache", free => $memoryBean->CodeCacheFree, used => $memoryBean->CodeCacheUsed, max => $memoryBean->CodeCacheMax, committed => $memoryBean->CodeCacheCommitted),
+  array(name => "Eden", free => $memoryBean->EdenFree, used => $memoryBean->EdenUsed, max => $memoryBean->EdenMax, committed => $memoryBean->EdenCommitted),
+  array(name => "PermGen", free => $memoryBean->PermGenFree, used => $memoryBean->PermGenUsed, max => $memoryBean->PermGenMax, committed => $memoryBean->PermGenCommitted),
+  array(name => "Survivor", free => $memoryBean->SurvivorFree, used => $memoryBean->SurvivorUsed, max => $memoryBean->SurvivorMax, committed => $memoryBean->SurvivorCommitted),
+  array(name => "Tenured", free => $memoryBean->TenuredFree, used => $memoryBean->TenuredUsed, max => $memoryBean->TenuredMax, committed => $memoryBean->TenuredCommitted)
+);
+
+echo "<h2>";
+echo gettext('Memory Pools');
+echo "</h2>\n";
+$row = 0;
+echo "<table id='sadf' class='data'>\n";
+
+echo "<thead>";
+echo "<tr>";
+echo "<th class='header' scope='col'>pool</th>\n";
+echo "<th scope='col'>% free</th>\n";
+echo "<th scope='col'>free";print_help("Memory#free");echo "</th>\n";
+echo "<th scope='col'>used";print_help("Memory#used");echo "</th>\n";
+echo "<th scope='col'>max";print_help("Memory#max");echo "</th>\n";
+echo "<th scope='col'>committed</th>\n";
+echo "</tr>";
+echo "</thead\n>";
+
+echo "<tbody>";
+
+$row = 0;
+foreach ($memory as $m) {
+  echo "<tr class='" . row_style($row++) . "'>";
+  echo "<td>$m[name]";
+  print_help("Memory#$m[name]");
+  echo "</td>";
+
+  echo"<td align='right'>" . sprintf("%.2f%%", 100 * $m[free] / $m[max])
+      . "</td>";
+
+  echo"<td align='right'>" . sprintf("%.2fM", $m[free] / 1e6) . "</td>";
+  echo"<td align='right'>" . sprintf("%.2fM", $m[used] / 1e6) . "</td>";
+  echo"<td align='right'>" . sprintf("%.2fM", $m[max] / 1e6) . "</td>";
+  echo"<td align='right'>" . sprintf("%.2fM", $m[committed] / 1e6) . "</td>";
+  echo "</tr>\n";
+}
+echo "</tbody>";
+
+echo "</table>";
+
+echo "</div>\n";
+echo "<div id='dump'>\n";
+
+$heap_dump_cl = java_class("com.caucho.profile.HeapDump");
+
+if ($heap_dump_cl->isAvailable()) {
+  $heap = @$heap_dump_cl->create();
+}
+
+$is_heap_available_heap = false;
+
+$heap_file = "/tmp/java.hprof";
+
+if ($heap) {
+  echo "<h2>";
+  echo gettext('Heap Dump');
+  echo "</h2>";
+  
+  echo "<form action='?q=memory' method='post'>";
+  echo gettext('Resin Heap Dump') . ": <input type='submit' name='action' value='dump heap'/><br/>";
+  echo gettext ('JVM Heap Dump') . ": <input type='submit' name='action' value='jvm heap dump'/> ";
+  echo preg_replace('/\$heap_file/', $heap_file, gettext('(saves JVM binary heap to $heap_file)'));
+  echo "</form>";
+
+  if ($_POST['action'] == 'jvm heap dump') {
+    $memory_mbean
+      = $g_mbean_server->lookup("com.sun.management:type=HotSpotDiagnostic");
+
+    $memory_mbean->dumpHeap($heap_file, true);
+
+    echo "<h2>Saving Heap to $heap_file</h2>";
+  }
+
+  if ($_POST['action'] == 'dump heap') {
+    $entries = $heap->dump();
+
+    $is_heap_available = sizeof($entries) > 0;
+  }
+  else {
+    $entries = $heap->getLastHeapDump();
+    $is_heap_available = true;
+  }
+}
+
+function display_heap_dump_subtab($name, $entries)
+{
+  $total_size = 0;
+  foreach ($entries as $entry) {
+    $total_size += $entry->getTotalSize();
+  }
+
+  if (sizeof($entries) > 0) {
+    echo "<div id='${name}-heap-dump-tab' class='heap-dump-tab'>\n";
+    echo "<div class='pie-chart'>\n";
+    echo "<span title='A pie chart representing the percentage of heap memory used by each class.'>\n";
+    echo "<canvas id='${name}-heap-dump-chart' width='300' height='300' style='display: block'></canvas>\n";
+    echo "</span>\n";
+    echo "<div id='${name}-heap-dump-label' class='chart-label'></div>\n";
+    echo "</div>\n";
+
+    echo "<table id='${name}-heap-dump' class='heap-dump data'>";
+    echo "<thead>\n";
+    echo "<tr>\n";
+    echo "  <th scope='col'>% self</th>\n";
+    echo "  <th scope='col'>self+desc</th>\n";
+    echo "  <th scope='col'>self</th>\n";
+    echo "  <th scope='col'>desc</th>\n";
+    echo "  <th scope='col'>count</th>\n";
+    echo "  <th scope='col' colspan='2'>class</th>\n";
+    echo "</tr>\n";
+    echo "</thead>\n";
+
+    echo "<tbody>\n";
+    for ($i = 0; $i < sizeof($entries); $i++) {
+      $entry = $entries[$i];
+
+      echo "<tr class='chart-data " . row_style($i) . "'>";
+
+      echo "<td class='heap-percent-self'>";
+      printf("%04.2f%%", 100 * $entry->getTotalSize() / $total_size);
+      echo "</td>";
+      echo "<td class='heap-self-plus-desc' align='right'>";
+      printf("%.3fM", $entry->getTotalSize() / (1024 * 1024));
+      echo "</td>";
+      echo "<td class='heap-self' align='right'>";
+      printf("%.3fM", $entry->getSelfSize() / (1024 * 1024));
+      echo "</td>";
+      echo "<td class='heap-desc' align='right'>";
+      printf("%.3fM", $entry->getChildSize() / (1024 * 1024));
+      echo "</td>";
+      echo "<td class='heap-count' align='right'>";
+      printf("%d", $entry->getCount());
+      echo "</td>";
+      echo "<td class='heap-class'>";
+      echo "{$entry->getClassName()}";
+      echo "</td>";
+      //<td> missing a <th>
+      /*echo "<td class='heap-legend'></td>";*/
+      echo "</tr>\n";
+    }
+    echo "</tbody>";
+
+    echo "</table>\n";
+    echo "</div>\n";
+  }
+}
+
+if (sizeof($entries) > 0) {
+  $application_entries = array();
+  $jvm_entries = array();
+  $resin_entries = array();
+  $class_loader_entries = array();
+
+  foreach ($entries as $entry) {
+    if (strpos($entry->getClassName(), "java") === 0
+        || strpos($entry->getClassName(), "com.sun") === 0
+        || strpos($entry->getClassName(), "sun.") === 0
+        || ereg("^(boolean|int|byte|float|double|long|char|short)(\[\])*$",
+                $entry->getClassName())) {
+      array_push($jvm_entries, $entry);
+    }
+    elseif (strpos($entry->getClassName(), "com.caucho") === 0) {
+      array_push($resin_entries, $entry);
+    }
+    else {
+      array_push($application_entries, $entry);
+    }
+    
+    if (strpos($entry->getClassName(), "ClassLoader") > 0) {
+      array_push($class_loader_entries, $entry);
+    }
+  }
+
+  echo "<div id='heap-tabs'>";
+  echo "<ul>";
+  if (count($application_entries) > 0)
+    echo "<li><a href='#Application-heap-dump-tab'>Application</a></li>\n";
+
+  if (count($jvm_entries) > 0)
+    echo "<li><a href='#JVM-heap-dump-tab'>JVM</a></li>\n";
+
+  if (count($resin_entries) > 0)
+    echo "<li><a href='#Resin-heap-dump-tab'>Resin</a></li>\n";
+
+  if (count($class_loader_entries) > 0)
+    echo "<li><a href='#ClassLoader-heap-dump-tab'>ClassLoader</a></li>\n";
+
+  if (count($entries) > 0)
+    echo "<li><a href='#All-heap-dump-tab'>All</a></li>\n";
+
+  echo "</ul>";
+
+  if (count($application_entries) > 0)
+    display_heap_dump_subtab("Application", $application_entries);
+
+  if (count($jvm_entries) > 0)
+    display_heap_dump_subtab("JVM", $jvm_entries);
+
+  if (count($resin_entries) > 0)
+    display_heap_dump_subtab("Resin", $resin_entries);
+
+  if (count($class_loader_entries) > 0)
+    display_heap_dump_subtab("ClassLoader", $class_loader_entries);
+
+  if (count($entries) > 0)
+    display_heap_dump_subtab("All", $entries);
+}
+else if (! $is_heap_available) {
+  if (! require_professional()) {
+    
+  } else {
+    echo "<div class=\"req-pro-message\">This feature requires compiled JNI an '-agentlib:resin' JVM argument in resin.xml</div>\n";
+
+    echo "<pre>\n";
+    echo "&lt;resin ...>\n";
+    echo "  &lt;cluster id='...'>\n";
+    echo "    &lt;server id='...'>\n";
+    echo "       ...\n";
+    echo "       &lt;jvm-arg>-agentlib:resin&lt;/jvm-arg>\n";
+    echo "    &lt;/server>\n";
+    echo "  &lt;/cluster>\n";
+    echo "&lt;/resin>\n";
+    echo "</pre>\n";
+  }
+}
+
+echo "</div>\n";
+echo "</div>\n";
+echo "</div>\n";
+
+$javascript = javascript_create_tab("memory-tabs");
+
+if ($_REQUEST["action"] == "dump heap"
+    || $_REQUEST["action"] == "jvm heap dump") {
+  $javascript .= "tabs.tabs('select', 1);\n";
+}
+
+if ($is_heap_available) {
+  $javascript .= <<<EOF
+
+var heapTabLinks = $("#heap-tabs > ul > li > a");
+var heapTabs = $("#heap-tabs").tabs();
+
+heapTabLinks.each(function(i) {
+  var tabContents = $($(this).attr("href"));
+  var table = tabContents.find("table.heap-dump");
+
+  var builder = null;
+
+  var buildChart = function() { 
+    if (builder == null) { 
+      builder = new PieChartBuilder();
+      builder.setTable(table);
+      builder.setLabelId(table.attr("id") + "-label");
+      builder.setChartId(table.attr("id") + "-chart");
+      builder.setLabelClass("heap-class");
+      builder.setDataClass("heap-self-plus-desc");
+      builder.setLegendClass("heap-legend");
+      builder.setNumTopSlices(10);
+      builder.create();
+    }
+  };
+
+  if (heapTabs.tabs("option", "selected") == i) {
+    buildChart();
+  }
+  else {
+    tabs.bind('tabsselect', function(event, ui) {
+      if (ui.index == i)
+        buildChart();
+    });
+  }
+});
+
+EOF;
+}
+
+display_footer($g_page, $javascript);
+
+?>

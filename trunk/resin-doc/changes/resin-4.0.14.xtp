@@ -1,0 +1,57 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.13 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Web Profile TCK">
+
+<ul>
+<li>EL - pass</li>
+<li>EJB - 1 fail (timing, possible TCK bug)</li>
+<li>JPA - pass</li>
+<li>JSF - pass</li>
+<li>JSP - pass</li>
+<li>JSR-299 (CDI) - 1 fail (disputed TCK test)</li>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSTL - 1 fail (ordering issue with map, possible TCK bug)</li>
+<li>JTA - pass* (*JTA TCK includes CORBA tests which aren't required by WebProfile)</li>
+<li>Servlet - pass</li>
+</ul>
+
+</s1>
+
+<s1 title="Resin Eclipse plugin update">
+
+<p>The Resin eclipse plugin has been updated at
+<a href="http://caucho.com/eclipse">http://caucho.com/eclipse</a>.</p>
+</s1>
+
+<s1 title="WebSocket API Update">
+
+<p>We've updated the WebSocket API based on changes to the draft
+IETF specification, available in com.caucho.websocket.*. Since the
+specification itself is moving very slowly (but in incompatible ways),
+Resin's WebSockets can only be used with its own WebSocket client.</p>
+</s1>
+
+<s1 title="BAM Update">
+
+<p>BAM has been updated to a cleaner Broker-Actor-Mailbox model, 
+more closely matching traditional Actor APIs.</p>
+
+</s1>
+
+<s1 title="Comet/Async Updates">
+
+<p>The Comet/Async networking code has been reworked, fixing some callback
+timing behavior with complete() calls.</p>
+
+</s1>
+
+</body>
+</document>

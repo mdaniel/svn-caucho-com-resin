@@ -1,0 +1,14 @@
+<document>
+  <header>
+    <title>Health</title>
+    <description>
+    
+      <p>Resin includes a powerful and configurable system for monitoring 
+      application server health and graphing performance metrics.</p>
+      
+    </description>
+  </header>
+  <body>
+    <summary/>
+  </body>
+</document>

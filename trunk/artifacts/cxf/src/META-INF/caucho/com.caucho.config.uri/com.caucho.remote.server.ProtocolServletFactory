@@ -1,0 +1,3 @@
+cxf=com.caucho.cxf.CXFProtocolServletFactory
+soap=com.caucho.cxf.CXFProtocolServletFactory
+

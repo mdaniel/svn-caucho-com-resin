@@ -1,0 +1,60 @@
+Summary: Resin application server
+Name: resin
+Version: @VERSION@
+Release: 1
+License: Caucho
+Group: Application/Web
+Source0: %{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Provides: resin-pro
+Requires: openssl-devel, glibc-devel, shadow-utils
+AutoReqProv: no
+
+%description
+
+%prep
+%setup -q
+
+%build
+
+%install
+rm -rf $RPM_BUILD_ROOT
+mkdir m4
+DESTDIR="$RPM_BUILD_ROOT" ./configure
+DESTDIR="$RPM_BUILD_ROOT" make rpm-dist
+DESTDIR="$RPM_BUILD_ROOT" make install
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%config(noreplace) /etc/resin/*
+%config(noreplace) /etc/init.d/resin
+%attr(-,resin,resin) %config(noreplace) /var/resin
+/usr/local/share/*
+/var/log/resin
+/usr/bin/*
+
+%pre
+/usr/bin/getent group resin || /usr/sbin/groupadd -r resin
+/usr/bin/getent passwd resin || /usr/sbin/useradd -r -s /bin/false -g resin resin
+
+%post
+/sbin/chkconfig resin reset
+/usr/bin/resinctl start
+exit
+
+%postun
+/sbin/chkconfig --del resin
+/usr/bin/resinctl shutdown
+exit
+
+%doc
+
+
+%changelog
+* Thu Oct 27 2011  <caucho@centos6-64> - 
+- Initial build.
+

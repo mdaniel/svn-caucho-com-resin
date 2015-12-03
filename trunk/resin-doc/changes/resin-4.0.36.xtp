@@ -1,0 +1,49 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.36 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.36 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.36 is primarily a bug fix release. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="ProxyCache">
+
+<p>Resin's HTTP Proxy module has been updated to support full load-balancing, 
+failover, and network timeouts.  A proxycache cluster was added to resin.xml
+and resin.properties, including the new 'backend_servers' property used to 
+supply a list of backend HTTP servers to proxy to.  Resin's proxy-cache 
+request caching capability is automatically applied on this layer, providing 
+true HTTP caching proxy capability.</p>
+
+</s1>
+
+<s1 title="BAM: clustered messaging">
+
+<p>The low-level queuing implementation for BAM's mailboxes has been updated
+to better handle high load spikes.</p>
+
+<p>The BAM queues have also been extended to handle larger load.</p>
+
+</s1>
+
+<s1 title="Quercus">
+
+<p>Quercus encoding issues with MySQL databases have been resolved.</p>
+
+</s1>
+
+</body>
+
+</document>

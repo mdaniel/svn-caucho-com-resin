@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <title>The Hello World of AJAX</title>
+        <script language="JavaScript" type="text/javascript">
+            //Gets the browser specific XmlHttpRequest Object
+            function getXmlHttpRequestObject() {
+                if (window.XMLHttpRequest) {
+                    return new XMLHttpRequest(); //Not IE
+                } else if(window.ActiveXObject) {
+                    return new ActiveXObject("Microsoft.XMLHTTP"); //IE
+                } else {
+                    //Display your error message here. 
+                    //and inform the user they might want to upgrade
+                    //their browser.
+                    alert("Your browser doesn't support the XmlHttpRequest object.  Better upgrade to Firefox.");
+                }
+            }           
+            //Get our browser specific XmlHttpRequest object.
+            var receiveReq = getXmlHttpRequestObject();     
+            //Initiate the asyncronous request.
+            function sendEmployee() {
+                //If our XmlHttpRequest object is not in the middle of a request, start the new asyncronous call.
+                if (receiveReq.readyState == 4 || receiveReq.readyState == 0) {
+                    //Setup the connection as a GET call to SayHello.html.
+                    //True explicity sets the request to asyncronous (default).
+                    receiveReq.open("POST", 'JampServlet', true);
+                    //Set the function that will be called when the XmlHttpRequest objects state changes.
+                    receiveReq.onreadystatechange = handleSendEmployee; 
+                    //Make the actual request.
+                    var obj = "[\"send\",\"to\",\"from\",\"addEmployee\",[{\"java_type\":\"com.caucho.test.Employee\",\"name\":\"Rick Hightower\",\"old\":false,\"phoneNumber\":\"5205551212\"},7,9.99,8,\"loves love but no love says\"]]";
+
+                    receiveReq.send(obj);
+                }           
+            }
+            //Called every time our XmlHttpRequest objects state changes.
+            function handleSendEmployee() {
+                //Check to see if the XmlHttpRequests state is finished.
+                if (receiveReq.readyState == 4) {
+                    //Set the contents of our span element to the result of the asyncronous call.
+                    document.getElementById('span_result').innerHTML = receiveReq.responseText;
+                }
+            }
+            </script>
+            
+            <script language="javascript">
+   
+                var  socket = new WebSocket("ws://localhost:8080/jamp_servlet/JampServlet", "employee-add-protocol");
+                socket.onmessage = function(msg){  
+                    document.getElementById("span_result").innerHTML = msg.data;
+                }  
+    
+                socket.onerror = function(msg){  
+                    document.getElementById("error_result").innerHTML = "ERROR" + msg.data;
+                }  
+    
+                socket.onopen = function(){  
+                    document.getElementById("span_result").innerHTML = "Socket Status: " +socket.readyState+ " (open)";
+                }  
+                socket.onclose = function(){  
+                	document.getElementById("span_result").innerHTML = "Socket Status: " +socket.readyState+ " (Closed)";
+                	
+                }     
+				
+				function sendEmployeeViaWebSocket () {
+					
+				  document.getElementById("span_result").innerHTML="SENDING";		
+				  var obj = "[\"send\",\"to\",\"from\",\"addEmployee\",[{\"java_type\":\"com.caucho.test.Employee\",\"name\":\"Rick Hightower\",\"old\":false,\"phoneNumber\":\"5205551212\"},7,9.99,8,\"loves love but no love says\"]]";
+				
+				  socket.send(obj);
+				
+				}
+				
+                function clearSend () {
+                    document.getElementById("span_result").innerHTML="";       
+
+                }
+</script>
+    </head>
+    <body>
+        12th attempt <br />
+        <!-- Clicking this link initiates the asyncronous request -->
+        <a href="javascript:sendEmployee();">Send Employee via Ajax</a><br />
+        <a href="javascript:sendEmployeeViaWebSocket();">Send Employee via WebSocket</a><br />
+        <a href="javascript:clearSend();">Clear send results</a><br />
+
+        <!-- used to display the results of the asyncronous request -->
+        <span id="span_result"></span>
+        <span id="error_result"></span>
+
+    </body>
+</html>

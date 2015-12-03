@@ -1,0 +1,83 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.26 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>Thanks to everyone who reported bugs in 4.0.24. We encourage people to
+report 4.0.26 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+</s1>
+
+<s1 title="Thread Pool improvements">
+
+<p>Resin's thread pool has been updated to improve the efficiency and
+reduce the number of threads spawned. Applications with spiky load should
+see better performance and lower overall thread use.</p>
+
+</s1>
+
+<s1 title="Static File Performance">
+
+<p>Resin's static file serving is now faster and more efficient with
+the operating system sendfile() support. Large files are sent directly
+from the file system to the HTTP socket by the operating system, minimizing
+Java overhead.</p>
+
+</s1>
+
+<s1 title="jCache annotations: @CacheResult, @CachePut">
+
+<p>Resin's jCache implementation has been updated, adding the new
+@CacheResult, and @CachePut Java Dependency Injection (CDI) annotations,
+which enable caching for any CDI-enabled bean.</p>
+
+</s1>
+
+<s1 title="Command Line Interface">
+  <p>Resin's command line interface introduces a new command that
+  deletes deployed configuration
+  </p>
+  <example title="Example: undeploying configuration">
+    # deploy configuration
+    resinctl config-deploy conf.jar
+    # undeploy configuraton
+    resinctl config-undeploy
+  </example>
+
+  <p>Capability to save PDF report was added to pdf-report command.</p>
+  <example title="Example: writing PDF report to a local file">
+    # create pdf-report
+    resinctl pdf-report -local -local-dir /tmp
+  </example>
+
+</s1>
+
+<s1 title=".deb package distribution">
+  <p>Default resin user and group is changed to www-data for Resin Daemon.</p>
+</s1>
+
+<s1 title="REST Administration Interface">
+  <p>New Resin REST interface provides an http(s) integration point. By default
+  the interface is disabled. To enable the interface edit resin.properties to
+  set rest_admin_enable property to true. Also configure admin_user and
+  admin_password.
+  </p>
+  <p>Once the three prerequisites are met rest interface is available at its
+    default url: http://locahost:8080/resin-rest</p>
+
+  <example title="Example: Listing MBeans via REST">
+    curl  --user admin:secret http://localhost:8080/resin-rest/jmx-list
+  </example>
+
+</s1>
+
+</body>
+</document>

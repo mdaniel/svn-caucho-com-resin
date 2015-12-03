@@ -1,0 +1,740 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Virtual Hosting</title>
+    <description>
+<p>A Resin server can serve many virtual hosts, each with
+its own servlets and documents.  The configuration is flexible,
+allowing dynamic host deployment in a <code>hosts</code> directory
+or using explicit &lt;host> tags for additional control and security,
+and compatibility with existing Apache sites, enabling easy upgrades
+and evaluation for PHP servers to Quercus.</p>
+    </description>
+
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="Overview">
+
+<p>Virtual hosts are multiple internet domains served by the same
+Resin server.  Because one JVM handles all the domains, its more memory
+and processing efficient, as well as sharing IP addresses.  With Resin,
+adding virtual hosts can as easy as creating a directory
+like <code>/var/resin/hosts/foo.com</code> and setting up the DNS name.
+Explicit virtual host is also possible to match existing layouts, like
+matching a <code>/var/resin/htdocs</code> configuration when migrating
+a PHP mediawiki or wordpress site to use Quercus
+for security and performance.</p>
+
+<p>The virtual host will contain one or
+more <a href="deploy-ref.xtp">web-apps</a> to serve the host's contents.
+Simple sites will use a fixed root webapp, like the Apache-style
+<code>/var/resin/htdocs</code>.  More complicated sites can use a
+<code>webapps</code>-style directory.</p>
+
+<p>Each virtual host belongs to a
+Resin &lt;cluster>, even if the
+cluster has only a single server.</p>
+
+<p>For example, a Resin server might manage both the
+<code>www.gryffindor.com</code> and <code>www.slytherin.com</code> domains,
+storing the content in separate directories (/var/resin/gryffindor and
+/var/resin/slytherin), and using a single IP address for both domains.
+In this scenario, both www.gryffindor.com and www.slytherin.com are
+registered with the standard domain name service registry as having the IP
+address <code>192.168.0.13</code>.  When a user types in the url
+<code>http://www.gryffindor.com/hello.jsp</code> in their browser,
+the browser will send the HTTP request to the IP address
+<code>192.168.0.13</code> and send an additional HTTP header for the
+gryffindor host, "Host: www.gryffindor.com".  When Resin receives the request
+it will grab the host header, and dispatch the request to the configured
+virtual host.</p>
+
+<example title="Example: HTTP request headers">
+C: GET /test.jsp HTTP/1.1
+C: Host: www.gryffindor.com
+C:
+</example>
+
+<ol>
+<li>host name</li>
+<li>host aliases</li>
+<li>optional host.xml</li>
+<li>root directory</li>
+<li>web-applications</li>
+<li>configuration environment</li>
+<li>logging</li>
+</ol>
+
+</s1>
+
+<s1 title="Dynamic virtual hosts">
+
+<p>Resin can deploy virtual hosts automatically by scanning a host
+deployment directory for virtual host content.  Each sub-directory in
+the <code>hosts</code> directory will cause Resin to create a new
+virtual host.  To customize the configuration, you can
+add a <code>host.xml</code> in the host's root directory for shared
+databases, beans or security, or to add
+<a href="http-virtual-hosts-ref.xtp#host-alias">&lt;host-alias></a> names.
+</p>
+
+<p>You can add hosts dynamically to a running server just by creating
+a new host directory.  Resin periodically scans the <code>hosts</code>
+directory looking for directory changes.  When it detects a new host directory,
+it will automatically start serving files from the new virtual hosts.</p>
+
+<p>If you add a <code>default</code> directory in the <code>hosts</code>,
+Resin will use it to serve all unknown virtual hosts.  The default host is
+handy for simple servers with only a single virtual host and for sites
+where the virtual host is handled in software, like Drupal. If the
+<code>default</code> directory is missing, Resin will
+return <code>404 Not Found</code> for any unknown virtual hosts.</p>
+
+<example title="Example: virtual host directory structure">
+/var/resin/hosts/www.gryffindor.com/
+                                 host.xml
+                                 log/access.log
+                                 webapps/ROOT/index.jsp
+                                 webapps/ROOT/WEB-INF/resin-web.xml
+				 
+/var/resin/hosts/www.slytherin.com/
+                                host.xml
+                                log/access.log
+                                webapps/ROOT/index.php
+                                webapps/ROOT/WEB-INF/resin-web.xml
+				 
+/var/resin/hosts/default/
+                      host.xml
+                      log/access.log
+                      webapps/ROOT/index.php
+                      webapps/ROOT/WEB-INF/resin-web.xml
+
+</example>
+
+<s2 title="host-aliasing for dynamic hosts">
+
+<p>Often, the same virtual host will respond to multiple names, like
+<code>www.slytherin.com</code> and <code>slytherin.com</code>.  One
+name is the primary name and the others are aliases.  In Resin, the
+primary name is configured by the <a href="http-virtual-hosts-ref.xtp#host-name">&lt;host-name></a> tag and aliases are configured
+by <a href="http-virtual-hosts-ref.xtp#host-alias">&lt;host-alias></a>.  In a dynamic
+host configuration, the directory name is used as the <code>host-name</code>
+by default, and aliases are declared in the <code>host.xml</code>.</p>
+
+<example title="Example: www.slytherin.com/host.xml">
+&lt;host xmlns="http://caucho.com/ns/resin">
+  &lt;host-name>www.slytherin.com&lt;/host-name>
+  &lt;host-alias>slytherin.com&lt;/host-alias>
+  &lt;host-alias>quidditch.slytherin.com&lt;/host-alias>
+&lt;/host>
+</example>
+
+<p>Since the <code>host.xml</code> is shared for all web-applications in
+the host, you can also use it to configure shared resources like security
+logins, shared databases, and shared resources.</p>
+
+</s2>
+
+<s2 title="host-deploy configuration">
+
+<p>The <a href="http-virtual-hosts-ref.xtp#host-deploy">&lt;host-deploy></a> tag configures
+the dynamic virtual hosting specifying the directory where Resin should
+scan for virtual hosts.  Because Resin does not automatically add default
+configuration, you will need to also add configuration for the
+<code>host.xml</code>, <code>app-default.xml</code> and
+<code>web-app-deploy</code>.  Although it's a bit more verbose, the
+no-default rule makes Resin more secure and debuggable.  If an item like
+a &lt;web-app> is missing, Resin will return <code>404 Not Found</code> for
+security.  Because all configuration is explicit, it's ultimately traceable
+to the <code>resin.xml</code> which makes debugging more reliable.</p>
+
+<p>Shared host configuration goes in the
+<a href="http-virtual-hosts-ref.xtp#host-default">&lt;host-default&gt;</a> tag.  In this
+case, we've added an optional <code>host.xml</code> for configuration,
+an access log in <code>log/access.log</code> and a standard
+<code>webapps</code> directory.  The standard servlets and file handling
+come from the <code>app-default.xml</code> file.  If you omit either the
+app-default.xml or the webapps, you will see <code>404 Not Found</code> for
+any requests.</p>
+
+<p>The example below is a complete, working <code>resin.xml</code> listening
+to HTTP at port 8080.  The <a href="clustering-overview.xtp">cluster</a>
+consists of a single server.  It includes a <a config-tag="development-mode-error-page"/> to help debugging
+the configuration.  Many sites will omit the error-page to
+hide configuration details in case an error occurs on a live site.</p>
+
+<example title="Example: /etc/resin/resin.xml host-deploy configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin"&gt;
+&lt;cluster id="app-tier">
+  &lt;server id="app-a" address="192.168.1.13" port="6800">
+    &lt;http port="8080"/>
+  &lt;/server>
+
+  &lt;development-mode-error-page/>
+
+  &lt;resin:import path="${__DIR__}/app-default.xml"/>
+  
+  &lt;host-default&gt;
+    &lt;resin:import path="host.xml" optional="true"/>
+
+    &lt;access-log path="log/access.log"/>
+	
+    &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+  &lt;/host-default&gt;
+
+  <b>&lt;host-deploy path="hosts"&gt;
+  &lt;/host-deploy&gt;</b>
+  
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<p>Any directory created in <code>${resin.root}/hosts</code> will now
+become a virtual
+host. You can also place a .jar file in <code>${resin.root}/hosts</code>, it is expanded to
+become a virtual host.</p>
+
+<example>
+${resin.root}/hosts/www.gryffindor.com/
+${resin.root}/hosts/www.gryffindor.com/webapps/ROOT/index.jsp
+${resin.root}/hosts/www.gryffindor.com/webapps/foo/index.jsp
+
+${resin.root}/hosts/www.slytherin.com.jar
+</example>
+
+<p>Jar libraries and class files that are shared amongst all webapps in the host
+can be placed in <code>lib</code> and <code>classes</code> subdirectories of the host:</p>
+
+<example>
+${resin.root}/hosts/www.gryffindor.com/lib/mysql-connector-java-3.1.0-alpha-bin.jar 
+${resin.root}/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
+</example>
+
+<p>More information is available in the configuration documentation
+for &lt;<a href="http-virtual-hosts-ref.xtp#host-deploy">host-deploy</a>&gt;
+and &lt;<a href="http-virtual-hosts-ref.xtp#host-default">host-default</a>&gt;.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="Explicit Virtual Hosting">
+
+<p>In a more structured site, you can take complete control of the
+virtual host configuration and configure each virtual host explicitly.
+Existing sites wanting to upgrade to Resin or sites with extra security needs
+may prefer to configure each &lt;host>  in the resin.xml. For
+example, a PHP Drupal site evaluating Quercus to
+improve performance and security might use the explicit &lt;host> to
+point to the existing <code>/var/resin/htdocs</code> directory.</p>
+
+<p>In the explicit configuration, each virtual host has its
+own <a href="http-virtual-hosts-ref.xtp#host">host</a> block.  At the very least, each host
+will define the <var>id</var> specifying the host name and a root web-app.
+A <a config-tag="root-directory"/> is often used to provide a host specific
+root for logfiles.</p>
+
+<p>As with the dynamic hosting, servlets and web-apps must be configured
+either in a &lt;host-default> or explicitly.  If they are missing, Resin
+will return a <code>404 Not Found</code> for security.  The host id=""
+is the default host and will serve any request that doesn't match other
+hosts.  If you don't have a default host, Resin will return a
+<code>404 Not Found</code> for any unknown host.</p>
+
+<p>The following sample configuration defines an explicit virtual hosts
+www.slytherin.com and a default host, each with its own
+root directory, access-log and a single explicit
+<a href="deploy-ref.xtp">&lt;web-app></a> in the <code>htdocs</code>
+directory.  The default virtual host is configured just like a typical
+Apache configuration, so it can be used to upgrade an Apache/PHP site
+to use Quercus for security and performance.</p>
+
+<example title="Example: /etc/resin/resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+        
+&lt;cluster id="app-tier">
+  &lt;server id="app-a" address="192.168.1.10" port="6800"&gt;
+    &lt;http port="8080"/>
+  &lt;/server>
+
+  &lt;development-mode-error-page/>
+
+  &lt;resin:import path="${__DIR__}/app-default.xml"/>
+
+  &lt;host id="">
+    &lt;root-directory&gt;/var/resin&lt;/root-directory&gt;
+
+    &lt;access-log path="logs/access.log"/>
+
+    &lt;web-app id="" root-directory="htdocs"/>
+  &lt;/host>
+
+  &lt;host id="www.slytherin.com">
+    &lt;host-alias>slytherin.com&lt;/host-alias>
+    
+    &lt;root-directory&gt;/var/slytherin&lt;/root-directory&gt;
+
+    &lt;access-log path="logs/access.log"/>
+
+    &lt;web-app id="" root-directory="htdocs"/>
+  &lt;/host>
+
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<p>Browsing http://gryffindor.caucho.com/test.php will look for
+/var/resin/htdocs/test.php.</p>
+
+<p>Browsing http://slytherin.caucho.com/test.php will look for
+/var/slytherin/htdocs/test.php.</p>
+
+</s1>
+
+<s1 title="Server per virtual host">
+
+<p>In some ISP setups, it may make sense to assign a server for each
+virtual host.  The isolation of web-apps may not be
+sufficient; each host needs a separate JVM.  In this configuration,
+each &lt;host> belongs to its own &lt;cluster> and has a dedicated
+&lt;server>.  Normally, this configuration will operate using load-balancing,
+so the load-balance server will dispatch requests as appropriate.</p>
+
+<p>For further security restrictions, see
+the <a href="health-watchdog.xtp">watchdog</a> section.  ISPs can also
+use the watchdog to assign different &lt;user-name> values for each
+host and can even create chroot directories for each JVM.</p>
+
+<p>A front-end web server receives all requests, and is configured to
+dispatch to back-end Resin server that correspond to the host name.</p>
+
+<figure src="config-jvmpervirtualhost.png" width="481" height="145" alt="client <-> front-end webserver <-> (resin:6802(jvm), resin:6803(jvm))"/>
+
+<s2 title="Back-end JVMs">
+
+<p>Each host is placed in its own &lt;cluster> with a dedicated
+&lt;server>.  Since the server listens to a TCP port for load-balancing
+and clustering messages, each server on the machine needs a different
+server port.</p>
+
+<p>In this example, the virtual hosts <code>www.gryffindor.com</code> and
+<code>www.slytherin.com</code> each get their own server.  The backend
+clusters have their own virtual host.  The frontend load-balancer dispatches
+the <a href="clustering-overview.xtp">&lt;resin:LoadBalance></a> tags
+to the backend.</p>
+
+<p>This example is split into two blocks to emphasize the frontend and
+backend.  Typically, they will both actually be in the same resin.xml
+to ensure consistency.</p>
+
+<example title="Example: /etc/resin/resin.xml for backend">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;cluster-default>
+    &lt;resin:import path="${resin.home}/conf/app-default.xml"/>
+    
+    &lt;host-default>
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+    &lt;/host-default>
+  &lt;/cluster-default>
+
+  &lt;cluster id="gryffindor&gt;
+    &lt;server id="gryffindor" host="localhost" port="6800"/&gt;
+
+    &lt;host id="www.gryffindor.com"&gt;
+  
+      &lt;root-directory&gt;/var/resin/gryffindor&lt;/root-directory&gt;
+
+    &lt;/host&gt;
+  &lt;/cluster&gt;
+
+  &lt;cluster id="slytherin"&gt;
+    &lt;server id="slytherin" host="localhost" port="6801"/&gt;
+
+    &lt;host id="www.slytherin.com"&gt;
+  
+      &lt;root-directory&gt;/var/resin/slytherin&lt;/root-directory&gt;
+
+    &lt;/host&gt;
+  &lt;/cluster&gt;
+
+  &lt;cluster id="web-tier">
+    &lt;!-- see below -->
+    ...
+  &lt;/cluster>
+
+&lt;/resin&gt;
+</example>
+
+<p>Each back-end server is started separately:</p>
+
+<example title="Example: starting backend servers">
+unix&gt; bin/resin.sh -server gryffindor start
+unix&gt; bin/resin.sh -server slytherin start
+</example>
+
+<example title="Example: stopping backend servers">
+unix&gt; bin/resin.sh -server gryffindor stop
+unix&gt; bin/resin.sh -server slytherin stop
+</example>
+</s2>
+
+<s2 title="Resin web-tier load balancer">
+
+<p>The host-specific back-end servers are ready to receive requests on their server
+ports.  A third Resin server can be used as the front-end load-balancer.
+It receives all requests and dispatches to the back-end servers.</p>
+
+<figure src="config-jvmpervirtualhost-resin.png" width="481" height="145" alt="client <-> Resin front-end webserver <-> (resin:6802(jvm), resin:6803(jvm))"/>
+
+<p>The Resin web server is configured using <a href="http-rewrite.xtp">rewrite</a> with a <a href="clustering-overview.xtp">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
+defined for each back-end host, so that the
+&lt;load-balance> knows how to find them.</p>
+
+<example title="Example: /etc/resin/resin.xml for front-end web server">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+     xmlns:resin="urn:java:com.caucho.resin">
+     
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default>
+      &lt;http port="80"/&gt;
+    &lt;/server-default>
+
+    &lt;server id="web" address="192.168.2.1" port="6800"/&gt;
+
+    &lt;host id="gryffindor.com"&gt;
+      &lt;web-app id="/"&gt;
+
+        &lt;resin:LoadBalance regexp="" cluster="gryffindor"/>
+
+      &lt;/web-app>
+    &lt;/host>
+
+    &lt;host id="slytherin.com"&gt;
+      &lt;web-app id="/"&gt;
+
+        &lt;resin:LoadBalance regexp="" cluster="slytherin"/>
+
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster&gt;
+
+  &lt;cluster id="gryffindor"&gt;
+    &lt;server id="gryffindor" address="192.168.2.2" port="6800"/>
+
+    &lt;host id="www.gryffindor.com">
+      ...
+    &lt;/host>
+  &lt;/cluster&gt;
+
+  &lt;cluster id="slytherin"&gt;
+    &lt;server id="slytherin" address="192.168.2.2" port="6801"/>
+
+    ...
+  &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<s3 title="Starting the servers on Unix">
+
+<p>The front-end server JVM is started similar to the back-end JVMs:</p>
+
+<example title="Example: starting the load balancer" >
+unix&gt; bin/resin.sh -server web -conf conf/resin.xml start
+...
+unix&gt; bin/resin.sh -server web -conf conf/resin.xml stop
+</example>
+
+</s3> <!-- unix startup -->
+
+<s3 title="Starting the servers on Windows">
+<p>With Windows, each JVM is installed as a service. Service is installed using
+  setup.exe graphical utility. It's possible to install a number of Resin
+  services each using a unique name. The name will need to be supplied into
+  'Service Name' field.</p>
+
+<figure src="setup-exe.png" alt="Resin setup.exe screenshot"/>
+
+<p>You will either need to reboot the machine or start the service from the
+Control Panel/Services panel to start the server. On a machine reboot, NT will
+automatically start the service.</p>
+
+<p>There is a bug in many JDKs which cause the JDK to exit when the
+administrator logs out. JDK 1.4 and later can avoid that bug if the JDK is
+started with -Xrs.</p>
+
+</s3> <!-- windows startup -->
+
+</s2> <!-- resin frontend -->
+
+</s1> <!-- jvm per virtual host -->
+
+<s1 title="Configuration tasks">
+
+<s2 title="host naming">
+
+<p>The virtual host name can be configured by
+an explicit <a href="http-virtual-hosts-ref.xtp#host-name">&lt;host-name></a>, 
+a <a href="http-virtual-hosts-ref.xtp#host-alias">&lt;host-alias></a>,
+a <a href="http-virtual-hosts-ref.xtp#host-alias-regexp">&lt;host-alias-regexp></a>,
+by the <a href="http-virtual-hosts-ref.xtp#host">&lt;host></a> tag or 
+implicitly by the <a href="http-virtual-hosts-ref.xtp#host-deploy">&lt;host-deploy></a>.
+For explicit configuration styles, the host name and alias
+configuration will generally be in the resin.xml.  For dynamic configuration,
+the host aliases will typically be in an included <code>host.xml</code> inside
+the host directory.</p>
+
+<p>The default host catches all unmatches hosts.  Simpler sites will
+use the default host for all requests, while security-conscious sites
+may remove the default host entirely.  If the default host is not configured,
+Resin will return a <code>404 Not Found</code>.</p>
+
+</s2>
+
+<s2 title="host.xml">
+
+<p>The <code>host.xml</code> is an optional file where virtual hosts can
+put host-common configuration.  The <code>host.xml</code>
+is a good place for shared resources like authentication, database pools
+or host-wide <a href="config-candi.xtp">beans and services</a>.  It's also a
+location for the &lt;host-alias> in a dynamic hosting configuration.</p>
+
+<p>The <code>host.xml</code> is configured in a &lt;host-deploy>
+or &lt;host-default> by adding a
+<a config-tag="resin:import">&lt;resin:import></a> tag
+specifying the host.xml name and location.  Because the &lt;host-default>
+applies the &lt;resin:import> to every virtual host, it becomes a common
+system-wide configuration file.</p>
+
+</s2>
+
+<s2 title="web-applications">
+
+<p>Hosts must define <a href="deploy-ref.xtp">web-apps</a> in order to
+serve files, servlets, or PHP pages.  If the host is missing all
+webapps, Resin will return <code>404 Not Found</code> for all requests
+make to the host.</p>
+
+<p>Both explicit <a href="deploy-ref.xtp#web-app">&lt;web-app></a> and
+dynamic <a href="deploy-ref.xtp#web-app-deploy">web-app-deploy</a> tags
+are used to configure webapps.  The explicit style is generally used for
+Apache-style configuration, while the dynamic style is generally used for
+Java app-server .war configuration.</p>
+
+<p>Remember, Resin's default servlets like the file, JSP, and PHP servlets
+also need to be defined before they're used.  So all Resin configuration
+files need to have a &lt;resin:import> of the <code>conf/app-default.xml</code>
+configuration file either in the &lt;cluster> or in a
+shared &lt;cluster-default>.  If the app-default.xml is missing, Resin will
+not serve static files, JSP, or PHP, and will not even look in the
+WEB-INF for resin-web.xml, classes, or lib.</p>
+
+</s2>
+
+</s1>
+
+
+<s1 title="IP-Based Virtual Hosting">
+
+<p>While Resin's virtual hosting is primarily aimed at named-based
+virtual hosts, it's possible to run Resin with IP-Based virtual hosts.</p>
+
+<p>With IP virtual hosting, each &lt;http&gt; block is configured
+with the virtual host name.  This configuration will override any
+virtual host supplied by the browser.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="web-tier">
+  &lt;server id="a"&gt;
+
+    &lt;http address="192.168.0.1" port="80"
+          virtual-host="slytherin.caucho.com"/&gt;
+
+    &lt;http address="192.168.0.2" port="80"
+          virtual-host="gryffindor.caucho.com"/&gt;
+
+  &lt;/server>
+
+  ...
+
+  &lt;host id="slytherin.caucho.com"&gt;
+    ...
+  &lt;/host&gt;
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</s1>
+
+<s1 title="Internationalization">
+
+<p>Resin's virtual hosting understands host names encoded using
+rfc3490 (Internationalizing Domain Names in Applications).  This support
+should be transparent.  Just specify the virtual host as usual, and
+Resin will translate the brower's encoded host name
+the unicode string.</p>
+
+<p>Support, of course, depends on the browser.  <a href="http://devedge.netscape.com/viewsource/2003/idn/">Mozilla 1.4</a> supports the encoding.
+
+</p></s1>
+
+<s1 title="Virtual Hosts with Apache or IIS">
+
+<p>A common configuration uses virtual hosts with Apache or IIS.
+As usual, Apache or IIS will pass matching requests to Resin.</p>
+
+<s2 title="Apache">
+<p>The Resin JVM configuration with Apache is identical to the
+standalone configuration.  That similarity makes it easy to debug the
+Apache configuration by retreating to Resin standalone if needed.</p>
+
+<p>The <var>ServerName</var> directive in Apache with
+the <var>UseCanonicalName</var> can be used to 
+select a canonical name for the virtual host
+virtual hosting work.  When Apache passes the request to Resin, it
+tells Resin the <var>ServerName</var>.  Without the <var>ServerName</var>,
+Apache will use the "Host:" header in the HTTP request to select which
+host to serve.</p>
+
+<example title="httpd.conf">
+LoadModule caucho_module /usr/local/apache/libexec/mod_caucho.so
+
+ResinConfigServer localhost 6802
+
+UseCanonicalName on
+
+&lt;VirtualHost 127.0.0.1&gt;
+  ServerName gryffindor.caucho.com
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost 192.168.0.1&gt;
+  ServerName slytherin.caucho.com
+&lt;/VirtualHost&gt;
+</example>
+
+<note>You'll the LoadModule must appear before
+the ResinConfigServer for Apache to properly understand the
+ResinConfigServer command.  If they're missing, Apache will send
+an error.</note>
+</s2>
+
+
+<s2 title="Apache front-end">
+
+<p>The host-specific back-end JVMs are ready to receive requests on their server
+ports.  Apache is the front-end server, and is configured to dispatch to the
+appropriate back-end Resin JVM for the host: </p>
+
+<figure src="config-jvmpervirtualhost-apache.png" width="481" height="145" alt="client <-> Apache <-> (resin:6802(jvm), resin:6803(jvm))"/>
+
+<example title="httpd.conf">
+UseCanonicalName on
+
+&lt;VirtualHost 127.0.0.1&gt;
+  ServerName gryffindor.caucho.com
+  ResinConfigServer 192.168.0.10 6800
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost 192.168.0.1&gt;
+  ServerName slytherin.caucho.com
+  ResinConfigServer 192.168.0.11 6800
+&lt;/VirtualHost&gt;
+</example>
+
+<p>When you restart the Apache web server, you can look at
+<var>http://gryffindor/caucho-status</var>
+and <var>http://slytherin/caucho-status</var> to check
+your configuration.  Check that each virtual host is using the
+server <var>address</var> and <var>port</var> that you expect.</p>
+</s2>
+
+<!--
+<s2 title="IIS">
+<p>Configuration and installation for IIS virtual sites is discussed in the <a href="../install/install-3rd-party.xtp">IIS installation</a> section.</p>
+</s2>
+-->
+</s1> <!-- with Apache or IIS -->
+
+<s1 title="Testing virtual hosts">
+<p>During development and testing, it is often inconvenient or impossible to
+use real virtual host names that are registered as internet sites, and resolve
+to an internet-available IP address.    OS-level features on the test client
+machine can be used to map a virtual host name to an IP address.  
+
+</p><p>For example, developers often run the Resin server and the test client
+(usually a browser) on the same machine.  The OS is configured to map the "www.gryffindor.com" and
+"www.slytherin.com" names to "127.0.0.1", pointing these host names back to
+computer that the client is running on.</p>
+
+<p>Unix users edit the file <code>/etc/hosts</code>:</p>
+
+<example title="/etc/hosts">
+127.0.0.1       localhost
+
+127.0.0.1       www.gryffindor.com
+127.0.0.1       www.slytherin.com
+</example>
+<p>Windows user edit the file <code>C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS</code>:</p>
+
+<example title="C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS">
+127.0.0.1       localhost
+
+127.0.0.1       www.gryffindor.com
+127.0.0.1       www.slytherin.com
+</example>
+
+</s1>
+
+<s1 title="Deployment">
+
+<s2 title="Overriding web-app-deploy configuration">
+
+<p>The web-app-deploy can override configuration for an expanded war with
+a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
+&lt;document-directory&gt; is used to match web-apps.</p>
+
+<example title="Example: resin.xml overriding web.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+&lt;host id="">
+
+&lt;web-app-deploy path="webapps"&gt;
+  &lt;web-app context-path="/wiki"
+              document-directory="wiki"&gt;
+    &lt;context-param database="jdbc/wiki"&gt;
+  &lt;/web-app&gt;
+&lt;/web-app-deploy&gt;
+
+&lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="versioning">
+
+<p>The versioning attribute of the &lt;web-app-deploy> tag improves web-app
+version updates by enabling a graceful update of sessions.  The web-apps
+are named with numeric suffixes, e.g. foo-10, foo-11, etc, and can be
+browsed as /foo.  When a new version of the web-app is deployed, Resin
+continues to send current session requests to the previous web-app.  New
+sessions go to the new web-app version.  So users will not be aware of
+the application upgrade.</p>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

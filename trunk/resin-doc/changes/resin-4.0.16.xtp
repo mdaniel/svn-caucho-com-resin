@@ -1,0 +1,205 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.16 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.16 has primarily been a bug-fix release.</p>
+
+</s1>
+
+<s1 title="Web Profile TCK">
+
+<ul>
+<li>EL - pass</li>
+<li>EJB - pass</li>
+<li>JDBC - pass</li>
+<li>JPA - pass</li>
+<li>JSF - pass</li>
+<li>JSP - pass</li>
+<li>JSR-299 (CDI) - pass</li>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSTL - pass</li>
+<li>JTA - pass</li>
+<li>Servlet - pass</li>
+</ul>
+
+</s1>
+
+<s1 title="Health Check Updates">
+
+<p>The health check system has been enhanced, allowing for more control of
+Resin restarts and logging. The configuration is still in progress, and
+can be seen in the conf/health.xml file.</p>
+
+<p>The health configuration follows the same pattern as the rewrite rules.
+Each action has a set of optional predicates that tell when the action
+should occur.</p>
+
+<example title="Example: cpu-based ThreadDump in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:CpuHealthCheck>
+    &lt;warningThreshold>95&lt;/warningThreshold>
+    &lt;criticalThreshold>99&lt;/criticalThreshold>
+  &lt;/health:CpuHealthCheck>
+  
+  &lt;health:DumpThreads>
+    &lt;health:IfCriticalRechecked time="2m" healthCheck="${cpuHealthCheck}"/>
+  &lt;/health:DumpThreads>
+&lt;/cluster>
+</example>
+
+<p>In the example, the &lt;health:IfCriticalRechecked> predicate is true
+if the CpuHealthCheck returns a critical value for 2 minutes. This will
+avoid log a thread dump for a temporary CPU spike.</p>
+
+</s1>
+
+<s1 title="WebSocket API">
+
+<p>Resin 4.0.16 has implemented draft-6 of the web socket protocol.
+A <a href="http://wiki4.caucho.com/Understanding_WebSockets_versus_Ajax/REST_for_Java_EE_Developers">Resin WebSocket Tutorial</a> is
+available.</p>
+
+<p>Resin's API is based on the stream model of the Servlet API, using
+OutputStream and PrintWriter to send messages and InputStream and Reader
+to receive messages.</p>
+
+<def title="WebSocketContext.java">
+package com.caucho.servlet;
+
+public interface WebSocketContext
+{
+  public OutputStream startBinaryMessage() throws IOException;
+
+  public PrintWriter startTextMessage() throws IOException;
+
+  public void setTimeout(long timeout);
+
+  public long getTimeout();
+
+  public void close();
+  
+  public void disconnect();
+}
+</def>
+
+<def title="WebSocketListener.java">
+package com.caucho.servlet;
+
+public interface WebSocketListener
+{
+  public void onStart(WebSocketContext context)
+    throws IOException;
+  
+  public void onReadBinary(WebSocketContext context, InputStream is)
+    throws IOException;
+
+  public void onReadText(WebSocketContext context, Reader is)
+    throws IOException;
+
+  public void onClose(WebSocketContext context)
+    throws IOException;
+
+  public void onDisconnect(WebSocketContext context)
+    throws IOException;
+
+  public void onTimeout(WebSocketContext context)
+    throws IOException;
+}
+</def>
+
+</s1>
+
+<s1 title="HMTP/BAM API changes">
+
+<p>The HMTP/JMTP messaging APIs continue to change as we work on simplifying
+the model. Resin uses HMTP/BAM as its internal clustered
+messaging framework.</p>
+
+<p>We now have 5 base classes:</p>
+
+<ul>
+<li>MessageStream - the underlying stream for the unidirectional and request/response messages</li>
+
+<li>Actor - the actor/service interface for an application service.</li>
+
+<li>Mailbox - the queue receiving messages for the actor.</li>
+
+<li>Broker - the router to dispatch messages to other actors' mailboxes.</li>
+
+<li>BamManager - manages adding and removing actors from a broker system.</li>
+
+</ul>
+
+</s1>
+
+<s1 title="rewrite-dispatch">
+
+<p>The rewrite-dispatch order has been normalized. This should be invisible
+for most users, Resin now has a better-defined order for dispatching.</p>
+
+<p>All requests now go through the following order (basically a servlet filter chain order.)</p>
+
+<example title="rewrite-dispatch order">
+security (checked first)
+rewrite-dispatch
+filters
+servlet
+</example>
+
+<p>Since dispatch actions like &lt;resin:LoadBalance> and
+&lt;resin:HttpProxy> are rewrite-dispatch rules, this means
+that security will be applied, but servlet filters will not be applied.</p>
+
+</s1>
+
+<s1 title="proxy cache">
+
+<p>The proxy cache has been refactored internally to better handle exceptions
+and disconnects while filling the cache. The decision to make a request a
+cache-fill thread now happens at the top filter call, which allows the
+cleanup logic to be a simple "finally" block.</p>
+
+</s1>
+
+<s1 title="{SSHA} authentication passwords">
+
+<p>Resin's authenticators now support LDAP-style {SSHA} passwords for
+all the built-in authenticators, or anyone extending
+from AbstractAuthenticator.</p>
+
+<example title="Sample XmlAuthenticator with {SSHA}">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+  
+  &lt;resin:XmlAuthenticator>
+     &lt;user name='harry' password='{SSHA}Vug/pmSPPOTh/dCG2GpDE6BIE+1zYWx0'/>
+     &lt;user name='draco' password='{SSHA}H9STJXP1NwWBy1VIL+6cVQPEMtxzbmFrZQ=='/>
+  &lt;/resin:XmlAuthenticator>
+
+&lt;/web-app>  
+</example>
+
+</s1>
+
+<s1 title="load-balance/cluster pools split">
+
+<p>The load-balance and cluster TCP socket pools are now split and
+using different timeouts. The cluster socket pool is used for HMTP/BAM
+messages for heartbeat, dist-cache, repository, etc. The load balance
+pool is used for &lt;resin:LoadBalance>, &lt;resin:HttpProxy> and
+&lt;resin:FastCgiProxy.</p>
+
+</s1>
+
+</body>
+</document>

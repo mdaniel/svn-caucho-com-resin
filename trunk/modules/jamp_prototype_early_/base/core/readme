@@ -1,0 +1,220 @@
+Updated 4/3/2012 at 9:09 PM
+
+
+Prototype project for jamp (json actor message protocol)
+See: http://hessian.caucho.com/jamp/index.xtp
+
+WebSocket JavaScript API is described here http://dev.w3.org/html5/websockets/
+http://net.tutsplus.com/tutorials/javascript-ajax/start-using-html5-websockets-today/
+
+
+
+Project Goal: 
+
+   Make calls from HTML 5.0 web application to JAMP websocket tier. DONE!
+   It works. 
+
+
+Status: 
+
+  Current Status: 
+     For the JampBinding I created a StompMessageSender. This allows one to proxy interfaces and send the method calls over jamp+stomp://somehost:6666.
+     I also created a StompMessageReceiver for the SOA server side. It allows you to bind any service interface to jamp+stomp://somehost:6666.
+     
+     Implemented a partial StompServer (Stomp broker) for testing. It handles most but not all of the Stomp semantics. 
+     StompServer only works with text streams only (no binary, but using it for JSON so seems good for what I am doing).
+     StompServer implements, SEND, SUBSCRIBE, UNSUBSCRIBE, CONNECT, protocol version negotiation, DISCONNECT (with receipt).
+     I did not implement ACK, BEGIN, COMMIT, or SUBSCRIBE/RECEIPT.     
+     
+     Implemented a StompClient (called StompConnection) that listens to messages, manages subscriptions, and can send messages.
+     It also is only text oriented which is all it needs to be for now.
+     
+     Created a full working prototype that goes end to end.
+     EmployeeServiceStompClient uses StompConnection to send message every time the EmployeeService.addEmployee proxy method is called.
+     StompConnection connects to running StompServer to send said method calls in JAMP format.
+     
+     EmployeeServiceStompSOAServer uses StompConnection to subscribe to messages send from EmployeeServiceStompClient.
+     StompConnection connects to running StompServer to subscribe to methods.
+     
+    Prototype.....    
+     Client code looks like this:
+     
+        AmpProxyCreator ampProxy = new AmpProxyCreator(new StompMessageSender("stomp://localhost:6666/foo", 
+                "rick", "rick", "queue/empService") );
+        
+        EmployeeService service = (EmployeeService) ampProxy.createProxy(EmployeeService.class, "to", "from");
+        
+        service.addEmployee(new Employee("Rick Hightower", "5205551212", books), 7, 9.99f, 8, "love's love but no love says");
+        service.addEmployee(new Employee("Rick6", "5205551212", books), 7, 9.99f, 8, "rocket");
+     
+        EmployeeService is a plain old Java interface with no annotations or nothing special. Employee is a POJO.
+        
+     
+     The SOA server code looks like this:
+    
+        new StompMessageReceiver("stomp://localhost:6666/foo", 
+                "rick", "rick", "queue/empService", EmployeeServiceImpl.class, null);
+    
+        
+     The EmployeeService interface looks likes this:
+   
+       public interface EmployeeService {
+          void addEmployee(Employee emp, int salary, float rate, Integer rank, String description);
+       }
+        
+     
+     The EmployeeServiceImpl (used by the server) looks like this:
+     
+     public class EmployeeServiceImpl implements EmployeeService{
+
+        public void addEmployee(Employee emp, int salary, float rate, Integer rank,
+            String description) {
+            System.out.printf("Employee Service %s %s  %s %s\n", emp, salary, rate, rank);
+        
+        }
+
+     }
+     
+     
+     So they are just POJOs and POJIs....
+     
+     The JSON messages look like this.
+     
+         ["send","to","from","addEmployee",[{"name":"Rick Hightower","books":[{"foo":"a"},{"foo":"b"}],"old":false,"phoneNumber":"5205551212","books2":null,"books3":null},7,9.99,8,"love's love but no love says"]]
+
+
+     The output from the EmployeeServiceImpl class looks like this:
+     
+         Employee Service Employee [name=Rick6, phoneNumber=5205551217, old=false, books=[AddressBook [foo=a], AddressBook [foo=b]], books2=null, books3=null] 7  9.99 8
+     
+     
+      A lot of code cleanup. Added Generics and such
+ 
+  Old Status:
+    Midway to adding STOMP support to JAMP. Going to build send/query/reply/error/reply-error on top of STOMP/HTTP(Servlet)/WebSocket
+    STOMP server code is just for testing.
+    STOMP client code only implements text no binary (not needed until Hessian)
+    
+
+  Old Status:
+   The list handling handles List generics, Sets, and arrays (tested manually, really needs some good unit tests).
+   If a prop can't be found in a setter method, it looks for a field in current class, and then keeps moving up super class tree.
+  
+  Old Status:
+   Issue  Updated scope and FIXED    JSONStringDecoder decodes all escape characters specified in JSON but does not handle null, +NAN, -NAN  
+             (minor oversights which may be okay for prototype).
+   http://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript
+   Seems NAN and Infinity must be coded as null.
+   
+   Issue handle nulls FIXED
+   
+   Issue ServiceInvoker does not handle List FIXED (not needed for first prototype, may be ok to leave out of prototype tutorial, easy to add).
+   
+   
+   
+  
+  Old Status:
+      Issue FIXED JSONDecoder is String/character array based, it should be Reader based.
+      
+
+   Old Status:
+      Issue FIXED JSONEncoder now properly encodes unicode /uXXX, tabs, formfeeds and more (it does 2 out of 9 which is fine for a prototype).
+      This can be summed up as follows:
+
+        Encoder encoder = new JSONEncoder();
+        Decoder decoder = new JSONDecoder();
+      
+        String str = "ßæçîñking bad~\u007f\u0080~"; //Range checking 007f end of ascii and 0080 start of unicode
+        assertEquals("\"\\u00DF\\u00E6\\u00E7\\u00EE\\u00F1king bad~\u007f\\u0080~\"", encoder.encodeObject(str));        
+        assertEquals(str, decoder.decodeObject(encoder.encodeObject(str)));
+        
+      Note:  
+      Made JSON encoding ASCII to unicode safe /u007E to //u0080 to be exact, 
+      decoder does not care if it is utf 8 or utf 16 or utf whatever.
+      Encoding assumes ASCII as per discussion here http://stackoverflow.com/questions/583562/json-character-encoding. 
+      This is inline with other JSON libraries.
+      
+   Old Status:
+      Wrote simple JavaScript/HTML 5 client for WebSocket and it works.
+      (Found problem with websocket. It was a typo in the JavaScript. I hate JavaScript. No warning or error. Just did not work.)
+
+
+   Older Status:
+     Wrote simple JavaScript/HTML 5 client for Ajax and it works
+     Wrote WebSocket client, and WebSocket Listeners in Java. The listeners in Java handle the message fine, but it does not seem to send back the message very well.
+     I am getting WebSocket messages to Java handlers, but they are not able to send text back yet.
+
+
+   Older Status:
+     2nd Early prototype working.
+     Prototype sent AMP message from HTTP request to Servlet.
+     I have enough where I can start writing the HTML 5 client. 
+     New class added HttpMessageSender (MessageSender).
+     Also created JampServlet which uses a ServiceInvoker and the new JampMessageReaderDecoder.
+     It works round trip. Just implemented void calls, i.e., jamp send.
+
+   Older still Status:
+     1st early prototype working. 
+     Prototype sends method calls to file system via JampFileSenderMain.
+
+   Client role of prototype:
+      JampFileSenderMain uses AmpProxyCreator passing AmpProxyCreator and interface and a MessageSender.
+      FileMessageSender just writes method calls as binary or text files to the file system.
+      AmpProxyCreator is responsible for encoding the method calls into JAMP or HAMP messages via a MethodEncoder (JampMethodEncoder or HampMethodEncoder).
+      
+      AmpProxyCreator uses simple reflection.
+      
+      In the example,  AmpProxyCreator creates a proxy EmployeeService. Calls to employeeService.addEmployee() equate to JSON files being written
+      to a directory.
+   
+      To change how the message gets sent replace FileMessageSender with WebSocketMessageSender, RESTMessageSender or STOMPMessageSender.
+
+
+   Server role of the prototype:
+      JampFileProcessorMain reads JSON files from a directory that contain JAMP messages.
+      JampFileProcessorMain uses a ServiceInvoker to invoke a method on an actual service.
+      ServiceInvoker gets bound to EmployeeServiceImpl.
+      JampFileProcessorMain invokes serviceInvoker.invokeMessage(payload) passing it the raw payload (String containing JAMP/JSON message).
+      ServiceInvoker uses two decoders to decode the Message, namely, JampMessageDecoder and JSONDecoder.
+      JampMessageDecoder is used to quickly decode the payload into a Message object (representing the fields of a JAMP message).
+      Then JSONDecoder is used to parse the message argument list.
+      
+      JSONDecoder decodes the incoming objects from the argument list into String, Integer, Double, booleans, Maps (JSON object), 
+      and Lists (JSON arrays), BUT no user classes. This can be an entire nested hierarchy as JSONDecoder is a recursive descent parser
+      that handles JSON syntax fairly well.
+      
+      ServiceInvoker finds the correct method to call on the service (method name and number of arguments must match).
+      ServiceInvoker then coerces the entire argument list (hierarchy) into Java equivalents. It converts JSON Objects (Java Map at this point)
+      into Java classes. It copies over properties from map entries. Again it does this recursively.
+      ServiceInvoker then invokes the method passing it the arguments.
+      
+      
+      Note: ServiceInvoker uses type information from the argument list as the authority on final conversion and coercion.
+      ServiceInvoker also coerces and converts from Integer, Double, Boolean (JSON types)
+      into int, short, long, double, float, byte, Integer, Short, Long, Double, Float, Byte, boolean, Boolean. 
+      The idea from Scott is that JSON payload does not need type information as methods arguments is the metadata source.
+      
+ Caveats:
+    This is prototype code. There is no logging, code conventions, etc.
+    Also this code (at this point), does not depend on anything outside of the Java SE.
+    It does not use any Cacuho classes or any library.
+    
+    
+ Known limitations (and TODO list):
+
+     JampServlet not generic. It could and should be.
+     JampListener (implements WebSocketListener) not generic either.
+     
+     http://stomp.github.com/stomp-specification-1.1.html#Augmented_BNF
+     WebSocketMessageSender, STOMPMessageSender are not implemented.
+     
+     JavaDocs mostly missing.
+     Resin coding style, mostly ignored for now, which may be ok if this is published tutorial/cookbook as it uses more common { placements.
+     Code quality prototype mode (error checking minimal, no logging, etc.)
+     Unit tesitng (not TDD, more like, just enough to feel confident that things are working) not robust
+
+     
+     
+  Next steps: 
+      HTML 5 client, Jamp Resin Web Socket Handler (WebSocketListener see http://caucho.com/resin-4.0/examples/websocket-java/)
+     

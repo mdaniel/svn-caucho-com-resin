@@ -1,0 +1,697 @@
+<?php
+/**
+ * Summary of threading
+ */
+
+require_once "WEB-INF/php/inc.php";
+
+import com.caucho.admin.action.ScoreboardAction;
+
+$javascript = <<<EOF
+  $("#thread-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
+EOF;
+
+if (! admin_init()) {
+  return;
+}
+
+print_title("threads", "Threads");
+
+$jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
+$server = $g_mbean_server->getServer();
+
+?>
+<!--
+<h2>Server: <?= $g_server->Id ? $g_server->Id : "default" ?></h2>
+-->
+<?php
+
+$stat_service = $g_mbean_server->getStatService();
+$si = sprintf("%02d", $server->SelfServer->ClusterIndex);
+
+$thread_pool = $g_server->ThreadPool;
+?>
+
+<!--
+"Restart" - "Exit this instance cleanly and allow the wrapper script to start a new JVM."
+-->
+
+<!--
+-->
+<?php
+
+$threads = array();
+$thread_ids = $jvm_thread->AllThreadIds;
+
+$info_list = $jvm_thread->getThreadInfo($thread_ids, true, true);
+
+foreach ($info_list as $info) {
+
+  $id = $info->threadId;
+  
+  $conn = $server->findConnectionByThreadId($id);
+  
+  $thread = array("id" => $id,
+                  "info" => $info);
+  
+  if ($conn && $conn->hasRequest()) {
+    $thread["url"] = $conn->getUrl();
+  }
+  
+  array_push($threads, $thread);
+}
+
+usort($threads, "thread_stack_cmp");
+
+$thread_group = partition_threads($threads);
+$groups = array("active", "blocked", "jni", "locking",
+                "misc", "wait", "idle", "all");
+
+display_tabs($thread_group, $groups);
+
+function display_tabs($thread_group, $groups)
+{
+  echo "<div id='thread-tabs'>";
+  echo "<ul>";
+
+  echo "<li><a href='#summary-tab'>Summary</a></li>\n";
+  
+  echo "<li><a href='#scoreboards-tab'>Scoreboards</a></li>\n";
+  
+  $count = 0;
+  foreach ($groups as $name) {
+    $entries = $thread_group[$name];
+
+    if (sizeof($entries) <= 0)
+      continue;
+
+    $count++;
+
+    $tab_name = $name . "-tab";
+
+    $thread_count = thread_count_rec($entries);
+
+    echo "<li><a href='#${tab_name}'>$name"
+         . " (" . $thread_count . ")</a></li>\n";
+  }
+  echo "</ul>\n";
+
+  thread_display_summary();
+  
+  thread_display_scoreboards();
+  
+  thread_display_content($thread_group, $groups);
+
+  echo "</div>\n";
+}
+
+function thread_display_summary()
+{
+  echo "<div id='summary-tab'>\n";
+
+  thread_display_summary_table();
+  
+  thread_display_summary_graph();
+  
+  echo "</div>\n";
+}
+
+function thread_display_scoreboards()
+{
+  echo "<div id='scoreboards-tab'>\n";
+  
+  try {
+    $action = new ScoreboardAction();
+  } catch (Exception $e) {
+  }
+  
+  if (! $action) {
+    return;
+  }
+  
+  $json = $action->executeJson("resin", true);
+  if (! $json) {
+    return;
+  }
+
+  $dump = json_decode($json, true);
+  
+  $scoreboards =& $dump["scoreboards"];
+  $keys =& $dump["keys"];
+  
+  $row = 0;
+    
+  echo "<h2>" . gettext('Thread Scoreboards') . "</h2>\n";
+  
+  echo "<div class='scoreboard-container'>";
+  echo "<div class='scoreboards'>";
+    
+  foreach ($scoreboards as $name => $value) {
+    echo "<div id='scoreboard-${row}'";
+    echo " class='scoreboard-header " . row_style($row) . "'>\n";
+    echo "$name";
+    echo "</div>";
+    echo "<pre class='scoreboard-data'>";
+    echo chunk_split($value, 80);
+    echo "</pre>\n";
+    
+    $row++;
+  }
+    
+  echo "</div>\n";
+    
+  echo "<div class='scoreboard-key'>";
+  echo "<table id='scoreboard_key' class='data'>\n";
+  echo "<tbody>";
+
+  $row = 0;
+  foreach ($keys as $name => $value) {
+    echo "<tr class='" . row_style($row++) . "'>";
+    echo "<td scope='row'>$name</td><td>$value</td>";
+    echo "</tr>\n";
+  }
+  
+  echo "</tbody>\n";
+  echo "</table>\n";
+  echo "</div>\n";
+  
+  echo "</div>\n";
+  
+  echo "</div>\n";
+}
+
+function thread_display_summary_table()
+{
+  global $g_mbean_server;
+  global $thread_pool;
+  global $jvm_thread;
+  
+  $resin_jvm_threads = $g_mbean_server->lookup("resin:type=JvmThreads");
+  
+?>
+<table class="data">
+  <tr>
+    <th scope='col' colspan='3'>Resin Threads</th>
+
+    <th scope='col' colspan='6'>JVM Threads</th>
+<!--
+    <th scope='col' colspan='2'>Config</th>
+    -->
+  </tr>
+  <tr>
+    <th scope='col' title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active</th>
+    <th scope='col' title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle</th>
+    <th scope='col' title="The current total number of threads managed by the pool.">Total</th>
+
+    <th scope='col' title="The number of threads currently running in the JVM.">Total</th>
+    <th scope='col' title="The maximum number of threads running in the JVM.">Peak</th>
+    <th scope='col' title="The number of runnable threads running in the JVM.">Runnable</th>
+    <th scope='col' title="The number of native threads running in the JVM.">Native</th>
+    <th scope='col' title="The number of blocked threads running in the JVM.">Blocked</th>
+    <th scope='col' title="The number of waiting threads running in the JVM.">Waiting</th>
+
+    <!--
+    <th scope='col' title="The maximum number of threads that Resin can allocate.">thread-max</th>
+    <th scope='col' title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
+    -->
+  </tr>
+  <tr align='right'>
+    <td><?= $thread_pool->ThreadActiveCount ?></td>
+    <td><?= $thread_pool->ThreadIdleCount ?></td>
+    <td><?= $thread_pool->ThreadCount ?></td>
+
+    <td><?= $jvm_thread->ThreadCount ?></td>
+    <td><?= $jvm_thread->PeakThreadCount ?></td>
+    <td><?= $resin_jvm_threads->RunnableCount ?></td>
+    <td><?= $resin_jvm_threads->NativeCount ?></td>
+    <td><?= $resin_jvm_threads->BlockedCount ?></td>
+    <td><?= $resin_jvm_threads->WaitingCount ?></td>
+
+    <!--
+    <td><?= $thread_pool->ThreadMax ?></td>
+    <td><?= $thread_pool->ThreadIdleMin ?></td>
+    -->
+  </tr>
+</table>
+<?php
+}
+
+function thread_display_summary_graph()
+{
+  global $g_server;
+  
+  $stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+  
+  enable_graph_controls();
+  
+  $si = sprintf("%02d", $g_server->Index);
+
+  $width = 250;
+  $height = 150;
+ 
+  echo "<div style='display:inline-block;'>\n";
+  echo " <div style='float:left;padding:.5em;'>\n";
+  
+	$resin_threads_params = new GraphParams("resin-threads", $width, $height);
+	$resin_threads_params->title = "Resin Threads";
+	$resin_threads_params->alt = "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.";
+  
+	stat_graph($resin_threads_params, 
+               array("$si|JVM|Thread|JVM Thread Count",
+                     "$si|Resin|Thread|Thread Count",
+                     "$si|Resin|Thread|Thread Active Count",
+                     "$si|Resin|Thread|Thread Idle Count",
+                     "$si|Resin|Thread|Thread Task Queue",
+                     "$si|Resin|Thread|Thread Priority Queue",
+                     "$si|Resin|Thread|Thread Overflow Count"));
+               
+	echo " </div>\n";
+  echo " <div style='float:right;padding:.5em;'>\n";
+
+	$jvm_threads_params = new GraphParams("jvm-threads", $width, $height);
+	$jvm_threads_params->title = "JVM Threads";
+	$jvm_threads_params->alt = "A line graph representing the number of threads in JVM thread states over the last 6 hours.";
+  
+  stat_graph($jvm_threads_params, 
+               array("$si|JVM|Thread|JVM Thread Count",
+                     "$si|JVM|Thread|JVM Runnable Count",
+                     "$si|JVM|Thread|JVM Blocked Count",
+                     "$si|JVM|Thread|JVM Native Count",
+                     "$si|JVM|Thread|JVM Waiting Count"));
+
+  echo " </div>";
+	echo "</div>";
+}
+
+function thread_display_content($partition, $groups)
+{
+  foreach ($groups as $name) {
+    $thread_group = $partition[$name];
+
+    if (sizeof($thread_group) <= 0)
+      continue;
+
+    echo "<div id='${name}-tab'>\n";
+
+    foreach ($thread_group as $threads) {
+      thread_display_group($name, $threads);
+    }
+    
+    echo "</div>\n";
+  }
+}
+
+function thread_display_group($group_name, $threads)
+{
+  $name = $threads["name"];
+  if (! $name) {
+    $name = $group_name;
+  }
+
+  echo "<table class='threads'>\n";
+
+  echo "<thead>\n";
+  echo "<tr class='head'><th colspan='5' align='left' id='${group_name}'>";
+  
+  echo "<span id='sw_" . $group_name . "' class='switch'></span>\n";
+  echo "$name (" . thread_count_rec($threads) . ")";
+
+  echo "</th></tr>\n";
+
+  echo "<tr>";
+  echo "<th id='${group_name}_name'>name</th>";
+  echo "<th id='${group_name}_method'>method</th>";
+  echo "<th id='${group_name}_state'>state</th>";
+  echo "<th id='${group_name}_id'>id</th>";
+  echo "<th id='${group_name}_url'>url</th>";
+  echo "</tr>\n";
+
+  echo "<tr>";
+  echo "<th id='${group_name}_stack' colspan='5'>stack</th>";
+  echo "</tr>\n";
+  echo "</thead>\n";
+
+  echo "<tbody>\n";
+  $count = 0;
+  $plainStackTrace = "";
+  $stackTraceClass = "rtb";
+
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+    $url = $thread["url"];
+
+    if (is_object($info)) {
+      $newPlainStackTrace = stack_trace_to_str($info);
+      $isNewStackTrace = ! ($newPlainStackTrace === $plainStackTrace);
+
+      if($isNewStackTrace && "rta" === $stackTraceClass)
+        $stackTraceClass = "rtb";
+      else if ($isNewStackTrace)
+        $stackTraceClass = "rta";
+
+      thread_display_thread($info,
+                            $group_name,
+                            $count++,
+                            stack_trace_to_html($group_name, $info),
+                            $stackTraceClass,
+                            $url);
+
+      $plainStackTrace = $newPlainStackTrace;
+    }
+  }
+
+  echo "</tbody>\n";
+  echo "</table>\n";
+}
+
+function thread_count_rec($value)
+{
+  $count = 0;
+
+  if (is_array($value)) {
+    $info = $value["info"];
+
+    if (is_object($info)) {
+      $count++;
+    }
+
+    foreach ($value as $item) {
+      $count += thread_count_rec($item);
+    }
+  }
+
+  return $count;
+}
+
+function thread_display_thread($info, $group_name, $count, $stackTrace,
+  $stackTraceClass, $url)
+{
+  echo "<tr class='" . "" . " " . $stackTraceClass . "'>";
+
+  $id = $info->threadId;
+
+//    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
+
+  echo "<td headers='${group_name} ${group_name}_name'>" . $info->threadName . "</td>";
+
+  $topStack = thread_get_description($info);
+
+  if ($topStack) {
+    $name = $topStack->className;
+    $tail = strrchr($name, '.');
+    if ($tail)
+      $name = substr($tail, 1);
+    echo "<td headers='${group_name} ${group_name}_method'>";
+    echo "<span id='sw_${group_name}_${id}' class='switch'></span>\n";
+    echo $name . "." . $topStack->methodName . "()";
+    echo "</td>";
+  }
+  else
+    echo "<td headers='${group_name} ${group_name}_id'></td>";
+    
+  echo "<td headers='${group_name} ${group_name}_state'>" . $info->threadState;
+  if ($info->isInNative())
+    echo " (JNI)";
+  if ($info->getBlockedTime() > 0)
+    echo sprintf(" (%dms)", $info->getBlockedTime());
+  else if ($info->getWaitedTime() > 0)
+    echo sprintf(" (%dms)", $info->getWaitedTime());
+  echo "</td>";
+
+  echo "<td headers='${group_name} ${group_name}_id'><a name='th_${id}'></a>";
+  echo $id . "</td>";
+  
+  echo "<td headers='${group_name} ${group_name}_url'><a name='th_${id}'></a>";
+  echo $url . "</td>";
+
+  echo "</tr>\n";
+
+  thread_display_stack($id, $group_name, $stackTrace, $stackTraceClass);
+}  
+
+function thread_display_stack($id, $group, $stackTrace, $stackTraceClass)
+{
+  echo "<tr class='stack_trace ${stackTraceClass} toggle-sw_${group} toggle-sw_${group}_${id}'>";
+  echo "<td colspan='5' headers='${group} ${group}_stack'>";
+ // echo "<pre class='stack_trace toggle-sw_${group}'>";
+  echo "<pre class='stack_trace'>";
+
+  echo $stackTrace;
+
+  echo "</pre>\n";
+  echo "</td>\n";
+  echo "</tr>\n";
+}
+
+function stack_trace_to_html($group, $info) {
+  $trace = "";
+   if ($info->getLockName()) {
+    $trace = "<b> -- waiting on " . $info->getLockName() . " owned by ";
+    $trace = $trace . "<a href='#th_{$group}_{$info->getLockOwnerId()}'>"
+         . $info->getLockOwnerId() . "</a></b>";
+
+    if ($info->getLockOwnerName()) {
+      $trace .= " (" . $info->getLockOwnerName() . ")";
+    }
+
+    $trace .= "\n\n";         
+  }
+
+  // XXX: need to look at the JDK 1.6 for locks
+  $monitors = $info->getLockedMonitors();
+  //$synchronizers = $info->getLockedSynchronizers();
+
+  $i = 0;
+  foreach ($info->stackTrace as $elt) {
+    $trace = $trace . thread_sprint_monitor($monitors, $i);
+    $trace = $trace . " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
+
+    $i++;
+  }
+
+  return $trace;
+}
+
+function stack_trace_to_str($info) {
+  $trace = "";
+
+  if ($info->threadState == "RUNNABLE") {
+    if ($info->isInNative())
+      $trace .= "AJ ";
+    else
+      $trace .= "AA ";
+  }
+  else {
+    $trace .= $info->threadState;
+  }
+
+  $size = sizeof($info->stackTrace);
+
+  for ($i = $size - 1; $i >= 0; $i--) {
+    $elt = $info->stackTrace[$i];
+
+    $trace = $trace . " {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber}) ";
+  }
+
+  // $trace = $trace . " " . $info->threadName;
+
+  return $trace;
+}
+
+function thread_sprint_monitor($monitors, $i)
+{
+  $monitorHtml = "";
+
+  foreach ($monitors as $monitor) {
+    if ($monitor->getLockedStackDepth() == $i) {
+      $monitorHtml = $monitorHtml . sprintf("<b> -- locked %s@0x%x</b>\n",
+             $monitor->getClassName(),
+             $monitor->getIdentityHashCode());
+    }
+
+    return $monitorHtml;
+  }
+}
+
+function thread_get_description($info)
+{
+  foreach ($info->stackTrace as $stackItem) {
+    if ($stackItem->className == "sun.misc.Unsafe"
+        || $stackItem->className == "java.util.concurrent.locks.LockSupport"
+        || $stackItem->className == "java.lang.Object") {
+      continue;
+    }
+
+    return $stackItem;
+  }
+
+  return $info->stackTrace[0];
+}
+
+function thread_stack_cmp($thread_a, $thread_b) {
+  $info_a = $thread_a["info"];
+  $info_b = $thread_b["info"];
+
+  if (! is_object($info_a))
+    return 1;
+  else if (! is_object($info_b))
+    return -1;
+
+  $stack_a = stack_trace_to_str($info_a);
+  $stack_a .= $info_a->threadName;
+  
+  $stack_b = stack_trace_to_str($info_b);
+  $stack_b .= $info_b->threadName;
+
+  return strcmp($stack_a, $stack_b);
+}
+
+function partition_threads($threads)
+{
+  $partition = array();
+
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+
+    $partition["all"][0][] = $thread;
+    
+    if (is_idle_pool_thread($info)) {
+      $partition["idle"][0][] = $thread;
+    }
+    else if ($info->getLockName() != null && $info->getLockOwnerId() > 0) {
+      $owner_id = $info->getLockOwnerId();
+      $owner_thread = thread_find($threads, $info->getLockOwnerId());
+
+      $lock_group =&  $partition["locking"][$owner_id];
+      
+      if ($owner_thread) {
+        $lock_group["owner"] = $owner_thread;
+        $lock_group["name"] = "lock = " . $info->getLockName();
+      }
+      else {
+        $lock_group["name"] = "system";
+      }
+
+      $lock_group[] = $thread;
+    }
+    else if (is_jni_thread($info)) {
+      $partition["jni"][0][] = $thread;
+    }
+    else if (is_wait_thread($info)) {
+      $partition["wait"][0][] = $thread;
+    }
+    else if (preg_match("/^(http|server)/", $info->threadName)) {
+      $partition["active"][0][] = $thread;
+    }
+    else {
+      $partition["misc"][0][] = $thread;
+    }
+  }
+
+  return $partition;
+}
+
+function thread_find($threads, $id)
+{
+  foreach ($threads as $thread) {
+    if ($thread["info"]->threadId == $id)
+      return $thread;
+  }
+
+  return null;
+}
+
+function is_accept_thread($info)
+{
+  foreach ($info->stackTrace as $item) {
+    if ($item->className == "com.caucho.server.port.Port"
+	&& $item->methodName == "accept")
+      return true;
+  }
+
+  return false;
+}
+
+function is_keepalive_thread($info)
+{
+  $stackTrace = $info->stackTrace;
+  
+  for ($i = 0; $i < sizeof($stackTrace); $i++) {
+    $item = $stackTrace[$i];
+  
+    if ($item->className == "com.caucho.server.port.TcpConnection"
+	&& $item->methodName == "waitForKeepalive")
+      return true;
+
+    if ($item->className == "com.caucho.server.port.TcpConnection"
+	&& $item->methodName == "run") {
+      $prev = $stackTrace[$i - 1];
+      
+      if ($prev->className == "com.caucho.vfs.ReadStream"
+	  && $prev->methodName == "waitForRead")
+	return true;
+      else if ($prev->className == "com.caucho.server.port.TcpConnection"
+  	       && $prev->methodName == "waitForKeepalive")
+	return true;
+      else
+	return false;
+    }
+  }
+
+  return false;
+}
+
+function is_blocked_thread($info)
+{
+  if ($info == null)
+    return false;
+
+  return ($info->getThreadState() == "BLOCKED");
+}
+
+function is_wait_thread($info)
+{
+  if ($info == null)
+    return false;
+
+  if ($info->getThreadState() == "WAITING"
+      || $info->getThreadState() == "TIMED_WAITING") {
+    return true;
+  }
+  else
+    return false;
+}
+
+function is_jni_thread($info)
+{
+  return $info && $info->isInNative();
+}
+
+function is_idle_pool_thread($info)
+{
+  $stackTrace = $info->stackTrace;
+  
+  for ($i = 0; $i < sizeof($stackTrace); $i++) {
+    $item = $stackTrace[$i];
+  
+    if ($item->className == "com.caucho.util.ThreadPool\$PoolThread"
+        && $item->methodName == "nextTask") {
+      $prev = $stackTrace[$i - 1];
+      
+      if ($prev->className == "java.util.concurrent.locks.LockSupport"
+  	  && $prev->methodName == "park")
+	return true;
+      else
+	return false;
+    }
+  }
+
+  return false;
+}
+
+display_footer($g_page, $javascript);
+
+?>

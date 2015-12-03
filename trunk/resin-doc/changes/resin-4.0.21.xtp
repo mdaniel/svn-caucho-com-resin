@@ -1,0 +1,154 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.21 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.21 continues focus on bug fixes and stability. 4.0.21 includes
+significant reworking of the networking state machine for keepalive
+timing issues.</p>
+
+<p>Thanks to everyone who reported bugs in 4.0.20. We encourage people to
+report 4.0.21 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+</s1>
+
+<s1 title="Command Line Interface">
+
+<p>Resin cli added error codes for specific failures e.g. authentication
+error, wrong argument, deployment error.</p>
+
+<p>Added a new command that makes resin boot process compatible
+with requirements of launchd (Mac OSX). 'start-with-foreground'
+command is an extension of 'start' command
+that keeps resin boot process running.</p>
+         
+<p>Deprecated 'watchdog' command. 'watchdog' command will still work, however,
+we recommend that 'start-with-foreground' is used instead.</p>
+
+</s1>
+
+<s1 title="Resin Eclipse Plugin">
+
+<p>Better error reporting was added to let users know of git deployment
+failures.</p>
+
+<p>Download and install functionality updated to install into version
+specific directory.</p>
+
+</s1>
+
+<s1 title="Resin Admin">
+
+<p>Threads page was tweaked to sort threads by stack trace.</p>
+
+<p>Graphing enhancements continue, with improved scrolling control.</p>
+
+</s1>
+
+<s1 title="Health">
+
+<p>New health actions and conditions:</p>
+
+ <ul>
+  <li><a href="../admin/health-checking.xtp#healthOnAbnormalStop">
+  &lt;health:OnAbnormalStop></a> - A condition that fires only when Resin 
+  stops unexpectedly.</li>
+  <li><a href="../admin/health-checking.xtp#healthDumpJmx">
+  &lt;health:DumpJmx></a> - A health action that creates a concise snapshot of 
+  all JMX MBean attributes and values.</li>
+  <li><a href="../admin/health-checking.xtp#healthSnapshot">
+  &lt;health:Snapshot></a> - A sequence of health actions: thread dump, heap 
+  dump, jmx dump, pdf report.</li>
+ </ul>
+
+<p>A Snapshot on OnAbnormalStop condition was added by default to health.xml. 
+ If upgrading we recommend you add this to your existing health.xml.</p> 
+<example title="Example: &lt;health:Snapshot> in health.xml">
+  &lt;health:Snapshot>
+    &lt;health:OnAbnormalStop/>
+  &lt;/health:Snapshot>
+</example>
+
+</s1>
+
+<s1 title="PDF Snapshot">
+
+<p>The PDF has been expanded to include heap, cpu profile, thread dump, and
+JMX data. This additional data gives a fuller snapshot of the JVM's state.</p>
+
+</s1>
+
+<s1 title="command-line pdf-report">
+
+<example title="Example: generating a pdf report">
+unix> bin/resin.sh pdf-report
+generated /usr/local/home/ferg/test/resin-pro-4.0.21/log/default-Summary-20110819T1434.pdf
+</example>
+
+<example title="Example: generating a pdf report with CPU profile">
+unix> bin/resin.sh pdf-report -profile-time 60
+generated /usr/local/home/ferg/test/resin-pro-4.0.21/log/default-Summary-20110819T1434.pdf
+</example>
+
+</s1>
+
+<s1 title="WebSocket">
+
+<p>The WebSocket implementation has been updated to the latest
+draft specification.</p>
+
+<p>Resin's WebSocket implementation is stream based, meaning
+arbitrary-length messages are supported.</p>
+
+<p>Messages are read in an application callback implementing
+WebSocketListener. The listener reads the InputStream until end of file
+which is the end of message, and then returns to allow the next message
+to be read.</p>
+
+<example title="WebSocketListener.java">
+package com.caucho.websocket;
+
+public interface WebSocketListener {
+  public void onReadBinary(WebSocketContext, InputStream is)
+    throws IOException;
+    
+  public void onReadText(WebSocketContext, Reader is)
+    throws IOException;
+}
+</example>
+
+<p>Messages are written using the WebSocketContext. The application starts
+new message with startBinaryMessage() or startTextMessage(), writes to
+the OutputStream and closes it on message end.</p>
+
+<example title="WebSocketContext.java">
+package com.caucho.websocket;
+
+public interface WebSocketContext {
+  public OutputStream startBinaryMessage()
+    throws IOException;
+    
+  public PrintWriter startTextMessage()
+    throws IOException;
+}
+</example>
+
+</s1>
+
+<s1 title="jcache">
+
+<p>We've been tracking the jcache specification updates. Jcache will provide
+a standard caching API. The latest changes include compare-and-set operations</p>
+
+</s1>
+
+</body>
+</document>

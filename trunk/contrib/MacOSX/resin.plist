@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.caucho.resin</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/bin/java</string>
+      <string>-jar</string>
+      <string>/appservers/resin-pro-4.0.23/lib/resin.jar</string>
+      <string>-resin-home</string>
+      <string>/appservers/resin-pro-4.0.23</string>
+      <string>-root-directory</string>
+      <string>/appservers/resin-pro-4.0.23</string>
+      <string>-conf</string>
+      <string>conf/resin.xml</string>
+      <string>start-with-foreground</string>
+    </array>
+    <key>StandardErrorPath</key>
+    <string>/tmp/resin-4.0.23.err</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/resin-4.0.23.out</string>
+  </dict>
+</plist>

@@ -1,0 +1,447 @@
+<?xml version="1.0"?>
+<document>
+  <header>
+    <product>resin</product>
+    <title>Deployment From The Command-Line</title>
+    <type>contents</type>
+    <description>
+      <p>.war files can be deployed to a cluster using
+      the Resin command-line. The uploaded file will be distributed to
+      all Resin servers.</p>
+    </description>
+  </header>
+<body>
+
+<s1 title="resin.xml requirements">
+
+<p>For security reasons, Resin's deployment must be
+enabled in the resin.xml. The default behavior is to disable deployment.</p>
+
+<p>The configuration has four requirements:</p>
+
+<ul>
+<li>Start the RemoteAdminService to enable remote administration.</li>
+<li>Add an AdminAuthenticator to protect deployment with a password.</li>
+<li>Start the DeployService itself to enable remote deployment.</li>
+<li>A web-app-deploy to provide a location for the deployed .war files.</li>
+</ul>
+
+<example title="Example: minimal resin.xml for deployment">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;cluster id="app-tier">
+    &lt;resin:AdminAuthenticator password-digest="none">
+      &lt;user name="foo" password="test"/>
+    &lt;/resin:AdminAuthenticator>
+
+    &lt;resin:RemoteAdminService/>
+    &lt;resin:DeployService/>
+
+    &lt;server id="" port="6800">
+       &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;host id="">
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="command-line deployment">
+
+<s2 title="deploy for default host">
+
+<p>The "deploy" command deploys a .war file to the default virtual
+host. Since the AdminAuthenticator requires a user and password, you'll
+need to pass those arguments as well.</p>
+
+<example title="Example: deploy hello.war">
+unix> resinctl deploy hello.war
+</example>
+
+</s2>
+
+<s2 title="undeploy for default host">
+
+<p>The "undeploy" command removes a  .war from the default virtual
+host. Since the AdminAuthenticator requires a user and password, you'll
+need to pass those arguments as well.</p>
+
+<example title="Example: undeploy hello">
+unix> resinctl undeploy hello
+</example>
+
+</s2>
+
+<s2 title="deploy with specified host">
+
+<p>The "deploy" command allows a "-host" argument to specify a virtual
+host.</p>
+
+<example title="Example: deploy www.example.com hello.war">
+unix> resinctl deploy -host www.example.com hello.war
+</example>
+
+</s2>
+
+<s2 title="undeploy for www.example.com">
+
+<p>The "undeploy" command removes a .war from the virtual
+host.</p>
+
+<example title="Example: undeploy www.example.com hello">
+unix> resinctl undeploy -host www.example.com hello
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="command-line deployment">
+
+<p>Command line deployment capabilities were introduced in Resin 4.0.14.
+The set of commands allows deploying, undeploying, listing applications
+deployed on the server and controlling application lifecycle.</p>
+
+<s2 title="Synopsis of the provided commands and options">
+<deftable title="commands">
+  <tr>
+    <th>Command</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>deploy</td>
+    <td>deploys an application archive</td>
+  </tr>
+  <tr>
+    <td>undeploy</td>
+    <td>un-deploys an application specified by a context</td>
+  </tr>
+  <tr>
+    <td>deploy-list</td>
+    <td>lists all applications deployed on a server</td>
+  </tr>
+  <tr>
+    <td>deploy-copy</td>
+    <td>copies an application from one context to another</td>
+  </tr>
+  <tr>
+    <td>webapp-start</td>
+    <td>starts web application context</td>
+  </tr>
+  <tr>
+    <td>webapp-stop</td>
+    <td>stops web application context</td>
+  </tr>
+  <tr>
+    <td>webapp-restart</td>
+    <td>restarts web application context</td>
+  </tr>
+</deftable>
+
+<deftable title="common options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-conf</td>
+    <td>configuration file</td>
+    <td>conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-address</td>
+    <td>ip or host name of the server</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-port</td>
+    <td>server http port</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-user</td>
+    <td>user name used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>-password</td>
+    <td>password used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>-m</td>
+    <td>commit message</td>
+    <td>none, optional</td>
+  </tr>
+</deftable>
+
+<s3 title="deploying application">
+<p>Deploying an application is done with a <code>deploy</code> command</p>
+
+<def>
+resinctl deploy [options] &lt;war-file&gt;
+</def>
+
+<example title="deploying an application from a hello-world.war archive">
+unix> resinctl deploy /projects/hello-world/hello-world.war
+
+Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
+<deftable title="deploy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-host</td>
+    <td>virtual host to make application available on</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-name</td>
+    <td>name of the context to deploy to, defaults to war-file name</td>
+    <td>[/foo].war</td>
+  </tr>
+  <tr>
+    <td>-stage</td>
+    <td>specifies stage for staging an application</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-version</td>
+    <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
+    <td>none</td>
+  </tr>
+</deftable>
+</s3>
+
+<s3 title="listing deployed applications">
+  
+<p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
+
+<def>
+resinctl deploy-list [options]
+</def>
+
+<example title="">
+unix> resinctl deploy-list
+
+production/webapp/default/hello-world
+</example>
+</s3>
+
+<s3 title="copy application from context '/hello-world' to context '/foo'">
+<p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
+
+<def>
+resinctl deploy-copy [options]
+</def>
+
+<example title="">
+resinctl deploy-copy -source hello-world -target foo
+
+copied production/webapp/default/hello-world to production/webapp/default/foo
+</example>
+
+<deftable title="deploy-copy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-source</td>
+    <td>context to copy application from</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-source host</td>
+    <td>host to copy application from</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-source-stage</td>
+    <td>source stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-source-version</td>
+    <td>version of the source application formatted as &lt;major.minor.micro.qualifier&gt;</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target</td>
+    <td>context to copy application to</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target-host</td>
+    <td>host to copy an application to</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-target-stage</td>
+    <td>target stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-target-version</td>
+    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier&gt;</td>
+    <td>none</td>
+  </tr>
+</deftable>
+</s3>
+<s3 title="undeploying application">
+<p>Undeploying an application is done with an <code>undeploy</code> command</p>
+
+<def>
+resinctl undeploy [options] &lt;name&gt;</def>
+
+<example title="">
+unix> resinctl undeploy undeploy foo
+
+Undeployed foo from http://127.0.0.1:8080/hmtp
+</example>
+
+  <deftable title="undeploy options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+<s3 title="starting application">
+<p>Starting an application is done with a <code>start-webapp</code> command</p>
+
+<def>
+unix> resinctl webapp-start [options] &lt;name&gt;
+</def>
+
+<example title="start web application deployed at context '/foo'">
+unix> resinctl webapp-start foo
+
+'production/webapp/default/foo' is started
+</example>
+
+  <deftable title="webapp-start options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+<s3 title="stopping application">
+<p>Stopping an application is done with an <code>stop-webapp</code> command</p>
+
+<def>
+resinctl webapp-stop [options] &lt;name&gt;
+</def>
+
+<example title="stop web application deployed at context '/foo'">
+unix> resinctl webapp-stop foo
+ 
+'production/webapp/default/foo' is stopped
+</example>
+
+  <deftable title="stop-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+<s3 title="restarting application">
+<p>Restarting an application is done with an <code>restart-webapp</code> command</p>
+
+<def>resinctl webapp-restart [options] &lt;name&gt;
+</def>
+
+<example title="stop web application deployed at context '/foo'">
+unix> resinctl webapp-restart foo
+
+'production/webapp/default/foo' is restarted
+</example>
+
+  <deftable title="restart-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier&gt;</td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s3>
+</s2>
+</s1>
+
+</body>
+</document>

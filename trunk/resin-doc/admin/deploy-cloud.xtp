@@ -1,0 +1,284 @@
+<document>
+<header>
+<title>Deploying Web-Applications to a Cluster</title>
+<description>
+
+<p>When you deploy an application, Resin ensures each
+server in the cluster gets a copy of the new application, using
+a transactional store to ensure consistency.</p>
+
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Deployment">
+
+<s2 title="Cluster Deployment">
+
+<p>To deploy an application to your cluster, use the same command-line
+deploy as you would for a single server. The deployment process is the same
+because Resin treats a standalone server as single server in a cluster.</p>
+
+<example title="Example: command-line deployment">
+unix> resinctl deploy test.war
+</example>
+
+<p>That command-line deploy will send the test.war to the cluster's
+triad-server repository, and then copy the repository to all three servers
+in the triad hub. If you have only two servers in the cluster,
+Resin will copy the application to both. Once all three triad hub servers
+have the deployed .war, Resin will update all the spoke servers
+in the cluster.</p>
+
+<figure src="deploy-triad-a.png" alt="deployment replicates to triad"/>
+
+<p>The cluster command-line deployment uses the &lt;web-app-deploy>
+tag in the resin.xml to configure and control where the
+deployed application should be expanded. Typically, the deployment
+will use the <em>webapps/</em> directory.</p>
+
+<example title="Example: web-app-deploy in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+  ...
+  &lt;host id="">
+  
+    <b>&lt;web-app-deploy path="webapps"
+                    expand-preserve-fileset="WEB-INF/work/**"/></b>
+    
+  &lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>When you're using virtual hosts, you'll add a <em>-host</em> tag to
+specify the virtual host to deploy to.</p>
+
+<p>The default deployment is to the default host with the war's name as
+a prefix. Both can be changed with deploy options.</p>
+
+<example title="Example: virtual host deployment">
+unix> resinctl deploy -host www.foo.com test.war
+</example>
+
+</s2>
+
+<s2 title="Controlling Restarts">
+
+<p>By default, a Resin server will detect an updated application
+automatically and restart the web-app immediately. You can delay
+the restart by putting it on manual control. In <em>manual</em> mode,
+Resin will only look for a new version when you use a
+command-line <em>webapp-restart</em>.</p>
+
+<example title="Example: command-line to restart the web-app">
+unix> resinctl webapp-restart test
+</example>
+
+<p>The manual control is configured by
+setting <em>&lt;restart-mode&lt;</em> to <em>manual</em> in
+the web-app-deploy:</p>
+
+
+<example title="Example: web-app-deploy in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+  &lt;host id="">
+  
+    &lt;web-app-deploy path="webapps"
+                 <b>restart-mode="manual"</b>
+                 expand-preserve-fileset="WEB-INF/work/**"/>
+    
+  &lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Zero Downtime Deployment (Versioning)">
+
+<p>You can configure Resin's cluster deployment in a versioning mode where
+users gracefully upgrade to your new application version. Since new user
+sessions use the new version and old user sessions use the old
+application version, users will not need to be aware of the
+version upgrade.</p>
+
+<p>By default, Resin restarts the web-app on a new deployment, destroying
+the current user sessions before starting them on the new deployment.
+You can change that behavior by setting <em>multiversion-routing</em> to true
+and deploying with a <em>-version</em> command-line option.</p>
+
+<example title="Example: web-app-deploy with versioning">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+  &lt;host id="">
+  
+    &lt;web-app-deploy path="webapps"
+                 <b>multiversion-routing="true"</b>
+                 expand-preserve-fileset="WEB-INF/work/**"/>
+    
+  &lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>For versioning to work, you'll deploy with a named version of your
+application. Resin will send new sessions to the most recent version and
+leave old sessions on the previous version.</p>
+
+<example title="Example: command-line deploy with versioning">
+unix> resinctl deploy -version 2.1.3 test.war
+</example>
+
+<p>Internally, the application repository has both versions active.</p>
+
+<example title="Example: internal repository tags">
+production/webapp/default/test-2.1.2
+production/webapp/default/test-2.1.3
+</example>
+
+</s2>
+</s1>
+
+<s1 title="Deployment Reliability">
+
+<p>Resin's deployment system is designed around several
+reliability requirements. Although the user-visible system is simple, the
+underlying architecture is sophisticated -- we're not just copying
+.war files.</p>
+
+<ul>
+<li><b>Predictable</b> - all servers run the same deployed application
+by design, whether the server has restarted, been taken off line
+for maintenance, started and stopped for dynamic load management, or
+started from scratch from a fresh VM image.</li>
+
+<li><b>Transactional</b> (all or nothing) - all of the update files
+are copied and verified in the background before the web-app restarts.
+While the update is occurring, Resin continues to serve the
+old application. Even if a network glitch occurs
+or a server restarts before the upgrade completes,
+Resin will continue to use the old web-app.</li>
+
+<li><b>Replicated</b> - all deployments are replicated to all three servers
+in the triad hub. If a triad server restarts, it will update itself to the
+latest repository version from the backup servers. As long as at least
+one triad server is available, the active servers will have access to the
+latest repository.</li>
+
+<li><b>Elastic</b> - the system supports dynamic adding
+and removal of servers. A new spoke server will contacts the triad hub
+for the latest application deployment and update itself.</li>
+
+<li><b>Staging, Archiving, and Versioning</b> - the deployment system
+supports these through naming conventions of the deployed tag, allowing
+multiple versions of the same web-app to be saved in the repository
+and deployed as appropriate.</li>
+
+<li><b>Straightforward</b> - the user-view of cloud deployment needs to
+be as simple as a single-server deployment. It needs to look simpler than
+it is. It needs to just work.</li>
+
+</ul>
+
+</s1>
+
+<s1 title="Deployment Architecture">
+
+<p>The following is a description of the underlying architecture of Resin's
+deployment system. It's not necessary to understand or even read any of
+this section to use Resin's deployment. But for those who are curious,
+some details might be interesting.</p>
+
+<s2 title=".git control system architecture">
+
+<p>The main repository is based on the distributed version control
+system .git, which is used for large programming projects like
+the Linux kernel. The .git format gives Resin the key transactional
+repository to make the cloud deployment reliable.</p>
+
+<p>Each file in the repository is stored by its secure document hash (SHA-1).
+The secure hash lets Resin verify that a file is completely copied without
+any corruption. If verifying the hash fails, Resin will recopy the file
+from the triad or from the deploy command. Since the file is not saved until
+it's validated, Resin can guarantee that the file contents are correct.</p>
+
+<p>Files are never overwritten in in Resin's repository. It's essentially
+write-only. Two versions of the same file are saved as two separate file:
+a test.jsp (version 23) which replaces a test.jsp (version 22). So there's
+never a case where an older version of the file can be
+partially overwritten.</p>
+
+<p>Since the repository itself is organized as a .git self-validating file,
+its own updates are validated before any changes occur. Essentially, Resin
+verifies every file in a repository update, and then verifies every directory,
+and then verifies the repository itself before making any changes visible.</p>
+
+<ol>
+<li>Resin detects that a new repository version
+is available (it continues to use the old repository) by
+checking with the triad.</li>
+<li>It checks for any new file updates and copies the new files from
+the triad (Resin continues to use the old files and repository.)</li>
+<li>When all the new files are verified, it copies and verifies the
+new directories and archives from the traid (Resin continues to use the old
+files and repository.)</li>
+<li>It now copies and verifies the top-level repository changes. (Resin
+continues to use the old files and repository.)</li>
+<li>After everything is verified on the local filesystem,
+Resin switches to the new repository.</li>
+</ol>
+
+<p>If at any point a servers stops, or the network fails, or a new file
+is corrupted in a partial transfer, Resin continues to use the old files.
+On recovery, Resin will verify and delete any partially copied files, and
+continue the repository update. Only the repository system itself knows
+that an update is in process; the rest of Resin continues to use the old
+repository files.</p>
+
+</s2>
+
+<s2 title="Repository tag system">
+
+<p>Internally, the repository is organized by tags where each
+tag is an archive like a .war.</p>
+
+</s2>
+
+<s2 title="Cloud Deployment">
+
+<p>Deploying to a cloud extends the transactional
+repository to all the servers in a cluster. In Resin's replicated
+hub-and-spoke model, a deployment copies the archive first to all three
+servers in the triad. (If you have two servers, it will copy to the
+second server.) Since all three servers have a copy of the
+entire repository, your system keeps it reliability even if one server
+is down for maintenance and a second server restarts for an unexpected
+reason.</p>
+
+<figure src="deploy-triad-a.png" alt="deployment replicates to triad"/>
+
+<p>After all three servers in the hub have received and verified the
+deployment update, the triad hub can send the changes to all of the spoke
+servers.</p>
+
+<figure src="deploy-cloud.png" alt="triad updates spoke servers"/>
+
+<p>If a spoke server restarts or a new spoke server is added to the cloud
+dynamically, it will contacts the hub for the most recent repository version.
+So even a new virtual-machine image can receive the most recent deployments
+without intervention.</p>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

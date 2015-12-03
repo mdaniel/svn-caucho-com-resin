@@ -1,0 +1,52 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 4.0</version>
+    <title>Resin Pro Licenses</title>
+
+    <description>
+      <p><b><em>Resin Pro License Guide</em></b>
+        If you purchased a Resin Pro license or would like to evaluate Resin Pro
+        features this page will provide detail on obtaining evaluation license
+        and deploying licenses to Resin Pro.
+      </p>
+    </description>
+  </header>
+
+  <body>
+
+    <localtoc/>
+<s1 title="Requesting Resin Pro License">
+<p> If you don't have a license file and would like to request one
+  please proceed to <a href="http://www.caucho.com/evaluation-license/">
+  request evaluation Resin Professional license</a>. Once you apply, please check
+  your mail-box, the license should already be there.
+</p>
+</s1>
+<s1 title="Resin Pro License Deployment">
+<p>
+ The simplest way to deploy a license is to copy it into licenses directory
+ under Resin Home.
+</p>
+
+<p>
+  Resin Pro is looking for licenses in the following locations
+</p>
+<ol>
+<li>Directory specified with <code>-Dresin.license.dir</code> JVM parameter</li>
+<li><code>licenses</code> directory in your working directory, i.e. <code>System.getProperty("user.dir")</code></li>
+<li><code>licenses</code> directory in Resin Configuration directory (typically <code>/etc/resin</code> on Unix).</li>
+</ol>
+
+</s1>
+
+<s1 title="Troubleshooting">
+<p>If something went wrong and Resin Pro can't find license, the first place to
+  check for problems is the log files.</p>
+
+<p>If the message in the log file isn't giving enough detail you can set logging
+  level to a higher value ('finest') and restart Resin with -verbose option.</p>
+</s1>
+
+</body>
+</document>

@@ -1,0 +1,90 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.33 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.33 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.33 is a bug fix release. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="@HandlesTypes scanning">
+
+<p>The ServletContainerInitializer @HandlesTypes was not properly
+implemented in Resin 4.0. This has been fixed.</p>
+
+</s1>
+
+<s1 title="Tiered Caching">
+
+<p>Resin's jCache implementation now supports tiered caching.
+The secondary tier can be used like memcache to support sharded,
+replicated, and persistent caching.</p>
+
+<p>The example below shows an additional feature where the tiered
+cache loads itself through a read-through cache configuration. This
+improves cache miss efficiency by allowing the cache to fill itself once
+on every cache miss, without forcing multiple misses.</p>
+
+<example title="tiered cache configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin"
+       xmlns:wscache="urn:java:com.caucho.distcache.websocket"
+       xmlns:test-cache="urn:java:test.cache">
+
+&lt;cluster id="app" root-directory="app">
+  &lt;server id="a"/>
+
+  &lt;host id="">
+    &lt;web-app id="">
+    
+      &lt;resin:TieredCache name="t1">
+        &lt;address>localhost:6810&lt;/address>
+      &lt;/resin:TieredCache>
+      
+    &lt;/web-app>
+  &lt;/host>
+&lt;/cluster>
+
+&lt;cluster id="cache" root-directory="cache">
+  &lt;server id="b" port="6810"/>
+
+  &lt;resin:TieredCacheServer/>
+
+  &lt;host id="">
+    &lt;web-app id="">
+      &lt;resin:ClusterCache name="t1">
+        &lt;cache-loader>&lt;test-cache:TestCacheLoader/>&lt;/cache-loader>
+        &lt;read-through/>
+      &lt;/resin:ClusterCache>
+    &lt;/web-app>
+  &lt;/host>
+&lt;/cluster>
+
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="JDBC Caching">
+
+<p>JDBC-style caching and session replication now supported again
+with Resin 4.0. With Resin 4.0, the JDBC cache serves as a backing
+store. Resin's main cache acts like a side-cache.</p>
+
+</s1>
+
+</body>
+
+
+</document>

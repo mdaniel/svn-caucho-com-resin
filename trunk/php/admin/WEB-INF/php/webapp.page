@@ -1,0 +1,456 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (!admin_init()) {
+  return;
+}
+
+$client = @new Java("com.caucho.server.admin.WebAppDeployClient");
+
+print_title("webapp", "WebApps");
+
+$request = quercus_servlet_request();
+$is_secure = 1; //$request->isSecure();
+$user = quercus_get_request()->getUserPrincipal();
+
+if ($is_secure) {
+  $action = $_POST['action'];
+
+  if ($action == "start") {
+    $mbean = $g_mbean_server->lookup($_POST['name']);
+    $mbean->start();
+  }
+  elseif ($action == "stop") {
+    $mbean = $g_mbean_server->lookup($_POST['name']);
+    $mbean->stop();
+  }
+  elseif ($action == "restart") {
+    $mbean = $g_mbean_server->lookup($_POST['name']);
+    $mbean->restart();
+  }
+  elseif ($action == "undeploy") {
+    undeploy($_POST['name']);
+  }
+}
+
+display_webapp_summary_page($g_mbean_server);
+
+function display_webapp_summary_page($g_mbean_server)
+{
+  echo "<div id='webapp-tabs' style='display: none'>\n";
+
+  echo "<ul>\n";
+  echo " <li><a href='#webapp-active'>" . gettext('Active') . "</a></li>\n";
+  echo " <li><a href='#webapp-idle'>" . gettext('Idle') . "</a></li>\n";
+  echo "</ul>\n";
+
+  echo "<div id='webapp-active'>\n";
+  display_webapp_summary($g_mbean_server, false);
+  echo "</div>\n";
+
+  echo "<div id='webapp-idle'>\n";
+  display_webapp_summary($g_mbean_server, true);
+  echo "</div>\n";
+
+  echo "</div>\n";
+}
+
+/**
+ * summary of all the webapps
+ */
+function display_webapp_summary($g_mbean_server, $is_idle)
+{
+  global $is_secure;
+
+  $cluster = $g_mbean_server->Cluster;
+  $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
+
+  echo "<h1>" . gettext('Cluster') . ": $cluster_name</h1>";
+  echo "<div class='section'>\n";
+
+  $servers = $cluster->Servers;
+
+  $webapp_id = 0;
+
+  $hosts = $g_mbean_server->query("resin:*,type=Host");
+  usort($hosts, "sort_host");
+  foreach ($hosts as $host) {
+
+    $hostName = empty($host->HostName) ? "default" : $host->HostName;
+
+    echo "<h2>" . gettext('Host') . ": $hostName</h2>\n";
+    echo "<div class='section'>\n";
+
+    $webapps = $host->WebApps;
+    usort($webapps, "sort_webapp");
+
+    $count = 0;
+
+    foreach ($webapps as $webapp) {
+
+      if ($is_idle != ($webapp->State == "STOPPED_IDLE")) {
+        continue;
+      }
+
+      $webapp_name = $webapp->mbean_name;
+      $webapp_id++;
+
+      $id = "sw_webapp_" . ($is_idle ? "idle" : "") . $webapp_id;
+
+      echo "<h3>" . gettext('WebApp') . " : $webapp_name</h3>\n";
+
+      echo "<table class='data webapp-data'>\n";
+      echo " <tr>\n";
+      echo "	<th scope='col' title='Expand'></th>\n";
+
+      echo "  <th scope='col' title='" . gettext('The context root of the application') . "'>";
+      echo gettext('Path');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('The current status of the application') . "'>";
+      echo gettext('State');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('How long the application has been running') . "'>";
+      echo gettext('Uptime');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' colspan='2' title='" . gettext('The number of HTTP 5xx errors the application has experienced and the time of the most recent 5xx error') . "'>";
+      echo gettext('500 errors');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('Version of cluster-wide deployment, where applicable') . "'>";
+      echo gettext('Deploy');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('Start, stop, and restart the application on the current server') . "'>";
+      echo gettext('Actions');
+      echo "  </th>\n";
+      echo " </tr>\n";
+
+      echo " <tr class='" . row_style($count++) . "'>";
+      echo "  <td><span id='${id}' class='switch'></span></td>\n";
+
+      $is_deploy_valid = true;
+      display_webapp($webapp, $is_deploy_valid);
+
+      echo " </tr>\n";
+      echo "</table>\n";
+
+      echo "<br/>\n";
+
+      echo "<div class='toggle-${id} webapp-expand'>\n";
+      display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid);
+      echo "</div>\n";
+    }
+
+    echo "</div>\n";
+  }
+
+  echo "</div>\n";
+}
+
+function display_webapp($webapp, &$is_deploy_valid)
+{
+  $session = $webapp->SessionManager;
+  $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
+  $disabled = "";
+
+  //if ($webapp->RepositoryTag) {
+  //  $context_path .= "<br/>&nbsp;&nbsp;(tag: {$webapp->RepositoryTag})";
+  //}
+
+  $object_name = $webapp->mbean_name;
+
+  echo "<td class='item'>$context_path</td>\n";
+
+  echo "<td>";
+  if ($webapp->State == "ACTIVE") {
+    print_ok("");
+    echo " ACTIVE";
+  }
+  else if ($webapp->State == "FAILED") {
+    print_fail(" FAILED");
+    $is_deploy_valid = false;
+  }
+  else {
+    echo "&nbsp;" . $webapp->State;
+  }
+  echo " </td>\n";
+
+  echo "<td class='" . format_ago_class($webapp->StartTime) . "'>";
+
+  if ($webapp->State == "ACTIVE")
+    echo format_ago($webapp->StartTime);
+  else
+    echo "&nbsp;";
+
+  echo "</td>\n";
+
+  format_ago_td_pair($webapp->Status500CountTotal, $webapp->Status500LastTime);
+
+  echo "<td>";
+  $deploy = validate_version($webapp);
+
+  if ($deploy["version"])
+    $version = $deploy["version"];
+  else
+    $version = $deploy["date"];
+
+  if (!$deploy) {
+    $is_deploy_valid = false;
+  }
+  else if ($deploy["status"] == "OK") {
+    print_ok("");
+    echo " $version";
+  }
+  else {
+    $is_deploy_valid = false;
+    print_fail(" $version");
+  }
+  echo "</td>";
+
+  $name = $webapp->mbean_name;
+  $tag = $webapp->getRepositoryMetaData()->get("tag");
+
+  echo "<td class='webapp-actions'>";
+  echo "<form method='post' style='display:inline' action='#'>\n";
+  echo "<input type='hidden' name='action' value='start'/>\n";
+  echo "<input type='hidden' name='name' value='$name'/>\n";
+  if ($webapp->State == "ACTIVE")
+    echo "<input type='submit' name='submit' value='start' disabled='disabled'/>\n";
+  else
+    echo "<input type='submit' name='submit' value='start' $disabled/>\n";
+  echo "</form>";
+
+  echo "<form method='post' style='display:inline' action='#'>\n";
+  echo "<input type='hidden' name='action' value='stop'/>\n";
+  echo "<input type='hidden' name='name' value='$name'/>\n";
+  if ($webapp->State == "ACTIVE")
+    echo "<input type='submit' name='submit' value='stop' $disabled/>\n";
+  else
+    echo "<input type='submit' name='submit' value='stop' disabled='disabled'/>\n";
+  echo "</form>";
+
+  echo "<form method='post' style='display:inline' action='#'>";
+  echo "<input type='hidden' name='action' value='restart'/>";
+  echo "<input type='hidden' name='name' value='$name'/>\n";
+  if ($webapp->State == "ACTIVE")
+    echo "<input type='submit' name='submit' value='restart' $disabled/>";
+  else
+    echo "<input type='submit' name='submit' value='restart' disabled='disabled'/>\n";
+  echo "</form>";
+
+  echo "<form method='get' style='display:inline' action='#'>";
+  echo "<input type='hidden' name='q' value='deploy'/>";
+  echo "<input type='hidden' name='update-name' value='${context_path}'/>";
+  echo "<input type='submit' name='submit' value='update'/>";
+  echo "</form>";
+
+  echo "<form method='post' style='display:inline' action='#'>";
+  echo "<input type='hidden' name='action' value='undeploy'/>";
+  echo "<input type='hidden' name='name' value='$name'/>\n";
+  if ($tag)
+    echo "<input type='submit' name='submit' value='undeploy' $disabled/>";
+  else
+    echo "<input type='submit' name='submit' value='undeploy' disabled='disabled'/>\n";
+  echo "</form>";
+
+  echo "</td>";
+}
+
+function validate_version($webapp)
+{
+  global $g_mbean_server;
+  global $g_server;
+
+  $repository = $webapp->getRepositoryMetaData();
+
+  if (!$repository || !$repository["root"]) {
+    return null;
+  }
+  else {
+    $status = "OK";
+    $hash = $repository["root"];
+
+    foreach ($g_server->SelfServer->Cluster->Servers as $s) {
+      $mbean_server = new MBeanServer($s->Name);
+      $s_webapp = $mbean_server->lookup($webapp->mbean_name);
+
+      if (!$s_webapp) {
+        $status = "FAIL";
+        continue;
+      }
+
+      $s_repository = $s_webapp->getRepositoryMetaData();
+
+      if ($s_repository["root"] != $repository["root"]) {
+        $status = "FAIL";
+      }
+    }
+
+    return array(status => $status,
+                 hash => $repository["root"],
+                 version => $repository["version"],
+                 date => $repository["date"]);
+  }
+}
+
+function display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid)
+{
+  global $g_mbean_server;
+  global $g_server;
+
+  $session = $webapp->SessionManager;
+
+  if ($webapp->ErrorMessage) {
+    echo "<div class='warn'>";
+    echo htmlspecialchars($webapp->ErrorMessage);
+    echo "</div>";
+  }
+
+  display_versions($webapp, $webapp_id, $is_deploy_valid);
+
+  $exp = mbean_explode($webapp->mbean_name);
+  $query = "resin:*,Host=" . $exp['Host'] . ",WebApp=" . $exp['name'];
+  $beans = $g_mbean_server->query($query);
+
+  array_push($beans, $webapp);
+
+  echo "<h3>Client activity</h3>";
+  echo "<table>\n";
+  echo "<tr><th scope='row'>Active Requests: </th><td>{$webapp->RequestCount}</td></tr>\n";
+  echo "<tr><th scope='row'>Active Sessions: </th><td>{$session->SessionActiveCount}</td></tr>\n";
+  echo "</table>\n";
+
+  echo "<h3>Application MBeans</h3>";
+  display_jmx($beans);
+}
+
+function display_versions($webapp, $webapp_id, $is_deploy_valid)
+{
+  global $g_server;
+
+  $repository = $webapp->getRepositoryMetaData();
+
+  if (!$repository || !$repository["root"]) {
+    return;
+  }
+
+  echo "<h3>Versions</h3>\n";
+  echo "<table class='data'>";
+  echo "<tr><th scope='col'>";
+  echo "<span id='sw_deploy_${webapp_id}' class='switch'></span>\n";
+  echo "</th>\n";
+  echo "<th scope='col'>Deploy</th>";
+  echo "<th scope='col'>";
+
+  $root = $repository["root"];
+
+  if ($repository["version"])
+    $msg = $repository["version"];
+  else
+    $msg = $repository["date"];
+
+  if ($is_deploy_valid)
+    print_ok($msg);
+  else
+    print_fail($msg);
+
+  echo "</th></tr>\n";
+
+  foreach ($g_server->SelfServer->Cluster->Servers as $s) {
+    $s_mbean_server = new MBeanServer($s->Name);
+
+    $s_webapp = $s_mbean_server->lookup($webapp->mbean_name);
+
+    echo "<tr class='toggle-sw_deploy_${webapp_id}'><td></td>";
+
+    $name = $s->Name;
+    if (!$name)
+      $name = "default";
+
+    printf("<td>%02d - %s</td>", $s->SelfServer->ClusterIndex, $name);
+
+    echo "<td>";
+    if ($s_webapp) {
+      $s_repository = $s_webapp->getRepositoryMetaData();
+
+      if ($s_repository["version"]) {
+        $msg = $s_repository["version"];
+      }
+      else if ($s_repository["date"]) {
+        $msg = $s_repository["date"];
+      }
+      else {
+        $msg = "not deployed";
+      }
+
+      if ($s_repository["root"] == $root) {
+        print_ok($msg);
+      }
+      else {
+        print_fail($msg);
+      }
+    }
+    else {
+      print_fail("--");
+    }
+    echo "</td>";
+
+    echo "</tr>\n";
+  }
+
+  echo "</table>\n";
+}
+
+function undeploy($name)
+{
+  global $user;
+  global $client;
+  global $g_mbean_server;
+
+  $webapp = $g_mbean_server->lookup($name);
+  $host = $webapp->Host->Name;
+
+  $commit = new Java("com.caucho.env.repository.CommitBuilder");
+
+  $commit->type("webapp");
+
+  $commit->stage("production");
+
+  if (!$host)
+    $host = "default";
+
+  $context = $webapp->ContextPath;
+
+  if ($context == '/')
+    $context = "/ROOT";
+
+  $version = $webapp->Version;
+
+  if ($version) {
+    $parts = explode(".", $version, 4);
+
+    $major = $parts[0];
+    $minor = $parts[1];
+    $micro = $parts[2];
+    $qualifier = $parts[3];
+
+    $commit->version($major, $minor, $micro, $qualifier);
+  }
+
+  $commit->tagKey($host . $context);
+
+  $commit->message("undeployed via resin-admin web form");
+
+  $commit->attribute("user", $user);
+
+  $client->removeTag($commit);
+}
+
+$javascript = javascript_create_tab("webapp-tabs");
+
+display_footer($g_page, $javascript);
+?>

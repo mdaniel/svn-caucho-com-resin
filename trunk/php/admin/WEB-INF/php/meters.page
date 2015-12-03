@@ -1,0 +1,67 @@
+<?php
+/**
+ * Custom meters
+ */
+
+require_once "WEB-INF/php/inc.php";
+require_once "WEB-INF/php/meters_inc.php";
+
+$javascript = <<<EOF
+  $("#meter-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
+EOF;
+
+if (! admin_init()) {
+  return;
+}
+
+print_title("meters", "Meters");
+
+$stat_service = get_stats_service();
+
+if (! require_professional()) {
+  return;
+} else if (! $stat_service) {
+  echo "<div class=\"req-pro-message\">" . gettext('This feature requires &lt;resin:AdminServices/> in resin.xml') . "</div>\n";
+  return;
+}
+
+$pages = $stat_service->getMeterGraphPages();
+
+usort($pages, "page_name_compare");
+
+display_tabs($pages);
+
+function page_name_compare($a, $b)
+{
+  return strcmp($a->name, $b->name);
+}
+
+function display_tabs($pages)
+{
+  echo "<div id='meter-tabs'>";
+  echo "<ul>";
+
+  foreach ($pages as $page) {
+    $name = preg_replace('/ /', '_', $page->name);
+    $tab_name = "$name-tab";
+
+    echo "<li><a href='#${tab_name}'>" . gettext($page->name) . "</a></li>\n";
+  }
+  
+  echo "</ul>\n";
+
+  foreach ($pages as $page) {
+    $name = preg_replace('/ /', '_', $page->name);
+    $tab_name = "$name-tab";
+    
+    echo "<div id='${tab_name}'>\n";
+    meter_display_page($page);
+    echo "</div>";
+  }
+
+  echo "</div>\n";
+}
+
+display_footer($g_page, $javascript);
+
+?>

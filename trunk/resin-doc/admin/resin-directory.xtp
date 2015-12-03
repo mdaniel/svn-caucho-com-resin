@@ -1,0 +1,86 @@
+<document>
+  <header>
+    <title>Resin Directory Layout</title>
+    <description>
+      <p>Standard layout and locations for Resin files.</p>
+    </description>
+    
+  </header>
+
+  <body>
+
+    <summary/>
+
+<s1 title="unix layout">
+
+<example title="Sample Debian layout">
+/var/resin/            # Resin root-directory
+  app-inf/             # custom app-tier cluster configuration and jars
+  doc/                 # Resin documentation
+  endorsed/            # Special overriding jar directory (uncommon)
+  project-jars/        # Resin extensions to third-party projects
+  resin-data/          # Resin working directory
+  resin-inf/           # custom Resin-wide configuration and jars
+  watchdog-data/       # Watchdog working directory
+  webapp-jars/         # jars included for every web-app
+  webapps/             # Application deployment
+
+/var/log/resin/        # Resin runtime logs
+  watchdog-manager.log # log for the watchdog
+  jvm-app-0.log        # log for the server named "app-0"
+
+/etc/resin/            # Resin configuration
+  resin.properties     # configuration properties
+  resin.xml            # main configuration file
+  app-default.xml      # documentation for web-app default
+  cluster-default.xml  # common configuration for all clusters
+  health.xml           # health system rules, meters, and actions
+  keys/                # openssl keys
+  licenses/            # Resin licenses
+  
+/etc/init.d/resin      # Unix init startup service
+
+/usr/bin/resinctl      # Resin command-line script
+
+/usr/share/resin/      # resin-home
+  bin/                 # Resin startup scripts
+  lib/                 # Resin jars
+  libexec64/           # Resin jni binaries
+</example>
+
+</s1>
+
+<s1 title="resin-data">
+
+<p>The resin-data directory contains Resin's internal data, including
+deployed webapps, the health system data, and distributed caches.</p>
+
+<p>If Resin's internal data becomes corrupted, you can remove
+the resin-data directory to reset the state. If you have multiple servers
+in a triad hub, the reset server will restore its values from the other
+servers.</p>
+
+<p>When Resin is deployed in a Unix environment, the resin-data will typically
+be in /var/resin/resin-data.</p>
+
+<example title="example resin-data">
+resin-data/
+  app-0/          # each named server gets its own section
+    .git/         # web-app deployment .git repository
+    distcache/    # distributed cache directory
+      data.db     # distcache value data
+      mnode.db    # distcache key/value binding
+    log/          # health system log
+      log_data.db # log entries
+      log_name.db # log names
+    stat_data.db  # health statistics data
+    stat_name.db  # health statistics names
+    tmp/          # temp swap directory
+      temp_file   
+    xa.log.a      # XA log
+</example>
+
+</s1>
+
+  </body>
+</document>

@@ -1,0 +1,146 @@
+<book title="Resin Administration">
+  <chapter title="Starting Resin">
+    <linked-section link="admin/starting-resin.xtp" />
+  </chapter>
+  
+  <chapter title="Eclipse">
+    <linked-section link="admin/resin-eclipse-support.xtp" />
+  </chapter>
+
+  <chapter title="Migrating to Resin 4.0">
+    <linked-section link="admin/migration.xtp" />
+  </chapter>
+
+  <chapter title="Administration web application">
+    <linked-section link="admin/resin-admin-console.xtp" />
+  </chapter>
+
+  <chapter title="Administration: REST">
+    <linked-section link="admin/resin-admin-rest.xtp" />
+  </chapter>
+
+  <chapter title="Clustering">
+    <linked-section link="admin/clustering-overview.xtp" />
+  </chapter>
+
+  <chapter title="Clustering: Server Config">
+    <linked-section link="admin/cluster-server.xtp" />
+  </chapter>
+
+  <chapter title="Clustering: Dynamic Server (Cloud)">
+    <linked-section link="admin/cluster-cloud.xtp" />
+  </chapter>
+
+  <chapter title="Command-Line">
+    <linked-section link="admin/resin-admin-command-line.xtp" />
+  </chapter>
+
+  <chapter title="Configuration">
+    <linked-section link="admin/config-overview.xtp" />
+  </chapter>
+
+  <chapter title="Configuration: resin.properties">
+    <linked-section link="admin/config-resin-properties.xtp" />
+  </chapter>
+
+  <chapter title="Configuration: resin.xml">
+    <linked-section link="admin/config-resin-xml.xtp" />
+  </chapter>
+    
+  <chapter title="Configuration: CDI and XML">
+    <linked-section link="admin/config-candi.xtp" />
+    <linked-section link="admin/config-el.xtp" />
+  </chapter>
+
+  <chapter title="Database">
+    <linked-section link="admin/database.xtp" />
+  </chapter>
+
+  <chapter title="Deployment">
+    <linked-section link="admin/deploy.xtp" />
+  </chapter>
+  
+  <chapter title="Deployment: Cloud">
+    <linked-section link="admin/deploy-cloud.xtp" />
+  </chapter>
+
+  <chapter title="Deployment: Command-Line">
+    <linked-section link="admin/deploy-command-line.xtp" />
+  </chapter>
+    <!--
+    <linked-section link="admin/deploy-git-architecture.xtp" />
+    <linked-section link="admin/deploy-ant-maven.xtp" />
+    -->
+
+  <chapter title="Health: Checks and Meters">
+    <linked-section link="admin/health-checking.xtp" />
+    <linked-section link="admin/health-meters.xtp" />
+  </chapter>
+
+  <chapter title="Health: Report">
+    <linked-section link="admin/health-report.xtp" />
+  </chapter>
+
+  <chapter title="Health: Watchdog">
+    <linked-section link="admin/health-watchdog.xtp" />
+  </chapter>
+
+  <chapter title="Installation">
+    <!--
+    <linked-section link="admin/starting-resin-install.xtp" />
+    <linked-section link="admin/starting-resin-command-line.xtp" />
+    -->
+    <linked-section link="admin/starting-resin-apache.xtp" />
+    <linked-section link="admin/starting-resin-iis-7.xtp" />
+    <!--
+    <linked-section link="admin/starting-resin-licenses.xtp" />
+    -->
+    <linked-section link="admin/resin-directory.xtp" />
+  </chapter>
+
+  <chapter title="Logging">
+    <linked-section link="admin/logging.xtp" />
+  </chapter>
+
+  <chapter title="Scheduled Tasks">
+    <linked-section link="admin/scheduled-tasks.xtp" />
+  </chapter>
+
+  <chapter title="Security">
+    <linked-section link="admin/security-overview.xtp" />
+    <linked-section link="admin/security-authenticators.xtp" />
+    <linked-section link="admin/security-authentication-method.xtp" />
+    <linked-section link="admin/security-authorization.xtp" />
+    <linked-section link="admin/security-ssl.xtp" />
+  </chapter>
+
+  <chapter title="Web Server: HTTP Server">
+    <linked-section link="admin/http-server.xtp" />
+  </chapter>
+  
+  <chapter title="Web Server: URL Rewriting and Dispatch">
+    <linked-section link="admin/http-rewrite.xtp" />
+  </chapter>
+  
+  <chapter title="Web Server: Virtual Hosts">
+    <linked-section link="admin/http-virtual-hosts.xtp" />
+  </chapter>
+  
+  <chapter title="Web Server: Web Apps">
+    <linked-section link="admin/http-web-apps.xtp" />
+  </chapter>
+
+  <chapter title="Web Server: HTTP Proxy Cache">
+    <linked-section link="admin/http-proxy-cache.xtp" />
+  </chapter>
+
+  <chapter title="Advanced Topics">
+    <linked-section link="admin/advanced-classloaders.xtp" />
+    <linked-section link="admin/advanced-jmx.xtp" />
+  </chapter>
+
+  <chapter title="Reference">
+    <linked-section link="reference.xtp" />
+  </chapter>
+
+</book>

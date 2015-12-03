@@ -1,0 +1,791 @@
+<?php
+/**
+ * Provides the most important status information about the Resin server.
+ *
+ * @author Sam
+ */
+
+require_once "WEB-INF/php/inc.php";
+require_once "WEB-INF/php/meters_inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+print_title("summary", "Resin Summary");
+
+$report = "Summary";
+
+echo "<div id='summary-tabs'>\n";
+echo "<ul>\n";
+
+echo "<li><a href='#overview-tab'>" . gettext('Overview') . "</a></li>\n";
+/*
+echo "<li><a href='#meter-tab'>" . gettext('Meters') . "</a></li>\n";
+*/
+echo "<li><a href='#health-tab'>" . gettext('Health') . "</a></li>\n";
+echo "<li><a href='#table-tab'>" . gettext('Tables') . "</a></li>\n";
+echo "<li><a href='#log-tab'>" . gettext('Logs') . " </a></li>\n";
+echo "<li><a href='#pdf-tab'>" . gettext('PDF') . "</a></li>\n";
+echo "</ul>";
+
+echo "<div id='overview-tab'>";
+
+print_overview();
+
+print_overview_graphs();
+
+echo "</div>";
+echo "<div id='health-tab'>";
+
+if (require_professional()) {
+  echo "<h2>" . gettext('Health'); print_Help("Health"); echo "</h2>\n";
+  
+  display_health_status($g_server->SelfServer);
+  
+  display_health_status_graph($g_server->SelfServer);
+}
+
+echo "</div>";
+
+echo "<div id='table-tab'>\n";
+
+print_connections();
+print_tcp_ports();
+print_load_balance();
+print_database_pools();
+
+echo "</div>\n";
+
+echo "<div id='log-tab'>";
+
+recent_messages(40);
+
+echo "</div>";
+
+echo "<div id='pdf-tab'>";
+
+print_pdf_select();
+
+echo "</div>";
+
+echo "</div>";
+
+function print_overview()
+{
+  global $g_mbean_server, $g_server, $g_resin;
+
+  $server = $g_server;
+  $resin = $g_resin;
+
+  $runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
+  $os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
+  $license_store = $g_mbean_server->lookup("resin:type=LicenseStore");
+  
+  $row = 0;
+?>
+
+<table class="data" summary="Overview">
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="server_id" class='item'
+        title="<?= gettext('The server id used when starting this instance of Resin, the value of \'-server\'.')?>"><?= gettext('Server id:')?>
+    </th>
+    <td headers="server_id"><?= $server->Id ? $server->Id : '""' ?></td>
+    <th id="user" class='item'
+        title="<?= gettext('The operating system user that is running this instance of Resin.')?>"><?= gettext('User:')?>
+    </th>
+    <td headers="user"><?= $resin->UserName ?></td>
+    
+    <th id='machine' class='item'
+        title="<?= gettext('The ip address of the machine that is running this instance of Resin.')?>"><?= gettext('Machine:')?>
+    </th>
+    <td headers="machine"><?= $runtime->Name ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id='version' class='item'
+        title="<?= gettext('The Resin version.')?>"><?= gettext('Resin:')?>
+    </th>
+    <td headers="version" colspan='5'><?= $resin->Version ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="jdk" class='item'
+        title="<?= gettext('The JDK version.')?>"><?= gettext('JDK:')?>
+    </th>
+    <td headers="jdk" colspan='5'><?= $runtime->VmName ?> <?= $runtime->VmVersion ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="os" class='item'
+        title="<?= gettext('The OS version.')?>"><?= gettext('OS:')?>
+    </th>
+    <td headers="os" colspan='5'>
+      <?= $os->AvailableProcessors ?> cpu,
+      <?= $os->Name ?>
+      <?= $os->Arch ?>
+      <?= $os->Version ?>
+    </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="start" class='item'
+        title="<?= gettext('The Watchdog Start Message.')?>"><?= gettext('Message:')?>
+    </th>
+    <td headers="start" colspan='5'>
+      <?= $resin->WatchdogStartMessage ?>
+    </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="start" class='item'
+        title="<?= gettext('The license message.')?>"><?= gettext('License:')?>
+    </th>
+    <td headers="start" colspan='5'>
+    <? if ($license_store) {
+         $licenses = $license_store->ValidLicenses;
+         foreach($licenses as $license) {
+           $license_msg = $license->Description . ", " . $license->ExpireMessage;
+           echo "${license_msg}<br>\n";
+         }
+       } else {
+         echo "GNU GPL";
+       }
+     ?>
+    </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="state" class='item'
+        title="<?= gettext('The current lifecycle state')?>"><?= gettext('State:')?>
+    </th>
+    <td headers="state" class="<?= $server->State ?>"><?= $server->State ?></td>
+
+    <th id="uptime" class='item'
+        title="<?= gettext('The time that this instance was last started or restarted.')?>"><?= gettext('Uptime:')?>
+    </th>
+    <?php
+      $start_time = $server->StartTime->time / 1000;
+      $now = $server->CurrentTime->time / 1000;
+      $uptime = $now - $start_time;
+
+      if ($uptime < 12 * 3600)
+        echo "<td headers='uptime' class='warmup' colspan='3'>";
+      else
+        echo "<td headers='uptime' colspan='3'>";
+
+      echo sprintf("%d days %02d:%02d:%02d",
+                   $uptime / (24 * 3600),
+                   $uptime / 3600 % 24,
+                   $uptime / 60 % 60,
+                   $uptime % 60);
+      echo " -- " . format_datetime($server->StartTime);
+     ?>
+   </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="heap_free" class='item'
+        title="<?= gettext('The current free amount of heap memory available for the JVM, in bytes.')?>"><?= gettext('Free heap:')?>
+    </th>
+    <td headers="heap_free"><?= format_memory($server->RuntimeMemoryFree) ?></td>
+    
+    <th id="heap_total" class='item'
+        title="<?= gettext('The current total amount of heap memory available for the JVM, in bytes.')?>"><?= gettext('Total heap:')?>
+    </th>
+    <td headers="heap_total" colspan='3'><?= format_memory($server->RuntimeMemory) ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="fd_count" class='item'
+        title="<?= gettext('The current file descriptors used.')?>"><?= gettext('File des:')?>
+    </th>
+    <td headers="fd_count"><?= $os->OpenFileDescriptorCount ?></td>
+    
+    <th id="fd_max" class='item'
+        title="<?= gettext('The maximum file descriptors available.')?>"><?= gettext('File des max:')?>
+    </th>
+    <td headers="fd_max" colspan='3'><?= $os->MaxFileDescriptorCount ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="swap_free" class='item'
+        title="<?= gettext('The free amount of operating-system swap space.')?>"><?= gettext('Free Swap:')?>
+    </th>
+    <td headers="swap_free"><?= format_memory($os->FreeSwapSpaceSize) ?></td>
+    
+    <th id="swap_total" class='item'
+        title="<?= gettext('The total amount of operating-system swap space.')?>"><?= gettext('Total Swap:')?>
+    </th>
+    <td headers="swap_total" colspan='3'><?= format_memory($os->TotalSwapSpaceSize) ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="mem_free" class='item'
+        title="<?= gettext('The free amount of operating-system physical memory.')?>"><?= gettext('Free Physical:')?>
+    </th>
+    <td headers="mem_free"><?= format_memory($os->FreePhysicalMemorySize) ?></td>
+    
+    <th id="mem_total" class='item'
+        title="<?= gettext('The total amount of operating-system physical memory.')?>"><?= gettext('Total Physical')?>:</th>
+    <td headers="mem_total" colspan='3'><?= format_memory($os->TotalPhysicalMemorySize) ?></td>
+  </tr>
+
+
+<?php
+
+  echo "</table>\n";
+}
+
+function print_overview_graphs()
+{
+  global $g_server, $g_si;
+  
+  $stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+  
+  enable_graph_controls();
+    
+  $width = 250;
+  $height = 150;
+
+  echo "<h3>" . gettext('Graphs') . "</h3>\n";
+
+  echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>\n";
+  echo "<tr valign='top'><td>\n";
+
+  $threads_params = new GraphParams("sum-threads", $width, $height);
+  $threads_params->title = gettext('Threads');
+  $threads_params->alt = gettext('A line graph representing the number of threads in various thread pools over the last 6 hours.');
+
+  stat_graph($threads_params,
+             array("$g_si|JVM|Thread|JVM Thread Count",
+                   "$g_si|Resin|Thread|Thread Count",
+                   "$g_si|Resin|Thread|Thread Idle Count",
+                   "$g_si|JVM|Thread|JVM Runnable Count",
+                   "$g_si|JVM|Thread|JVM Blocked Count",
+                   "$g_si|JVM|Thread|JVM Native Count",
+                   "$g_si|JVM|Thread|JVM Waiting Count"));
+
+  echo "</td><td>\n";
+  
+	$mem_params = new GraphParams("sum-memory", $width, $height);
+	$mem_params->title = gettext('Memory');
+	$mem_params->alt = gettext('A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
+
+  stat_graph($mem_params,
+    array("$g_si|JVM|Memory|Heap Memory Free",
+      "$g_si|JVM|Memory|Heap Memory Used",
+      "$g_si|JVM|Memory|Tenured Memory Free",
+      "$g_si|JVM|Memory|Tenured Memory Used",
+      "$g_si|JVM|Memory|PermGen Memory Free",
+      "$g_si|JVM|Memory|PermGen Memory Used"));
+
+  echo "</td><td>\n";
+
+  $cpu_params = new GraphParams("sum-cpu", $width, $height);
+  $cpu_params->title = gettext("CPU");
+  $cpu_params->alt
+    = gettext('A line graph representing the active CPU usage over the last 6 hours.');
+
+  stat_graph($cpu_params, 
+             array("$g_si|OS|CPU|CPU Active"));
+
+  echo "</td></tr>\n";
+  echo "</table>\n";
+}
+
+function print_graphs()
+{
+  $stat = get_stats_service();
+  if (! $stat)
+    return;
+
+  $page = $stat->getMeterGraphPage("Snapshot");
+  if ($page)
+    meter_display_page($page);  
+}
+
+function display_health_status_graph($s)
+{
+  $si = sprintf("%02d", $s->ClusterIndex);
+  $server_id = $s->Name;
+  if ($server_id == "")
+  	$server_id = "default";
+
+  $mbean_server = new MBeanServer($server_id);
+
+  $label = "$si - $server_id";
+	
+  display_health_graph($mbean_server, $s, $si, $label);
+}
+
+function display_health_graph($mbean_server, $s, $si, $label)
+{
+  $params = new GraphParams("health_${si}", 600, 200);
+  $params->title = gettext('Server') . "${label}";
+
+  $params->alt
+    = gettext("A line graph representing the status of each health check performed on server $label over the last 24 hours.");
+  $params->alt = preg_replace('/\$label/', $label, $params->alt);
+
+  $params->labels_mbean = "resin:type=HealthSystem";
+  $params->mbean_server = $mbean_server;
+
+  stat_graph_regexp($params, "/^${si}\|Resin\|Health/");
+}
+
+function recent_messages($max)
+{
+  global $g_server, $g_mbean_server;
+
+  $mbean = $g_mbean_server->getLogService();
+
+  if (! require_professional()) {
+    return;
+  } else if (! $mbean) {
+    echo "<div class=\"req-pro-message\">" . gettext('This feature requires &lt;resin:AdminServices/> in resin.xml') . "</div>\n";
+    return;
+  }
+
+  //
+  // recent messages
+  //
+  
+  if ($mbean) {
+    $now = time();
+
+    $messages = $mbean->findMessages("warning",
+                                     ($now - 24 * 3600) * 1000,
+                                     $now * 1000);
+
+    echo "<h2>" . gettext('Recent Warnings') . "</h2>\n";
+
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
+    echo "    <th scope='col' class='level'>" . gettext('Level') . "</th>";
+    echo "    <th scope='col' class='message'>" . gettext('Message') . "</th></tr>\n";
+    echo "</thead>\n";
+
+    if (! empty($messages)) {
+      
+      $messages = array_reverse($messages);
+
+      if ($max < sizeof($messages)) {
+        $messages = array_slice($messages, 0, $max);
+      }
+
+      echo "<tbody class='scroll'>\n";
+      
+      foreach ($messages as $message) {
+        echo "<tr class='{$message->level}'>";
+        echo "  <td class='date'>";
+        echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $message->timestamp / 1000);
+        echo "</td>";
+        echo "  <td class='level'>{$message->level}</td>";
+        echo "  <td class='message'>" . nl2br(htmlspecialchars(wordwrap($message->message, 90)));
+        echo "  </td>";
+        echo "</tr>";
+      }
+      
+      echo "</tbody>\n";
+    } else {
+      echo "<tbody>\n";
+      echo "<tr><td colspan='3'>" . gettext('No recent warnings') . "</td></tr>\n";
+      echo "</tbody>\n";
+    }
+      
+    echo "</table>\n";
+    
+    //
+    // startup
+    //
+    $start_time = $g_server->StartTime->time / 1000;
+
+    $messages = $mbean->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
+
+    echo "<h2>" . gettext('Recent Shutdown Messages') . "</h2>\n";
+
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
+    echo "    <th scope='col' class='level'>" . gettext('Level') . "</th>";
+    echo "    <th scope='col' class='message'>" . gettext('Message') . "</th></tr>\n";
+    echo "</thead>\n";
+    
+    if (! empty($messages)) {
+      
+      $messages = array_reverse($messages);
+
+      echo "<tbody class='scroll'>\n";
+
+      // mark the start time
+      echo "<tr class='warning'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $start_time);
+      echo "</td>";
+      echo "  <td class='level'></td>";
+      echo "  <td class='message'>Start Time</td>";
+      echo "</tr>";
+
+      foreach ($messages as $message) {
+        echo "<tr class='{$message->level}'>";
+        echo "  <td class='date'>";
+        echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+        echo "</td>";
+        echo "  <td class='level'>{$message->level}</td>";
+        echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90)) . "</td>";
+        echo "</tr>";
+      }
+
+      echo "</tbody>\n";
+    } else {
+      echo "<tbody>\n";
+      echo "<tr><td colspan='3'>" . gettext('No recent shutdown messages') . "</td></tr>\n";
+      echo "</tbody>\n";
+    }
+    
+    echo "</table>\n";
+  }
+}
+
+function print_pdf_select()
+{
+  global $g_periods;
+  global $g_period;
+  global $g_server_index;
+
+  $stat = get_stats_service();
+  
+  if (! require_professional()) {
+    return;
+  } else if (! $stat) {
+    echo "<div class=\"req-pro-message\">" . gettext('This feature requires &lt;resin:AdminServices/> in resin.xml') . "</div>\n";
+    return;
+  }
+  
+ echo "<h2>" . gettext('Summary PDF Report') . "</h2>\n";
+ echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
+  echo "<input type='hidden' name='snapshot' value='true'/>\n";
+  echo "<input type='hidden' name='report' value='Snapshot'/>\n";
+  echo "<input type='hidden' name='s' value='$g_server_index'/>\n";
+  echo "<div>\n";
+  echo "<div style='display:inline-block;float:left;padding-right:0.5em;'>\n";
+  echo "<input type='checkbox' id='profiling_enabled' value='true'/> ";
+  echo "</div>\n";
+  echo "<div style='display:inline-block'>\n";
+  echo "<label for='profiling_enabled'>" . gettext('Enable Profiling (Optional)') . "</label><br/><br/>\n";
+  echo "<script language='javascript' type='text/javascript'>\n";
+  echo "<!-- \n";
+  $alert_message = gettext('Warning: The PDF report will be display after profiling data is gathered for the selected active time period.');
+  echo "$('#profiling_enabled').change(function() {\n";
+  echo "  if ($('#profiling_enabled').attr('checked')) {\n";
+  echo "    $(\"#profile_tick\").removeAttr('disabled');\n";
+  echo "    $(\"#profile_depth\").removeAttr('disabled');\n";
+  echo "    $(\"#profile_time\").removeAttr('disabled');\n";
+  echo "    alert('$alert_message');\n";
+  echo "  } else {\n";
+  echo "    $(\"#profile_tick\").attr('disabled','disabled');\n";
+  echo "    $(\"#profile_depth\").attr('disabled','disabled');\n";
+  echo "    $(\"#profile_time\").attr('disabled','disabled');\n";
+  echo "  }\n";
+  echo "});\n";
+  echo " -->\n";
+  echo "</script>";
+    
+  echo "<label for='profile_tick'>" . gettext('Sampling Rate') . "</label>: <select name='profile_tick' id='profile_tick' disabled='disabled'>";
+
+  $RATES = Array(10, 25, 100, 250, 1000, 2500, 10000);
+
+  if (!isset($_POST['profile_tick']) || !is_numeric($_POST['profile_tick']) || !in_array($_POST['profile_tick'], $RATES))
+    $postedRate = 100;
+  else
+    $postedRate = $_POST['profile_tick'];
+
+  foreach ($RATES as $rate) {
+    if ($rate == $postedRate) 
+      echo "  <option selected='selected' value='${rate}'>${rate}ms</option>";  
+    else
+      echo "  <option value='${rate}'>${rate}ms</option>";
+  }
+
+  echo "</select>";
+
+  echo " &nbsp;<label for='profile_depth'>" . gettext('Depth') . "</label>: <select name='profile_depth' id='profile_depth' disabled='disabled'>";
+
+  $DEPTHS = Array(1, 2, 4, 8, 12, 16, 20, 32, 250);
+
+  if (!isset($_POST['profile_depth']) || !is_numeric($_POST['profile_depth']) || !in_array(intval($_POST['profile_depth']), $DEPTHS))
+    $postedDepth = 16;
+  else
+    $postedDepth = $_POST['profile_depth'];
+
+  foreach ($DEPTHS as $depth) {
+    if ($depth == $postedDepth) 
+      echo "  <option selected='selected' value='${depth}'>${depth}</option>";
+    else
+      echo "  <option value='${depth}'>${depth}</option>";
+  }
+
+  echo "</select>";
+  
+  echo " &nbsp;<label for='profile_time'>" . gettext('Active Time') . "</label>: <select name='profile_time' id='profile_time' disabled='disabled'>";
+
+  $PROFILE_TIMES = Array(60 => '1m',
+                         120 => '2m',
+                         300 => '5m');
+
+  if (!isset($_POST['profile_time']) || !is_numeric($_POST['profile_time']) || !in_array(intval($_POST['profile_time']), $PROFILE_TIMES))
+    $postedProfileTime = 1;
+  else
+    $postedProfileTime = $_POST['profile_time'];
+
+  foreach ($PROFILE_TIMES as $profileTime => $name) {
+    if ($profileTime == $postedProfileTime) 
+      echo "  <option selected='selected' value='${profileTime}'>${name}</option>";
+    else
+      echo "  <option value='${profileTime}'>${name}</option>";
+  }
+
+  echo "</select>\n";
+  echo "</div>\n";
+  echo "</div><br/>\n";
+  
+  echo "<label for='period'>" . gettext('Report Period') . "</label>: ";
+  echo "<select name='period' id='period'>\n";
+  
+  if (!isset($_POST['period']) || !is_numeric($_POST['period']) || !in_array(intval($_POST['period']), $g_periods))
+    $postedPeriod = $g_period;
+  else
+    $postedPeriod = $_POST['period'];
+		
+  foreach ($g_periods as $period => $name) {
+    if ($period == $postedPeriod) 
+      echo "  <option selected='selected' value='${period}'>${name}</option>";
+    else
+      echo "  <option value='${period}'>${name}</option>";
+  }
+
+  echo "</select>\n";
+
+  echo " &nbsp;<input type='submit' value='" . gettext('Generate PDF') . "'/>\n";
+
+  echo "</form>";
+}
+
+function print_tcp_ports()
+{
+  global $g_server;
+
+  $ports = $g_server->Ports;
+
+  if ($ports) {
+    echo "<h2>" . gettext('TCP ports'); print_help("Ports"); echo "</h2>\n";
+?>
+
+<table class="data">
+  <tr>
+    <th colspan='2'>&nbsp;</th>
+    <th colspan='3' id='threads'><?= gettext('Threads')?></th>
+    <th colspan='4' id='keepalive'><?= gettext('Keepalive')?></th>
+  </tr>
+
+  <tr>
+    <th id='listener'><?= gettext('Listener')?></th>
+    <th id='port-status'><?= gettext('Status')?></th>
+
+    <th id='thread-active'><?= gettext('Active')?></th>
+    <th id='thread-idle'><?= gettext('Idle')?></th>
+    <th id='thread-total'><?= gettext('Total')?></th>
+
+    <th id='keepalive-active'><?= gettext('Total')?></th>
+    <th id='keepalive-thread'><?= gettext('Thread')?></th>
+    <th id='keepalive-non-block'><?= gettext('Non-Block')?></th>
+    <th id='keepalive-comet'><?= gettext('Comet')?></th>
+  </tr>
+<?php
+    $count = 0;
+    $row = 0;
+
+    foreach ($ports as $port) {
+      $count++;
+?>
+
+  <tr class='<?= $row++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item' headers="listener"><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
+    <td class="<?= $port->State ?>" headers="port-status"><?= $port->State ?></td>
+    <td headers="threads thread-active"><?= $port->ThreadActiveCount ?></td>
+    <td headers="threads thread-idle"><?= $port->ThreadIdleCount ?></td>
+    <td headers="threads thread-total"><?= $port->ThreadCount ?></td>
+
+    <td headers="keepalive keepalive-active"><?= $port->KeepaliveCount ?></td>
+    <td headers="keepalive keepalive-thread"><?= $port->KeepaliveThreadCount ?></td>
+    <td headers="keepalive keepalive-non-block"><?= $port->KeepaliveSelectCount ?></td>
+    <td headers="keepalive keepalive-comet"><?= $port->CometIdleCount ?></td>
+  </tr>
+<?php
+    }
+
+    echo "</table>";
+  }
+}
+
+function print_connections()
+{
+  global $g_mbean_server;
+  global $g_server;
+
+  $jvm_thread_mbean = $g_mbean_server->lookup("java.lang:type=Threading");
+
+  $connInfoList = array();
+
+  foreach ($g_server->Ports as $port) {
+    $portConnInfo = $port->connectionInfo();
+    if ($portConnInfo)
+      $connInfoList = array_merge($connInfoList, $portConnInfo);
+  }
+
+  $row = 0;
+  @ usort($connInfoList, "conn_time_cmp");
+
+  echo "<h2>" . gettext('Open Connections') . "</h2>";
+
+  echo "<table class='data' summary='" . gettext("Open Connections") . "'>";
+  echo "<tr><th scope='col'>" . gettext('action') . "</th>";
+  echo "<th scope='col'>" . gettext('time') . "</th>";
+  echo "<th scope='col'>" . gettext('id') . "</th>";
+  echo "<th scope='col'>" . gettext('url') . "</th>";
+  echo "<th scope='col'>" . gettext('IP') . "</th></tr>\n";
+
+  foreach ($connInfoList as $connInfo) {
+  	if ($connInfo->hasRequest()) {
+	    echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
+	    echo "<td>\n";
+	
+	    $pname = "port_" . $row;
+	    
+	    $threadId = $connInfo->threadId;
+	    
+	    $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
+	    $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
+	    echo "<a id='s_$pname' href=\"javascript:$show\">" . gettext('[show]') . "</a> ";
+	    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>" . gettext('[hide]') . "</a> ";
+	    
+	    echo "</td>\n<td>";
+	    echo sprintf("%.3fs", $connInfo->requestActiveTime * 0.001);
+	    
+	    echo "</td>\n<td>";
+	    echo $connInfo->id;
+	    
+	    echo "</td>\n<td>";
+	    echo $connInfo->getUrl();
+	
+	    echo "</td>\n<td>";
+	    echo $connInfo->getRemoteAddress();
+	    echo "</td>\n";
+	    echo "</tr>";
+	
+	    echo "<tr><td colspan='6'>";
+	    echo "<pre id='h1_$pname' style='display:none'>";
+	
+	    $thread = $jvm_thread_mbean->getThreadInfo($threadId, 50);
+	    echo $thread;
+	
+	    echo "</pre>";
+	    echo "</td>";
+	    echo "</tr>\n";
+	}
+  }
+
+  echo "</table>\n";
+}
+
+function print_load_balance()
+{
+  global $g_resin;
+  
+  $resin = $g_resin;
+
+  echo "<!-- Cluster -->\n";
+
+  echo "<h2>" . gettext('Load Balance and Clusters');
+  print_help("Load Balance");
+  echo "</h2>\n"
+
+?>
+
+<table class="data">
+  <tr>
+    <th id="cluster-server"><?= gettext('Server')?></th>
+    <th id="cluster-address"><?= gettext('Address')?></th>
+    <th id="cluster-status"><?= gettext('Status')?></th>
+    <th id="cluster-active"><?= gettext('Active')?></th>
+    <th id="cluster-idle"><?= gettext('Idle')?></th>
+    <th id="cluster-conn_miss"><?= gettext('Connection Miss')?></th>
+    <th id="cluster-load"><?= gettext('Load')?></th>
+    <th id="cluster-latency"><?= gettext('Latency')?></th>
+    <th id="cluster-failures" colspan='2'><?= gettext('Failures')?></th>
+    <th id="cluster-busy" colspan='2'><?= gettext('Busy')?></th>
+  </tr>
+<?php
+
+  foreach ($g_resin->Clusters as $cluster) {
+    if (empty($cluster->Servers))
+      continue;
+
+    echo "<tr><td class='group' colspan='12' id='$cluster->Name'>$cluster->Name</td></tr>\n";
+
+  $count = 0;
+  foreach ($cluster->Servers as $client) {
+?>
+
+  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item' headers="cluster-server <?=$cluster->Name?>"><?= $client->Name ?></td>
+    <td headers="cluster-address <?=$cluster->Name?>"><?= $client->Address ?>:<?= $client->Port ?></td>
+    <td headers="cluster-status <?=$cluster->Name?>" class="<?= $client->ClusterState ?>"><?= $client->ClusterState ?></td>
+    <td headers="cluster-active <?=$cluster->Name?>"><?= $client->ConnectionActiveCount ?></td>
+    <td headers="cluster-idle <?=$cluster->Name?>"><?= $client->ConnectionIdleCount ?></td>
+    <td headers="cluster-conn_miss <?=$cluster->Name?>"><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
+                              $client->ConnectionNewCountTotal) ?></td>
+    <td headers="cluster-load <?=$cluster->Name?>"><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
+    <td headers="cluster-latency <?=$cluster->Name?>"><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
+    <?php
+      format_ago_td_pair($client->ConnectionFailCountTotal, $client->LastFailTime, "cluster-failures " . $cluster->Name);
+      format_ago_td_pair($client->ConnectionBusyCountTotal, $client->LastBusyTime, "cluster-busy " . $cluster->Name);
+    ?>
+  </tr>
+<?php 
+    }
+  }
+
+  echo "</table>\n";
+}  
+
+function print_database_pools()
+{
+  global $g_mbean_server;
+  
+  $db_pools = $g_mbean_server->query("resin:*,type=ConnectionPool");
+
+  if ($db_pools) {
+    require_once("WEB-INF/php/db.php");
+
+    echo "<h2>" . gettext('Database Pools');
+    print_help("Database Pools");
+    echo "</h2>\n";
+
+    echo print_db_pools($db_pools);
+  }
+}
+
+function conn_time_cmp($conn_a, $conn_b)
+{
+  return $conn_b->requestStartTime - $conn_a->requestStartTime;
+}
+
+display_footer($g_page, javascript_create_tab("summary-tabs"));
+
+?>

@@ -1,0 +1,22 @@
+<?php
+
+include("graph_flot.php");
+
+$graphs = json_decode($HTTP_RAW_POST_DATA);
+if (! $graphs) {
+  return;
+}  
+
+$mbean_server = new MBeanServer();
+if (! $mbean_server) {
+  return;
+}
+
+$stat = $mbean_server->getStatService();
+
+foreach ($graphs as $graph) {
+  stat_graph_script($stat, $graph->canvas, $graph->names, 
+                    $graph->time, $graph->offset, $graph->period);
+}
+
+?>

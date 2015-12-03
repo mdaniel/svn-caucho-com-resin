@@ -1,0 +1,434 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+if (! require_professional()) {
+  return;
+}
+
+enable_graph_controls();
+
+echo "<h1>";
+echo gettext('Health');
+echo print_help("Health");
+echo "</h1>\n";
+
+echo "<div id='health-tabs'>\n";
+echo "<ul>";
+echo "<li><a href='#health'>" . gettext('Health') . "</a></li>\n";
+echo "<li><a href='#health-graph'>" . gettext('Graphs') . "</a></li>\n";
+echo "<li><a href='#health-logs'>" . gettext('Health Logs') . "</a></li>\n";
+echo "<li><a href='#health-availability'>" . gettext('Availability') . "</a></li>\n";
+echo "</ul>";
+
+echo "<div id='health'>\n";
+display_health_tab();
+echo "</div>\n";
+
+echo "<div id='health-graph'>\n";
+display_health_graph_tab();
+echo "</div>\n";
+
+echo "<div id='health-logs'>\n";
+display_health_logs();
+echo "</div>\n";
+
+echo "<div id='health-availability'>\n";
+display_health_availability();
+echo "</div>\n";
+
+echo "</div>\n";
+
+function display_health_tab()
+{
+  global $g_server;
+
+  foreach ($g_server->SelfServer->Cluster->Servers as $s) {
+    display_health_status($s);
+  }
+}
+
+function display_health_graph_tab()
+{
+  global $g_server;
+
+  foreach ($g_server->SelfServer->Cluster->Servers as $s) {
+    display_health_status_graph($s);
+  }
+}
+
+function display_health_status_graph($s)
+{
+  $si = sprintf("%02d", $s->ClusterIndex);
+  $server_id = $s->Name;
+  if ($server_id == "")
+  	$server_id = "default";
+
+  $mbean_server = new MBeanServer($server_id);
+
+  $label = "$si - $server_id";
+	
+  display_health_graph($mbean_server, $s, $si, $label);
+}
+
+function display_health_graph($mbean_server, $s, $si, $label)
+{
+  $params = new GraphParams("health_${si}", 600, 200);
+  $params->title = gettext('Server') . "${label}";
+
+  $params->alt
+    = gettext("A line graph representing the status of each health check performed on server $label over the last 24 hours.");
+  $params->alt = preg_replace('/\$label/', $label, $params->alt);
+
+  $params->labels_mbean = "resin:type=HealthSystem";
+  $params->mbean_server = $mbean_server;
+
+  stat_graph_regexp($params, "/^${si}\|Resin\|Health/");
+}
+
+function display_heartbeat()
+{
+  global $g_server;
+
+  $resin = $g_server->Cluster->Resin;
+  $clusters = $resin->Clusters;
+
+  echo "<table cellspacing='5'>";
+
+  echo "<tr>";
+
+  foreach ($clusters as $c) {
+    echo "<th>" . $c->Name . "</th>\n";
+  }
+
+  echo "</tr>";
+
+  for ($i = 0; $i < 64; $i++) {
+    if (! has_server($clusters, $i))
+      continue;
+
+    echo "<tr>";
+
+    foreach ($clusters as $c) {
+      echo "<td>";
+    
+      $triad_a = $c->Servers[0];
+      if ($triad_a) {
+        $mbean_server_a = new MBeanServer($triad_a->Name);
+      }
+    
+      $triad_b = $c->Servers[1];
+      if ($triad_b) {
+        $mbean_server_b = new MBeanServer($triad_b->Name);
+      }
+
+      $triad_c = $c->Servers[2];
+      if ($triad_c) {    
+        $mbean_server_c = new MBeanServer($triad_c->Name);
+      }
+
+      $s = $c->Servers[$i];
+
+      if ($s) {
+        $style = "border-width : 1px";
+
+        $s_mbean_server = new MBeanServer($s->Name);
+        $s_server = $s_mbean_server->getServer();
+
+        if (! $s_server) {
+          $style .= "; border-color : #cc0000";
+        }
+        else if ($s->Name === $g_server->SelfServer->Name) {
+          $style .= "; border-color : #e5a122";
+        }
+      
+        if ($s->isTriadServer()) {
+          $style .= "; border-style : solid";
+        }
+        else {
+          $style .= "; border-style : dashed";
+        }
+
+        echo "<table style='$style' width='100%'>\n";
+
+        echo "<tr>";
+        echo "<td>";
+      
+        $is_health = $s_server;
+      
+        print_check_or_x($is_health);
+      
+        echo "</td>";
+        echo "<td width='5em'>";
+  
+      $name = $s->Name;
+      if (! $name)
+        $name = "default";
+      printf("%02d - %s", $s->ClusterIndex, $name);
+
+      echo "</td>\n";
+      echo "<td>";
+
+      do_triad($s, $triad_a, $mbean_server_a);
+
+      echo "</td></tr>\n";
+      echo "<tr><td>&nbsp;</td><td>";
+
+      printf("%s:%d", $s->Address, $s->Port);
+
+      echo "</td>\n<td>";
+
+      do_triad($s, $triad_b, $mbean_server_b);
+
+      echo "</td></tr>\n";
+
+      //
+      // third row - health and triad C
+      // 
+
+      $s_mbean_server = new MBeanServer($s->Name);
+      $s_server = $s_mbean_server->getServer();
+      $s_health = $s_mbean_server->lookup("resin:type=HealthCheck,name=Resin");
+      
+      $is_health = $s_server;
+      
+      echo "<tr><td></td><td nowrap='nowrap'>";
+
+      if (! $s_health) {
+        echo "n/a";
+      }
+      else {
+      	print_health($s_health->Status, "Health " . $s_health->Status);
+      }
+      
+      echo "</td><td>";
+      do_triad($s, $triad_c, $mbean_server_c);
+      echo "</td>";
+      
+      echo "</tr>\n";
+      echo "</table>\n";
+    }
+
+    echo "</td>";
+  }
+
+  echo "</tr>";
+  }
+
+  echo "</table>";
+}
+
+function has_server($clusters, $i)
+{
+  return true;
+}  
+
+function do_triad($s, $triad, $triad_mbean_server)
+{
+  if (! $triad) {
+    echo "&nbsp;&nbsp;\n";
+    return;
+  }
+
+  echo "<span style='font-size=1.2em'>";
+  
+  $s_mbean_server = new MBeanServer($s->Name);
+  $s_server = $s_mbean_server->getServer();
+  $s_triad_server = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
+
+  $triad_server = $triad_mbean_server->getServer();
+  $triad_cluster = $triad_server->SelfServer->Cluster;
+  $triad_cluster_server = $triad_cluster->Servers[$s->ClusterIndex];
+
+  if (! $s_triad_server) {
+    echo "<span>&ndash;</span>";
+  }
+  else if ($s_triad_server->isHeartbeatActive()) {
+    echo "<span style='color:#00c000'>&larr;</span>";
+  }
+  else {
+    echo "<span style='color:#c00000'>&#x2717;</span>";
+  }
+
+  if (! $triad_cluster_server) {
+    echo "<span>&ndash;</span>";
+  }
+  else if ($triad_cluster_server->isHeartbeatActive()) {
+    echo "<span style='color:#00c000'>&rarr;</span>";
+  }
+  else {
+    echo "<span style='color:#c00000'>&#x2717;</span>";
+  }
+  
+  echo "</span>\n";
+}
+
+function display_health_logs()
+{
+  global $g_period, $g_offset;
+  global $g_server_index, $g_server, $g_mbean_server;
+
+  if (! require_professional()) {
+    return;
+  }
+  
+  $end = time() - $g_offset;
+  $start = ($end - $g_period);
+  
+  $health_service = $g_mbean_server->lookup("resin:type=HealthSystem");
+  if ($health_service) {
+  
+    $events = $health_service->findEvents($g_server_index, 
+                                          $start * 1000, $end * 1000, 9999);
+  
+    echo "<h2>" . gettext('Health Events') . "</h2>\n";
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
+    echo "    <th scope='col' class='event'>" . gettext('Event Type') . "</th>";
+    echo "    <th scope='col' class='event'>" . gettext('Source') . "</th>";
+    echo "    <th scope='col' class='message'>" . gettext('Message') . "</th></tr>\n";
+    echo "</thead>\n";
+
+    if (! empty($events))
+      echo "<tbody class='scroll'>\n";
+      
+    foreach ($events as $event) {
+      
+      $type = strtolower($event->type);
+      $style = "";
+      if ($type == "start_time")
+        $style = "border-bottom: 3px solid black;";
+      
+      echo "<tr>\n";
+      echo "  <td class='date' style='${style}'>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $event->timestamp / 1000) . " </td>\n";
+      echo "  <td class='event' style='${style}'><img src='images/${type}_16.png' align='top' width='16' height='16' alt='${type}'/>&nbsp;" . $event->typeDescription . "</td>\n";
+      echo "  <td class='source' style='${style}'>" . $event->source . "</td>\n";
+      echo "  <td class='message' style='${style}'>" . nl2br(htmlspecialchars(wordwrap($event->message, 90))) . "</td>\n"; 
+      echo "</tr>\n";
+    }
+      
+    echo "</tbody>\n";
+  } else {
+    echo "<tbody>\n";
+    echo "<tr><td colspan='3'>" . gettext('No recent health events') . "</td></tr>\n";
+    echo "</tbody>\n";
+  }
+      
+  echo "</table>\n";
+}
+
+function display_health_availability()
+{
+  global $g_period, $g_offset;
+  global $g_si, $g_server_index, $g_mbean_server, $g_label;
+
+  if (! require_professional()) {
+    return;
+  }
+
+  $stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+  
+  $end = time() - $g_offset;
+  $start = ($end - $g_period);
+      
+  $downtimes = $stat->getDownTimes($g_server_index, $start * 1000, $end * 1000);
+  if (is_null($downtimes)) {
+    echo gettext("No data available");
+    return; 
+  }
+  
+  $params = new GraphParams("downtime_${g_si}", 600, 200);
+  $params->title = $g_label . " " . gettext('Uptime');
+  $params->alt
+    = gettext("A line graph representing the availability of the server.");
+  $params->mbean_server = $g_mbean_server;
+  $params->labels = array("DOWN","","","UP");
+
+  stat_graph($params, array("$g_si|Resin|Uptime|Up"));
+  
+  echo "<h2>" . gettext('Availability Summary') . "</h2>\n";
+  
+  $downtimes = array_reverse($downtimes);
+  
+  $total = 0;
+  $count = 0;
+  
+  foreach($downtimes as $downtime) {
+    $et = $downtime->ET;
+    if ($et > 0) {
+      $total += $et;
+      $count++;
+    }
+  }
+  
+  $total /= 1000;
+  $avg = 0;
+  if ($count > 0)
+    $avg = $total / $count;
+  $uptime = 100 - (($total / $g_period) * 100);
+  
+  echo "<table class='data'>\n";
+  echo "<tr><th scope='row'>" . gettext('Report Period') . "</th>";
+  echo "<td>" . format_seconds($g_period) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Start Time') . "</th>";
+  echo "<td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $start) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('End Time') . "</th>";
+  echo "<td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $end) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Number of Downtimes') . "</th>";
+  echo "<td>${count}</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Total Downtime') . "</th>";
+  echo "<td>" . format_seconds($total) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Average Downtime Period') . "</th>";
+  echo "<td>" . format_seconds($avg) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Availability') . "</th>";
+  echo "<td>" . number_format($uptime, 4) . "%</td></tr>\n";
+  echo "</table>\n";
+  
+  echo "<h2>" . gettext('Downtimes') . "</h2>\n";
+  echo "<table class='data'>\n";
+  echo "<thead>\n";
+  echo "<tr><th scope='col'>" . gettext('Stop Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('Restart Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('Elapsed Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('Notes') . "</th></tr>";
+  echo "</thead>\n";
+  
+  echo "<tbody class='scroll'>\n";
+  foreach($downtimes as $downtime) {
+    echo "<tr>\n";
+    $et = $downtime->ET/1000;
+    if ($downtime->isDataAbsent()) {
+      $note = gettext('* No data: using report start time');
+    } else if ($downtime->isEstimated()) {
+      $note = gettext('* Approximate');
+    } else {
+      $note = '';
+    }
+    
+    echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->startTime / 1000);
+    if ($note) {
+      echo " *";
+    }
+    echo " </td>\n";
+    echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->endTime / 1000) . " </td>\n";
+    echo "  <td>" . format_seconds($et) . " </td>\n";
+    echo "  <td>" . $note . " </td>\n";
+      
+    echo "</tr>\n";
+  }
+  echo "</tbody>\n";
+  
+  echo "</table>\n";
+}
+
+display_footer($g_page, javascript_create_tab("health-tabs"));
+
+?>

@@ -1,0 +1,14 @@
+1. ~caucho/git/download resin-4.0.x resin-pro-4.0.x
+
+2. debian 64
+
+3. debian 32
+
+4. maven-dist/maven-rsync
+
+5. www.caucho.com/download links
+
+6. quercus.caucho.com/index.xtp links
+
+7. svn copy
+

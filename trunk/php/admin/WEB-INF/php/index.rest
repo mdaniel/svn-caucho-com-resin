@@ -1,0 +1,28 @@
+<?php
+
+admin_init();
+
+echo "<h1>REST Pages</h1>";
+
+$pages = load_pages("rest");
+
+echo "<ul>\n";
+foreach ($pages as $key => $page) {
+  if ($key == "index")
+    continue;
+  echo "<li><a href='?q=" . $key . "'>" . $key . "</a></li>\n";
+}
+echo "</ul>\n";
+
+?>
+
+<br/>
+
+<ul><li><a href="http://wiki4.caucho.com/Application_Server:_Custom_REST_Pages">Writing Custom REST Pages</a></li></ul>
+
+<br/>
+<br/>
+
+<?php
+display_footer($g_page, $javascript);
+?>

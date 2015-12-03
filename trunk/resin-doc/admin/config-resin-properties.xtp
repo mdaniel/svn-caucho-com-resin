@@ -1,0 +1,858 @@
+<document>
+<header>
+  <title>resin.properties: standard configuration</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+Most common Resin properties are configured by resin.properties.
+The resin.properties variables are used by the main resin.xml
+configuration file.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+
+<p>The resin.properties file is a condensed configuration for the most
+common Resin configurations. Since it is a set of variables used by the main
+resin.xml confguration file, the variables are defined by convention.
+The sections following show some of the most common configurations, followed
+by a description of the variables.</p>
+
+<p>The resin.properties is in the same directory as resin.xml. In unix
+systems as /etc/resin.properties. In systems deployed in a single directory,
+it will be ${resin.home}/conf/resin.properties.</p>
+
+<example title="Example: key resin.properties">
+...
+app_servers : 127.0.0.1:6800
+
+app.http : 8080
+
+setuid_user : resin
+setuid_group : resin
+
+jvm_args : -Xmx2G -XX:MaxPermSize=256m
+...
+</example>
+
+<s2 title="Qualifying properties by cluster or server">
+
+<p>Properties can be restricted to a server or a cluster by prefixing
+the variable by the cluster or server name. For example, a <em>http</em>
+port can be specific to the server named 'app-0' by using <em>app-0.http</em>.
+The port can be specific to the cluster 'app' with <em>app.http</em>.</p>
+
+<example title="Example: http restrictions">
+http       : 8080    # default value if unspecified
+app-0.http : 8081    # server 'app-0' uses 8082
+app-1.http : 8082    # server 'app-0' uses 8082
+app.http   : 8089    # servers in 'app' cluster use 8089
+web.http   : 8090    # servers in 'web' cluster use 8090
+</example>
+
+</s2>
+
+<s2 title="Extending resin.properties in custom resin.xml">
+
+<p>Because the resin.properties variables are defined by the resin.xml, sites
+that use their own custom resin.xml can define their own variables in their
+resin.xml and set those variables in the resin.properties.</p>
+
+<p>For custom users, the resin.properties is read using a
+&lt;resin:properties> tag in the resin.xml. The variables are used with
+the standard EL values.</p>
+
+<example title="Example: resin.xml import and use of resin.properties">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+    xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:properties path="${__DIR__}/resin.properties" optional="true"/>
+
+  &lt;dependency-check-interval>${my_var?:'2s'}&lt;/dependency-check-interval>
+
+  ...
+
+&lt;/resin>
+</example>
+
+<p>The previous example defines the dependency-check-interval using
+a resin.properties variable <em>my_var</em> and a default value of 2s.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="Application Server Key Properties">
+
+<p>A basic application server configuration needs a few key properties to
+configure the HTTP port, the servers in the cluster, the operating system
+user and the JVM arguments for memory and GC.</p>
+
+<p>Each server in the cluster can have the same resin.xml and
+resin.properties. On start, Resin will detect which server is the local one,
+select it and start it.</p>
+
+<example title="Example: key resin.properties">
+...
+app_servers : 127.0.0.1:6800
+
+app.http : 8080
+
+setuid_user : resin
+setuid_group : resin
+
+jvm_args : -Xmx2G -XX:MaxPermSize=256m
+...
+</example>
+
+<p>The server names configured by <em>app_servers</em> are
+generated automatically by position: app-0, app-1, ..., app-n.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>app_servers</td>
+  <td>A list of IP:port addresses for each server in the app-tier cluster.</td>
+</tr>
+<tr>
+  <td>app.http</td>
+  <td>The HTTP port for each app-tier server.</td>
+</tr>
+<tr>
+  <td>setuid_user</td>
+  <td>The operating system user name for the Resin instance.</td>
+</tr>
+<tr>
+  <td>setuid_group</td>
+  <td>The operating system group name for the Resin instance.</td>
+</tr>
+<tr>
+  <td>jvm_args</td>
+  <td>The Java arguments for the Resin instance.</td>
+</tr>
+</deftable>
+
+<p><em>app.http</em> configures the HTTP port for the 'app' cluster.
+The <em>http</em> defines the variable used in
+the resin.xml, and the <em>app</em> restricts it to servers in defined
+by <em>app_servers</em>. This system allows for different http ports when 
+starting multiple servers on the same machine, like a web-tier load 
+balancer, an app-tier server, and an memcached server.</p>
+
+</s1>
+
+<s1 title="Web Tier (Load Balancer) Key Properties">
+
+<p>This web tier configuration has one web server that
+handles the HTTP, load balancing, and proxy caching, and one application
+server that runs the servlet applications. The web server load balances
+and proxies HTTP requests to the backend application cluster. To scale up,
+add more servers to <em>app_servers</em>.</p>
+
+<example title="Example: web-tier resin.properties">
+...
+web_servers : 127.0.0.1:6810
+web.http    : 80
+
+proxy_cache_enable : true
+proxy_cache_size   : 256m
+
+app_servers : 127.0.0.1:6800
+app.http    : 8080
+
+setuid_user : resin
+setuid_group : resin
+
+jvm_args : -Xmx2G -XX:MaxPermSize=256m
+...
+</example>
+
+<p>The server names configured by <em>web_servers</em> are
+generated automatically by position: web-0, web-1, ..., web-n.</p>
+
+<example title="Example: CLI starting the servers">
+# resinctl start-all
+</example>
+
+<p>The <em>start-all</em> command-line will start both servers in the
+example because both servers are listening to a local port.</p>
+
+</s1>
+
+<s1 title="Memcached Tier Key Properties">
+
+<p>To configure Resin as a memcached server, add IP:port addresses
+to the <em>memcached_servers</em> configuration.</p>
+
+<example title="Example: memcached-tier resin.properties">
+...
+memcached_servers   : 127.0.0.1:6820
+memcached_port      : 11211
+
+memcached.http      : 8080
+</example>
+
+<p>The <em>memcached.http</em> is used for the /resin-admin managment
+and REST administration.</p>
+
+</s1>
+
+<s1 title="property reference">
+
+<defun title="accept_thread_max">
+
+<p><em>accept_thread_max</em> limits the maximum threads waiting for
+a new connection on the port. Higher values are more resiliant to
+connection spikes because the idle threads are ready and waiting.</p>
+
+<p>In general, the default value is reasonable and does not usually
+need changing.</p>
+
+<example title="Example: accept_thread_max">
+...
+accept_thread_max : 32
+accept_thread_min : 4
+...
+</example>
+
+</defun>
+
+<defun title="accept_thread_min">
+
+<p><em>accept_thread_min</em> triggers a new thread to listen for
+connections when the number of waiting threads drops below the limit. It
+works with <em>accept_thread_max</em> to manage the threads waiting in the
+accept state. Higher values can improve connection spike resposiveness.</p>
+
+<p>In general, the default value is reasonable and does not usually
+need changing.</p>
+
+<example title="Example: accept_thread_min">
+...
+accept_thread_max : 32
+accept_thread_min : 4
+...
+</example>
+
+</defun>
+
+<defun title="admin_password">
+
+<p><em>admin_password</em> is the password used with <em>admin_user</em>
+for /resin-admin administration, REST, and remote <em>resinctl</em>
+CLI administration.</p>
+
+<p><em>admin_password</em> is generated with either
+the CLI <em>resinctl generate-password</em> or the /resin-admin
+login screen.</p>
+
+<example title="Example: admin_user in resin.properties">
+...
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+
+web_admin_enable   : true
+web_admin_ssl      : true
+web_admin_external : false
+remote_cli_enable  : false
+rest_admin_enable  : true
+rest_admin_ssl     : true
+...
+</example>
+
+<example title="Example: resinctl generate-password">
+unix> resinctl generate-password my-admin my-password
+admin_user : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+</example>
+
+</defun>
+
+<defun title="admin_user">
+
+<p><em>admin_user</em> creates a login user name for /resin-admin
+administration, REST, and remote <em>resinctl</em> CLI administration.
+It is used with <em>admin_password</em> and <em>web_admin_enable</em>.
+</p>
+
+<p><em>admin_password</em> is generated with either
+the CLI <em>resinctl generate-password</em> or the /resin-admin
+login screen.</p>
+
+<example title="Example: admin_user in resin.properties">
+...
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+
+web_admin_enable   : true
+web_admin_ssl      : true
+web_admin_external : false
+remote_cli_enable  : false
+rest_admin_enable  : true
+rest_admin_ssl     : true
+...
+</example>
+
+<example title="Example: resinctl generate-password">
+unix> resinctl generate-password my-admin my-password
+admin_user : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+</example>
+
+</defun>
+
+<defun title="app.http">
+
+<p>The HTTP port for the 'app' cluster. The <em>"app."</em> is a prefix to
+the <em>http</em> property, restricting it to the named cluster, "app".</p>
+
+<example title="Example: app.http">
+...
+app.http : 8080
+...
+</example>
+
+</defun>
+
+<defun title="app.https">
+
+<p>The HTTPS port for the 'app' cluster. The <em>"app."</em> is a prefix to
+the <em>https</em> property, restricting it to the named cluster, "app".</p>
+
+<p><em>app.https</em> is generally used with <em>openssl_file</em>,
+<em>openssl_key</em> and <em>openssl_password</em>.</p>
+
+<example title="Example: app.https">
+...
+app.https : 8443
+...
+</example>
+
+</defun>
+
+<defun title="cluster_system_key">
+
+<p><em>cluster_system_key</em> configures a shared secret across Resin
+servers in a cluster. The shared secret is checked when servers in the
+cluster connect. The key can be any string.</p>
+
+<example title="Example: cluster_system_key">
+cluster_system_key : ms8cntp8743z
+</example>
+
+</defun>
+
+<defun title="dependency_check_interval">
+
+<p><em>dependency_check_interval</em> sets how often Resin will check
+for updated files. In development this will be a small value.
+In deployment it can be a larger value.</p>
+
+<example title="Example: dependency_check_interval">
+dependency_check_interval : 2m
+</example>
+
+</defun> <!-- dependency_check_interval -->
+
+<defun title="elastic_cloud_enable">
+
+<p><em>elastic_cloud_enable</em> lets dynamic servers join a cluster.
+If the "start" command either has an "--elastic-server" flag or
+if the <em>elastic_server</em> property is set, Resin will connect to the
+cluster as a new dynamic server.</p>
+
+<p>The cluster is either specified by "--cluster foo" or
+the <em>home_cluster</em> property. The cluster triad hub servers
+are specified by the <em>app_servers</em> property.</p>
+
+<example title="Example: elastic_cloud_enable">
+app_servers : 182.168.1.10:6800
+
+elastic_server       : true
+elastic_cloud_enable : true
+home_cluster         : app
+</example>
+
+<p>To start a dynamic server, use <em>resinctl</em> with <em>start</em>
+and specify <em>--elastic-server</em> to force a dynamic server. 
+The <em>--cluster</em> is optional if a <em>home-cluster</em> has been 
+defined.</p>
+
+<example title="Example: elastic_cloud_enable">
+# resinctl start --elastic-server --cluster app
+</example>
+
+</defun> <!-- elastic_cloud_enable -->
+
+<defun title="elastic_dns">
+
+<p><em>elastic_dns</em> is used in cloud environments that assign IP
+addresses or DNS names after the server starts, for example in an EC2
+environment. When <em>elastic_dns</em> is enabled, Resin
+will start the server, wait and retry until the local IP addresses or
+DNS resolve to a matching server.</p>
+
+<p>For example, a Resin cluster might have a fixed pre-allocated DNS
+name of "app0.mydomain" and <em>app_servers</em> might include that
+address. At server boot time, the cloud assigns the dynamic IP 192.168.2.114.
+Later the cloud or the user will attach the IP to the DNS
+name "app0.mydomain". Resin will then recognize it and start with the correct
+value.</p>
+
+<ol>
+<li>Reserve DNS address "app0.mydomain" with cloud provider.</li>
+<li>Configure resin.properties with that fixed address
+and <em>elastic_dns</em>.</li>
+<li>Start Resin instance in the cloud (with address 192.168.2.114)</li>
+<li>[Resin is in wait mode until the following step because it doesn't
+lookup "app0.mydomain" to 192.168.2.114 in the configuration files.]</li>
+<li>Assign the DNS name "app0.mydomain" to 192.168.1.10
+with the cloud provider.</li>
+<li>Resin will detect the new assignment and start as that server.</li>
+</ol>
+
+<example title="Example: elastic_dns">
+app_servers : app0.mydomain:6800
+
+elastic_dns           : true
+</example>
+
+<p>You can specify the <em>elastic_dns</em> in the resin.properties or
+equivalently specify it on the command line as <em>--elastic-dns</em>.</p>
+
+<example title="Example: CLI elastic-dns">
+# resinctl start-all --elastic-dns
+</example>
+
+</defun> <!-- elastic_dns -->
+
+<defun title="elastic_server">
+
+<p><em>elastic_server</em> starts the server as a dynamic server and
+joins a cluster. The dynamic server must have a hub server configured
+in the cluster to register itself. The cluster must also have the
+<em>elastic_cloud_enable</em> set to enable dynamic servers.</p>
+
+<p>When the "start" command either has an "--elastic-server" flag or
+if the <em>elastic_server</em> property is set, Resin will connect to the
+cluster as a new dynamic server.</p>
+
+<p>The cluster is either specified by "--cluster foo" or
+the <em>home_cluster</em> property. The cluster triad hub servers
+are specified by the <em>app_servers</em> property.</p>
+
+<ul>
+<li>Either <em>elastic_server</em> in the resin.properties or <em>--elastic-server</em> on the command line to start an elastic server.</li>
+<li>Either <em>home_server</em> in the resin.properties or <em>--cluster</em> on the command line to specify the cluster.</li>
+<li><em>elastic_cloud_enable</em> in the resin.properties to enable
+dynamic servers.</li>
+<li>At least one static server defined in <em>app_servers</em> in the
+resin.properties as the hub. Three servers is preferred.</li>
+</ul>
+
+<example title="Example: elastic_server">
+app_servers : 182.168.1.10:6800
+
+elastic_server       : true
+elastic_cloud_enable : true
+home_cluster         : app
+</example>
+
+<p>To start a dynamic server, use <em>resinctl</em> with <em>start</em>
+and specify <em>--elastic-server</em> or <em>elastic_server</em> in
+the resin.properties to force a dynamic server. 
+The <em>--cluster</em> is optional if a <em>home-cluster</em> has been 
+defined.</p>
+
+<example title="Example: elastic_server">
+# resinctl start --elastic-server --cluster app
+</example>
+
+</defun> <!-- elastic_server -->
+
+<defun title="email">
+
+<p><em>email</em> is an admin email address used to send automatic
+reports like weekly PDF reports.</p>
+
+<example title="Example: email">
+email : myuser@admin.example.org
+</example>
+
+</defun>
+
+<defun title="http">
+
+<p>The HTTP port for all servers, usually restricted to the cluster
+or server as <em>app.http</em> or <em>web.http</em>. If the plain
+<em>http</em> property is used, it is the default http for all servers.
+</p>
+
+<example title="Example: http">
+...
+http     : 8080
+app.http : 8081   # overrides for a server in cluster 'app'
+...
+</example>
+
+</defun>
+
+<defun title="http_address">
+
+<p><em>http_address</em> selects a specific IP address and port for HTTP.
+It can be useful when each server needs to bind to a different address.</p>
+
+<p>The <em>http_address</em> can be qualified by the cluster or the
+individual server like other properties. For example,
+<em>app-0.http_address</em> configures the address for server
+<em>app-0</em> in the app cluster.</p>
+
+<example title="Example: http_address">
+...
+app-0.http_address     : 192.168.1.10
+app-1.http_address     : 192.168.1.11
+
+app.http               : 8080
+...
+</example>
+
+</defun>
+
+<defun title="http_ping_urls">
+
+<p><em>http_ping_urls</em> is a list of URLs to check for server reliability.
+Resin's health system will periodically check the URLs on the current server.
+If the server does not respond, the health system will force an automatic
+restart of Resin.</p>
+
+<example title="Example: http_ping_urls">
+http_ping_urls : http://www.myfoo.com/my-test http://www.mybar.com/my-test2
+</example>
+
+</defun>
+
+<defun title="jvm_args">
+
+<p><em>jvm_args</em> defines the JDK memory and GC parameters to
+start the Resin process.</p>
+
+<example title="Example: jvm_args">
+jvm_args : -Xmx2G -XX:MaxPermSize=256m
+</example>
+
+</defun>
+
+<defun title="openssl_file">
+
+<p><em>openssl_file</em> configures the OpenSSL *.crt certificate file
+when using SSL. The file location is relative to the resin.xml file.</p>
+
+<example title="Example: openssl_file">
+app.https         : 8443
+
+openssl_file      : keys/foo.crt
+openssl_key       : keys/foo.key
+openssl_password  : my-password
+</example>
+
+</defun>
+
+<defun title="openssl_key">
+
+<p><em>openssl_key</em> configures the OpenSSL *.key key file
+when using SSL. The file location is relative to the resin.xml file.</p>
+
+<example title="Example: openssl_key">
+app.https         : 8443
+
+openssl_file      : keys/foo.crt
+openssl_key       : keys/foo.key
+openssl_password  : my-password
+</example>
+
+</defun>
+
+<defun title="openssl_password">
+
+<p><em>openssl_password</em> configures the password for OpenSSL key file
+when using SSL.</p>
+
+<example title="Example: openssl_key">
+app.https         : 8443
+
+openssl_file      : keys/foo.crt
+openssl_key       : keys/foo.key
+openssl_password  : my-password
+</example>
+
+</defun>
+
+<defun title="port_thread_max">
+
+<p><em>port_thread_max</em> restricts the active threads available for
+a single port. Connections beyond the limit will use the
+async/select manager, and queue for an available thread.</p>
+
+<p><em>port_thread_max</em> can be used to limit the maximum load on an
+overloaded system. If more connection arrive than <em>port_thread_max</em>
+and beyond the select manager, they will be delayed instead of overloading
+the system.</p>
+
+<example title="Example: port_thread_max">
+...
+port_thread_max   : 256
+accept_thread_max : 32
+accept_thread_min : 4
+</example>
+
+</defun>
+
+<defun title="properties_import_url">
+
+<p><em>properties_import_url</em> adds a new properties file to be
+processed after the resin.properties. Cloud servers using EC2-style
+/user-data can use the url to customize properties for each server.</p>
+
+<example title="Example: properties_import_url for EC2">
+...
+properties_import_url : http://169.254.169.254/latest/user-data
+</example>
+
+</defun>
+
+<defun title="proxy_cache_enable">
+
+<p><em>proxy_cache_enable</em> enables Resin's HTTP proxy cache. The
+proxy cache improves performance by saving the server's generated pages.
+It can be used for formatted web pages or REST-style GET pages that
+change infrequently.</p>
+
+<example title="Example: proxy_cache_enable">
+proxy_cache_enable : true
+proxy_cache_size  : 256m
+</example>
+
+</defun>
+
+<defun title="proxy_cache_size">
+
+<p><em>proxy_cache_size</em> is the size of the in-memory proxy cache
+size. The actual maximum size is much larger, because the memory is used
+as a block cache for a disk based store. The memory block cache is also
+used for distributed caching.</p>
+
+<example title="Example: proxy_cache_size">
+proxy_cache_enable : true
+proxy_cache_size  : 256m
+</example>
+
+</defun>
+
+<defun title="remote_cli_enable">
+
+<p><em>remote_cli_enable</em> enables the CLI <em>resinctl</em> to be
+used for remote servers. By default the CLI is restricted to the local
+network.</p>
+
+<example title="Example: remote_cli_enable">
+remote_cli_enable : true
+</example>
+
+</defun>
+
+<defun title="rest_admin_enable">
+
+<p><em>rest_admin_enable</em> enables REST-based administration of a
+Resin server. REST can be used to integrate Resin with remote administration
+consoles or status scripts.</p>
+
+<p><em>rest_admin_enable</em> requires an <em>admin_user</em>
+and <em>admin_password</em> for security. It can optionally be restricted
+to SSL ports with <em>resin_admin_ssl</em>.</p>
+
+<example title="Example: rest_admin_enable in resin.properties">
+...
+rest_admin_enable  : true
+rest_admin_ssl     : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+...
+</example>
+</defun>
+
+<defun title="rest_admin_ssl">
+
+<p><em>rest_admin_ssl</em> requires an SSL connection for REST-based 
+administration of a Resin server. REST can be used to integrate Resin
+with remote administration consoles or status scripts.</p>
+
+<example title="Example: rest_admin_ssl in resin.properties">
+...
+rest_admin_enable  : true
+rest_admin_ssl     : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+...
+</example>
+</defun>
+
+<defun title="sendfile">
+
+<p><em>sendfile</em> enables operating system sendfile() call, which
+will send an entire file without requiring Resin to read the file itself.
+<em>sendfile</em> is particularly useful when much of the traffic is
+large static files.
+</p>
+
+<example title="Example: sendfile">
+...
+sendfile   : true
+tcp_cork   : true
+</example>
+
+</defun>
+
+<defun title="session_store">
+
+<p><em>session_store</em> enables clustered persistent sessions
+for failover.</p>
+
+<example title="Example: session_store">
+...
+session_store : true
+...
+</example>
+</defun>
+
+<defun title="setuid_user">
+
+<p>On unix, <em>setuid_user</em> runs the Resin instance as the specified
+user for security.</p>
+
+<example title="Example: setuid_user">
+...
+setuid_user : resin
+setuid_group : resin
+...
+</example>
+
+</defun>
+
+<defun title="setuid_group">
+
+<p>On unix, <em>setuid_group</em> runs the Resin instance as the specified
+group for security.</p>
+
+<example title="Example: setuid_group">
+...
+setuid_user : resin
+setuid_group : resin
+...
+</example>
+
+</defun>
+
+<defun title="tcp_cork">
+
+<p><em>tcp_cork</em> enables advanced TCP flow control on Linux systems
+for improved performance of large files. When it is enabled, sent data
+will be buffered in the operating system until the buffers fill, instead
+of being sent out with partial buffers. An application flush() will still
+force the data to be sent out.</p>
+
+<example title="Example: tcp_cork">
+...
+tcp_cork   : true
+</example>
+
+</defun>
+
+<defun title="web_admin_enable">
+
+<p><em>web_admin_enable</em> enables /resin-admin for a
+Resin server. /resin-admin can show the server status, report
+statistics graphs, deploy applications, and generate PDF reports.</p>
+
+<p><em>web_admin_enable</em> requires an <em>admin_user</em>
+and <em>admin_password</em> for security. It can optionally be restricted
+to SSL ports with <em>web_admin_ssl</em>.</p>
+
+<example title="Example: web_admin_enable in resin.properties">
+...
+web_admin_enable  : true
+web_admin_ssl     : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+...
+</example>
+</defun>
+
+<defun title="web_admin_external">
+
+<p><em>web_admin_external</em> enables /resin-admin access for
+servers outside the local network. If enabled, it should be always used 
+with <em>web_admin_ssl</em>.</p>
+
+<example title="Example: web_admin_external in resin.properties">
+...
+web_admin_enable   : true
+web_admin_external : true
+web_admin_ssl      : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+...
+</example>
+</defun>
+
+<defun title="web_admin_ssl">
+
+<p><em>web_admin_ssl</em> requires an SSL connection for /resin-admin
+administration of a Resin server.  /resin-admin can show the server status,
+report statistics graphs, deploy applications, and generate PDF reports.</p>
+
+<example title="Example: web_admin_ssl in resin.properties">
+...
+web_admin_enable  : true
+web_admin_ssl     : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+...
+</example>
+</defun>
+
+<defun title="webapp_multiversion_routing">
+
+<p><em>webapp_multiversion_routing</em> is a deployment versioning
+system where Resin selects the most recent deployed application.
+Web-apps named with numeric suffixes, e.g. foo-10.0.war and can be browsed
+as /foo. When a new version of the web-app is deployed, Resin continues
+to route active session requests to the previous web-app version while
+new sessions go to the new version, so users will not be aware of the
+application upgrade.</p>
+
+<example title="Example: webapp_multiversion_routing">
+...
+webapp_multiversion_routing : true
+...
+</example>
+</defun>
+
+</s1>
+
+</body>
+</document>

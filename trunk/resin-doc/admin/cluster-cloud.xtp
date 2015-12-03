@@ -1,0 +1,489 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Cluster: Dynamic Server (Elastic Cloud) configuration</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+      Configuration and deployment of an dynamic-server Resin cluster.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+
+<p>Resin's cloud support is an extension of its clustering. It is the
+third generation of Resin clustering, designed for elastic clusters:
+adding and removing servers from a live cluster.</p>
+
+<p>A triple-redundant hub-and-spoke network is the heart of
+a Resin cluster. The three servers that form the hub are called the
+'triad' and are responsible for reliability and for load-balancing
+clustered services like caching. All other servers can be added or
+removed without affecting the shared data.</p>
+
+<p>Services like clustered deployment, caching, JMS, and
+load-balancing recognize the new server and automatically add it to
+the service. When you delete a server, the services will adapt to the
+smaller network.</p>
+
+<figure src="cloud-hub.png" alt="Resin's hub-and-spoke cloud model"/>
+
+<p>The triad hub-and-spoke model solves several clustering issues
+we've discovered over the years. The three primary issues are the need
+for triple redundancy, managing dynamic servers (particularly removing
+servers), and giving an understandable user model for persistent
+storage.</p>
+
+<p>Triple redundancy is needed because of server maintenance
+and load-balancing. When you take down a server for scheduled
+maintenance, the remaining servers have extra load and they are more
+vulnerable to a server failure. A triple-redundant hub with one
+server down for maintenance can survive a crash of one of the two
+remaining servers. The load is less, too. When one server is down for
+maintenance, the other two servers share an extra 50% load each. With
+only a backup system, the extra server would double its load.</p>
+
+<p>Dynamic servers benefit from the hub-and-spoke model because the
+'spoke' servers are not needed for reliability. Because they don't store the
+primary cache values, the primary application deployment repository,
+or the queue store, it's possible to add and remove them without
+affecting the primary system. With other network configurations,
+removing a server forces a shuffling around backup data to the
+remaining servers.</p>
+
+<p>The triad also gives a simpler user model for understanding where
+things are stored: data is stored in the triad. Other servers just use
+the data. Understanding the triad means you can feel confident about
+removing non-triad servers, and also know that the three triad servers
+are worth additional reliability attention.</p>
+
+</s1>
+
+<s1 title="Baseline: three static server (triad) with resin.properties">
+
+<p>The standard /etc/resin.properties configuration lets you configure
+a triad and dynamic servers without a few properties.</p>
+
+<p>To configure three static servers for the triad hub, enable dynamic
+servers, and select the "app" cluster as the default dynamic server, use
+csomething like the following in your /etc/resin.properties.</p>
+
+<example title="Example: resin.properties for a 3-server hub">
+...
+# app-tier Triad servers: app-0 app-1 app-2
+app_servers      : 192.168.1.10:6800 192.168.1.11:6800 192.168.1.12:6800
+...
+# Allow elastic nodes to join the cluster (enable for cloud mode)
+elastic_cloud_enable : true
+
+# The cluster that elastic nodes should join - each will contact a Triad server
+# Use a separate resin.properties file for each cluster
+home_cluster : app
+</example>
+
+<ul>
+<li><b>app_servers:</b> each IP:port in the app-servers adds a new static
+server.</li>
+<li><b>elastic_cloud_enable:</b> enable dynamic servers.</li>
+<li><b>home_cluster:</b> select the home cluster for the dynamic server.</li>
+</ul>
+
+<p>To start the server, you can use the "start-all" command. The
+<em>start-all</em>
+with start all local servers (by comparing the IP to the IP addresses of
+the current machine.) If no local servers are found, <em>start-all</em>
+will start a dynamic server using the &lt;home-cluster>.</p>
+
+<example title="CLI: starting the servers">
+unix> resinctl start-all
+</example>
+
+<p>If you've installed Resin as a Unix service, it will be started
+automatically when the server starts. You can either use
+the /etc/init.d resin command or the "service" if it's available.
+The service start is equivalent to a resinctl "start-all".</p>
+
+<example title="CLI: service on debian">
+# service resin start
+</example>
+
+</s1>
+
+<s1 title="Custom: three static server (triad) in resin.xml">
+
+<p>If you are creating a custom resin.xml or modifying the default one,
+you can configure the servers explicitly in the resin.xml.</p>
+
+<p>The baseline cloud configuration is like a normal Resin configuration:
+define the three triad servers in your resin.xml, and copy the resin.xml
+across all servers. You will attach new servers to the cluster when
+you start it on the command-line. You can still define more servers in
+the resin.xml, or fewer if you have a small deployment; it's just the
+basic resin.xml example that uses three servers.</p>
+
+<p>The baseline configuration looks like the following:</p>
+
+<ol>
+<li>Define a resin.xml with three static servers as the triad.</li>
+<li>Start the triad servers as normal.</li>
+<li>Deploy .wars to the triad with the command-line 'deploy' to
+enable automatic deployment to the new servers.</li>
+<li>Install a machine (or VM image) with Resin, your licenses, and the
+resin.xml.</li>
+<li>Start the new Resin server with an --elastic-server and --cluster command-line
+option.</li>
+<li>The new server will load the applications from the triad and join
+in any clustered services like load-balancing and caching.</li>
+<li>When load drops, stop the new Resin server as usual.</li>
+</ol>
+
+<p>You can configure the cluster using resin.properties without needing
+to modify the resin.xml. For the hub servers, add an IP:port for each
+static server. For the dynamic servers, enable <em>elastic_cloud_enable</em>
+and <em>home_cluster</em>.</p>
+
+<p>You can also configure the resin.xml directly to add the servers
+individually.</p>
+
+
+<example title="Example: basic resin.xml for a 3-server hub">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+...
+  &lt;home-cluster>my-cluster&lt;/home-cluster>
+...
+&lt;cluster id="my-cluster">
+
+  <b>&lt;server id="a" address="192.168.1.10" port="6800"/>
+  &lt;server id="b" address="192.168.1.11" port="6800"/>
+  &lt;server id="c" address="192.168.1.12" port="6800"/></b><br/>
+
+  &lt;resin:ElasticCloudService/>
+  
+  ...
+&lt;/cluster>
+...
+&lt;/resin>
+</example>
+
+<p>The first three &lt;server> tags in a cluster always form the
+triad. If you have one or two servers, they will still form the
+hub. One server acts like a Resin standalone; two servers back each
+other up. More than three &lt;server> tags form static servers acting
+as spoke servers in the hub-and-spoke model. The static servers are
+identical to any dynamic servers, but are predefined in the
+resin.xml</p>
+
+<p>The &lt;resin:ElasticCloudService/> enables dynamic servers. For security,
+Resin's is to disable dynamic servers.</p>
+
+<p>You can also add a &lt;home-cluster> which provides a default for the
+--cluster command-line option.</p>
+
+<s2 title="command-line: adding a dynamic server">
+
+<p>Before starting a server, your new machine needs the following to
+be installed:</p>
+
+<ol>
+<li>The Java JDK</li>
+<li>Resin and your licenses</li>
+<li>Your resin.properties which defines the three triad servers
+or a custom resin.xml which defines the servers.</li>
+</ol>
+
+<p>Since these three items are the same for each new server, you can
+make a virtual machine image with these already saved, use the VM
+image for the new machine and start it.</p>
+
+<p>To start a new server, you'll add a '--cluster' option with
+the name of the cluster you want to join.</p>
+
+<example title="Example: command-line starting a dynamic server">
+unix> resinctl --elastic-server --cluster my-cluster start
+</example>
+
+<p>If you don't have a &lt;resin-system-auth-key> in the resin.xml,
+and you do have admin users defined in the AdminAuthenticator, you
+will also need to pass a -user and -password arguments.</p>
+
+<p>The new server will join the cluster by contacting the triad. It
+will then download any deployed applications or data, and then start
+serving pages.</p>
+
+<figure src="cloud-add-server.png" alt="Adding a new server to the cloud"/>
+
+<p>The triad will inform cluster services about the load balancer,
+services like caching, admin, JMS, and load-balancer.</p>
+
+</s2>
+
+<s2 title="Removing a dynamic server">
+
+<p>To remove a dynamic server, just stop the server instance. The
+triad will keep its place in the topology reserved for another 15
+minutes to handle restarts, maintenance and outages. After the 15
+minutes expire, the triad will automatically remove the server.</p>
+
+</s2>
+
+<s2 title="Variations: fewer static servers and more servers">
+
+<p>Although the three static server configuration is a useful baseline
+for understanding Resin's clustering, you can configure fewer or more
+static servers in the resin.xml.</p>
+
+<p>Defining fewer servers than three in the resin.xml is only
+recommended if you actually have fewer than three servers.
+Defining more servers than three in the resin.xml depends on your own
+preference. Having only three servers in the resin.xml means you don't
+need to change the resin.xml when you add new servers, but listing all
+servers in the resin.xml makes your servers explicit - you can look in
+the resin.xml to know exactly what you've configured. It's a
+site preference.</p>
+
+<p>If you have fewer than three servers, you can define only the
+servers you need in the resin.xml. You won't get the triple
+redundancy, but you will still get a backup in the two-server
+case. For elastic configurations, it's possible to use a single static
+server in the resin.xml, for example if your load was between one and
+two servers.</p>
+
+<p>If your site always has two servers active or three servers, you
+will want to list them in the resin.xml as static servers, even
+through Resin would let you get away with one. Listing all the servers
+in the resin.xml ensures that you can connect to at least one in case
+of a failure. In other words, it's more reliable.</p>
+
+<p>With more static servers than three, you can also add them
+to the resin.xml. You can also define dynamic servers in the resin.xml
+if their IP addresses are fixed, because Resin will dynamically adapt
+to stopped servers. If you use the static/elastic technique, you
+still need to keep the triad servers up. In other words, you'll adjust
+load by stopping servers from the end, shutting down server "f" and
+keeping servers "a", "b", and "c".</p>
+
+</s2>
+
+</s1>
+
+<s1 title="Application Deployment">
+
+<p>
+Cluster deployment works with dynamic servers to ensure each server
+is running the same application, including the newly spun-up
+dynamic servers. The new server will ask the triad servers for the
+most recent application code and deploy it. While it's nice for the
+convenience (skipping the copy step), it's more important for the
+extra reliability.
+</p>
+
+<p>
+Cloud deployments should generally use the cluster command-line (or browser)
+deployment instead of dropping a .war in the webapps directory because
+the cluster deployment automatically pushes deployment to new
+servers.</p>
+
+<p>With a cluster command-line deployment, the new server will check
+with the triad hub for the latest deployment. If there's a new
+version, the dynamic server will download the updates from the triad
+hub. The cluster deployment ensures all servers are running the same
+.war deployment. You don't need external scripts to copy versions to
+each server; that's taken care of by a core Resin capability.</p>
+
+<example title="Example: command-line deployment">
+unix> resinctl deploy test.war
+</example>
+
+<p>If you don't have a &lt;resin-system-auth-key> and do have
+administrator users configured, you will also need to pass the -user
+and -password parameters.</p>
+
+<s2 title="Configuration for cluster deployment">
+
+<p>The basic configuration for cluster deployment is the same as
+for single-server deployment. Resin uses the same &lt;web-app-deploy>
+tag to specify where cluster deployment should be expanded. If for
+some reason you deploy a .war in the webapps directory and deploy one
+on the clustered command-line, the cluster will take priority.</p>
+
+<p>In the following example, a test.war deployed in the command-line
+will be expanded to the webapps/test/ directory. The example uses
+&lt;cluster-default> and &lt;host-default> so every cluster and every
+virtual host can use the webapps deployment.</p>
+
+<example title="Example: resin.xml cluster deployment">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+...
+&lt;cluster-default>
+&lt;host-default>
+
+  <b>&lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/></b>
+
+&lt;/host-default>
+&lt;/cluster-default>
+
+&lt;cluster id="app-tier">
+  ...
+&lt;/cluster>
+...
+&lt;/resin>
+</example>
+
+
+</s2>
+
+</s1>
+
+<s1 title="Load Balancing">
+
+<p web-only='true'>See the <a href="cluster-load-balancer.xtp">load
+balancer</a> documentation for more information about the load balancer.</p>
+
+<p>
+When the new server starts, it needs to receive the new requests from
+the load balancer. If you're using Resin's load balancer (or Resin's
+mod_caucho), the load balancer will send HTTP requests to the new
+server. The load balancer must be configured in the same resin.xml as
+the application tier because the app-tier cluster needs to communicate
+with the load balancer tier.
+</p>
+
+<p>
+Resin's load balancer is configured in the resin.xml as
+a web-tier cluster with a <a href="http-rewrite.xtp">URL rewrite
+rule</a> dispatching to the app-tier cluster.
+</p>
+
+<example title="Example: resin.xml for load balancing">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+&lt;cluster id="web-tier">
+  &lt;server id="web-a" address="192.168.1.20" port="6800"/>
+  &lt;server id="web-b" address="192.168.1.21" port="6800"/>
+
+  &lt;proxy-cache/>
+
+  &lt;host id="">
+    <b>&lt;resin:LoadBalance cluster="app-tier"/></b>
+  &lt;/host>
+&lt;/cluster>
+
+&lt;cluster id="app-tier">
+  &lt;server id="app-a" address="192.168.1.10" port="6800"/>
+  &lt;server id="app-b" address="192.168.1.11" port="6800"/>
+  &lt;server id="app-c" address="192.168.1.12" port="6800"/>
+
+  ...
+&lt;/cluster>  
+
+&lt;/resin>
+</example>
+
+<p>With the example configuration, Resin will distribute HTTP requests
+to all static and dynamic servers in the app-tier. Because the HTTP
+proxy-cache is enabled, Resin will also cache on the web-tier.</p>
+
+<figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
+
+<p>
+If you're not using Resin's load balancer, your cloud will need some
+way of informing the load balancer of the new server.  Some cloud
+systems have REST APIs for configuring load balancers. Others might
+require a direct configuration. Resin's load balancer does not require
+those extra steps.
+</p>
+
+</s1>
+
+<s1 title="Cluster Resources: Cache, Queues">
+
+<p>Resin's cluster-aware resources adapt to the added and removed
+servers automatically. A new server can participate in the same clustered
+cache as the cluster, see the same cache values, and update the cache
+with entries visible to all the servers.</p>
+
+<p>The Resin resources that are automatically cache-aware are:</p>
+
+<ul>
+<li>jcache: clustered caching</li>
+<li>distributed sessions</li>
+<li>JMS queues</li>
+<li>load-balancing</li>
+<li>administration</li>
+<li>deployment</li>
+</ul>
+
+<s2 title="Clustered Caching">
+
+<p>Resin's clustered caching uses the jcache API which can either use
+a jcache method annotation to cache method results or an explicit
+Cache object injected CDI or JNDI. By minimizing the configuration and API
+complexities, Resin makes it straightforward to improve your
+performance through caching.</p>
+
+<p>The jcache method annotation lets you cache a method's results by
+adding a @CacheResult annotation to a CDI bean (or servlet or
+EJB.) The following example caches the result of a long computation,
+keyed by an argument. Because the cache is clustered, all the servers
+can take advantage of the cached value.</p>
+
+<example title="Example: method caching with @CacheResult">
+import javax.cache.CacheResult;
+
+public class MyBean {
+
+  @CacheResult
+  public Object doSomething(String arg)
+  {
+    ...
+  }
+}
+</example>
+
+<p>When using cached injection, you'll need to configure a cache
+instance in the resin-web.xml. Your code and its injection
+are still standards-based because it's using the CDI and jcache standards.</p>
+
+<example title="Example: resin-web.xml Cluster cache configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:ClusterCache name="my-cache"/>
+
+&lt;/web-app>
+</example>
+
+<p>The cache can be used with CDI and standard injection:</p>
+
+<example title="Example: using jcache">
+package mypkg;
+
+import javax.inject.*;
+import javax.cache.*;
+
+public class MyClass {
+  @Inject
+  private Cache&lt;String,String> _myCache;
+
+  public void doStuff()
+  {
+    String value = _myCache.get("mykey");
+  }
+}  
+</example>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

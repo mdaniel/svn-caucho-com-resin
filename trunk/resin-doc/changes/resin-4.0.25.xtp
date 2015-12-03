@@ -1,0 +1,179 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.25 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>Thanks to everyone who reported bugs in 4.0.24. We encourage people to
+report 4.0.25 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.25 includes an update of the WebSocket support for the final
+RFC 6455 release.</p>
+
+<p>It includes several changes to improve the cloud support to make
+Resin PAAS ready without needing additional PAAS-provider support.
+The specific changes include dynamic server updates
+and cloud configuration.</p>
+
+</s1>
+
+<s1 title="PDF">
+
+<p>Snapshot and Watchdog PDF reports have been reformed and updated to 
+include more information including Resin paths, ports, licenses, and 
+health status.  
+</p>
+
+<p>PDF reports can be generated on-demand from the Summary
+and Watchdog pages in resin-admin, automatically in health.xml,
+or from the command line as follows:</p>
+
+<example title="Example: generating PDF reports from the command-line">
+# report on the last restart
+bin/resin.sh pdf-report -user admin -password secret -watchdog 
+# report on the last 24 hours
+bin/resin.sh pdf-report -user admin -password secret -shapshot 
+</example>
+
+</s1>
+
+<s1 title="POST parameter limit: DOS Protection">
+
+<p>The form-parameter-max element in the &lt;web-app> restricts the
+maximum number of parameters in a form. The default value is 10,000.</p>
+
+</s1>
+
+<s1 title="WebSocket">
+
+<p>Resin's WebSocket implementations now passes the protocol tests for
+the final RFC version of WebSockets.</p>
+
+</s1>
+
+<s1 title="Config Password">
+
+<p>Passwords for databases and custom configuration can now be
+scrambled using the &lt;resin:Password> tag in the config file.</p>
+
+<example title="database in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+      xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;database jndi-name="jdbc/mysql">
+    &lt;driver type="com.mysql.jdbc.Driver">
+      &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+      &lt;user>resin&lt;/user>
+      &lt;password>
+        &lt;resin:Password value="{RESIN}zZEEvYw4uxuyJotZf39bBw=="/>
+      &lt;/password>
+    &lt;/driver>
+  &lt;/database>
+&lt;/web-app>
+</example>
+
+<p>The encrypted password can be generated on the command line with
+the password-encrypt command:</p>
+
+<example title="resinctl password-encrypt">
+unix> resinctl password-encrypt changeme
+password: {RESIN}zZEEvYw4uxuyJotZf39bBw==
+</example>
+
+</s1>
+
+<s1 title="CLI: added $HOME/.resin and --mode">
+
+<p>The command-line resinctl will now look in $HOME/.resin
+for properties to launch the watchdog with. The --mode option selects
+groups of properties.</p>
+
+<p>The purpose of the $HOME/.resin is to allow remote CLI
+administration of Resin (by setting the server addresses) without
+needing to change the /etc/resin.properties.</p>
+
+</s1>
+
+<s1 title="Config: /etc/resin/resin-inf">
+
+<p>Local configuration and jars can now be placed in /etc/resin/resin-inf
+without needing to change the resin.xml itself. A jar placed in /etc/resin/resin-inf/lib/mysql.jar will be available to the entire server.</p>
+
+</s1>
+
+<s1 title="Config: EL/rvar merging">
+
+<p>EL variables in the resin.xml will now lookup properties without
+needing the "rvar" function. For a server id "app-0", ${http} will
+look for "app-0.http" in the resin.properties and if that's missing,
+use "http".</p>
+
+</s1>
+
+<s1 title="Config: sample resin.xml updated">
+
+<p>The sample resin.xml has been updated and split into a
+sample "cluster-default.xml" to better show the base configuration.
+</p>
+</s1>
+
+<s1 title="Config: cloud configuration">
+
+<p>Cloud configuration support has been added to Resin. When a new
+Resin server spins up, it will ask the triad hub for the cloud
+configuration updates, which will include any shared database drivers
+and configuration.</p>
+
+<p>The cloud configuration is structured like the /etc/resin
+directory, and is imported by the resin.xml. (You can look at
+/etc/resin/resin.xml to see how this is done.)</p>
+
+<p>The command-line "config-deploy" will deploy the cloud configuration.
+"config-ls" and "config-cat" will show the configuration for debugging.</p>
+
+<example title="cloud config example">
+my-cloud-conf/admin-users.xml
+my-cloud-conf/resin-inf/mysql.xml
+my-cloud-conf/resin-inf/lib/mysql.jar
+</example>
+
+<p>The configuration can be bundled into a .jar or deployed as a directory
+with the "config-deploy"</p>
+
+<example title="resinctl config-deploy with directory">
+unix> resinctl config-deploy my-cloud-conf
+</example>
+
+<example title="resinctl config-deploy with jar">
+unix> resinctl config-deploy my-cloud-conf.jar
+</example>
+
+<p>When the configuration is deployed, it is parsed just like any
+other resin configuration file or jar file.</p>
+
+</s1>
+
+<s1 title="Cloud: dynamic servers and home-cluster">
+
+<p>When your configuration has more than the three servers
+in the triad hub, you can use the &lt;home-cluster> configuration
+to automatically configure the additional spoke servers.
+The &lt;home-cluster> tells Resin which cluster your new server
+should belong to. When you start the new server, it will contact
+the triad hub and connect itself, becoming a new cloud server.</p>
+
+<p>Once the cloud server is connected, it will download any
+cloud configuration changes like a new database driver, and any
+application deployments.</p>
+
+</s1>
+
+</body>
+</document>

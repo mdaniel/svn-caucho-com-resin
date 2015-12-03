@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ejb"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jstl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jta"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kernel"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/quercus"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/servlet16"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/webbeans"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jpa"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jca"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jms"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jcache"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/javamail-141.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/jsr88.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/webservices-api.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/webservices-extra-api.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/validation-api-1.0.0.GA.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

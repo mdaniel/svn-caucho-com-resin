@@ -1,0 +1,37 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.35 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.35 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.35 is primarily a bug fix release. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="BAM/Actor Worker Thread Fixes">
+
+<p>Updated the thread launching for workers threads to avoid possible
+synchronization issues.</p>
+
+</s1>
+
+<s1 title="AnomalyAnalyzer">
+
+<p>Added min-threshold and max-threshold to AnomalyAnalyzer
+and min-value and max-value, to limit overzealous analyzer reports.</p>
+
+</s1>
+
+</body>
+
+</document>

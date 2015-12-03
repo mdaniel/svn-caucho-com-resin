@@ -1,0 +1,56 @@
+<navigation threaded="true" section="Resin : Changes : " comment="true">
+  <item title="Changes" link="index.xtp">
+    <item link="release-notes.xtp" title="Release Notes">
+      <item link="resin-4.0.45.xtp" title="Resin 4.0.45"/>
+      <item link="resin-4.0.44.xtp" title="Resin 4.0.44"/>
+      <item link="resin-4.0.43.xtp" title="Resin 4.0.43"/>
+      <item link="resin-4.0.42.xtp" title="Resin 4.0.42"/>
+      <item link="resin-4.0.41.xtp" title="Resin 4.0.41"/>
+      <item link="resin-4.0.40.xtp" title="Resin 4.0.40"/>
+      <item link="resin-4.0.39.xtp" title="Resin 4.0.39"/>
+      <item link="resin-4.0.38.xtp" title="Resin 4.0.38"/>
+      <item link="resin-4.0.37.xtp" title="Resin 4.0.37"/>
+      <item link="resin-4.0.36.xtp" title="Resin 4.0.36"/>
+      <item link="resin-4.0.35.xtp" title="Resin 4.0.35"/>
+      <item link="resin-4.0.34.xtp" title="Resin 4.0.34"/>
+      <item link="resin-4.0.33.xtp" title="Resin 4.0.33"/>
+      <item link="resin-4.0.32.xtp" title="Resin 4.0.32"/>
+      <item link="resin-4.0.31.xtp" title="Resin 4.0.31"/>
+      <item link="resin-4.0.30.xtp" title="Resin 4.0.30"/>
+      <item link="resin-4.0.29.xtp" title="Resin 4.0.29"/>
+      <item link="resin-4.0.28.xtp" title="Resin 4.0.28"/>
+      <item link="resin-4.0.27.xtp" title="Resin 4.0.27"/>
+      <item link="resin-4.0.26.xtp" title="Resin 4.0.26"/>
+      <item link="resin-4.0.25.xtp" title="Resin 4.0.25"/>
+      <item link="resin-4.0.24.xtp" title="Resin 4.0.24"/>
+      <item link="resin-4.0.23.xtp" title="Resin 4.0.23"/>
+      <item link="resin-4.0.21.xtp" title="Resin 4.0.21"/>
+      <item link="resin-4.0.20.xtp" title="Resin 4.0.20"/>
+      <item link="resin-4.0.19.xtp" title="Resin 4.0.19"/>
+      <item link="resin-4.0.18.xtp" title="Resin 4.0.18"/>
+      <item link="resin-4.0.17.xtp" title="Resin 4.0.17"/>
+      <item link="resin-4.0.16.xtp" title="Resin 4.0.16"/>
+      <item link="resin-4.0.15.xtp" title="Resin 4.0.15"/>
+      <item link="resin-4.0.14.xtp" title="Resin 4.0.14"/>
+      <item link="resin-4.0.13.xtp" title="Resin 4.0.13"/>
+      <item link="resin-4.0.12.xtp" title="Resin 4.0.12"/>
+      <item link="resin-4.0.11.xtp" title="Resin 4.0.11"/>
+      <item link="resin-4.0.10.xtp" title="Resin 4.0.10"/>
+      <item link="resin-4.0.9.xtp" title="Resin 4.0.9"/>
+      <item link="resin-4.0.8.xtp" title="Resin 4.0.8"/>
+      <item link="resin-4.0.7.xtp" title="Resin 4.0.7"/>
+      <item link="resin-4.0.6.xtp" title="Resin 4.0.6"/>
+      <item link="resin-4.0.5.xtp" title="Resin 4.0.5"/>
+      <item link="resin-4.0.4.xtp" title="Resin 4.0.4"/>
+      <item link="resin-4.0.3.xtp" title="Resin 4.0.3"/>
+      <item link="resin-4.0.2.xtp" title="Resin 4.0.2"/>
+      <item link="resin-4.0.1.xtp" title="Resin 4.0.1"/>
+      <item link="resin-4.0.0.xtp" title="Resin 4.0.0"/>
+    </item>
+
+    <item link="change-logs.xtp" title="Change Logs">
+      <item link="changes.xtp" title="Resin 4.0 Changes"/>
+      <item link="http://caucho.com/resin-3.1/changes/changes.xtp" title="Resin 3.1 Changes"/>
+    </item>
+  </item>
+</navigation>

@@ -1,0 +1,411 @@
+<?php
+/**
+ * Provides the most important status information about the Resin server.
+ */
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+global $g_mbean_server;
+global $g_server_index;
+global $g_stat_prefix;
+
+global $g_page;
+global $g_time;
+global $g_offset;
+global $g_period;
+
+$mbean_server = $g_mbean_server;
+$stat = get_stats_service();
+
+if (! require_professional()) {
+  return;
+} else if (! $stat) {
+  echo "<div class=\"req-pro-message\">";
+  echo gettext('This feature requires &lt;resin:AdminServices/> in resin.xml');
+  echo "</div>\n";
+
+  return;
+}
+
+
+enable_graph_controls();
+
+print_title("watchdog", "Watchdog Analysis");
+
+$now = time();
+$start = $now - 14 * 24 * 60 * 60;
+
+$restart_list = $stat->getStartTimes($g_server_index, $start * 1000, $now * 1000);
+
+if (empty($restart_list)) {
+  echo "<p>";
+  echo gettext('No server restarts have been found in the last 7 days.');
+  echo "</p>";
+
+  return;
+}
+
+sort($restart_list);
+
+$form_time = $_REQUEST['t'];
+
+if (in_array($form_time, $restart_list)) {
+  $restart_ms = $form_time;
+}
+else {
+  $restart_ms = $restart_list[count($restart_list) - 1];
+}
+$restart_time = floor($restart_ms / 1000);
+
+$g_time = $restart_time;
+
+echo "<form name='restarts' method='get' action='#'>";
+echo " <input type='hidden' name='q' value='${g_page}'/>\n";
+echo " <input type='hidden' name='s' value='${g_server_index}'/>\n";
+echo " <input type='hidden' name='p' value='${g_period}'/>\n";
+echo " <input type='hidden' name='o' value='${g_offset}'/>\n";
+echo "<label for='time'>";
+echo gettext('Restart Time');
+echo "</label>: <select name='t' onchange='document.forms.restarts.submit();' id='time'>\n";
+foreach ($restart_list as $time_ms) {
+  $time = floor($time_ms / 1000);
+  
+  echo "<option value='$time_ms'";
+  if ($time_ms == $restart_ms)
+    echo " selected='selected'";
+  echo ">";
+  echo date("Y-m-d H:i", $time);
+  echo "</option>";
+}
+echo "</select>\n";
+echo "</form>";
+
+echo "<h2>";
+echo gettext('Restart at ');
+echo date("Y-m-d H:i", $restart_time);
+echo "</h2>\n";
+
+$log_mbean = $mbean_server->getLogService();
+
+echo "<div id='watchdog-tabs'>\n";
+echo "<ul>";
+echo "<li><a href='#pm-graph'>" . gettext('Graphs') . "</a></li>\n";
+if ($log_mbean) {
+  echo "<li><a href='#pm-logs'>" . gettext('Logs') . "</a></li>\n";
+}  
+echo "<li><a href='#pm-pdf'>" . gettext('PDF') . "</a></li>\n";
+echo "</ul>";
+
+echo "<div id='pm-graph'>\n";
+display_watchdog_graph($mbean_server);
+echo "</div>\n";
+
+if ($log_mbean) {
+  echo "<div id='pm-logs'>\n";
+  display_watchdog_logs($log_mbean);
+  echo "</div>\n";
+}
+
+echo "<div id='pm-pdf'>\n";
+print_pdf_select();
+echo "</div>\n";
+
+echo "</div>";
+
+function display_watchdog_graph($mbean_server)
+{
+  global $restart_time;
+  global $g_si;
+  
+  $width = 250;
+  $height = 150;
+  
+  echo "<h2>";
+  echo gettext('Watchdog Graphs');
+  echo "</h2>\n";
+  
+  echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>";
+  echo "<tr valign='top'><td colspan='3' align='center'>";
+
+  $health_params = new GraphParams("health", $width, $height, $restart_time);
+  $health_params->mbean_server = $mbean_server;
+  $health_params->title = gettext('Health');
+  $health_params->alt
+    = gettext('A line graph representing the status of each health check performed in the last 60 minutes before the selected restart.');
+  $health_params->labels_mbean = "resin:type=HealthSystem";
+  $health_params->legend = "right";
+  
+  stat_graph_regexp($health_params, "/^$g_si\|Resin\|Health/");
+  
+  echo "</td></tr>\n";
+  echo "<tr valign='top'><td>";
+
+  $request_params = new GraphParams("request", $width, $height, $restart_time);
+  $request_params->mbean_server = $mbean_server;
+  $request_params->title = gettext('Request Count');
+  $request_params->alt
+    = gettext('A line graph representing the number HTTP requests received in the last 60 minutes before the selected restart.');
+
+  stat_graph($request_params, array("$g_si|Resin|Http|Request Count"));
+             
+  echo "</td><td>";
+
+  $request_time_params
+    = new GraphParams("request_time", $width, $height, $restart_time);
+  $request_time_params->mbean_server = $mbean_server;
+  $request_time_params->title = gettext('Request Time');
+  $request_time_params->alt
+    = gettext('A line graph representing the amount of time spent processing HTTP requests in the last 60 minutes before the selected restart.');
+
+  stat_graph($request_time_params,
+             array("$g_si|Resin|Http|Request Time",
+                  "$g_si|Resin|Http|Request Time Max"));
+
+  echo "</td><td>";
+
+  $netstat_params = new GraphParams("netstat", $width, $height, $restart_time);
+  $netstat_params->mbean_server = $mbean_server;
+  $netstat_params->title = gettext('Netstat');
+  $netstat_params->alt
+    = gettext('A line graph representing network activity over the last 6 hours.');
+
+  stat_graph_regexp($netstat_params, "/$g_si\|OS\|Network\|(?!tcp-time)/");
+
+  echo "</td></tr>\n";
+  echo "<tr valign='top'><td>";
+
+  $database_params
+    = new GraphParams("database", $width, $height, $restart_time);
+  $database_params->mbean_server = $mbean_server;
+  $database_params->title = gettext('Database Connection Active');
+  $database_params->alt
+    = gettext('A line graph representing the amout of time the database connection was active in the last 60 minutes before the selected restart.');
+
+  stat_graph($database_params, array("$g_si|Resin|Database|Connection Active"));
+
+  echo "</td><td>";
+
+  $database_time_params
+    = new GraphParams("database_time", $width, $height, $restart_time);
+  $database_time_params->mbean_server = $mbean_server;
+  $database_time_params->title = gettext('Database Query Time');
+  $database_time_params->alt
+    = gettext('A line graph representing the amout of time spent querying the database in the last 60 minutes before the selected restart.');
+
+  stat_graph($database_time_params,
+             array("$g_si|Resin|Database|Query Time",
+                  "$g_si|Resin|Database|Query Time Max"));
+
+  echo "</td><td></td></tr>\n";
+  echo "<tr valign='top'><td>";
+
+  $jvm_thread_params
+    = new GraphParams("jvm-thread", $width, $height, $restart_time);
+  $jvm_thread_params->mbean_server = $mbean_server;
+  $jvm_thread_params->title = gettext('JVM Threads;');
+  $jvm_thread_params->alt
+    = gettext('A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.');
+
+  stat_graph($jvm_thread_params,
+             array("$g_si|JVM|Thread|JVM Thread Count",
+                  "$g_si|JVM|Thread|JVM Runnable Count",
+                  "$g_si|JVM|Thread|JVM Native Count",
+                  "$g_si|JVM|Thread|JVM Waiting Count",
+                  "$g_si|JVM|Thread|JVM Blocked Count"));
+
+  echo "</td><td>";
+
+  $resin_thread_params
+    = new GraphParams("resin-thread", $width, $height, $restart_time);
+  $resin_thread_params->mbean_server = $mbean_server;
+  $resin_thread_params->title = gettext('Resin Thread');
+  $resin_thread_params->alt
+    = gettext('A line graph representing the number of threads in Resin thread pools in the last 60 minutes before the selected restart.');
+
+  stat_graph($resin_thread_params,
+             array("$g_si|JVM|Thread|JVM Thread Count",
+                  "$g_si|Resin|Thread|Thread Count",
+                  "$g_si|Resin|Thread|Thread Active Count",
+                  "$g_si|Resin|Thread|Thread Idle Count",
+                  "$g_si|Resin|Thread|Thread Task Queue",
+                  "$g_si|Resin|Thread|Thread Priority Queue",
+                  "$g_si|Resin|Thread|Thread Overflow Count"));
+
+  echo "</td><td>";
+
+  $cpu_params = new GraphParams("cpu", $width, $height, $restart_time);
+  $cpu_params->mbean_server = $mbean_server;
+  $cpu_params->title = gettext('CPU');
+  $cpu_params->alt
+    = gettext('A line graph representing the active CPU usage in the last 60 minutes before the selected restart.');
+
+  stat_graph_regexp($cpu_params, "/^$g_si\|OS\|CPU\|CPU Active/");
+
+  echo "</td></tr>\n";
+  echo "<tr valign='top'><td>";
+
+  $memory_params = new GraphParams("memory", $width, $height, $restart_time);
+  $memory_params->mbean_server = $mbean_server;
+  $memory_params->title = gettext('Memory');
+  $memory_params->alt
+    = gettext('A line graph representing the amount of time spent perfoming garbage collection in the last 60 minutes before the selected restart.');
+
+  stat_graph($memory_params,
+             array("$g_si|JVM|Memory|Heap Memory Free",
+                  "$g_si|JVM|Memory|Tenured Memory Free",
+                  "$g_si|JVM|Memory|PermGen Memory Free"));
+
+  echo "</td><td>";
+
+  $memory_gc_params
+    = new GraphParams("memory_gc", $width, $height, $restart_time);
+  $memory_gc_params->mbean_server = $mbean_server;
+  $memory_gc_params->title = gettext('GC Time');
+  $memory_gc_params->alt
+    = gettext('A line graph representing network activity in the last 60 minutes before the selected restart.');
+
+  stat_graph_regexp($memory_gc_params, "/$g_si\|JVM\|Memory\|GC Time/");
+
+  echo "</td><td>";
+
+  $file_descriptors_params
+    = new GraphParams("file_descriptors", $width, $height, $restart_time);
+  $file_descriptors_params->mbean_server = $mbean_server;
+  $file_descriptors_params->title = gettext('File Descriptors');
+  $file_descriptors_params->alt
+    = gettext('A line graph representing the file descriptor count in the last 60 minutes before the selected restart.');
+
+  stat_graph_regexp($file_descriptors_params,
+                    "/$g_si\|OS\|Process\|File Descriptor Count/");
+
+  echo "</td></tr>\n";
+  echo "</table>";
+}
+
+function display_watchdog_logs($log_mbean)
+{
+  global $restart_time;
+
+  //
+  // startup
+  //
+  $start_messages = $log_mbean->findMessagesByType("Resin|Startup", "info",
+                                             ($restart_time - 60 * 60) * 1000,
+                                             ($restart_time) * 1000);
+
+  if ($start_messages)
+    $start_message = $start_messages[0]->message;
+
+  if (! $start_message)
+    $start_message = "Start Time";
+
+  $messages = $log_mbean->findMessages("warning",
+                                       ($restart_time - 60 * 60) * 1000,
+                                       ($restart_time) * 1000);
+
+  echo "<h2>";
+  echo gettext('Log Messages');
+  echo "</h2>\n";
+
+  echo "<table class='data'>\n";
+  echo "<thead>\n";
+  echo "<tr><th scope='col' class='date'>";
+  echo gettext('Date');
+  echo "</th>";
+  echo "<th scope='col' class='level'>";
+  echo gettext('Level');
+  echo "</th>";
+  echo "<th scope='col' class='message'>";
+  echo gettext('Message');
+  echo "</th></tr>\n";
+  echo "</thead>\n";
+    
+  if (! empty($messages)) {
+    
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+
+    // mark the start time
+    echo "<tr class='severe'>";
+    echo "  <td class='date'>";
+    echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $restart_time);
+    echo "  </td>";
+    echo "  <td class='level'></td>";
+    echo "  <td class='severe'>$start_message</td>";
+    echo "</tr>";
+
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90)) . "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+  } else {
+    echo "<tbody>\n";
+    echo "<tr><td colspan='3'>No log messages</td></tr>\n";
+    echo "</tbody>\n";
+  }
+    
+  echo "</table>\n";
+}
+
+function print_pdf_select()
+{
+
+  global $g_periods;
+  global $g_period;
+  
+  global $g_time;
+  
+  $stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+
+  echo "<h2>";
+  echo gettext('Watchdog PDF Report');
+  echo "</h2>\n";
+
+  echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
+  echo "<input type='hidden' name='report' value='Restart'/>\n";
+  echo "<input type='hidden' name='time' value='${g_time}'/>\n";
+  
+  echo "<label for='period'>";
+  echo gettext('Report Period');
+  echo "</label>: ";
+
+  echo "<select name='period' id='period'>\n";
+  
+  if (!isset($_POST['period']) || !is_numeric($_POST['period']) || !in_array(intval($_POST['period']), $g_periods))
+    $postedPeriod = $g_period;
+  else
+    $postedPeriod = $_POST['period'];
+
+  foreach ($g_periods as $period => $name) {
+    if ($period == $postedPeriod)
+      echo "  <option selected='selected' value='${period}'>${name}</option>";
+    else
+      echo "  <option value='${period}'>${name}</option>";
+  }
+
+  echo "</select> ";
+  echo gettext('before');
+  echo ' ' . date("Y-m-d H:i", $g_time) . ".\n";
+  echo " &nbsp;<input type='submit' value='";
+  echo gettext('Generate PDF');
+  echo "'/>\n";
+
+  echo "</form>";
+}
+
+display_footer($g_page, $javascript . javascript_create_tab("watchdog-tabs"));

@@ -1,0 +1,87 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.42 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.42 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.42 is primarily a bug fix release. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="SSL3 'poodle' attack">
+
+<p>Disabling -sslv3 is now recommended for all SSL ports because of a newly
+discovered security attack. The configuration is already available; you
+don't need to upgrade Resin versions. The configuration to disable SSL3 looks like:</p>
+
+<example>
+&lt;resin ...>
+&lt;cluster ...>
+  &lt;server...>
+  
+    &lt;http port="443">
+      &lt;openssl>
+         ...
+         &lt;protocol>-sslv3&lt;/protocol>
+      &lt;/openssl>
+</example>
+
+</s1>
+
+<s1 title="change list">
+
+<ul>
+<li>websocket: read loop needs to use getAvailableBuffer() (ep by Arun Durairaju)</li>
+<li>bam: too much logging for queue full (rep by Dan Stilts)</li>
+<li>bam: use smallest queue for remoting instead of round-robin to handle frozen connections (rep by Dan Stilts)</li>
+<li>comet: cleanup of comet state machine (#5826, rep by S. Nobuaki)</li>
+<li>cxf: missing servlet config for CXFProtocolServletFactory (#5825, rep by balaiitm)</li>
+<li>servlet: setHeader("foo", null) now removes header value (#5824)</li>
+<li>db: fixed expires and orphan queries to remove expired sessions (#5748, rep by Thomas Rogan)</li>
+<li>ejb: added scan-persistence-xml to &lt;ejb-server> to allow disabling of persistence-unit scanning (#4908)</li>
+<li>ssl: update openssl option processing. Update SSL_free/SSL_new</li>
+<li>health: add snapshot-jmx and snapshot-heap-dump to avoid issues on weekly reports (#5495, rep by ssbbartgroup)</li>
+<li>resin.sh: chdir to $RESIN_HOME before starting (#5668, rep by balaiitm)</li>
+<li>apache: NPE issues with Apache locking (#5747, #5744, rep by vicsanca, ssmax)</li>
+<li>apache: configure/make issues with Apache 24</li>
+<li>jni: add loading of classes/native/*.so (or native/*.so in a jar) (#5760, rep by William Damage)</li>
+<li>openssl: SSL field (ssl_sock) value was being cleared by std.c (#5815, rep by Nick Stephens, Sarah Gillespie)</li>
+<li>openssl: SSLv3 is now disabled by default (#5819)</li>
+<li>health: StartProfiler was saving data in text, not json (#5736, rep by S Nobuaki)</li>
+<li>admin: load-balance connection state could get stuck in "starting" on certain success cases (#5653)</li>
+<li>async: on comet restart, allow the previous state to be completed (#5684, rep by KC Baltz)</li>
+<li>async: send 500 on empty response with timeout (#5570, rep by Shinomiya Nobuaki)</li>
+<li>async: issues with starting async in forward (#5544, rep by Shinomiya Nobuaki)</li>
+<li>cache: update FileServlet to generate ETag including mime-type to support mime-type updates (#5761, rep by M. Lowe)</li>
+<li>servlet: multipart parts were not supported for namedDispatcher forward (#5543, rep by Shinomiya Nobuaki)</li>
+<li>dbpool: on manual init(), do not register JNDI, CDI, or JMX (#5595, rep by Shinomiya Nobuaki)</li>
+<li>webapp: sort initializers by web-fragment (#5514, rep by beamerblvd)</li>
+<li>ring-queue: offer with no wait and full requires a wake before blocking (#5599)</li>
+<li>jsp: allow binary output stream with non text/ contentType (#5027)</li>
+<li>async/gzip: issues with async combined with gzip (#5033)</li>
+<li>rpm: added %postun to shutdown resin (#5635, rep by S. Gillespie)</li>
+<li>i18n: classloading issues with utf-8 names (#5549, rep by konfetov)</li>
+<li>database: use JDK's ReentrantReadWriteLock instead of custom Resin lock (#5624, rep by Shinomiya Nobuaki)</li>
+<li>database: on close, fsync validation is does not allow for late writes (#5636, rep by Shinomiya Nobuaki)</li> 
+<li>servlet: relax checking of public for Filter constructor (#5701)</li>
+<li>log: limit log message database (#5802, rep by R. Murayama)</li>
+<li>database: force remove of old file when file is created (#5803, rep by R. Murayama)</li>
+<li>jni: only epoll is supported as select-manager (#5811, rep by qjian)</li>
+<li>jni: on windows use File.lastModified() instead of stat result to avoid windows DST bug (rep by Jason Barr)</li>
+<li>health: add &lt;mail> to PdfReport configuration (rep by Steffen Busch)</li>
+</ul>
+
+</s1>
+
+</body>
+</document>

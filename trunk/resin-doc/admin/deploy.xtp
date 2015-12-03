@@ -1,0 +1,411 @@
+<document>
+<header>
+<title>Deploying Web-Applications</title>
+<description>
+
+<p>Resin's deployment capabilities include 
+clustered deployment, remote deployment, versioning and rollback,
+command-line deployment, browser deployment, and standard
+webapps directory filesystem deployment.
+</p>
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+
+<p>Resin's .war application deployment can be as simple as copying a .war
+file to a webapps/ directory on a local machine, and as powerful as cloud
+deployment, archiving, staging, rollback.</p>
+
+<ul>
+<li><b>cloud deployment:</b> Resin's cloud deployment will distribute a
+new web-application to all servers in the cloud, using a transactional
+store to ensure consistency.</li>
+
+<li><b>activation control:</b> deployment and activation can be
+controlled independently, allowing applications to be deployed and verified
+on all servers, and then activated at once or on a rolling-server basis.</li>
+
+<li><b>command-line:</b> web-applications can be deployed to the cloud
+from the command-line for scriptable deployment.</li>
+
+<li><b>browser:</b> for convenience, applications can also be deployed
+from a browser using the /resin-admin site.</li>
+
+</ul>
+
+</s1>
+
+<s1 title="Basic Deployment Methods">
+
+<s2 title="Webapps Directory Deployment">
+
+<p>For a simple deployment, you can copy a .war archive file containing
+your application to a webapps directory. Resin will detect the .war archive,
+expand it, and start serving requests.</p>
+
+<p>The webapps directory is configured and enabled by the &lt;web-app-deploy/>
+tag in the resin.xml.</p>
+
+<example title="Example: web-app-deploy in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;cluster id="">
+    ...
+    &lt;host id="">
+  
+      <b>&lt;web-app-deploy path="webapps"
+                      expand-preserve-fileset="WEB-INF/work/**"/></b>
+    
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>The <em>expand-preserve-fileset</em> attribute lets you keep files
+for a redeployment, which can improve restart times.
+Normally, Resin will delete all files for an update,
+including the compiled files for JSP, which forces Resin
+to recompile JSP files, even if they haven't changed in the update.
+If you add the <em>expand-preserve-fileset</em>, Resin will only recompile the JSP files that have changed.</p>
+
+</s2>
+
+<s2 title="Command-Line Deployment">
+
+<p>Command-line deployment uses the same resin.xml &lt;web-app-deploy>
+configuration as a webapps deployment and expands the archive to the
+same directory. Instead of looking for the .war file in a directory,
+Resin will look in an internal repository using the web-app's identifier.</p>
+
+<example title="Example: command-line deployment">
+unix> resinctl deploy test.war
+</example>
+
+<p>The default deployment is to the default host with the war's name as
+a prefix. Both can be changed with deploy options.</p>
+
+</s2>
+
+<s2 title="Command-Line vs Directory Priority">
+
+<p>The command-line deployment takes priority over the
+directory deployement, because a deployment to a cluster ensures that all
+servers have the same version of the application. This means you must
+undeploy a web-app from the command-line if you decide to switch from
+command-line deployment to directory deployment.</p>
+
+<example title="Example: command-line undeployment">
+unix> resinctl undeploy test.war
+unix> cp test.war webapps
+</example>
+
+</s2>
+
+<s2 title="Deployment Expansion">
+
+<p>The <a config-tag="web-app-deploy"/> controls the expansion based on web-app ids
+like "production/webapps/default/test" which is the same as the web-app
+identifier. The deployment expansion process looks like the following:</p>
+
+<ol>
+<li>Look in the internal repository for "production/webapps/default/test" (uploaded by command-line). If an archive exists in the internal repository,
+skip to step #4.</li>
+
+<li>If that fails, look for a webapps/test.war</li>
+
+<li>If the webapps/test.war exists, copy the test.war into the internal repository as "server/[server-id]/webapps/default/test"</li>
+
+<li>Use the archive in "production/webapps/default/test"
+(or "server/[server-id]/webapps/default/test") as the repository
+source archive.</li>
+
+<li>Delete the old webapps/test directory (saving some directories when expand-preserve-fileset is configured.)</li>
+
+<li>Expand the repository source archive files into the webapps/test directory.</li>
+
+<li>Restart the webapp</li>
+
+</ol>
+
+<p>The deployment identifier matches the web-app id that Resin logs at
+startup time. The identifier a repository tag that lets Resin have a general
+cloud repository system and also handle web-app deployments, versioning,
+and staging.</p>
+
+<p>For the example web-app tag "production/webapp/default/test", the "production" is the deployment stage, "webapp" is
+because it's a webapp deployment, "default" is the virtual-host name
+and "test" is the web-app name.</p>
+
+</s2>
+</s1>
+
+<s1 title="Cloud Deployment">
+
+<p>Resin deploys a web-application to all servers in
+the cluster when you deploy using the command-line
+or the browser. This process happens automatically and does not require
+any configuration beyond Resin's normal cluster configuration.</p>
+
+<p>This cloud deployment does not occur when you deploy using the filesystem
+by placing a .war in a webapps directory. Cloud deployment only occurs on
+the command-line or browser.</p>
+
+<p>Resin replicates the deployed application to all three triad servers,
+or to all available server if you have less than three servers. Any server
+beyond the triad will copy the deployed application from the triad. Normally,
+you don't need to be aware of the triad, except to make sure at least one of
+the first three servers is always available.</p>
+
+<p>When you add a new dynamic server or restart a server, the server will
+check with the triad and update to the most recent copy of the application.
+The system is reliable if servers crash or even if a server crash or network
+outage occurs during deployment. Since the deployment is transactional,
+the new version is only activated when every file has been copied
+and verified on the server.</p>
+
+</s1>
+
+<s1 title="Activating deployed applications">
+
+<p>Applications can be activiated independent of their deployment, letting
+you upload a new deployment to a cloud, and then activating all servers at
+once or creating a rolling activation.</p>
+
+<p>By default, activation is automatic. When an application is deployed,
+it is automatically activated. You can change the default behavior by setting
+the startup-mode and redeploy-mode for the web-app-deploy.</p>
+
+<s2 title="Startup and Redeploy Modes">
+<p>
+The startup-mode is used in a number of places to determine the behaviour of a resource when the server starts.
+</p>
+
+<p>
+The startup-mode has three values: "automatic", "lazy", and "manual".
+</p>
+
+<ul>
+  <li>automatic - starts the resource on server start (default)</li>
+  <li>lazy - starts the resource on the first use</li>
+  <li>manual - waits for JMX to start the resource</li>
+</ul>
+
+<p>
+The redeploy-mode is used in a number of places to determine the behaviour of a resource when it is replaced or modified while the server is running.
+</p>
+
+<p>
+The redeploy-mode has two values: "automatic", and "manual".
+</p>
+
+<ul>
+  <li>automatic - restarts the resource when it is modified (web.xml, *.class, *.war, etc).</li>
+  <li>manual - waits for JMX to restart the resource when changes occur.</li>
+</ul>
+</s2>
+
+<s2 title="Deploying to a live server without interruption">
+<p>It may be possible to deploy a web application to a live server
+without interruption to service if certain conditions are met.</p>
+
+<ol>
+  <li>The session objects for your users are being persisted.</li>
+  <li>The usage of session scoped objects between the old version and the new is compatible.
+  </li>
+  <li>The usage of application scoped objects between the old version and the new is compatible.</li>
+  <li>Database schema changes are not required.</li>
+</ol>
+
+<p>Resin allows you to have a backup instance running.  The idea is that
+this backup instance of Resin takes over if your primary Resin
+instance goes down.</p>
+
+<p>If you are using a load balancer to distribute your load to multiple
+primary servers, each primary server has a backup server.</p>
+
+<p>You can use this feature to deploy to a live server without
+interruption of service.</p>
+
+<ol>
+<li>shutdown primary server(s) (backup server(s) takes over)</li>
+
+<li>deploy new war to primary server(s)</li>
+
+<li>start primary server(s).  As soon as the primary server starts,
+the user will be using the new version of the application.</li>
+
+<li>deploy new war to backup server(s)</li>
+</ol>
+
+</s2>
+
+</s1>
+
+<s1 title="Versioning and Graceful Upgrades">
+
+<p>Resin can deploy multiple versions of a web-app simultaneously,
+simplifying any application upgrades.  The old version of the web-app
+will continue to receive old sessions, while the new version will get
+the new requests.  So any user will see a consistent version as the
+web site update occurs with no downtime required.</p>
+
+<p>The versioning requires <a config-tag="web-app-deploy"/>, i.e. it works with
+the webapps directory.  The versioning is numerically-based, allowing
+dotted notation, to determine the most recent version.  A simple deployment
+process might use <var>foo-101</var> to upgrade from <var>foo-100</var>.
+A more complicated one might use <var>foo-10.3.14</var> to upgrade from
+<var>foo-10.3.13</var>.</p>
+
+<p>The <var>versioning</var> attribute of the <a config-tag="web-app-deploy"/>
+enables versioning:</p>
+
+<example title="Example: resin.xml for webapps versioning">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+&lt;host id="">
+
+  <b>&lt;web-app-deploy path="webapps" versioning="true"
+           expand-preserve-fileset="WEB-INF/work/**"/></b>
+
+&lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="Deployment Methods">
+
+<s2 title="Filesystem deployment: Custom web-app with .war file">
+
+<p>In this scenario, you want to configure a web-app with a
+specific root-directory and specify the location of the .war file.
+As usual, when Resin sees any changes in the .war file, it will expand
+the new data into the root-directory and restart the web-app.  This
+capability, gives sites more flexibility where their directories and
+archive files should be placed, beyond the standard webapps directory.</p>
+
+<p>The optional <code>archive-path</code> argument of the
+<a config-tag="web-app"/> will point to the .war file to be expanded.</p>
+
+<deftable title="web-app deployment options">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>archive-path</td>
+  <td>path to the .war file which contains the web-app's contents</td>
+  <td></td>
+</tr>
+<tr>
+  <td>dependency-check-interval</td>
+  <td>how often Resin should check for changes in the web-app for a redeployment</td>
+  <td>2s</td>
+</tr>
+<tr>
+  <td>expand-preserve-fileset</td>
+  <td>a set of files/directories Resin should preserve on a redeploy when it deletes the expanded directory</td>
+  <td></td>
+</tr>
+<tr>
+  <td>id</td>
+  <td>unique identifier for the web-app and the default context-path value</td>
+  <td></td>
+</tr>
+<tr>
+  <td>redeploy-check-interval</td>
+  <td>how often Resin should check the .war file for changes</td>
+  <td>60s</td>
+</tr>
+<tr>
+  <td>redeploy-mode</td>
+  <td>how Resin should handle redeployment: automatic, lazy, or manual</td>
+  <td>automatic</td>
+</tr>
+<tr>
+  <td>root-directory</td>
+  <td>path to the expanded web-app directory</td>
+  <td><var>id</var> as a sub-directory of the virtual-hosts's root</td>
+</tr>
+</deftable>
+
+<example title="Example: resin.xml for custom web-app">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="">
+    &lt;host id="">
+
+      <b>&lt;web-app id="/foo" root-directory="/var/resin/foo"
+               expand-preserve-fileset="WEB-INF/work/**"
+               archive-path="/usr/local/stage/foo.war"/></b>
+
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Command-Line Remote Deployment">
+
+<p>The "deploy" command deploys a .war file to the default virtual
+host. In a cloud environment, Resin will copy the deployed .war
+to all servers in the cluster. Since the <a javadoc="com.caucho.security.AdminAuthenticator"/> requires a user
+and password, you'll need to pass those arguments.</p>
+
+<example title="Example: deploy hello.war">
+unix> resinctl deploy hello.war \
+           -user foo -password test
+</example>
+
+</s2>
+
+<s2 title="Browser-based Remote Deployment">
+<p>
+As of Resin 4.0.0, it is now possible to deploy web applications remotely
+to a shared repository that is distributed across the cluster.  This feature
+allows you to deploy once to any triad server and have the application
+be updated automatically across the entire cluster.  When a new 
+<a href="clustering-overview.xtp#DynamicServers">dynamic server</a> joins the cluster, the
+triad will populate it with these applications as well.
+</p>
+<p>
+To deploy an application remotely:
+</p>
+<ol>
+<li>log into the resin-admin console on
+any triad server.  <em>Make sure you are connecting over SSL, as this feature
+is not available over a non-encrypted channel.</em></li>
+<li>Browse to the "webapp" tab of the resin-admin server and at the bottom
+of the page, enter the virtual host, URL, and local .war file specifying
+the web application, then press "Deploy".
+<figure src="deploy-webapp.png" alt="Virtual Host:default, URL:/foo, .war file:/tmp/foo.war, Deploy button"/>
+</li>
+<li>
+The application should now be deployed on the server.  In a few moments,
+all the servers in the cluster will have the webapp.
+<figure src="deployed-webapp.png" alt="WebApps: /:active, /foo:active, /resin-admin:active"/>
+</li>
+</ol>
+</s2>
+
+<!--
+<s2 title="ant/maven Remote Deployment">
+
+<p>Deployment may be interegrated with ant/maven using the command-line
+interface or with ant/maven plugins. See the <a href="deploy-ant-maven.xtp">deploy-ant-maven</a> page for
+more information.</p>
+
+</s2>
+-->
+
+</s1>
+
+</body>
+</document>

@@ -1,0 +1,436 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>resin.xml: server instance configuration</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+      Configuration of JVM, threading, cluster,
+      and TCP parameters for a server.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+
+<p web-only='true'>The reference for the &lt;server> tag and its
+schema are at <a href="reference.xtp#server">&lt;server></a>.</p>
+
+<ul>
+<li><b>Core configuration:</b> the server's id, local TCP address and port
+which configure it in the cluster.</li>
+<li><b>server-default:</b> shared configuration for all servers belongs in
+a server-default.</li>
+<li><b>cluster/cloud</b> the server configuration in the cluster block
+defines the cluster.</li>
+<li><b>JVM:</b> JVM command-line parameters like -Xmx.</li>
+<li><b>HTTP and TCP ports:</b> configuring the server's HTTP ports.</li>
+<li><b>Thread Pool:</b> thread pool size and idle thread pool size.</li>
+<li><b>Load balancing:</b> timeouts and weights for the load balancer.</li>
+<li><b>Watchdog:</b> configuration for the server's watchdog.</li>
+</ul>
+
+</s1>
+
+<s1 title="Core Configuration">
+
+<p>A cluster server has an "id", a local network "address" and a local
+  network "port". For a standalone server, the address and port can be omitted,
+  but the server cannot participate in a cluster or be managed from
+  a command line.</p>
+
+<p>The following example shows the minimal server for a two-server cluster.
+  These servers do not listen to a HTTP port, so they are either a backend
+  tier with a load-balancer or they are a non-HTTP use of Resin (like
+  a SOA service.)</p>
+
+<example title="Example: minimal server in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+
+  &lt;server id="a" address="192.168.1.10" port="6800"/>
+  &lt;server id="b" address="192.168.1.11" port="6800"/>
+
+  ...
+
+&lt;/cluster>
+&lt;/resin>
+</example>
+  
+</s1>
+
+<s1 title="Clustering: servers in a cluster">
+
+<p>Each &lt;server> becomes part of a cluster, the &lt;cluster> that
+contains the server tag. Because each server has a local-network address and
+port, the servers can automatically communicate with each other.
+Essentially, there's no extra configuration needed for Resin clustering.</p>
+
+<p>A Resin cluster uses a triple-redundant hub called the
+<b>triad</b> to store shared data and to coordinate cluster services
+like caching and JMS queues. If you have two servers, those servers
+will form the hub. The triple redundancy is important for reliability:
+the cluster can survive two triad servers going down. The
+hub-and-spoke topology is important for elastic cloud configurations:
+adding and removing servers just removes spokes without affecting the
+hub.</p>
+
+<p>Typically, a site with many servers will configure at least the
+first three in the resin.xml, and use Resin's elastic-server
+capability for the remaining servers. Keeping the first three in the
+resin.xml ensures that all servers can connect to at least one of
+the triad even if one is down for maintenance or a restart.</p>
+
+<example title="Example: triad configuration in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+
+  &lt;server id="a" address="192.168.1.10" port="6800"/>
+  &lt;server id="b" address="192.168.1.11" port="6800"/>
+  &lt;server id="c" address="192.168.1.12" port="6800"/>
+    
+  &lt;dynamic-server-enable/>
+  &lt;resin:DynamicCloudService/>
+
+  ...
+
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+<s2 title="dynamic servers and --cluster">
+
+<p web-only='true'>For more details see the <a
+href="clustering-overview.xtp">clustering overview</a>.</p>
+
+<p>Elastic servers are added to a cluster using the command-line
+<b>--elastic-server</b> and <b>--cluster</b> option. The new server
+is assigned a server id
+from the command line, an IP address from the local network. The new
+server contacts the triad defined in the resin.xml and requests to be
+added. The triad updates the cluster topology and informs all servers
+about the new server.</p>
+
+<example title="Example: command-line for dynamic server">
+unix> bin/resin.sh start --cluster app-tier --elastic-server start
+</example>
+
+<p>
+The new server will use configuration from the &lt;server-default>
+in the cluster it's joining.  It will automatically deploy
+applications which were deployed in the cluster, and will
+automatically join clustered caches, JMS queues, and load balancing.
+</p>
+
+<p>When the server shuts down, the triad will hold its topology spot
+open for 15 minutes to allow for restarts. After the timeout, the
+triad will remove the server.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="server-default">
+
+<p>Most sites use a shared &lt;server-default> to configure servers
+because parameters for a cluster's servers are usually identical.
+The HTTP ports, timeouts, keepalives, JVM and thread configurations can
+be shared easily. Servers that do need different configuration (like
+a staging server) can override
+the configuration in the &lt;server> tag.</p>
+
+<p>For example, the following defines a common set of JVM and
+HTTP configuration.</p>
+
+<example title="Example: basic http configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="app">
+
+  &lt;server-default>
+    &lt;jvm-arg-line>-Xmx2048m&lt;/jvm-arg-line>
+    
+    &lt;accept-thread-min>32&lt;/accept-thread-max>
+    &lt;accept-thread-min>64&lt;/accept-thread-max>
+    
+    &lt;port-thread-max>256&lt;/port-thread-max>
+    
+    &lt;http port="80"/>
+  &lt;/server-default>
+
+  &lt;server id="a" address="192.168.1.10" port="6800"/>
+  &lt;server id="b" address="192.168.1.11" port="6800"/>
+  ...
+</example>  
+
+</s1>
+
+<s1 title="HTTP and TCP ports: managing sockets and timeouts">
+
+<p>HTTP ports are typically configured in a &lt;server-default>
+tag because a Resin servers in a cluster will typically all listen to
+the same HTTP port. If each server listens to a different HTTP port, the
+&lt;http> tag is in the individual &lt;server> block instead of
+the &lt;server-default>.</p>
+
+<p>The following example is a typical configuration for a Resin
+cluster where each server listens to the same HTTP port.</p>
+
+<example title="Example: basic http configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;server-default>
+    <b>&lt;http port="80"/></b>
+  &lt;/server-default>
+  
+  &lt;server id="a" address="192.168.1.10" port="6800"/>
+  ...
+</example>
+
+<s2 title="Accept thread and connection pools">
+
+<p>Each HTTP port has a thread pool which listens for new requests and
+processes them. The thread that accepts a HTTP connection will
+also process the request, and a new thread will be created to take
+its place listening for new requests. Since this HTTP thread pool is
+a child of Resin's main thread pool, the Resin threads limits and management
+automatically apply.</p>
+
+<p><b>port-thread-max</b> is the maximum thread count for handling
+a port's requests. If more requests arrive than threads, the requests
+will be queued until a thread becomes available. You can use
+<em>port-thread-max</em> to limit the maximum load on a server.</p>
+
+<p><b>accept-thread-min</b> sets the minimum number of threads
+which are concurrently accepting a new connection. If the thread count
+drops below accept-thread-min, Resin will spawn a new thread
+to accept() the connection. If you look at a thread dump, there will always
+be at least this many threads in the accept() method. A larger value
+for <b>accept-thread-min</b> improves load-spike handling.</p>
+
+<p><b>accept-thread-max</b> sets the maximum number of threads
+which are concurrently accepting a new connection. When a request completes,
+it normally tries to accept a new connection, but when <b>accept-thread-max</b>
+threads are already listening, the thread will exit instead. A larger gap
+between accept-thread-min and accept-thread-max reduces thread churning.</p>
+
+<p><b>connection-max</b> limits the total requests/connections
+allowed at any time. Typically this will be very large because most
+sites will never need to throttle the connections.</p>
+
+<p><b>throttle-concurrent-max</b> limits the concurrent requests from a
+single IP address. This limit can help with denial-of-service attacks.</p>
+
+<p>The following example show a typical configuration for the HTTP accept
+pool. The example tags are in the &lt;server-default> instead of the
+&lt;http> for convenience, since both &lt;http> ports 80 and 81 need
+the same configuration. If the two &lt;http> ports needed different values,
+you would put the &lt;accept-thread-min> tag inside
+the &lt;http> port itself.</p>
+
+<example title="Example: configuring the accept thread pool">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;server-default>
+    <b>&lt;accept-thread-min>32&lt;accept-thread-min></b>
+    <b>&lt;accept-thread-max>64&lt;accept-thread-max></b>
+
+    &lt;http port="80"/>
+    &lt;http port="81"/>
+  &lt;/server-default>
+
+  ...
+</example>
+
+</s2>
+
+<s2 title="HTTP socket timeouts and configuration">
+
+<p><b>socket-timeout</b> configures the read and write
+timeout for the socket to protect against network hangs and denial-of-service
+attacks. When Resin reads a HTTP request or POST data, it uses
+the socket-timeout to limit how long it will wait. Resin also uses
+socket-timeout on the response writes to disconnect from frozen clients.</p>
+
+<p>The socket-timeout must be at least 65s because of browser requirements.</p>
+
+<p>If you have a long-polling application, you will probably need to increase
+the default socket-timeout to your long-polling time.</p>
+
+<example title="Example: socket-timeout for a HTTP port">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;server-default>
+    <b>&lt;socket-timeout>120s&lt;socket-timeout></b>
+
+    &lt;http port="80"/>
+    &lt;http port="81"/>
+  &lt;/server-default>
+
+  ...
+</example>
+
+</s2>
+
+<s2 title="Keepalive configuration">
+
+<p>HTTP keepalives improve performance by letting browsers reuse the same
+TCP socket for new requests, for example images and javascript files from
+a main page. You can balance the added efficiency against the extra sockets
+and threads in the &lt;server> and &lt;http> keepalive configuration.</p>
+
+<p>To handle many keepalive sockets with fewer threads,
+Resin Pro has a "keepalive-select" manager which detaches the thread from
+its connection and reuses the thread. The keepalive-select manager allows
+for tens of thousands of connections as many as your operating system will
+allow file descriptors.</p>
+
+<p><b>keepalive-timeout</b> will close the socket if the browser waits too
+long before sending a new request. Because requests are bursty, even a small
+value like 10s can improve performance.</p>
+
+<p><b>keepalive-max</b> defines the maximum connections waiting for
+keepalive requests. With the keepalive-select manager or a 64-bit system,
+this can be a large number. It's generally better to limit the keepalives
+using keepalive-timeout instead of keepalive-max.</p>
+
+<p><b>keepalive-select-enable</b> lets you disable the keepalive-select
+manager. Because modern 64-bit operating systems handle threads efficiently,
+it can be more efficient to use the connection thread to wait for a new
+request.  However, the <b>keepalive-select-thread-timeout</b> may be
+a better choice in that situation.</p>
+
+<p><b>keepalive-select-thread-timeout</b> sets a short thread-based
+keepalive timeout waiting for the next request before going to the
+select manager. Because keepalive requests are bursty and thread-based
+keepalive is faster, Resin waits for a short time. You can increase the
+performance with a slight increased thread
+count by increasing <b>keepalive-select-thread-timeout</b>.</p>
+
+</s2>
+
+<s2 title="Openssl and Jsse">
+
+<p web-only='true'>For more information see the <a href='security-ssl.xtp'>SSL page</a>.</p>
+
+<p>HTTP ports can use either OpenSSL (faster) or JSSE to support SSL
+ports. The SSL configuration tags belong inside the &lt;http> tag.</p>
+
+<example title="Example: OpenSSL HTTP configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;server-default>
+  
+    &lt;http port="443">
+      &lt;openssl>
+        &lt;certificate-file>keys/mycert.crt&lt;/certificate-file>
+        &lt;certificate-key-file>keys/mycert.key&lt;/certificate-key-file>
+        &lt;password>mypassword&lt;/password>
+        &lt;protocol>-sslv3&lt;/protocol>
+      &lt;/openssl>
+    &lt;/http>
+    
+  &lt;/server-default>
+
+  ...
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Load Balancing: Socket Pooling, Timeouts, and Failover">
+
+<p>For efficiency, Resin's load balancer manages a pool of sockets
+connecting to the app-tier servers.  If Resin forwards a new request to
+an app-tier server and it has an idle socket available, it will reuse that
+socket, improving performance an minimizing network load.  Resin uses a
+set of timeout values to manage those idle sockets and to handle any
+failures or freezes of the backend servers.  The following diagram
+illustrates the main timeout values:</p>
+
+<figure src="load-balance-idle-time.png" alt="web-a:connecty-timeout,app-a:socket-timeout,web-a:recover-time,app-a:keepalive-timeout,web-a:idle-time"/>
+
+<ul>
+<li><b>load-balance-connect-timeout</b>: the load balancer timeout
+for the <code>connect()</code> system call to complete to
+the app-tier (5s).</li>
+<li><b>load-balance-idle-time</b>: load balancer timeout
+for an idle socket before closing it automatically (5s).</li>
+<li><b>load-balance-recover-time</b>: the load balancer connection failure wait
+time before trying a new connection (15s).</li>
+<li><b>load-balance-socket-timeout</b>: the load balancer
+timeout for a valid request to complete (665s).</li>
+<li><b>keepalive-timeout</b>: the app-tier timeout for a keepalive
+connection (15s)</li>
+<li><b>socket-timeout</b>: the app-tier timeout for a read or
+write (65s)</li>
+</ul>
+
+</s1>
+
+<s1 title="JVM parameters: setting the JVM command line">
+
+<p>JVM command-line parameters are configured in the &lt;server> tag.
+When launching Resin, the watchdog process will read the &lt;server> tag
+and add the JVM argument to the launched command-line.</p>
+
+<p>Because most servers in a cluster are identical, you'll generally
+put the JVM configuration in a &lt;server-default>. If you have some
+servers with different requirements, you can configure the JVM in &lt;server>.</p>
+
+<example title="Example: -Xmx2048m in server-default">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+
+  &lt;server-default>
+    &lt;jvm-arg>-Xmx2048m&lt;/jvm-arg>
+  &lt;/server-default>
+
+  ...
+
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+<s2 title="setuid: user-name and group-name">
+
+<p>Because Unix requires root access to bind to port 80 and 443, Resin can
+change from root (the watchdog) to a specific user (the Resin server). The
+user-name and group-name tags in the &lt;server> set the user to run as.</p>
+
+
+<example title="Example: user-name and group-name">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+
+  &lt;server-default>
+    &lt;user-name>resin&lt;/user-name>
+    &lt;group-name>resin&lt;/group-name>
+  &lt;/server-default>
+
+  ...
+
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

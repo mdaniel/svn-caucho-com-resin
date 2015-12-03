@@ -1,0 +1,37 @@
+{ "string_name_rick"		:
+
+"Rick Hightower",
+"string_phone_510"	
+:	
+	
+	"510-555-3411",  	
+		"integer_age_42" : 42 ,
+	"double_height_5.9" : 5.9,
+	"object_manager" : {
+			"string_name_scott" : "Scott F",
+			"string_phone_415" 	: 	"415-555-3411",
+			"integer_age_42" : 42,
+			"double_height_6.1" : 6.1
+		},
+	"array_reports" : [3,
+		{
+			"string_name_joe" : "Joe Hightower",
+			"string_phone_510" 	: 	"510-541-3411",
+			"integer_age_42" : 42,
+			"double_height_5.9" : 5.9
+		},
+		{
+			"string_name_smoe" : "Smoe Hightower",
+			"string_phone_510" 	: 	"510-541-3411",
+			"integer_age_42" : 42,
+			"double_height_5.9" : 5.9
+		},
+		{
+			"string_name_bill" : "Bill Hightower",
+			"string_phone_510" 	: 	"510-541-3411",
+			"integer_age_42" : 
+				42,
+			"double_height_5.9" : 5.9
+		}
+	]	
+}

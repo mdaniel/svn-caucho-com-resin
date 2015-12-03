@@ -1,0 +1,14 @@
+msgid ""
+msgstr ""
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=5; plural=n;\n"
+
+msgid "Summary"
+msgstr "Summary"
+
+msgid "Overview"
+msgstr "Overview"
+
+msgid "A summary of the server's state."
+msgstr "A summary of the server's state."

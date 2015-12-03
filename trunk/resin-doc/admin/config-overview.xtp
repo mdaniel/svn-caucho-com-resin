@@ -1,0 +1,188 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>resin.xml: configuration overview</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+      Overview of the Resin configuration: resin.properties
+      for most common properties and resin.xml for full customization.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+
+<p>All Resin configuration is ultimately managed by the resin.xml. To keep
+configuration manageable, the resin.xml imports properties files like
+resin.properties, and xml files like cluster-default.xml and health.xml.
+Many sites will never need to change the resin.xml and can just
+modify the resin.properties.</p>
+
+</s1>
+
+<s1 title="Concepts and naming conventions">
+
+<ul>
+<li><b>cluster</b> - a collection of identically-configured servers.</li>
+<li><b>environment</b> - isolated class-loader contexts with shared resources:
+server, host and web-app are the main environments.</li>
+<li><b>host</b> - a HTTP virtual host.</li>
+<li><b>proxy cache</b> - HTTP proxy cache.</li>
+<li><b>resource</b> - drivers or services available to the application
+though JNDI or CDI like databases, JMS queues, custom
+CDI-configured service. Resin-specific resources include security,
+authenticators, health-checks and the rewrite/dispatch system.</li>
+<li><b>rewrite/dispatch</b> - the configuration for dispatching HTTP URLs
+to servlets and response codes like Apache's mod_rewrite.</li>
+<li><b>server</b> - a Resin JVM instance. There may be multiple servers on
+a machine.</li>
+<li><b>watchdog</b> - a JVM instance which watches over the Resin server
+and restarts the server if necessary.</li>
+<li><b>web-app</b> - a HTTP web-application which runs servlets.</li>
+</ul>
+
+</s1>
+
+<s1 title="resin.properties">
+
+<p>The <a href="config-resin-properties.xtp">resin.properties</a>
+defines properties used by the resin.xml for the Resin
+server and cluster. Many sites will only need to modify the
+resin.properties for their configuration.</p>
+
+<example title="Example: key resin.properties">
+# web-tier Triad servers: web-0 web-1 web-2
+# web_servers      : 192.168.1.20:6810
+# web.http          : 80
+
+# app-tier Triad servers: app-0 app-1 app-2
+app_servers      : 192.168.1.10:6800 192.168.1.11:6800
+
+app.http          : 8080
+
+setuid_user   : resin
+setuid_group  : resin
+
+home_cluster : app
+elastic_cloud_enable : true
+
+jvm_args  : -Xmx2048m -XX:MaxPermSize=256m
+
+web_admin_enable  : true
+
+admin_user     : my-admin
+admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
+</example>
+
+<p>The properties in resin.properties are converted into JSP EL variable
+used by the resin.xml, like <em>port="${http}"</em>.</p>
+
+<p>Properties can be qualified by the server's name or by its
+cluster. The <em>app.http</em> in the above example is the <em>${http}</em>
+variable specific to the "app" cluster. You can also use
+<em>app-0.http</em> to define a custom http port for 
+a specific server.</p>
+
+</s1>
+
+<s1 title="resin.xml">
+
+<p>The <a href="config-resin-xml.xtp">resin.xml file</a> is
+the root of Resin's configuration. Other files like the
+resin.properties and cluster-default.xml are imported files
+to organize the configuration. Conceptually, they're all delegated
+from the resin.xml.</p>
+
+<p>The resin.xml configures clusters, servers, virtual hosts,
+web-app deployment, resources, health checks, and class-loaders.
+Almost all of Resin's behavior is configured by the resin.xml.</p>
+
+<p>The standard resin.xml distributed with Resin and its property file
+reisn.properties configures a standard, flexible clustering system
+including an application server tier, a http web tier,
+and virtual hosts. Many sites will not need to modify the standard
+resin.xml.</p>
+
+<p>The resin.xml is flexible enough to configure non-http servers.
+If you have a non-http Java service, it can take advantage of Resin's
+watchdog, lifecycle and health system by being configured as a standard
+CDI service in a non-http Resin system.</p>
+
+<example title="Example: resin.xml outline">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;cluster-default>          
+    &lt;!-- shared configuration across all clusters -->
+    
+    &lt;resin:import path="classpath:META-INF/caucho/app-default.xml"/>
+    
+    &lt;resin:import path="${__DIR__}/health.xml" optional="true"/>
+  &lt;/cluster-default>          
+    
+  &lt;cluster id="my-cluster">
+
+    &lt;server-default>
+      &lt;!-- thread limits, JVM config, keepalives, ports, HTTP -->
+
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+    &lt;server id="server-a" address="192.168.1.10" port="6800"/>
+    &lt;server id="server-b" address="192.168.1.11" port="6800"/>
+
+    &lt;host id="www.myhost.com" root-directory="hosts/myhost.com">
+
+      &lt;resin:MovedPermanently regexp="/old-file" target="/new-path"/>
+    
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
+
+      &lt;web-app id="/custom">
+      &lt;/web-app>
+      
+    &lt;/host>
+  
+  &lt;/cluster>
+          
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="Next Steps">
+
+<ul>
+<li><b><a href="config-resin-properties.xtp">resin.properties</a></b> configuration shows how to customize basic configuration.</li>
+<li><b><a href="config-resin-xml.xtp">resin.xml</a></b> configuration shows more advanced and specialized configuration.</li>
+<li><b><a href="resin-admin-command-line.xtp">command-line</a></b> describes
+using the <b>resinctl</b> command line interface.</li>
+<li><b><a href="deploy.xtp">deployment</a></b> deploying applications to
+a running server.</li>
+<li><b><a href="clustering.xtp">clustering</a></b> describes clustering,
+cloud, and dynamic servers.</li>
+<li><b><a href="resin-admin.xtp">resin-admin</a></b> describes the
+/resin-admin browser-based interface.</li>
+<li><b><a href="health.xtp">health</a></b> describes the
+Resin health and monitoring system.</li>
+<li><b><a href="resin-admin-rest.xtp">REST admin</a></b> describes the
+REST interface for remote third-party admin integration.</li>
+<li><b><a href="http.xtp">Resin HTTP Web Server</a></b>
+describes fast, scalable HTTP web server.</li>
+<li><b><a href="http-rewrite.xtp">HTTP URL Rewrite</a></b>
+describes Resin's URL rewriting (like mod_rewrite).</li>
+<li><b><a href="security.xtp">Security</a></b>
+describes authentication, authorization and SSL.</li>
+</ul>
+
+</s1>
+
+</body>
+</document>

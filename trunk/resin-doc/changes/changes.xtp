@@ -1,0 +1,1731 @@
+<document>
+<header>
+<title>Resin Change Log</title>
+</header>
+<body>
+
+<s1 title="Resin Change Log">
+
+<s2 title="4.0.47 - in progress">
+<ul>
+<li>session: fixes related to Java deserialization (#5947, rep by Shinomiya Nobuaki)</li>
+<li>distcache: locking overhead reduced (#5962, rep by snicolai)</li>
+<li>distcache: update remove query and locking (#5952)</li>
+<li>session: fixes related to session removal/timeout (#5952, rep by S. Catna)</li>
+<li>compile: jdk5 compile issues (#6940, rep by anton_kg)</li>
+<li>cache/mmap: jdk6 compatibility issues (#5959, #5960, rep by S. Gavandi)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.46 - Oct 4, 2015">
+<ul>
+<li>jsp: tag loading issue due to WEB-INF case (#5936, rep by libor)</li>
+<li>table: improper early closing of file on shutdown (#5946)</li>
+<li>servlet: drop instantiation check for instances of servlets and filters (#5934, rep by msouthall)</li>
+<li>jsse-ssl: add support for honor-cipher-order (#5939)</li>
+<li>jsp: reflection not properly scoped to class-loader context (#5944, rep by Andreas Buchele)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.45 - Aug 6, 2015">
+<ul>
+<li>session: change shutdown state machine to allow getAttribute on invalidating session (#5919, rep by Shinomiya Nobuaki)</li>
+<li>build: remove LoadTimeWeaver (#5923, rep by M. Barker)</li>
+<li>watchdog: change default -Xss to 1m (#5927, rep by anupmondal)</li>
+<li>servlet: check for dual registration of ServletContextListener (#5893, rep by Matias Lagerwall)</li>
+<li>jsp: share classloading of .tag files (#5914, rep by nfedorov)</li>
+<li>dyn-server: on server restart, allow same address:port (#5903, rep by Tom Pohl)</li>
+<li>dyn-server: added lock in resin-data to ensure multiple servers cannot use same data (#5902, rep by Tom Pohl)</li>
+<li>ssl: allow OpenSSL ECC support for forward secrecy (#5906, rep by Nick Stephens)</li>
+<li>db: add validation and restart for corrupted BTree index (#5912, rep by wesleywu)</li>
+<li>build: allow for JDK 8 build (#5901, rep by dave)</li>
+<li>health: removed perm gen checks (#5910)</li>
+<li>ejb: ejbTimer.cancel() needs to remove timer from getTimers() (#5891, rep by bbik)</li>
+<li>servlet: FileService character-encoding should exclude images (#5907, rep by Mathias Lagerwall)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.44 - 2015-04-22">
+<ul>
+<li>jsee: self signed cert should support Firefox and Chrome default cipher-suites(#5884)</li>
+<li>jsee: self signed cert should check expire (#5885)</li>
+<li>class-loader: excessive reread of jar certificates (#5850, rep by konfetov)</li>
+<li>log: add sanity check for log rollover (#5845, rep by Keith F.)</li>
+<li>deploy (git): use utf-8 to store path names (#5874, rep by alpor9)</li>
+<li>websocket: setTimeout was being overridden by Port keepaliveTimeout (#5841, rep by A. Durairaju)</li>
+<li>jni: on windows, skip JNI for File metadata like length (#5865, rep by Mathias Lagerwall)</li>
+<li>db: isNull issues with left join (#5853, rep by Thomas Rogan)</li>
+<li>websocket: check for socket close on startTextMessage (#5837, rep by samadams)</li>
+<li>log: when log rollover fails, log to stderr (#5855, rep by Rock)</li>
+<li>filter: allow private instantiation (#5839, rep by V. Selvaggio)</li>
+<li>rewrite: added SetRequestCharacterEncoding (#5862, rep by Yoon)</li>
+<li>health: change health check timeout to critical instead of fatal to allow for development sleep (#5867)</li>
+<li>alarm: timing issue with warnings and alarm extraction (#4854, rep by SHinomiya Nobuaki)</li>
+<li>session: orphan deletion throttling needs faster retry time (rep by Thomas Rogan)</li>
+<li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.43 - 2015-02-10">
+<ul>
+<li>openssl: use SSL_free in connection close</li>
+<li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.42 - 2015-01-20">
+<ul>
+<li>websocket: read loop needs to use getAvailableBuffer() (rep by Arun Durairaju)</li>
+<li>bam: too much logging for queue full (rep by Dan Stilts)</li>
+<li>bam: use smallest queue for remoting instead of round-robin to handle frozen connections (rep by Dan Stilts)</li>
+<li>comet: cleanup of comet state machine (#5826, rep by S. Nobuaki)</li>
+<li>cxf: missing servlet config for CXFProtocolServletFactory (#5825, rep by balaiitm)</li>
+<li>servlet: setHeader("foo", null) now removes header value (#5824)</li>
+<li>db: fixed expires and orphan queries to remove expired sessions (#5748, rep by Thomas Rogan)</li>
+<li>ejb: added scan-persistence-xml to &lt;ejb-server> to allow disabling of persistence-unit scanning (#4908)</li>
+<li>ssl: update openssl option processing. Update SSL_free/SSL_new</li>
+<li>health: add snapshot-jmx and snapshot-heap-dump to avoid issues on weekly reports (#5495, rep by ssbbartgroup)</li>
+<li>resin.sh: chdir to $RESIN_HOME before starting (#5668, rep by balaiitm)</li>
+<li>apache: NPE issues with Apache locking (#5747, #5744, rep by vicsanca, ssmax)</li>
+<li>apache: configure/make issues with Apache 24</li>
+<li>jni: add loading of classes/native/*.so (or native/*.so in a jar) (#5760, rep by William Damage)</li>
+<li>openssl: SSL field (ssl_sock) value was being cleared by std.c (#5815, rep by Nick Stephens, Sarah Gillespie)</li>
+<li>openssl: SSLv3 is now disabled by default (#5819)</li>
+<li>health: StartProfiler was saving data in text, not json (#5736, rep by S Nobuaki)</li>
+<li>admin: load-balance connection state could get stuck in "starting" on certain success cases (#5653)</li>
+<li>async: on comet restart, allow the previous state to be completed (#5684, rep by KC Baltz)</li>
+<li>async: send 500 on empty response with timeout (#5570, rep by Shinomiya Nobuaki)</li>
+<li>async: issues with starting async in forward (#5544, rep by Shinomiya Nobuaki)</li>
+<li>cache: update FileServlet to generate ETag including mime-type to support mime-type updates (#5761, rep by M. Lowe)</li>
+<li>servlet: multipart parts were not supported for namedDispatcher forward (#5543, rep by Shinomiya Nobuaki)</li>
+<li>dbpool: on manual init(), do not register JNDI, CDI, or JMX (#5595, rep by Shinomiya Nobuaki)</li>
+<li>webapp: sort initializers by web-fragment (#5514, rep by beamerblvd)</li>
+<li>ring-queue: offer with no wait and full requires a wake before blocking (#5599)</li>
+<li>jsp: allow binary output stream with non text/ contentType (#5027)</li>
+<li>async/gzip: issues with async combined with gzip (#5033)</li>
+<li>rpm: added %postun to shutdown resin (#5635, rep by S. Gillespie)</li>
+<li>i18n: classloading issues with utf-8 names (#5549, rep by konfetov)</li>
+<li>database: use JDK's ReentrantReadWriteLock instead of custom Resin lock (#5624, rep by Shinomiya Nobuaki)</li>
+<li>database: on close, fsync validation is does not allow for late writes (#5636, rep by Shinomiya Nobuaki)</li> 
+<li>servlet: relax checking of public for Filter constructor (#5701)</li>
+<li>log: limit log message database (#5802, rep by R. Murayama)</li>
+<li>database: force remove of old file when file is created (#5803, rep by R. Murayama)</li>
+<li>jni: only epoll is supported as select-manager (#5811, rep by qjian)</li>
+<li>jni: on windows use File.lastModified() instead of stat result to avoid windows DST bug (rep by Jason Barr)</li>
+<li>health: add &lt;mail> to PdfReport configuration (rep by Steffen Busch)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.41 - Sep 26, 2014">
+<ul>
+<li>health: update PdfReport on start to log warning messages for mail (#570, rep by D. Tapsell)</li>
+<li>servlet: ServletContextListener was called twice when registered from ServletContainerInitializer (#5611, rep by Gerrit Janssen)</li>
+<li>scheduled-task: check for early task call (#5709, rep by Daniel Jimenez)</li>
+<li>gzip: gzip response needs to filter out content-length (#5777, rep by wxiaoguang)</li>
+<li>jni: update EINTR processing for poll/nonblocking read (#5627, rep by bean)</li>
+<li>log: ensure rollover worker is called after flush (#5785, rep by mros2stf)</li>
+<li>log: missing timestamp due to buffer fill condition (#5794, rep by Daniel Jimenez)</li>
+<li>health: add "DISABLED" state to HealthStatus for disabled health checks (#5711, rep by Shinomiya Nobuaki)</li>
+<li>dbpool: reduce logging level for dbpool driver close, because exception are
+expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>
+<li>cli: added -timeout to deploy command (#5598, #5597)</li>
+<li>openssl: add +tlsv1.1 and +tlsv1.2 (#5682, rep by Sarah Gillespie)</li>
+<li>servlet: welcome-file processing with query string creates duplicate for getParameterValues (#5642)</li>
+<li>servlet: content-type and application/json (#5565, rep by 54chen)</li>
+<li>health: add ping-port attribute to HttpStatusHealthCheck in health.xml (#5572)</li>
+<li>async: allow dispatch() in onTimeout() (#5779, rep by azuo_lee)</li>
+<li>ssl: jni ssl mmap support must go through OpenSSL API (#5790, rep by N. Kikhia)</li>
+<li>jni: calculate_poll_result could return invalid value (#5632, rep by bean)</li>
+<li>session: check for NPE on shutdown (#5633, #5681 rep by M. Jindal)</li> 
+<li>configure: change ln -sfT to ln -sf for Mac install (#5717, rep by wileysaw)</li>
+<li>io: null source check on read (#5731)</li>
+<li>config: jvm-arg not properly picking up dynamic server.id (#5793, rep by daniel)</li>
+<li>jni: use _filelengthi64 for windows JniRandomAccessFile.getLength (#5733, rep by Mattias Lagerwall)</li>
+<li>config: ResinEnv exception declaration in init() (#5737, rep by matthiasblaesing)</li>
+<li>server: add NPE check for generateController (#5744, rep by Shinomiya Nobuaki)</li>
+<li>file: added TransmitFile for windows (#5784)</li>
+<li>servlet: error-page for 400-bad request NPE (#5749)</li>
+<li>servlet: loadOnStartup was incorrectly enabled for @WebServlet even when unset (#5778, rep by Marko Asplund)</li>
+<li>load-balance: utf-8 encoding in urls (#5785, rep by R Cohen)</li>
+<li>access-log: rollover-count was not property matching files with .gz extension (#5789, rep by Uv Wildner)</li>
+<li>jdbc: UserStatement.getWarnings() needs to work even after close (rep by Ole Dalgaard)</li>
+<li>health: add critical/fatal messages to health shutdown message (#5762, rep by J. Meyer)</li>
+<li>resin.xml: moved default cluster-default.xml to classpath and defaulted app-default.xml to be dir-relative (#5762, rep by M. Lowe)</li>
+<li>@WebSocket: interference between @WebSocket and CDI/JSP EL (#5776, rep by marko_asplund)</li>
+<li>jsp-el: cookie.containsKey() fix: (#5683, rep. by Jason Wang)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.40 (May 13, 2014)">
+<ul>
+<li>classLoader: getResource() should skip broken jars (#5706, rep by Constantinos Karantzas)</li>
+<li>servlet-env: bind java:comp/BeanValidation (#5587, rep by Matthias Jiderhamn)</li>
+<li>vfs: normalize windows drive letters to lower case to avoid dups (#5592, rep by Matthias Jiderhamn)</li>
+<li>bam: increase default timeout for remote deploy (#5652, rep by Matthias Jiderhamn)</li> 
+<li>xa: clear _suspendState on transaction resume for memory issues (#5647, rep by Matthias Jiderhamn)</li>
+<li>i18n: iso-8859-1 encoding issue with non-latin-1 characters needs to return error character (rep by Yoel Gluck)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.39 (Mar 28, 2014)">
+<ul>
+<li>session: session-mode=before-header was disabling reloading on secondary servers (#5639, rep by Thomas Rogan)</li>
+<li>resin: disable-soft command timeout error fix (#5656, rep by Sarah Gillespie)</li>
+<li>resin: shutdown-wait-max not propagating to ShutdownSystem fix (#5660, rep by Shinomiya Nobuaki)</li>
+<li>resin-admin: cross-site scripting vulnerability in /resin-admin (#5669, rep by G. Krstic)</li>
+<li>jsp: taglib defined listeners should be called before Filter's init() (#5659, rep by Mattias Jiderhamn)</li>
+<li>quercus: SimpleXMLElement->xpath() does not work for relative queries (#5622, rep by G. Krall)</li>
+<li>quercus: SimpleXMLElement->children() returns null values (#5432, rep by ckir)</li>
+<li>quercus: DOMDocument->schemaValidate() not implemented (#5613, rep by G. Krall)</li>
+<li>quercus: empty() needs to call ArrayAccess->offsetExists() (#5620, rep by tssets)</li>
+<li>quercus: spl_object_hash() not implemented (#5623, rep by G. Krall)</li>
+<li>quercus: cannot execute multiple PDO statements on the same connection (#5625, rep by remaus)</li>
+<li>quercus: nowdoc does not work (#5626, rep by remaus)</li>
+<li>quercus: parent classes needs to call its version of private methods within its scope (#5631, rep by G. Krall)</li>
+<li>quercus: ReflectionParameter::getClass() returns null (#4863, rep by ds82)</li>
+<li>quercus: Parent keyword does not work inside a Trait (#5581, rep by tobia)</li>
+<li>quercus: class_alias() is not implemented (#5443, rep by jsnoriegam)</li>
+<li>quercus: quercus namespace issue in compiled mode (#5640, rep by R. Emaus)</li>
+<li>quercus: simplexml children()->foo does not work for nodes with only text (#5655, rep by G. Krall)</li>
+<li>quercus: rename META-INF/services/* so JBoss doesn't parse them (#5654, rep by G. Krall)</li>
+<li>quercus: JsonSerializable class not implemented (#5504)</li>
+<li>quercus: add FILTER_SANITIZE_STRIPPED as an alias of FILTER_SANITIZE_STRING (#5663, rep by M. McHugh)</li>
+<li>quercus: implement filter_input(FILTER_UNSAFE_RAW) for phpMyFaq (#5661, rep by M. McHugh)</li>
+<li>quercus: implement FILTER_SANITIZE_SPECIAL_CHARS (#5665, rep by M. McHugh)</li>
+<li>quercus: force the java Mysql driver to use prepared statements (#5671, rep by R. Emaus)</li>
+<li>quercus: quercus cannot start on Wildfly (#5674, rep by G. Krall)</li>
+<li>quercus: unpack("H*") returns nothing (#5676, rep by M. Dykman)</li>
+<li>quercus: clearstatcache() has 2 optional arguments (#5687, rep by G. Krall)</li>
+<li>quercus: stream_is_local() is not implemented (#5685, rep by G. Krall)</li>
+<li>quercus: curl_multi_init() suite of functions not implemented (#3516, rep by koreth)</li>
+<li>quercus: SplObjectStorage class not implemented (#5696, rep by G. Krall)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.38 (Dec 13, 2013)">
+<ul>
+<li>win32: windows returns incorrect mtime for stat() for DST (#5578, rep by Jason Barr)</li>
+<li>deploy: NPE on undeploy (#5596)</li>
+<li>session: update to session id generation to reduce reliance on SecureRandom to avoid duplication (#5602)</li>
+<li>memcached: MemcachedClient in independent Resin's was improperly caching (rep by Scott Weatbrook)</li>
+<li>jpa: EntityManager proxy needs to check isOpen before freeing EntityManager for reuse (#5541, rep by Riccardo Cohen)</li>
+<li>ear: dependency-check could get stuck in the modified state (#5525, rep by Ryan Edwards)</li>
+<li>rpm: %config updates for /etc/resin, and file mode on /usr/bin (#5562, rep by Christopher Powell, #5539, rep by Khalid Hosein)</li>
+<li>cache: add memory-size-min to ClusterCache to configure minimum memory cache size (#5558, rep by J Tschida)</li>
+<li>cluster: dynamic server must heartbeat address to recover from triad restarts (#5561, rep by T Pohl)</li>
+<li>health: sort message times so PDF report of health dump will be most recent (#5358)</li>
+<li>watchdog: increate idle thread on startup to avoid dependency on swap (#5500, rep by K. Hosein)</li>
+<li>jms: transaction/ack issues with file and message driven bean (#5535, rep by Scott Weatbrook)</li>
+<li>hessian: InetAddress serialization (#5540, rep by Michael Charnoky)</li>
+<li>servlet: on shutdown, check facade._request for null (#5537)</li>
+<li>deploy: redeploy delete issues with symlinks (#5536, rep by ssmax)</li>
+<li>health: OpenFileDescriptorCount is not available on some JMVs (#5515, rep by Y. Zhao)</li>
+<li>servlet: missing cookie-config in web.xml (#5521, rep by Arjan Tijms)</li>
+<li>ioc: remove validation of generic type on produces method (#5522, rep by A Tijms)</li>
+<li>ioc: extends observers now auto-convert ProcessManagedBean&lt;Foo> to ProcessManagedBean&lt;? extends Foo> (#5531, rep by A Tijms)</li>
+<li>quercus: empty() needs to call ArrayAccess->offsetExists() (#5612, rep by G. Krall)</li>
+<li>quercus: session_status() not implemented (#5609, rep by G. Krall)</li>
+<li>quercus: self doesn't work inside a namespace (#5608, G. Krall)</li>
+<li>quercus: ReflectionParameter->getClass() not implemented (#5607, rep by G. Krall)</li>
+<li>quercus: IllegalArgumentException vfs: not found on JBoss (#5606, rep by G. Krall)</li>
+<li>quercus: ReflectionFunction does not work for closures (#5605, rep by G. Krall)</li>
+<li>quercus: Xml reader is not working (#5603, rep by qumo)</li>
+<li>quercus: call_user_func() needs to call __invoke (#5601, rep by G. Krall)</li>
+<li>quercus: instanceof Closure returns false for closures (#5600, rep by G. Krall)</li>
+<li>quercus: QuercusCompiledScript.eval() needs to return the Value object (#5589, rep by S. Guo)</li>
+<li>quercus: ScriptEngineManager.getEngineByName("php") returns Quercus with unicode.semantics=off (#5588, rep by S. Guo)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.37 - Sept 7, 2013">
+<ul>
+<li>ejb: avoid double EJB timer call when timer is slow (#5518, rep by K. Hosein)</li>
+<li>admin/rest: missing close on resource</li>
+<li>windows: Added a global mutex to windows service wrapper to avoid starting multiple instances of Resin Watchdog</li>
+<li>cloud: elastic server issues with dynamic remove/timeout (#5510, rep by T Pohl)</li>
+<li>log: check for null logger name in LogRecord (#5499)</li>
+<li>cdi: cdi vs jpa load order (#5493)</li>
+<li>elastic: elastic servers use server-multi defaults (#5412)</li>
+<li>jni: added check on nativeRead for buffer length (#5428, rep by Daniel Shearer)</li>
+<li>deploy: start/fail must notify waiting threads (Hrushi Agrawal)</li>
+<li>health: AnomalyAnalyzer now has min-deviation to avoid spurious messages (#5365)</li>
+<li>cli: add password verification to password-generate (#5384)</li>
+<li>access-log: add &lt;access-log-buffer-size> in &lt;cluster> (#5393, rep by A. Foong)</li>
+<li>bam: force restart if BAM overflow continues (#5479, rep by J. Barr)</li>
+<li>vfs: stat vs _stati64 issues on win64 (#5494, rep by Matias Lagerwall)</li>
+<li>jsp: updated JSP page compile locking (#5460, rep by Nikolay Fedorov)</li>
+<li>jsf: updated javax.faces to 2.1.24 (#5485, rep by cyttesen)</li>
+<li>load-balance: cookie with max-age(0) not properly propagated (#5456, rep by H. Cleland)</li>
+<li>shutdown: avoid spurious warnings on connection close during shutdown (#5463, rep by Stefanos Zachariadis)</li>
+<li>cdi: multiple initializer classes in separate jars need to be unique (#5481, rep by Rick Mann)</li>
+<li>bytecode: add constant-pool scanning for JDK 7 MethodHandle (#5466, rep by wxiaoguang)</li>
+<li>session: add table-name to JDBC sessions (#5488, rep by B. Garber)</li>
+<li>watchdog: add -Djava.web.headlesslib=true (# 5474, rep by Riccardo Cohen)</li>
+<li>el: descriptor in BeanELResolver should be initialized lazily to work around JSF memory leak (rep by Mattias Jiderhamn)</li>
+<li>servlet: ServletResponse.reset() should reset cookies (#5464)</li>
+<li>iis.net: fixed Resin.IIS.handler.dll intermittent slow connection to resin issue (#5455, rep by Shinomiya Nobuaki)</li>
+<li>cli: heap-dump double-dash isn't recognized with -raw option(#5454)</li>
+<li>socket: client-disconnect exception needs to construct exception before socket close (#5392)</li>
+<li>openssl: added "compression" flag with a default false (#5435)</li>
+<li>jsp: dependency detection issues with inner classes causing recompilation (#5408, rep by stefan_bieler2)</li>
+<li>servlet/async: async support with hmux (#5420, rep by bhauer1)</li>
+<li>el: issue with permissions on inner classes (#5447, rep by mate)</li>
+<li>webapp: check state on controller init (#5406, rep by gattu)</li>
+<li>servlet: allow @Observes on servlet (#5444)</li>
+<li>cli: status command needs to accept -watchdog-port (#5442)</li>
+<li>servlet: getServerName() with IPv6 and no port (#5399, rep by shiny)</li>
+<li>servlet: servlets with @Inject were not calling servlet init() (#5427, rep by Bill Digman)</li>
+<li>classloader: classload errors in system classloader should not be at warning (#5416)</li>
+<li>ejb: @Schedule must be removed when context closes (#5434)</li>
+<li>cli: --version option was treated as version command (#5415, rep by Tamas Perlaky)</li>
+<li>jsp: array index exception from utf-8 encoding buffer issues (#5436)</li>
+<li>jsp: utf-8 encoding buffer issues with surrogate pairs (#5437)</li>
+<li>network: issue with socket-timeout an non-jni (#5426, rep by HS Im)</li>
+<li>quercus: preg_replace($array[0]) array dereference fix for preg_replace</li>
+<li>quercus: ReflectionProperty::isProtected() fix</li>
+<li>quercus: method_exists("__invoke") does not work with closures (#5501)</li>
+<li>quercus: static local variables must be unique to a particular closure instance (#5502)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.36 - Apr 25, 2013">
+<ul>
+<li>bam: updated bam queue size to handle heavy load better</li>
+<li>actor-queue: updated non-locking synchronization on ring queue</li>
+<li>websocket: IllegalStateException when data size exceeds a single message (#5394, rep by S Zachariadis)</li>
+<li>quercus: quercus_disable was misnamed (#5389, rep by  J Craan)</li>
+<li>access-log: added buffer-size to access log at cluster level (#5378, rep by Andrew Foong)</li>
+<li>apache: added apache 2.4 support(#5241)</li>
+<li>apache, iis: added support for disabled servers(#5364)</li>
+<li>embed: add ResinEmbed.setServerId (#5350, rep by D. Shearer)</li>
+<li>jmx: MBean/MXBean interface scanning was assuming class implementation matching (#5357, rep by Steve Francis)</li>
+<li>jdbc: added jdbc 7 stub methods for compilation (#5370)</li>
+<li>cdi: add NoClassDefError catches for optional classes (#5371)</li>
+<li>session: jdbc session support for isolated server instances (#5374, rep by Keith Paulson)</li>
+<li>jCache: removeAll support</li>
+<li>jCache: isStoreValue=true (#5343)</li>
+<li>jCache: spec changed to use Configuration instead of builders</li>
+<li>apache: mod_caucho fix for failover issue(#5266, rep by Shinomiya Nobuaki)</li>
+<li>iis: isapi_srun.dll fix for failover issue(#5360, rep by Jason Barr)</li>
+<li>quercus: Overloading: __callStatic not implemented (#4247, rep by domdorn)</li>
+<li>quercus: mysqli_get_charset, mysqli_set_charset not implemented (#5379)</li>
+<li>quercus: error_get_last() not implemented (#5380, rep by kenfoo)</li>
+<li>quercus: drupal utf-8 issue (#3772, rep by bago)</li>
+<li>quercus: mysql utf-8 inserts are viewable in MySQL GUI browsers (#3849, Ocean)</li>
+<li>quercus: mysql Character Encoding incompatibility with standard PHP (#3618, rep by tlandmann)</li>
+<li>quercus: cannot find license in non-WEB-INF directories (#5397, rep by adam)</li>
+<li>quercus: $_SERVER['HTTP_X_SSL_REQUEST'] is not set for SSL connections (#5402, rep by V. Spivak)</li>
+<li>quercus: gethostname() not implemented (#5403, rep by V. Spivak)</li>
+<li>quercus: wordpress plugin Contact Forms 7 does not work (#5407)</li>
+<li>quercus: static::$foo needs to return child's field when inside parent:: methods (#5409, rep by V. Spivak)</li>
+<li>quercus: Quercus PHP does not understand Java enums (#3898, rep by syndetic)</li>
+<li>quercus: java Enum returned from method should be of Enum type (#5411, rep by zalmolksis)</li>
+<li>quercus: NULL values is handled different in method arguments - java interface (#5413, rep by zalmolksis)</li>
+<li>quercus: error_log not working correctly with files (#4178, rep by kmoore4now)</li>
+<li>quercus: error_log() needs to print a newline after each log message (#5289, rep by chubbsondubs)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.35 - Feb 13, 2013">
+<ul>
+<li>install: ./configure fix don't set -m32 on Raspberry Pi</li>
+<li>db: cleanup for index validation/restore</li>
+<li>actor: updates for actor threading to avoid queue overflow (#5362)</li>
+<li>access-log: %{Set-Cookie}o should also print addHeader values (#5352, rep by A. Foong)</li>
+<li>access-log: %{Set-Cookie}o should print all cookies (#5353, rep by A. Foong)</li>
+<li>health: add min-threshold and max-threshold to AnomalyAnalyzer</li>
+<li>health: add min-value and max-value to AnomalyAnalyzer</li>
+<li>admin: fixed rest.php?q=mod_status support (#5351)</li>
+<li>servlet: encoding for et, lt, lv should be ISO-8859-4 (#5355)</li>
+<li>servlet: .DS_store hidden from directory servlet (#5341, rep by Jason Walsh)</li>
+<li>watchdog: removed repeated CLI properties (#5342)</li>
+<li>cloud: server-multi needs to support cluster-port (#5345)</li>
+<li>health: if health-system is disabled and an event occurs, log at a lower level (#5344)</li>
+<li>servlet: changed default encoding for et, lv, lt locales to iso-8859-2</li>
+<li>health: pdf-report thread-dump printing when missing file info (#5347)</li>
+<li>health: add DumpThreads.setDepth to control the max thread depth (#5348)</li>
+<li>cloud: CloudPod.findServer array bounds issue (#5346, rep by Jason Barr)</li>
+<li>quercus: OutOfMemory with UserCake Captcha (#5354)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.34 - Jan 30, 2013">
+<ul>
+<li>health: named predicates don't match HttpStatusHealthCheck properly(#5283)</li>
+<li>db: NPE in BlockManager on Raspberry Pi (#5338)</li>
+<li>watchdog: hangle missing java.lang:type=Runtime arguments on startup (#5299)</li>
+<li>servlet: content-type encoding updates for .gif files (#5271, rep by Mathias Lagerwell)</li>
+<li>watchdog: watchdog must read system-property (#5294, rep by chinaliwee)</li>
+<li>jsp: validate ResponseStream on PageContextImpl (#5273, rep by B. Loy)</li>
+<li>config: allow EL expressions in host-alias (#5300, rep by Andrew Foong)</li>
+<li>config: static regexps can be deployed on start (#5275, rep by R. Mann)</li>
+<li>load-balance: re-encoding of HTTP url requests (#5317, rep by Ethan Larson)</li>
+<li>load-balance: add session-cookie to LoadBalance (#5332, rep by D. Shearer)</li>
+<li>servlet: utf-8 buffer boundary writing (#5323)</li>
+<li>jsp: static text splitting needs to be smaller for utf-8 characters (#5320)</li>
+<li>install: Makefile add space after error-suppressing '-' for BSD compatibility (#5322, rep by jigzat)</li>
+<li>cache: global-cache ping needs to by async (#5336, rep by D. Shearer)</li>
+<li>config: added jvm-mode for -server, default none (#5331)</li>
+<li>class-loader: synchronize on package creation (#5277, rep by S. Nobuaki)</li>
+<li>health: C SEGV possible in JNI heap_dump (#5330)</li>
+<li>websocket: websocket timeout too short (#5253, rep by hmz820)</li>
+<li>log: for pro database logging, do not throw exception when name insert fails (#5302, rep by Andrew Foong)</li>
+<li>cdi: init timing issue with xmlExtension/log-formatting (#5274, rep by R Mann)</li>
+<li>jsp: .tld lookup needs to look for WEB-INF classloader context (#5243, rep by S. Nobuaki)</li>
+<li>ssl: add honor-cipher-order to match Apache's SSLHonorCipherOrder (#5282)</li>
+<li>servlet: gzip content-length was not properly filtered (#5326, rep by Keith Fetterman)</li>
+<li>load-balance: update active-wait-time for better slow-initialization (#5321, rep by Ethan Larson)</li>
+<li>servlet: add a default='true' attribute to servlet-mapping to allow programmatic overriding of default (#5314, rep by Rick Mann)</li>
+<li>quercus: oci_execute() always returns true (#5311, rep by EricESCP)</li>
+<li>quercus: Event endlessly repeated under Drupal Commons 6.x (#5290, rep by jordi)</li>
+<li>quercus: wordpress-3.5.0 tested and runs on Quercus</li>
+<li>quercus: drupal-commons-6.x-2.11 tested and runs on Quercus</li>
+<li>quercus: mediawiki-1.20.2 tested and runs on Quercus</li>
+<li>quercus: phpBB3-3.0.11 tested and runs on Quercus</li>
+<li>quercus: dokuwiki-2012-10-13 tested and runs on Quercus</li>
+<li>quercus: complete support for PHP 5.4 core language features</li>
+<li>quercus: support for traits (PHP 5.4)</li>
+<li>quercus: support for short array syntax (PHP 5.4)</li>
+<li>quercus: support for function array dereferencing (PHP 5.4)</li>
+<li>quercus: support for $this use in closures (PHP 5.4)</li>
+<li>quercus: &lt;?= short open tag is now always on (PHP 5.4)</li>
+<li>quercus: support for class member access on instantiation (PHP 5.4)</li>
+<li>quercus: support for Class::{expr}() syntax (PHP 5.4)</li>
+<li>quercus: support for binary number format: 0b001001101 (PHP 5.4)</li>
+<li>quercus: $_SERVER['REQUEST_TIME_FLOAT'] is populated (PHP 5.4)</li>
+<li>quercus: can not save permission in drupal6.26 (#5278, rep by kevinw8801)</li>
+<li>quercus: Not able to use PDO with postgres (#5325, rep by publicocean0)</li>
+<li>quercus: Regexp Failure - group-level recursion (#3829, rep by alexander_hristov)</li>
+<li>quercus: dokuwiki regexp illegal syntax - utf-16 surrogate pairs (#3955, rep by M. Pezzoli)</li>
+<li>quercus: vBulletin 4.0.1 - invalid conditional regexp (#3879, rep by derickso)</li>
+<li>quercus: sqlite PDO support (#3997, rep by Janos)</li>
+<li>quercus: Regex PCRE recursion (balancing groups) isn't working as expected in Quercus (#4974, rep by nemostein)</li>
+<li>quercus: object field foreach ordering does not match PHP (#5327, rep by K. Patel)</li>
+<li>quercus: $a instanceof self/parent does not work (#5329)</li>
+<li>quercus: QuercusScriptEngine now returns Quercus Value types</li>
+<li>quercus: QuercusScriptEngine now defaults to unicode.semantics=on and utf-8 script encoding</li>
+<li>quercus: Scripting utf-8 output vietnamese incorrect (#5328, rep by ngoc)</li>
+<li>quercus: assignment to arrays is not evaluated in the correct order (#5333)</li>
+<li>pdf: availability report was inaccurate for quick restarts (#5220)</li>
+<li>pdf: added graph shading to highlight period of downtime</li>
+
+</ul>
+</s2>
+
+<s2 title="4.0.33 - Dec 18, 2012">
+<ul>
+<li>http-proxy: header must end with /r/n(#5265, rep by mnsh)</li>
+<li>servlet: file servlet content-length issues with > 2G files (#5265, rep by Amir Langer)</li>
+<li>cdi: memory held by CDI as negative caching across web-app restarts (rep by Mattais Jiderhamn)</li>
+<li>cli: remote management was not properly using -server in some cases (#5226)</li>
+<li>cache: add jdbc cache as backing</li>
+<li>cache: add tiered cache</li>
+<li>jsp: add jsp-property-group default-content-type (#4232, rep by mattp)</li>
+<li>jsp: let BeanELResolver auto-convert to Enum (#5230, rep by mate)</li>
+<li>loader: added setDisableURLs to DynamicClassLoader to work around RMI bug (#5186)</li>
+<li>jmx: needs to support @MXBean (#5212, rep by kay)</li>
+<li>jamm/health: event firing needs to work from null classloader context (#4254, rep by Luke Bigum)</li>
+<li>servlet: access-log of %u wasn't properly grabbing user (#5250, rep by W. Tao)</li>
+<li>cli: -verbose needs to enable finer logging and display exceptions (#5237, rep by Steve Francis)</li>
+<li>servlet: jersey compatibility (related to @HandlesTypes issue) (#5228, rep by Ryan T)</li>
+<li>servlet: getCookies timing/NPE (#5252, rep by harsha)</li>
+<li>ioc: check for Enum using isAssignableFrom to work around IBM JDK (#5240, rep by S Francis)</li>
+<li>servlet: @HandlesTypes scanning for ServletContainerInitializer</li>
+<li>hessian: IdentityIntMap needs Math.abs for System.identityHashCode (#5239, rep by S Francis)</li>
+<li>jsp-el: improve serialization for JSF (#5231, rep by Mattias Jiderhamn)</li>
+<li>quercus: cannot reference nested java classes (#5245, rep by ismak)</li>
+<li>quercus: strtotime returns null value on DST when given an ISO-8601 timestamp as an argument (#5259, rep by gbruins)</li>
+<li>quercus: session_set_cookie_params() does not support HttpOnly (#5249, rep by ottomatico)</li>
+<li>quercus: drupal facebook activity stream doesn't work (#5264, rep by jordi)</li>
+<li>quercus: Serialize() not supportes using curl in GAE (#5199, rep by ismak)</li>
+<li>quercus: array_merge_recursive() modifies input array arguments (#5269, rep by jordi)</li>
+<li>quercus: javax.script cannot call PHP library functions (#5270, rep by udvs)</li>
+<li>quercus: eval() does work with large code with utf8 data (#5280, rep by tobias)</li>
+<li>quercus: QuercusDataSource needs to implement getParentLogger() for JDK 1.7 (#5281, rep by ottomatico)</li>
+<li>quercus: postgresql - pdo parameters need to be casted to actual column types (#5285, rep by tobias)</li>
+<li>quercus: clone() doesn't work with DateTime (#5287, rep by jordi)</li>
+<li>quercus: date_modify($date, "+37 month") does nothing (#5288, rep by jordi)</li>
+<li>quercus: servlet should not close ServletOutputStream, for ServletFilters downstream (#5293, rep by jornvl90)</li>
+<li>quercus: need to implement DateTime::diff() for PHP 5.3 (#5292, rep by LostInCloud)</li>
+<li>quercus: postgres PDO prepare does not work with "::interval" (#5297, rep by tobias)</li>
+<li>quercus: add Cloud Storage and Cloud SQL support for Google App Engine</li>
+<li>quercus: ' ' is an unknown regexp flag (#5304, rep by K. Patel)</li>
+<li>quercus: isset() complains about undefined variables in compiled mode (#5305, rep by K. Patel)</li>
+<li>quercus: /index.php/about returns a 404</li>
+<li>quercus: QuercusScriptEngine throws OOM if instantiated repeatedly (#5307, rep by woddle)</li>
+<li>quercus: QuercusScriptEngine needs to output unicode correctly (#5308, rep by woddle)</li>
+<li>quercus: php.ini disable_functions does not work (#4005, rep by hm2k)</li>
+<li>quercus: Floating point formatting in locales that use comma as decimal separator (#5312)</li>
+<li>cli: comand usage output reformatted to improve usability</li>
+<li>install: --with-resin-init.d does not create directory (#5244, rep by K. Fetterman)</li>
+<li>pdf: generated PDFs are corrupt in locales that use comma as decial separator (#5298, rep by F. Degen)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.32 - Oct 1, 2012">
+<ul>
+<li>cli: unify deploy and config-deploy commands</li>
+<li>deploy: with --host and host-deploy, use proper directory (#5215, rep by Gerrit Janssen)</li>
+<li>heartbeat: added heartbeat timeout</li>
+<li>cache: negative caching for null values on triad</li>
+</ul>
+</s2>
+
+<s2 title="4.0.31 - Sep 12, 2012">
+<ul>
+<li>elastic: elastic server joining in EC2 configuration (#5177)</li>
+<li>servlet: parent/child servlet instantiation could result in incorrect instantiation (#5208, rep by Keith Fetterman)</li>
+<li>config: allow resin:import with path="http://..." and optional (#5206)</li>
+<li>cookie: cookie with space generation issues (#5179, rep by kiilerich)</li>
+<li>session: persistent session timing with on-shutdown and lru (#5170, rep by Mathias Lagerwall)</li>
+<li>install: 'make install' target fails on solaris(#5207, rep by Leonid Kaminsky)</li>
+<li>IIS: isapi_srun.dll fix for can't connect to resin issue (#5198, rep by Claudio H Braga)</li>
+<li>mod_caucho: linux timeout issue millis vs sec in read timeout (#5203, rep by ssmax)</li>
+<li>http: sendfile needs to open file using O_RDONLY (#5202, rep by ssmax)</li>
+<li>health: log notify-heartbeat-start when heartbeat recovers (#5173)</li>
+<li>session: save session on first request even if no data stored (#5196)</li>
+<li>jsp: EL triggering back-compat issues with jsp-fragment (#4768, #5200, rep by evernat, cyttesen)</li>
+<li>jsp: flushing issue with JSP/filter and buffer size (#5201, rep by evernat)</li>
+<li>ejb: improved ejb-ee skipping for jira</li>
+<li>cloud: added oracle jdbc-store (#4643, rep by Eric Kreiser)</li>
+<li>server: web-app-deploy expand issues with expand-preserve-fileset &amp; expand-cleanup-fileset (#5193, #5194)</li>
+<li>cloud: --elastic-server warning messages improved (#5184)</li>
+<li>health-check: changed health-check timeout and warning message</li>
+<li>resin-admin: specific warning for missing &lt;resin:AdminServices/>(#5183)</li>
+<li>watchdog: memory leak issue with "status" command (#5178, rep by nmmn)</li>
+<li>config: restore support for old &lt;management> tag (#5176)</li>
+<li>cdi: normal scope proxy issues with 'char' parameters (#5182)</li>
+<li>cloud: added --elastic-server-port and --elastic-server-address</li>
+<li>jsp: added integration with Jasper jsp engine (#4982)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.30 - Aug 21, 2012">
+<ul>
+<li>cloud: added --elastic-dns for Amazon-style local dns or elastic ip</li>
+<li>cloud: elastic servers now require --elastic or &lt;elastic-server></li>
+<li>websocket: build standalone resin-websocket-client.jar (#5142, rep by Judd Gaddie)</li>
+<li>init.d: update status return code (#5166, rep by nmmn)</li>
+<li>install: add --with-setuid and --with-setgid (#5105)</li>
+<li>health: scheduled pdf reports as started asynchronously (#5164, rep by Keith Fetterman)</li>
+<li>mod_caucho: updated load balance to better distribute backups (#5116)</li>
+<li>ejb: skipped ejb.xml must not throw validation exceptions (#5165, rep by Anand Talari)</li>
+<li>install: solaris build issues (#5098, rep by tokyoturnip)</li>
+<li>db: transaction-isolation reset issues when double-set (#5150, rep by Ryan Johnson)</li>
+<li>http-cache: check for valid before checking is-modified (#4865)</li>
+<li>comet/async: keepalive close was not allowed with async written from separate thread (#5159, rep by Adrian Sutton)</li>
+<li>embed: isModified class-loader-context issue (#5156, rep by M Barker)</li>
+<li>debian: update to debian post install scripts (#5140, rep by Alex Sharaz)</li>
+<li>jsf: upgrade mojarra distribution (#5137, rep by mate)</li>
+<li>jsp: add start-timeout to thread spawning to quickly fail when threads full (#5153, rep by TheScrumMaster)</li>
+<li>port/thread: add config warning when port-thread-max is greated than thread-max (#5138, rep by Mark Price)</li>
+<li>debian: update debian postinst script to change the user (#5140)</li>
+<li>quercus: NPE on curl_exec (#5145)</li>
+<li>cli: deploy can now be used with a director instead of a .war (#5139, rep by S. Bjornebekk)</li>
+<li>ejb: @Async uses LinkedBlockingQueue to avoid blocking on offer (#4994, rep by Yen-Fen Hsu)</li>
+<li>servlet: Part.getInputStream() now uses request.getCharacterEncoding() (#4954, rep by Mattias Jiderhamn)</li>
+<li>cli: add deploy-restart-cluster (#4812)</li>
+<li>log: timestamp offset issues with min:sec (#5149, rep by Shinomiya Nobuaki)</li>
+<li>network: bind to IPv6 when address="*" (#5147, #5151, #4825, rep by Alex Sharaz, S Nobuaki)</li>
+<li>load-balance: issue with empty cookie values (#5144, rep by Scott Weatbrook)</li>
+<li>jmx: updated session jmx debug (#5143)</li>
+<li>jsp-el: add enum marshal for methods (#5131, rep by mate)</li>
+<li>embed: setRootDirectory applied in incorrect order (#5132, rep by M. Barker)</li>
+<li>jni: JNI compile warnings fixed (#5129)</li>
+<li>server: check dependencies in separate thread to avoid delays (#5128, rep by Russ Pridemore)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.29 - Jul 13, 2012">
+<ul>
+<li>config: watchdog needs to enable rvar variables (#5126, rep by Kirk Kirkconnell)</li>
+<li>cloud: validate that no two servers have the same IP:address (#5122)</li>
+<li>cdi: Serialization with bean with writeReplace in parent (#4992, rep by guus)</li>
+<li>servlet: add JMX ServletManager.getStickySessionServer (#5072)</li>
+<li>mod_caucho: update ./configure detection of mod_caucho (#5117)</li>
+<li>cli: validate that watchdog resin.home matches CLI resin.home (#5099)</li>
+<li>deploy: update repository failure message (#4051, rep by spance)</li>
+<li>json: Double.NaN needs to print as 0.0 (#5111, rep by Alexey Abashev)</li>
+<li>health: HttpStatusHealthCheck must configure a singleton (#5019)</li>
+<li>cdi: BeforeBeanDiscovery must occur before any ProcessAnnotatedType (#5103)</li>
+<li>openssl: on openssl read, need to check SSL_pending before poll (#5120, rep by Mattias Jiderhamn)</li>
+<li>watchdog: OOM issue with startup of multiple servers (#5096, rep by chiefgeek)</li>
+<li>init.d: add START_CMD to /etc/init.d/resin to allow changes to start-all (#5022)</li>
+<li>config: cluster-socket-timeout is configurable (#5096)</li>
+<li>client socket: modify client timeout to extend from ClientDisconnect (#4975, rep by Y. Hsu)</li>
+<li>watchdog: shutdown was killing processes, not stopping them, skipping graceful shutdown (#4969, rep by aiman_a)</li>
+<li>cgi: error codes above 400 did not allow custom bodies from cgi (#4953)</li>
+<li>ext: upgrade to slf4j 1.6.6 (#4853)</li>
+<li>config: ~/.resin not properly read by Resin (#4947)</li>
+<li>resin-admin: lazy lookup of server id for dynamic server (#4790)</li>
+<li>resin-admin: update server selection param (#4789)</li>
+<li>jsp: scanning for ok:foo.tld issues (#4960, rep by Sean Moore)</li>
+<li>servlet: add &lt;env> to CgiServlet (#4915, rep by William Au)</li>
+<li>mod_caucho: add TCP/OS SND/RCV timeouts to sockets (#4988)</li>
+<li>cli: handle -server "" by renaming to -server "default" (#5005, rep by K. Ding)</li>
+<li>admin: both health.xml and resin-admin use "Restart" as the PDF name (#4935)</li>
+<li>load-balance: clear DNS lookup when connect fails (#4902, rep by B. Plump)</li>
+<li>jsp: issues with pushBody(Writer) (#4964, rep by mcamca)</li>
+<li>cli: watchdog-arg was not working properly with start-all (#4978)</li>
+<li>deploy: undeploy needs to remove webapps directory (#4875, rep by jafr)</li>
+<li>alarm: allow Alarm to be instantiated in maven context (#4796, #5112 rep by Alexey Abashev)</li>
+<li>config: app-inf in cluster wasn't picked up properly (#5004)</li>
+<li>cloud: EC2elastic server with "ext:" address and missing cluster-system-key (#5015)</li>
+<li>servlet: add header-size-max and header-count-max (#4986, rep by Deepak Ramaprasad)</li>
+<li>deploy: web-socket issue causing large deployment problems (#5113, rep by Alexey Abashev)</li>
+<li>servlet: multipart-mime with forward parameters was double-parsing (#4896)</li>
+<li>deploy: ear-deploy allows dependency-check-interval (#4901)</li>
+<li>cli: "start" message with no -server and multiple ids (#4898)</li>
+<li>cli: "restart" needs to re-read configuration file (#4788)</li>
+<li>embed: add ResinEmbed.setIgnoreClientDisconnect (#4774)</li>
+<li>jmx: add getClassPath to WebAppMXBean (#5007)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.28 - Jun 7, 2012">
+<ul>
+<li>install: --disable-ssl does not disable SSL (#5090, rep by R. Aughenbaugh)</li>
+<li>install: --disable-jni causes make to fail (#5094, rep by R. Aughenbaugh)</li>
+<li>load-balance: bounds check on hmux load-balance (#5058, rep by Travis Romney)</li>
+<li>load-balance: improve error message when open source configures a cluster</li>
+<li>logging: add formatting for entering/exiting (#5071)</li>
+<li>logging: add actor queue for logging</li>
+<li>servlet: add x-forwarded-host support for HTTP (#5092)</li>
+<li>hessian: add deflate support to hessian proxy (#4151, rep by ebourg)</li>
+<li>hessian: Iterator deserializer (#4164, rep by ebourg)</li>
+<li>ioc: processInjectionTarget should only be called on scanning, not createInjectionTarget</li>
+<li>cloud: cross-pod deployment (#4807)</li>
+<li>servlet: isMultipartEnable() NPE (#4995)</li>
+<li>class-loader: sort tree-loader before adding to classpath (#5006)</li>
+<li>jsp-el: method calls (rep by mate, #5011, #5087)</li>
+<li>http: header/url length limits for keepalive (rep by alex, #4999)</li>
+<li>jsp-el: coerceToType handling Class (rep by mate, #5061)</li>
+<li>jsp-el: BeanELResolver getType() for getValue w/o setValue (rep by mate, #5039)</li>
+<li>hessian: NullFieldDeserializer must extend FieldSerializer (rep by Thomas Poppe)</li>
+<li>db/distcache: fsync/timestamp on shutdown to avoid index revalidation when clean</li>
+<li>distcache: reworked cache data management to simplify and stale data cleanup.</li>
+<li>cloud: deploy timeout needs to adjust for long deployments that are progressing.</li>
+<li>resin: fixed directory naming for dynamic server on windows.(#5023, #5026)</li>
+<li>resin: fixed directory naming for dynamic server.(#5079)</li>
+<li>resin: fixed WEB-INF/lib/*.jar not being released on application stop problem.(#5059)</li>
+<li>servlet: fixed Resin schema constraint for async-supported servlet element.(#5044, rep by Naohisa Ohshima)</li>
+<li>jsp: fixed ELParser to accept expressions as argument to method calls.(#5034, rep by mate)</li>
+<li>jsp: fixed ResourceBundleELResolver handling of MissingResourceException (#5035, rep by mate)</li>
+<li>cloud: fixes for .jar support in deploy-config</li>
+<li>database: introduced new commit-on-timeout tag to manage expired connections.(#4926, rep by T. Fukuda)</li>
+<li>resin: fixed start issue with -server "" arguments on windows.(#5005, rep by K. Ding)</li>
+<li>servlet: fixed Part.getHeader case sensitivity issue.(#5018, rep by ralscha)</li>
+<li>servlet: fixed doOptions and doTrace HttpSerlvet methods.(#5020, rep by Andy Paladino)</li>
+<li>resin: fixed access-log@web-tier not reporting cookies problem.(#4965, rep by Chris Hart)</li>
+<li>resin: home-server for EC2/cloud configuration</li>
+<li>resin: license-add command fix for unlicensed pro server (#5008, rep by rickHigh)</li>
+<li>resin: mac osx case insensitive servlet mapping fix (#4980, rep by Alex Rojkov)</li>
+<li>resin: fixed Resin OS Proxy Servlet (5002, rep by lewellyn)</li>
+<li>debian: dpkg shouldn't override /etc/resin/resin.properties (#5000, rep by lewellyn)</li>
+<li>jsf: restored Mojarra12InjectionProvider (#4996, rep by igor)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.27 - Mar 22, 2012">
+<ul>
+<li>servlet: split CauchoWrapper from AbstractCauchoRequest (#4993, rep by Leonid Kaminsky)</li>
+<li>health: add "Resin|Http|Ping|Ping Time" and anomaly analyzer</li>
+<li>health: add http_ping_urls to resin.properties</li>
+<li>websocket: added createOutputQueue and encoder</li>
+<li>security: custom authenticators were called too many times (#4976, rep by Alan Wright)</li>
+<li>health: remove meters from /resin-admin summary page, in meters page</li>
+<li>health: add meter for "Resin|Port|Throttle Disconnect Count"</li>
+<li>port: throttle keepalives when port-thread-max is hit</li>
+<li>port: fixed thread launcher housekeeping</li>
+<li>port: added &lt;port-thread-max> for throttling</li>
+<li>threading: updated ring-queue for improved concurrency</li>
+</ul>
+</s2>
+
+<s2 title="4.0.26 - Feb 29, 2012">
+<ul>
+<li>cli: added config-undeploy command</li>
+<li>pdf-report: added option to save reports locally</li>
+<li>debian: changed default Resin Daemon user and group to www-data</li>
+<li>xa: change timeout message to include EXTRA_TIMEOUT (#4927, rep by Shinomiya Nobuaki)</li>
+<li>config: tiered *.xml files belong in ${tier}-inf/*.xml and ${tier}-inf/*.jar (#4952)</li>
+<li>watchdog: improve error message when &lt;user-name> is an invalid user (#4942)</li>
+<li>web-server: HttpProxy needs to query DNS on timeout to pick up changes (#4903, rep by B. Plump)</li>
+<li>kernel: split CurrentTime from Alarm for embedded applications (#4889)</li>
+<li>watchdog: add allow-non-reserved-ip as a &lt;server> argument for private networks (#4941, rep by georgbuschbeck)</li>
+<li>http: added sendfile() for large files</li>
+<li>watchdog: Resin pwd is set to root-directory (#4928, rep by Trung Nguyen)</li>
+<li>mod_caucho: send resolved IP address for cluster (#4945)</li>
+<li>thread: update threading architecture</li>
+<li>cli: password-generate issue with --user (#4938)</li>
+<li>websocket/hessian: websocket frame must be read fully on hessian end (#4943)</li>
+<li>jcache: cache annotations (@CacheResult, @CachePut)</li>
+<li>websocket: debug threaddump not removed (#bhauer, #4940)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.25 - Jan 24, 2012">
+<ul>
+<li>cache: validate/remove corrupted blob rows (#4919, rep by Keith Fetterman)</li>
+<li>cache: remove corrupted database on restart (#4919, rep by Keith Fetterman)</li>
+<li>servlet: add form-parameter-max (default 10000) to limit form parameters (#4912, rep by georgbuschbeck)</li>
+<li>install: make install target fails to compare directories on Solaris (#4917, rep by Leonid Kaminksy)</li>
+<li>install: ./configure fails to link conftest on Solaris (#4916, rep by Leonid Kaminksy)</li>
+<li>async: comet memory retention of HttpResponse needs unlink (#4907, rep by Richard Mccluskey)</li>
+<li>config: rvar app-0.http when read in watchdog needs current server-id (#4900)</li>
+<li>config:  ${foo} now uses rvar search path automatically</li>
+<li>cli: add $HOME/.resin and --mode</li>
+<li>cli: add config-cat and config-ls for debugging</li>
+<li>websocket: pass autobahn test suite</li>
+<li>config: added $disable_compiling_loader to properties (#4787, rep by systhemes)</li>
+<li>cli: made web-app-deploy, web-app-restart, etc. primary cli (#4885)</li>
+<li>servlet: web-app root url /foo now automatically redirects to /foo/ (#4884)</li>
+<li>config: add password-encrypt and &lt;resin:Password> (#4810, Leonid Kaminsky)</li>
+<li>health: stat gathering limited to 14 days for baseline (#4893)</li>
+<li>config: server should start but not serve pages for certain config errors (#4891)</li>
+<li>config: cluster merging, used by local.d (#4882)</li>
+<li>http: add &lt;tcp-keepalive> to enable TCP keepalive for a socket (#4886, rep by Hal Hildebrand)</li>
+<li>cdi: interceptor and InterceptorBinding with enum array (#4883, rep by andreaskaltenbach)</li>
+<li>health: add expire-timeout to LogService (#4848, rep by C. Moran)</li>
+<li>health: HealthSystem event as a classloader context (#4861)</li>
+<li>cache: timing in mmap file extension could truncate (#4854, rep by georgbuschbeck)</li>
+<li>config: rvar should work like an EL var lookup (#4879)</li>
+<li>debian: change /var/www ownership to 'resin' for rpm consistency</li>
+<li>cli/deploy: deploy with --address when local machine has resinctl (#4868)</li>
+<li>jsp: pageContext.errorData.throwable could grab the wrong exception attribute (#4874, rep by mate)</li>
+<li>cli: update/normalization of usage messages</li>
+<li>jstl: validation of JSTL fast-mode c:if, etc. (#4866)</li>
+<li>vhosts: host-alias-regexp needs to have implicit anchors for the pattern (#4859, rep by Rick Mann)</li>
+<li>server: NPE on getUserPrincipal() (#4862, rep by wtao)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.24 - Nov 17, 2011">
+<ul>
+<li>servlet: session creation with enable-cookies=false (#4775, rep by jkeays)</li>
+<li>quercus: isset returning true for null values in compiled mode (Wordpress fix) (#4477, rep by mhixson)</li>
+<li>health pdf: mailto config should be mail-to (rep by Keith Fetterman)</li>
+<li>security: custom constraints could not be added to resin:security-constraint (#4835, rep by K. Ding)</li>
+<li>cli: new "license-add" command</li>
+<li>config: added rvar() method to properties-based config</li>
+<li>access-log: use Alarm.getExactTime() for '%D' formatting in access log (#4842, rep by William Au)</li>
+<li>servlet: transport constraint priority(#4843, rep by Keith Fetterman)</li>
+<li>ssl: jsse self-signed certificates are only possible with Sun/Oracle JDK (#4829)</li>
+<li>el: added "?:" operator ("x ?: 80" is "x != null ? x : 80")</li>
+<li>iis: add suport for windows authentiation(#4826, rep by Urs Kehrli)</li>
+<li>centos: update ./configure for centos (#4803)</li>
+<li>servlet: fixed bug failing @MultipartConfig when used with resin:Forward(#4777)</li>
+<li>config: add resin:properties</li>
+<li>cli: "restart" command needs to handle dynamic servers (#4801)</li>
+<li>jsp-el: CompositeELResolver wasn't implementing invoke properly (#4820, rep by Wesley Wu)</li>
+<li>websocket: WebSocketReader.read(char[]) was using iso-8859-1 instead of utf-8 (#4818, rep by ihristov)</li>
+<li>hessian: add setUnshared and HessianUnshared for serialization performance</li>
+<li>health: added LicenseHealthCheck</li>
+<li>health pdf: added license info to PDF report</li>
+<li>health pdf: add cluster summary section to PDF report</li>
+<li>health pdf: add http error codes to PDF report</li>
+<li>health pdf: add log warning counts to PDF report</li>
+<li>jsp: errorPage with setStatus(200) not properly logged (#4804, rep by richardmoco)</li>
+<li>solaris: solaris needs #define _POSIX_PTHREAD_SEMANTICS for proper ctime_r behavior (#4791, rep by Alan Wright)</li>
+<li>health: added health events and anomaly events (#4724)</li>
+<li>db-pool: reduced default max-create-connections back to 5 (#4734)</li>
+<li>db-pool: add min-idle-count to &lt;database> configuration (#4664)</li>
+<li>log: log-handler config wasn't in proper class loader context (#4784, rep by chris214)</li>
+<li>log: flush logs in separate thread so writers don't need to be bottlenecked (#4765, apleshi)</li>
+<li>servlet: allow null to getRealPath(null) which returns null (#4761, rep by stbu)</li>
+<li>db-pool: on close connection, if auto-commit is false, do not automatically call rollback() (#4663)</li>
+<li>jsf: updated to mojarra-2.1.3 (#4746, rep by cyttesen)</li>
+<li>servlet: character-encoding should not be defaulted for images (#4778, rep by fesse)</li>
+<li>webapp: detailed web-app statistics gathering needs flush (#4750)</li>
+</ul>
+</s2>
+
+
+<s2 title="4.0.23 - Sep 30, 2011">
+<ul>
+<li>hessian: ServiceContext.end wasn't clearing _response pointer (rep by Mattias Jiderhamn)</li>
+<li>health: added mail-to to PdfReport</li>
+<li>websocket: connection: upgrade may exist with other tokens (#4771, rep by RLM)</li>
+<li>cloud: cross-cluster server topology updates (#4764, rep by Alan Wright)</li>
+<li>embed: WebAppEmbed undeploy was not cleaning up fully (#4749, rep by A. Knutsen)</li>
+<li>jni: mmap file loading issue in win32 - disabled but shouldn't be throwing exception (#4758, rep by Mathias Langerwall)</li>
+<li>health: PdfReport in resin.xml needs to use resin.root, not resin.home for pdf-gen.php (#4760)</li>
+<li>resin: fixed bug preventing setup.exe and resin.exe support -java-home (#4763, rep by Brian Deng)</li>
+<li>cli/watchdog: stop and kill with no -server should stop the unique server (#4732)</li>
+<li>logging: log-handler el resolution fix (#4753)</li>
+<li>xa: use rollback instead of forget in XA recover (#4748)</li>
+<li>resin: JMX issue with not reporting correct request time and request count (#4660, rep by Rick Hightower)</li>
+<li>cdi: scanning issues with directories with '+' in name (#4739)</li>
+<li>init.d: changed init.d/resin to use "java" as backup Resin, also added $JOIN_CLUSTER (#4738)</li>
+<li>server: changed Alarm timing algorithm (#4730)</li>
+<li>session: add cookie-http-only to session-config (#4737, rep by L. Kaminsky)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.22 - Sep 1, 2011">
+<ul>
+<li>cluster deploy: .war issue on non-triad servers (#4743, rep by James Meyer)</li>
+<li>servlet/cache: added range limits (#4744, rep by R Madej)</li>
+<li>webapp: add alias-url-regexp to match multiple context-paths to a web-app (#4720, rep by Sachidanand Shukla)</li>
+<li>command-line: added uptime to "status" command"</li>
+<li>alarm: Alarm's base classloader needs to be Alarm not system classloader (#4707, rep by M Schmidt)</li>
+<li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
+<li>jndi: EnvironmentModel dynamic copy needs ConcurrentHashMap (#4721)</li>
+<li>servlet: getAvailable() issue with POST (#4726, rep by Olaf Krische)</li>
+<li>install: --disable-64bit changes to ./configure and CFLAGS (#4714, rep by S. Patil)</li>
+<li>ejb: @Async needs to propagage security principal (#4710, rep by ddalessa)</li>
+<li>jsp: jsp:include/jsp:param parameter order issues (#4719, rep by Brandon Kearby)</li>
+<li>distribution: unbundled resin-eclipselink.jar from resin.jar (#4722, rep by Steffen Busch)</li>
+<li>async: request end needs to clear AsyncContext link (#4723, rep by Mark Price)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.21 - Aug 19, 2011">
+<ul>
+<li>env: data-source-definition ordering with JPA (#4712, rep by stoty)</li>
+<li>ssl: extra debugging output for openssl with disconnecting client (#4709, rep by Keith Fetterman)</li>
+<li>eclipse-plugin: install resin into version specific directory (#4693, rep by manishdevraj)</li>
+<li>resin-cli: introduced new command start-with-foreground (see launchd restrictions)</li>
+<li>resin-cli: unknown argument should fail resin start (#4689, rep alex)</li>
+<li>log: log rotation alarm refactor (#4680, rep by Steve Francis)</li>
+<li>rewrite: added &lt;resin:NotFound> (#4705, rep by Aaron Freeman)</li>
+<li>git: corrupted .git on startup (#4701, rep by Bill Au)</li>
+<li>cloud: added deploy-config and cluster-config: scheme (#4604)</li>
+<li>i18n: utf8writer issues with surrogate pairs (#4700, rep by SHinomiya Nobuaki)</li>
+<li>install: ./configure changes for Solaris cc (#4678, rep by nits4resin)</li>
+<li>logging: Resin logging was not working properly in IBM JDK (#4695, rep by Steve Francis)</li>
+<li>async: complete() should not dispatch a following GET (#4697, rep by Adrian Sutton)</li>
+<li>servlet: sendRedirect from filter needs to escape redirect URL (#4699, rep by jyung)</li>
+<li>session: maxInactiveInterval issues with persistent sessions and includes (#4692, rep by mnsh)</li>
+<li>jni: changed crc64/readdir code to user readdir_r (#4698, rep by Peter Mei)</li>
+<li>jsp: tag compilation issues with @Inject (#4690, rep by mnsh)</li>
+<li>cdi: @Disposes introspection needs to be lazy on binding (#4681, rep by Dirk Mahler)</li>
+<li>debian: updated resin/lib and resin/libexec64 (#4548, rep by dicr)</li>
+<li>health: change health.xml to dump snapshot (rep by Bill Au).</li>
+<li>servlet: added CsrfFilter (#4497, rep by Myeung Kyu Jang)</li>
+<li>cdi/ejb: DataSourceDefinition timing with JPA (#4488)</li>
+<li>vhost: i18n/idna parsing issues (#4583, rep by gfranz)</li>
+<li>cdi/servlet: add WebApp.runInSessionContext to support threads using session scope (#4049, rep by sweigersf)</li>
+<li>network: timeout issues with keepalive (#4683, rep by Amir Langer)</li>
+<li>jsp: incorrect jsp:param encoding of '&amp;' (#4685, rep by dicr)</li>
+<li>ejb/cdi: stateless decorators (#4630, rep by Chris)</li>
+<li>install: check for /usr/libexec/java_home in ./configure (#4572)</li>
+<li>servlet: request.getReader() mark/reset support (#3350, rep by karlgold)</li>
+<li>loader: added ClassLoader.getResource and ClassLoader.getResourceAsStream cache (#4082)</li>
+<li>logging: &lt;log-handler> needs to check for missing 'name' attribute (#4682)</li>
+<li>health: PdfReport needs to require the &lt;path> parameter (#4679, rep by Bill Au)</li>
+<li>jsf: jsf/resin integration when replacing jsf libraries in WEB-INF/lib (#4676, rep by cyttesen)</li>
+<li>ScheduledTask: add validation of ScheduledThreadPool (#4668, rep by Wesley Wu)</li>
+<li>servlet: add ThrottleFilter.getCurrent().addPoisonedIP(addr) (#4133, rep by Aaron Freeman)</li>
+<li>install: add resinctl.in which will be filled in with configured location from ./configure (#4579)</li>
+<li>jsp: JspCompiler should not start the web-app for compilation (#4397)</li>
+<li>load-balance: add StickyHost for sticky load balancing (#2969, rep Daniel Bjuhr)</li>
+<li>mod_caucho: restore 'backup' option for mod_caucho (#4673, rep by Halvor Utby)</li>
+<li>resin-admin: profile needs better message when JNI not compiled (#4652)</li>
+<li>install: ./configure changes for --disable-64bit to compile 32bit on a 64bit system (#4675, rep by nits4resin)</li>
+<li>load-balance: add disable-soft to disable round-robin, but not session dispatching (#3365, rep by Cameron Stokes)</li>
+<li>debian: resin-eclipselink was not added to debian files (#4547, rep by dicr)</li>
+<li>cache/db: mmap synchronization updates</li>
+</ul>
+</s2>
+
+<s2 title="4.0.20 - Jul 15, 2011">
+<ul>
+<li>health: PdfReport added</li>
+<li>session: always-load-session needs to set local-read timeout to 0 (rep by Eric Kreiser)</li>
+<li>network: comet/network state maching/timing issues (#4669, rep by Adrian Sutton)</li>
+<li>cloud: heartbeat needed across clusters for global cache (#4657, rep by William Kong)</li>
+<li>cloud: heartbeat needs to retry every 5s on connection failure (#4601)</li>
+<li>network: keepalive housekeeping simplified (#4613, rep by Mark Cleveland)</li>
+<li>session: session timeout needs to be picked up on persistent load (#4473, rep by vicsanca)</li>
+<li>network: issues with too many CLOSE_WAIT connections (#4639, rep by Mark Price)</li>
+<li>jsf: conversation scope issues with classloading (#4656, marcin_gomulkiewicz)</li>
+<li>jpa: data-source lookup needs to check JNDI return type (#4591, rep by paru)</li>
+<li>cron: day-of-week calculation bug (#4560, rep by Tyson Weighs)</li>
+<li>health: add ShutdownService configuration to not restart on OOM (#4075, rep by Martin Thompson)</li>
+<li>cli: console libexec needs to use same is64Bit as watchdog (#4558)</li>
+<li>stat: add read/write byte statistics for http request (#4126, rep by Martin Thompson)</li>
+<li>jpa: check persistent-unit NPE for EntityManagerJtaProxy (#4564, rep by dicr)</li>
+<li>xa: recover/forget needs to check xid against current server (#4645)</li>
+<li>webapp: multipart-config needed in servlet tag (#4648)</li>
+<li>webapp: multiple-init issue with versioned controllers (#4637, rep by W. Au)</li>
+<li>cdi/ejb: issue with @Alternative working with EJBs (#4636, rep by ChrisC)</li>
+<li>jsp: NPE with trimDirectiveWhitespaces and empty scriptlet (#4651, rep by mnsh)</li>
+<li>resin-admin: added 60s ajax updates to summary graphs (#4577)</li>
+<li>quercus: DateTime NPE (#4596, rep by rmann)</li>
+<li>cdi: InjectionPoint on producer was overriding all other producers (#4649, rep by Max Bureck)</li>
+<li>command-line: add -data-directory to change location of resin-data (#4646, rep by Keith Fetterman)</li>
+<li>command-line: command-line now uses hmux servers when available (#4616)</li>
+<li>db/cache: Table.validateIndexes wasn't freeing its Block/TableIterator (#4624, rep by Michael O'Dea)</li>
+<li>ssl: ssl write needs poll/select on SSL_ERROR_WANT_WRITE (#4582, rep by Mike O'Dea)</li>
+<li>xa: failure during forget should be at finer logging, not warning (#4644, rep by Takahiro Fukuda)</li>
+<li>multipart-form: added parameter-length-max (#4638, rep by Daniel Kador)</li>
+<li>system: &lt;resin:LogService> needs to check for existing log system (rep by Adrian Sutton)</li>
+<li>install: --with-resin-log should update init.d/resin.in (#4640, rep by K Fetterman)</li>
+<li>health: added graph page configuration to health.xml (#4577)</li>
+<li>network: refactored networking to split thread-safe/and non-thread-safe state machines (#4633, by Danny Yates)</li>
+<li>resin: options on the command should be global (#4605)</li>
+<li>resin: command line user mgmt (#4603)</li>
+<li>jsf: allow JSF in WEB-INF/lib (will disables CDI) (#4573, rep by cyttesen)</li>
+<li>hessian: debug should not throw illegal state exceptions but should log</li>
+<li>database: allow numeric transaction-isolation values (#4627, rep by mnsh)</li>
+<li>jpa: javax.persistence.Persistence classloader leak (#4628, rep by Patric Rufflar)</li>
+<li>rewrite: CanDI-style rewrite rules in cluster were ignored (#4618, rep by Aaron Freeman)</li>
+<li>scheduled-task: scheduled task remove has stack overflow (#4523, rep by mnsh)</li>
+<li>security: JaasAuthenticator add support for Group/roles (#4621, rep by dicr)</li>
+<li>admin: summary/postmortem now show startup info from watchdog (#4595)</li>
+<li>db: row allocation must check for table close (#4599, rep by Steve Francis)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.19 - June 14, 2011">
+<ul>
+<li>command-line: resin-system-auth-key wasn't properly managed (#4602)</li>
+<li>deploy: git/war validation needs better error messages for the ant jar task duplicate file creation (#4606, rep by Jeff Schnitzer)</li>
+<li>logging: logger in &lt;resin> context needs to use system class loader to match command-line log-level (#4587, rep by William Au)</li>
+<li>resin-admin: added undeploy action for repository managed webapps</li>
+<li>command-line: authentication needs to understand {SSHA} configuration (#4593)</li>
+<li>eclipse-plugin: added auto-restart for redeployed apps (req. by hwellmann, Caucho forums)</li>
+<li>cache: lease changes for triad and cloud to reduce network traffic</li>
+<li>deploy: add expand-preserve-fileset to web-app-deploy to improve development (#4592, rep by Harald Wellmann)</li>
+<li>ejb: generic introspection/generation (#4590, rep by Harald Wellmann)</li>
+<li>cache: leasing must apply to cloud servers (#4588, rep by William Kong)</li>
+<li>cloud/bam: hmtp pool must be shared across server (#4588, rep by William Kong)</li>
+<li>cloud/bam: remote send must return error messages (#4588, rep by William Kong)</li>
+<li>eclipse-plugin: finishing server wizard early produces bad configuration (#4589, rep by hwellmann)</li>
+<li>dist: add multiversion for debian packages (#4314, rep by jlangevin)</li>
+<li>health: check MemUsage for max/committed to calculate free memory (#4507)</li>
+<li>install: Makefile needs to create /var/log/resin event if /var/www exists (#4574)</li>
+<li>cache: streaming cache update between clusters &lt;replication-source-cluster> (#4569)</li>
+<li>install: webapp-jars need to be copied to resin.home (#4575)</li>
+<li>jsp: c:set validation issue (#4586, rep by thihy)</li>
+<li>websocket: text buffer size issues with 8192 length values (#4584, rep by ihristov)</li>
+<li>ejb: EJBException serialization id needs generation (#4578, rep by cyttesen)</li>
+<li>watchdog: Unix systems should not have -Xrs on the command-line (#4585, rep by William Au)</li>
+<li>servlet/async: dispatch sync issues causing dispatches to be ignored (#4570, rep by Danny Yates)</li>
+<li>resin: moved app-default to resin.jar, changed resin.xml's resin:import to load from classpath</li>
+<li>php: fix for DOMDocument::saveXML($node) (#4563, rep by Lisa Stillwell)</li>
+<li>resin-cli: added disable and enable commands to Resin Pro (#3756, rep by Rob Lockstone, Jonas Kowall)</li>
+<li>async/comet: with Resin comet API, check for complete on suspend (#4534, rep by Brent Plump)</li>
+<li>ejb: with generics Class&lt;T> as argument and return (#4551, rep by dicr)</li>
+<li>servlet: finally handling for request needs to check for null (#4545)</li>
+<li>access-log: add rollover-check-time configuration (#4533, rep by peng yao)</li>
+<li>./configure: removed OPENSSL_LIB search instead using standard library (rep by Michael O'Dea)</li>
+<li>ejb: synthetic/bridge methods should not be reflected (#4555, rep by dicr)</li>
+<li>ejb: static methods for session beans should not be overridden (#4552, rep by dicr)</li>
+<li>config doc: clarified database init-param vs IoC-style configuration (#4550, rep by dicr)</li>
+<li>./configure: updated config.guess and config.sub (#4407, rep by GT500)</li>
+<li>db-store: free block scanning needs to test for store close (#4562, rep by S Francis)</li>
+<li>mod_caucho: allocation/free of locks needs to be locked (#4529, rep by remkodev)</li>
+<li>network: read/write timeout needs handling in Java layer (#4506, #4524, rep by Matthew Schmidt, Prabhu)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.18 - May 12, 2010">
+<ul>
+<li>watchdog: set the LD_LIBRARY_PATH_64 variable on 64-bit systems (#4536)</li>
+<li>access-log: rollover rescheduling of alarm was not reliable (#4540, rep by mros2stf)</li>
+<li>ant-plugin: ant plugin has been moved to http://github.com/caucho/ant-plugin</li>
+<li>resin-cli: added jmx-list, jmx-set, jmx-call commands</li>
+<li>health: add  OnStart, OnStop, OnRestart health predicates (#4257)</li>
+<li>scheduled-task: forward with param was causing NPE (#4530, rep by kenjrwalker)</li>
+<li>web-app: explicit web-app id="/" must override webapps/ROOT (#4531, rep by danielnuriyev)</li>
+<li>session: distributed sessions now allows jdbc as a backup (#3929, rep by jkriesten)</li>
+<li>servlet: fragment after/others ordering issues (#4523)</li>
+<li>cdi: abstract decorators were not properly handled (#4406)</li>
+<li>servlet: crlf escaping required for response headers because of rewrite-dispatch (#4525)</li>
+<li>jpa: when jta-data-source is null and JPA fails to start, allow web-app to start w/o error (#4491)</li>
+<li>watchdog: ResinMXBean now contains information about the last watchdog restart (#4257, rep by Tony Matson)</li>
+<li>jsp/el: MethodExpr invocation was not applied property (#4515)</li>
+<li>candi: @Produces on @Stateless with no interfaces (#4513)</li>
+<li>config: add &lt;data-source> element support (#4487)</li>
+<li>jsp/el: BeanELResolver isValue/getValue mismatch (#4511, rep by Keith Fetterman)</li>
+<li>servlet: web-fragment &lt;name> can have an "id" attribute (#4484)</li>
+<li>candi: ResinBeanContainer beans.xml @Alternatives issue (#4501)</li>
+<li>candi: ResinBeanContainer JPA/beans.xml ordering issues (#4502)</li>
+<li>session: add destroy-on-lru flag to session-config to call SessionListener.destroy on a LRU even when session is persisted (#4504)</li>
+<li>servlet: CauchoRequestWrapper updates for MockHttpServletRequest compatibility (#4509)</li>
+<li>jstl: c:set not properly returning XML for validation (#4492)</li>
+<li>ejb: stateless generics on interface superclass (#4512, rep by andreaskaltenbach)</li>
+<li>ejb: stateless generics on method argument (#4514)</li>
+<li>config: &lt;class-loader> has automatic priority (#4500)</li>
+<li>watchdog: signal status reporting was showing exit 0 for signals (#4508)</li>
+<li>hessian: send-collection-type should always send java.util types (#4489, rep by Keith Fetterman)</li>
+<li>ioc: resin:message not properly initialized (#4496, rep by Keith Fetterman)</li>
+<li>ioc: env-entry does not use EL - doc update (#4516, rep by mnsh)</li>
+<li>ejb: ejb-ee jar with &lt;entity> should be skipped w/o fatal error (#4503, rep by Rick Mann)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.17 - Apr 15, 2011">
+<ul>
+<li>candi: jar order dependency for ProcessManagedBean (#4493, rep by andreaskaltenbach)</li>
+<li>security: order dependency between user-role and transport guarantee (#4495, rep by Keith Fetterman)</li>
+<li>netbeans: fixed installation issues and change deployment options to deploy to an exploded web-apps directory</li>
+<li>eclipse: fixed "Debugging does not work with 4.0.15 version of the Eclipse plugin" bug (#4417, rep by stoty)</li>
+<li>eclipse: fixed "Eclipse plug-in won't install" bug (#4418, rep by adamzr)</li>
+<li>resin: added thread-dump, heap-dump, log-level and profile commands.</li>
+<li>el: add mbean function for JMX attribute access</li>
+<li>el: add =~ for regular expression matching</li>
+<li>resin-admin: include link to SSL on deploy page when accessing non-ssl (#4455)</li>
+<li>resin-admin: hide user/password generation when user exists (#4486, rep by Keith Fetterman)</li>
+<li>resin-admin: use {SSHA} for generated password</li>
+<li>webapp: webapp restart/session close timing issues (#4471, rep by jiucal)</li>
+<li>rewrite: Forward with target="/foo?q=2" caused duplicate query param (#4431, rep by mhixson)</li>
+<li>install: make install updates (#4468, rep by silent)</li>
+<li>openssl: connection must close if SSL_write fails (#4476, rep by Keith Paulson)</li>
+<li>boot: ResinActor should not be started when Resin called directly (#4440)</li>
+<li>proxy-cache: inappropriate warning on included cache (#4472, rep by Keith Fetterman)</li>
+<li>jsp: special case jsp:fragments with single jsp:element (#4463, rep by imaniyar)</li>
+<li>maven: EnvInit was improperly logged (#4481, rep by ccwf)</li>
+<li>jsp-el: resolve introspection conflict between getFoo() and getFoo(i) (#4462, rep by jhartline)</li>
+<li>dist: deprecated resin-ant tasks. The command-line should be used instead (#4447)</li>
+<li>startup: resin.exe space issues with -conf (#4448, rep by pmorrow)</li>
+<li>resin-admin: mod_status requires Resin Pro (#4454)</li>
+<li>el: conversion issues from string '1.0' to long (#4482)</li>
+<li>proxy-cache: issue with include, and filter and wrapped output (#4437, rep by Haley)</li>
+<li>vfs: update http: normalization to use query-string verbatim (#4427, rep by Deepak Jadhav)</li>
+<li>candi: ResinBeanContainer standalone (#4434)</li>
+<li>log: add ${thread} to log formatting (#4459, rep by Keith Fetterman)</li>
+<li>deploy: issues with merging versioned webapps with explicity &lt;web-app> (#4444, rep by Keith Fetterman)</li>
+<li>deploy: restart timing issue with .war alarm, request and slow start (#4474, rep by Mattias Jiderhamn)</li>
+<li>ejb: stateless matching of varargs to API (#4466, rep by andreaskaltenbach)</li>
+<li>repository: repository tag-map timing issue (#4450)</li>
+<li>session: Java deserialization not using proper classloader (#4475, rep by Keith Fetterman)</li>
+<li>install: config/health.xml location issues (#4443)</li>
+<li>install: doc/resin-doc location fixed for make install (#4445, rep by Bill Au)</li>
+<li>cloud: removed obsolete HmtpRequest logging (#4461, rep by TJ Wallace)</li>
+<li>session: change default serialization to "java" instead of "hessian"</li>
+<li>cluster: add -join-cluster for dynamic server support</li>
+</ul>
+</s2>
+
+<s2 title="4.0.16 - Mar 17, 2011">
+<ul>
+<li>rewrite-dispatch: normalization of rewrite order so rewrites always occur before filters</li>
+<li>server: add server information to 404 error pages (#4433, rep by Alex Sharaz)</li>
+<li>server: invocation-cache-size wasn't properly configurable (#4428, rep by R. Ranjan)</li>
+<li>cluster: cluster/network timings split from load-balance configuration (#4429, rep by Dmitri Kolpakov)</li>
+<li>cluster-cache: mismatched message/query replication for data actor (#4425, rep by Dmitri Kolpakov)</li>
+<li>session: inconsistent setMaxInactiveInterval with timeouts (#4419, rep by vicsanca)</li>
+<li>proxy-cache: check cache refill against invalidated cache (#4413, rep by shine)</li>
+<li>cdi: @Stateless beans need to be treated as serializable for injection (#4405)</li>
+<li>ioc/xml: update error messages for whitespace properties (#4385, rep by jkriesten)</li>
+<li>watchdog: update error message on 500 exception to a watchdog (#4402, rep by Alex Sharaz)</li>
+<li>mod_caucho: configuration etag wasn't including timeouts and therefore wasn't updating (#4259)</li>
+<li>servlet: ServletContext.getResource("/foo/") was not returning URL when foo is a directory, needed for spring (#4411, rep by ccwf)</li>
+<li>access-log: add '%S' for session tracking (#4422, rep by Steffen Busch)</li>
+<li>include/forward: cross-context include/forward was not switching WebApps properly (#4362, rep by igor)</li>
+<li>classloader: enabled jar caching to improve startup times (#4420, rep by Mattias Jiderhamn)</li>
+<li>database: toLowerCase must use toLowerCase(Locale.ENGLISH) for Turkish encodings (#4414, rep by ozgurcakmak)</li>
+<li>watchdog: Resin shutdown warning exceptions need to be caught on shutdown (#4400, #4402, rep by Daniel Lopez, Alex Sharaz)</li>
+<li>servlet: addCookie should allow cookie with null value (#4410, rep by Brandon Kearby)</li>
+<li>install: resin-doc copy issues (#4408, rep by copart)</li>
+<li>install: validator/slf4j added to webapp-lib (#4386, rep by Jeff Schnitzer)</li>
+<li>proxy-cache: corrupted data with client disconnects (#4398, rep by Luke Jobling)</li>
+<li>watchdog: stdout-log inside &lt;cluster> now configures the watchdog managed jvm-default.log (#4395, rep by Steve Francis)</li>
+<li>openssl: timeout support for solaris (#4280, rep by nicolai)</li>
+<li>configure: change solaris build to include -R/usr/sfw/lib/64 for -d64 and resin_os.so linking (#3045, rep by Eric Bowman)</li>
+<li>ejb: MDB with JMS inflow (ActiveMQ) not properly handling XA (#4327, rep by danc)</li>
+<li>ejb: MDB with JCA inflow and driver XA control not properly handled</li>
+<li>security: add RFC2307 (ldap-style) support for {plain}, {sha}, {ssha}, {md5} (#3432, rep by Laurent Jaccard)</li>
+<li>cdi: @MBean on class automatically registers bean in JMX (#3427, rep by Scott Hernandez)</li>
+<li>webservices: add ${resin.home}/endorsed support for metro support (#3415, #4032, rep by Bartlomeij Kolodziejczyk, Reggie Vito)</li>
+<li>rewrite: conflict between rewrite (welcome-file) and custom constraint (#4388, rep by K Ding MNP)</li>
+<li>scheduled-task: CDI timing issue between scheduled-task and CDI bean (#4393, rep by Tero Ripattila)</li>
+<li>ssl: JSSE client certificate should not automatically populate getUserPrincipal (#4044, rep by adamknight)</li>
+<li>install: configure was not detecting plugins on x360 (#4383, rep by mros2stf)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.15 - Feb 8, 2011">
+<ul>
+<li>eclipse-plugin: require automated eval. license request only for new download (#4379, rep by Daniel Lopez)</li>
+<li>jsp: sendRedirect in JSP could cause IllegalStateException (#4290, rep by Mattias Jiderhamn)</li>
+<li>cookie: ssl-session-cookie should not automatically set Secure for the non-SSL cookie (#4372)</li>
+<li>/resin-admin: increased upload_max_filesize for web app deployment. New limit is 128Mb. (#4371 rep by Naoki Yano)</li>
+<li>bam/cluster: HmtpQueue in ProDomainManager needs to be ConcurrentHashMap and not WeakReference (rep by Jamie Novak)</li>
+<li>watchdog: "status" was returning the watchdog's user, not the Resin instance user (#4359, rep by mros2stf)</li>
+<li>async/comet: request should not force flush on async (#4360, rep by Manoj Chennath)</li>
+<li>cloud: server.ifSelf() changed to more reliable predicate (#4355, rep by Jamison Novak)</li>
+<li>http: url-length-max wasn't allowing large URLs (#4358, rep by Daniel Kador)</li>
+<li>cloud: messages during startup are queued if mailbox isn't registered yet (rep by Jamison Novak)</li>
+<li>cdi: enable Conversation scope for JSP/servlets</li>
+<li>database: add DatabaseManager.closeConnection (#3703, rep by Nobuaki Shinomiya)</li>
+<li>servlet: request HashMapImpl fixes for inserts (#3726, rep by Fiaz Hossein)</li>
+<li>install: ${resin.root}/resin-doc will be updated on a new install (#4350, rep by mros2stf)</li>
+<li>resin-admin: use ${resin.root}/resin-doc location for resin-admin (#4350, rep by mros2stf)</li>
+<li>configure: test for dev environment faulty, causing resinssl build issues (#4352, rep by mros2stf)</li>
+<li>meter/sensor: add sensor callback to so failures can be acted on (#3731, rep by Martin Thompson)</li>
+<li>resin-admin: if admin-users.xml.generated cannot be created in resin.conf, use resin-data (#3785)</li>
+<li>network: add listener/port read/write statistics (#4150)</li>
+<li>bam: separate queues for large messages (#4128, rep by Martin Thompson)</li>
+<li>git: validate repository and reload from triad if corrupted (#4341, rep by Jamison Novak)</li>
+<li>cdi: serialization of intercepted beans (#4083, rep by sweigersf)</li>
+<li>cdi: enhanced CDI beans must use proxies (TCK)</li>
+<li>jni: JniSelectManager should use toError() is removeNative fails (#4349, rep by Jens Christensen)</li>
+<li>gzip: flush/error issue with JSP (#3893)</li>
+<li>watchdog: add "watchdog" command for MacOS LaunchD (#3891, #4124, rep by Rob Lockstone)</li>
+<li>session: if session is not valid due to timing issues, create new session (#3942, rep by bregnvig)</li>
+<li>jpa: eclipselink was not properly closed on webapp restart (#4154, rep by Riccardo Cohen)</li>
+<li>ssl: jsse-ssl add cipher-suites-forbidden (#3970, rep by Aaron Freeman)</li>
+<li>jsp: @page contentType should not affect request.getCharacterEncoding() (#4007, rep by Shinomiya Nobuaki)</li>
+<li>ssl: jsse-ssl add verify-client="optional" support (#4052, rep by adamknight)</li>
+<li>ear: ear deployment problems when war context-url is "/" (#4348, rep by koge_pan)</li>
+<li>security: allow FormLogin with selected authenticator (#4143)</li>
+<li>cdi: allow inline injection &lt;value>&lt;qa:MyQualifier>&lt;/value></li>
+<li>session: add serialization-collection-type to allow disabling of Hibernate collection serialization (#4211, rep by Matthew Schmidt)</li>
+<li>watchdog: on configuration error, delay Resin restart by 30s (#4202, rep by norlab)</li>
+<li>load-balance: bind-ports-after-start and disable should cause failover during startup (#4129, rep by Wesley Wu)</li>
+<li>date: setMonth(1) when setDay(31) previously was setting to march (#4094, rep by nam)</li>
+<li>admin: add isJniEnabled() property to the Port MBean (#4088, rep by skippopotamus)</li>
+<li>servlet: allow cookies with space values (#3897, rep by ykim)</li>
+<li>cluster: triad warning when triad servers are on same machine (#4177)</li>
+<li>webapp: web-app deployment with invalid root-directory needs warning (#4207)</li>
+<li>database: logging adds ".d0", ".d1" to show round-robin (#4222, rep by Anthony Balandran)</li>
+<li>init.d: change init.d/resin to log startup to /var/log/resin/console.log (#4223, rep by Raul Luna)</li>
+<li>i18n: changed MacRoman file.encoding to default to utf-8 (#4180)</li>
+<li>url: invalid utf-8 character parses to %xfffd (#4183, rep by cjohn)</li>
+<li>comet: add suspend-reaper-timeout to port configuration (#4249, rep by baoqinye)</li>
+<li>startup: Resin started message changed to log at INFO level (#4135, rep by briandeng)</li>
+<li>database: check isClosed() on connection reuse to avoid dead connections (#4231)</li>
+<li>log: rollover needs dedicated alarm for proper timeout (#4234, rep by mros2stf)</li>
+<li>watchdog: relative -root-directory was applying the relative path twice (#4198)</li>
+<li>servlet: getResource("/") was returning a URL for the directory incorrectly (#4301, rep by mate)</li>
+<li>watchdog: Resin child needs -Xrs on windows (#4308, rep by robin dun)</li>
+<li>deploy: web-app start needs to synchronize on getDeployInstance (#4342, rep by Jamison Novak)</li>
+<li>session: session cache needs to use createIfAbsent to avoid timing issues (#4340, rep by Jamison Novak)</li>
+<li>access-log: AbstractRolloverLog needs dedicated rollover alarm (#4321, rep by mros2stf)</li>
+<li>access-log: content-length improperly calculated for chunked (#4317, rep by Martin Thompson)</li>
+<li>rewrite: added AddHeader to add cookies (#4326, rep by C. Stokes)</li>
+<li>jni: npe check for nativeWrite (#4323, rep by Prabhu)</li>
+<li>watchdog: check that watchdog-manager.log can be written before starting (#4333)</li>
+<li>cloud: errors for messages which cannot connect log the destination for debugging (#4315, rep by Cameron Stokes)</li>
+<li>proxy-cache: 304 returned for proxy cache (#4239, rep by Jamison Novak)</li>
+<li>proxy-cache: pdf/range using improper recursive call (#4334 rep by C. Fernandez)</li>
+<li>embed: add setAsyncSupported to ServletEmbed (#4332, rep by Michael Barker)</li>
+<li>resin: LoadBalance inside &lt;web-app> needs to pass along context-path (#4304, rep by Kenneth Yeung)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.14 - Jan 7, 2011">
+<ul>
+<li>resin: CLI added deploy, undeploy, list, start-webapp, stop-webapp, restar-webapp commands (#4316, rep by Patrick Brigger)</li>
+<li>cache: use cursor to update data timeouts</li>
+<li>heartbeat: server connections need to depend on heartbeat only</li>
+<li>access-log: off-by-one issue with access log rollover causing missed 1D (rep by Steve Francis)</li>
+<li>thread: if Thread cannot be instantiated, restart Resin (rep by B Hafezi)</li>
+<li>quercus: SimpleXMLElement needs a __count function (#4318, rep by Homayoun Zariv)</li>
+<li>quercus: list($a) = each($this->foo) was not compiled properly (#4319, rep by Akara Sucharitakul)</li>
+<li>quercus: add array_replace, array_replace_recursive (#4312, rep by Homayoun Zariv)</li>
+<li>quercus: simplexml_load_file not working properly with http: (#4311, rep by Akara Sucharitakul)</li>
+<li>cdi: InjectManager.resolveAllBeans with incorrect synchronization (rep by Wesley Wu)</li>
+<li>security: FormLogin persistence/session issues (#4299, rep by Jamison Novak)</li>
+<li>jsp-el: parsing confusion with "0#${foo}" (#4190, rep by olaf2010)</li>
+<li>rewrite: host-level rewrite issues with access-log (#4198)</li>
+<li>distribution: slf4j.jar removed from resin/lib (#4271, rep by Nicolai Steven)</li>
+<li>servlet: setHeader("Content-Length", "12;") was throwing an exception (#4210, rep by mkjang)</li>
+<li>servlet: getOutputStream was not allowed after flushBuffer (#4289, rep by vbavin)</li>
+<li>db-pool: increased default DB create count to 20 (#4252, rep by Wesley Wu)</li>
+<li>hessian: change HessianServlet to extend HttpServlet (#4193, rep by voodude)</li>
+<li>cookie: change &lt;http-only> to apply only to the session cookie (#4217, rep by gzhu)</li>
+<li>thread: priority thread queue fixes (#4228, #4291, rep by Jamison Novak)</li>
+<li>thread: refactor ThreadLauncher to use AbstractTaskWorker</li>
+<li>cdi: error with @Produces method with generic result and @Named (#4265, rep by jharting)</li>
+<li>cdi: allow &lt;resin:FileQueue> to be assigned to BlockingQueue&lt;MyItem> (#4067, rep by Jeff Schnitzer)</li>
+<li>jsp: cross-context forward classloader/.tld not updating (#4284, rep by Brian Deng)</li>
+<li>ejb: generic interface issues MyBean implements Foo&lt;String> (#4266, rep by jharting)</li>
+<li>servlet: cross context forward classloader not properly updated (#4248, rep by jessicay)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.13 - Nov 10, 2010">
+<ul>
+<li>hessian: java.sql.Timestamp deserialization NPE (#4286, rep by Matt Poirier and Shawn Frederickson)</li>
+<li>servlet: url-mapping="" was not handled properly (#4283, rep by Peter Yuill)</li>
+<li>welcome-file: use 301 instead of 302 (#4212, rep by jkowall)</li>
+<li>conf: sample resin.xml no longer uses www-data user-name (#4220, rep by Arthur Naylor)</li>
+<li>ejb: EjbInjectionTarget ordering (#4057, rep by Jeff Schnitzer)</li>
+<li>file servlet: 404 should take precedence over OPTIONS (#4218, rep by stbu)</li>
+<li>conf: server-default not configured property (#4251, rep by snw)</li>
+<li>jsp: fragment/attribute issues with jsp (#4258, rep by nfederov)</li>
+<li>rewrite: convert recursion to iteration to handle many rewrite rules (#4272, rep by Nick Pilch)</li>
+<li>cdi: @Alternatives processing ordering issues rep by (Wesley Wu)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.12 - Oct 15, 2010">
+<ul>
+<li>dist: cr-nl issue on windows for .git commit  (#4241, rep by James Gittelson)</li>
+<li>session: serialization issues with classloader and timeout (#4254, rep by Steven Nicholai)</li>
+<li>dbpool: ping on connection/statement errors instead of discarding</li>
+<li>health: add ConnectionPoolHealthCheck</li>
+<li>watchdog: "stop" should shutdown the watchdog manager if the last server is stopped</li>
+<li>health: log HealthCheck warnings and failures</li>
+<li>host: allow id=":8081" for /resin-admin as virtual host</li>
+<li>dbpool: ping now only occurs after an error</li>
+<li>xa: detach JCA pooling from UserTransaction</li>
+<li>xa: add meters, JMX and HealthCheck for transaction manager</li>
+<li>resin: access.log rotation into zip archive fixes (#4216)</li>
+<li>dist: war files with many entries cause recursive overflow (rep by Steve Francis, #4236)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.11 - Sept 29, 2010">
+<ul>
+<li>hessian: XSS protection against bogus message (rep by Dan Cornell)</li>
+<li>servlet: CauchoResponseWrapper shouldn't assume wrapping CauchoResponse (#4206)</li>
+<li>class-loader: getProtectionDomain() should return the file:... for the jar object, not the jar contents (#4194)</li>
+<li>resin-admin: JMX display has been reorganized and domains split into tabs</li>
+<li>resin-admin: graph generation has been updated</li>
+<li>resin-admin: thread page now includes locking tab giving blocking threads and their lockers.</li>
+<li>resin-admin: thread page includes locking information in stack trace.</li>
+<li>resin-admin: webapp page now includes deployment version validation.</li>
+<li>health: HealthCheck added to JMX</li>
+<li>health: JvmDeadlock and Memory checks were not being added to the Health check.</li>
+</ul>
+</s2>
+
+<s2 title="4.0.10 - Aug 23, 2010">
+<ul>
+<li>candi: _namedBeanMap is active and needs to be a ConcurrentHashMap (rep by Wesley Wu)</li>
+<li>hessian: for HessianServlet, do not attempt to find implicit API (#4168, rep by Riccardo Cohen)</li>
+<li>remote: add cxt to artifacts (#4314, rep by Riccardo Cohen)</li>
+<li>remote: cxt needs to have WebServiceContext (#4314, rep by Riccardo Cohen)</li>
+<li>remote: @HessianRemote as servlet was instantiating two instances (#4175, rep by Jeff Schnitzer)</li>
+<li>embed: ResinBeanContainer verified to work with XA and Database (#4160, rep by Michael Barker)</li>
+<li>proxy-cache: proxy-cache requiring Pro warning was being shown even when proxy-cache was available (#4173)</li>
+<li>admin: jmx-service, log-service in the old &lt;management> allowed for open source (#4172)</li>
+<li>database/xa: distinct &lt;database> should be distinct Resource Managers (#4176, rep by Takahiro Fukuda)</li>
+<li>cluster: removed &lt;machine> tag as obsolete</li>
+<li>load-balance: fixes to weight and warmup</li>
+<li>load-balance: created LoadBalanceService for testability</li>
+<li>watchdog: added logging of Resin exit codes on detected shutdown</li>
+<li>system: added ShutdownService to centralize Resin shutdown</li>
+<li>system: added WarningService to send Resin messages to the watchdog</li>
+<li>embed: add ResinEmbed.setRootDirectory and WebAppEmbed.setArchivePath (rep by Danny Yates)</li>
+<li>resin-admin: jmx hide &amp; show acted on wrong detail boxes. (#4145, Rep by Jamison Novak)</li>
+<li>jpa: eclipselink properties for Resin JTA not set when eclipselink found by scanning (#4167, rep by Riccardo Cohen)</li>
+<li>thread: alarm locking issue (rep by Wesley Wu, Jan Kriesten)</li>
+<li>win: fixed dll loading issue (#4159), rep hans</li>
+<li>servlet: fixed cross context include issue (#4117), rep Brian Deng</li>
+<li>servlet: fixed getInputStream issue for String params with Servlet3.0 Part (#4153), rep by Wesley Wu</li>
+<li>servlet: remove &lt;multipart-form> from app-default.xml (#4102, rep by Brian Deng)</li>
+<li>file: range parsing issue with firefox and FileServlet (#4149, rep by Fred Howell)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.9 - 2010-07-26">
+<ul>
+<li>remoting: add userName and password to HessianClient (#4130, rep by Jeff Schnitzer)</li>
+<li>build: missing eclipselink in build (rep by Bill Au)</li>
+<li>alarm: updates for atomic refactor causing cpu-spin (rep by Jeff Schnitzer)</li>
+<li>watchdog: set log rollover size to 64m (rep by Scott Croco)</li>
+<li>candi: ioc/timing issue with EL configuration and custom beans (#4131, rep by Jeff Schnitzer)</li>
+<li>(2010-07-20) cloud: refactor triad messaging into BamTriadServer in cloud.bam for consistency across cloud services</li>
+<li>cloud: refactor heartbeat into cloud.heartbeat and increase service priority</li>
+<li>network: refactor hmtp/cloud client pool from cluster into cloud.bam</li>
+<li>network: refactor network listener from Server into cloud.network</li>
+<li>network: refactor cluster listener from Server into cloud.network</li>
+<li>resin: refactor Resin/Server main to use ResinSystem</li>
+<li>database: locking/sync rework to use atomic references when possible</li>
+<li>database: locking/sync rework to use JDK's locking</li>
+<li>candi: CDI session destroy must be after other session listeners (#4901, rep by sweigersf)</li>
+<li>thread: Thread/ThreadWorker rework to use atomic references where possible</li>
+<li>thread: Thread/ThreadWorker sync issues (#3960, rep by rmann)</li>
+<li>LogService: add pooled connection (#4096, rep by Brian Deng)</li>
+<li>watchdog: added &lt;resin-system-auth-key&gt; for watchdog authentication (#4113)</li>
+<li>dist-session: performance/locking work for DB stability and perf (#4089, #4093, rep by Skippopotamus)</li>
+<li>database: createSQLXML filter implemented (#4092, rep by alex)</li>
+<li>server: utf-8 encoding issues in ServletResponse (#4101, #4106, rep by jkriesten, Kaj Hejer)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.8 - June 28, 2010">
+<ul>
+<li>servlet: added support for MockHttpServletRequest and MockHttpServletResponse: (#4073)</li>
+<li>configure: fix for bad libtool message: (#4048)</li>
+<li>resin: fixed startup routine for directory with spaces issue: (#4021)</li>
+<li>resin-admin: fixed IllegalStateExceptionwith with readonly conf/admin-users.xml.generated (#4055)</li>
+<li>servlet: fixed NPE with MultipartConfig caching bug (#4051, rep by subwiz)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.7 - May 21, 2010">
+<ul>
+<li>iis: fixed bug preventing iis from serving web-apps defined with web-app tag (#3890)</li>
+<li>iis: allow IIS to choose when to use chunked encoding (#3871)</li>
+<li>iis: 64 bit IIS Handler build provided (#3846)</li>
+<li>iis: fixed aberrant behaviour of servlets with IIS7 (#2694, rep by mitch)</li>
+<li>iis: fixed bug preventing iis plugin from sending data larger 20kb(#3178, rep gert)</li>
+<li>iis: fixed bug preventing static content from being served by the plugin(#3889)</li>
+<li>iis: fixed bug was preventing use of virtual hosts with ports in IIS + Resin setup(#3951)</li>
+<li>init.d: added "status" to init.d/resin (#3841, rep by Matt Pangaro)</li>
+<li>init.d: test for log_daemon_msg directly (#3932, #4012)</li>
+<li>proxy-cache: no longer disable cache on exception (#3957, rep by Dave Hintemeyer)</li>
+<li>rewrite: add &lt;resin:IfMBeanEnabled> (#4042, rep by stbu)</li>
+<li>rewrite: add &lt;resin:MovedPermanently> (#4023)</li>
+<li>ssl: jsse doesn't understand Socket.shutdownOutput (#4030, rep by Martin Morawetz)</li>
+<li>jpa: Persistence.getPersistenceUtil() (#4038, rep by Kaj Hejer)</li>
+<li>hmux: Thread.dumpStack() in HMUX with JSP data after sendRedirect (#4025, rep by vicsanca)</li>
+<li>http: catch ClientDisconnectException during finish/skip (#4029, rep by iRideSnow)</li>
+<li>network: keepalive-timeout was incorrectly applied to initial read (#4001, rep by Jamie Novak)</li>
+<li>quercus: WWW-Authenticate does not work (#4000, rep by hm2k)</li>
+<li>quercus: NullPointerException in Alarm (after Glassfish redeploy) (#3711, rep by ashamash)</li>
+<li>quercus: quercus-4.0.6.war incorrect version reporting (#4033)</li>
+<li>quercus: date_format() does not use user-set default time zone (#4034, rep by sblommers)</li>
+<li>quercus: report as php 5.2.1 (#3916, rep by derickso)</li>
+<li>quercus: parse_ini_file does not replace PHP Constants (#3878, rep by ice-breaker)</li>
+<li>quercus: PHP clone object is ignored? (#3607, rep by sblommers)</li>
+<li>quercus: error_display in php.ini (#4037, rep by wml)</li>
+<li>quercus: java.lang.NullPointerException on drupal admin/user/permissions (#4020, #4035, rep by alberto, sblommers)</li>
+<li>quercus: is_executable is broken (#3979, rep by domdorn)</li>
+<li>quercus: Wordpress MU Settings link causes exception (#3918, rep by chiefgeek)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.6 - April 6, 2010">
+<ul>
+<li>openssl: crypto threading issues with CRYPTO_set_locking_callback (#3531, #3740, rep by Benjamin Loy, bryan)</li> 
+<li>jni: socket accept/close changes to avoid fd leak (#3960, rep by rmann)</li>
+<li>jsp: jsp:param in jsp:include must encode '%' (#3976, rep by Aaron Freeman)</li>
+<li>servlet: escape status message for default error page (#3781, rep by Bill Au)</li>
+<li>class-loader: changed override order to match config order (#3773, rep by cyttesen)</li>
+<li>servlet: add cookie-domain-regexp to &lt;session-config> (#3865, rep by Matt Sporleder)</li>
+<li>watchdog: add &lt;jvm-arg-line> as shortcut for &lt;jvm-arg> (#3940, rep by Bill Au)</li>
+<li>log: print timestamp only for first item for multiline (#3229, rep by Jamison Novak)</li>
+<li>log: remove excess synchronization for log period calculation (#3814, rep by zenant)</li>
+<li>log: change date calculating to use TimeZone.getOffset(time) (#3853, rep by Jamison Novak)</li>
+<li>cdi: allow circular XML/EL definition of beans (#3954, rep by Hontvari Jozsef)</li>
+<li>classloader: avoid class loader deadlocks on ClassEntry (#3848, rep by zenant)</li>
+<li>jni: LD_LIBRARY_PATH handling moved from Watchdog to SystemClassLoader</li>
+<li>servlet: micro-second logging not properly matching start time (#3935, rep by mocospace)</li>
+<li>jsp: jsp:forward issues with buffer="10k" (#3922, rep by Danny Mann)</li>
+<li>jsp: SimpleTag parents not properly managed with fragments (#3953, rep by Jamison Novak)</li>
+<li>jni: readNative was not properly handling SO_RCVTIMEO (#3941, rep by Vinod Mehra)</li>
+<li>configure: --enable-64bit needs to enable both JNI and plugin (#3968, rep by Bill Au)</li>
+<li>cdi: ProcessInjectionTarget.getAnnotatedType() was returning null (#3967, rep by jharting)</li>
+<li>ejb: ejb-ref partial support added (rep by 3964, rep by Matthew Brew)</li>
+<li>jsp: x:forEach was not properly setting isFirst and isLast (#3752, rep by biku)</li>
+<li>rewrite: IfNetwork now supports IPv6 (#3903)</li>
+<li>ejb: ejb-server should no longer be required (rep by smallufo)</li>
+<li>network: IPv6 support (#3924, rep by webapps)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.5 - March 16, 2010">
+<ul>
+<li>mod_caucho: read timeout needs to repeat only on EINTR</li>
+<li>setup.exe: added GUI capability to install and remove Resin Services</li>
+<li>resin.exe: moved service installation commands (-install, -install-as, -remove, -remove-as) to setup.exe</li>
+<li>jsp: the implementation produced successful results with the latest JSP TCK V2.1b</li>
+<li>servlet: check isSecure() for NPE on close (#3938, rep by mocospace)</li>
+<li>jsp: check for *.jsf servlet causes NPE (#3937, rep by tangxj)</li>
+<li>servlet: welcome-file-list changes with *.jsf</li>
+<li>cloud: cluster single-signon no longer enabled automatically</li>
+<li>cloud: cluster store database stress test fixes (#3895, rep by smallufo)</li>
+<li>cloud: cluster store database was not properly handling QueryContext (#3850, rep by mocospace)</li>
+<li>watchdog: permissions issues with ports and log files (rep by Jamison Novak)</li>
+<li>admin: added HealthJvmDeadlock in com.caucho.env.health (#3912, rep by Jamison Novak, #3912)</li>
+<li>admin: refactored Sample and Probe to com.caucho.env.sample</li>
+<li>hessian: writeReplace should be allowed to return itself (rep by Jamison Novak, #3911)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.4 - Feb 23, 2010">
+<ul>
+<li>jni: improved error messages</li>
+<li>hessian: custom deserializer (#3632, rep by era)</li>
+<li>configure: check for cp -u (#3888, rep by Kaminsky, Leonid)</li>
+<li>configure: standardize default resin root, conf, and log directories</li>
+<li>web-app: web-app deploy with archive-and root-directory was not propery set (#3887, #3873, rep by chiefgeen)</li>
+<li>cdi: @ServiceType (@HessianService) was removing the bean from CDI (#3852, rep by Scott Hernandez)</li>
+<li>javac: external javac was busy-looping on the output causing heavy load (#3847, rep by mocospace)</li>
+<li>session: persistent sessions were not properly timed out (#3872, rep by chiefgeek)</li>
+<li>jpa 2.0: add com.caucho.env.jpa.DisabledPersistenceProvider (#3760, rep by Georg Busch Bech)</li>
+<li>jpa 2.0: api and CanDI integration</li>
+<li>ioc: issues with circular references (#3886, rep by Hontvari Jozsef)</li>
+<li>ioc: issues with CDI "diamond" creation (#3863, rep by Wesley Wu)</li>
+<li>jsp: TeamCity JSP related fixes (#3115)</li>
+<li>(2010-02-10) proxy-cache: missing write Lock on cache deallocation (#3885, rep by KovIS)</li>
+<li>logging: Logger.getHandlers() must return empty array instead of null (#3882, rep by Knut Forkalsrud)</li>
+<li>load-balance: setting of isSecure was not properly cleared (rep by Matt Pangaro)</li>
+<li>boot: check for Java 1.6 or later before start (#3862, rep by Tom Howard)</li>
+<li>ejb: MessageDriven updated to understand ConnectionFactoryJndiName</li>
+<li>mod_caucho: backup needs to hash the entire cookie for the new clustering (#3877)</li>
+<li>quercus: remove java_bean and java_lookup Resin dependencies (rep by domdom)</li>
+<li>junit: add com.caucho.junit.ResinJUnitRunner for junit</li>
+<li>embed: add com.caucho.resin.ResinContext for non-server embedding, e.g. testing.</li>
+<li>javaee: refactor @PersistenceContext, @PersistenceUnit, @Resource (#3708, rep by Wesley)</li>
+<li>deploy: git-expand needs to setLastModified of created files to consistent time (#3839, rep by Matt Pangaro)</li>
+<li>watchdog: "status" returns watchdog-pid (#3768, rep by cyttesen)</li>
+<li>watchdog: "status" queries Resin using HMTP/BAM for pid (#3768, rep by cyttesen)</li>
+<li>watchdog: jvm-args are first in command-line to help 'ps' control (#3759, rep by Nathan Bardsley)</li>
+<li>javac: use file.encoding as default encoding (#3719, rep by Shinomiya Nobuaki)</li>
+<li>ejb: update EJBException serialization (#3779, rep by C Yttesen)</li>
+<li>config: ${cluster} regression failure (#3842, rep by Jamie Novak)</li>
+<li>database-pool: connection timing issues with multiple request (#3837, #3779, rep by Bryant Harris)</li>
+</ul>
+</s2>
+
+
+<s2 title="4.0.3 - Jan 4, 2010">
+<ul>
+<li>mod_caucho: post/ack cleanup</li>
+<li>hessian: allow custom URL connector with HessianProxy</li>
+<li>hessian: avoid NPE on protocol corruption error (#3777, rep by Riccardo Cohen)</li>
+<li>hessian: patch for GAE compatibility (rep by Jeff Schnitzer)</li>
+<li>server: FileServlet handling of broken browser range requests (#3766, rep by Knut Forkalsrud)</li>
+<li>cluster: hmux idle timeouts not properly handled (#3812, rep by Wesley Wu)</li>
+<li>watchdog: race condition in log stream closing (#3807, rep by jnovak)</li>
+<li>server: add logging to track down TempBuffer issues (#3807, rep by jnovak)</li>
+<li>hessian: add UnsafeSerializer and deserializer</li>
+<li>ejb: @SessionPool to configure maxIdle and maxConcurrent (#3739, rep by Jeff Schnitzer)</li>
+<li>ejb: @PostConstruct not called on @Stateless (#3798, rep by voodude)</li>
+<li>hessian: HessianProxyFactory needs to consistently use the ClassLoader instead of Thread.contextClassLoader() (#2860, rep by jghallen)</li>
+<li>hessian: deserializer construct w/o calling constructors (#3357, rep by oehmiche)</li>
+<li>hessian: reading of InputStream as object not properly dispatched (#3634, rep by mate)</li>
+<li>hessian: string/binary encoding problems with 0x30-0x37 (#3690, rep by Adam Bryzak)</li>
+<li>hessian: HessianSkeleton.createDebugPrintWriter created to allow debug override (#3646, rep by Peter Dettman)</li>
+<li>hessian: add HessianProxyFactory.setConnectTimeout (#3658, rep by Patrik Stymne)</li>
+<li>hessian: EnumSet deserialization (#3663, rep by danwatt)</li>
+<li>server: hmux post/forward issues (#3793, rep by Jamison Novak and Wesley Wu)</li>
+<li>server: hmux load balancer with incorrect protocol for short-response post (#3790, rep by Wesley Wu)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.2 - Nov 24, 2009">
+<ul>
+<li>resin-admin: fixed cluster page not loading graphs (#3805)</li>
+<li>resin-admin: fixed pages does not respond to changing "Server:" error (#3806)</li>
+<li>resin-admin: fixed jmx page exception on Mac OSX 10.6.2 (#3782)</li>
+<li>resin.exe: fixed timeout issue when stopping resin(#3762)</li>
+<li>resin: max-uri-length configuration tag introduced to set limit on URIs served by Resin. Default is 1024.</li>
+<li>ubuntu: missing LSB information (#3720, rep by floating world)</li>
+<li>jsp: findAncestorWithClass() fails with tags nested in a tag file(#3436, rep by paru)</li>
+<li>security: add LoginList to allow both form and basic for /resin-admin REST (rep by Martin Thompson)</li>
+<li>admin: add /resin-admin/rest.php?q=mod_status to duplicate Apache's REST interface (#3730, rep by Martin Thompson)</li>
+<li>jsp: Faulty code generated for tag files with scriptlets (#3699, rep by daniel_larsson)</li>
+<li>async: poll socket periodically to test for client exit (#3294, rep by Caleb Richardson)</li>
+<li>(2009-10-28): BeanELResolver IllegalAccessException (#3727, rep on behalf of Kenneth Yeung)</li>
+<li>(2009-10-22) encoding: JSP response character encoding can be specified at jsp group property level</li>
+<li>(2009-10-12) encoding: default encoding is now set by file.encoding and defaults to utf-8 if no file.encoding exists</li>
+<li>watchdog: add watchdog-log configuration (#3566, rep by Pedre Neves)</li>
+<li>comet: wrapped request needs to work with comet (#3665, rep by Fiaz Hossain)</li>
+<li>config: relaxng forbid duplicate rules (#3595, rep by hmh)</li>
+<li>ssi: add basic SSI conditionals (#3534, rep by fly-away)</li>
+<li>jpa: issue with @ManyToOne and MappedSuperclass (#3335, rep by rdhauwe)</li>
+<li>vfs: paths with spaces in them caused trouble with class scanning and enhancement (#3574, rep by N. Shannon)</li>
+<li>servlet: sendRedirect in filter with artifactory (#3416, rep by Jan Kriesten)</li>
+<li>xml: XMLStream parsing for atlassian (#3651)</li>
+<li>session: add cookie-use-context-path and cookie-path</li>
+<li>loader: handle duplicate class definition errors (#3673, rep by Jamison Novak)</li>
+<li>config: add ${server.address} and ${server.port} (#3671, rep by Ken Roach)</li>
+<li>jsp: StaticMethodExpr needs serialization fix (#3677, rep by boris_kovalenko)</li>
+<li>jsp: jsp:attribute in tag file (#3228, rep by jens)</li>
+<li>log: update AbstractRolloverLog to eliminate long archive block (#3650, rep by Patrik Stymne)</li>
+<li>candi: scope adapter left in debugging (#3675, rep by hontvari)</li>
+<li>database: _idlePool and _pool must be synchronized together (#3660, rep by Shinomiya Nobuaki)</li>
+<li>database: cleanup connection idle pooling (#3052)</li>
+<li>admin: add database "Query Time" statistics (#3397, rep by Bryant Harris)</li>
+<li>admin: add "database" tab to admin and improve configuration visibility (rep by Bill Au)</li>
+<li>admin: add DatabaseMXBean and add getUrl() (#3664, rep by Bill Au)</li>
+<li>configure: MacOS-X was not properly detecting JVMTI for profile (#3000, rep by Bryant Harris)</li>
+<li>jsp: add CodeSigner for JSP class loader (#3657, rep by Kai Virkki)</li>
+<li>http-proxy: enable load-balancing (#3068, rep by Zeke)</li>
+<li>deploy: -preview now detaches server from load balancing (#3345)</li>
+<li>ejb: session beans were not initialized in correct context (#3603, rep by Matthew Brew)</li>
+<li>session: add "java" as a session serialization type (#3648, rep by Mattias Jiderhamn)</li>
+<li>servlet: allow-forward-after-flush allows forward after response has been commited (feature) (#3580, rep by andrewm)</li>
+<li>admin: add ping-url for server-independent ping testing (#3605, rep by John Bowen)</li>
+<li>security: ClusterSingleSignon in cluster and host (#3467, rep by Scott Hernandez)</li>
+<li>ejb: TimerService needs to be injectalbe (#3572)</li>
+<li>ejb: ear scanning issues (#3583)</li>
+<li>ejb: .ear manifest with class-path prevented detection of ejbs (#3601, rep by mbrew)</li>
+<li>vfs: ReadStream.skip incorrectly updated index with negative skip (#3542, rep by Jamison Novak)</li>
+<li>embed: add resetLogManager() and call it by default in ResinEmbed (#3530, rep by Daniel Lopez)</li>
+<li>jpa: EntityManager.getDelegate() needs to create delegate if none exists (#3537, rep by voodude)</li>
+<li>embed/maven: ResinEmbed.initializeEnvironment() must start JNDI (#3486, rep by Jan Kriesten)</li>
+<li>admin: -agentlib:resin start cleanup (#3118 rep by bubek)</li>
+<li>vfs: NotFoundPath (error:) needs to be able to lookup absolute paths (#3628, #3475, rep by kvirkki)</li>
+<li>jsp: Jspc ant/maven task needs to disable resource-ref validation (#3577, rep by Boris Goykhman)</li>
+<li>jpa: registration of EntityManagerFactory incorrect (#3429, rep by Scott Hernandez)</li>
+<li>jpa: registration of PersistenceContext incorrect (#3622, rep by Jeff Schnitzer)</li>
+<li>server: QDate isLeapYear using _year field instead of argument (#3512, rep by damaan)</li>
+<li>amber: query maxResults issues (#3424, rep by Riccardo Cohen)</li>
+<li>web-app: check error case where root-directory with .war expansion is same as root (#3535, rep by voodude)</li>
+<li>security: request and SecurityContext isUserInRole share implementation (#3501, rep by skot)</li>
+<li>cron: use getCurrentTime() consistently for Alarm (#3548, rep by mkenney)</li>
+<li>ping: add freeze-timeout to PingThread configuration (#3592, rep by C. Karantzas)</li>
+<li>mod_caucho: use load-balance-connect-timeout for mod_caucho (#3642)</li>
+<li>xa: _transactionList rollback needs to be outside of synchronized (#3571, rep by jacky)</li>
+<li>jni: user-name fix with 64-bit start (#3521, rep by norlab)</li>
+<li>eclipse: server wizard cleanup and enhancement</li>
+<li>eclipse: spaces in path (#3589, rep by Michael Ludwig)</li>
+<li>eclipse: respect http port (#3502, rep by Michael Ludwig)</li>
+<li>eclipse: invalid chars in hot deploy (#3503, rep by Michael Ludwig)</li>
+<li>eclipse: deploy from temp directory (#3515, req by Yujin Kim)</li>
+<li>eclipse: breakpoints (#3484, rep by Doug and sblommers)</li>
+<li>embed: EmbedPort getLocalPort() returns ephemeral port (#3567, rep by zed)</li>
+<li>xml: XMLStreamReaderImpl on bad input (#2989, rep by Bill Au)</li>
+<li>servlet: footer/md5 HTTP handling (#3044, rep by Eric Bowman)</li>
+<li>thread: ThreadPool cleanup (#3645, rep by Daniel Wigenfors)</li>
+<li>jsp: BeanELResolver accessible issues (#3598, rep by rymsha)</li>
+<li>deploy: staging and versioning capacilibies (#3514, rep by Yujin Kim)</li>
+<li>cluster: add com.caucho.cluster.LockManager for distributed locking (#3464, rep by Martin Thompson)</li>
+<li>build: jsf-api.jar needs to be in src distribution (#3633, rep by joey)</li>
+<li>loader: sync/deadlock in EnvironmentClassLoader on startup (rep by Patrik Styme, #3641)</li>
+<li>jms: ClusterQueue single consumer (#2766, rep by Eric Masson)</li>
+<li>servlet: include/forward should not trigger request events (#3111, rep by tempestse)</li>
+<li>http: refactor to eliminate buffer/session reuse for subsequent requests (#3557, rep by Kevin Kilmer-Choi)</li>
+<li>servlet: forward attribute issues with wrappers (#3059, rep by masum)</li>
+<li>server: content-length counting issues (#3619, rep by Matthew Schmidt)</li>
+<li>jmx: IntrospectionMBean _attrGetMap needs to be synchronized (#3620, rep by ebarlas)</li>
+<li>jsse: added jsse cipher-suite support (#3593, rep by vbavin)</li>
+<li>jni: JNI detection of clientdisconnect issues (rep by Fiaz Hossain)</li>
+<li>quercus: image fixes for vbulletin</li>
+<li>quercus: ksort fixes for vbulletin</li>
+<li>quercus: WordPress: Post revisions not shown (#3753)</li>
+<li>quercus: Avoid recursive instropection of methods. (#3748, rep by PeterJ)</li>
+<li>quercus: quercus request for support for $_SERVER["REQUEST_TIME"] (#3712, rep by ashamash)</li>
+<li>quercus: Enable overridding of setting TYPE_SCROLL_INSENSITIVE (#3746, rep by PeterJ)</li>
+<li>quercus: date_timezone_set does not update date correctly (#3737, rep by damien)</li>
+<li>quercus: jetty: ClassNotFoundException for org.eclipse.jetty.server.AsyncContext (#3733, rep by andjarnic)</li>
+<li>quercus: is_object and is_resource return wrong results in many cases (#3701, rep by PeterJ)</li>
+<li>quercus: isset returns wrong answer with multiple variables (#3702, rep by PeterJ)</li>
+<li>quercus: failure in simplexml_load_string() (#3476, rep by jredden)</li>
+<li>quercus: quercus 4.0.1 is missing QuercusServlet (#3674, everflux)</li>
+<li>quercus: phpBB3 - Links not displaying (#3637, rep by GT500)</li>
+<li>quercus: java.lang.NullPointerException running Yii (#3541, rep by johnsavior)</li>
+<li>quercus: Drupal and OpenID (#3609, rep by B. Wu)</li>
+<li>quercus: QuercusParseException - missing semicolon within a scriptlet php tag. (#3668, rep by kenfoo)</li>
+<li>quercus: StringBuilderValue.create() is not performing a "&amp; 0xFF" on the character value (#3654, rep by kenfoo)</li>
+<li>quercus: ErrorException is missing (#3667, rep by kenfoo)</li>
+<li>quercus: substr_compare failed (#3662, rep by jindw)</li>
+<li>quercus: Quercus allows to make non-abstract function abstract again (#3644, rep by tlandmann)</li>
+<li>quercus: count() error with recursive (#3586, rep by Hoang)</li>
+<li>quercus: PHP-style hash algorithm names not supported (#3513, rep by koreth)</li>
+<li>quercus: Quercus $foo->getClass() method (#3555, rep by Herbert)</li>
+<li>quercus: NumberFormatException when calling $result = file_get_contents($url) (#3587, rep by tomi_m)</li>
+<li>quercus: instanceof parsing precedence (#3621, rep by H. Punt)</li>
+<li>quercus: isset() returns FALSE for $_SESSION (#3636, rep by rabbitism)</li>
+<li>quercus: static function variables not "really" static (#3610, rep by tlandmann)</li>
+<li>quercus: wordpress 2.8.1 and resin load-balancing - can't login (#3624, rep by J. Novak)</li>
+<li>quercus: mail() does not handle multi-line headers properly (#3616)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.1">
+<ul>
+<li>session: save-mode='before-header' should not serialize sessions after the request (rep by Gagan Chaudhari)</li>
+<li>server: chunking issues with filled content (rep by Rick Mann)</li>
+<li>gzip: empty gzip response should return 0 bytes (#3599, rep by martin thompson)</li>
+<li>jsp: jsp recompilation detection for WEB-INF/tags (#3578, rep by rmann)</li>
+<li>(2009-07-14) jsf: ViewExpiredException with JSF RI(#3517, on behalf of Matthew Schmidt)</li>
+<li>server: host-default and web-app-default were included multiple times (#3554, rep by Jean Padilla)</li>
+<li>candi: scope-adapter bytecode issues with more than 3 arguments (#3564, rep by wesley)</li>
+<li>xa: allow synchronization added in beforeCompletion to also be called by beforeCompletion (#3559, rep by Peter Pastrnak)</li>
+<li>cache: jsp/include/html was not properly cached (#3379, rep by Driss Louriagli)</li>
+<li>servlet: error page file-not-found is reporting the original URL, not the missing error page (#3561, rep by Abhishek Neralla)</li>
+<li>watchdog: start can create a new task if the old one is in the process of shutting down (#3527, rep by Rob Lockston)</li>
+<li>watchdog: stop needs to wait for Resin to exit (#3528, #3418, rep by Rob Lockstone)</li>
+<li>watchdog: require "console" option, and forbid command-line without command</li>
+<li>hessian: hessian 1.0/2.0 debug conflict for date ('d' vs \x4a) (#3452, rep by Rick Mann)</li>
+<li>candi: multiple registration issue with @ApplicationScoped HessianService (#3543, rep by skot)</li>
+<li>dist-session: open source wasn't properly saving (#3545, rep by Mattias Jiderhamn)</li>
+<li>candi: resin-web.xml needs to override scanned beans (#3546, rep by voodude0</li>
+<li>hessian: issues with 2 vs 1 version detection (#3036, rep by skipper13)</li>
+<li>candi: stack overflow with EL config (#3480, rep by Scott Hernandez)</li>
+<li>ejb: @Current SessionContext injection for stateful/session (#3506, rep by skot)</li>
+<li>candi: increase priority of XML over discovered beans (#3507, rep by Jeff Schnitzer)</li>
+<li>embed: ResinEmbed support for non-empty cluster and server names (#3498, rep by skot)</li>
+<li>server: isUserInRole NPE in AbstractHttpRequest (#3489, rep by voodude)</li>
+<li>build: ant dist build.xml optional for Makefile.in (#3490, rep by skot)</li>
+<li>hessian: java.lang.Object (#3448)</li>
+<li>hessian: Byte/Short as handles</li>
+<li>jni: RandomAccessFile JNI code missing mode (#3442, rep by koreth)</li>
+<li>jsp: jsp:useBean with generic type and XML validation (#3455, rep by kir)</li>
+<li>jsp: prelude with include NPE (#3508, rep by Shinomiya Nobuaki)</li>
+<li>deploy: error messages and documentation for remote deploy not clear for BAM/HMTP (#3477, rep by Scott Hernandez)</li>
+<li>quercus: Curl has issues with urls having @ in it (#3585, rep by anash)</li>
+<li>quercus: Wordpress 2.8.1 parent constructor call (#3597, rep by csw)</li>
+<li>server: UTF8Reader with byte-order-mark needs to read full next character (#3525, rep by Fiaz Hossain)</li>
+<li>jca: max-active-time default needs to changed to Long.MAX_VALUE instead of Integer.MAX_VALUE (rep by KC Baltz)</li>
+<li>log: SyslogHandler has improper initialization (rep by Michael Glenney)</li>
+<li>class loader: remove potential classloadering deadlock based on ClassEntry lock (#3423, rep by stbu)</li>
+<li>database: driver support for META-INF/services and url without type</li>
+<li>database: DataSource now allowed as a driver type (#3318, rep by atifmk)</li>
+<li>server: web-app versioning updates with /ROOT (#3466, rep by sibyj)</li>
+<li>server: HTTP PrintWriter with i18n double-byte encoding overrun (#3434, rep by Fiaz Hossain)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.0 - May 5, 2009">
+<ul>
+<li>security: ClusterSingleSignon logging wrong class (rep by Scott Hernandez)</li>
+<li>thread pool: improve detection of illegal internal thread state (rep by Takahiro Fukuda)</li>
+<li>(2008-04-08) thread: ThreadPool initialization needs to be synchronized because of lazy-init (rep by Dannis Devota)</li>
+<li>jsp: BeanInfo vs introspection for tags (#3066, rep by Mike McNally)</li>
+<li>classloader: maven classloader replaces osgi</li>
+<li>jsp: trimDirectiveWhitespaces was ignored for tag files (#3386, rep by kvirkki)</li>
+<li>admin: PingMailer updated to Java Injection (#3257, rep by kenjrwalker)</li>
+<li>session: timeout/listener updates (#3116, rep by Richard Grantham)</li>
+<li>rewrite: &lt;dispatch> needs to change Invocation (#3067, rep by Leonid Geller)</li>
+<li>admin: sort_webapp duplicate error in /resin-admin (#3405, rep by c. whalley)</li>
+<li>ioc: add @Produces foo(InjectionPoint ij)</li>
+<li>jsp: UTF-8 BOM should not force text/html (#3062, rep by CnXiaowei)</li>
+<li>proxy-cache: Authorization header should not disable proxy caching (#3065, rep by Daniel Wigenfors)</li>
+<li>servlet: sendRedirect URL encoding to use iso-8859-1 when character encoding set (#3032, rep by bjopet)</li>
+<li>hessian: timeout on http connection clear needs to be short (#3039, rep by Jeff Porter)</li>
+<li>http: improve error message on chunked encoding (#3021, rep by e_rajasekar)</li>
+<li>error: allow custom error page for 400 bad request errors (#3008, rep by Vinod Mehra)</li>
+<li>jsp: error parsing should ignore encoding errors (#2967, rep by Takahiro Fukuda)</li>
+<li>load balance: dynamic servers (#2867, rep by Dana P'Simer)</li>
+<li>load balance: add green load balancing (#2831)</li>
+<li>admin: added URL to thread dump when available (#3194, rep by Keith Paulson)</li>
+<li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>
+<li>log: non-gz/zip archiving now uses rename instead of copy</li>
+<li>log: added ${request}, ${session}, ${cookie} to log format (#3255, rep by Philippe Collard)</li>
+<li>log: multiline logs like thread dumps should not have extra timestamps (#3229, rep by Jamison Novak)</li>
+<li>rewrite: &lt;dispatch> should not modify uri unless it has a target (#3295, rep by Ethan Larson)</li>
+<li>distcache: distributed cache update times must be deltas because of clock skew (#3161, rep by Dushyanth Harinath)</li>
+<li>jms: commit() NPE check (#3287, rep by tyson weihs)</li>
+<li>rewrite: new rewrite rules allow custom dispatching (#3096, rep by Leonid Geller)</li>
+<li>rewrite: &lt;rewrite:SetHeader>,&lt;rewrite: Location> (#3381, rep by Andrea Sodomaco)</li>
+<li>rewrite: request-secure disabled access log (#3354, rep by Tamas Pinter)</li>
+<li>security: &lt;secure> interaction with auth-constraint (#3333, rep by stbu)</li>
+<li>servlet: add &lt;cron> syntax for servlet (#3188, rep by mate)</li>
+<li>boot: update setuid/setgid code (#3330, rep by tlandmann)</li>
+<li>quercus: charAt needs to check range (#3363, rep by gyvc)</li>
+<li>boot: improve bind error messages for failed binding (#3193, #3204, rep by sibyj)</li>
+<li>dist: init.d/resin.in distribution changes (#3374, rep by jkriesten)</li>
+<li>(2009-03-18) mod_caucho: only allow one thread to update config for worker model</li>
+<li>win32: truncate applied incorrect file mode for new file (#3382, rep by Kair Virkki)</li>
+<li>(2009-02-26) boot: windows machines can't add -server option automatically (#3331)</li>
+<li>inject: findByName needs to work during shutdown (#3334, rep by stbu)</li>
+<li>make: "make clean" not properly propagated in modules/c/src/Makefile (#3340, rep by copart)</li>
+<li>boot: add system-class-loader configuration (#3339, rep by toomasr)</li>
+<li>servlet: run-at race condition on web-app restart (rep by stbu, #3342)</li>
+<li>boot: update messages for Quercus Personal (#3352)</li>
+<li>quercus: $f($v) with foo(&amp;$v) declaration (#3351, rep by koreth)</li>
+<li>(2009-02-23) jms: btree split off-by-one issue (#3287, rep by tyson weihs)</li>
+<li>jms: file missing primary declaration (#3287, rep by tyson weihs)</li>
+<li>hessian: Annotation support</li>
+<li>hessian: AbstractSerializer changes to improve usability</li>
+<li>hessian: META-INF/hessian/serializers and deserializers</li>
+<li>server: sync performance with Encoding (#3226, rep by lookis)</li>
+<li>quercus: hmac performance (#3297, rep by koreth)</li>
+<li>server: cron syntax not properly handling day of week (#3248, rep by mate)</li>
+<li>mod_caucho: content-length not properly propagated (#2995, rep by uwe schaefer)</li>
+<li>(2009-01-27) inject: update packaging to latest Java Injection draft</li>
+<li>make: makefiles updated to use $(CC) instead of $(LD) (#3267, rep by dicr)</li>
+<li>admin: add &lt;resin-data-directory> to replace admin path</li>
+<li>remote: &lt;remote:BamService> replaces &lt;bam-service></li>
+<li>quercus: batch compiled files (#3261, rep by koreth)</li>
+<li>quercus: strtotime with date and not time needs to zero-out time (#3177, rep by dmaa)</li>
+<li>quercus: FilterIterator (#3214, rep by koreth)</li>
+<li>quercus: stub out CURLOPT_MAXREDIRS (#3126, rep by koreth)</li>
+<li>quercus: double printing needs to match php (#3279, rep by koreth)</li>
+<li>quercus: curl CURLOPT_POSTFIELDS needs to understand array (#3281, rep by koreth)</li>
+<li>quercus: microtime() was using System.nanos() incorrectly (#3280, rep by koreth)</li>
+<li>quercus: date() not using default timezone (#3273, rep by koreth)</li>
+<li>quercus: pwd not working properly in passthru (#3247, rep by mikhailb)</li>
+<li>quercus: get_object_vars must not use iterator (#3253, rep by haplo)</li>
+<li>quercus: Java interfaces not properly populating instanceof (#3230, rep by haplo)</li>
+<li>quercus: ArrayIterator constructor issues (#3239, #3253, rep by haplo)</li>
+<li>quercus: instanceof not working with Java classes (#3242, rep by haplo)</li>
+<li>quercus: static variables related to late static binding (#3225, rep by koreth)</li>
+<li>osgi: getLocalResource needs to check for loader null (#3236, rep by koreth)</li>
+<li>jsf: f:view not bound when using jsf:ri with xml syntax (#3102, rep by alex)</li>
+<li>(2008-01-05) quercus: instanceof issues with Exceptions (#3209, rep by koreth)</li>
+<li>quercus: regexp handling of /[\p{Arabic}]/ (#3131, rep by koreth)</li>
+<li>quercus: classes scope to the dynamic class, not static class (#3213, rep by koreth)</li>
+<li>quercus: abstract class not properly initialized in statement (#3216, rep by koreth)</li>
+<li>quercus: i18n issues with "set names" (#3203, rep by M Schmidt)</li>
+<li>quercus: array copyOnWrite issue with _var vs _value (#3210, rep by koreth)</li>
+<li>quercus: array return value from external call (#347b, rep by koreth)</li>
+<li>quercus: json_decode of '{}' not handled properly, cont (#3201, rep by koreth)</li>
+<li>(2008-12-29) quercus: json_decode of '{}' not handled properly (#3197, rep by koreth)</li>
+<li>quercus: add profile-probability="0.001" to QuercusServlet (#3200, rep by koreth)</li>
+<li>quercus: NPE for preg_match and "/^x|^x/" (#3198, rep by koreth)</li>
+<li>security: add WebBeans-style configuration, e.g. &lt;sec:FormLogin>, &lt;sec:XmlAuthenticator</li>
+<li>session: convert to TriplicateCache</li>
+<li>cluster: convert to ClusterTriad</li>
+<li>watchdog: convert to BAM</li>
+<li>quercus: regexp needs to handle anchor optim (#3195, rep by koreth)</li>
+<li>install: Mac OS X flags for 64 bit</li>
+<li>security: authentication generation of cookies should be optional (#3049, rep by Eric Bowman)</li>
+<li>gzip: if application sets Vary, do not add extra Vary (#3043, rep by Eric Bowman)</li>
+<li>config: Resin config vars like ${server} should not affect JSP EL (#3078, rep by Jan Kriesten)</li>
+<li>jmx: remove admin-dummy-root for remote service (#3087, rep by dicr)</li>
+<li>jstl: ${cookie.foo} with no cookies causes NPE (#3023, rep by vicsanca)</li>
+<li>session: SessionManager.createSession check for initialization (#3074, rep by dicr)</li>
+<li>boot: watchdog communication proxy not setting proper classloader (#3174, rep by koreth)</li>
+<li>amber: @ManyToOne issue with @JoinColumn not specifying name (#3081, rep by dicr)</li>
+<li>amber: @Version fixes for java.sql.Timestamp (#3080, rep by dicr)</li>
+<li>config: webApp.url should default to http://localhost instead of http://default (#3035, rep by skipper13)</li>
+<li>config: resin:import will throw config exception is include file exists bug is not readable (#3076, rep by dicr)</li>
+<li>server: reduce default BlockManager size (#3054, rep by Daniel Vydra)</li>
+<li>amber: @Entity wasn't allowing protected constructor (#3071, rep by dicr)</li>
+<li>admin: log-service default changed to 'warning' (#3084, rep by Bryant Harris)</li>
+<li>build: debian web user should be 'www-data' (#3124, rep by Geert Van Damme)</li>
+<li>quercus: $GLOBALS array regression (#3176, rep by koreth)</li>
+<li>quercus: compress.zlib parsing error (#3171, rep by koreth)</li>
+<li>quercus: $_SERVER and $HTTP_SERVER_VARS not identical (#3168, rep by koreth)</li>
+<li>quercus: stream_get_meta_data extra logging (#3170, rep by koreth)</li>
+<li>quercus: class static fields must be handled as mangled globals (#3155, #3165, rep by koreth)</li>
+<li>quercus: DoubleValue issues in assignments, e.g. for commas (#3163, rep by koreth)</li>
+<li>quercus: array copy-on-write issues with latest optimizations (#3160, rep by koreth)</li>
+<li>quercus: unset compilation issues with latest optimizations (#3157, rep by koreth)</li>
+<li>jsf: invalid input is not redisplayed in JSF UI Input (#3057, rep by freemant)</li>
+<li>quercus: resin_save_state()/resin_restore_state() (rep by koreth)</li>
+<li>server: 304 was not properly ignoring content (#3089, rep by Andrew Phillips)</li>
+<li>quercus: catch regexp stack overflow and log (rep by koreth)</li>
+<li>quercus: array_shift regression (#3150, rep by koreth)</li>
+<li>quercus: array($x = 3) compilation issue (#3139, rep by koreth)</li>
+<li>quercus: experimental lazy function classloading (rep by koreth)</li>
+<li>quercus: NPE with func_get_args (#3103, rep by koreth)</li>
+<li>core: added StreamSource for hessian serialization</li>
+<li>hessian: added AbstractStreamSerializer and AbstractStreamDeserializer</li>
+<li>hessian: added *HessianSerializer and *HessianDeserializer pattern</li>
+<li>jsf: Application MessageBundle fixes (#3056, rep by freemant)</li>
+<li>jsf: JSF State with Serializable ActionListener (#3058, rep by freemant)</li>
+<li>server: ThreadLocal removal/cleanup</li>
+<li>admin: change profile default to 10ms</li>
+<li>http: 304 should not return content-length (#3089, rep by Andrew Phillips)</li>
+<li>admin: changed log-service default logging level to WARNING (rep by Bryant Harris)</li>
+<li>memory: DispatchRequest._invocation needs to be cleared (rep by Mattias Jiderhamn)</li>
+<li>session: clustering triplicate='true' with only one server (rep by Mark Morgan)</li>
+<li>database: NPE in ConnectionPool.destroy() (#3070, rep by dicr)</li>
+<li>thread: thread pool load smoothing (rep by Martin Thompson)</li>
+<li>boot: watchdog kill NPE (#3009, rep by stbu)</li>
+<li>persistent-store: sessions larger than 4M were not properly persisted (#3025, rep by mate)</li>
+<li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
+<li>admin: OSGi bundles now registered as OsgiBundleMXBean</li>
+<li>admin: WebBeans now registered as WebBeanMXBean</li>
+<li>Servlet: various fixes for Servlet TCK</li>
+<li>JSP: various fixes for JSP TCK</li>
+<li>WebBeans: javax.webbeans.manager.Manager and Bean are new SPI for WebBeans</li>
+<li>WebBeans: @Current replaces @In as default @BindingType</li>
+<li>WebBeans: &lt;Deploy> enables @DeploymentType and establishes priority</li>
+<li>WebBeans: @DeploymentType replaces old @ComponentType</li>
+<li>WebBeans: @Named semantics changes for new draft - Named is no longer a @BindingType and no longer automatically names beans</li> 
+<li>WebBeans: move web-beans.xml to root from META_INF for new draft</li>
+<li>WebBeans: new XML web-beans.xml syntax for new draft</li>
+</ul>
+</s2>
+
+<p>
+
+<ul>
+<li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
+</ul>
+
+<a href="changes-3.xtp">Resin 3 changes</a>
+<a href="changes-31.xtp">Resin 3.1 changes</a>
+<a href="changes-2.xtp">Resin 1.2 changes</a>
+<a href="changes-1.xtp">older changes</a>
+</p>
+</s1>
+</body>
+</document>

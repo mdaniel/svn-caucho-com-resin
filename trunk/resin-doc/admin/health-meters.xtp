@@ -1,0 +1,176 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Health Meters</title>
+  <description>
+  <p>Health meters are a simple way to create visually pleasing graphs in 
+  /resin-admin.</p>
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Configuration">
+
+<s2 title="health.xml">
+
+<p>Meters are configured as part of <b>health.xml</b> using 
+<a href="../admin/config-candi.xtp">CanDI</a> to create and update Java 
+objects.  Refer to <a href="../admin/health-checking.xtp#Configuration">health 
+checking configuration</a> for a full description of health.xml.  Resin 
+4.0.17 and later includes a full compliemnt of pre-configured JMX meters 
+in health.xml.</p>
+
+<example title="Example: importing health.xml into resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+  &lt;cluster-default>  
+    ...
+    &lt;!--
+       - Admin services
+      -->
+    &lt;resin:DeployService/>
+    
+    &lt;resin:if test="${resin.professional}">
+      &lt;resin:AdminServices/>
+    &lt;/resin:if>
+
+    &lt;!--
+       - Configuration for the health monitoring system
+      -->
+    &lt;resin:if test="${resin.professional}">
+      &lt;resin:import path="${__DIR__}/health.xml" optional="true"/>
+    &lt;/resin:if>
+    ...
+  &lt;/cluster-default>
+&lt;/resin>
+</example>
+
+<p>Note: <code>&lt;resin:AdminServices/></code> (or more precisely just 
+<code>&lt;resin:StatsService/></code>) is required to support health meters
+and graphing.</p>
+
+</s2>
+
+<s2 title="Meter names">
+
+<p>Health meters are named using a concatenation of keys separated by pipe (|) 
+characters, loosely organized from least specific to most specific.  Since 
+meter statistics are shared between each member in a Resin cluster, Resin will 
+automatically prefix each meter name with the cluster node index to insure 
+the name is unique between cluster members.</p>
+
+<p>The pipe character in the name provides a secondary benefit of helping to 
+enhance the /resin-admin UI by categorizing meters into drill downs.  
+Consider the following example.</p>
+
+<example title="Example: meter naming">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:JmxDeltaMeter>
+    &lt;name>JVM|Compilation|Compilation Time&lt;/name>
+    &lt;object-name>java.lang:type=Compilation&lt;/object-name>
+    &lt;attribute>TotalCompilationTime&lt;/attribute>
+  &lt;/health:JmxDeltaMeter>
+
+&lt;/cluster>
+</example>
+
+<p>In this example, <code>JVM|Compilation|Compilation Time</code> provides 
+the base of the name.  For cluster node index 0, Resin prefixes the name 
+with <code>00|</code>.  /resin-admin will then use the cluster index and first 
+two keys to create drill downs to logically organized meters for display.</p>
+
+<figure src="health-meters.png" alt="Graphs: 00|JVM|Compilation|Compilation Time, Time:1 Hour" width="600"/>
+
+</s2>
+
+</s1>
+
+<s1 title="JMX meters">
+
+<p>Virtually any local numeric JMX MBean attribute can be graphed using 
+JMX meters.</p>
+
+<include-defun name="health:JmxMeter"/>
+
+<include-defun name="health:JmxDeltaMeter"/>
+
+</s1>
+
+<s1 title="Statistical Analysis">
+
+<s2 title="Detecting Anomalies">
+
+<p>Meters alone are useful for manual inspection in resin-admin since every 
+meter can be graphed. However Resin provides an extremely useful automatic 
+analysis tool called AnomalyAnalyzer. AnomalyAnalyzer looks at the current 
+meter value, checking for deviations from the average value. So unusual 
+changes like a spike in blocked threads can be detected.</p>
+
+<include-defun name="health:AnomalyAnalyzer"/>
+
+</s2>
+
+<s2 title="Standard Anomaly detection">
+
+<p>The default health.xml configures some general anomaly analysis.
+In general, anomaly detection can tell you when something went wrong in the
+server. It looks for unusual spikes of behavior by recording an average baseline
+for a value and then looking for deviations.</p>
+
+<ul>
+<li>"File Descriptor Count" - counts open files and open TCP sockets. Examples include
+denial of service attacks (TCP) or open file leaks.</li>
+<li>"JVM Thread Count" - detects thread spawning. Examples include services that
+spawn too many threads, a likely application bug.</li>
+<li>"JVM Runnable Count" - detects active threads. Examples include CPU spikes or
+infinite looping code, a likely application bug.</li>
+<li>"JVM Waiting Count" - detects threads waiting for other threads. Examples include
+synchronization bottlenecks like deadlocks or livelocks, likely application or library
+bugs.</li>
+<li>"JVM Blocked Count" - detects threads waiting for other threads. Examples include
+synchronization bottlenecks like deadlocks or livelocks, likely application or library
+bugs.</li>
+<li>"Database|Connection Active" - detects database connection spikes. Examples include
+database problems.</li>
+<li>"HTTP|Request Time" - detects spikes in HTTP requests. Examples include
+problems in the application, e.g. blocking. Useful to take a thread dump to
+debug further.</li>
+<li>"HTTP|Ping Time" - detects spikes in HTTP requests. Examples include
+problems in the application, e.g. blocking. Useful to take a thread dump to
+debug further.</li>
+<li>"Port|Throttle Disconnect Count" - detects throttling of attempted TCP connections.
+Either DOS attacks or an overloaded system.</li>
+<li>"HTTP|400" - detects spikes in redirects.</li>
+<li>"HTTP|500" - detects spikes in server exceptions. Indication of application
+bugs.</li>
+<li>"Cluster|Message Read Count" - detects overloads in cluster messages. Indication
+of a Resin cluster issue.</li>
+<li>"Cluster|Message Write Count" - detects overloads in cluster messages. Indication
+of a Resin cluster issue.</li>
+</ul>
+
+
+</s2>
+
+<s2 title="Reacting to Anomalies">
+
+<p>The &lt;health-event> attribute of AnomalyAnalyzer allows us to tie health 
+actions to a detected anomaly by using the &lt;health:IfHealthEvent> 
+condition.</p>
+
+<include-defun name="health:IfHealthEvent"/>
+
+</s2>
+
+</s1>
+
+</body>
+
+</document>
