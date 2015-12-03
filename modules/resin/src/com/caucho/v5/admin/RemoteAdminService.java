@@ -73,6 +73,8 @@ public class RemoteAdminService
     _server = HttpContainer.getCurrent();
 
     if (_server == null) {
+      if (true) return;
+      
       throw new ConfigException(L.l("<admin:{0}> may only be instantiated in an active server",
                                     getClass().getSimpleName()));
     }
