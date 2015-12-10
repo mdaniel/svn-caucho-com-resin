@@ -29,38 +29,29 @@
 
 package com.caucho.v5.config.types;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.DefaultLiteral;
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.config.types.InitParam;
-import com.caucho.v5.config.types.InjectionTarget;
-import com.caucho.v5.config.types.Validator;
-import com.caucho.v5.el.Expr;
+import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.inject.spi.Bean;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Configuration for the init-param pattern.
@@ -267,11 +258,13 @@ public class ResourceRef extends ResourceGroupConfig
     }
     
     if (_value == null && getLookupName() == null) {
-      CandiManager cdiManager = CandiManager.getCurrent();
+      InjectManager cdiManager = InjectManager.current();
       
+      /*
       Set<Bean<?>> beans = cdiManager.getBeans(_type);
       
       _bean = cdiManager.resolve(beans);
+      */
     }
 
     
@@ -287,14 +280,21 @@ public class ResourceRef extends ResourceGroupConfig
   {
     Object value;
    
-    if (_value != null)
+    if (_value != null) {
       value = _value;
-    else if (getLookupName() != null)
+    }
+    else if (getLookupName() != null) {
       return JndiUtil.lookup(getLookupName());
-    else {
-      CandiManager cdiManager = CandiManager.getCurrent();
+    }
+    else if (_type != null) {
+      InjectManager cdiManager = InjectManager.current();
       
-      value = cdiManager.getReference(_bean);
+      value = cdiManager.create(_type);
+      //value = cdiManager..create(_bean);
+      //value = null;
+    }
+    else {
+      value = null;
     }
     
     return value;

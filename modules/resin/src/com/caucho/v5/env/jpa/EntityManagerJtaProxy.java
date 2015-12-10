@@ -38,6 +38,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -45,10 +46,8 @@ import javax.persistence.metamodel.Metamodel;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
-import javax.persistence.TransactionRequiredException;
 import javax.transaction.Transaction;
 
-import com.caucho.v5.config.candi.HandleAware;
 import com.caucho.v5.transaction.ManagedResource;
 import com.caucho.v5.transaction.ManagedXAResource;
 import com.caucho.v5.transaction.TransactionImpl;
@@ -62,7 +61,7 @@ import com.caucho.v5.util.L10N;
  */
 @SuppressWarnings("serial")
 public class EntityManagerJtaProxy
-  implements EntityManager, java.io.Serializable, HandleAware
+  implements EntityManager, java.io.Serializable // , HandleAware
 {
   private static final L10N L = new L10N(EntityManagerJtaProxy.class);
   private static final Logger log

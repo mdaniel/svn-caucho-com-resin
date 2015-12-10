@@ -31,8 +31,6 @@ package com.caucho.v5.config.program;
 
 import java.util.Hashtable;
 
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
-
 /**
  * Creates a new value.
  */

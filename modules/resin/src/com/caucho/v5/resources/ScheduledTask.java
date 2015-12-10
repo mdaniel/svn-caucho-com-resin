@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.el.ELContext;
 import javax.el.MethodExpression;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -47,8 +46,6 @@ import javax.servlet.RequestDispatcher;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.Unbound;
-import com.caucho.v5.config.candi.CandiELContext;
-import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.types.CronType;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.types.Trigger;
@@ -201,7 +198,8 @@ public class ScheduledTask
     if (_task != null) {
     }
     else if (_method != null) {
-      _task = new MethodTask(_method);
+      //_task = new MethodTask(_method);
+      throw new UnsupportedOperationException();
     }
     else if (_url != null) {
       _task = new ServletTask(_url, _webApp);
@@ -319,6 +317,7 @@ public class ScheduledTask
     return getClass().getSimpleName() + "[" + _task + "," + _trigger + "]";
   }
 
+  /*
   public static class MethodTask implements Runnable {
     private static final Object[] _args = new Object[0];
     
@@ -341,6 +340,7 @@ public class ScheduledTask
       return getClass().getSimpleName() + "[" + _method + "]";
     }
   }
+  */
 
   public class ServletTask implements Runnable {
     private String _url;

@@ -29,27 +29,17 @@
 
 package com.caucho.v5.config.j2ee;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Resource;
-import javax.annotation.Resources;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.BeanValueGenerator;
-import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.config.program.FieldGeneratorProgram;
-import com.caucho.v5.config.program.MethodGeneratorProgram;
-import com.caucho.v5.config.program.NullProgram;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
@@ -66,11 +56,12 @@ public class ResourceHandler extends JavaeeInjectionHandler {
   
   private static final Method _lookupMethod;
   
-  public ResourceHandler(CandiManager manager)
+  public ResourceHandler(InjectManager manager)
   {
     super(manager);
   }
   
+  /*
   @Override
   public ConfigProgram introspectField(AnnotatedField<?> field)
   {
@@ -91,7 +82,9 @@ public class ResourceHandler extends JavaeeInjectionHandler {
                                      field.getJavaMember(), 
                                      gen);
   }
+  */
   
+  /*
   @Override
   public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
   {
@@ -114,7 +107,9 @@ public class ResourceHandler extends JavaeeInjectionHandler {
                                       method.getJavaMember(), 
                                       gen);
   }
+  */
 
+  /*
   @Override
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
@@ -151,6 +146,7 @@ public class ResourceHandler extends JavaeeInjectionHandler {
 
     return new NullProgram();
   }
+  */
 
   private void introspectClass(String location, Resource resource)
   {
@@ -249,12 +245,14 @@ public class ResourceHandler extends JavaeeInjectionHandler {
       jndiName = pContext.name();
      */
 
-    Bean<?> bean;
+    Bean<?> bean = null;
   
+    /*
     bean = bind(location, bindType, name);
   
     if (bean == null)
       bean = bind(location, bindType, mappedName);
+      */
 
     if (bean != null) {
       // valid bean
@@ -276,7 +274,8 @@ public class ResourceHandler extends JavaeeInjectionHandler {
 
     // return new ComponentValueGenerator(location, (AbstractBean) bean);
   
-    return new BeanValueGenerator(location, bean);
+    //return new BeanValueGenerator(location, bean);
+    return null;
   }
   
   static {

@@ -29,20 +29,19 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
-import com.caucho.v5.naming.JndiUtil;
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
-import com.caucho.v5.vfs.Vfs;
-
-import javax.annotation.PostConstruct;
-import javax.naming.*;
-import javax.persistence.*;
-
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import com.caucho.v5.config.program.ObjectFactoryNaming;
+import com.caucho.v5.naming.JndiUtil;
+import com.caucho.v5.util.L10N;
 
 /**
  * Configuration for the persistence-unit-ref.

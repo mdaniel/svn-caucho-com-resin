@@ -33,11 +33,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
-import javax.naming.NamingException;
-
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
 import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.types.ResourceGroupConfig;
 import com.caucho.v5.util.L10N;
@@ -149,7 +146,7 @@ public class ResourceInjectionTargetProgram extends ConfigProgram
   }
 
   @Override
-  public Object createObject(Hashtable<?, ?> env) throws NamingException
+  public Object createObject(Hashtable<?, ?> env)
   {
     Object value = _resourceConfig.getValue();
     

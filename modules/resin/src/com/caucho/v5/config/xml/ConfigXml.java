@@ -56,7 +56,7 @@ import com.caucho.v5.config.LineConfigException;
 import com.caucho.v5.config.attribute.AttributeConfig;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.core.ContextConfig;
-import com.caucho.v5.config.el.ConfigELContext;
+import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
@@ -738,6 +738,7 @@ public class ConfigXml extends Config
   /**
    * Returns the variable resolver.
    */
+  /*
   public static ELContext getELEnvironment()
   {
     ContextConfigXml builder = ContextConfigXml.getCurrent();
@@ -748,10 +749,12 @@ public class ConfigXml extends Config
     else
       return EL.getEnvironment();
   }
+  */
 
   /**
    * Returns the variable resolver.
    */
+  /*
   public static ConfigELContext getELContext()
   {
     ContextConfigXml builder = ContextConfigXml.getCurrent();
@@ -762,13 +765,16 @@ public class ConfigXml extends Config
     else
       return null;
   }
+  */
 
   public static Object getElVar(String var)
   {
+    /*
     ELContext context = getELEnvironment();
     
     if (context != null)
       return context.getELResolver().getValue(context, null, var);
+      */
     
     return getProperty(var);
   }
@@ -788,13 +794,7 @@ public class ConfigXml extends Config
   public static String evalString(String str)
     throws ELException
   {
-    ELContext elContext = ConfigELContext.EL_CONTEXT;
-    
-    if (elContext == null) {
-      elContext = getELEnvironment();
-    }
-
-    return EL.evalString(str, elContext);
+    return Config.evalString(str);
   }
 
   /**
@@ -810,9 +810,8 @@ public class ConfigXml extends Config
    * Evaluates an EL boolean in the context.
    */
   public static boolean evalBoolean(String str)
-    throws ELException
   {
-    return EL.evalBoolean(str, getELEnvironment());
+    return ExprCfg.newParser(str).parse().evalBoolean(Config.getEnvironment());
   }
 
   public static ELContext getEnvironment(HashMap<String,Object> varMap)

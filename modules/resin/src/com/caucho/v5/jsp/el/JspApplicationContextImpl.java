@@ -36,16 +36,13 @@ import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.servlet.jsp.JspApplicationContext;
 
-//import com.caucho.v5.el.StreamELResolver;
-
-
-import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.jsp.PageManager;
 import com.caucho.v5.jsp.TaglibManager;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.ConcurrentArrayList;
 import com.caucho.v5.util.L10N;
+//import com.caucho.v5.el.StreamELResolver;
 
 public class JspApplicationContextImpl implements JspApplicationContext
 {
@@ -73,11 +70,12 @@ public class JspApplicationContextImpl implements JspApplicationContext
   {
     _webApp = webApp;
 
-    CandiManager injectManager = CandiManager.getCurrent(_webApp.getClassLoader());
+    //InjectManager injectManager = InjectManager.current(_webApp.getClassLoader());
     
     ExpressionFactory factory = new JspExpressionFactoryImpl(this);
     
-    _expressionFactory = injectManager.wrapExpressionFactory(factory);
+    //_expressionFactory = injectManager.wrapExpressionFactory(factory);
+    _expressionFactory = factory;
     
     _contextLocal.set(this);
   }

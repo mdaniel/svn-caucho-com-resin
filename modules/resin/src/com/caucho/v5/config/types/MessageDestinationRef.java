@@ -28,21 +28,20 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
-import com.caucho.v5.config.types.InjectionTarget;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
+
+import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.Vfs;
-
-import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
-import javax.naming.Context;
-import javax.rmi.PortableRemoteObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Hashtable;
 
 public class MessageDestinationRef
   implements ObjectFactoryNaming
@@ -182,7 +181,7 @@ public class MessageDestinationRef
   }
 
   private void resolve(Class type)
-    throws NamingException
+      throws NamingException
   {
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, L.l("{0} resolving", this));

@@ -29,12 +29,11 @@
 
 package com.caucho.v5.config.program;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.custom.CustomBean;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -45,19 +44,18 @@ public class BeanValueGenerator extends ValueGenerator {
     = Logger.getLogger(BeanValueGenerator.class.getName());
   private static final L10N L = new L10N(BeanValueGenerator.class);
 
-  private final CandiManager _beanManager;
-  private final Bean _bean;
+  private final InjectManager _beanManager;
+  private final CustomBean _bean;
 
   private final String _location;
 
-  public BeanValueGenerator(String location, Bean bean)
+  public BeanValueGenerator(String location, CustomBean bean)
   {
-    if (bean == null)
-      throw new NullPointerException();
+    Objects.requireNonNull(bean);
 
     _location = location;
 
-    _beanManager = CandiManager.create();
+    _beanManager = InjectManager.create();
     _bean = bean;
   }
 
@@ -66,10 +64,14 @@ public class BeanValueGenerator extends ValueGenerator {
    */
   public Object create()
   {
+    /*
     CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
     Class type = _bean.getBeanClass();
 
     return _beanManager.getReference(_bean, type, env);
+    */
+    
+    return null;
   }
 
   public String toString()

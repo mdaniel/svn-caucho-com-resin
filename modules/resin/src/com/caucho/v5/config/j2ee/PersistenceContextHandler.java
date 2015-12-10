@@ -29,26 +29,12 @@
 
 package com.caucho.v5.config.j2ee;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.DefinitionException;
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
-import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.BeanValueGenerator;
-import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.config.program.FieldGeneratorProgram;
-import com.caucho.v5.config.program.MethodGeneratorProgram;
-import com.caucho.v5.config.program.NullProgram;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.util.L10N;
 
@@ -58,11 +44,12 @@ import com.caucho.v5.util.L10N;
 public class PersistenceContextHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(PersistenceContextHandler.class);
 
-  public PersistenceContextHandler(CandiManager manager)
+  public PersistenceContextHandler(InjectManager manager)
   {
     super(manager);
   }
   
+  /*
   @Override
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
@@ -85,7 +72,9 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     
     return new NullProgram();
   }
+  */
   
+  /*
   @Override
   public ConfigProgram introspectField(AnnotatedField<?> field)
   {
@@ -110,8 +99,10 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     
     return new FieldGeneratorProgram(Config.getCurrent(), javaField, gen);
   }
+  */
   // InjectIntrospector.introspect(_injectProgramList, field);
   
+  /*
   @Override
   public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
   {
@@ -129,16 +120,11 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     
     BeanValueGenerator gen;
     
-    /*
-    if (PersistenceContextType.EXTENDED.equals(type))
-      return generateExtendedContext(field, pContext);
-    else
-    */
-    
     gen = generateTransactionContext(location, pContext);
     
     return new MethodGeneratorProgram(Config.getCurrent(), javaMethod, gen);
   }
+  */
   // InjectIntrospector.introspect(_injectProgramList, field);
 
   private BeanValueGenerator 
@@ -146,23 +132,31 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
                              PersistenceContext pContext)
     throws ConfigException
   {
+    /*
     Bean<?> bean = bindEntityManager(location, pContext);
 
     BeanValueGenerator gen
       = new BeanValueGenerator(location, bean);
     
     return gen;
+    */
+    
+    return null;
   }
 
   private ValueGenerator generateExtendedContext(String location,
                                                  PersistenceContext pContext)
   {
+    /*
     Bean<?> bean = bindExtendedEntityManager(location, pContext);
 
     BeanValueGenerator gen
       = new BeanValueGenerator(location, bean);
     
     return gen;
+    */
+    
+    return null;
   }
   
   private Bean<?> bindEntityManager(String location, 
@@ -171,13 +165,14 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     String name = pContext.name();
     String unitName = pContext.unitName();
 
-    Bean<?> bean;
+    Bean<?> bean = null;
     
+    /*
     bean = bind(location, EntityManager.class, unitName);
     
     if (bean == null)
       bean = bind(location, EntityManager.class, name);
-
+*/
     if (bean != null) {
       // valid bean
     }
@@ -203,12 +198,14 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     String name = pContext.name();
     String unitName = pContext.unitName();
 
-    Bean<?> bean;
-    
+    Bean<?> bean = null;
+  
+    /*
     bean = bind(location, EntityManager.class, unitName);
     
     if (bean == null && "".equals(unitName))
       bean = bind(location, EntityManager.class, name);
+      */
 
     if (bean != null) {
       // valid bean

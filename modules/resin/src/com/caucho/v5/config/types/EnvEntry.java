@@ -39,10 +39,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.DefaultLiteral;
 import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.naming.JndiUtil;
@@ -287,7 +283,8 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     if (value == null)
       return;
     
-    CandiManager cdiManager = CandiManager.create();
+    /*
+    InjectManager cdiManager = InjectManager.create();
 
     // XXX: EJB TCK
     if (cdiManager.getBeans(_name).size() > 0)
@@ -306,6 +303,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     builder.type(types);
 
     cdiManager.addBeanDiscover(builder.singleton(value));
+    */
   }
 
   /**

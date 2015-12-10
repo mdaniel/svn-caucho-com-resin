@@ -29,25 +29,13 @@
 
 package com.caucho.v5.config.j2ee;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Set;
 
-import javax.enterprise.inject.AmbiguousResolutionException;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.util.AnnotationLiteral;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.AnyLiteral;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.DefaultLiteral;
-import com.caucho.v5.config.candi.InjectionPointHandler;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.naming.JndiUtil;
 
@@ -55,25 +43,25 @@ import com.caucho.v5.naming.JndiUtil;
  * Common JavaEE injection handler
  */
 abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
-  private CandiManager _manager;
+  private InjectManager _manager;
   
-  protected JavaeeInjectionHandler(CandiManager manager)
+  protected JavaeeInjectionHandler(InjectManager manager)
   {
     _manager = manager;
   }
 
-  protected CandiManager getManager()
+  protected InjectManager getManager()
   {
     return _manager;
   }
-  
+  /*
   protected Bean<?> bind(String location, 
                          Class<?> type, 
                          String name,
                          Annotation ...bindings)
   {
     try {
-      CandiManager injectManager = getManager();
+      InjectManager injectManager = getManager();
       
       Set<Bean<?>> beans = null;
 
@@ -110,7 +98,9 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       throw new InjectionException(location + e, e);
     }
   }
+  */
   
+  /*
   protected Bean<?> bind(String location,
                          Class<?> type, 
                          Annotation ...qualifiers)
@@ -138,6 +128,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       throw new InjectionException(location + e.getMessage(), e);
     }
   }
+  */
   
   protected void bindJndi(String name, ValueGenerator gen, String fullJndiName)
   {
@@ -153,8 +144,11 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      if (_manager.getJndiClassLoader() != null)
+      /*
+      if (_manager.getJndiClassLoader() != null) {
         thread.setContextClassLoader(_manager.getJndiClassLoader());
+        }
+        */
       
       JndiUtil.bindDeep(name, gen);
     } catch (NamingException e) {
@@ -174,8 +168,11 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     ClassLoader loader = thread.getContextClassLoader();
 
     try {
-      if (_manager.getJndiClassLoader() != null)
+      /*
+      if (_manager.getJndiClassLoader() != null) {
         thread.setContextClassLoader(_manager.getJndiClassLoader());
+      }
+      */
       
       JndiUtil.bindDeep(name, gen);
     } catch (NamingException e) {
@@ -201,8 +198,11 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     ClassLoader loader = thread.getContextClassLoader();
 
     try {
-      if (_manager.getJndiClassLoader() != null)
+      /*
+      if (_manager.getJndiClassLoader() != null) {
         thread.setContextClassLoader(_manager.getJndiClassLoader());
+      }
+      */
       
       JndiUtil.bindDeep(name, gen);
     } catch (NamingException e) {

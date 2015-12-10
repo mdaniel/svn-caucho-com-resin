@@ -29,19 +29,19 @@
 
 package com.caucho.v5.config.j2ee;
 
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.spi.PersistenceProperty;
+
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.util.L10N;
 
-import javax.persistence.*;
-import javax.persistence.spi.PersistenceProperty;
-import javax.enterprise.util.AnnotationLiteral;
-
-import java.util.*;
-import java.util.logging.Logger;
-
-public class PersistenceContextGenerator extends WebBeanGenerator
+public class PersistenceContextGenerator extends ValueGenerator
 {
   private static final Logger log
     = Logger.getLogger(PersistenceContextGenerator.class.getName());
@@ -90,11 +90,13 @@ public class PersistenceContextGenerator extends WebBeanGenerator
   /**
    * Returns the expected type
    */
+  /*
   @Override
   public Class<?> getType()
   {
     return EntityManager.class;
   }
+  */
 
   /**
    * Creates the value.
@@ -105,6 +107,7 @@ public class PersistenceContextGenerator extends WebBeanGenerator
     if (_manager != null)
       return _manager;
 
+    /*
     try {
       if (PersistenceContextType.EXTENDED.equals(_type)) {
         _manager = create(EntityManager.class,
@@ -117,6 +120,7 @@ public class PersistenceContextGenerator extends WebBeanGenerator
     } catch (Exception e) {
       throw ConfigException.create(_location, e);
     }
+    */
 
     return _manager;
   }

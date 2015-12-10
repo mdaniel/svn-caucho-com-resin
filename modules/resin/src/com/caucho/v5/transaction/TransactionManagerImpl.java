@@ -51,7 +51,6 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import com.caucho.v5.config.candi.SingletonBindingHandle;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.meter.MeterService;
 import com.caucho.v5.env.meter.TimeSensor;
@@ -596,10 +595,12 @@ public class TransactionManagerImpl
   /**
    * Serialize to a handle
    */
+  /*
   private Object writeReplace()
   {
     return new SingletonBindingHandle(TransactionManager.class);
   }
+  */
 
   public String toString()
   {

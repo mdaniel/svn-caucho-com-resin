@@ -40,7 +40,7 @@ import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.j2ee.BeanNameLiteral;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
@@ -302,12 +302,31 @@ public class EjbRef extends BaseRef
     
     Class<?> type = calculateType();
     
-    CandiManager injectManager = CandiManager.getCurrent();
+    InjectManager injectManager = InjectManager.current();
     
     Set<Bean<?>> beans = null;
+    Object value = null;
     
-    if (getEjbLink() != null)
+    
+    if (getEjbLink() != null) {
+      value = injectManager.lookup(_type, new BeanNameLiteral(getEjbLink()));
+    }
+    
+    if (value == null) {
+      value = injectManager.lookup(_type);
+    }
+    
+    if (value == null) {
+      throw new ConfigException(L.l("ejb-ref '{0}' is an unknown bean", 
+                                    _type));
+    }
+    
+    return value;
+    
+    /*
+    if (getEjbLink() != null) {
       beans = injectManager.getBeans(_type, new BeanNameLiteral(getEjbLink()));
+    }
     
     if (beans == null || beans.size() == 0)
       beans = injectManager.getBeans(_type);
@@ -329,6 +348,7 @@ public class EjbRef extends BaseRef
     CreationalContext<?> cxt = injectManager.createCreationalContext(bean);
     
     return injectManager.getReference(bean, _type, cxt);
+    */
     
     /*
      if (_target == null) {

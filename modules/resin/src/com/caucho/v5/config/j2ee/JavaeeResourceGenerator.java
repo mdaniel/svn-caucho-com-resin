@@ -29,32 +29,20 @@
 
 package com.caucho.v5.config.j2ee;
 
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.AnyLiteral;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.config.program.ValueGenerator;
-import com.caucho.v5.config.xml.ContextConfigXml;
-import com.caucho.v5.naming.*;
-import com.caucho.v5.util.L10N;
-
-import javax.naming.*;
-import javax.persistence.*;
-
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.rmi.*;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.enterprise.inject.spi.Bean;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
+
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.naming.JndiUtil;
+import com.caucho.v5.util.L10N;
 
 /**
  * Generator for the JavaEE JNDI Resources
@@ -74,7 +62,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
   private final String _mappedName;
   private final String _beanName;
 
-  private CandiManager _beanManager;
+  private InjectManager _beanManager;
   private Bean<?> _bean;
 
   JavaeeResourceGenerator(String location,
@@ -84,7 +72,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
                           String mappedName,
                           String beanName)
   {
-    _beanManager = CandiManager.create();
+    _beanManager = InjectManager.create();
     
     if (! fieldType.isAssignableFrom(type))
       type = fieldType;
@@ -121,6 +109,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
     if (value != null)
       return value;
 
+    /*
     Bean bean = _bean;
 
     if (_bean == null)
@@ -128,6 +117,9 @@ public class JavaeeResourceGenerator extends ValueGenerator {
 
     CreationalContext cxt = _beanManager.createCreationalContext(bean);
     value = _beanManager.getReference(bean, bean.getBeanClass(), cxt);
+    */
+    
+    value = _beanManager.create(_type);
 
     return value;
   }
@@ -213,17 +205,19 @@ public class JavaeeResourceGenerator extends ValueGenerator {
 
   public Bean bind(String location, Class type, String name)
   {
-    CandiManager webBeans = _beanManager;
+    InjectManager webBeans = _beanManager;
 
     Set<Bean<?>> beans = null;
 
+    /*
     if (name != null)
       beans = webBeans.getBeans(type, Names.create(name));
 
     if (beans != null && beans.size() != 0)
       return webBeans.resolve(beans);
+      */
 
-    beans = webBeans.getBeans(type, AnyLiteral.ANY);
+    //beans = webBeans.getBeans(type, AnyLiteral.ANY);
 
     if (beans == null || beans.size() == 0)
       return null;

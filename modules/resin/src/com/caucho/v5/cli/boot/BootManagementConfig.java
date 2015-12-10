@@ -32,8 +32,7 @@ package com.caucho.v5.cli.boot;
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.security.AdminAuthenticator;
@@ -111,12 +110,20 @@ public class BootManagementConfig
       if (_auth != null) {
         _auth.init();
       
-        CandiManager manager = CandiManager.create();
+        InjectManager manager = InjectManager.create();
+
+        /*
+        manager.newBean(_auth)
+               .type(AuthenticatorRole.class)
+               .type(AdminAuthenticator.class)
+               .build();
+        
         BeanBuilder<?> factory = manager.createBeanBuilder(AuthenticatorRole.class);
         factory.type(AuthenticatorRole.class);
         factory.type(AdminAuthenticator.class);
 
         manager.addBeanDiscover(factory.singleton(_auth));
+        */
       }
     } catch (Exception e) {
       e.printStackTrace();

@@ -36,10 +36,10 @@ import javax.annotation.PostConstruct;
 import javax.el.ELException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
-import com.caucho.v5.config.el.ConfigELContext;
-import com.caucho.v5.el.Expr;
+import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.util.L10N;
 
@@ -65,7 +65,7 @@ public class IfExpr implements RequestPredicate
   private static final L10N L = new L10N(IfExpr.class);
   private static final Logger log = Logger.getLogger(IfExpr.class.getName());
   
-  private Expr _test;
+  private ExprCfg _test;
 
   public IfExpr()
   {
@@ -75,18 +75,18 @@ public class IfExpr implements RequestPredicate
    * Sets the EL expression to compare against.
    */
   // @Configurable
-  public void setTest(Expr expr)
+  public void setTest(ExprCfg expr)
   {
     setExpr(expr);
   }
   
   @Configurable
-  public void setExpr(Expr expr)
+  public void setExpr(ExprCfg expr)
   {
     _test = expr;
   }
   
-  public void setValue(Expr expr)
+  public void setValue(ExprCfg expr)
   {
     setTest(expr);
   }
@@ -108,7 +108,7 @@ public class IfExpr implements RequestPredicate
   public boolean isMatch(HttpServletRequest request)
   {
     try {
-      return _test.evalBoolean(ConfigELContext.EL_CONTEXT);
+      return _test.evalBoolean(Config.getEnvironment());
     } catch (ELException e) {
       log.log(Level.FINER, e.toString(), e);
       

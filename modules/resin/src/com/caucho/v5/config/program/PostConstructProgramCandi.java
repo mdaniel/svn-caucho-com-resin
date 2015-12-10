@@ -39,17 +39,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.CurrentLiteral;
-import com.caucho.v5.config.candi.InjectionPointBase;
 import com.caucho.v5.config.inject.InjectContext;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.inject.Module;
 
 @Module
@@ -117,12 +114,12 @@ public class PostConstructProgramCandi extends ConfigProgram
     
     Annotation [][]paramAnns = _init.getParameterAnnotations();
 
-    CandiManager webBeans = CandiManager.create();
+    InjectManager inject = InjectManager.create();
     
     for (int i = 0; i < paramTypes.length; i++) {
       Annotation []bindings = createBindings(paramAnns[i]);
       
-      _program[i] = new ParamProgram(webBeans, paramTypes[i],
+      _program[i] = new ParamProgram(inject, paramTypes[i],
                                      bindings, paramAnns[i]);
     }
   }
@@ -211,10 +208,10 @@ public class PostConstructProgramCandi extends ConfigProgram
   }
 
   private static class ParamProgram {
-    private final CandiManager _inject;
-    private final InjectionPointBase _injectionPoint;
+    private final InjectManager _inject;
+    //private final InjectionPointBase _injectionPoint;
 
-    ParamProgram(CandiManager inject,
+    ParamProgram(InjectManager inject,
                  Type type,
                  Annotation []bindings,
                  Annotation []annList)
@@ -224,16 +221,20 @@ public class PostConstructProgramCandi extends ConfigProgram
       Member member = null;
       HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 
+      /*
       if (bindings != null) {
         for (Annotation ann :  bindings)
           bindingSet.add(ann);
       }
       else
         bindingSet.add(CurrentLiteral.CURRENT);
+        */
 
+      /*
       _injectionPoint = new InjectionPointBase(inject,
                                                    bean, member, type,
                                                    bindingSet, annList);
+                                                   */
     }
 
     public Object eval(InjectContext env)

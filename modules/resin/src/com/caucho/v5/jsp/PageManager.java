@@ -50,8 +50,7 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.OwnerCreationalContext;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.java.JavaCompilerUtil;
@@ -379,15 +378,18 @@ abstract public class PageManager {
     page._caucho_isModified();
 
     try {
-      CandiManager beanManager = CandiManager.create();
+      InjectManager injectManager = InjectManager.create();
 
-      InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
+      /*
+      InjectionTarget inject = injectManager.createInjectionTarget(page.getClass());
 
       CreationalContext<?> env = new OwnerCreationalContext(null);
 
       inject.inject(page, env);
 
       inject.postConstruct(page);
+      */
+      injectManager.inject(null, page);
     } catch (InjectionException e) {
       throw ConfigException.createConfig(e);
     } catch (RuntimeException e) {

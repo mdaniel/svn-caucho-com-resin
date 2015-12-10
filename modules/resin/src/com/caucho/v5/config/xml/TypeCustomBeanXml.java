@@ -35,11 +35,9 @@ import org.w3c.dom.Node;
 
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.core.ContextConfig;
-import com.caucho.v5.config.custom.ConfigCustomBean;
 import com.caucho.v5.config.custom.TypeCustomBean;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.xml.QNode;
 
 /**
  * Represents a CanDI-style introspected bean type for configuration.
@@ -85,6 +83,7 @@ public class TypeCustomBeanXml<T> extends TypeCustomBean<T>
   {
     super.beforeConfigure(builder, bean, node);
     
+    /*
     if (bean instanceof ConfigCustomBean) {
       ConfigCustomBean xmlBean = (ConfigCustomBean) bean;
       
@@ -97,5 +96,6 @@ public class TypeCustomBeanXml<T> extends TypeCustomBean<T>
         xmlBean.setConfigLocation(uri, line);
       }
     }
+    */
   }
 }

@@ -48,7 +48,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.amp.thread.ThreadPool;
-import com.caucho.v5.config.candi.SingletonBindingHandle;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentListener;
@@ -484,10 +483,12 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Serialize to a webbeans handle
    */
+  /*
   public Object writeReplace()
   {
     return new SingletonBindingHandle(ScheduledExecutorService.class);
   }
+  */
 
   @Override
   public String toString()

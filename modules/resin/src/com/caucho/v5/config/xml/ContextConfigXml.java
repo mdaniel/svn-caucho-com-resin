@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.el.ELContext;
 import javax.el.ELException;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -51,19 +50,16 @@ import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
 import com.caucho.v5.config.attribute.AttributeConfig;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.CreationalContextImpl;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.core.ContextConfig;
-import com.caucho.v5.config.el.ConfigELContext;
+import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.config.inject.InjectContext;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.RecoverableProgram;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.StringType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
-import com.caucho.v5.el.ELParser;
-import com.caucho.v5.el.Expr;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.CompileException;
 import com.caucho.v5.util.DisplayableException;
@@ -92,9 +88,10 @@ public class ContextConfigXml extends ContextConfig
   public final static NameCfg TEXT = new NameCfg("#text");
   private final static Object NULL = new Object();
 
-  private CreationalContextImpl<?> _beanStack;
+  //private CreationalContextImpl<?> _beanStack;
 
   private Document _dependDocument;
+  private InjectContext _beanStack;
 
   public ContextConfigXml(ContextConfigXml parent)
   {
@@ -121,15 +118,19 @@ public class ContextConfigXml extends ContextConfig
    * Returns the component value for the dependent scope
    */
   //@Override
+  /*
   public Object get(Bean<?> bean)
   {
     return CreationalContextImpl.find(_beanStack, bean);
   }
+  */
   
+  /*
   @Override
   public Object findByName(String name)
   {
-    return CreationalContextImpl.findByName(_beanStack, name);
+    //CreationalContextImpl.findByName(_beanStack, name);
+    return InjectManager.current().createByName(name);
   }
   
   @Override
@@ -137,10 +138,11 @@ public class ContextConfigXml extends ContextConfig
   {
     InjectContext oldCxt = _beanStack;
     
-    _beanStack = (CreationalContextImpl<?>) cxt;
+    _beanStack = cxt; // (CreationalContextImpl<?>) cxt;
     
     return oldCxt;
   }
+  */
 
   /**
    * External call to configure a bean based on a top-level node.
@@ -560,10 +562,13 @@ public class ContextConfigXml extends ContextConfig
       qualifier = configureChildBean(qualifier, qualifierType,
                                      childNode, attrStrategy);
       
-      CandiManager cdiManager = CandiManager.getCurrent();
+      InjectManager cdiManager = InjectManager.current();
       
       Class<?> attrType = attrStrategy.getConfigType().getType();
       
+      childBean = cdiManager.create(attrType, (Annotation) qualifier);
+
+      /*
       Set<Bean<?>> beans
         = cdiManager.getBeans(attrType, (Annotation) qualifier);
       
@@ -571,7 +576,8 @@ public class ContextConfigXml extends ContextConfig
       
       CreationalContext cxt = null;
       
-      childBean = cdiManager.getReference(bean, attrType, cxt); 
+      childBean = cdiManager.getReference(bean, attrType, cxt);
+      */ 
     }
     else {
       childBean = type.create(parent, childQname);
@@ -956,10 +962,12 @@ public class ContextConfigXml extends ContextConfig
   /**
    * Returns the variable resolver.
    */
+  /*
   public static ConfigELContext getELContext()
   {
     return ConfigELContext.EL_CONTEXT;
   }
+  */
 
   /**
    * Returns the text value of the node.
@@ -1030,14 +1038,18 @@ public class ContextConfigXml extends ContextConfig
 
   private Object eval(ConfigType<?> type, String data)
   {
+    /*
     ELContext elContext = getELContext();
 
     ELParser parser = new ELParser(elContext, data);
 
     Expr expr = parser.parse();
+    */
+    ExprCfg expr = ExprCfg.newParser(data).parse();
 
     //Object value = type.valueOf(elContext, expr);
-    Object value = expr.evalObject(elContext);
+    //Object value = expr.evalObject(elContext);
+    Object value = expr.eval(Config.getEnvironment());
     
     value = type.valueOf(value);
 
@@ -1094,11 +1106,14 @@ public class ContextConfigXml extends ContextConfig
     throws ELException
   {
     if (exprString.indexOf("${") >= 0 && isEL()) {
+      return Config.eval(exprString);
+      /*
       ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
 
       return expr.getValue(getELContext());
+      */
     }
     else
       return exprString;

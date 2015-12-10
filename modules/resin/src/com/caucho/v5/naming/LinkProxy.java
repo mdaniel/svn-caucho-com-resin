@@ -28,10 +28,9 @@
 
 package com.caucho.v5.naming;
 
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
-import com.caucho.v5.config.types.InitParam;
-import com.caucho.v5.util.L10N;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
@@ -39,9 +38,10 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 
-import java.util.Hashtable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ObjectFactoryNaming;
+import com.caucho.v5.config.types.InitParam;
+import com.caucho.v5.util.L10N;
 
 /**
  * An object proxy for a foreign JNDI factory.

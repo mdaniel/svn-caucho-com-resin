@@ -34,10 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.management.MBeanServer;
 import javax.transaction.TransactionManager;
@@ -68,23 +65,6 @@ public class CdiProducerResin
   
   public CdiProducerResin()
   {
-  }
-
-  /**
-   * Returns the web beans conversation controller
-   */
-  @Produces
-  @Named("javax.enterprise.context.conversation")
-  @RequestScoped
-  @CauchoBean
-  public ConversationContext getConversation()
-  {
-    return new ConversationContext();
-  }
-  
-  public void destroy(@Disposes @Named("javax.enterprise.context.conversation") ConversationContext conversation)
-  {
-    conversation.destroy();
   }
 
   /**

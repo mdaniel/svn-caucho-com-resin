@@ -40,7 +40,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 
 import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 
 /**
  * The @PersistenceUnit, container managed entity manager proxy, used
@@ -167,10 +167,10 @@ public class EntityManagerFactoryProxy
     
     private Object readResolve()
     {
-      CandiManager beanManager = CandiManager.getCurrent();
+      InjectManager beanManager = InjectManager.current();
       
-      return beanManager.getReference(EntityManagerFactory.class, 
-                                      Names.create(_name));
+      return beanManager.create(EntityManagerFactory.class, 
+                                Names.create(_name));
     }
   }
 }

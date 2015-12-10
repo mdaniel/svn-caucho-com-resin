@@ -37,8 +37,7 @@ import java.util.logging.Logger;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.el.CandiElResolver;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.jsp.cfg.JspConfig;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.cfg.JspTaglib;
@@ -58,7 +57,7 @@ public class WebAppResin extends WebApp
   // private RestContainer _restContainer;
   private WebAppBuilderResin _builder;
 
-  private CandiManager _cdiManager;
+  private InjectManager _injectManager;
 
   private boolean _isContainerInit;
 
@@ -141,7 +140,7 @@ public class WebAppResin extends WebApp
   {
     super.startInContext();
     
-    _jspApplicationContext.addELResolver(new CandiElResolver());
+    //_jspApplicationContext.addELResolver(new CandiElResolver());
 
     // initRest();
   }
@@ -152,9 +151,10 @@ public class WebAppResin extends WebApp
     super.initConstructor();
     
     _jspApplicationContext = new JspApplicationContextImpl(this);
-    _jspApplicationContext.addELResolver(getBeanManager().getELResolver());
+    
+    //_jspApplicationContext.addELResolver(getBeanManager().getELResolver());
 
-    _cdiManager = CandiManager.create(getClassLoader());
+    _injectManager = InjectManager.create(getClassLoader());
   }
   
   @Override
@@ -173,9 +173,10 @@ public class WebAppResin extends WebApp
     }
   }
   
-  private CandiManager getBeanManager()
+  private InjectManager getBeanManager()
   {
-    return CandiManager.getCurrent(getClassLoader());
+    //return InjectManager.getCurrent(getClassLoader());
+    return _injectManager;
   }
 
   public JspApplicationContextImpl getJspApplicationContext()

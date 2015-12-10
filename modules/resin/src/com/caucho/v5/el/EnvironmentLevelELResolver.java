@@ -29,15 +29,14 @@
 
 package com.caucho.v5.el;
 
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.loader.*;
+import java.beans.FeatureDescriptor;
+import java.util.Iterator;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
-import javax.enterprise.inject.spi.BeanManager;
 
-import java.beans.FeatureDescriptor;
-import java.util.Iterator;
+import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
  * Creates a variable resolver based on the classloader.
@@ -53,12 +52,15 @@ public class EnvironmentLevelELResolver extends ELResolver {
   {
     _loader = loader;
 
+    _beanResolver = null;
+    /*
     if (Environment.getEnvironmentClassLoader(loader) != null) {
       BeanManager beanManager = CandiManager.create(loader);
       _beanResolver = beanManager.getELResolver();
     }
     else
       _beanResolver = null;
+      */
   }
   
   /**

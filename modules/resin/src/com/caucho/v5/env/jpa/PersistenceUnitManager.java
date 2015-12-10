@@ -39,12 +39,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.inject.spi.Bean;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.SharedCacheMode;
@@ -58,8 +55,7 @@ import javax.sql.DataSource;
 import com.caucho.v5.cli.resin.ResinCommandLineAgent;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DynamicClassLoader;
@@ -674,19 +670,27 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     if (name == null)
       return null;
     
-    Named named = Names.create(name);
-    CandiManager beanManager = CandiManager.create();
+    //Named named = Names.create(name);
+    InjectManager beanManager = InjectManager.create();
     
+    Object value = beanManager.createByName(name);
+    /*
     Set<Bean<?>> beans = beanManager.getBeans(DataSource.class, named);
     
     if (beans != null && beans.size() > 0) {
       return (DataSource) beanManager.getReference(beanManager.resolve(beans));
     }
+    */
     
-    Object value = JndiUtil.lookup(name);
-    
-    if (value instanceof DataSource)
+    if (value instanceof DataSource) {
       return (DataSource) value;
+    }
+    
+    value = JndiUtil.lookup(name);
+    
+    if (value instanceof DataSource) {
+      return (DataSource) value;
+    }
 
     throw new ConfigException(L.l("{0}: name '{1}' is an unknown or unconfigured JDBC DataSource with value {2}.",
                                   this, name, value));

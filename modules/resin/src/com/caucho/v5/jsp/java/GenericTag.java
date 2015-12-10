@@ -37,6 +37,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +53,6 @@ import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.ValidationMessage;
 import javax.servlet.jsp.tagext.VariableInfo;
 
-import com.caucho.v5.config.candi.ReferenceFactory;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.JspUtil;
@@ -363,7 +363,7 @@ abstract public class GenericTag extends JspContainerNode
         && ! _tag.getAndSetInjectFactory(true)) {
       out.println();
       out.print("static ");
-      out.printClass(ReferenceFactory.class);
+      out.printClass(Supplier.class);
       out.println(" _jsp_inject_" + _tag.getId());
       out.print("  = ");
       out.printClass(JspUtil.class);

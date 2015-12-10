@@ -29,15 +29,14 @@
 
 package com.caucho.v5.jsp;
 
+import java.util.function.Supplier;
+
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
-import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.ReferenceFactory;
-import com.caucho.v5.config.el.CandiExpr;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.MethodExpressionImpl;
 import com.caucho.v5.inject.Module;
@@ -66,17 +65,21 @@ public class JspUtil
   {
     JspELParser parser = new JspELParser(elContext, exprString);
 
-    return new CandiExpr(parser.parse());
+    //return new CandiExpr(parser.parse());
+    return parser.parse();
   }
   
-  public static <T> ReferenceFactory<T> getInjectFactory(Class<T> cl)
+  public static <T> Supplier<T> getInjectFactory(Class<T> cl)
   {
-    CandiManager cdiManager = CandiManager.create();
+    InjectManager cdiManager = InjectManager.create();
     
-    Bean<T> bean = cdiManager.createManagedBean(cl);
+    //Bean<T> bean = cdiManager.createManagedBean(cl);
     
-    return cdiManager.getBeanManager().getReferenceFactory(bean);
+    //return cdiManager.getBeanManager().getReferenceFactory(bean);
+    
+    return cdiManager.supplierCreate(cl);
   }
+  
 
   public static MethodExpression createMethodExpression(ELContext elContext,
                                                         String exprString,

@@ -33,7 +33,6 @@ import io.baratine.core.Startup;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -42,7 +41,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
@@ -52,18 +50,13 @@ import javax.inject.Singleton;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.DefaultLiteral;
-import com.caucho.v5.config.custom.ConfigCustomBean;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyStringProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.inject.Module;
-import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -84,9 +77,9 @@ public class BeanConfig
   private String _mbeanName;
   private Class<?> _beanConfigClass;
 
-  private ConfigCustomBean _customBean;
+  //private ConfigCustomBean _customBean;
 
-  private CandiManager _cdiManager;
+  private InjectManager _injectManager;
 
   private Class<?> _cl;
 
@@ -112,7 +105,7 @@ public class BeanConfig
 
   public BeanConfig()
   {
-    _cdiManager = CandiManager.create();
+    _injectManager = InjectManager.create();
 
     if (getDefaultScope() != null)
       setScope(getDefaultScope());
@@ -120,9 +113,9 @@ public class BeanConfig
     setService(isDefaultService());
   }
 
-  public CandiManager getBeanManager()
+  public InjectManager getBeanManager()
   {
-    return _cdiManager;
+    return _injectManager;
   }
 
   protected String getDefaultScope()
@@ -181,10 +174,14 @@ public class BeanConfig
 
   public Class<?> getClassType()
   {
+    /*
     if (_customBean != null)
       return _customBean.getClassType();
     else
       return _cl;
+      */
+    
+    return _cl;
   }
 
   public Bean<?> getComponent()
@@ -457,10 +454,12 @@ public class BeanConfig
     return _uri;
   }
 
+  /*
   public void addCustomBean(ConfigCustomBean<?> customBean)
   {
     _customBean = customBean;
   }
+  */
 
   protected String getTagName()
   {
@@ -475,12 +474,14 @@ public class BeanConfig
   @PostConstruct
   public void init()
   {
+    /*
     if (_customBean != null) {
       // server/1a37
       // _customBean.initComponent();
 
       return;
     }
+    */
 
     if (_cl == null) {
       throw new ConfigException(L.l("<{0}> requires a class attribute",
@@ -489,7 +490,8 @@ public class BeanConfig
 
     introspect();
 
-    CandiManager beanManager = CandiManager.create();
+    InjectManager beanManager = InjectManager.create();
+    /*
     BeanBuilder builder =  beanManager.createBeanBuilder(_cl);
 
     if (builder == null)
@@ -507,25 +509,8 @@ public class BeanConfig
       builder.name(getCdiNamed());
     }
 
-    /*
-    if (_annotatedType.isAnnotationPresent(javax.ejb.Singleton.class)
-        || _annotatedType.isAnnotationPresent(Stateful.class) 
-        || _annotatedType.isAnnotationPresent(Stateless.class) 
-        || _annotatedType.isAnnotationPresent(MessageDriven.class)
-        ) {
-      throw new ConfigException(L.l("{0} cannot be configured by <bean> because it has an EJB annotation.  Use CDI syntax instead.",
-                                    _annotatedType));
-    }
-    */
-
     // server/21q1
-    if (isStartup()
-        /*
-        && ! _annotatedType.isAnnotationPresent(Stateful.class)
-        && ! _annotatedType.isAnnotationPresent(Stateless.class)
-        && ! _annotatedType.isAnnotationPresent(MessageDriven.class)
-        */
-        ) {
+    if (isStartup()) {
       builder.annotation(new StartupLiteral());
     }
 
@@ -576,6 +561,7 @@ public class BeanConfig
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+    */
   }
   
   protected String getCdiNamed()
@@ -595,19 +581,21 @@ public class BeanConfig
   {
     if (_bean != null) {
       // ejb/1030, env/1070
-      // getBeanManager().addBean(_bean,  _extAnnotated);
-      getBeanManager().addBeanDiscover(_bean,  _extAnnotated);
+      //getBeanManager().addBeanDiscover(_bean,  _extAnnotated);
     }
   }
 
   public Object getObject()
   {
     if (_bean != null) {
+      /*
       CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
 
       Object value = _cdiManager.getReference(_bean, _bean.getBeanClass(), env);
+      */
 
-      return value;
+      //return value;
+      return null;
     }
     else
       return null;
@@ -616,10 +604,11 @@ public class BeanConfig
   public Object createObjectNoInit()
   {
     if (_bean != null) {
-      CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
+      //CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
       // XXX:
-      return _cdiManager.getReference(_bean, (Class<?>) null, env);
+      //return _cdiManager.getReference(_bean, (Class<?>) null, env);
       // return _bean.createNoInit();
+      return null;
     }
     else
       return null;

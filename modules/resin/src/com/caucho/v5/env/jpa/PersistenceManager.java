@@ -39,7 +39,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
@@ -47,10 +46,7 @@ import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListener;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.CurrentLiteral;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.inject.Module;
@@ -350,9 +346,9 @@ public class PersistenceManager
       // jpa/1630
       thread.setContextClassLoader(_classLoader);
       
-      CandiManager cdiManager = CandiManager.getCurrent();
+      //InjectManager cdiManager = InjectManager.current();
       
-      cdiManager.updateResources();
+      //cdiManager.updateResources();
 
       ArrayList<PersistenceUnitManager> pUnitList
         = new ArrayList<PersistenceUnitManager>();
@@ -408,8 +404,9 @@ public class PersistenceManager
   private void registerPersistenceUnit(PersistenceUnitManager pUnit)
   {
     try {
-      CandiManager beanManager = CandiManager.create(_classLoader);
+      InjectManager beanManager = InjectManager.create(_classLoader);
       
+      /*
       BeanBuilder<EntityManagerFactory> emfFactory;
       emfFactory = beanManager.createBeanBuilder(EntityManagerFactory.class);
 
@@ -428,6 +425,7 @@ public class PersistenceManager
       } else {
         log.finer(L.l("register persistent-unit `{0}' with transaction-type RESOURCE_LOCAL", pUnit.getName()));
       }
+  */
 
       /*
       factory = manager.createBeanFactory(EntityManager.class);

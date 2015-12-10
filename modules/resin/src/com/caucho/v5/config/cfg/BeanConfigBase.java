@@ -33,20 +33,13 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.BeanManagerBase;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.custom.ConfigCustomBean;
 import com.caucho.v5.config.custom.CustomBean;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ContainerProgram;
-import com.caucho.v5.config.reflect.AnnotatedTypeImpl;
-import com.caucho.v5.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -235,10 +228,11 @@ abstract public class BeanConfigBase {
   
   protected <X> Bean<X> deploy()
   {
-    CandiManager beanManager = CandiManager.create();
+    InjectManager beanManager = InjectManager.create();
 
-    AnnotatedTypeImpl<X> beanType = buildAnnotatedType();
+    //AnnotatedTypeImpl<X> beanType = buildAnnotatedType();
 
+    /*
     BeanBuilder<X> builder = beanManager.createBeanFactory(beanType);
 
     if (_scope != null)
@@ -263,8 +257,12 @@ abstract public class BeanConfigBase {
     }
 
     return bean;
+    */
+    
+    return null;
   }
   
+  /*
   protected <X> AnnotatedTypeImpl<X> buildAnnotatedType()
   {
     CandiManager cdiManager = CandiManager.create();
@@ -294,6 +292,7 @@ abstract public class BeanConfigBase {
     
     return beanType;
   }
+  */
 
   protected Object replaceObject()
   {

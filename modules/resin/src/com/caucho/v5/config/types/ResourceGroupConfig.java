@@ -41,10 +41,10 @@ import javax.naming.NamingException;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
-import com.caucho.v5.config.candi.CandiManagerResin;
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
 import com.caucho.v5.config.inject.InjectContext;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.config.program.ResourceInjectionTargetProgram;
 import com.caucho.v5.config.program.ResourceProgram;
 import com.caucho.v5.naming.JndiUtil;
@@ -159,7 +159,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    CandiManagerResin cdiManager = CandiManagerResin.getCurrent();
+    InjectManager cdiManager = InjectManager.current();
     
     for (InjectionTarget target : _injectionTargets) {
       String targetClassName = target.getInjectionTargetClass();
@@ -173,7 +173,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram
                                                  targetClass,
                                                  targetMethod);
         
-        cdiManager.getResourceManager().addResource(resourceProgram);
+        //cdiManager.getResourceManager().addResource(resourceProgram);
         
         if (getJndiClassLoader() != null)
           thread.setContextClassLoader(getJndiClassLoader());
@@ -251,7 +251,6 @@ abstract public class ResourceGroupConfig extends ConfigProgram
 
   @Override
   public Object createObject(Hashtable<?,?> env)
-    throws NamingException
   {
     Object value = getValue();
     

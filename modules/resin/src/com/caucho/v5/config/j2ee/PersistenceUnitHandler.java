@@ -29,24 +29,17 @@
 
 package com.caucho.v5.config.j2ee;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Set;
 
-import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.DefinitionException;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.AnyLiteral;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.config.program.FieldGeneratorProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
 import com.caucho.v5.util.L10N;
 
@@ -56,11 +49,12 @@ import com.caucho.v5.util.L10N;
 public class PersistenceUnitHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(PersistenceUnitHandler.class);
   
-  public PersistenceUnitHandler(CandiManager manager)
+  public PersistenceUnitHandler(InjectManager manager)
   {
     super(manager);
   }
   
+  /*
   @Override
   public ConfigProgram introspectField(AnnotatedField<?> field)
   {
@@ -75,7 +69,9 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     
     return generateContext(field, pUnit);
   }
+  */
   
+  /*
   @Override
   public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
   {
@@ -95,7 +91,9 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     
     return generateContext(method, pUnit);
   }
+  */
 
+  /*
   private ConfigProgram generateContext(AnnotatedField<?> field,
                                         PersistenceUnit pUnit)
     throws ConfigException
@@ -104,14 +102,11 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     
     String location = getLocation(javaField);
 
-    /*
-    if (! "".equals(pContext.name()))
-      jndiName = pContext.name();
-      */
     BeanValueGenerator gen = bind(location, pUnit);
     
     return new FieldGeneratorProgram(Config.getCurrent(), javaField, gen);
   }
+*/
 
   private ConfigProgram generateContext(AnnotatedMethod<?> method,
                                         PersistenceUnit pUnit)
@@ -141,7 +136,8 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
       */
 
     Bean<?> bean = null;
-    
+
+    /*
     if (! "".equals(unitName)) {
       bean = bind(location, EntityManagerFactory.class, unitName);
       
@@ -154,10 +150,14 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
                                                  beans));
       }
     }
+    */
     
+    /*
     if (bean == null)
       bean = bind(location, EntityManagerFactory.class, name);
+      */
 
+    /*
     if (bean != null) {
       // valid bean
     }
@@ -174,14 +174,19 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     else {
       throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
     }
+    */
 
     // bindJndi(location, jndiName, bean);
 
     // return new ComponentValueGenerator(location, (AbstractBean) bean);
     
+    /*
     BeanValueGenerator gen
       = new BeanValueGenerator(location, bean);
 
     return gen;
+    */
+    
+    return null;
   }
 }

@@ -43,7 +43,7 @@ import javax.sql.DataSource;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
@@ -63,11 +63,12 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
   
   private static final L10N L = new L10N(DataSourceDefinitionHandler.class);
   
-  public DataSourceDefinitionHandler(CandiManager manager)
+  public DataSourceDefinitionHandler(InjectManager manager)
   {
     super(manager);
   }
   
+  /*
   @Override
   public ConfigProgram introspectField(AnnotatedField<?> field)
   {
@@ -75,7 +76,9 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
     
     return generateProgram(field, db);
   }
+  */
   
+  /*
   @Override
   public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
   {
@@ -83,7 +86,9 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
     
     return generateProgram(method, db);
   }
+  */
 
+  /*
   @Override
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
@@ -122,6 +127,7 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
 
     return new NullProgram();
   }
+  */
 
   private void introspectClass(String location, DataSourceDefinition def)
   {

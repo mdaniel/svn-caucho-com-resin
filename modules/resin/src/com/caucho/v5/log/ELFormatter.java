@@ -44,7 +44,6 @@ import javax.servlet.http.HttpSession;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.expr.ExprCfg;
-import com.caucho.v5.config.scope.ThreadRequestFactory;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.L10N;
@@ -144,7 +143,8 @@ public class ELFormatter extends MessageFormatter {
     public Object apply(String property)
     {
       if ("cookie".equals(property)) {
-        HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
+        //HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
+        HttpServletRequest req = null;
 
         if (req != null) {
           Cookie []cookies = req.getCookies();
@@ -162,10 +162,11 @@ public class ELFormatter extends MessageFormatter {
       }
       */
       else if ("request".equals(property)) {
-        return ThreadRequestFactory.getCurrentHttpRequest();
+        //return ThreadRequestFactory.getCurrentHttpRequest();
+        return null;
       }
       else if ("session".equals(property)) {
-        HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
+        HttpServletRequest req = null;//ThreadRequestFactory.getCurrentHttpRequest();
         
         if (req != null) {
           HttpSession session = req.getSession(false);

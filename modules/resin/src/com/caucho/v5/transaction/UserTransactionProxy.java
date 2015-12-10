@@ -41,8 +41,6 @@ import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 
-import com.caucho.v5.config.candi.SingletonBindingHandle;
-
 /**
  * Implementation of the UserTransactionImpl for a thread instance.
  */
@@ -238,10 +236,12 @@ public class UserTransactionProxy
   /**
    * Serialization handle
    */
+  /*
   private Object writeReplace()
   {
     return new SingletonBindingHandle(UserTransaction.class);
   }
+  */
 
   public String toString()
   {

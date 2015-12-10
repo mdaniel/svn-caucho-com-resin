@@ -29,16 +29,24 @@
 
 package com.caucho.v5.naming;
 
-import com.caucho.v5.config.candi.ObjectFactoryNaming;
-import com.caucho.v5.util.L10N;
-
-import javax.naming.*;
-import javax.naming.spi.NamingManager;
-
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NameNotFoundException;
+import javax.naming.NameParser;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.NotContextException;
+import javax.naming.OperationNotSupportedException;
+import javax.naming.Reference;
+import javax.naming.spi.NamingManager;
+
+import com.caucho.v5.config.program.ObjectFactoryNaming;
+import com.caucho.v5.util.L10N;
 
 /**
  * Resin's implementation of the JNDI <code>Context</code>.  The actual storage

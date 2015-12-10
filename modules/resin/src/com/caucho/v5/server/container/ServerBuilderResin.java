@@ -30,23 +30,15 @@
 package com.caucho.v5.server.container;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.cli.resin.BootConfigParserResin;
 import com.caucho.v5.cli.server.BootConfigParser;
-import com.caucho.v5.config.Config;
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.functions.FmtFunctions;
-import com.caucho.v5.config.lib.ResinConfigLibrary;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerBuilder;
 import com.caucho.v5.http.container.HttpContainerBuilderResin;
-import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.nautilus.impl.NautilusSystem;
-import com.caucho.v5.server.cdi.CdiProducerResin;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
@@ -142,7 +134,8 @@ public class ServerBuilderResin extends ServerBuilder
   {
     super.initCdiEnvironment();
     
-    CandiManager cdiManager = CandiManager.create();
+    /*
+    //CandiManager cdiManager = CandiManager.create();
 
     if (cdiManager.getBeans(CdiProducerResin.class).size() == 0) {
       Config.setProperty("fmt", new FmtFunctions());
@@ -166,6 +159,7 @@ public class ServerBuilderResin extends ServerBuilder
 
       cdiManager.update();
     }
+      */
 
     ResinServerConfigLibrary.configure();
   }

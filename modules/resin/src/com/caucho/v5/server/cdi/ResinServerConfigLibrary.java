@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigPropertiesResolver;
-import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;

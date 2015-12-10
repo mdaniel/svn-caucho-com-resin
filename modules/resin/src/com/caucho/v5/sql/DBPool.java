@@ -46,11 +46,7 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Names;
-import com.caucho.v5.config.candi.BeanBuilder;
-import com.caucho.v5.config.candi.CandiManager;
-import com.caucho.v5.config.candi.CurrentLiteral;
-import com.caucho.v5.config.candi.HandleAware;
+import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.dbpool.ConnectionPool;
@@ -112,7 +108,7 @@ import com.caucho.v5.util.L10N;
 
 @SuppressWarnings("serial")
 public class DBPool
-  implements DataSource, java.io.Serializable, HandleAware
+  implements DataSource, java.io.Serializable // , HandleAware
 {
   protected static final Logger log
     = Logger.getLogger(DBPool.class.getName());
@@ -783,9 +779,10 @@ public class DBPool
       JndiUtil.bindDeepShort(name, this);
     }
 
-    CandiManager manager = CandiManager.getCurrent();
+    InjectManager manager = InjectManager.current();
     
     if (manager != null) {
+      /*
       BeanBuilder<?> factory = manager.createBeanBuilder(DataSource.class);
 
       String name = _name;
@@ -814,11 +811,9 @@ public class DBPool
       }
 
       // factory.stereotype(CauchoDeployment.class);
-      System.out.println("MGR: " + name + " " + manager
-                         + " " + System.identityHashCode(manager)
-                         + " " + Thread.currentThread().getContextClassLoader());
 
       manager.addBean(factory.singleton(this));
+      */
     }
 
     _queryAdmin.register();

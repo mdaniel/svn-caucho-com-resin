@@ -33,21 +33,12 @@ import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.candi.CandiManager;
 import com.caucho.v5.config.inject.InjectManager;
-import com.caucho.v5.inject.ThreadContext;
 import com.caucho.v5.java.WorkDir;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.CompilingLoader;
@@ -121,9 +112,9 @@ public class ResinBeanContainer {
   private static final L10N L = new L10N(ResinBeanContainer.class);
 
   private EnvironmentClassLoader _classLoader;
-  private CandiManager _cdiManager;
+  private InjectManager _cdiManager;
 
-  private ThreadLocal<BeanContainerRequest> _localContext = new ThreadLocal<BeanContainerRequest>();
+  //private ThreadLocal<BeanContainerRequest> _localContext = new ThreadLocal<BeanContainerRequest>();
 
   // Path to the current module (typically the current directory)
   private Path _modulePath;
@@ -136,11 +127,11 @@ public class ResinBeanContainer {
   public ResinBeanContainer()
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
-    _cdiManager = CandiManager.create(_classLoader);
+    _cdiManager = InjectManager.create(_classLoader);
 
     // ioc/0b07
-    _cdiManager.replaceContext(new RequestScope());
-    _cdiManager.replaceContext(ThreadContext.getContext());
+    //_cdiManager.replaceContext(new RequestScope());
+    //_cdiManager.replaceContext(ThreadContext.getContext());
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -178,7 +169,7 @@ public class ResinBeanContainer {
     return this;
   }
 
-  public CandiManager getCdiManager()
+  public InjectManager getCdiManager()
   {
     return _cdiManager;
   }
@@ -308,7 +299,8 @@ public class ResinBeanContainer {
       else
         _cdiManager.addXmlPath(path);
         */
-      _cdiManager.addConfigPath(path);
+      
+      //_cdiManager.addConfigPath(path);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -414,6 +406,8 @@ public class ResinBeanContainer {
     try {
       thread.setContextClassLoader(_classLoader);
 
+      return _cdiManager.create(type, qualifiers);
+      /*
       Set<Bean<?>> beans = _cdiManager.getBeans(type, qualifiers);
 
       if (beans.size() > 0) {
@@ -423,12 +417,7 @@ public class ResinBeanContainer {
       }
 
       return type.newInstance();
-    } catch (InstantiationException e) {
-      // XXX: proper exception
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      // XXX: proper exception
-      throw new RuntimeException(e);
+      */
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -449,6 +438,7 @@ public class ResinBeanContainer {
     try {
       thread.setContextClassLoader(_classLoader);
 
+      /*
       Set<Bean<?>> beans = _cdiManager.getBeans(name);
 
       if (beans.size() > 0) {
@@ -456,8 +446,9 @@ public class ResinBeanContainer {
 
         return _cdiManager.getReference(bean);
       }
-
-      return null;
+      */
+      
+      return _cdiManager.createByName(name);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -481,19 +472,20 @@ public class ResinBeanContainer {
 
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    BeanContainerRequest oldContext = _localContext.get();
+    //BeanContainerRequest oldContext = _localContext.get();
 
-    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader,
-        oldContext);
+    //BeanContainerRequest context = new BeanContainerRequest(this, oldLoader,
+      //  oldContext);
 
     thread.setContextClassLoader(_classLoader);
 
-    _localContext.set(context);
+    //_localContext.set(context);
 
     try {
       runnable.run();
     } finally {
-      context.close();
+      thread.setContextClassLoader(oldLoader);
+      //context.close();
     }
   }
 
@@ -517,6 +509,7 @@ public class ResinBeanContainer {
    * @return the RequestContext which must be passed to
    *         <code>completeContext</code>
    */
+  /*
   public BeanContainerRequest beginRequest()
   {
     Thread thread = Thread.currentThread();
@@ -534,10 +527,12 @@ public class ResinBeanContainer {
 
     return context;
   }
+  */
 
   /**
    * Completes the thread's request and exits the Resin context.
    */
+  /*
   public void completeRequest(BeanContainerRequest context)
   {
     Thread thread = Thread.currentThread();
@@ -545,6 +540,7 @@ public class ResinBeanContainer {
     thread.setContextClassLoader(context.getOldClassLoader());
     _localContext.set(context.getOldContext());
   }
+  */
 
   /**
    * Shuts the context down.
@@ -574,14 +570,18 @@ public class ResinBeanContainer {
 
       Class<?> resinCdiProducer = CdiProducerResin.class;
 
+      /*
       if (resinCdiProducer != null)
-        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinCdiProducer));
+        _cdiManager.addManagedBean(_cdiManager.createNew(resinCdiProducer));
+        */
 
       Class<?> resinValidatorClass
       = CdiProducerResin.createResinValidatorProducer();
 
+      /*
       if (_cdiManager != null && resinValidatorClass != null)
-        _cdiManager.addManagedBean(_cdiManager.createManagedBean(resinValidatorClass));
+        _cdiManager.addManagedBean(_cdiManager.createNew(resinValidatorClass));
+        */
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -593,6 +593,7 @@ public class ResinBeanContainer {
     return getClass().getName() + "[]";
   }
 
+  /*
   private class RequestScope implements Context {
     @Override
     public <T> T get(Contextual<T> bean)
@@ -628,4 +629,5 @@ public class ResinBeanContainer {
       return _localContext.get() != null;
     }
   }
+  */
 }
