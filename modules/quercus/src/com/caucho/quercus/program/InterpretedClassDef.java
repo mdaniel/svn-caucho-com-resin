@@ -83,6 +83,7 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _unset;
   protected AbstractFunction _call;
   protected AbstractFunction _callStatic;
+  protected AbstractFunction _clone;
 
   protected AbstractFunction _serializeFun;
   protected AbstractFunction _unserializeFun;
@@ -308,6 +309,9 @@ public class InterpretedClassDef extends ClassDef
     if (_unset != null)
       cl.setUnset(_unset);
 
+    if (_clone != null)
+      cl.setClone(_clone);
+    
     if (_serializeFun != null) {
       cl.setSerialize(_serializeFun, _unserializeFun);
     }
@@ -421,6 +425,9 @@ public class InterpretedClassDef extends ClassDef
 
     if (name.equalsString("__construct")) {
       _constructor = fun;
+    }
+    else if (name.equalsString("__clone")) {
+      _clone = fun;
     }
     else if (name.equalsString("__destruct")) {
       _destructor = fun;

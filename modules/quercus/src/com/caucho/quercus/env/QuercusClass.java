@@ -86,6 +86,7 @@ public class QuercusClass extends NullValue {
   private AbstractFunction _toString;
   private AbstractFunction _isset;
   private AbstractFunction _unset;
+  private AbstractFunction _clone;
 
   private ArrayDelegate _arrayDelegate;
   private TraversableDelegate _traversableDelegate;
@@ -2706,6 +2707,11 @@ public class QuercusClass extends NullValue {
     _unset = unset;
   }
 
+  public void setClone(AbstractFunction clone)
+  {
+    _clone = clone;
+  }
+
   public AbstractFunction getIsset()
   {
     return _isset;
@@ -2714,6 +2720,14 @@ public class QuercusClass extends NullValue {
   public AbstractFunction getUnset()
   {
     return _unset;
+  }
+  
+  /**
+   * @return __clone method
+   */
+  public AbstractFunction getClone()
+  {
+    return _clone;
   }
 
   public String toString()

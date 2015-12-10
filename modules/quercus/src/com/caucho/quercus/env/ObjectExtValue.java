@@ -1025,6 +1025,12 @@ public class ObjectExtValue extends ObjectValue
 
       obj.initField(env, canonicalName, value);
     }
+    
+    AbstractFunction clone = _quercusClass.getClone();
+
+    if (clone != null) {
+      clone.callMethod(env, _quercusClass, obj);
+    }
   }
 
   // XXX: need to check the other copy, e.g. for sessions
