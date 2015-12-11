@@ -517,8 +517,22 @@ public class JavaValue extends ObjectValue
    * Serializes the value.
    */
   @Override
-  public void serialize(Env env, StringBuilder sb, SerializeMap map)
+  public void serialize(Env env, StringBuilder sb, SerializeMap serializeMap)
   {
+    Integer index = serializeMap.get(this);
+
+    if (index != null) {
+      sb.append("r:");
+      sb.append(index);
+      sb.append(";");
+      
+      serializeMap.incrementIndex();
+
+      return;
+    }
+
+    serializeMap.put(this);
+    serializeMap.incrementIndex();
     String name = _classDef.getSimpleName();
 
     Set<? extends Map.Entry<Value,Value>> entrySet = entrySet();
@@ -534,7 +548,7 @@ public class JavaValue extends ObjectValue
 
       for (Map.Entry<Value,Value> entry : entrySet) {
         entry.getKey().serialize(env, sb);
-        entry.getValue().serialize(env, sb, map);
+        entry.getValue().serialize(env, sb, serializeMap);
       }
 
       sb.append("}");

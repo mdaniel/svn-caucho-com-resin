@@ -170,21 +170,35 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public final Value getField(Env env, StringValue name)
   {
+    return getField(env, name, false);
+  }
+
+  @Override
+  public Value getField(Env env, StringValue name, boolean isAccessible) {
     Value returnValue = getFieldExt(env, name);
 
     if (returnValue == UnsetValue.UNSET) {
       // __get didn't work, lets look in the class itself
       Entry entry = _fieldMap.get(name);
 
+      if (entry == null && isAccessible) {
+        // this might be a private field
+        ClassField classField = getQuercusClass().getClassField(name);
+        if (classField != null) {
+          entry = _fieldMap.get(classField.getCanonicalName());
+        }
+      }
+
       if (entry != null) {
         // php/09ks vs php/091m
         return entry._value.toValue();
       }
+      
     }
 
     return returnValue;
   }
-
+  
   /**
    * Gets a field value.
    */
@@ -386,11 +400,17 @@ public class ObjectExtValue extends ObjectValue
     return new ArgGetFieldValue(env, this, name);
   }
 
+  @Override
+  public Value putField(Env env, StringValue name, Value value) {
+    return putField(env, name, value, false);
+  }
+  
   /**
    * Adds a new value.
    */
   @Override
-  public Value putField(Env env, StringValue name, Value value)
+  public Value putField(Env env, StringValue name, Value value,
+      boolean isAccessible)
   {
     Entry entry = getEntry(env, name);
 
@@ -414,6 +434,9 @@ public class ObjectExtValue extends ObjectValue
       }
 
       ClassField classField = _quercusClass.getClassDef().getField(name);
+      if (classField == null) {
+        classField = _quercusClass.getClassField(name);
+      }
       if (classField != null) {
         entry = createEntry(classField.getCanonicalName());
       } else {
@@ -721,7 +744,15 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Iterator<Map.Entry<Value, Value>> getBaseIterator(Env env)
   {
-    return new KeyValueIterator(_fieldMap.values().iterator());
+    Map<Value, Value> map = new HashMap<Value, Value>(_fieldMap.size());
+    for (Map.Entry<StringValue, Entry> entry : _fieldMap.entrySet()) {
+      if (!entry.getValue().isPrivate() || getQuercusClass().equals(env.getCallingClass())) {
+        StringValue ordinaryName = ClassField.getOrdinaryName(entry.getKey());
+        map.put(ordinaryName, entry.getValue().getValue());
+      }
+    }
+    
+    return map.entrySet().iterator();
   }
 
   /**
@@ -1052,6 +1083,8 @@ public class ObjectExtValue extends ObjectValue
       sb.append("r:");
       sb.append(index);
       sb.append(";");
+      
+      serializeMap.incrementIndex();
 
       return;
     }

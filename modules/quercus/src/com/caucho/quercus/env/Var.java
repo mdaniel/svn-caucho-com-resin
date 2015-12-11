@@ -2335,6 +2335,7 @@ public class Var extends Value
       sb.append("R:");
       sb.append(index);
       sb.append(";");
+      serializeMap.incrementIndex();
     }
     else {
       serializeMap.put(this);

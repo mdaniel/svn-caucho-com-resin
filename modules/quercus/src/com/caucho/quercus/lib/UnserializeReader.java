@@ -299,7 +299,7 @@ public final class UnserializeReader {
         expect('"');
 
         if (! isValidString(len)) {
-          return BooleanValue.FALSE;
+          return _useReference ? createReference(BooleanValue.FALSE) : BooleanValue.FALSE;
         }
 
         String className = readString(len);
@@ -316,7 +316,7 @@ public final class UnserializeReader {
           log.fine(L.l("{0} is an undefined class in unserialize",
                    className));
 
-          return BooleanValue.FALSE;
+          return _useReference ? createReference(BooleanValue.FALSE) : BooleanValue.FALSE;
         }
 
         AbstractFunction fun = qClass.getUnserialize();
@@ -325,11 +325,11 @@ public final class UnserializeReader {
           log.fine(L.l("{0} does not implement unserialize()",
                        className));
 
-          return BooleanValue.FALSE;
+          return _useReference ? createReference(BooleanValue.FALSE) : BooleanValue.FALSE;
         }
 
         if (! isValidString(count)) {
-          return BooleanValue.FALSE;
+          return _useReference ? createReference(BooleanValue.FALSE) : BooleanValue.FALSE;
         }
 
         String data = readString(count);
@@ -340,7 +340,7 @@ public final class UnserializeReader {
 
         expect('}');
 
-        return obj;
+        return _useReference ? createReference(obj) : obj;
       }
 
     case 'N':
@@ -369,8 +369,8 @@ public final class UnserializeReader {
         }
 
         Value ref = _valueList.get(index - 1);
-
-        return ref;
+        
+        return createReference(ref);
       }
     case 'r':
       {
@@ -503,6 +503,8 @@ public final class UnserializeReader {
           switch (read()) {
           case 's':
           case 'S':
+          case 'u':
+          case 'U':
             {
               expect(':');
               int keyLen = (int) readInt();
@@ -558,6 +560,8 @@ public final class UnserializeReader {
           switch (read()) {
             case 's':
             case 'S':
+            case 'u':
+            case 'U':
             {
               expect(':');
               int keyLen = (int) readInt();
