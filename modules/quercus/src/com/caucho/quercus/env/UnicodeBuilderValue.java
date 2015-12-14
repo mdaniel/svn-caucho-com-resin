@@ -31,6 +31,8 @@ package com.caucho.quercus.env;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.util.Locale;
 
@@ -983,6 +985,20 @@ public class UnicodeBuilderValue
     return new UnicodeBuilderValue(length);
   }
 
+  @Override
+  public void writeTo(OutputStream os) {
+    OutputStreamWriter osw = new OutputStreamWriter(os);
+    try {
+      int len = length();
+
+      for (int i = 0; i < len; i++)
+        osw.write(charAt(i));
+      
+      osw.flush();
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
   //
   // static helper functions
   //
