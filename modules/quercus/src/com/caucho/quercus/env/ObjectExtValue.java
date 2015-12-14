@@ -400,18 +400,11 @@ public class ObjectExtValue extends ObjectValue
     return new ArgGetFieldValue(env, this, name);
   }
 
-  @Override
-  public Value putField(Env env, StringValue name, Value value) {
-    return putField(env, name, value, false);
-  }
-  
   /**
    * Adds a new value.
    */
   @Override
-  public Value putField(Env env, StringValue name, Value value,
-      boolean isAccessible)
-  {
+  public Value putField(Env env, StringValue name, Value value) {
     Entry entry = getEntry(env, name);
 
     // XXX: php/09ks, need visibility check

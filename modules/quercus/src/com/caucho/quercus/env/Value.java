@@ -49,6 +49,7 @@ import java.util.Set;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.lib.reflection.ReflectionProperty;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.program.ClassField;
 import com.caucho.util.L10N;
@@ -2331,6 +2332,18 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Same as {@link #getField(Env, StringValue)}, except that it also returns
+   * private and protected fields (see {@link ReflectionProperty#setAccessible(boolean)}).
+   * @param env
+   * @param name
+   * @param isAccessible Whether the ReflectionProperty has been set accessible.
+   * @return
+   */
+  public Value getField(Env env, StringValue name, boolean isAccessible) {
+    return getField(env, name);
+  }
+  
+  /**
    * Returns the field ref.
    */
   public Var getFieldVar(Env env, StringValue name)
@@ -2402,7 +2415,7 @@ abstract public class Value implements java.io.Serializable
   {
     return NullValue.NULL;
   }
-
+  
   public final Value putField(Env env, StringValue name, Value value,
                               Value innerIndex, Value innerValue)
   {

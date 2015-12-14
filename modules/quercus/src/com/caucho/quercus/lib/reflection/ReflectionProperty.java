@@ -177,6 +177,7 @@ public class ReflectionProperty
     final StringValue _nameV;
 
     QuercusClass _declaringClass;
+    private boolean _isAccessible = false;
 
     public static Property create(Env env, QuercusClass cls, StringValue nameV)
     {
@@ -228,17 +229,18 @@ public class ReflectionProperty
 
     public Value getValue(Env env, ObjectValue obj)
     {
-      return obj.getField(env, _nameV);
+      return obj.getField(env, _nameV, _isAccessible);
     }
 
     public void setValue(Env env, Value obj, Value value)
     {
-      obj.putField(env, _nameV, value);
+      ClassField field = _cls.getClassField(_nameV);
+      obj.putField(env, field != null ? field.getCanonicalName() : _nameV, value);
     }
 
     public void setAccessible(boolean isAccessible)
     {
-      // XXX: protected and private always accessible through Reflection
+      _isAccessible  = isAccessible;
     }
 
     public final ReflectionClass getDeclaringClass(Env env)
