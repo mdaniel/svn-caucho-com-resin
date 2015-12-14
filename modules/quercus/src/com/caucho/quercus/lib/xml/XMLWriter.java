@@ -119,7 +119,7 @@ public class XMLWriter {
   /**
    * Returns the memory result
    */
-  public Value outputMemory()
+  public Value outputMemory(@Optional Boolean flush)
   {
     return flush();
   }
@@ -489,7 +489,7 @@ public class XMLWriter {
     if (_state == WriterState.ELEMENT_HEADER)
       startContent();
 
-    if (_state == WriterState.ELEMENT_BODY || _state == WriterState.TOP) {
+    if (_state == WriterState.ELEMENT_BODY || _state == WriterState.TOP ||  _state == WriterState.ATTRIBUTE) {
       int len = text.length();
 
       for (int i = 0; i < len; i++) {
@@ -684,6 +684,11 @@ public class XMLWriter {
    */
   public boolean writeRaw(Env env, StringValue value)
   {
+    if (_state == WriterState.ELEMENT_HEADER) {
+      _s.append(">");
+
+      _state = WriterState.ELEMENT_BODY;
+    }
     _s.append(env, value);
 
     return true;
