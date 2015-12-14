@@ -56,6 +56,11 @@ public class ZipDirectory
   private List<QuercusZipEntry> _entries = new ArrayList<QuercusZipEntry>();
   private Map<String, QuercusZipEntry> _nameToEntry = new HashMap<String, QuercusZipEntry>();
 
+  protected ZipDirectory()
+  {
+    
+  }
+  
   public ZipDirectory(ZipFile in)
   {
     _in = in;
@@ -65,7 +70,7 @@ public class ZipDirectory
       _nameToEntry.put(entry.zip_entry_name(), entry);
     }
   }
-
+  
   /**
    * Closes the previous entry and returns the next entry's metadata.
    */

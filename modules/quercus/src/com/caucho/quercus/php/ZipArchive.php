@@ -1,7 +1,7 @@
 <?php
 
 // Start of zip v.1.11.0
-
+import com.caucho.quercus.lib.zip.ZipDirectoryWriter;
 /**
  * A file archive, compressed with Zip.
  * @link http://php.net/manual/en/class.ziparchive.php
@@ -378,7 +378,11 @@ class ZipArchive  {
 	 * </p>
 	 */
 	public function open ($filename, $flags = null) {
-		$this->zipDirectory = zip_open($filename);
+		if ($flags == null) {
+			$this->zipDirectory = zip_open($filename);
+		} else if ($flags & (ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+			$this->zipDirectory = new ZipDirectoryWriter($filename);
+		}
 		if ($this->zipDirectory == null) {
 			return ZipArchive::ER_OPEN;
 		}
@@ -435,7 +439,9 @@ class ZipArchive  {
 	 * </p>
 	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
 	 */
-	public function addFromString ($localname, $contents) { throw new ErrorException("Not implemented - ZipArchive::addFromString"); }
+	public function addFromString ($localname, $contents) { 
+		return $this->zipDirectory->addFromString($localname, $contents);
+	}
 
 
 	/**
