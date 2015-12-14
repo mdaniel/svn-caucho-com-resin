@@ -29,7 +29,6 @@ public class XdebugConnection
 {
   private static final Logger log = Logger.getLogger(XdebugConnection.class
       .getName());
-  private static XdebugConnection INSTANCE;
   private final static String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
 
   public static enum State {
@@ -56,6 +55,7 @@ public class XdebugConnection
   private int nextBreakpointId = 1000000;
   private Map<Integer, Breakpoint> breakpointIdsMapping = new HashMap<Integer, Breakpoint>();
   private Map<String, Breakpoint> breakpointFileAndLineNumberMapping = new HashMap<String, Breakpoint>();
+  private int _locationToSkipStackDepth;
   private Location _locationToSkip;
   private Location _currentLocation;
   /**
@@ -66,7 +66,7 @@ public class XdebugConnection
   private Integer _breakAtExpectedStackDepth;
   private Map<StringValue, EnvVar>[] _envStack;
 
-  private XdebugConnection(Env env) {
+  public XdebugConnection(Env env) {
     _env = env;
     if (!isXdebugSessionActivated()) {
       return;
@@ -130,14 +130,6 @@ public class XdebugConnection
     } catch (IOException e) {
       return;
     }
-  }
-
-  public static XdebugConnection getInstance(Env env) {
-    if (INSTANCE != null && INSTANCE.isConnected()) {
-      return INSTANCE;
-    }
-    INSTANCE = new XdebugConnection(env);
-    return INSTANCE;
   }
 
   private boolean isXdebugSessionActivated() {
@@ -309,11 +301,12 @@ public class XdebugConnection
     }
     _currentLocation = location;
     try {
+      Breakpoint breakpoint = null;
       switch (_state) {
       case RUNNING:
         String filenameAndLineNumber = location.getFileName() + ":"
             + location.getLineNumber();
-        Breakpoint breakpoint = breakpointFileAndLineNumberMapping
+        breakpoint = breakpointFileAndLineNumberMapping
             .get(filenameAndLineNumber.toLowerCase());
         if (breakpoint == null) {
           break;
@@ -324,7 +317,8 @@ public class XdebugConnection
           // expected stack depth is not yet reached
           break;
         }
-        if (_locationToSkip != null && _currentLocation.equals(_locationToSkip)) {
+        if (_locationToSkip != null && _currentLocation.equals(_locationToSkip)
+            && breakpoint == null) {
           // still at the same location
           break;
         }
@@ -376,7 +370,7 @@ public class XdebugConnection
   }
 
   public void removeBreakpoint(String id) {
-    Breakpoint breakpoint = breakpointIdsMapping.get(id);
+    Breakpoint breakpoint = breakpointIdsMapping.get(Integer.parseInt(id));
     if (breakpoint != null) {
       breakpointFileAndLineNumberMapping.remove(breakpoint
           .getFileAndLineNumber());
@@ -448,5 +442,6 @@ public class XdebugConnection
 
   public void skipCurrentLocationForNextBreak() {
     _locationToSkip = _currentLocation;
+    _locationToSkipStackDepth = _env.getCallDepth();
   }
 }

@@ -3300,7 +3300,7 @@ public class Env
     _callStackTop++;
     
     if (_xdebugConnection == null) {
-      _xdebugConnection = XdebugConnection.getInstance(this);
+      _xdebugConnection = new XdebugConnection(this);
       _xdebugConnection.connect(call.getLocation());
     }
     notifyNewDebugLocation(call.getLocation());
