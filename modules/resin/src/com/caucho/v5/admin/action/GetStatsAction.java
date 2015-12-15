@@ -53,7 +53,7 @@ public class GetStatsAction implements AdminAction
   {
     StatSystem stats = StatSystem.getCurrent();
 
-    int id = HttpContainer.getCurrent().getServerIndex();
+    int id = HttpContainer.current().getServerIndex();
 
     String serverIndex;
 

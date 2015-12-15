@@ -155,7 +155,7 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    HttpContainer server = HttpContainer.getCurrent();
+    HttpContainer server = HttpContainer.current();
 
     if (server == null) {
       throw new ConfigException(L.l("'{0}' requires an active Resin server",

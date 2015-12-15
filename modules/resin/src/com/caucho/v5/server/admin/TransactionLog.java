@@ -74,7 +74,7 @@ public class TransactionLog
   public void start()
   {
     if (_path == null) {
-      HttpContainer server = HttpContainer.getCurrent();
+      HttpContainer server = HttpContainer.current();
 
       if (server == null)
         return;

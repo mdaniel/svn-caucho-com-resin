@@ -70,7 +70,7 @@ public class RemoteAdminService
   public void init()
     throws Exception
   {
-    _server = HttpContainer.getCurrent();
+    _server = HttpContainer.current();
 
     if (_server == null) {
       if (true) return;

@@ -50,7 +50,7 @@ public class ManagerProxyActor
   
   public String enable()
   {
-    HttpContainer server = HttpContainer.getCurrent();
+    HttpContainer server = HttpContainer.current();
     
     server.setEnabled(true);
     
@@ -59,7 +59,7 @@ public class ManagerProxyActor
   
   public String disable()
   {
-    HttpContainer server = HttpContainer.getCurrent();
+    HttpContainer server = HttpContainer.current();
     
     server.setEnabled(false);
 

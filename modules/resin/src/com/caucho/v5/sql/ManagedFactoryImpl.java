@@ -74,7 +74,7 @@ public class ManagedFactoryImpl
     _drivers = drivers;
     _backupDrivers = backupDrivers;
 
-    HttpContainer server = HttpContainer.getCurrent();
+    HttpContainer server = HttpContainer.current();
     if (server != null) {
       ServerBartender selfServer = server.getSelfServer();
 
