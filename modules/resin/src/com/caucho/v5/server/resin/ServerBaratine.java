@@ -31,7 +31,6 @@ package com.caucho.v5.server.resin;
 
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBuilder;
 
@@ -47,10 +46,9 @@ public class ServerBaratine extends ServerBase
    */
   public ServerBaratine(ServerBuilder builder,
                         SystemManager systemManager,
-                        ServerBartender serverSelf,
-                        HttpContainerServlet httpContainer)
+                        ServerBartender serverSelf)
     throws Exception
   {
-    super(builder, systemManager, serverSelf, httpContainer);
+    super(builder, systemManager, serverSelf);
   }
 }

@@ -209,7 +209,7 @@ public class LoadBalanceBuilder
     String host = address.substring(0, p);
     int port = Integer.parseInt(address.substring(p + 1));
 
-    HttpContainerServlet httpContainer = HttpContainer.current();
+    HttpContainerServlet httpContainer = HttpContainerServlet.current();
     
     BartenderSystem bartender = BartenderSystem.getCurrent();
     ServerBartender server = bartender.getServerHandle(host, port);

@@ -363,7 +363,7 @@ public class ResinEmbed implements Closeable
 
       // _server = _resin.createHttpContainer();
       
-      _server = _resin.getHttpContainer();
+      _server = (HttpContainerServlet) _resin.getHttpContainer();
       
       thread.setContextClassLoader(_resin.getClassLoader());
       

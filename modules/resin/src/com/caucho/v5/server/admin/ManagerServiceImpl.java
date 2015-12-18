@@ -99,7 +99,7 @@ public class ManagerServiceImpl
     if (_isInit.getAndSet(true))
       return;
 
-    _server = HttpContainer.current();
+    _server = HttpContainerServlet.current();
     if (_server == null)
       throw new ConfigException(L.l(
         "resin:ManagerService requires an active Server.\n  {0}",

@@ -33,7 +33,6 @@ import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.http.container.HttpContainerBuilder;
 import com.caucho.v5.http.rewrite.DispatchRuleBase2;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.util.L10N;
@@ -42,7 +41,7 @@ import com.caucho.v5.util.L10N;
  * Configuration for the <cluster> and <server> tags.
  */
 @Configurable
-public class HttpContainerBuilderResin extends HttpContainerBuilder
+public class HttpContainerBuilderResin extends HttpContainerBuilderServlet
 {
   private static final L10N L = new L10N(HttpContainerBuilderResin.class);
 
@@ -57,6 +56,7 @@ public class HttpContainerBuilderResin extends HttpContainerBuilder
     super(serverSelf, serverHeader);
   }
   
+  /*
   @Override
   protected HttpContainerResin createHttpContainer()
   {
@@ -68,6 +68,7 @@ public class HttpContainerBuilderResin extends HttpContainerBuilder
   {
     return (HttpContainerResin) super.getHttpContainer();
   }
+  */
 
   /**
    * Creates a persistent store instance.
@@ -167,4 +168,11 @@ public class HttpContainerBuilderResin extends HttpContainerBuilder
     return null;
   }
   
+  @Override
+  public HttpContainerResin build()
+  {
+    init();
+    
+    return new HttpContainerResin(this);
+  }
 }

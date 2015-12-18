@@ -116,7 +116,7 @@ public class ResinEmbed
       
     try {
       // _resin.start();
-      _server = _resin.getHttpContainer();
+      _server = (HttpContainerServlet) _resin.getHttpContainer();
       
       if (_httpPort >= 0) {
         ServerBuilderResin builder = null;

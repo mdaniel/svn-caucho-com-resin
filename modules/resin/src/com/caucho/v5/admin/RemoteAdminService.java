@@ -71,7 +71,7 @@ public class RemoteAdminService
   public void init()
     throws Exception
   {
-    _server = HttpContainer.current();
+    _server = HttpContainerServlet.current();
 
     if (_server == null) {
       if (true) return;
@@ -128,7 +128,7 @@ public class RemoteAdminService
         log.log(Level.FINEST, e.toString(), e);
       }
       
-      _server.addHost(hostConfig);
+      //_server.addHost(hostConfig);
       
       if (log.isLoggable(Level.FINER))
         log.finer(this + " enabled at http://" + _hostName + "/hmtp");

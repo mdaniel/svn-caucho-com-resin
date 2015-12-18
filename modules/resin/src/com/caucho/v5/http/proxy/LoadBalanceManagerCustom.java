@@ -70,7 +70,7 @@ abstract public class LoadBalanceManagerCustom extends LoadBalanceManager {
     String host = address.substring(0, p);
     int port = Integer.parseInt(address.substring(p + 1));
 
-    HttpContainerServlet httpContainer = HttpContainer.current();
+    HttpContainerServlet httpContainer = HttpContainerServlet.current();
 
     boolean isSecure = false;
     
