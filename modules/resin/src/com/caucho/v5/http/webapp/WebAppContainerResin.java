@@ -33,8 +33,8 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
 import com.caucho.v5.deploy.DeployHandle;
-import com.caucho.v5.http.container.HttpContainer;
-import com.caucho.v5.http.dispatch.Invocation;
+import com.caucho.v5.http.container.HttpContainerServlet;
+import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.rewrite.DispatchRule;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
@@ -64,7 +64,7 @@ public class WebAppContainerResin extends WebAppContainer
   /**
    * Creates the webApp with its environment loader.
    */
-  public WebAppContainerResin(HttpContainer server,
+  public WebAppContainerResin(HttpContainerServlet server,
                          Host host,
                          Path rootDirectory,
                          EnvironmentClassLoader loader,
@@ -83,7 +83,7 @@ public class WebAppContainerResin extends WebAppContainer
   }
 
   @Override
-  protected FilterChain buildFilterChain(Invocation invocation,
+  protected FilterChain buildFilterChain(InvocationServlet invocation,
                                          FilterChain chain)
   {
     if (_rewriteDispatch != null) {

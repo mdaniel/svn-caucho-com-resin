@@ -47,6 +47,7 @@ import com.caucho.v5.env.dbpool.ManagedConnectionFactory;
 import com.caucho.v5.env.dbpool.ResourceException;
 import com.caucho.v5.env.dbpool.ValidatingManagedConnectionFactory;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -74,7 +75,7 @@ public class ManagedFactoryImpl
     _drivers = drivers;
     _backupDrivers = backupDrivers;
 
-    HttpContainer server = HttpContainer.current();
+    HttpContainerServlet server = HttpContainer.current();
     if (server != null) {
       ServerBartender selfServer = server.getSelfServer();
 

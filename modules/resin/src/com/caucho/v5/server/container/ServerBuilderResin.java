@@ -35,7 +35,7 @@ import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.cli.resin.BootConfigParserResin;
 import com.caucho.v5.cli.server.BootConfigParser;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.container.HttpContainerBuilder;
 import com.caucho.v5.http.container.HttpContainerBuilderResin;
 import com.caucho.v5.nautilus.impl.NautilusSystem;
@@ -94,7 +94,7 @@ public class ServerBuilderResin extends ServerBuilder
    * Configures the selected server from the boot config.
    */
   @Override
-  protected HttpContainer initHttpSystem(SystemManager system,
+  protected HttpContainerServlet initHttpSystem(SystemManager system,
                                          ServerBartender selfServer)
     throws IOException
   {
@@ -111,7 +111,7 @@ public class ServerBuilderResin extends ServerBuilder
   @Override
   public Resin build(SystemManager systemManager,
                      ServerBartender serverSelf,
-                     HttpContainer httpContainer)
+                     HttpContainerServlet httpContainer)
     throws Exception
   {
     return new Resin(this, systemManager, serverSelf, httpContainer);

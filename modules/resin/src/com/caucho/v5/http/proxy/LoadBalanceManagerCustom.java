@@ -33,6 +33,7 @@ import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.network.balance.ClientSocketFactory;
 import com.caucho.v5.util.L10N;
 
@@ -69,7 +70,7 @@ abstract public class LoadBalanceManagerCustom extends LoadBalanceManager {
     String host = address.substring(0, p);
     int port = Integer.parseInt(address.substring(p + 1));
 
-    HttpContainer httpContainer = HttpContainer.current();
+    HttpContainerServlet httpContainer = HttpContainer.current();
 
     boolean isSecure = false;
     

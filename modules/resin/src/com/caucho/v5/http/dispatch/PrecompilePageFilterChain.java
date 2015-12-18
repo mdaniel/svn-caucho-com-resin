@@ -30,8 +30,8 @@ package com.caucho.v5.http.dispatch;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.dispatch.FilterChainException;
+import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.dispatch.Invocation;
-import com.caucho.v5.http.dispatch.ServletInvocation;
 import com.caucho.v5.jsp.Page;
 import com.caucho.v5.jsp.QServlet;
 import com.caucho.v5.make.AlwaysModified;
@@ -71,7 +71,7 @@ public class PrecompilePageFilterChain implements FilterChain {
     _servlet = servlet;
   }
 
-  static FilterChain create(ServletInvocation invocation,
+  static FilterChain create(Invocation invocation,
                             PageFilterChain pageChain)
   {
     String query = invocation.getQueryString();
@@ -89,8 +89,8 @@ public class PrecompilePageFilterChain implements FilterChain {
     if (tail.startsWith("=\"true\"") ||
         tail.startsWith("=true") ||
         ! tail.startsWith("=")) {
-      if (invocation instanceof Invocation) {
-        Invocation inv = (Invocation) invocation;
+      if (invocation instanceof InvocationServlet) {
+        InvocationServlet inv = (InvocationServlet) invocation;
 
         inv.setDependency(AlwaysModified.create());
       }

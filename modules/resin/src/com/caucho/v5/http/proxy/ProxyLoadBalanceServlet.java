@@ -29,9 +29,9 @@ import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.bartender.pod.NodePodAmp;
 import com.caucho.v5.bartender.pod.PodBartender;
-import com.caucho.v5.bartender.pod.ServerPod;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.protocol.RequestHttpBase;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseCaucho;
@@ -155,7 +155,7 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    HttpContainer server = HttpContainer.current();
+    HttpContainerServlet server = HttpContainer.current();
 
     if (server == null) {
       throw new ConfigException(L.l("'{0}' requires an active Resin server",

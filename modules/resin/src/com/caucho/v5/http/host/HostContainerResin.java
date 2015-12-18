@@ -34,8 +34,8 @@ import java.util.HashMap;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.v5.http.container.HttpContainer;
-import com.caucho.v5.http.dispatch.Invocation;
+import com.caucho.v5.http.container.HttpContainerServlet;
+import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.host.HostContainer;
 import com.caucho.v5.http.host.HostController;
@@ -63,7 +63,7 @@ public class HostContainerResin extends HostContainer
   /**
    * Creates the webApp with its environment loader.
    */
-  public HostContainerResin(HttpContainer server)
+  public HostContainerResin(HttpContainerServlet server)
   {
     super(server);
   }
@@ -102,9 +102,9 @@ public class HostContainerResin extends HostContainer
    * Creates the invocation.
    */
   @Override
-  public Invocation buildInvocation(Invocation invocation)
+  public InvocationServlet routeInvocation(InvocationServlet invocation)
   {
-    invocation = super.buildInvocation(invocation);
+    invocation = super.routeInvocation(invocation);
     
     String hostName = invocation.getHostName(); 
 
@@ -125,7 +125,7 @@ public class HostContainerResin extends HostContainer
                                                       chain);
 
       if (rewriteChain != chain) {
-        HttpContainer server = getServer();
+        HttpContainerServlet server = getServer();
         WebApp webApp = server.getDefaultWebApp();
         invocation.setWebApp(webApp);
 

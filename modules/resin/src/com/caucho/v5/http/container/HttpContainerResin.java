@@ -29,14 +29,14 @@
 
 package com.caucho.v5.http.container;
 
-import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.HostContainer;
 import com.caucho.v5.http.host.HostContainerResin;
 import com.caucho.v5.http.webapp.WebAppBuilderResin;
 import com.caucho.v5.http.webapp.WebAppController;
 
 
-public class HttpContainerResin extends HttpContainer
+public class HttpContainerResin extends HttpContainerServlet
 {
   /**
    * Creates a new http container.

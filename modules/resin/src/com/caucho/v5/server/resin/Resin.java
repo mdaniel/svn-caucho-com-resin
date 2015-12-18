@@ -31,7 +31,7 @@ package com.caucho.v5.server.resin;
 
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBuilder;
 
@@ -47,7 +47,7 @@ public class Resin extends ServerBase
   public Resin(ServerBuilder builder, 
                SystemManager systemManager,
                ServerBartender serverSelf,
-               HttpContainer httpContainer)
+               HttpContainerServlet httpContainer)
     throws Exception
   {
     super(builder, systemManager, serverSelf, httpContainer);

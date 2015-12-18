@@ -33,7 +33,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.http.dispatch.Invocation;
+import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.webapp.WebAppDispatch;
 
@@ -73,7 +73,7 @@ public class WebAppDispatchResin extends WebAppDispatch
   
   @Override
   protected FilterChain applyRewrite(DispatcherType type,
-                                     Invocation invocation,
+                                     InvocationServlet invocation,
                                      FilterChain chain)
   {
     switch (type) {

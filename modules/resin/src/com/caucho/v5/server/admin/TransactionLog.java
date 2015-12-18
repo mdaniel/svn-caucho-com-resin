@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.xalog.AbstractXALogManager;
 import com.caucho.v5.util.L10N;
@@ -74,7 +75,7 @@ public class TransactionLog
   public void start()
   {
     if (_path == null) {
-      HttpContainer server = HttpContainer.current();
+      HttpContainerServlet server = HttpContainer.current();
 
       if (server == null)
         return;

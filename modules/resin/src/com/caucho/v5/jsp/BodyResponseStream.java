@@ -41,7 +41,8 @@ import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BodyResponseStream extends OutResponseBase {
+public class BodyResponseStream extends OutResponseBase
+{
   private static final Logger log
     = Logger.getLogger(BodyResponseStream.class.getName());
   
@@ -167,6 +168,12 @@ public class BodyResponseStream extends OutResponseBase {
       return;
 
     _out.write(buf, offset, length);
+  }
+
+  public void print(String v)
+    throws IOException
+  {
+    _out.write(v);
   }
 
   /**

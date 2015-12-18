@@ -32,9 +32,9 @@ package com.caucho.v5.http.dispatch;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.http.dispatch.Invocation;
+import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.dispatch.ServletBuilder;
-import com.caucho.v5.http.dispatch.ServletInvocation;
+import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.dispatch.ServletManager;
 
 /**
@@ -47,7 +47,7 @@ public class ServletManagerResin extends ServletManager
    */
   public FilterChain createServletChain(String servletName,
                                         ServletBuilder config,
-                                        ServletInvocation invocation)
+                                        Invocation invocation)
     throws ServletException
   {
     FilterChain chain = super.createServletChain(servletName, config, invocation);
@@ -55,7 +55,7 @@ public class ServletManagerResin extends ServletManager
     if (chain instanceof PageFilterChain) {
       PageFilterChain pageChain = (PageFilterChain) chain;
       
-      Invocation inv = (Invocation) invocation;
+      InvocationServlet inv = (InvocationServlet) invocation;
       
       chain = PrecompilePageFilterChain.create(inv, pageChain);
     }

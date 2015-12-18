@@ -32,6 +32,7 @@ package com.caucho.v5.server.admin;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.util.L10N;
 
 // @ActorFor(api = ManagerProxyApi.class)
@@ -50,7 +51,7 @@ public class ManagerProxyActor
   
   public String enable()
   {
-    HttpContainer server = HttpContainer.current();
+    HttpContainerServlet server = HttpContainer.current();
     
     server.setEnabled(true);
     
@@ -59,7 +60,7 @@ public class ManagerProxyActor
   
   public String disable()
   {
-    HttpContainer server = HttpContainer.current();
+    HttpContainerServlet server = HttpContainer.current();
     
     server.setEnabled(false);
 

@@ -40,6 +40,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.DeployMode;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppConfig;
@@ -56,7 +57,7 @@ public class RemoteAdminService
   private static final L10N L = new L10N(RemoteAdminService.class);
 
   private String _hostName = "admin.resin";
-  private HttpContainer _server;
+  private HttpContainerServlet _server;
   private boolean _isAuthenticationRequired = true;
 
   private WebApp _webApp;

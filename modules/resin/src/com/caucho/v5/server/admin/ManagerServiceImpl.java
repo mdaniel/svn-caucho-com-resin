@@ -63,6 +63,7 @@ import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.action.JmxSetQueryReply;
 import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
@@ -78,7 +79,7 @@ public class ManagerServiceImpl
 
   private static final L10N L = new L10N(ManagerServiceImpl.class);
 
-  private HttpContainer _server;
+  private HttpContainerServlet _server;
   private Path _hprofDir;
 
   private AtomicBoolean _isInit = new AtomicBoolean();

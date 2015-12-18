@@ -35,7 +35,7 @@ import java.io.InputStream;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.config.xml.ConfigXml;
-import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.webapp.WebAppConfig;
@@ -55,7 +55,7 @@ public class ResinEmbed
   
   private Resin _resin;
   private Host _host;
-  private HttpContainer _server;
+  private HttpContainerServlet _server;
   
   private int _httpPort = -1;
 

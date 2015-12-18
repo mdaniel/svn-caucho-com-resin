@@ -43,7 +43,7 @@ import javax.servlet.ServletException;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
-import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.rewrite.DispatchRule;
 import com.caucho.v5.http.rewrite.RewriteFilter;
 import com.caucho.v5.http.webapp.WebApp;
@@ -59,7 +59,7 @@ public class RewriteDispatch
     = Logger.getLogger(RewriteDispatch.class.getName());
 
   private final WebApp _webApp;
-  private final HttpContainer _server;
+  private final HttpContainerServlet _server;
 
   private HashSet<String> _dispatcherTypes = new HashSet<String>();
 
@@ -76,7 +76,7 @@ public class RewriteDispatch
   private final boolean _isFiner;
   private final boolean _isFinest;
 
-  public RewriteDispatch(HttpContainer server)
+  public RewriteDispatch(HttpContainerServlet server)
   {
     this(server, null);
   }
@@ -86,7 +86,7 @@ public class RewriteDispatch
     this(null, webApp);
   }
 
-  private RewriteDispatch(HttpContainer server, WebApp webApp)
+  private RewriteDispatch(HttpContainerServlet server, WebApp webApp)
   {
     _server = server;
     _webApp = webApp;

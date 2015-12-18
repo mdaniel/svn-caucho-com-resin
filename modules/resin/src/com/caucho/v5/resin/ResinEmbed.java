@@ -46,7 +46,7 @@ import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.ConfigInstanceBuilder;
-import com.caucho.v5.http.container.HttpContainer;
+import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.protocol.HttpProtocol;
@@ -99,7 +99,7 @@ public class ResinEmbed implements Closeable
   private String _configFile = EMBED_CONF;
 
   private Host _host;
-  private HttpContainer _server;
+  private HttpContainerServlet _server;
 
   private String _serverHeader;
 
