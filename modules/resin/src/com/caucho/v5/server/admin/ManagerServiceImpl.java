@@ -62,7 +62,6 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.action.JmxSetQueryReply;
 import com.caucho.v5.health.stat.StatSystem;
-import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.util.CurrentTime;
@@ -90,7 +89,7 @@ public class ManagerServiceImpl
   {
     ServiceManagerAmp manager = AmpSystem.getCurrentManager();
     
-    manager.service(this).bind("/manager");
+    manager.service(this).address("/manager").ref();
   }
 
   @PostConstruct

@@ -340,7 +340,7 @@ public class ResinBeanContainer {
                         .name("resin-bean-container")
                         .classLoader(_classLoader)
                         .autoStart(false)
-                        .build();
+                        .start();
         
         Amp.setContextManager(ampManager);
         

@@ -96,7 +96,8 @@ public class NautilusSystem extends SubSystemBase
     _nautilusServiceImpl = new NautilusServiceImpl(this);
     
     rampManager.service(_nautilusServiceImpl)
-               .bind("public://" + NautilusService.PATH);
+               .address("public://" + NautilusService.PATH)
+               .ref();
   }
   
   @Override
