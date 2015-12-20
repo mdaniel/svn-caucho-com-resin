@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.v5.bartender.admin;
+package com.caucho.v5.bartender.proc;
 
 import io.baratine.core.Result;
 import io.baratine.files.BfsFileSync;
@@ -39,6 +39,7 @@ import java.util.Collections;
 import com.caucho.v5.baratine.ServiceApi;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ClusterBartender;
+import com.caucho.v5.bartender.proc.ProcFileBase;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerServlet;
