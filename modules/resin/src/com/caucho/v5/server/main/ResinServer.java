@@ -37,7 +37,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.env.shutdown.ExitCode;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.server.resin.ServerArgsResin;
+import com.caucho.v5.server.resin.ArgsServerResin;
 import com.caucho.v5.util.CompileException;
 
 /**
@@ -65,7 +65,7 @@ public class ResinServer
       
       // Resin.validateEnvironment();
       
-      args = new ServerArgsResin(argv);
+      args = new ArgsServerResin(argv);
       //args.parse();
 
       args.doCommand();

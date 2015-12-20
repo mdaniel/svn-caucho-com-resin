@@ -246,7 +246,7 @@ public final class BrokerServiceImpl
     
     SenderBrokerNautilus sender = new SenderBrokerNautilus(sid, queue);
     
-    result.complete(sender);
+    result.ok(sender);
   }
 
   public ReceiverBroker createReceiver(String queueName,

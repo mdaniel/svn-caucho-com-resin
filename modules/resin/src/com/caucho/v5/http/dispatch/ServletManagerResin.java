@@ -32,11 +32,6 @@ package com.caucho.v5.http.dispatch;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.dispatch.ServletBuilder;
-import com.caucho.v5.http.dispatch.Invocation;
-import com.caucho.v5.http.dispatch.ServletManager;
-
 /**
  * Manages the servlets.
  */
@@ -45,9 +40,10 @@ public class ServletManagerResin extends ServletManager
   /**
    * Creates the servlet chain for the servlet.
    */
+  @Override
   public FilterChain createServletChain(String servletName,
                                         ServletBuilder config,
-                                        Invocation invocation)
+                                        InvocationServlet invocation)
     throws ServletException
   {
     FilterChain chain = super.createServletChain(servletName, config, invocation);
