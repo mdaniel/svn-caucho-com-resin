@@ -363,7 +363,7 @@ public class ResinEmbed implements Closeable
 
       // _server = _resin.createHttpContainer();
       
-      _server = (HttpContainerServlet) _resin.getHttpContainer();
+      _server = (HttpContainerServlet) _resin.getHttp();
       
       thread.setContextClassLoader(_resin.getClassLoader());
       
@@ -665,7 +665,7 @@ public class ResinEmbed implements Closeable
       _conn = new ConnectionSocketStream();
       // _conn.setVirtualHost(_virtualHost);
 
-      HttpProtocol httpProtocol = new HttpProtocol(_resin.getHttpContainer());
+      HttpProtocol httpProtocol = new HttpProtocol(_resin.getHttp());
       _request = new RequestProtocolHttp(httpProtocol, _conn);
       _request.init();
 
