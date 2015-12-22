@@ -406,7 +406,7 @@ public class ResinBeanContainer {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      return _cdiManager.create(type, qualifiers);
+      return _cdiManager.instance(type, qualifiers);
       /*
       Set<Bean<?>> beans = _cdiManager.getBeans(type, qualifiers);
 

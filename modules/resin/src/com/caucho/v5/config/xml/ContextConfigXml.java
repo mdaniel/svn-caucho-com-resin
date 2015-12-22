@@ -566,7 +566,7 @@ public class ContextConfigXml extends ContextConfig
       
       Class<?> attrType = attrStrategy.getConfigType().getType();
       
-      childBean = cdiManager.create(attrType, (Annotation) qualifier);
+      childBean = cdiManager.instance(attrType, (Annotation) qualifier);
 
       /*
       Set<Bean<?>> beans

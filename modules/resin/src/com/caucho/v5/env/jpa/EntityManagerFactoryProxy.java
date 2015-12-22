@@ -169,7 +169,7 @@ public class EntityManagerFactoryProxy
     {
       InjectManager beanManager = InjectManager.current();
       
-      return beanManager.create(EntityManagerFactory.class, 
+      return beanManager.instance(EntityManagerFactory.class, 
                                 Names.create(_name));
     }
   }

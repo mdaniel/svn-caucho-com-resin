@@ -289,7 +289,7 @@ public class ResourceRef extends ResourceGroupConfig
     else if (_type != null) {
       InjectManager cdiManager = InjectManager.current();
       
-      value = cdiManager.create(_type);
+      value = cdiManager.instance(_type);
       //value = cdiManager..create(_bean);
       //value = null;
     }

@@ -119,7 +119,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
     value = _beanManager.getReference(bean, bean.getBeanClass(), cxt);
     */
     
-    value = _beanManager.create(_type);
+    value = _beanManager.instance(_type);
 
     return value;
   }
