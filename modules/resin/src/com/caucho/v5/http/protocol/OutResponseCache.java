@@ -403,25 +403,17 @@ abstract public class OutResponseCache extends OutResponseToByte
   protected void closeImpl()
     throws IOException
   {
-    try {
-      setAutoFlush(true);
+    setAutoFlush(true);
 
-      flushCharBuffer();
+    flushCharBuffer();
 
-      flushByteBuffer(true);
+    flushByteBuffer(true);
 
-      //writeTail(true);
+    //writeTail(true);
 
-      // closeCache();
+    // closeCache();
 
-      //closeNext();
-    } catch (ClientDisconnectException e) {
-      _response.clientDisconnect();
-
-      if (! _response.isIgnoreClientDisconnect()) {
-        throw e;
-      }
-    }
+    //closeNext();
   }
 
   //

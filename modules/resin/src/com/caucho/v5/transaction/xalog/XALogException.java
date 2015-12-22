@@ -42,12 +42,13 @@
 
 package com.caucho.v5.transaction.xalog;
 
-import com.caucho.v5.vfs.IOExceptionWrapper;
+import java.io.IOException;
 
 /**
  * Exception while reading/writing the log.
  */
-public class XALogException extends IOExceptionWrapper {
+public class XALogException extends IOException
+{
   public XALogException()
   {
   }

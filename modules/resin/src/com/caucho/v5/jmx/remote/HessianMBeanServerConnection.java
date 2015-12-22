@@ -29,17 +29,35 @@
 
 package com.caucho.v5.jmx.remote;
 
+import java.io.IOException;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.JMException;
+import javax.management.ListenerNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServerConnection;
+import javax.management.NotCompliantMBeanException;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.QueryExp;
+import javax.management.ReflectionException;
+
 import com.caucho.v5.hessian.client.HessianProxyFactory;
 import com.caucho.v5.hessian.jmx.JMXSerializerFactory;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Log;
-import com.caucho.v5.vfs.IOExceptionWrapper;
-
-import javax.management.*;
-
-import java.io.IOException;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Static convenience methods.
@@ -380,10 +398,10 @@ public class HessianMBeanServerConnection
       info = getMBeanInfo(objectName);
     }
     catch (IntrospectionException e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOException(e);
     }
     catch (ReflectionException e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOException(e);
     }
 
     String className = info.getClassName();

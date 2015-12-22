@@ -173,7 +173,6 @@ public class OutResponseStub extends OutResponseBase {
    */
   @Override
   public void write(byte []buffer, int offset, int length)
-    throws IOException
   {
   }
 

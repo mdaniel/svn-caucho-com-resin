@@ -56,7 +56,6 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
-import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.http.security.Login;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.json.JsonName;
@@ -64,7 +63,6 @@ import com.caucho.v5.json.JsonTransient;
 import com.caucho.v5.util.CacheListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.IOExceptionWrapper;
 import com.caucho.v5.vfs.TempOutputStream;
 
 /**
@@ -917,7 +915,7 @@ public class SessionImpl implements HttpSession, CacheListener {
             }
           }
         } catch (Exception e) {
-          throw IOExceptionWrapper.create(e);
+          throw new IOException(e);
         }
       }
     }

@@ -28,19 +28,17 @@
 
 package com.caucho.v5.vfs;
 
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.util.Log;
-import com.caucho.v5.vfs.FilesystemPath;
-import com.caucho.v5.vfs.IOExceptionWrapper;
-import com.caucho.v5.vfs.Path;
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.caucho.v5.hessian.io.IOExceptionWrapper;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.Log;
 
 /**
  * Adapts the JNDI to the Path API.  The name separator is always '/'.
@@ -105,7 +103,7 @@ public class JndiPath extends FilesystemPath {
 
       return true;
     } catch (Exception e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOException(e);
     }
   }
   
@@ -120,7 +118,7 @@ public class JndiPath extends FilesystemPath {
 
       return parent.lookup(getTail());
     } catch (Exception e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOException(e);
     }
   }
   
@@ -138,7 +136,7 @@ public class JndiPath extends FilesystemPath {
       parent.rebind(getTail(), value);
     } catch (Exception e) {
       e.printStackTrace();
-      throw new IOExceptionWrapper(e);
+      throw new IOException(e);
     }
   }
 

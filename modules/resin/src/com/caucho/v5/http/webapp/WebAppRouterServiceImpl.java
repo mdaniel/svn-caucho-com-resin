@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.webapp;
 
-import io.baratine.core.CancelHandle;
+import io.baratine.core.Cancel;
 import io.baratine.core.Direct;
 import io.baratine.core.OnInit;
 import io.baratine.core.Result;
@@ -77,7 +77,7 @@ public class WebAppRouterServiceImpl implements WebAppRouterService
   
   private HashMap<String,DeployHandle<WebApp>> _webAppMap = new HashMap<>();
   
-  private CancelHandle _onStartCancel;
+  private Cancel _onStartCancel;
 
   private final Lifecycle _lifecycle = new Lifecycle();
   private DeploySystem _deploySystem;

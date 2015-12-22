@@ -29,15 +29,16 @@
 
 package com.caucho.v5.http.protocol;
 
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
-import com.caucho.v5.vfs.TempCharBuffer;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Encoding;
+import com.caucho.v5.vfs.IOExceptionRuntime;
+import com.caucho.v5.vfs.TempCharBuffer;
 
 abstract public class OutResponseToChar extends OutResponseBase {
   private static final Logger log
@@ -267,11 +268,7 @@ abstract public class OutResponseToChar extends OutResponseBase {
   public void setBufferOffset(int offset)
   {
     if (offset > 0) {
-      try {
-        write(_byteBuffer, 0, offset);
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
+      write(_byteBuffer, 0, offset);
     }
   }
 
@@ -306,32 +303,35 @@ abstract public class OutResponseToChar extends OutResponseBase {
    */
   @Override
   public void write(byte []buf, int offset, int length)
-    throws IOException
   {
-    if (length == 0)
-      return;
+    try {
+      if (length == 0)
+        return;
 
-    if (_encodingReader == null) {
-      // server/1b13
-      if (_in == null)
-        _in = new BufferInputStream();
-      _encodingReader = Encoding.getReadEncoding(_in, getEncoding());
-    }
-
-    // XXX: performance issues
-    if (_encodingReader == null) {
-      for (; length > 0; length--) {
-        print((char) buf[offset++]);
+      if (_encodingReader == null) {
+        // server/1b13
+        if (_in == null)
+          _in = new BufferInputStream();
+        _encodingReader = Encoding.getReadEncoding(_in, getEncoding());
       }
-      return;
-    }
-    
-    _in.init(buf, offset, length);
 
-    // XXX: performance issues
-    int ch;
-    while ((ch = _encodingReader.read()) >= 0) {
-      print(ch);
+      // XXX: performance issues
+      if (_encodingReader == null) {
+        for (; length > 0; length--) {
+          print((char) buf[offset++]);
+        }
+        return;
+      }
+
+      _in.init(buf, offset, length);
+
+      // XXX: performance issues
+      int ch;
+      while ((ch = _encodingReader.read()) >= 0) {
+        print(ch);
+      }
+    } catch (IOException e) {
+      throw new IOExceptionRuntime(e);
     }
   }
 

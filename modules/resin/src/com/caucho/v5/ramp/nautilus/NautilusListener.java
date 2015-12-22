@@ -56,7 +56,7 @@ class NautilusListener
   NautilusListener(ServiceRef consumer)
   {
     _consumer = (ServiceRefAmp) consumer;
-    _rampManager = (ServiceManagerAmp) consumer.getManager();
+    _rampManager = (ServiceManagerAmp) consumer.manager();
     _jIn = new InJamp(this);
   }
   

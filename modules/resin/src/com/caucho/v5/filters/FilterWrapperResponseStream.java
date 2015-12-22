@@ -30,11 +30,17 @@ package com.caucho.v5.filters;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.v5.http.protocol.OutResponseToByte;
 import com.caucho.v5.vfs.TempBuffer;
 
-public class FilterWrapperResponseStream extends OutResponseToByte {
+public class FilterWrapperResponseStream extends OutResponseToByte
+{
+  private static final Logger log
+    = Logger.getLogger(FilterWrapperResponseStream.class.getName());
+  
   private CauchoResponseWrapper _response;
   
   private OutputStream _os;
@@ -71,24 +77,27 @@ public class FilterWrapperResponseStream extends OutResponseToByte {
 
   @Override
   protected TempBuffer flushData(TempBuffer head, TempBuffer tail, boolean isEnd)
-      throws IOException
   {
-    OutputStream os = getStream();
-    
-    System.out.println("FDO: " + head);
-    
-    if (os != null) {
-      // os.write(buf, offset, length);
+    try {
+      OutputStream os = getStream();
+
+      if (os != null) {
+        // os.write(buf, offset, length);
+      }
+
+      TempBuffer next = head.getNext();
+
+      if (next != null) {
+        head.setNext(null);
+        TempBuffer.freeAll(next);;
+      }
+
+      return head;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return null;
     }
-    
-    TempBuffer next = head.getNext();
-    
-    if (next != null) {
-      head.setNext(null);
-      TempBuffer.freeAll(next);;
-    }
-    
-    return head;
   }
 
   /**

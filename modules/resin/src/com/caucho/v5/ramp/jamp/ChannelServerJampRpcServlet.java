@@ -239,7 +239,7 @@ public class ChannelServerJampRpcServlet implements ChannelServer
     
     MethodRefAmp methodRef = _registry.lookupMethod(address, methodName);
     ServiceRefAmp serviceRef = methodRef.getService();
-    String addressService = serviceRef.getAddress();
+    String addressService = serviceRef.address();
 
     if (addressService.startsWith("session:")) {
       ServiceRefAmp sessionRef = lookupSession(serviceRef);
@@ -275,7 +275,7 @@ public class ChannelServerJampRpcServlet implements ChannelServer
     }
     
     ServiceRefAmp serviceRef = _registry.lookup(address);
-    String addressService = serviceRef.getAddress();
+    String addressService = serviceRef.address();
     
     if (addressService.startsWith("session:")) {
       ServiceRefAmp sessionRef = lookupSession(serviceRef);

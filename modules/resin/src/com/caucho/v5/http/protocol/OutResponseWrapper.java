@@ -29,16 +29,16 @@
 
 package com.caucho.v5.http.protocol;
 
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.TempBuffer;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.TempBuffer;
 
 public class OutResponseWrapper extends OutResponseBase {
   private static final Logger log
@@ -224,11 +224,7 @@ public class OutResponseWrapper extends OutResponseBase {
   public void setBufferOffset(int offset)
   {
     if (offset > 0) {
-      try {
-        write(_byteBuffer, 0, offset);
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
+      write(_byteBuffer, 0, offset);
     }
   }
 
@@ -280,19 +276,23 @@ public class OutResponseWrapper extends OutResponseBase {
    * @param length length of the data in the buffer
    */
   public void write(byte []buf, int offset, int length)
-    throws IOException
   {
-    if (length == 0)
+    if (length == 0) {
       return;
-    
-    if (_os == null) {
-      if (_next == null)
-        return;
-      
-      _os = _next.getOutputStream();
     }
+    
+    try {
+      if (_os == null) {
+        if (_next == null)
+          return;
 
-    _os.write(buf, offset, length);
+        _os = _next.getOutputStream();
+      }
+
+      _os.write(buf, offset, length);
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   /**

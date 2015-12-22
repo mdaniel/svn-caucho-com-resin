@@ -42,11 +42,10 @@ import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 
-import com.caucho.v5.http.cache.EntryHttpCacheBase;
-import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.http.protocol.OutResponseToByte;
 import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.vfs.IOExceptionRuntime;
 import com.caucho.v5.vfs.TempBuffer;
 
 public class OutResponseInclude extends OutResponseToByte {
@@ -151,7 +150,6 @@ public class OutResponseInclude extends OutResponseToByte {
    */
   @Override
   protected void flushCharBuffer()
-    throws IOException
   {
     int charLength = getCharOffset();
     
@@ -168,7 +166,11 @@ public class OutResponseInclude extends OutResponseToByte {
     setCharOffset(0);
     char []buffer = getCharBuffer();
 
-    getWriter().write(buffer, 0, charLength);
+    try {
+      getWriter().write(buffer, 0, charLength);
+    } catch (IOException e) {
+      throw new IOExceptionRuntime(e);
+    }
   }
 
   /**
@@ -226,7 +228,6 @@ public class OutResponseInclude extends OutResponseToByte {
    */
   @Override
   public void write(byte []buf, int offset, int length)
-    throws IOException
   {
     flushCharBuffer();
       
@@ -236,10 +237,16 @@ public class OutResponseInclude extends OutResponseToByte {
     // server/2h0m
     // XXX: _response.killCache();
 
-    if (_stream != null)
+    if (_stream != null) {
       super.write(buf, offset, length);
-    else
-      getOutputStream().write(buf, offset, length);
+    }
+    else {
+      try {
+        getOutputStream().write(buf, offset, length);
+      } catch (IOException e) {
+        throw new IOExceptionRuntime(e);
+      }
+    }
   }
 
   /*
@@ -252,10 +259,10 @@ public class OutResponseInclude extends OutResponseToByte {
 
   @Override
   protected TempBuffer flushData(TempBuffer head, TempBuffer tail, boolean isEnd)
-      throws IOException
   {
     for (TempBuffer ptr = head; ptr != null; ptr = ptr.getNext()) {
       boolean ptrEnd = isEnd && ptr.getNext() == null;
+      
       flushDataBuffer(ptr.getBuffer(), 0, ptr.getLength(), ptrEnd);
     }
     
@@ -278,7 +285,6 @@ public class OutResponseInclude extends OutResponseToByte {
    */
   // @Override
   protected void flushDataBuffer(byte []buf, int offset, int length, boolean isEnd)
-    throws IOException
   {
     try {
       /* XXX:
@@ -304,7 +310,7 @@ public class OutResponseInclude extends OutResponseToByte {
         _response.killCache();
       */
 
-      throw e;
+      throw new IOExceptionRuntime(e);
     }
   }
 

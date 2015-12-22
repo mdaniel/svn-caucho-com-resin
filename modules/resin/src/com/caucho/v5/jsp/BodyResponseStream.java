@@ -29,17 +29,17 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.http.protocol.OutResponseBase;
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
-import com.caucho.v5.vfs.TempBuffer;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.Encoding;
+import com.caucho.v5.vfs.TempBuffer;
 
 public class BodyResponseStream extends OutResponseBase
 {
@@ -206,11 +206,7 @@ public class BodyResponseStream extends OutResponseBase
   public void setBufferOffset(int offset)
   {
     if (offset > 0) {
-      try {
-        write(_byteBuffer, 0, offset);
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
+      write(_byteBuffer, 0, offset);
     }
   }
 
@@ -245,29 +241,32 @@ public class BodyResponseStream extends OutResponseBase
    */
   @Override
   public void write(byte []buf, int offset, int length)
-    throws IOException
   {
-    if (length == 0)
-      return;
+    try {
+      if (length == 0)
+        return;
 
-    if (_encodingReader == null) {
-      if (_in == null)
-        _in = new BufferInputStream();
-      _encodingReader = Encoding.getReadEncoding(_in, _encoding);
-    }
-
-    if (_encodingReader == null) {
-      for (; length > 0; length--) {
-        print((char) (buf[offset++] & 0xff));
+      if (_encodingReader == null) {
+        if (_in == null)
+          _in = new BufferInputStream();
+        _encodingReader = Encoding.getReadEncoding(_in, _encoding);
       }
-      return;
-    }
-    
-    _in.init(buf, offset, length);
 
-    int ch;
-    while ((ch = _encodingReader.read()) >= 0) {
-      print(ch);
+      if (_encodingReader == null) {
+        for (; length > 0; length--) {
+          print((char) (buf[offset++] & 0xff));
+        }
+        return;
+      }
+
+      _in.init(buf, offset, length);
+
+      int ch;
+      while ((ch = _encodingReader.read()) >= 0) {
+        print(ch);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

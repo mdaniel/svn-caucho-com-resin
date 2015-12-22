@@ -28,18 +28,17 @@
 
 package com.caucho.v5.xml;
 
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.IOExceptionWrapper;
-import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
-
-import org.w3c.dom.Node;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.OutputStream;
+
+import org.w3c.dom.Node;
+
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.Vfs;
 
 /**
  * QAbstractNode is an abstract implementation for any DOM node.
@@ -83,7 +82,7 @@ public class SerializedXml implements java.io.Externalizable {
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw new IOExceptionWrapper(e);
+      throw new IOException(e);
     }
 
     parser.free();
