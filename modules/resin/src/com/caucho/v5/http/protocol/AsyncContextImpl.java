@@ -421,7 +421,7 @@ public class AsyncContextImpl extends RequestProtocolBase
   }
 
   @Override
-  public NextState handleRequest() throws IOException
+  public NextState service() throws IOException
   {
     _stateRef.compareAndSet(StateAsync.START, StateAsync.WAKE);
     // _stateRef.compareAndSet(StateAsync.WAKE, StateAsync.IDLE);

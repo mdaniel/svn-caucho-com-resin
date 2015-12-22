@@ -130,7 +130,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
     RequestHttpBase req = _response.getRequest();
     
-    HttpContainerServlet http = (HttpContainerServlet) req.getHttpContainer();
+    HttpContainerServlet http = (HttpContainerServlet) req.getHttp();
     
     _cacheMaxLength = http.getCacheMaxLength();
   }
@@ -279,7 +279,7 @@ abstract public class OutResponseCache extends OutResponseToByte
       return;
     }
 
-    long contentLengthHeader = _response.getContentLengthHeader();
+    long contentLengthHeader = _response.getContentLength();
     // Can't write beyond the content length
     if (0 < contentLengthHeader
         && contentLengthHeader < length + _contentLength) {

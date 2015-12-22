@@ -84,7 +84,7 @@ public class OutResponseWrapper extends OutResponseBase {
   /**
    * Sets the buffer size.
    */
-  public void setBufferSize(int size)
+  public void setBufferCapacity(int size)
   {
     _next.setBufferSize(size);
   }
@@ -92,7 +92,7 @@ public class OutResponseWrapper extends OutResponseBase {
   /**
    * Gets the buffer size.
    */
-  public int getBufferSize()
+  public int getBufferCapacity()
   {
     return _next.getBufferSize();
   }

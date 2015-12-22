@@ -210,7 +210,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public void setBufferSize(int size)
   {
-    getResponseStream().setBufferSize(size);
+    getResponseStream().setBufferCapacity(size);
   }
 
   /**
@@ -219,7 +219,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public int getBufferSize()
   {
-    return getResponseStream().getBufferSize();
+    return getResponseStream().getBufferCapacity();
   }
 
   // needed to support JSP
@@ -1267,14 +1267,27 @@ public final class ResponseServlet extends ResponseCauchoBase
   */
 
   /**
-   * Sets a header by converting an integer value to a string.
+   * Convenience for setting an integer header.  An old header with the
+   * same name will be replaced.
    *
-   * @param name name of the header
-   * @param value the value as an integer
+   * @param name the header name.
+   * @param value an integer to be converted to a string for the header.
    */
   public void setIntHeader(String name, int value)
   {
-    _response.setIntHeader(name, value);
+    setHeader(name, String.valueOf(value));
+  }
+
+  /**
+   * Convenience for adding an integer header.  If an old header already
+   * exists, both will be sent to the browser.
+   *
+   * @param key the header name.
+   * @param value an integer to be converted to a string for the header.
+   */
+  public void addIntHeader(String key, int value)
+  {
+    addHeader(key, String.valueOf(value));
   }
 
   /**
@@ -1318,17 +1331,6 @@ public final class ResponseServlet extends ResponseCauchoBase
   }
 
   /**
-   * Adds a header by converting an integer value to a string.
-   *
-   * @param name name of the header
-   * @param value the value as an integer
-   */
-  public void addIntHeader(String name, int value)
-  {
-    _response.addIntHeader(name, value);
-  }
-
-  /**
    * Adds a cookie to the response.
    *
    * @param cookie the response cookie
@@ -1338,25 +1340,29 @@ public final class ResponseServlet extends ResponseCauchoBase
   {
     _request.setHasCookie();
 
-    if (cookie == null)
+    if (cookie == null) {
       return;
+    }
 
-    if (_cookiesOut == null)
+    if (_cookiesOut == null) {
       _cookiesOut = new ArrayList<Cookie>();
+    }
 
     _cookiesOut.add(cookie);
   }
 
   public Cookie getCookie(String name)
   {
-    if (_cookiesOut == null)
+    if (_cookiesOut == null) {
       return null;
+    }
 
     for (int i = _cookiesOut.size() - 1; i >= 0; i--) {
       Cookie cookie = _cookiesOut.get(i);
 
-      if (cookie.getName().equals(name))
+      if (cookie.getName().equals(name)) {
         return cookie;
+      }
     }
 
     return null;

@@ -732,7 +732,7 @@ public class ResinEmbed implements Closeable
         } catch (Exception e) {
         }
 
-        while (! _request.handleRequest().isClosed()) {
+        while (! _request.service().isClosed()) {
           out.flush();
         }
       } catch (EOFException e) {

@@ -266,7 +266,7 @@ public class PageContextImpl extends PageContext
 
     if (bufferSize != TempCharBuffer.SIZE) {
       try {
-        _responseStream.setBufferSize(bufferSize);
+        _responseStream.setBufferCapacity(bufferSize);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

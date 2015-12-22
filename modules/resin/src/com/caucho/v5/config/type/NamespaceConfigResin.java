@@ -32,7 +32,7 @@ package com.caucho.v5.config.type;
 import com.caucho.v5.config.cfg.BeanConfig;
 import com.caucho.v5.config.core.MessageConfig;
 import com.caucho.v5.config.core.ResinChoose;
-import com.caucho.v5.config.core.ResinIf;
+import com.caucho.v5.config.core.IfConfig;
 import com.caucho.v5.config.core.ResinProperties;
 import com.caucho.v5.config.core.ResinSet;
 import com.caucho.v5.config.core.ResinSystemConfig;
@@ -78,7 +78,7 @@ class NamespaceConfigResin extends NamespaceConfig
     super.initCore();
     
     addFlow("choose", ResinChoose.class);
-    addFlow("if", ResinIf.class);
+    //addFlow("if", IfConfig.class);
     addFlow("properties", ResinProperties.class);
     
     addBean("import", ImportConfigXml.class);
@@ -93,6 +93,8 @@ class NamespaceConfigResin extends NamespaceConfig
   @Override
   protected void initExtensions()
   {
+    super.initExtensions();
+    
     addBean("authenticator", "com.caucho.security.Authenticator");
     
     addBean("bean", BeanConfig.class);
@@ -123,7 +125,7 @@ class NamespaceConfigResin extends NamespaceConfig
     */
     addBean("env-entry", EnvEntry.class);
     
-    addBean("if", ResinIf.class);
+    //addBean("if", IfConfig.class);
     addBean("import", ImportConfigXml.class);
     // addBean("include", ResinInclude.class);
     // addBean("interceptor", "com.caucho.v5.config.cfg.InterceptorConfig");

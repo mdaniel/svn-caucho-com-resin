@@ -336,12 +336,12 @@ public class ResponseInclude extends ResponseCauchoWrapper
 
   public void setBufferSize(int size)
   {
-    _stream.setBufferSize(size);
+    _stream.setBufferCapacity(size);
   }
 
   public int getBufferSize()
   {
-    return _stream.getBufferSize();
+    return _stream.getBufferCapacity();
   }
 
   public void flushBuffer()

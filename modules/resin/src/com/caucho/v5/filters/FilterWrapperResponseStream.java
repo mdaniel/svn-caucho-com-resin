@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.caucho.v5.http.protocol.OutResponseToByte;
+import com.caucho.v5.vfs.TempBuffer;
 
 public class FilterWrapperResponseStream extends OutResponseToByte {
   private CauchoResponseWrapper _response;
@@ -55,6 +56,7 @@ public class FilterWrapperResponseStream extends OutResponseToByte {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  /*
   @Override
   protected void flushDataBuffer(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
@@ -65,16 +67,29 @@ public class FilterWrapperResponseStream extends OutResponseToByte {
       os.write(buf, offset, length);
     }
   }
+  */
 
-  /*
   @Override
-  protected TempBuffer flushData(TempBuffer head, boolean isEnd)
+  protected TempBuffer flushData(TempBuffer head, TempBuffer tail, boolean isEnd)
       throws IOException
   {
+    OutputStream os = getStream();
+    
     System.out.println("FDO: " + head);
+    
+    if (os != null) {
+      // os.write(buf, offset, length);
+    }
+    
+    TempBuffer next = head.getNext();
+    
+    if (next != null) {
+      head.setNext(null);
+      TempBuffer.freeAll(next);;
+    }
+    
     return head;
   }
-  */
 
   /**
    * flushing

@@ -275,7 +275,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
 
   public HttpContainer getServer()
   {
-    return (HttpContainer) getAbstractHttpRequest().getHttpContainer();
+    return (HttpContainer) getAbstractHttpRequest().getHttp();
   }
 
   protected HashMapImpl<String,String[]> parseQueryImpl()

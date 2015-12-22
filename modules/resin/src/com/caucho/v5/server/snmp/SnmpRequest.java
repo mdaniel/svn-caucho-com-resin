@@ -118,7 +118,7 @@ public class SnmpRequest extends RequestProtocolBase
    * handleConnection again after the connection completes, so 
    * the implementation must initialize any variables for each connection.
    */
-  public NextState handleRequest() 
+  public NextState service() 
     throws IOException
   {
     ReadStream in = _connection.getReadStream();

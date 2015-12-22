@@ -470,7 +470,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
         if (responseFacade.getStatus() == 304)
           buffer[offset++] = (byte) '-';
         else
-          offset = print(buffer, offset, response.getContentLength());
+          offset = print(buffer, offset, response.getContentLengthSent());
         break;
 
         // cookie

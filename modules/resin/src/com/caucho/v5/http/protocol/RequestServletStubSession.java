@@ -68,7 +68,7 @@ public class RequestServletStubSession extends RequestServletStub
   }
 
   @Override
-  public NextState handleRequest() throws IOException
+  public NextState service() throws IOException
   {
     return NextState.CLOSE;
   }

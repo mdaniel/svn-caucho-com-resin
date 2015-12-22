@@ -157,13 +157,13 @@ public class ResponseAdapter extends ResponseWrapper
   @Override
   public int getBufferSize()
   {
-    return _responseStream.getBufferSize();
+    return _responseStream.getBufferCapacity();
   }
 
   @Override
   public void setBufferSize(int size)
   {
-    _responseStream.setBufferSize(size);
+    _responseStream.setBufferCapacity(size);
   }
 
   @Override

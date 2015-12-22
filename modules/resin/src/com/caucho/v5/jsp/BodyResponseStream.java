@@ -92,14 +92,14 @@ public class BodyResponseStream extends OutResponseBase
   /**
    * Sets the buffer size.
    */
-  public void setBufferSize(int size)
+  public void setBufferCapacity(int size)
   {
   }
 
   /**
    * Gets the buffer size.
    */
-  public int getBufferSize()
+  public int getBufferCapacity()
   {
     return SIZE;
   }

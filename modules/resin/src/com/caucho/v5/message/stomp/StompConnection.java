@@ -324,7 +324,7 @@ public class StompConnection extends RequestProtocolBase
   }
 
   @Override
-  public NextState handleRequest() throws IOException
+  public NextState service() throws IOException
   {
     ReadStream is = _link.getReadStream();
     

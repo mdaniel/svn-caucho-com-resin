@@ -34,11 +34,11 @@ import java.io.IOException;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.cli.resin.BootConfigParserResin;
 import com.caucho.v5.cli.server.BootConfigParser;
+import com.caucho.v5.env.health.HealthStatusService;
+import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerBuilder;
 import com.caucho.v5.http.container.HttpContainerBuilderResin;
-import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.nautilus.impl.NautilusSystem;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
 import com.caucho.v5.server.config.RootConfigBoot;
@@ -108,6 +108,11 @@ public class ServerBuilderResin extends ServerBuilder
     super.initHttpSystem(system, selfServer);
   }
 
+  @Override
+  public String getProgramName()
+  {
+    return "Resin";
+  }
 
   @Override
   public Resin build(SystemManager systemManager,
@@ -127,6 +132,28 @@ public class ServerBuilderResin extends ServerBuilder
     NautilusSystem.createAndAddSystem();
    
     return serverSelf;
+  }
+
+  @Override
+  protected void addPreTopologyServices()
+  {
+    super.addPreTopologyServices();
+    
+    HealthStatusService.createAndAddService();
+    
+    // BlockManagerSubSystem.createAndAddService();
+
+    //createKrakenStoreSystem();
+      
+    // ShutdownSystem.getCurrent().addMemoryFreeTask(new BlockManagerMemoryFreeTask());
+    
+    if (! isWatchdog()) {
+      HealthSubSystem health = HealthSubSystem.createAndAddSystem();
+      
+      if (isEmbedded()) {
+        health.setEnabled(false);
+      }
+    }
   }
 
   @Override

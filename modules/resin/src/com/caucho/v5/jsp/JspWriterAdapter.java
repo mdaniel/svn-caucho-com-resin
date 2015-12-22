@@ -185,7 +185,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
    */
   public int getBufferSize()
   {
-    return _out.getBufferSize();
+    return _out.getBufferCapacity();
   }
 
   /**

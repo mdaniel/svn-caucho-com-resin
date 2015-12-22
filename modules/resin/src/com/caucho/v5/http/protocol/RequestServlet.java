@@ -1808,7 +1808,7 @@ public final class RequestServlet extends RequestCauchoBase
 
   public final HttpContainer getServer()
   {
-    return _request.getHttpContainer();
+    return _request.getHttp();
   }
 
   /**

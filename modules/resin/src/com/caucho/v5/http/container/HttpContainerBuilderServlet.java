@@ -187,8 +187,17 @@ public class HttpContainerBuilderServlet extends HttpContainerBuilder
    * Sets the root directory.
    */
   @Configurable
+  public void setRootDirectory(Path path)
+  {
+  }
+
+  /**
+   * Sets the root directory.
+   */
+  @Configurable
   public void setRootDir(Path path)
   {
+    setRootDirectory(path);
   }
 
   /**

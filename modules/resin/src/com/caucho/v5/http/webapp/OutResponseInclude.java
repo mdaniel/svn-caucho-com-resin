@@ -47,6 +47,7 @@ import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.http.protocol.OutResponseToByte;
 import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.vfs.TempBuffer;
 
 public class OutResponseInclude extends OutResponseToByte {
   private static final Logger log
@@ -248,7 +249,26 @@ public class OutResponseInclude extends OutResponseToByte {
     startCaching(true);
   }
   */
-  
+
+  @Override
+  protected TempBuffer flushData(TempBuffer head, TempBuffer tail, boolean isEnd)
+      throws IOException
+  {
+    for (TempBuffer ptr = head; ptr != null; ptr = ptr.getNext()) {
+      boolean ptrEnd = isEnd && ptr.getNext() == null;
+      flushDataBuffer(ptr.getBuffer(), 0, ptr.getLength(), ptrEnd);
+    }
+    
+    TempBuffer next = head.getNext();
+    
+    if (next != null) {
+      head.setNext(null);
+      TempBuffer.freeAll(next);;
+    }
+    
+    return head;
+  }
+
   /**
    * Writes the next chunk of data to the response stream.
    *
