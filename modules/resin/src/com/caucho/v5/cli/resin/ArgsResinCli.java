@@ -50,7 +50,6 @@ import com.caucho.v5.cli.boot.PasswordGenerateCommand;
 import com.caucho.v5.cli.boot.PdfReportCommand;
 import com.caucho.v5.cli.boot.RestartCommand;
 import com.caucho.v5.cli.boot.ScoreboardCommand;
-import com.caucho.v5.cli.boot.StartCommandGui;
 import com.caucho.v5.cli.boot.StartWithForegroundCommand;
 import com.caucho.v5.cli.boot.StatusCommand;
 import com.caucho.v5.cli.boot.StoreLoadCommand;
@@ -144,7 +143,7 @@ public class ArgsResinCli extends ArgsCli
     manager.addCommand(new DisableCommand().hide());
     manager.addCommand(new EnableCommand().hide());
 
-    manager.addCommand(new StartCommandGui().hide());
+    //manager.addCommand(new StartCommandGui().hide());
 
     // manager.addCommand(new HeapDumpCommand().hide());
     manager.addCommand(new HeapDumpCommandBaratine().hide());

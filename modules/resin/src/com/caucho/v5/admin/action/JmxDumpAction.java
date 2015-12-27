@@ -45,7 +45,7 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeType;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.QDate;
@@ -60,7 +60,7 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
   public String execute()
     throws ConfigException, JMException, ClassNotFoundException
   {
-    MBeanServer server = JmxUtil.getMBeanServer();
+    MBeanServer server = JmxUtilResin.getMBeanServer();
     if (server == null)
       server = ManagementFactory.getPlatformMBeanServer();
     

@@ -579,6 +579,7 @@ public class WebAppController
   /**
    * Returns the deploy admin.
    */
+  /*
   @Override
   protected DeployControllerAdmin<WebApp,WebAppController>
   getDeployAdmin(DeployHandle<WebApp> handle)
@@ -592,6 +593,7 @@ public class WebAppController
     
     // return _admin;
   }
+  */
   
   @Override
   public void merge(DeployController<WebApp> oldControllerDeploy)

@@ -93,11 +93,12 @@ public class ThreadActivityReportResin extends ThreadActivityReportBase
   
   protected ThreadActivityGroup[] createGroups()
   {
+    if (true) throw new UnsupportedOperationException();
     List<ThreadActivityGroup> groups = new ArrayList<ThreadActivityGroup>();
     
     HttpContainerServlet servletService = HttpContainerServlet.current();
     if (servletService != null) {
-      ServerMXBean serverAdmin = servletService.getAdmin();
+      ServerMXBean serverAdmin = null; // servletService.getAdmin();
       
       if (serverAdmin != null) {
         PortMXBean []ports = serverAdmin.getPorts();

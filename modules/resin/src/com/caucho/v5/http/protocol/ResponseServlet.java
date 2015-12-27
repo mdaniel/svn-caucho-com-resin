@@ -151,7 +151,8 @@ public final class ResponseServlet extends ResponseCauchoBase
       log.log(Level.FINER, e.toString(), e);
     }
 
-    _outputStream = _response.getResponseOutputStream();
+    if (true) throw new UnsupportedOperationException();
+    //_outputStream = _response.getResponseOutputStream();
     _outputStream.init(stream);
 
     /*
@@ -181,7 +182,8 @@ public final class ResponseServlet extends ResponseCauchoBase
     if (_outputStream != null) {
       if (_response.isClosed()) {
         // jsp/017o
-        _writer = _response.getResponsePrintWriter();
+        if (true) throw new UnsupportedOperationException();
+        //_writer = _response.getResponsePrintWriter();
         _writer.init(getResponseStream());
         return _writer;
       }
@@ -191,7 +193,8 @@ public final class ResponseServlet extends ResponseCauchoBase
 
     String encoding = getCharacterEncoding();
 
-    _writer = _response.getResponsePrintWriter();
+    if (true) throw new UnsupportedOperationException();
+    //_writer = _response.getResponsePrintWriter();
     _writer.init(getResponseStream());
 
     if (encoding != null) {

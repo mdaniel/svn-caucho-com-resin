@@ -127,7 +127,7 @@ public class JspcCommand extends ServerCommandBase<ArgsCli>
     } catch (Exception e) {
       log.log(Level.SEVERE, e.getMessage(), e);
 
-      return ExitCode.EXIT_1;
+      return ExitCode.FAIL;
     }
   }
 

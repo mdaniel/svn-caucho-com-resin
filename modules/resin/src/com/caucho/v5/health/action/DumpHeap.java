@@ -27,7 +27,7 @@ import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
 import com.caucho.v5.env.log.LogSystem;
 import com.caucho.v5.health.event.HealthEvent;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.profile.HeapDump;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.CurrentTime;
@@ -235,7 +235,7 @@ public class DumpHeap extends HealthActionBase
     if (hprofPath.exists() && hprofPath.isFile())
       hprofPath.remove();
 
-    MBeanServer mBeanServer = JmxUtil.getMBeanServer();
+    MBeanServer mBeanServer = JmxUtilResin.getMBeanServer();
     mBeanServer.invoke(name,
                        "dumpHeap",
                        new Object[]{hprofPath.getPath(), Boolean.TRUE},

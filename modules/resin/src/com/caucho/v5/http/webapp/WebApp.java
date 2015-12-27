@@ -119,7 +119,6 @@ import com.caucho.v5.make.DependencyContainer;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.network.listen.ConnectionTcp;
 import com.caucho.v5.network.listen.RequestProtocol;
-import com.caucho.v5.ramp.jamp.ServletContainerInitBaratine;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.BasicFuture;
 import com.caucho.v5.util.CauchoUtil;
@@ -1516,6 +1515,7 @@ public class WebApp extends ServletContextImpl
   {
     _isContainerInit = true;
     
+    /*
     try {
       ServletContainerInitBaratine baratine = new ServletContainerInitBaratine();
     
@@ -1523,6 +1523,7 @@ public class WebApp extends ServletContextImpl
     } finally {
       _isContainerInit = false;
     }
+    */
   }
   
   protected void initWebFragments()

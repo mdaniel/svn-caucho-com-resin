@@ -67,7 +67,7 @@ public class UserAddCommand extends ManagementCommandBase
     if (user == null) {
       System.err.println(usage(args));
 
-      return ExitCode.EXIT_1;
+      return ExitCode.FAIL;
     }
 
     String passwordString = args.getArg("-p");

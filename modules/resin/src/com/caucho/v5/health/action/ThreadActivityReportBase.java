@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.caucho.v5.http.container.HttpContainerServlet;
-import com.caucho.v5.management.server.PortMXBean;
-import com.caucho.v5.management.server.ServerMXBean;
 import com.caucho.v5.management.server.TcpConnectionInfo;
 import com.caucho.v5.util.L10N;
 
@@ -98,6 +96,9 @@ public abstract class ThreadActivityReportBase
       new HashMap<Long, TcpConnectionInfo>();
     
     HttpContainerServlet servletService = HttpContainerServlet.current();
+    
+    if (true) throw new UnsupportedOperationException();
+    /*
     if (servletService != null) {
       ServerMXBean serverAdmin = servletService.getAdmin();
       
@@ -119,6 +120,7 @@ public abstract class ThreadActivityReportBase
         }
       }
     }
+    */
     
     return connectionInfoMap;
   }

@@ -38,7 +38,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.Config;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.naming.JndiUtil;
 
 /**
@@ -77,7 +77,7 @@ public class ResinConfigLibrary {
   public static ObjectName mbean(String name)
   {
     try {
-      return JmxUtil.getObjectName(name);
+      return JmxUtilResin.getObjectName(name);
     } catch (MalformedObjectNameException e) {
       log().log(Level.FINEST, e.toString(), e);
       return null;

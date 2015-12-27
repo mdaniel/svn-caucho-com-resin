@@ -23,7 +23,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.hessian.io.ExtSerializerFactory;
 import com.caucho.v5.hessian.io.StringValueDeserializer;
 import com.caucho.v5.hessian.io.StringValueSerializer;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.server.admin.JmxInfoQuery;
 import com.caucho.v5.server.admin.JmxInfoResult;
@@ -74,7 +74,7 @@ public class JmxService
 
     // getBroker().createAgent(getActor());
 
-    _mbeanServer = JmxUtil.getMBeanServer();
+    _mbeanServer = JmxUtilResin.getMBeanServer();
 
     _extFactory = new ExtSerializerFactory();
     _extFactory.addSerializer(ObjectName.class,

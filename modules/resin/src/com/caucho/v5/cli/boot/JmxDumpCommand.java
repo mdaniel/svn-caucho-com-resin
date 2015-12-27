@@ -90,7 +90,7 @@ public class JmxDumpCommand extends JmxCommand
       return ExitCode.OK;
     } catch (IOException e) {
       e.printStackTrace();
-      return ExitCode.EXIT_1;
+      return ExitCode.FAIL;
     } finally {
       IoUtil.close(out);
     }

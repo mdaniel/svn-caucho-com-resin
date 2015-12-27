@@ -66,18 +66,17 @@ public class RestartCommand extends StartCommandBase
   }
   */
 
-  @Override
+  //@Override
   public ExitCode doCommand(ArgsDaemon args, 
                             ConfigBoot boot,
-                            ServerConfigBoot watchdogServer,
-                            WatchdogService watchdog)
+                            ServerConfigBoot watchdogServer)
     throws BootArgumentException
   {
     try {
       // if (id == null)
       // id = _client.getId();
       
-      watchdog.restart(watchdogServer.getPort(), args.getArgv());
+      //watchdog.restart(watchdogServer.getPort(), args.getArgv());
 
       System.out.println(L.l(
         "Resin/{0} restarted port {1} for watchdog at {2}:{3}",
@@ -93,7 +92,7 @@ public class RestartCommand extends StartCommandBase
 
       log.log(Level.FINE, e.toString(), e);
 
-      return ExitCode.EXIT_1;
+      return ExitCode.FAIL;
     }
 
     return ExitCode.OK;

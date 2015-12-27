@@ -13,7 +13,7 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 
 import com.caucho.v5.health.check.AbstractHealthCheck;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 
 /**
  * Configuration for management.
@@ -26,7 +26,7 @@ public class JvmDeadlockHealthCheckImpl extends AbstractHealthCheck
 
   public JvmDeadlockHealthCheckImpl()
   {
-    _mbeanServer = JmxUtil.getMBeanServer();
+    _mbeanServer = JmxUtilResin.getMBeanServer();
   }
 
   @Override

@@ -67,7 +67,6 @@ import javax.websocket.server.ServerEndpointConfig;
 import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanClassBase;
 import com.caucho.v5.bytecode.scan.ScanListener;
-import com.caucho.v5.ramp.jamp.ServletContainerInitBaratine;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;

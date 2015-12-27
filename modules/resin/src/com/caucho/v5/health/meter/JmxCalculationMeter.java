@@ -69,7 +69,8 @@ public class JmxCalculationMeter
   
   protected void createMeter() throws Exception
   {
-    MeterService.createJmxCalculation(getName(), _expr);
+    if (true) throw new UnsupportedOperationException();
+    //MeterService.createJmxCalculation(getName(), _expr);
   }
   
   public String getName()

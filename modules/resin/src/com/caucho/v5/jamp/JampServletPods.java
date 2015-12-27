@@ -29,11 +29,10 @@
 
 package com.caucho.v5.jamp;
 
-import com.caucho.v5.ramp.jamp.JampServletPodsImpl;
 
 /**
  * JampServlet responds to JAMP REST and WebSocket connections.
  */
-public class JampServletPods extends JampServletPodsImpl
+public class JampServletPods // extends JampServletPodsImpl
 {
 }

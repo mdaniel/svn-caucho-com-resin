@@ -33,8 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.daemon.ArgsDaemon;
+import com.caucho.v5.cli.resin.ClientWatchdog;
 import com.caucho.v5.cli.server.BootArgumentException;
-import com.caucho.v5.cli.server.ClientWatchdog;
 import com.caucho.v5.cli.server.ServerCommandBase;
 import com.caucho.v5.env.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
@@ -99,7 +99,7 @@ public class StatusCommand extends ServerCommandBase<ArgsDaemon>
 
       log.log(Level.FINE, e.toString(), e);
 
-      return ExitCode.EXIT_1;
+      return ExitCode.FAIL;
     }
 
     return ExitCode.OK;

@@ -1006,18 +1006,22 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   /**
    * Returns the admin.
    */
+  /*
   public ServerMXBean getAdmin()
   {
     return _admin;
   }
+  */
 
   /**
    * Returns the admin for the current environment.
    */
+  /*
   public EnvironmentMXBean getEnvironmentAdmin()
   {
     return getClassLoader().getAdmin();
   }
+  */
 
   /**
    * Returns the default web-app or error web-app for top-level errors

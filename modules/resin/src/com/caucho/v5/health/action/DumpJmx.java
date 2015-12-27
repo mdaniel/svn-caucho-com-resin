@@ -35,7 +35,7 @@ import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
 import com.caucho.v5.env.log.LogSystem;
 import com.caucho.v5.health.event.HealthEvent;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
@@ -160,7 +160,7 @@ public class DumpJmx extends HealthActionBase
   public String execute()
     throws ConfigException, JMException, ClassNotFoundException
   {
-    MBeanServer server = JmxUtil.getMBeanServer();
+    MBeanServer server = JmxUtilResin.getMBeanServer();
     if (server == null)
       server = ManagementFactory.getPlatformMBeanServer();
     

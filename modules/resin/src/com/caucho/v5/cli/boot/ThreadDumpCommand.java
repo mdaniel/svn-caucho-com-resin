@@ -83,7 +83,7 @@ public class ThreadDumpCommand extends ManagementCommandBase
     } catch (IOException e) {
       e.printStackTrace();
 
-      return ExitCode.EXIT_1;
+      return ExitCode.FAIL;
     }
   }
 }

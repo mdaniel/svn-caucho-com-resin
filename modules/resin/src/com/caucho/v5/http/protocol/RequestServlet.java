@@ -31,7 +31,6 @@ package com.caucho.v5.http.protocol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -65,7 +64,6 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.network.listen.ConnectionSocket;
 import com.caucho.v5.network.listen.NextState;
 import com.caucho.v5.network.listen.RequestProtocol;
-import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
@@ -317,7 +315,8 @@ public final class RequestServlet extends RequestCauchoBase
 
     _hasInputStream = true;
 
-    return _request.getInputStream();
+    throw new UnsupportedOperationException();
+    //return _request.getInputStream();
   }
 
   /**
@@ -930,7 +929,8 @@ public final class RequestServlet extends RequestCauchoBase
         return null;
       }
       
-      cookiesIn = request.getCookies();
+      if (true) throw new UnsupportedOperationException();
+      cookiesIn = new Cookie[0]; // request.getCookies();
 
       SessionManager sessionManager = getSessionManager();
       String sessionCookieName = getSessionCookie(sessionManager);

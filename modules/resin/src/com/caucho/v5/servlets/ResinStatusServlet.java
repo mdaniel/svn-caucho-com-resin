@@ -30,7 +30,7 @@
 package com.caucho.v5.servlets;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.jmx.server.*;
 import com.caucho.v5.management.server.ClusterMXBean;
 import com.caucho.v5.management.server.ClusterServerMXBean;
@@ -120,15 +120,15 @@ public class ResinStatusServlet extends GenericServlet {
 
       // _mbeanServer = Jmx.getMBeanServer();
       _mbeanServer =
-        JmxUtil.getMBeanServer();
+        JmxUtilResin.getMBeanServer();
 
       //_resinServer = (ResinServerMBean) Jmx.find("resin:type=ResinServer");
       //_servletServer = (ServletServerMBean) Jmx.find("resin:name=default,type=Server");
 
-      _resin = JmxUtil.find("resin:type=Resin", ResinMXBean.class);
-      _server = JmxUtil.find("resin:type=Server", ServerMXBean.class);
-      _cluster = JmxUtil.find("resin:type=Cluster", ClusterMXBean.class);
-      _proxyCache = JmxUtil.find("resin:type=ProxyCache", ProxyCacheMXBean.class);
+      _resin = JmxUtilResin.find("resin:type=Resin", ResinMXBean.class);
+      _server = JmxUtilResin.find("resin:type=Server", ServerMXBean.class);
+      _cluster = JmxUtilResin.find("resin:type=Cluster", ClusterMXBean.class);
+      _proxyCache = JmxUtilResin.find("resin:type=ProxyCache", ProxyCacheMXBean.class);
     } catch (Exception e) {
       throw new ServletException(e);
     }
@@ -289,7 +289,7 @@ public class ResinStatusServlet extends GenericServlet {
     out.println("<table border='3'>");
 
     ThreadPoolMXBean threadPool
-      = JmxUtil.find("resin:type=ThreadPool", ThreadPoolMXBean.class);
+      = JmxUtilResin.find("resin:type=ThreadPool", ThreadPoolMXBean.class);
     
     out.println("<tr><th colspan='3'>Threads");
     out.println("    <th colspan='3'>Config");

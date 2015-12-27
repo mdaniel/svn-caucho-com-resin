@@ -37,7 +37,7 @@ import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.health.analysis.HealthAnalyzer;
 import com.caucho.v5.health.stat.StatSystem.JmxItem;
 import com.caucho.v5.health.stat.StatSystem.Sample;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
 import com.caucho.v5.jmx.server.MeterGraphInfo;
 import com.caucho.v5.jmx.server.MeterGraphPageInfo;
@@ -46,7 +46,7 @@ import com.caucho.v5.management.server.BaselineQueryResult;
 import com.caucho.v5.management.server.DownTime;
 import com.caucho.v5.management.server.StatServiceMXBean;
 import com.caucho.v5.management.server.StatServiceValue;
-import com.caucho.v5.server.container.MemoryAdmin;
+import com.caucho.v5.profile.MemoryUtil;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
@@ -131,7 +131,7 @@ public class StatServiceLocalImpl
     _isResinServer = true; // _server.isResinServer();
     _admin = new Admin();
 
-    _mbeanServer = JmxUtil.getMBeanServer();
+    _mbeanServer = JmxUtilResin.getMBeanServer();
 
     /* XXX:
     try {
@@ -142,7 +142,7 @@ public class StatServiceLocalImpl
     */
 
     try {
-      MemoryAdmin.create();
+      MemoryUtil.create();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

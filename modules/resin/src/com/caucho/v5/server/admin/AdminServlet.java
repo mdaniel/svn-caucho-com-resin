@@ -31,14 +31,13 @@ package com.caucho.v5.server.admin;
 
 import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
-import com.caucho.v5.ramp.jamp.JampServletBase;
 import com.caucho.v5.websocket.server.WebSocketServletDispatch.WebSocketContextDispatch;
 
 
 /**
  * Admin access as a rest servlet.
  */
-public class AdminServlet extends JampServletBase
+public class AdminServlet // extends JampServletBase
 {
   private ServiceManagerAmp _ampManager;
   private WebSocketContextDispatch _wsCxt;

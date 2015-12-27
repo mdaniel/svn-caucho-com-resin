@@ -41,8 +41,8 @@ import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.env.meter.MeterService;
 import com.caucho.v5.env.meter.TotalMeter;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.dispatch.InvocationManager;
+import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.jmx.server.EnvironmentMXBean;
 import com.caucho.v5.management.server.AbstractEmitterObject;
 import com.caucho.v5.management.server.CacheItem;
@@ -52,9 +52,7 @@ import com.caucho.v5.management.server.PortMXBean;
 import com.caucho.v5.management.server.ServerMXBean;
 import com.caucho.v5.management.server.TcpConnectionInfo;
 import com.caucho.v5.management.server.ThreadPoolMXBean;
-import com.caucho.v5.network.listen.ConnectionTcp;
 import com.caucho.v5.network.listen.PortTcp;
-import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.CurrentTime;
 
 public class HttpAdmin extends AbstractEmitterObject
@@ -149,6 +147,8 @@ public class HttpAdmin extends AbstractEmitterObject
   @Override
   public PortMXBean []getPorts()
   {
+    throw new UnsupportedOperationException();
+    /*
     Collection<PortTcp> portList = getNetworkListeners();
 
     PortMXBean []ports = new PortMXBean[portList.size()];
@@ -159,6 +159,7 @@ public class HttpAdmin extends AbstractEmitterObject
     }
 
     return ports;
+    */
   }
 
   /**
@@ -167,7 +168,8 @@ public class HttpAdmin extends AbstractEmitterObject
   @Override
   public ThreadPoolMXBean getThreadPool()
   {
-    return ServerBase.getCurrent().getAdmin().getThreadPoolAdmin();
+    throw new UnsupportedOperationException();
+    //return ServerBase.getCurrent().getAdmin().getThreadPoolAdmin();
   }
 
   /**
@@ -534,12 +536,15 @@ public class HttpAdmin extends AbstractEmitterObject
   @Override
   public TcpConnectionInfo findConnectionByThreadId(long threadId)
   {
+    throw new UnsupportedOperationException();
+    /*
     ConnectionTcp conn = getListenService().findConnectionByThreadId(threadId);
 
     if (conn != null)
       return conn.getConnectionInfo();
     else
       return null;
+      */
   }
   
   private Collection<PortTcp> getNetworkListeners()

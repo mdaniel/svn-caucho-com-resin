@@ -303,6 +303,7 @@ public class HostController
   /**
    * Returns the deploy admin.
    */
+  /*
   @Override
   protected DeployControllerAdmin getDeployAdmin(DeployHandle<Host> handle)
   {
@@ -312,6 +313,7 @@ public class HostController
     
     return new HostAdmin(handle);
   }
+  */
 
   public Path getWarExpandDirectory()
   {

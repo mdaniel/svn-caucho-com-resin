@@ -65,13 +65,14 @@ public class StartWithForegroundCommand extends StartCommandBase
     return "starts the watchdog in foreground mode (for MacOS-X)";
   }
 
-  @Override
+  //@Override
   public ExitCode doCommand(ArgsDaemon args,
                        ConfigBoot boot,
-                       ServerConfigBoot watchdogServer,
-                       WatchdogService watchdog)
+                       ServerConfigBoot watchdogServer)
     throws BootArgumentException
   {
+    throw new UnsupportedOperationException();
+    /*
     try {
       Process process = null; // server.startWatchdog(args.getArgv(), true);
 
@@ -99,7 +100,7 @@ public class StartWithForegroundCommand extends StartCommandBase
           return ExitCode.OK;
         }
         else {
-          return ExitCode.EXIT_1; // process.exitValue();
+          return ExitCode.FAIL; // process.exitValue();
         }
       }
       else {
@@ -127,6 +128,7 @@ public class StartWithForegroundCommand extends StartCommandBase
     }
 
     return ExitCode.OK;
+    */
   }
 
   /*

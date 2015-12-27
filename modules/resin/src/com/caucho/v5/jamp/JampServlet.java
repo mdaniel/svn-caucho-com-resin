@@ -29,14 +29,11 @@
 
 package com.caucho.v5.jamp;
 
-import javax.servlet.annotation.WebServlet;
-
-import com.caucho.v5.ramp.jamp.JampServletWebApp;
 
 /**
  * JampServlet responds to JAMP REST and WebSocket connections.
  */
-@WebServlet(value="/jamp/*",asyncSupported=true)
-public class JampServlet extends JampServletWebApp
+// @WebServlet(value="/jamp/*",asyncSupported=true)
+public class JampServlet // extends JampServletWebApp
 {
 }

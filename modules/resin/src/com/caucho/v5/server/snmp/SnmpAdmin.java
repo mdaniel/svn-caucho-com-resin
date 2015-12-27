@@ -34,7 +34,7 @@ import java.util.HashMap;
 
 import javax.management.ObjectName;
 
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
 
 public class SnmpAdmin extends ManagedObjectBase
@@ -96,7 +96,7 @@ public class SnmpAdmin extends ManagedObjectBase
     try {
       ObjectName name = new ObjectName("resin:type=Resin");
     
-      return JmxUtil.getMBeanServer().getAttribute(name, "Version").toString();
+      return JmxUtilResin.getMBeanServer().getAttribute(name, "Version").toString();
     }
     catch (Exception e) {
       return "";
@@ -113,7 +113,7 @@ public class SnmpAdmin extends ManagedObjectBase
     try {
       ObjectName name = new ObjectName("java.lang:type=Runtime");
     
-      Object obj = JmxUtil.getMBeanServer().getAttribute(name, "Uptime");
+      Object obj = JmxUtilResin.getMBeanServer().getAttribute(name, "Uptime");
     
       if (obj instanceof Number)
         return ((Number) obj).longValue();
@@ -140,7 +140,7 @@ public class SnmpAdmin extends ManagedObjectBase
     try {
       ObjectName name = new ObjectName("resin:type=Host,name=default");
         
-      Object obj = JmxUtil.getMBeanServer().getAttribute(name, "URL");
+      Object obj = JmxUtilResin.getMBeanServer().getAttribute(name, "URL");
       
       return obj.toString();
     }

@@ -76,7 +76,7 @@ import com.caucho.v5.http.security.BasicPrincipal;
 import com.caucho.v5.http.security.ConstraintManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.jmx.JmxUtil;
+import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.Alarm;
@@ -1260,7 +1260,7 @@ public class ServletBuilder
 
             props.put("type", _servlet.getClass().getSimpleName());
             props.put("name", _servletName);
-            JmxUtil.register(_servlet, props);
+            JmxUtilResin.register(_servlet, props);
           } catch (Exception e) {
             log.finest(e.toString());
           }
