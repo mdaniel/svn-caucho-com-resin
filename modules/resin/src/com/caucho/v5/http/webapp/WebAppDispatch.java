@@ -53,7 +53,6 @@ import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.http.cache.HttpCacheBase;
 import com.caucho.v5.http.dispatch.FilterChainBuilder;
@@ -71,6 +70,7 @@ import com.caucho.v5.http.dispatch.ServletMapper;
 import com.caucho.v5.http.dispatch.ServletMapping;
 import com.caucho.v5.http.dispatch.SubInvocation;
 import com.caucho.v5.http.rewrite.WelcomeFile;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;

@@ -32,9 +32,9 @@ package com.caucho.v5.resin;
 import javax.enterprise.context.ApplicationScoped;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 
 /**

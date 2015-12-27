@@ -35,10 +35,10 @@ import org.w3c.dom.Node;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
-import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.FlowProgram;
 import com.caucho.v5.config.type.ConfigType;
+import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.xml.QNode;
 

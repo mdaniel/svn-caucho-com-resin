@@ -36,8 +36,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.java.JavaCompilerUtil;
-import com.caucho.v5.java.JavaWriter;
+import com.caucho.v5.javac.JavaCompilerUtil;
+import com.caucho.v5.javac.JavaWriter;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.SimpleLoader;
 import com.caucho.v5.util.CauchoUtil;

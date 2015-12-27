@@ -201,10 +201,12 @@ public class RequestServletStub implements RequestCaucho {
 
   public boolean isUserInRole(String str) { return false; }
   
+  /*
   public DuplexController upgradeProtocol(DuplexListener handler)
   {
     return null;
   }
+  */
 
   public RequestHttpBase getAbstractHttpRequest()
   {

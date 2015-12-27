@@ -42,7 +42,6 @@ import java.util.logging.LogManager;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.ConfigInstanceBuilder;
@@ -56,6 +55,7 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppContainer;
+import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.network.listen.ConnectionSocketStream;

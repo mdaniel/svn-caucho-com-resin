@@ -41,12 +41,12 @@ import javax.naming.NamingException;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
-import com.caucho.v5.config.inject.InjectContext;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.config.program.ResourceInjectionTargetProgram;
 import com.caucho.v5.config.program.ResourceProgram;
+import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 

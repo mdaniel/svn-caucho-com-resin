@@ -30,7 +30,7 @@
 package com.caucho.v5.jsp;
 
 import com.caucho.v5.config.cf.NameCfg;
-import com.caucho.v5.java.LineMap;
+import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.jsp.java.JspNode;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;

@@ -50,10 +50,10 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
-import com.caucho.v5.java.JavaCompilerUtil;
+import com.caucho.v5.inject.InjectManager;
+import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.Environment;
 import com.caucho.v5.util.CacheListener;

@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.java.JavaWriter;
+import com.caucho.v5.javac.JavaWriter;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.WriteStream;
 

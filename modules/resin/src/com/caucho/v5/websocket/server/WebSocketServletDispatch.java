@@ -60,8 +60,6 @@ import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.websocket.common.ConnectionWebSocketBase;
 import com.caucho.v5.websocket.io.FrameInputStream;
-import com.caucho.v5.websocket.io.FrameInputStreamMasked;
-import com.caucho.v5.websocket.io.FrameInputStreamUnmasked;
 import com.caucho.v5.websocket.io.WebSocketConstants;
 import com.caucho.v5.websocket.plain.ConnectionPlain;
 
@@ -354,10 +352,7 @@ public class WebSocketServletDispatch
 
     FrameInputStream fIs;
 
-    if (isMasked)
-      fIs = new FrameInputStreamMasked();
-    else
-      fIs = new FrameInputStreamUnmasked();
+    fIs = new FrameInputStream();
 
     /*
     String uri = "ws://" + req.getServerName();
@@ -408,7 +403,7 @@ public class WebSocketServletDispatch
 
     wsConn.setSubprotocol(subprotocol);
 
-    RequestWebSocketServer webSocket = new RequestWebSocketServer(wsConn, req.getConnection());
+    RequestWebSocketServer webSocket = null;//new RequestWebSocketServer(wsConn, req.getConnection());
 
     // order for duplex
     req.startDuplex(webSocket);

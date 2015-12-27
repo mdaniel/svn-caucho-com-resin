@@ -50,12 +50,12 @@ import javax.inject.Singleton;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyStringProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.type.TypeFactoryConfig;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
 

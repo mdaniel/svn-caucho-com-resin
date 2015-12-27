@@ -30,7 +30,7 @@
 package com.caucho.v5.java.gen;
 
 import com.caucho.v5.bytecode.JMethod;
-import com.caucho.v5.java.JavaWriter;
+import com.caucho.v5.javac.JavaWriter;
 import com.caucho.v5.util.L10N;
 
 import java.io.IOException;

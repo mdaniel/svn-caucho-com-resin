@@ -41,7 +41,7 @@ import com.caucho.v5.config.types.EnvEntry;
 import com.caucho.v5.config.xml.ImportConfigXml;
 import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnit;
 import com.caucho.v5.env.jpa.ConfigJpaPersistenceUnitDefault;
-import com.caucho.v5.java.JavacConfig;
+import com.caucho.v5.javac.JavacConfig;
 import com.caucho.v5.loader.ClassLoaderConfig;
 import com.caucho.v5.loader.ClasspathConfig;
 import com.caucho.v5.loader.DependencyCheckInterval;

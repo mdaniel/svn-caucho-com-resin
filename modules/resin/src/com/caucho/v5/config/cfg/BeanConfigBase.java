@@ -38,8 +38,8 @@ import javax.inject.Qualifier;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.custom.CustomBean;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 
 /**

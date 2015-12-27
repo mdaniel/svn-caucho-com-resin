@@ -1675,7 +1675,8 @@ public final class RequestServlet extends RequestCauchoBase
   /**
    * Starts duplex mode.
    */
-  public DuplexController startDuplex(DuplexListener handler)
+  /*
+  private DuplexController startDuplex(DuplexListener handler)
   {
     DuplexController duplex = _request.startDuplex(handler);
     
@@ -1683,6 +1684,7 @@ public final class RequestServlet extends RequestCauchoBase
     
     return duplex;
   }
+  */
   
   /**
    * Starts duplex mode.
@@ -1692,30 +1694,6 @@ public final class RequestServlet extends RequestCauchoBase
     _request.startDuplex(request);
     
     _response.onStartDuplex();
-  }
-  
-  private String calculateWebSocketAccept(String key)
-  {
-    try {
-      MessageDigest md = MessageDigest.getInstance("SHA1");
-      
-      int length = key.length();
-      for (int i = 0; i < length; i++) {
-        md.update((byte) key.charAt(i));
-      }
-      
-      String guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-      length = guid.length();
-      for (int i = 0; i < length; i++) {
-        md.update((byte) guid.charAt(i));
-      }
-      
-      byte []digest = md.digest();
-      
-      return Base64Util.encode(digest);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public int getAvailable()

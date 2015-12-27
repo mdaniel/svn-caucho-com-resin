@@ -35,8 +35,8 @@ import java.lang.reflect.Method;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 
 /**

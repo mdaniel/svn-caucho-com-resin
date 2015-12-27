@@ -277,9 +277,7 @@ public class WebSocketContainerClient extends ContainerWebSocketBase
       
       WebSocketClientServlet client = null;
       
-      if (true) { throw new UnsupportedOperationException(); }
-      
-      //  client = new WebSocketClient(uri.toString(), endpoint, this, cfg);
+      client = new WebSocketClientServlet(uri.toString(), endpoint, this, cfg);
     
       if (host != null) {
         client.setVirtualHost(host);

@@ -46,11 +46,11 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.dbpool.ConnectionPool;
 import com.caucho.v5.env.dbpool.ManagedConnectionFactory;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.JdbcDriverMXBean;
 import com.caucho.v5.naming.JndiUtil;

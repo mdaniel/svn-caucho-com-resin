@@ -151,8 +151,11 @@ public class EndpointJamp extends Endpoint
                                        _channelContext, // _channelEnv,
                                        config.getJsonFactory());
       
+      if (true) throw new UnsupportedOperationException();
+      /*
       _session.addMessageHandler(jampReader);
       _ampWriter = new OutJampWebSocket(config.getJsonFactory());
+      */
       return;
     }
       
@@ -161,10 +164,13 @@ public class EndpointJamp extends Endpoint
       hampReader = new InHampWebSocket(_rampManager, _channelRegistry,
                                        _channelContext); // , _channelEnv); 
       
+      if (true) throw new UnsupportedOperationException();
+      /*
       _session.addMessageHandler(hampReader);
       
       _ampReader = hampReader; 
       _ampWriter = new OutHampWebSocket();
+      */
       return;
     }
 
@@ -237,8 +243,10 @@ public class EndpointJamp extends Endpoint
                    String address, String methodName, PodRef podCaller,
                    Object[] args)
   {
+    if (true) throw new UnsupportedOperationException();
     _channelContext.start(_channelEnv);
-    
+
+    /*
     try {
       _ampWriter.send(_session, headers, 
                       address, methodName, podCaller, 
@@ -248,6 +256,7 @@ public class EndpointJamp extends Endpoint
     } finally {
       _channelContext.start(null);
     }
+    */
   }
 
   @Override
@@ -256,6 +265,8 @@ public class EndpointJamp extends Endpoint
                     String address, String methodName, PodRef podCaller, 
                     Object[] args)
   {
+    if (true) throw new UnsupportedOperationException();
+    /*
     try {
       _ampWriter.query(_session,
                        headers,
@@ -265,6 +276,7 @@ public class EndpointJamp extends Endpoint
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    */
   }
 
   @Override
@@ -274,6 +286,8 @@ public class EndpointJamp extends Endpoint
                      ResultStream<?> result,
                      Object[] args)
   {
+    if (true) throw new UnsupportedOperationException();
+    /*
     try {
       _ampWriter.query(_session,
                        headers,
@@ -284,27 +298,34 @@ public class EndpointJamp extends Endpoint
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    */
   }
 
   @Override
   public void reply(HeadersAmp headers, String address, long qid, Object result)
   {
+    if (true) throw new UnsupportedOperationException();
+    /*
     try {
       _ampWriter.reply(_session, headers, address, qid, result);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    */
   }
 
   @Override
   public void queryError(HeadersAmp headers, String address, long qid,
                          Throwable exn)
   {
+    if (true) throw new UnsupportedOperationException();
+    /*
     try {
       _ampWriter.queryError(_session, headers, address, qid, exn);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    */
   }
 
   @Override
@@ -316,11 +337,14 @@ public class EndpointJamp extends Endpoint
                           Throwable exn,
                           boolean isComplete)
   {
+    if (true) throw new UnsupportedOperationException();
+    /*
     try {
       _ampWriter.streamReply(_session, headers, address, qid, sequence, results, exn, isComplete);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    */
   }
 
   @Override

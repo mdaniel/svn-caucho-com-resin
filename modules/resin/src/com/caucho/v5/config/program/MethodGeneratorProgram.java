@@ -38,7 +38,7 @@ import javax.rmi.PortableRemoteObject;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectContext;
+import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.util.L10N;
 
 public class MethodGeneratorProgram extends ConfigProgram

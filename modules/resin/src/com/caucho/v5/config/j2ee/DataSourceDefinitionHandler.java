@@ -43,7 +43,6 @@ import javax.sql.DataSource;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
@@ -51,6 +50,7 @@ import com.caucho.v5.config.program.NullProgram;
 import com.caucho.v5.config.program.SingletonValueGenerator;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.env.jdbc.DatabaseFactory;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 

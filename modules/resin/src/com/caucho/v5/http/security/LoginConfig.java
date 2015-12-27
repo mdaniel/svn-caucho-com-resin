@@ -32,8 +32,8 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 
 /**

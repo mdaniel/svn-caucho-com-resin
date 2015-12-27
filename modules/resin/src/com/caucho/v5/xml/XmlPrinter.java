@@ -28,7 +28,7 @@
 
 package com.caucho.v5.xml;
 
-import com.caucho.v5.java.LineMap;
+import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;

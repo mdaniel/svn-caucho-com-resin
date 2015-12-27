@@ -45,9 +45,6 @@ import javax.websocket.Extension;
 import javax.websocket.Session;
 
 import com.caucho.v5.amp.thread.ThreadPool;
-import com.caucho.v5.jni.JniSocketImpl;
-import com.caucho.v5.jni.SelectManagerFactoryJni;
-import com.caucho.v5.network.listen.PollTcpManager;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.QSocket;
@@ -59,8 +56,6 @@ import com.caucho.v5.websocket.common.EndpointConnection;
 import com.caucho.v5.websocket.common.EndpointConnectionQSocket;
 import com.caucho.v5.websocket.common.EndpointReaderWebSocket;
 import com.caucho.v5.websocket.io.FrameInputStream;
-import com.caucho.v5.websocket.io.FrameInputStreamMasked;
-import com.caucho.v5.websocket.io.FrameInputStreamUnmasked;
 import com.caucho.v5.websocket.io.WebSocketConstants;
 import com.caucho.v5.websocket.io.WebSocketProtocolException;
 import com.caucho.v5.websocket.plain.ConnectionPlain;
@@ -68,7 +63,7 @@ import com.caucho.v5.websocket.plain.ConnectionPlain;
 /**
  * WebSocketClient
  */
-public class WebSocketClientServlet extends WebSocketClient 
+public class WebSocketClientServlet
   implements WebSocketConstants
 {
   private static final Logger log
@@ -97,7 +92,7 @@ public class WebSocketClientServlet extends WebSocketClient
   private boolean _isClosed;
 
   // private NioClientTask _context;
-  private ThreadClientTask _threadTask;
+  private ThreadClientTaskServlet _threadTask;
   private ConnectionWebSocketJni _jniTask;
 
   private FrameInputStream _frameIs;
@@ -120,8 +115,7 @@ public class WebSocketClientServlet extends WebSocketClient
   */
 
   public WebSocketClientServlet(String address,
-                         Object endpoint)
-                         
+                                Object endpoint)
   {
     this(address,
          endpoint,
@@ -134,7 +128,6 @@ public class WebSocketClientServlet extends WebSocketClient
                          WebSocketContainerClient container,
                          ClientEndpointConfig config)
   {
-    super(address, null);
     Objects.requireNonNull(container);
     Objects.requireNonNull(address);
     Objects.requireNonNull(endpoint);
@@ -418,12 +411,7 @@ public class WebSocketClientServlet extends WebSocketClient
 
     parseHeaders(is);
 
-    if (_isMasked) {
-      _frameIs = new FrameInputStreamMasked();
-    }
-    else {
-      _frameIs = new FrameInputStreamUnmasked();
-    }
+    _frameIs = new FrameInputStream();
     //_frameIs.init(this, _is);
 
     // _wsOut = new WebSocketOutputStream(_out);
@@ -460,6 +448,7 @@ public class WebSocketClientServlet extends WebSocketClient
 
     // _context.start();
 
+    /*
     if (s instanceof JniSocketImpl) {
       PollTcpManager selectManager;
 
@@ -468,9 +457,10 @@ public class WebSocketClientServlet extends WebSocketClient
         _jniTask = new ConnectionWebSocketJni(this, s, selectManager);
       }
     }
+    */
 
     if (_jniTask == null) {
-      _threadTask = new ThreadClientTask(this);
+      _threadTask = new ThreadClientTaskServlet(this);
     }
 
     if (_jniTask != null) {

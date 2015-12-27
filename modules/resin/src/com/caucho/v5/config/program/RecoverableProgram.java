@@ -35,8 +35,8 @@ import java.util.logging.Logger;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
-import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.config.type.ConfigType;
+import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.loader.Environment;
 
 /**

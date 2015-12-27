@@ -36,9 +36,9 @@ import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.MethodExpressionImpl;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 import com.caucho.v5.jsp.el.JspELParser;

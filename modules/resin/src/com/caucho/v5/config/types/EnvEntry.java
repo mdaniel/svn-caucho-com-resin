@@ -39,8 +39,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectContext;
 import com.caucho.v5.el.Expr;
+import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 

@@ -44,7 +44,7 @@ import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
-import com.caucho.v5.java.LineMap;
+import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.SimpleLoader;

@@ -41,10 +41,10 @@ import javax.servlet.http.HttpSessionListener;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.types.DescriptionGroupConfig;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 
 /**

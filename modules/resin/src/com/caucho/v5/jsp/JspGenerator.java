@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.java.LineMap;
+import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.PersistentDependency;

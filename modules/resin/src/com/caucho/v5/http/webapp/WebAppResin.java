@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
-import com.caucho.v5.config.inject.InjectManager;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.jsp.cfg.JspConfig;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.cfg.JspTaglib;

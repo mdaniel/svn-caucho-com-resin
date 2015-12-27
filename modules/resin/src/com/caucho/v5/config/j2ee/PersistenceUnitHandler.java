@@ -37,10 +37,10 @@ import javax.persistence.PersistenceUnit;
 
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 
 /**

@@ -30,8 +30,8 @@
 package com.caucho.v5.java.gen;
 
 import com.caucho.v5.bytecode.JClass;
-import com.caucho.v5.java.JavaWriter;
-import com.caucho.v5.java.LineMap;
+import com.caucho.v5.javac.JavaWriter;
+import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;

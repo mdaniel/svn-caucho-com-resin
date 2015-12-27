@@ -311,7 +311,7 @@ public class AsyncContextImpl extends RequestProtocolBase
                                           this));
     }
      
-    _connTcp.requestWake();
+    _connTcp.getProxy().requestWake();
     // cometController.wake();
   }
 
@@ -356,7 +356,7 @@ public class AsyncContextImpl extends RequestProtocolBase
     StateAsync state = _stateRef.get();
     _stateRef.compareAndSet(state, state.toComplete());
     
-    _connTcp.requestWake();
+    _connTcp.getProxy().requestWake();
     /*
     Thread thread = Thread.currentThread();
     

@@ -7,10 +7,15 @@
 	<classpathentry kind="src" path="modules/resin/src"/>
 	<classpathentry kind="src" path="modules/jpa-stub/src"/>
 	<classpathentry kind="src" path="modules/jsf-stub/src"/>
+	<classpathentry kind="src" path="modules/websocket/src"/>
 	<classpathentry kind="lib" path="modules/ext/activation.jar"/>
 	<classpathentry exported="true" kind="lib" path="modules/ext/javamail-141.jar"/>
 	<classpathentry kind="lib" path="modules/ext/junit-4.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="modules/ext/validation-api-1.1.0.Final.jar"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/baratine-api"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hessian"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/servlet"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

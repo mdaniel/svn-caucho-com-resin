@@ -31,7 +31,7 @@ package com.caucho.v5.jsp;
 
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.java.LineMap;
+import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.util.CharScanner;
 import com.caucho.v5.util.L10N;

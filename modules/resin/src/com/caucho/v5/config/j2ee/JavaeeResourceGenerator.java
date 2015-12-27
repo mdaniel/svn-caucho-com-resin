@@ -39,8 +39,8 @@ import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.inject.InjectManager;
 import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 
