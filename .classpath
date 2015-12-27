@@ -17,5 +17,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/baratine-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hessian"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/servlet"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/plugins"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
