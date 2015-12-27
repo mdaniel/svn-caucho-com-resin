@@ -1,22 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry combineaccessrules="false" kind="src" path="/baratine"/>
-	<classpathentry kind="src" path="modules/junit/src"/>
-	<classpathentry kind="src" path="modules/jstl/src"/>
-	<classpathentry kind="src" path="modules/jta/src"/>
-	<classpathentry kind="src" path="modules/resin/src"/>
-	<classpathentry kind="src" path="modules/jpa-stub/src"/>
-	<classpathentry kind="src" path="modules/jsf-stub/src"/>
-	<classpathentry kind="src" path="modules/websocket/src"/>
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="modules/junit/src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry including="**/*.java" kind="src" path="modules/jstl/src"/>
+	<classpathentry including="**/*.java" kind="src" path="modules/jta/src"/>
+	<classpathentry including="**/*.java" kind="src" path="modules/resin/src"/>
+	<classpathentry including="**/*.java" kind="src" path="modules/jpa-stub/src"/>
+	<classpathentry including="**/*.java" kind="src" path="modules/jsf-stub/src"/>
+	<classpathentry including="**/*.java" kind="src" path="modules/websocket/src"/>
 	<classpathentry kind="lib" path="modules/ext/activation.jar"/>
 	<classpathentry exported="true" kind="lib" path="modules/ext/javamail-141.jar"/>
 	<classpathentry kind="lib" path="modules/ext/junit-4.7.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="modules/ext/validation-api-1.1.0.Final.jar"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/baratine-api"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hessian"/>
+	<classpathentry including="**/*.java" kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/servlet"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/plugins"/>
-	<classpathentry kind="output" path="modules/resin/build/classes"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/baratine"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/baratine-api"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hessian"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
