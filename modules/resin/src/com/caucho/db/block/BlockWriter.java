@@ -117,7 +117,7 @@ public class BlockWriter extends AbstractTaskWorker {
 
     // if (findBlock(block.getBlockId()) != block) {
     //System.err.println(" OFFER: " + Long.toHexString(block.getBlockId()));
-    if (! _blockWriteRing.offer(block, 3 * 60, TimeUnit.SECONDS)) {
+    if (! _blockWriteRing.offer(block, 180, TimeUnit.SECONDS)) {
       String message = "OFFER_FAILED: " + block
                        + " head:" + _blockWriteRing.getHead()
                        + " tail:" + _blockWriteRing.getTail();
