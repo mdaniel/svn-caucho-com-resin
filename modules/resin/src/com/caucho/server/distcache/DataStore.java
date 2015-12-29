@@ -701,9 +701,10 @@ public class DataStore {
         if (orphanList.size() > 0) {
           log.info("DataStore removing " + orphanList.size() + " orphans");
         }
-        
+
+        PreparedStatement pStmt = conn.prepareDelete();
+
         for (Long did : orphanList) {
-          PreparedStatement pStmt = conn.prepareDelete();
           pStmt.setLong(1, did);
           
           if (pStmt.executeUpdate() > 0) {
