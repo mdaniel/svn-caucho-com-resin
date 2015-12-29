@@ -47,9 +47,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.listen.ConnectionSocket;
-import com.caucho.v5.network.listen.NextState;
-import com.caucho.v5.network.listen.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.NextState;
+import com.caucho.v5.network.port.RequestProtocolBase;
 import com.caucho.v5.util.L10N;
 
 /**

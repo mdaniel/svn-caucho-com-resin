@@ -28,7 +28,7 @@
 
 package com.caucho.v5.http.dispatch;
 
-import com.caucho.v5.util.LineCompileException;
+import com.caucho.v5.config.LineCompileException;
 
 import javax.servlet.ServletException;
 

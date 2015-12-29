@@ -412,7 +412,7 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
         return clientOld;
       }
       
-      String url = "http://" + server.getAddress() + ":" + server.getPort();
+      String url = "http://" + server.getAddress() + ":" + server.port();
   
       ClientHttp2 clientNew = new ClientHttp2();
   

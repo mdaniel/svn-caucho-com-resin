@@ -50,7 +50,7 @@ import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.dbpool.ManagedConnectionFactory;
 import com.caucho.v5.env.meter.ActiveTimeSensor;
 import com.caucho.v5.env.meter.MeterService;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentListener;
 import com.caucho.v5.management.server.JdbcDriverMXBean;
@@ -926,7 +926,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void init()
     throws Exception
   {
-    Environment.addEnvironmentListener(this);
+    EnvLoader.addEnvironmentListener(this);
 
     try {
       if (_tm == null) {

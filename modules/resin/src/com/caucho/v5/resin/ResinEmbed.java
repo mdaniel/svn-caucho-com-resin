@@ -57,8 +57,8 @@ import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.lifecycle.Lifecycle;
-import com.caucho.v5.loader.Environment;
-import com.caucho.v5.network.listen.ConnectionSocketStream;
+import com.caucho.v5.loader.EnvLoader;
+import com.caucho.v5.network.port.ConnectionSocketStream;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBuilderResin;
@@ -313,7 +313,7 @@ public class ResinEmbed implements Closeable
    */
   public void initializeEnvironment()
   {
-    Environment.initializeEnvironment();
+    EnvLoader.initializeEnvironment();
   }
 
   /**
@@ -346,7 +346,7 @@ public class ResinEmbed implements Closeable
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      Environment.initializeEnvironment();
+      EnvLoader.initializeEnvironment();
 
       _serverBuilder = new ServerBuilderResin(_args);
       

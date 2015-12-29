@@ -32,8 +32,8 @@ package com.caucho.v5.resin;
 import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.protocol.HttpProtocol;
-import com.caucho.v5.network.listen.PortTcp;
-import com.caucho.v5.network.listen.PortTcpBuilder;
+import com.caucho.v5.network.port.PortTcp;
+import com.caucho.v5.network.port.PortTcpBuilder;
 import com.caucho.v5.server.container.ServerBuilder;
 
 /**
@@ -91,14 +91,14 @@ public class HttpEmbed extends PortEmbed
   public void bindTo(ServerBuilder serverBuilder)
   {
     try {
-      PortTcpBuilder portBuilder = new PortTcpBuilder();
+      PortTcpBuilder portBuilder = new PortTcpBuilder(env());
+      
+      portBuilder.protocol(new HttpProtocol());
+      portBuilder.address(getAddress());
+      
+      //portBuilder.portDefault(getPort());
       
       _port = new PortTcp(portBuilder);
-      
-      _port.setProtocol(new HttpProtocol());
-
-      _port.setPort(getPort());
-      _port.setAddress(getAddress());
       
       _port.init();
       

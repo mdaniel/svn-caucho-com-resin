@@ -39,7 +39,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.nautilus.ReceiverMode;
 import com.caucho.v5.nautilus.broker.BrokerNautilusBase;
 import com.caucho.v5.nautilus.broker.BrokerProviderEnvironment;
@@ -83,7 +83,7 @@ public class BrokerNautilusImpl extends BrokerNautilusBase implements Closeable
     
     initImpl();
     
-    Environment.addCloseListener(this);
+    EnvLoader.addCloseListener(this);
     
     registerSelf();
   }

@@ -28,12 +28,13 @@
  */
 
 
-package com.caucho.v5.network.listen;
+package com.caucho.v5.network.port;
 
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.jmx.server.*;
 import com.caucho.v5.management.server.PortMXBean;
 import com.caucho.v5.management.server.TcpConnectionInfo;
+import com.caucho.v5.network.port.PortTcp;
 
 @Module
 public class AdminPortTcp extends ManagedObjectBase
@@ -49,30 +50,30 @@ public class AdminPortTcp extends ManagedObjectBase
   @Override
   public String getName()
   {
-    String addr = _port.getAddress();
+    String addr = _port.address();
 
     if (addr == null)
       addr = "INADDR_ANY";
     
-    return addr + '-' + _port.getPort();
+    return addr + '-' + _port.port();
   }
 
   @Override
   public String getProtocolName()
   {
-    return _port.getProtocolName();
+    return _port.protocolName();
   }
 
   @Override
   public String getAddress()
   {
-    return _port.getAddress();
+    return _port.address();
   }
 
   @Override
   public int getPort()
   {
-    return _port.getPort();
+    return _port.port();
   }
 
   @Override

@@ -50,7 +50,7 @@ import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.cfg.TldPreload;
 import com.caucho.v5.jsp.cfg.TldTaglib;
 import com.caucho.v5.loader.DynamicClassLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
@@ -845,7 +845,7 @@ public class TldManager {
   {
     String classpath = null;
     
-    loader = Environment.getDynamicClassLoader(loader);
+    loader = EnvLoader.getDynamicClassLoader(loader);
 
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getClassPath();

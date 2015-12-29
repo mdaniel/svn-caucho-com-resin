@@ -33,12 +33,12 @@ import java.net.BindException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.env.shutdown.ExitCode;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.resin.ArgsServerResin;
-import com.caucho.v5.util.CompileException;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -61,7 +61,7 @@ public class ResinServer
     ArgsServerBase args = null;
     
     try {
-      Environment.init();
+      EnvLoader.init();
       
       // Resin.validateEnvironment();
       

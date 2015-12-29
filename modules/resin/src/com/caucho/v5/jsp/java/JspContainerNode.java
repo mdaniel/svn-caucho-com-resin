@@ -28,11 +28,11 @@
 
 package com.caucho.v5.jsp.java;
 
+import com.caucho.v5.config.LineCompileException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.util.LineCompileException;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.XmlChar;
 

@@ -34,9 +34,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.caucho.v5.inject.Module;
-import com.caucho.v5.network.listen.ConnectionSocket;
-import com.caucho.v5.network.listen.NextState;
-import com.caucho.v5.network.listen.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.NextState;
+import com.caucho.v5.network.port.RequestProtocolBase;
 import com.caucho.v5.websocket.io.InWebSocket;
 import com.caucho.v5.websocket.io.WebSocketBaratine;
 

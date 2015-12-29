@@ -91,7 +91,7 @@ public class WatchdogMain {
   {
     ArgsWatchdog args = new ArgsWatchdog(getArgv(), new ProgramInfoDaemon());
     
-    args.getEnv().initLogging();
+    args.envCli().initLogging();
 
     args.parse();
 

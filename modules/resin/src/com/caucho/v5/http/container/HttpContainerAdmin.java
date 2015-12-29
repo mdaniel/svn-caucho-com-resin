@@ -32,7 +32,7 @@ package com.caucho.v5.http.container;
 import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.health.check.MemoryTenuredHealthCheck;
-import com.caucho.v5.network.listen.PollTcpManagerBase;
+import com.caucho.v5.network.port.PollTcpManagerBase;
 
 public class HttpContainerAdmin extends HttpAdmin
 {

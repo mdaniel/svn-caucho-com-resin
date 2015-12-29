@@ -146,7 +146,7 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   public long getShutdownWaitMax();
 
   /**
-   * Returns true if a {@link com.caucho.v5.network.listen.PollTcpManagerBase}
+   * Returns true if a {@link com.caucho.v5.network.port.PollTcpManagerBase}
    * is enabled and active
    */
   @Description("A SelectManager handles keepalive without requiring a thread")

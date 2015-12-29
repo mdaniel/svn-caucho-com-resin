@@ -28,12 +28,12 @@
 
 package com.caucho.v5.jsp.java;
 
+import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.LineCompileException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.*;
 import com.caucho.v5.jsp.cfg.*;
-import com.caucho.v5.util.CompileException;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.util.LineCompileException;
 import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.SimpleTag;

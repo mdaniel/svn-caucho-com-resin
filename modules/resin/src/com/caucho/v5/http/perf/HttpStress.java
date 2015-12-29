@@ -35,8 +35,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.network.listen.ControllerPollContext;
-import com.caucho.v5.network.listen.PollTcpSystem;
+import com.caucho.v5.network.port.ControllerPollContext;
+import com.caucho.v5.network.port.PollTcpSystem;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;

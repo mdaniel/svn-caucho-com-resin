@@ -29,6 +29,8 @@
 
 package com.caucho.v5.http.dispatch;
 
+import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.DisplayableException;
 import com.caucho.v5.util.*;
 
 import java.io.*;

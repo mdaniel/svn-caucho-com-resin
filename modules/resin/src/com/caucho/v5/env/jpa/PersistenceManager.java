@@ -51,7 +51,7 @@ import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.inject.Module;
 import com.caucho.v5.loader.DynamicClassLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentEnhancerListener;
 import com.caucho.v5.loader.EnvironmentLocal;
@@ -99,14 +99,14 @@ public class PersistenceManager
 
   private PersistenceManager(ClassLoader loader)
   {
-    _classLoader = Environment.getEnvironmentClassLoader(loader);
+    _classLoader = EnvLoader.getEnvironmentClassLoader(loader);
     _localManager.set(this, _classLoader);
 
     _tempLoader = _classLoader.getNewTempClassLoader();
 
     _classLoader.addScanListener(this);
 
-    Environment.addEnvironmentListener(this, _classLoader);
+    EnvLoader.addEnvironmentListener(this, _classLoader);
 
     try {
       if (_classLoader instanceof DynamicClassLoader)

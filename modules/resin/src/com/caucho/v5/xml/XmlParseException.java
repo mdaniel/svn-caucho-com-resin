@@ -29,7 +29,6 @@
 package com.caucho.v5.xml;
 
 import com.caucho.v5.config.*;
-import com.caucho.v5.util.LineCompileException;
 
 import org.xml.sax.SAXException;
 

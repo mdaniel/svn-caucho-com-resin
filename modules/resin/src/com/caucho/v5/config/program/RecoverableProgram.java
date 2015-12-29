@@ -37,7 +37,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.inject.InjectContext;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 
 /**
  * Stored configuration program for an attribute.
@@ -76,7 +76,7 @@ public class RecoverableProgram extends FlowProgram {
       _program.inject(bean, cxt);
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
-      Environment.setConfigException(e);
+      EnvLoader.setConfigException(e);
     } finally {
       Config.setProperty(ATTR, oldRecover);
     }
@@ -90,7 +90,7 @@ public class RecoverableProgram extends FlowProgram {
       return _program.create(type, cxt);
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
-      Environment.setConfigException(e);
+      EnvLoader.setConfigException(e);
       
       return null;
     }

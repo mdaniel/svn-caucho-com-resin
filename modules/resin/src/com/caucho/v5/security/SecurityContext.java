@@ -33,8 +33,8 @@ import java.security.Principal;
 
 import com.caucho.v5.http.security.SecurityContextException;
 import com.caucho.v5.http.security.SecurityContextProvider;
-import com.caucho.v5.network.listen.ConnectionTcp;
-import com.caucho.v5.network.listen.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.RequestProtocol;
 import com.caucho.v5.util.L10N;
 
 /**

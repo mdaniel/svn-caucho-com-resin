@@ -40,7 +40,7 @@ import com.caucho.v5.config.Unbound;
 import com.caucho.v5.config.cfg.BeanConfig;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.loader.AbstractEnvironmentListener;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 
 /**
@@ -155,7 +155,7 @@ public class ScheduledTaskConfig extends BeanConfig
       super.init();
     }
     
-    Environment.addEnvironmentListener(new StartListener());
+    EnvLoader.addEnvironmentListener(new StartListener());
   }
   
   private void start()

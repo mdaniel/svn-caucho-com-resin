@@ -32,7 +32,7 @@ import java.security.Permission;
 import java.security.Policy;
 import java.util.ArrayList;
 
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -56,7 +56,7 @@ public class GrantConfig {
     }
     
     for (int i = 0; i < _permissionList.size(); i++) {
-      Environment.addPermission(_permissionList.get(i));
+      EnvLoader.addPermission(_permissionList.get(i));
     }
   }
 }

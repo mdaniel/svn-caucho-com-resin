@@ -30,7 +30,7 @@ package com.caucho.v5.http.protocol;
 
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.listen.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionSocket;
 import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;

@@ -384,7 +384,7 @@ public class HealthSubSystem extends SubSystemBase
     
     _lifecycle.toActive();
     
-    ServerBase resin = ServerBase.getCurrent();
+    ServerBase resin = ServerBase.current();
     if (resin != null) {
       resin.addStartInfoListener(new ResinRestartListener());
     }

@@ -110,15 +110,15 @@ import com.caucho.v5.i18n.CharacterEncoding;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.javac.WorkDir;
 import com.caucho.v5.lifecycle.Lifecycle;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.make.DependencyContainer;
 import com.caucho.v5.management.server.HostMXBean;
-import com.caucho.v5.network.listen.ConnectionTcp;
-import com.caucho.v5.network.listen.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.RequestProtocol;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.BasicFuture;
 import com.caucho.v5.util.CauchoUtil;
@@ -1117,7 +1117,7 @@ public class WebApp extends ServletContextImpl
   {
     _shutdownWaitTime = wait.getPeriod();
 
-    ServerBase server = ServerBase.getCurrent();
+    ServerBase server = ServerBase.current();
     if (server!= null &&
         server.getShutdownWaitMax() < _shutdownWaitTime) {
       log.warning(L.l("web-app shutdown-wait-max '{0}' is longer than server shutdown-wait-max '{1}'.",
@@ -1243,7 +1243,7 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.setCheckInterval(getClassLoader().getDependencyCheckInterval());
 
       if (_tempDir == null) {
-        _tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
+        _tempDir = (Path) EnvLoader.getLevelAttribute("caucho.temp-dir");
       }
 
       try {
@@ -1442,7 +1442,7 @@ public class WebApp extends ServletContextImpl
       // configuration exceptions discovered by resources like
       // the persistence manager
       if (_configException == null) {
-        _configException = Environment.getConfigException();
+        _configException = EnvLoader.getConfigException();
       }
       
       startAuthenticators();

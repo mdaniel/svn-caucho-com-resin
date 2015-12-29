@@ -37,8 +37,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.RequestServlet;
-import com.caucho.v5.network.listen.ConnectionSocket;
-import com.caucho.v5.network.listen.ConnectionTcp;
+import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.QSocket;

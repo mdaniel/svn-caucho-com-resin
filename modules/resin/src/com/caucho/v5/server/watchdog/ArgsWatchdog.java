@@ -86,7 +86,7 @@ public class ArgsWatchdog extends ArgsDaemon
 
   public ArgsWatchdog createArgsChild(String[] argv)
   {
-    return new ArgsWatchdog(getEnv(), argv, getProgramInfo());
+    return new ArgsWatchdog(envCli(), argv, getProgramInfo());
   }
 
   static String calculateClassPath(Path homeDir,

@@ -65,7 +65,7 @@ import com.caucho.v5.http.session.SessionImpl;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.i18n.CharacterEncoding;
-import com.caucho.v5.network.listen.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionSocket;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.util.CurrentTime;

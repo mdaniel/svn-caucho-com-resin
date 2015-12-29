@@ -32,7 +32,7 @@ package com.caucho.v5.security;
 import java.security.Principal;
 import java.util.ArrayList;
 
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 
 /**
@@ -52,7 +52,7 @@ public class RoleMapManager
 
   private RoleMapManager(RoleMapManager parent)
   {
-    _id = Environment.getEnvironmentName();
+    _id = EnvLoader.getEnvironmentName();
     
     _parent = parent;
   }

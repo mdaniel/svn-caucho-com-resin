@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 import com.caucho.v5.env.meter.MeterBase;
 import com.caucho.v5.env.meter.MeterService;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 
 // TODO: service cleanup
 public class StatProbeManager extends MeterService { // implements Closeable {
@@ -53,7 +53,7 @@ public class StatProbeManager extends MeterService { // implements Closeable {
     
     setManager(this);
 
-    Environment.addCloseListener(this);
+    EnvLoader.addCloseListener(this);
   }
 
   public void setService(StatServiceLocal statService)

@@ -59,7 +59,7 @@ import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.loading.ClassLoaderRepository;
 
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.WeakCloseListener;
 
 /**
@@ -95,7 +95,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   {
     _defaultDomain = defaultDomain;
 
-    Environment.addClassLoaderListener(new WeakCloseListener(this));
+    EnvLoader.addClassLoaderListener(new WeakCloseListener(this));
   }
 
   /**

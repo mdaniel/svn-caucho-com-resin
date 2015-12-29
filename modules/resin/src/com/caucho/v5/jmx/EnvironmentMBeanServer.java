@@ -33,7 +33,7 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerDelegate;
 
 import com.caucho.v5.loader.DynamicClassLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.L10N;
 
@@ -150,7 +150,7 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer implements java.
   protected MBeanContext getCurrentContext(ClassLoader loader)
   {
     if (loader == null)
-      loader = Environment.getEnvironmentClassLoader(loader);
+      loader = EnvLoader.getEnvironmentClassLoader(loader);
     
     return _localContext.getLevel(loader);
   }
@@ -162,7 +162,7 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer implements java.
   protected void setCurrentContext(MBeanContext context, ClassLoader loader)
   {
     if (loader == null)
-      loader = Environment.getEnvironmentClassLoader(loader);
+      loader = EnvLoader.getEnvironmentClassLoader(loader);
     
     synchronized (_localContext) {
       if (_localContext.getLevel(loader) != null

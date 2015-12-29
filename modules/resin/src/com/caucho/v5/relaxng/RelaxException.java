@@ -28,7 +28,7 @@
 
 package com.caucho.v5.relaxng;
 
-import com.caucho.v5.util.CompileException;
+import com.caucho.v5.config.CompileException;
 
 /**
  * A relax exception.

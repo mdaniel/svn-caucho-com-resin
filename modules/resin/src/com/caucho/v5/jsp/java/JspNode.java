@@ -44,6 +44,8 @@ import javax.el.ValueExpression;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 
+import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.LineCompileException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.jsp.JspLineParseException;
@@ -54,9 +56,7 @@ import com.caucho.v5.jsp.PageContextImpl;
 import com.caucho.v5.jsp.ParseState;
 import com.caucho.v5.jsp.TagInstance;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.util.CompileException;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.util.LineCompileException;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.XmlChar;

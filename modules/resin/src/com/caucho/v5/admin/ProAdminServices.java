@@ -26,7 +26,7 @@ public class ProAdminServices extends AdminServices
   {
     super.initImpl();
 
-    ServerBase resin = ServerBase.getCurrent();
+    ServerBase resin = ServerBase.current();
    
     if (resin != null) {
       StatService statService = new StatService();

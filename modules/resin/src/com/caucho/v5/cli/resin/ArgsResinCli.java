@@ -100,7 +100,7 @@ public class ArgsResinCli extends ArgsCli
   @Override
   public ArgsResinCli createChild(String []argv)
   {
-    return new ArgsResinCli(getEnv(), argv, getProgramInfo());
+    return new ArgsResinCli(envCli(), argv, getProgramInfo());
   }
   
 

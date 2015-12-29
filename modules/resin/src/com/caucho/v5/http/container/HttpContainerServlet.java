@@ -81,7 +81,7 @@ import com.caucho.v5.jmx.server.EnvironmentMXBean;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.management.server.ServerMXBean;
@@ -222,7 +222,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     try {
       Thread thread = Thread.currentThread();
 
-      Environment.addClassLoaderListener(this, getClassLoader());
+      EnvLoader.addClassLoaderListener(this, getClassLoader());
 
       /*
       PermissionManager permissionManager = new PermissionManager();
@@ -787,7 +787,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   {
     _accessLog = log;
     
-    Environment.setAttribute("caucho.server.access-log", log);
+    EnvLoader.setAttribute("caucho.server.access-log", log);
   }
 
   /**
@@ -821,7 +821,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
    */
   public long getDependencyCheckInterval()
   {
-    return Environment.getDependencyCheckInterval(getClassLoader());
+    return EnvLoader.getDependencyCheckInterval(getClassLoader());
   }
 
   /**

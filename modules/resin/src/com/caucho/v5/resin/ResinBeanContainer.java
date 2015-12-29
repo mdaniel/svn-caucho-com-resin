@@ -42,7 +42,7 @@ import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.javac.WorkDir;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.CompilingLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.ResourceLoader;
 import com.caucho.v5.server.cdi.CdiProducerResin;
@@ -145,12 +145,12 @@ public class ResinBeanContainer {
       // if there's no ejb-jar.xml
       // EjbManager.setScanAll();
 
-      Environment.init();
+      EnvLoader.init();
 
       //Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       //Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
-      Environment.addCloseListener(this);
+      EnvLoader.addCloseListener(this);
 
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -344,7 +344,7 @@ public class ResinBeanContainer {
         
         Amp.setContextManager(ampManager);
         
-        Environment.addCloseListener(ampManager);
+        EnvLoader.addCloseListener(ampManager);
       }
 
       // env/0e81 vs env/0e3b

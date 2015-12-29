@@ -42,7 +42,7 @@ import com.caucho.v5.http.log.AccessLogBase;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseServlet;
-import com.caucho.v5.network.listen.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionSocket;
 
 /**
  * Logs the request.

@@ -31,7 +31,7 @@ package com.caucho.v5.config.types;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.loader.ClassLoaderListener;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentListener;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.naming.LinkProxy;
@@ -130,13 +130,13 @@ public class JndiLink {
     if (obj instanceof ClassLoaderListener) {
       ClassLoaderListener listener = (ClassLoaderListener) obj;
 
-      Environment.addClassLoaderListener(listener);
+      EnvLoader.addClassLoaderListener(listener);
     }
 
     if (obj instanceof EnvironmentListener) {
       EnvironmentListener listener = (EnvironmentListener) obj;
 
-      Environment.addEnvironmentListener(listener);
+      EnvLoader.addEnvironmentListener(listener);
     }
 
     Object proxy = new LinkProxy((InitialContextFactory) obj,

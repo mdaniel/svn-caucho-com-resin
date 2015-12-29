@@ -154,7 +154,7 @@ public class LinkChildServiceImpl
     log.info(_serverContainer + " stop request from watchdog");
 
     String msg = L.l("{0} shutdown from watchdog stop",
-                     _serverContainer.getProgramName());
+                     _serverContainer.programName());
     
     try {
       ShutdownSystem.shutdownActive(mode, ExitCode.OK, msg, 
@@ -181,7 +181,7 @@ public class LinkChildServiceImpl
   public void destroy()
   {
     String msg = L.l("{0} shutdown from unexpected watchdog exit.",
-                     _serverContainer.getProgramName());
+                     _serverContainer.programName());
     
     ShutdownSystem.shutdownActive(ExitCode.WATCHDOG_EXIT, msg);
   }

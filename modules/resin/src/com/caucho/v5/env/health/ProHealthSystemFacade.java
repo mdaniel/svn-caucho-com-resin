@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.env.shutdown.ExitCode;
 import com.caucho.v5.env.shutdown.ShutdownSystem;
 import com.caucho.v5.health.HealthSystemFacade;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
@@ -62,7 +62,7 @@ public class ProHealthSystemFacade extends HealthSystemFacade
       ClassLoader loader = oldLoader;
       
       if (! (loader instanceof EnvironmentClassLoader))
-        loader = Environment.getEnvironmentClassLoader();
+        loader = EnvLoader.getEnvironmentClassLoader();
       
       HealthSubSystem healthSystem = HealthSubSystem.getCurrent();
     

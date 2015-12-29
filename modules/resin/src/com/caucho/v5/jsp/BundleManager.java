@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.TimedCache;
@@ -67,7 +67,7 @@ public class BundleManager {
 
   private BundleManager()
   {
-    long updateInterval = Environment.getDependencyCheckInterval();
+    long updateInterval = EnvLoader.getDependencyCheckInterval();
     
     _bundleCache = new TimedCache(256, updateInterval);
 
@@ -269,7 +269,7 @@ public class BundleManager {
       
       if (is instanceof ReadStream) {
         Path path = ((ReadStream) is).getPath();
-        Environment.addDependency(path.createDepend());
+        EnvLoader.addDependency(path.createDepend());
       }
 
       ResourceBundle bundle = new PropertyResourceBundle(is);

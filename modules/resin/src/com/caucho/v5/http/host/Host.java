@@ -61,7 +61,7 @@ import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.management.server.HostMXBean;
-import com.caucho.v5.network.listen.PortTcp;
+import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Dependency;
 import com.caucho.v5.vfs.Path;
@@ -315,23 +315,23 @@ public class Host
       NetworkSystem networkSystem = NetworkSystem.getCurrent();
 
       for (PortTcp port : networkSystem.getPorts()) {
-        if ("http".equals(port.getProtocolName())) {
-          String address = port.getAddress();
+        if ("http".equals(port.protocolName())) {
+          String address = port.address();
 
           if (address == null || address.equals(""))
             address = "localhost";
 
-          return "http://" + address + ":" + port.getPort();
+          return "http://" + address + ":" + port.port();
         }
       }
 
       for (PortTcp port : networkSystem.getPorts()) {
-        if ("https".equals(port.getProtocolName())) {
-          String address = port.getAddress();
+        if ("https".equals(port.protocolName())) {
+          String address = port.address();
           if (address == null || address.equals(""))
             address = "localhost";
 
-          return "https://" + address + ":" + port.getPort();
+          return "https://" + address + ":" + port.port();
         }
       }
 

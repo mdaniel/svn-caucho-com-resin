@@ -32,7 +32,7 @@ package com.caucho.v5.nautilus.broker;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.nautilus.ReceiverMode;
 import com.caucho.v5.nautilus.impl.BrokerNautilusImpl;
@@ -62,7 +62,7 @@ public class BrokerProviderEnvironment implements BrokerNautilus
   private BrokerProviderEnvironment()
   {
     _loader = Thread.currentThread().getContextClassLoader();
-    _id = Environment.getEnvironmentName(_loader);
+    _id = EnvLoader.getEnvironmentName(_loader);
     
     _localBroker.set(this);
   }

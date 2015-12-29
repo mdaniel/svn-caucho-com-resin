@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.http.protocol.RequestCaucho;
-import com.caucho.v5.network.listen.ConnectionTcp;
+import com.caucho.v5.network.port.ConnectionTcp;
 
 /**
  * Backwards compatibility

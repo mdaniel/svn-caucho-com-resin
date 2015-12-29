@@ -28,9 +28,9 @@
 
 package com.caucho.v5.http.log;
 
+import com.caucho.v5.config.CompileException;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.util.CompileException;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.ExceptionWrapper;
 import com.caucho.v5.util.QDate;

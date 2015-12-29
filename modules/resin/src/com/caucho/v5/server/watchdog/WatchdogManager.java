@@ -46,6 +46,7 @@ import com.caucho.v5.bartender.heartbeat.ServerHeartbeatBuilder;
 import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.cloud.security.SecuritySystem;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.EnvConfig;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.jni.JniBoot;
@@ -54,7 +55,7 @@ import com.caucho.v5.loader.DependencyCheckInterval;
 import com.caucho.v5.log.impl.EnvironmentStream;
 import com.caucho.v5.log.impl.LogHandlerConfig;
 import com.caucho.v5.log.impl.RotateStream;
-import com.caucho.v5.network.listen.PortTcp;
+import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.Alarm;
@@ -194,7 +195,8 @@ public class WatchdogManager implements AlarmListener
       selfBuilder.pod("watchdog");
 
       BartenderBuilder bartenderBuilder
-        = BartenderSystem.createBuilder(address, port, false, 
+        = BartenderSystem.createBuilder(EnvConfig.env().get(),
+                                        address, port, false, 
                                         portBartender, 
                                         "watchdog", "watchdog", 
                                         port,

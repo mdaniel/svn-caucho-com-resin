@@ -29,6 +29,7 @@
 
 package com.caucho.v5.resin;
 
+import com.caucho.v5.config.EnvConfig;
 import com.caucho.v5.server.container.ServerBuilder;
 
 /**
@@ -38,7 +39,14 @@ abstract public class PortEmbed
 {
   private int _port = -1;
   private String _address;
+  
+  private EnvConfig _env = EnvConfig.env().get();
 
+  protected EnvConfig env()
+  {
+    return _env;
+  }
+  
   /**
    * The TCP port
    */

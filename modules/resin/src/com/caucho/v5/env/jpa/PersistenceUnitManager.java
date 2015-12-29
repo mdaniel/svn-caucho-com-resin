@@ -59,7 +59,7 @@ import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DynamicClassLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
@@ -212,7 +212,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   {
     boolean isMatch = false;
     
-    String classPath = Environment.getLocalClassPath();
+    String classPath = EnvLoader.getLocalClassPath();
     
     for (String pathName : classPath.split("[" + File.pathSeparatorChar + "]")) {
       if (pathName.endsWith(jarFile)) {

@@ -28,10 +28,10 @@
 
 package com.caucho.v5.jsp;
 
+import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.LineCompileException;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.javac.LineMapException;
-import com.caucho.v5.util.CompileException;
-import com.caucho.v5.util.LineCompileException;
 
 import javax.servlet.ServletException;
 

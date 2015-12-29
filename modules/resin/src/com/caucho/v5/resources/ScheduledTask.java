@@ -52,7 +52,7 @@ import com.caucho.v5.config.types.Trigger;
 import com.caucho.v5.http.protocol.RequestServletStub;
 import com.caucho.v5.http.protocol.ResponseServletStub;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentListener;
 import com.caucho.v5.server.util.ScheduledThreadPool;
@@ -214,7 +214,7 @@ public class ScheduledTask
       _trigger = _timerTrigger;
     }
     
-    Environment.addEnvironmentListener(this);
+    EnvLoader.addEnvironmentListener(this);
   }
 
   private void start()

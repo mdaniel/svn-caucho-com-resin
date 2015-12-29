@@ -61,6 +61,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.ServletSecurity;
 
+import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.Config;
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
@@ -77,11 +78,10 @@ import com.caucho.v5.http.security.ConstraintManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.jmx.JmxUtilResin;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
-import com.caucho.v5.util.CompileException;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 
@@ -557,7 +557,7 @@ public class ServletBuilder
         //XXX:
         final String msg;
         
-        EnvironmentClassLoader envLoader = Environment.getEnvironmentClassLoader();
+        EnvironmentClassLoader envLoader = EnvLoader.getEnvironmentClassLoader();
 
         if (e instanceof ClassNotFoundException && e.getCause() instanceof CompileException) {
           msg = e.toString();
@@ -1009,7 +1009,7 @@ public class ServletBuilder
       if (_servletClass != null) {
       }
       else if (requireClass) {
-        envLoader = Environment.getEnvironmentClassLoader();
+        envLoader = EnvLoader.getEnvironmentClassLoader();
       
         String subMsg = "";
 

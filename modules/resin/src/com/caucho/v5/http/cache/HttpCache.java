@@ -27,7 +27,7 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.webapp.FilterChainCaucho;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.CacheItem;
 import com.caucho.v5.util.L10N;
@@ -271,7 +271,7 @@ public class HttpCache extends HttpCacheBase
       throw new ConfigException(L.l("Cache path '{0}' must be a directory.",
                                     _path));
 
-    String server = (String) Environment.getAttribute("caucho.server-id");
+    String server = (String) EnvLoader.getAttribute("caucho.server-id");
 
     if (server == null || server.equals(""))
       server = "cache";

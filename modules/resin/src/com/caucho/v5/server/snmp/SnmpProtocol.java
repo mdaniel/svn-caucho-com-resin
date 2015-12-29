@@ -29,9 +29,9 @@
 
 package com.caucho.v5.server.snmp;
 
-import com.caucho.v5.network.listen.ConnectionSocket;
-import com.caucho.v5.network.listen.ProtocolBase;
-import com.caucho.v5.network.listen.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ProtocolBase;
+import com.caucho.v5.network.port.RequestProtocol;
 import com.caucho.v5.server.snmp.types.OctetStringValue;
 import com.caucho.v5.server.snmp.types.SnmpValue;
 

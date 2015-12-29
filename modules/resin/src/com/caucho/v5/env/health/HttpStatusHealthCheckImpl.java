@@ -23,7 +23,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.meter.MeterActiveTime;
 import com.caucho.v5.env.meter.MeterService;
 import com.caucho.v5.health.check.AbstractHealthCheck;
-import com.caucho.v5.network.listen.PortTcp;
+import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
@@ -142,7 +142,7 @@ public class HttpStatusHealthCheckImpl extends AbstractHealthCheck
       
       if (port != null) {
         if (_pingHost == null)
-          _pingHost = port.getAddress();
+          _pingHost = port.address();
         
         if (_pingPort == 0)
           _pingPort = port.getLocalPort();
@@ -155,7 +155,7 @@ public class HttpStatusHealthCheckImpl extends AbstractHealthCheck
     NetworkSystem network = NetworkSystem.getCurrent();
     
     for (PortTcp port : network.getPorts()) {
-      if ("http".equals(port.getProtocolName())) {
+      if ("http".equals(port.protocolName())) {
         return port;
       }
     }

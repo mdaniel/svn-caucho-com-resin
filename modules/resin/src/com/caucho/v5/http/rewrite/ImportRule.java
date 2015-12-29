@@ -40,7 +40,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.jmx.Description;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.management.server.RewriteImportMXBean;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -72,7 +72,7 @@ public class ImportRule
   {
     super(rewriteDispatch);
 
-    _dependencyCheckInterval = Environment.getDependencyCheckInterval();
+    _dependencyCheckInterval = EnvLoader.getDependencyCheckInterval();
   }
 
   public String getTagName()

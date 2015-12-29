@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.config.types.PathBuilder;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployGenerator;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentListener;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;
@@ -246,7 +246,7 @@ public class DeployGeneratorWebAppSingle
 
     _controller.setSourceType("single");
 
-    Environment.addEnvironmentListener(this, _parentLoader);
+    EnvLoader.addEnvironmentListener(this, _parentLoader);
 
     // server/1d02
     //_controller.init();
@@ -373,7 +373,7 @@ public class DeployGeneratorWebAppSingle
   @Override
   protected void destroyImpl()
   {
-    Environment.removeEnvironmentListener(this, _parentLoader);
+    EnvLoader.removeEnvironmentListener(this, _parentLoader);
 
     _container.removeWebAppDeploy(this);
 

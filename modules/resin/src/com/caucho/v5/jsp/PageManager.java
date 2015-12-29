@@ -55,7 +55,7 @@ import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.util.CacheListener;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
@@ -107,7 +107,7 @@ abstract public class PageManager {
 
     _classDir = CauchoUtil.getWorkPath();
 
-    long interval = Environment.getDependencyCheckInterval();
+    long interval = EnvLoader.getDependencyCheckInterval();
   
     JspPropertyGroup jspPropertyGroup = _webApp.getJsp();
 

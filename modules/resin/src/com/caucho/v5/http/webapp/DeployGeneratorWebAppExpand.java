@@ -42,7 +42,7 @@ import com.caucho.v5.deploy.DeployControllerType;
 import com.caucho.v5.deploy.DeployGeneratorExpand;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.deploy.DeployMode;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentListener;
 import com.caucho.v5.vfs.Path;
 
@@ -230,7 +230,7 @@ public class DeployGeneratorWebAppExpand
   {
     super.startImpl();
 
-    Environment.addEnvironmentListener(this, _parentLoader);
+    EnvLoader.addEnvironmentListener(this, _parentLoader);
 
     _admin.register();
   }
@@ -404,7 +404,7 @@ public class DeployGeneratorWebAppExpand
 
     _container.removeWebAppDeploy(this);
 
-    Environment.removeEnvironmentListener(this, _parentLoader);
+    EnvLoader.removeEnvironmentListener(this, _parentLoader);
 
     super.destroyImpl();
   }

@@ -144,7 +144,7 @@ class ClientGroupLoadBalanceCluster
         port = _port;
       }
       else {
-        port = server.getPort();
+        port = server.port();
       }
       
       if (port > 0) {

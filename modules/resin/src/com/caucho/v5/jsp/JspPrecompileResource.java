@@ -30,6 +30,7 @@
 package com.caucho.v5.jsp;
 
 import com.caucho.v5.amp.thread.ThreadPool;
+import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.*;
 import com.caucho.v5.http.webapp.WebApp;
@@ -37,7 +38,6 @@ import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.util.Alarm;
-import com.caucho.v5.util.CompileException;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Path;

@@ -54,7 +54,7 @@ import javax.transaction.xa.Xid;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.meter.MeterService;
 import com.caucho.v5.env.meter.TimeSensor;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.transaction.xalog.AbstractXALogManager;
 import com.caucho.v5.transaction.xalog.AbstractXALogStream;
 import com.caucho.v5.util.Crc64;
@@ -211,7 +211,7 @@ public class TransactionManagerImpl
   private long getServerId()
   {
     if (_serverId == 0) {
-      String server = (String) Environment.getAttribute("caucho.server-id");
+      String server = (String) EnvLoader.getAttribute("caucho.server-id");
 
       if (server == null)
         _serverId = 1;

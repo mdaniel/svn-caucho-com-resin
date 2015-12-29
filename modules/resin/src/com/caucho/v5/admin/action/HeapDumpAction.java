@@ -64,7 +64,7 @@ public class HeapDumpAction implements AdminAction
       "com.sun.management:type=HotSpotDiagnostic");
     
     if (hprofPath == null) {
-      ServerBase resin = ServerBase.getCurrent();
+      ServerBase resin = ServerBase.current();
       
       if (resin == null)
         hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));

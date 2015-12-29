@@ -32,7 +32,7 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerBuilder;
 import javax.management.MBeanServerDelegate;
 
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 
 /**
  * implementation for an MBeanServer factory.
@@ -92,7 +92,7 @@ public class EnvironmentMBeanServerBuilder extends MBeanServerBuilder {
   public static EnvironmentMBeanServer getGlobal()
   {
     if (_globalServer == null) {
-      Environment.init();
+      EnvLoader.init();
       
       EnvironmentMBeanServerBuilder builder = new EnvironmentMBeanServerBuilder();
       builder.newMBeanServer(JmxUtilResin.DOMAIN, null, builder.newMBeanServerDelegate());

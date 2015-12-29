@@ -61,7 +61,7 @@ public class WatchdogBaratine extends WatchdogMain
   {
     ArgsWatchdog args = new ArgsWatchdog(argv, new ProgramInfoBaratine());
     
-    args.getEnv().put("watchdog", true);
+    args.envCli().put("watchdog", true);
     
     args.doMain();
   }

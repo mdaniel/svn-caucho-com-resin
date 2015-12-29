@@ -43,9 +43,9 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import com.caucho.v5.jmx.JmxUtilResin;
-import com.caucho.v5.network.listen.ConnectionSocket;
-import com.caucho.v5.network.listen.NextState;
-import com.caucho.v5.network.listen.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.NextState;
+import com.caucho.v5.network.port.RequestProtocolBase;
 import com.caucho.v5.server.snmp.types.GetResponsePduValue;
 import com.caucho.v5.server.snmp.types.IntegerValue;
 import com.caucho.v5.server.snmp.types.NullValue;

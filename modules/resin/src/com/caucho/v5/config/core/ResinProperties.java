@@ -36,7 +36,7 @@ import com.caucho.v5.config.core.ControlConfig;
 import com.caucho.v5.config.type.FlowBean;
 import com.caucho.v5.config.types.FileSetType;
 import com.caucho.v5.config.xml.XmlSchemaBean;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
@@ -136,7 +136,7 @@ public class ResinProperties extends ControlConfig implements FlowBean
       try {
         log.config(L.l("resin:properties '{0}'", path.getNativePath()));
 
-        Environment.addDependency(new Depend(path));
+        EnvLoader.addDependency(new Depend(path));
         
         readProperties(path);
       } catch (FileNotFoundException e) {

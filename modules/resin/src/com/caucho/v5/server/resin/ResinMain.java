@@ -34,13 +34,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.spi.Command;
+import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.env.shutdown.ExitCode;
 import com.caucho.v5.env.shutdown.ShutdownSystem;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.container.ServerBuilder;
-import com.caucho.v5.util.CompileException;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -61,12 +61,12 @@ public class ResinMain
   public static void main(String []argv)
   {
     try {
-      Environment.init();
+      EnvLoader.init();
       
-      ServerBuilder.validateEnvironment();
+      //ServerBuilder.validateEnvironment();
       
       ArgsServerBase args = new ArgsServerBase(argv);
-      args.getEnv().initLogging();
+      args.envCli().initLogging();
       args.initHomeClassPath();
       args.doCommand();
       /*

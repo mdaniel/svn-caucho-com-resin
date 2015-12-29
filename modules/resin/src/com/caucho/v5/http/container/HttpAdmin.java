@@ -52,7 +52,7 @@ import com.caucho.v5.management.server.PortMXBean;
 import com.caucho.v5.management.server.ServerMXBean;
 import com.caucho.v5.management.server.TcpConnectionInfo;
 import com.caucho.v5.management.server.ThreadPoolMXBean;
-import com.caucho.v5.network.listen.PortTcp;
+import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.CurrentTime;
 
 public class HttpAdmin extends AbstractEmitterObject

@@ -34,8 +34,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpSession;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.listen.NextState;
-import com.caucho.v5.network.listen.RequestProtocol;
+import com.caucho.v5.network.port.NextState;
+import com.caucho.v5.network.port.RequestProtocol;
 
 /**
  * Used when there isn't any actual request object, e.g. for calling

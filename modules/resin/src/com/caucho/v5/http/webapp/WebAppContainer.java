@@ -64,7 +64,7 @@ import com.caucho.v5.http.webapp.WebAppRouter.WebAppUriMap;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentListener;
 import com.caucho.v5.make.AlwaysModified;
@@ -297,7 +297,7 @@ public class WebAppContainer
   {
     _accessLog = log;
 
-    Environment.setAttribute("caucho.server.access-log", log);
+    EnvLoader.setAttribute("caucho.server.access-log", log);
   }
 
   /**

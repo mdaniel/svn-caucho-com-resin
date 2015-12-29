@@ -45,8 +45,8 @@ import com.caucho.v5.http.protocol.RequestFacade;
 import com.caucho.v5.http.protocol.RequestProtocolHttp;
 import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.listen.ConnectionTcp;
-import com.caucho.v5.network.listen.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.RequestProtocol;
 import com.caucho.v5.vfs.Dependency;
 
 /**

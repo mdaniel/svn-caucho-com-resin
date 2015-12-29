@@ -28,7 +28,7 @@
 
 package com.caucho.v5.el;
 
-import com.caucho.v5.util.CompileException;
+import com.caucho.v5.config.CompileException;
 
 /**
  * An expression language exception.

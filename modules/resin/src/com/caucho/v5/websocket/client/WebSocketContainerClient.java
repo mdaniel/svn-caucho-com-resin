@@ -49,7 +49,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import com.caucho.v5.inject.Module;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.Vfs;
@@ -104,7 +104,7 @@ public class WebSocketContainerClient extends ContainerWebSocketBase
       thread.setContextClassLoader(oldLoader);
     }
     
-    Environment.addCloseListener(this);
+    EnvLoader.addCloseListener(this);
   }
   
   @Override

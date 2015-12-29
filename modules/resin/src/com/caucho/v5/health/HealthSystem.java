@@ -43,7 +43,7 @@ public class HealthSystem
   
   public HealthSystem()
   {
-    ServerBase resin = ServerBase.getCurrent();
+    ServerBase resin = ServerBase.current();
 
     _healthService = SystemManager.getCurrentSystem(HealthSubSystem.class);
     if (_healthService == null && resin == null) {

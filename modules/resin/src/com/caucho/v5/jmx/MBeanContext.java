@@ -49,7 +49,7 @@ import javax.management.loading.ClassLoaderRepository;
 
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.CloseListener;
-import com.caucho.v5.loader.Environment;
+import com.caucho.v5.loader.EnvLoader;
 
 /**
  * The context containing mbeans registered at a particular level.
@@ -97,7 +97,7 @@ public class MBeanContext
   {
     _mbeanServer = mbeanServer;
     
-    loader = Environment.getEnvironmentClassLoader(loader);
+    loader = EnvLoader.getEnvironmentClassLoader(loader);
 
     if (loader == null) {
       loader = ClassLoader.getSystemClassLoader();
@@ -108,7 +108,7 @@ public class MBeanContext
 
     _mbeanServer.setCurrentContext(this, loader);
 
-    Environment.addCloseListener(this, loader);
+    EnvLoader.addCloseListener(this, loader);
 
     //Environment.addClassLoaderListener(new WeakCloseListener(this), _loader);
     
