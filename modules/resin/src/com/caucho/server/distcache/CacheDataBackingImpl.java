@@ -74,7 +74,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
   private DataSourceImpl _dataSource;
   
-  private long _reaperTimeout = 5 * 60 * 1000;
+  //private long _reaperTimeout = 5 * 60 * 1000;
+  private long _reaperTimeout = 15 * 60 * 1000;
 
   private long _reaperCycleMaxActiveDurationMs = 1 * 1000;
   private double _reaperCycleIdleToActiveUtilizationRatio = 2.0;
@@ -225,6 +226,12 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                MnodeUpdate mnodeUpdate)
   {
     boolean isSave = false;
+    
+    MnodeStore mnodeStore = _mnodeStore;
+    
+    if (mnodeStore == null) {
+      return true;
+    }
 
     if (oldEntryEntry == null
         || oldEntryEntry.isImplicitNull()
@@ -244,7 +251,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     } else {
-      if (_mnodeStore.updateSave(key.getHash(),
+      if (mnodeStore.updateSave(key.getHash(),
                                  cacheKey.getHash(),
                                  mnodeUpdate,
                                  mnodeEntry.getValueDataId(),
@@ -252,7 +259,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                  mnodeEntry.getLastModifiedTime())) {
         isSave = true;
       }
-      else if (_mnodeStore.insert(key,
+      else if (mnodeStore.insert(key,
                                   cacheKey,
                                   mnodeUpdate,
                                   mnodeEntry.getValueDataId(),
@@ -512,7 +519,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     long entryCount = _mnodeStore.getCount();
     long createCount = _createCount.get();
 
-    int delta = Math.max(1024, (int) (entryCount / 8));
+    int delta = Math.max(64 * 1024, (int) (entryCount / 8));
 
     _createReaperCount = createCount + delta;
   }

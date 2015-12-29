@@ -116,6 +116,8 @@ class InsertQuery extends Query {
       _table.insert(queryContext, xa, _columns, _values);
 
       queryContext.setRowUpdateCount(1);
+      
+      xa.writeData(); // XXX:
     } catch (java.io.IOException e) {
       throw new SQLExceptionWrapper(e);
     } finally {

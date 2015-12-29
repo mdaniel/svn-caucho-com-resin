@@ -214,9 +214,11 @@ class BlobColumn extends Column {
       
       Inode inode = new Inode();
       inode.init(getTable(), xa, block, rowOffset + _columnOffset);
-      xa.addDeleteInode(inode);
+      //xa.addDeleteInode(inode);
       
       setNull(block, rowOffset);
+      
+      inode.remove();
     }
   }
 

@@ -1055,6 +1055,8 @@ public class Table extends BlockStore {
 
           column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
         }
+        
+        xa.writeData(); // 
 
         buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
 

@@ -50,9 +50,11 @@ public class DataStreamSource extends StreamSource
   {
     _valueDataId = valueDataId;
     _dataBacking = dataBacking;
-    
+
+    /*
     if (dataBacking == null)
       throw new NullPointerException();
+      */
   }
 
   /**
@@ -72,7 +74,13 @@ public class DataStreamSource extends StreamSource
   public InputStream openInputStream()
     throws IOException
   {
-    InputStream is = _dataBacking.openInputStream(_valueDataId);
+    DataStore dataBacking = _dataBacking;
+    
+    if (dataBacking == null) {
+      return null;
+    }
+    
+    InputStream is = dataBacking.openInputStream(_valueDataId);
     
     return is;
   }
