@@ -1026,7 +1026,11 @@ public class Table extends BlockStore
     iter.init(queryContext);
 
     boolean isOkay = false;
-    queryContext.lock();
+    
+    if (! queryContext.lock()) {
+      log.warning("Unable to lock table");
+      return;
+    }
 
     try {
       iter.setRow(block, rowOffset);

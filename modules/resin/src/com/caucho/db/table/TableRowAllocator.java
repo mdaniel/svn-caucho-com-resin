@@ -110,7 +110,12 @@ class TableRowAllocator extends AbstractTaskWorker {
   {
     Lock blockLock = block.getWriteLock();
 
-    blockLock.tryLock(xa.getTimeout(), TimeUnit.MILLISECONDS);
+    if (! blockLock.tryLock(xa.getTimeout(), TimeUnit.MILLISECONDS)) {
+      log.warning("Unable to lock allocate table: " + xa.getTimeout() + "ms");
+      
+      return -1;
+    }
+    
     try {
       block.read();
 

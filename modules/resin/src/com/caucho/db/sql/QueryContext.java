@@ -537,11 +537,11 @@ public class QueryContext {
    *
    * @param isWrite if true, the block should be locked for writing
    */
-  public void lock()
+  public boolean lock()
     throws SQLException
   {
     if (_isNonLocking) {
-      return;
+      return true;
     }
       
     if (_isLocked) {
@@ -554,7 +554,10 @@ public class QueryContext {
       Lock tableLock = _tableIterators[0].getTable().getTableLock();
       
       if (_isWrite) {
-        tableLock.tryLock(_xa.getTimeout(), TimeUnit.MILLISECONDS);
+        return tableLock.tryLock(_xa.getTimeout(), TimeUnit.MILLISECONDS);
+      }
+      else {
+        return true;
       }
       /*
       else {
@@ -589,7 +592,11 @@ public class QueryContext {
     Lock tableLock = _tableIterators[0].getTable().getTableLock();
 
     if (_isWrite) {
-      tableLock.unlock();
+      try {
+        tableLock.unlock();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
     }
 
     try {

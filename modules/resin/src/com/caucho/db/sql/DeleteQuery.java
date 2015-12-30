@@ -78,7 +78,9 @@ class DeleteQuery extends Query {
       }
 
       do {
-        context.lock();
+        if (! context.lock()) {
+          throw new IllegalStateException("unable to lock for delete");
+        }
         
         try {
           if (isSelect(context) && rows[0].delete()) {
