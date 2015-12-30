@@ -43,7 +43,7 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import com.caucho.v5.bytecode.scan.ScanClass;
-import com.caucho.v5.bytecode.scan.ScanListener;
+import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.LineConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
@@ -67,7 +67,7 @@ import com.caucho.v5.vfs.Vfs;
  */
 @Module
 public class PersistenceManager 
-  implements ScanListener, EnvironmentEnhancerListener
+  implements ScanListenerByteCode, EnvironmentEnhancerListener
 {
   private static final Logger log
     = Logger.getLogger(PersistenceManager.class.getName());

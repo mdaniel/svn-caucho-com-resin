@@ -37,7 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.logging.Logger;
 
 import com.caucho.v5.bytecode.scan.ScanClass;
-import com.caucho.v5.bytecode.scan.ScanListener;
+import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.Path;
@@ -45,7 +45,7 @@ import com.caucho.v5.vfs.Path;
 /**
  * scans a class hierarchy.
  */
-class ScanListenerClassHierarchy implements ScanListener
+class ScanListenerClassHierarchy implements ScanListenerByteCode
 {
   private final static Logger log 
     = Logger.getLogger(ScanListenerClassHierarchy.class.getName());
