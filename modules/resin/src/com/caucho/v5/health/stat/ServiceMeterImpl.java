@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.env.meter.MeterBase;
+import com.caucho.v5.health.meter.MeterBase;
 
 public final class ServiceMeterImpl extends MeterBase {
   private static final Logger log

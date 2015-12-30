@@ -43,9 +43,9 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import com.caucho.v5.jmx.JmxUtilResin;
-import com.caucho.v5.network.port.ConnectionSocket;
-import com.caucho.v5.network.port.NextState;
-import com.caucho.v5.network.port.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.StateConnection;
 import com.caucho.v5.server.snmp.types.GetResponsePduValue;
 import com.caucho.v5.server.snmp.types.IntegerValue;
 import com.caucho.v5.server.snmp.types.NullValue;
@@ -61,7 +61,7 @@ import com.caucho.v5.vfs.ReadStream;
 /*
  * Responds to SNMP requests.
  */
-public class SnmpRequest extends RequestProtocolBase
+public class SnmpRequest implements ConnectionProtocol
 {
   private static final Logger log
     = Logger.getLogger(SnmpRequest.class.getName());
@@ -75,14 +75,14 @@ public class SnmpRequest extends RequestProtocolBase
   public static final int READ_ONLY = 4;
   public static final int GENERAL_ERROR = 5;
   
-  private final ConnectionSocket _connection;
+  private final ConnectionTcp _connection;
 
   private IntegerValue _version = IntegerValue.ZERO;
   private final OctetStringValue _communityString;
   
   private TreeMap<String, Oid> _mibMap;
   
-  public SnmpRequest(ConnectionSocket connection,
+  public SnmpRequest(ConnectionTcp connection,
                      TreeMap<String, Oid> mibMap,
                      OctetStringValue community)
   {
@@ -118,7 +118,7 @@ public class SnmpRequest extends RequestProtocolBase
    * handleConnection again after the connection completes, so 
    * the implementation must initialize any variables for each connection.
    */
-  public NextState service() 
+  public StateConnection service() 
     throws IOException
   {
     ReadStream in = _connection.getReadStream();
@@ -133,7 +133,7 @@ public class SnmpRequest extends RequestProtocolBase
 
     sendResponse(response);
     
-    return NextState.READ;
+    return StateConnection.READ;
   }
   
   final protected void checkVersion(SnmpMessageValue req)

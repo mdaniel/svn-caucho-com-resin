@@ -118,7 +118,7 @@ import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.make.DependencyContainer;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.network.port.ConnectionTcp;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.BasicFuture;
 import com.caucho.v5.util.CauchoUtil;
@@ -1218,7 +1218,7 @@ public class WebApp extends ServletContextImpl
 
   public static ServletRequest getThreadRequest()
   {
-    RequestProtocol serverRequest = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol serverRequest = ConnectionTcp.getCurrentRequest();
 
     if (serverRequest instanceof ServletRequest)
       return (ServletRequest) serverRequest;
@@ -2377,7 +2377,7 @@ public class WebApp extends ServletContextImpl
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldClassLoader = thread.getContextClassLoader();
-    RequestProtocol serverRequest = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol serverRequest = ConnectionTcp.getCurrentRequest();
     RequestServletStubSession stubRequest;
     
     try {

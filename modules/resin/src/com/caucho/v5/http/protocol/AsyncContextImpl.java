@@ -47,21 +47,20 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.port.ConnectionSocket;
-import com.caucho.v5.network.port.NextState;
-import com.caucho.v5.network.port.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.StateConnection;
 import com.caucho.v5.util.L10N;
 
 /**
  * Public API to control a comet connection.
  */
-public class AsyncContextImpl extends RequestProtocolBase
+public class AsyncContextImpl // extends RequestProtocolBase
   implements AsyncContext { //, CometListenerSocket {
   private static final L10N L = new L10N(AsyncContextImpl.class);
   private static final Logger log = Logger
       .getLogger(AsyncContextImpl.class.getName());
 
-  private ConnectionSocket _connTcp;
+  private ConnectionTcp _connTcp;
   //private AsyncController _cometController;
 
   private ServletRequest _request;
@@ -311,7 +310,7 @@ public class AsyncContextImpl extends RequestProtocolBase
                                           this));
     }
      
-    _connTcp.getProxy().requestWake();
+    _connTcp.proxy().requestWake();
     // cometController.wake();
   }
 
@@ -356,7 +355,7 @@ public class AsyncContextImpl extends RequestProtocolBase
     StateAsync state = _stateRef.get();
     _stateRef.compareAndSet(state, state.toComplete());
     
-    _connTcp.getProxy().requestWake();
+    _connTcp.proxy().requestWake();
     /*
     Thread thread = Thread.currentThread();
     
@@ -400,7 +399,7 @@ public class AsyncContextImpl extends RequestProtocolBase
   /**
    * CometHandler callback when the connection times out.
    */
-  @Override
+  //@Override
   public void onTimeout()
   {
     StateAsync state = _stateRef.get();
@@ -420,8 +419,8 @@ public class AsyncContextImpl extends RequestProtocolBase
     }
   }
 
-  @Override
-  public NextState service() throws IOException
+  //@Override
+  public StateConnection service() throws IOException
   {
     _stateRef.compareAndSet(StateAsync.START, StateAsync.WAKE);
     // _stateRef.compareAndSet(StateAsync.WAKE, StateAsync.IDLE);
@@ -439,7 +438,7 @@ public class AsyncContextImpl extends RequestProtocolBase
     }
   }
   
-  @Override
+  //@Override
   public void onCloseConnection()
   {
     onComplete();
@@ -489,17 +488,17 @@ public class AsyncContextImpl extends RequestProtocolBase
     }
   }
 
-  public NextState getNextState()
+  public StateConnection getNextState()
   {
-    NextState nextState = NextState.READ;
+    StateConnection nextState = StateConnection.READ;
     switch (_stateRef.get()) {
     case IDLE:
       return nextState;
     case START:
-      return NextState.SUSPEND;
+      return StateConnection.SUSPEND;
     case COMPLETE:
     case WAKE:
-      return NextState.WAKE;
+      return StateConnection.WAKE;
     case CLOSED:
       return nextState;
     default:

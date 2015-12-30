@@ -31,7 +31,7 @@ package com.caucho.v5.server.container;
 
 import java.util.Objects;
 
-import com.caucho.v5.env.warning.WarningHandler;
+import com.caucho.v5.health.warning.WarningHandler;
 import com.caucho.v5.server.watchdog.LinkWatchdogService;
 
 /**

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import com.caucho.v5.env.health.HealthCheckResult;
 import com.caucho.v5.env.health.HealthStatus;
-import com.caucho.v5.env.meter.MeterBase;
+import com.caucho.v5.health.meter.MeterBase;
 import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;

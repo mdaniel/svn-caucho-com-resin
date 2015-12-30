@@ -34,9 +34,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.caucho.v5.inject.Module;
-import com.caucho.v5.network.port.ConnectionSocket;
-import com.caucho.v5.network.port.NextState;
-import com.caucho.v5.network.port.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.StateConnection;
 import com.caucho.v5.websocket.io.InWebSocket;
 import com.caucho.v5.websocket.io.WebSocketBaratine;
 
@@ -44,7 +44,7 @@ import com.caucho.v5.websocket.io.WebSocketBaratine;
  * User facade for http requests.
  */
 @Module
-public class RequestWebSocketServer extends RequestProtocolBase
+public class RequestWebSocketServer implements ConnectionProtocol
 {
   private static final Logger log = Logger.getLogger(RequestWebSocketServer.class.getName());
   
@@ -61,10 +61,10 @@ public class RequestWebSocketServer extends RequestProtocolBase
   private InWebSocket _reader;
 
   //private Connection _conn;
-  private ConnectionSocket _connTcp;
+  private ConnectionTcp _connTcp;
 
   public RequestWebSocketServer(WebSocketBaratine wsConn,
-                                ConnectionSocket connTcp)
+                                ConnectionTcp connTcp)
   {
     /*
     _request = request;
@@ -156,14 +156,14 @@ public class RequestWebSocketServer extends RequestProtocolBase
   */
 
   @Override
-  public NextState service()
+  public StateConnection service()
     throws IOException
   {
     if (_reader.onRead()) {
-      return NextState.READ;
+      return StateConnection.READ;
     }
     else {
-      return NextState.CLOSE;
+      return StateConnection.CLOSE;
     }
   }
 
@@ -182,7 +182,7 @@ public class RequestWebSocketServer extends RequestProtocolBase
   }
 
   @Override
-  public void onCloseConnection()
+  public void onClose()
   {
     InWebSocket reader = _reader;
     _reader = null;

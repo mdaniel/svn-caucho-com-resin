@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.server.ServerCommandBase;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.jsp.JspCompiler;
 import com.caucho.v5.server.config.ConfigBoot;
 

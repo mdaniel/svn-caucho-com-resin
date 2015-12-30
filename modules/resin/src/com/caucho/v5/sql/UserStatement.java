@@ -34,7 +34,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import com.caucho.v5.env.meter.ActiveTimeSensor;
+import com.caucho.v5.health.meter.ActiveTimeSensor;
 import com.caucho.v5.util.L10N;
 
 

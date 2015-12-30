@@ -33,7 +33,7 @@ import com.caucho.v5.baratine.client.ServiceManagerClient;
 import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.server.RemoteCommandBase;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;
 

@@ -55,7 +55,7 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.NullEnumeration;
 import com.caucho.v5.vfs.ReadStream;
 
@@ -522,7 +522,7 @@ public class RequestServletStub implements RequestCaucho {
   }
 
   @Override
-  public ConnectionSocket getSocketLink()
+  public ConnectionTcp getSocketLink()
   {
     return null;
   }

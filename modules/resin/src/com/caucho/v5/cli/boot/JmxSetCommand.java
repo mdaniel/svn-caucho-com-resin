@@ -34,8 +34,8 @@ import javax.management.ObjectName;
 
 import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.shutdown.ExitCode;
 import com.caucho.v5.health.action.JmxSetQueryReply;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.L10N;

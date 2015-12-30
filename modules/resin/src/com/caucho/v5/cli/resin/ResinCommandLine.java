@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.spi.Command;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.util.L10N;
 
 /**

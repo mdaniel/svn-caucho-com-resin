@@ -32,9 +32,9 @@ package com.caucho.v5.env.health;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.caucho.v5.env.shutdown.ExitCode;
-import com.caucho.v5.env.shutdown.ShutdownSystem;
 import com.caucho.v5.health.HealthSystemFacade;
+import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.CurrentTime;

@@ -30,7 +30,7 @@ package com.caucho.v5.cli.boot;
 
 import java.io.Serializable;
 
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 
 /**
  * Queries the Resin instance for its pid.

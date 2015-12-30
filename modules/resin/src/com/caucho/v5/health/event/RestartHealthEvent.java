@@ -7,7 +7,7 @@
 package com.caucho.v5.health.event;
 
 import com.caucho.v5.env.health.HealthSubSystem;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 
 public class RestartHealthEvent extends HealthEvent
 {

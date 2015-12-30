@@ -30,7 +30,7 @@
 package com.caucho.v5.cli.boot;
 
 import com.caucho.v5.cli.baratine.ArgsCli;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.admin.StringQueryReply;
 import com.caucho.v5.server.config.ServerConfigBoot;

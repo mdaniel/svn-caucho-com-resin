@@ -108,7 +108,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
   public HostContainer(HttpContainerServlet server)
   {
     _server = server;
-    _classLoader = server.getClassLoader();
+    _classLoader = server.classLoader();
 
     _rootDir = Vfs.lookup();
 

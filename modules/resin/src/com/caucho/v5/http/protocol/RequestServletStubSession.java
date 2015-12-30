@@ -34,15 +34,15 @@ import java.io.IOException;
 import javax.servlet.http.HttpSession;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.port.NextState;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionProtocol;
+import com.caucho.v5.network.port.StateConnection;
 
 /**
  * Used when there isn't any actual request object, e.g. for calling
  * run-at servlets.
  */
 public class RequestServletStubSession extends RequestServletStub
-  implements RequestProtocol
+  implements ConnectionProtocol
 {
   private WebApp _webApp;
   private String _sessionId;
@@ -62,15 +62,15 @@ public class RequestServletStubSession extends RequestServletStub
     return _session;
   }
   @Override
-  public String getProtocolRequestURL()
+  public String urlProtocolRequest()
   {
     return null;
   }
 
   @Override
-  public NextState service() throws IOException
+  public StateConnection service() throws IOException
   {
-    return NextState.CLOSE;
+    return StateConnection.CLOSE;
   }
 
   /*
@@ -80,58 +80,5 @@ public class RequestServletStubSession extends RequestServletStub
     return false;
   }
   */
-
-  @Override
-  public void init()
-  {
-  }
-
-  @Override
-  public boolean isWaitForRead()
-  {
-    return false;
-  }
-  
-  @Override
-  public void onCloseRead()
-  {
-  }
-  
-  @Override
-  public void onCloseConnection()
-  {
-  }
-
-  @Override
-  public void onStartConnection()
-  {
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.network.listen.ProtocolConnection#onAttachThread()
-   */
-  @Override
-  public void onAttachThread()
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.network.listen.ProtocolConnection#onDetachThread()
-   */
-  @Override
-  public void onDetachThread()
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void onTimeout()
-  {
-    // TODO Auto-generated method stub
-    
-  }
 }
   

@@ -35,7 +35,7 @@ import java.util.logging.Level;
 
 import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.admin.StringQueryReply;
 import com.caucho.v5.server.config.ServerConfigBoot;

@@ -57,7 +57,6 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import com.caucho.v5.http.container.HttpContainer;
-import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.http.security.Login;
@@ -65,7 +64,7 @@ import com.caucho.v5.http.session.SessionImpl;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.i18n.CharacterEncoding;
-import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.util.CurrentTime;
@@ -1050,7 +1049,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   }
 
   @Override
-  public ConnectionSocket getSocketLink()
+  public ConnectionTcp getSocketLink()
   {
     RequestHttpBase request = getAbstractHttpRequest();
     

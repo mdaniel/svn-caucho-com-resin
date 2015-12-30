@@ -34,7 +34,7 @@ import com.caucho.v5.cli.server.BootCommand;
 import com.caucho.v5.cli.spi.ArgsBase;
 import com.caucho.v5.cli.spi.CommandArgumentException;
 import com.caucho.v5.cli.spi.OptionCommandLine;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.watchdog.ArgsWatchdog;
 

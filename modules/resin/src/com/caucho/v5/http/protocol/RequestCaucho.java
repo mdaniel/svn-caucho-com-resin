@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.vfs.ReadStream;
 
 public interface RequestCaucho extends HttpServletRequest
@@ -86,6 +86,6 @@ public interface RequestCaucho extends HttpServletRequest
 
   ServletResponse getServletResponse();
   RequestHttpBase getAbstractHttpRequest();
-  ConnectionSocket getSocketLink();
+  ConnectionTcp getSocketLink();
   void completeCache();
 }

@@ -38,7 +38,7 @@ import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.server.ServerCommandBase;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.CharBuffer;

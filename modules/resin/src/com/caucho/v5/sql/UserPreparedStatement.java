@@ -50,7 +50,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-import com.caucho.v5.env.meter.ActiveTimeSensor;
+import com.caucho.v5.health.meter.ActiveTimeSensor;
 import com.caucho.v5.util.L10N;
 
 /**

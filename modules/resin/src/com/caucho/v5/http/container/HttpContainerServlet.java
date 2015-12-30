@@ -46,8 +46,8 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.deploy.DeployHandle;
-import com.caucho.v5.env.shutdown.ExitCode;
-import com.caucho.v5.env.shutdown.ShutdownSystem;
+import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.http.cache.HttpCache;
 import com.caucho.v5.http.cache.HttpCacheBase;
 import com.caucho.v5.http.dispatch.FilterChainError;
@@ -217,12 +217,12 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     // cannot set the based on server-id because of distributed cache
     // _classLoader.setId("server:" + id);
 
-    _serverLocal.set(this, getClassLoader());
+    _serverLocal.set(this, classLoader());
 
     try {
       Thread thread = Thread.currentThread();
 
-      EnvLoader.addClassLoaderListener(this, getClassLoader());
+      EnvLoader.addClassLoaderListener(this, classLoader());
 
       /*
       PermissionManager permissionManager = new PermissionManager();
@@ -232,7 +232,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-        thread.setContextClassLoader(getClassLoader());
+        thread.setContextClassLoader(classLoader());
 
         _serverIdLocal.set(getSelfServer().getId());
         
@@ -406,7 +406,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-        thread.setContextClassLoader(getClassLoader());
+        thread.setContextClassLoader(classLoader());
 
         _adminAuth = _injectManager.lookup(AuthenticatorRole.class,
                                               new AdminLiteral());
@@ -562,7 +562,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   {
     _hostContainer.setRootDirectory(path);
 
-    Vfs.setPwd(path, getClassLoader());
+    Vfs.setPwd(path, classLoader());
   }
 
   /**
@@ -821,7 +821,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
    */
   public long getDependencyCheckInterval()
   {
-    return EnvLoader.getDependencyCheckInterval(getClassLoader());
+    return EnvLoader.getDependencyCheckInterval(classLoader());
   }
 
   /**
@@ -1208,7 +1208,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
-      thread.setContextClassLoader(getClassLoader());
+      thread.setContextClassLoader(classLoader());
 
       if (! _lifecycle.toStarting()) {
         return;
@@ -1289,7 +1289,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   @Override
   public boolean isModified()
   {
-    DynamicClassLoader classLoader = getClassLoader();
+    DynamicClassLoader classLoader = classLoader();
     
     if (classLoader != null)
       return classLoader.isModified();
@@ -1300,7 +1300,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   @Override
   public boolean logModified(Logger log)
   {
-    DynamicClassLoader classLoader = getClassLoader();
+    DynamicClassLoader classLoader = classLoader();
     
     if (classLoader != null)
       return classLoader.logModified(log);
@@ -1316,7 +1316,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
    */
   public boolean isModifiedNow()
   {
-    DynamicClassLoader classLoader = getClassLoader();
+    DynamicClassLoader classLoader = classLoader();
     
     if (classLoader != null)
       return classLoader.isModifiedNow();
@@ -1479,7 +1479,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(getClassLoader());
+      thread.setContextClassLoader(classLoader());
 
       if (! _lifecycle.toStopping()) {
         return;
@@ -1515,7 +1515,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       */
 
       try {
-        getClassLoader().stop();
+        classLoader().stop();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -1559,7 +1559,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(getClassLoader());
+      thread.setContextClassLoader(classLoader());
 
       try {
         _hostContainer.destroy(mode);

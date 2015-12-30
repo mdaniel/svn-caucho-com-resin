@@ -36,9 +36,9 @@ import javax.annotation.PostConstruct;
 import com.caucho.v5.nautilus.broker.BrokerNautilus;
 import com.caucho.v5.nautilus.broker.BrokerProviderEnvironment;
 import com.caucho.v5.nautilus.broker.SenderBroker;
-import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ProtocolBase;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionProtocol;
 
 /**
  * Custom serialization for the cache
@@ -66,13 +66,13 @@ public class StompProtocol extends ProtocolBase
   }
   
   @Override
-  public RequestProtocol createConnection(ConnectionSocket link)
+  public ConnectionProtocol createConnection(ConnectionTcp link)
   {
     return new StompConnection(this, link);
   }
 
   @Override
-  public String getProtocolName()
+  public String name()
   {
     return "stomp";
   }

@@ -37,8 +37,8 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.amp.thread.ThreadPool;
-import com.caucho.v5.env.shutdown.ExitCode;
 import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.util.L10N;
 

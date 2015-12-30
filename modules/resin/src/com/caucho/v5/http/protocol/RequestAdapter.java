@@ -28,12 +28,9 @@
 
 package com.caucho.v5.http.protocol;
 
-import com.caucho.v5.http.session.SessionManager;
-import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.port.ConnectionSocket;
-import com.caucho.v5.util.FreeList;
-import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.ReadStream;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -46,9 +43,12 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
+import com.caucho.v5.http.session.SessionManager;
+import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.util.FreeList;
+import com.caucho.v5.util.L10N;
+import com.caucho.v5.vfs.ReadStream;
 
 /**
  * Any requests that depends on an underlying request, like
@@ -552,7 +552,7 @@ public class RequestAdapter extends RequestWrapper
   }
 
   @Override
-  public ConnectionSocket getSocketLink()
+  public ConnectionTcp getSocketLink()
   {
     if (getRequest() instanceof RequestCaucho)
       return ((RequestCaucho) getRequest()).getSocketLink();

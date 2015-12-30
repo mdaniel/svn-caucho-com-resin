@@ -8,8 +8,8 @@ package com.caucho.v5.health.stat;
 
 import java.util.ArrayList;
 
-import com.caucho.v5.env.meter.Meter;
-import com.caucho.v5.env.meter.MeterBase;
+import com.caucho.v5.health.meter.Meter;
+import com.caucho.v5.health.meter.MeterBase;
 import com.caucho.v5.health.stat.StatSystem.Sample;
 import com.caucho.v5.jmx.server.MeterGraphInfo;
 import com.caucho.v5.jmx.server.MeterGraphPageInfo;

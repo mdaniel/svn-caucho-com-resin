@@ -43,7 +43,7 @@ import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.server.StartCommand;
 import com.caucho.v5.cli.spi.OptionCommandLine;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.container.ArgsServerBase;

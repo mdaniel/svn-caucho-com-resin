@@ -32,7 +32,7 @@ package com.caucho.v5.cli.boot;
 import java.util.Arrays;
 
 import com.caucho.v5.cli.baratine.ArgsCli;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.AddUserQueryReply;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;

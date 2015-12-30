@@ -14,7 +14,7 @@ import javax.inject.Singleton;
 
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthSubSystem;
-import com.caucho.v5.env.meter.MeterBase;
+import com.caucho.v5.health.meter.MeterBase;
 
 /**
  * Monitors CPU usage.

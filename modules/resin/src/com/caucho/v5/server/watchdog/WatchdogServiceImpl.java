@@ -52,7 +52,7 @@ import com.caucho.v5.baratine.Remote;
 import com.caucho.v5.cli.daemon.ArgsDaemon;
 import com.caucho.v5.cli.server.BootConfigParser;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.JmxUtil;

@@ -42,11 +42,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.RequestFacade;
-import com.caucho.v5.http.protocol.RequestProtocolHttp;
+import com.caucho.v5.http.protocol.ConnectionHttp;
 import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.network.port.ConnectionTcp;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.vfs.Dependency;
 
 /**
@@ -316,10 +316,10 @@ public class InvocationServlet extends Invocation
    */
   public static ServletRequest getContextRequest()
   {
-    RequestProtocol req = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol req = ConnectionTcp.getCurrentRequest();
 
-    if (req instanceof RequestProtocolHttp) {
-      return (ServletRequest) ((RequestProtocolHttp) req).getRequestFacade();
+    if (req instanceof ConnectionHttp) {
+      return (ServletRequest) ((ConnectionHttp) req).requestFacade();
     }
     else if (req instanceof ServletRequest) {
       return (ServletRequest) req;

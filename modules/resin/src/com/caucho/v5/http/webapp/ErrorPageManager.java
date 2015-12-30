@@ -52,7 +52,7 @@ import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.DisplayableException;
 import com.caucho.v5.config.LineCompileException;
 import com.caucho.v5.config.LineException;
-import com.caucho.v5.env.shutdown.ShutdownSystem;
+import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.protocol.BadRequestException;

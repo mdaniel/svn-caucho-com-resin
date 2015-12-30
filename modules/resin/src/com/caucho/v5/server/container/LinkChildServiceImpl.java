@@ -46,8 +46,8 @@ import javax.management.ReflectionException;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.baratine.Remote;
-import com.caucho.v5.env.shutdown.ExitCode;
-import com.caucho.v5.env.shutdown.ShutdownSystem;
+import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.server.watchdog.LinkWatchdogService;
 import com.caucho.v5.util.JmxUtil;
 import com.caucho.v5.util.L10N;

@@ -14,10 +14,10 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.Configurable;
-import com.caucho.v5.env.shutdown.ExitCode;
-import com.caucho.v5.env.shutdown.ShutdownSystem;
 import com.caucho.v5.health.event.HealthEvent;
 import com.caucho.v5.health.event.StopHealthEvent;
+import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.util.L10N;
 
 /**

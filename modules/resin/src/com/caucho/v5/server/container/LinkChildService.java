@@ -32,7 +32,7 @@ package com.caucho.v5.server.container;
 import io.baratine.core.Result;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 
 /**
  * Resin child service communicating with the watchdog.

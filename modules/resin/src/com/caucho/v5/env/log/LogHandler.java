@@ -8,8 +8,8 @@ package com.caucho.v5.env.log;
 
 import java.util.logging.*;
 
-import com.caucho.v5.env.meter.CountSensor;
-import com.caucho.v5.env.meter.MeterService;
+import com.caucho.v5.health.meter.CountSensor;
+import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 

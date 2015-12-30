@@ -6,7 +6,7 @@
 
 package com.caucho.v5.health.stat;
 
-import com.caucho.v5.env.meter.MeterBase;
+import com.caucho.v5.health.meter.MeterBase;
 
 /**
  * Statistics gathering attribute.  Each time period, the attribute is polled.

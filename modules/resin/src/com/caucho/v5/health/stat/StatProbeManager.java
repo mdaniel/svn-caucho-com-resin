@@ -30,8 +30,8 @@ package com.caucho.v5.health.stat;
 
 import java.util.ArrayList;
 
-import com.caucho.v5.env.meter.MeterBase;
-import com.caucho.v5.env.meter.MeterService;
+import com.caucho.v5.health.meter.MeterBase;
+import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.loader.EnvLoader;
 
 // TODO: service cleanup

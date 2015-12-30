@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.caucho.v5.cli.baratine.ArgsCli;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.JsonQueryReply;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;

@@ -42,7 +42,7 @@ import com.caucho.v5.http.log.AccessLogBase;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseServlet;
-import com.caucho.v5.network.port.ConnectionSocket;
+import com.caucho.v5.network.port.ConnectionTcp;
 
 /**
  * Logs the request.
@@ -94,7 +94,7 @@ public class AccessLogFilterChain implements FilterChainCaucho {
   {
     _next.doFilter(request, response);
     
-    ConnectionSocket socketLink = null;
+    ConnectionTcp socketLink = null;
     
     if (request instanceof RequestCaucho) {
       socketLink = ((RequestCaucho) request).getSocketLink();

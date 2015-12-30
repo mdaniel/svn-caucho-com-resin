@@ -37,7 +37,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.RequestServlet;
-import com.caucho.v5.network.port.ConnectionSocket;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.vfs.ClientDisconnectException;
@@ -62,7 +61,7 @@ public class FilterChainStatistics implements FilterChain
     if (request instanceof RequestServlet) {
       RequestServlet httpRequest = (RequestServlet) request;
 
-      ConnectionSocket connection = httpRequest.getConnection();
+      ConnectionTcp connection = httpRequest.getConnection();
 
       if (connection instanceof ConnectionTcp) {
         ConnectionTcp tcpConnection = (ConnectionTcp) connection;
@@ -72,7 +71,7 @@ public class FilterChainStatistics implements FilterChain
         long readBytes = -1;
         long writeBytes = -1;
         
-        QSocket socket = tcpConnection.getSocket();
+        QSocket socket = tcpConnection.socket();
 
         readBytes = socket.getTotalReadBytes();
         writeBytes = socket.getTotalWriteBytes();

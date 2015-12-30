@@ -35,7 +35,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.network.port.ControllerPollContext;
+import com.caucho.v5.network.port.PollContext;
 import com.caucho.v5.network.port.PollTcpSystem;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
@@ -118,7 +118,7 @@ public class HttpStress
       return;
     }
 
-    ControllerPollContext cxt = _keepaliveSystem.createContext(new KeepaliveTask());
+    PollContext cxt = _keepaliveSystem.createContext(new KeepaliveTask());
 
     URI uri = _urls.get(0);
     InetSocketAddress addr = new InetSocketAddress(uri.getHost(), uri.getPort());
@@ -145,7 +145,7 @@ public class HttpStress
     System.out.format("OPS %.2f\n", 1e9 * count / delta);
   }
 
-  private void runOne(ControllerPollContext cxt,
+  private void runOne(PollContext cxt,
                       URI uri,
                       InetSocketAddress addr)
       throws IOException

@@ -29,13 +29,13 @@
 
 package com.caucho.v5.server.snmp;
 
-import com.caucho.v5.network.port.ConnectionSocket;
+import java.util.TreeMap;
+
+import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ProtocolBase;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.server.snmp.types.OctetStringValue;
 import com.caucho.v5.server.snmp.types.SnmpValue;
-
-import java.util.TreeMap;
 
 /*
  * SNMP v1 protocol.
@@ -195,7 +195,8 @@ public class SnmpProtocol extends ProtocolBase
     _community = s;
   }
 
-  public RequestProtocol createConnection(ConnectionSocket connection)
+  @Override
+  public ConnectionProtocol createConnection(ConnectionTcp connection)
   {
     OctetStringValue community;
     

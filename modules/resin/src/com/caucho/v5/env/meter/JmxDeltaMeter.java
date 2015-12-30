@@ -36,6 +36,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.health.meter.MeterBase;
 import com.caucho.v5.jmx.JmxUtilResin;
 
 public final class JmxDeltaMeter extends MeterBase {

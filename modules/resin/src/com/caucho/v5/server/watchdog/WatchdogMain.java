@@ -33,7 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.server.ProgramInfoDaemon;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.jni.JniCauchoSystem;
 import com.caucho.v5.loader.DynamicClassLoader;
 

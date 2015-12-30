@@ -6,8 +6,8 @@
 
 package com.caucho.v5.env.health;
 
-import com.caucho.v5.env.meter.MeterBase;
-import com.caucho.v5.env.meter.SampleMetadataAware;
+import com.caucho.v5.health.meter.MeterBase;
+import com.caucho.v5.health.meter.SampleMetadataAware;
 import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.util.CurrentTime;
 

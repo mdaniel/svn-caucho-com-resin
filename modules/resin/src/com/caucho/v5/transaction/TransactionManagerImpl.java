@@ -52,8 +52,8 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.env.meter.MeterService;
-import com.caucho.v5.env.meter.TimeSensor;
+import com.caucho.v5.health.meter.MeterService;
+import com.caucho.v5.health.meter.TimeSensor;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.transaction.xalog.AbstractXALogManager;
 import com.caucho.v5.transaction.xalog.AbstractXALogStream;

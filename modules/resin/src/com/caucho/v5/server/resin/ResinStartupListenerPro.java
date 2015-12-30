@@ -30,7 +30,7 @@
 package com.caucho.v5.server.resin;
 
 import com.caucho.v5.env.log.LogSystem;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.container.StartInfoListener;
 
 /**

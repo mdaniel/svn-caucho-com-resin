@@ -61,9 +61,9 @@ import com.caucho.v5.http.security.LoginBase;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.network.port.ConnectionSocket;
-import com.caucho.v5.network.port.NextState;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.StateConnection;
+import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
@@ -422,7 +422,7 @@ public final class RequestServlet extends RequestCauchoBase
   }
   
   @Override
-  public ConnectionSocket getSocketLink()
+  public ConnectionTcp getSocketLink()
   {
     return _request.getConnection();
   }
@@ -1410,7 +1410,7 @@ public final class RequestServlet extends RequestCauchoBase
     return _request.isConnectionClosed();
   }
 
-  public ConnectionSocket getConnection()
+  public ConnectionTcp getConnection()
   {
     return _request.getConnection();
   }
@@ -1454,7 +1454,7 @@ public final class RequestServlet extends RequestCauchoBase
   }
 
   @Override
-  public NextState service()
+  public StateConnection service()
   {
     try {
       getInvocation().service(this, getResponse());
@@ -1462,15 +1462,15 @@ public final class RequestServlet extends RequestCauchoBase
       log.log(Level.WARNING, e.toString(), e);
     }
     
-    return NextState.READ;
+    return StateConnection.READ;
   }
 
   @Override
-  public NextState resume()
+  public StateConnection resume()
     throws Exception
   {
     if (isAsyncComplete()) {
-      return NextState.READ;
+      return StateConnection.READ;
     }
     
     AsyncContextImpl asyncContext = getAsyncContext();
@@ -1497,7 +1497,7 @@ public final class RequestServlet extends RequestCauchoBase
       if (disp != null) {
         disp.dispatchResume(this, getResponse());
         
-        return NextState.CLOSE;
+        return StateConnection.CLOSE;
       }
     }
     
@@ -1689,7 +1689,7 @@ public final class RequestServlet extends RequestCauchoBase
   /**
    * Starts duplex mode.
    */
-  public void startDuplex(RequestProtocol request)
+  public void startDuplex(ConnectionProtocol request)
   {
     _request.startDuplex(request);
     

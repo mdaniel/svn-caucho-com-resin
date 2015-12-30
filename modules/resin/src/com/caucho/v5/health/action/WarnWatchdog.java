@@ -16,8 +16,8 @@ import com.caucho.v5.env.health.HealthCheckResult;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.env.warning.WarningSystem;
 import com.caucho.v5.health.event.HealthEvent;
+import com.caucho.v5.health.warning.WarningSystem;
 import com.caucho.v5.util.L10N;
 
 /**

@@ -14,7 +14,7 @@ import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.meter.JmxExpr;
-import com.caucho.v5.env.meter.MeterService;
+import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.util.L10N;
 
 @Startup

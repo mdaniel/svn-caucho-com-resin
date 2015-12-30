@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.shutdown.ExitCode;
+import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.resin.ArgsServerResin;

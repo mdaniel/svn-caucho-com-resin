@@ -29,14 +29,7 @@
 
 package com.caucho.v5.resin;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.logging.LogManager;
 
@@ -48,8 +41,6 @@ import com.caucho.v5.deploy.ConfigInstanceBuilder;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.host.HostConfig;
-import com.caucho.v5.http.protocol.HttpProtocol;
-import com.caucho.v5.http.protocol.RequestProtocolHttp;
 import com.caucho.v5.http.webapp.DeployGeneratorWebAppSingle;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppBuilder;
@@ -58,15 +49,12 @@ import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.EnvLoader;
-import com.caucho.v5.network.port.ConnectionSocketStream;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBuilderResin;
 import com.caucho.v5.server.resin.EmbedArgs;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Vfs;
-import com.caucho.v5.vfs.VfsStream;
-import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Embeddable version of the Resin server.
@@ -285,7 +273,7 @@ public class ResinEmbed implements Closeable
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-        thread.setContextClassLoader(_server.getClassLoader());
+        thread.setContextClassLoader(_server.classLoader());
 
         bean.configure();
       } catch (RuntimeException e) {
@@ -451,6 +439,7 @@ public class ResinEmbed implements Closeable
    * @param is input stream containing the HTTP request
    * @param os output stream to receive the request
    */
+  /*
   public void request(InputStream is, OutputStream os)
     throws IOException
   {
@@ -460,6 +449,7 @@ public class ResinEmbed implements Closeable
 
     conn.request(is, os);
   }
+  */
 
   /**
    * Sends a HTTP request to the embedded server for testing.
@@ -467,6 +457,7 @@ public class ResinEmbed implements Closeable
    * @param httpRequest HTTP request string, e.g. "GET /test.jsp"
    * @param os output stream to receive the request
    */
+  /*
   public void request(String httpRequest, OutputStream os)
     throws IOException
   {
@@ -476,6 +467,7 @@ public class ResinEmbed implements Closeable
 
     conn.request(httpRequest, os);
   }
+  */
 
   /**
    * Sends a HTTP request to the embedded server for testing.
@@ -484,6 +476,7 @@ public class ResinEmbed implements Closeable
    *
    * @return the HTTP result string
    */
+  /*
   public String request(String httpRequest)
     throws IOException
   {
@@ -493,17 +486,19 @@ public class ResinEmbed implements Closeable
 
     return conn.request(httpRequest);
   }
+  */
 
   /**
    * Creates a test connection to the server
    */
+  /*
   private TestConnection createConnection()
   {
     TestConnection conn = new TestConnection();
 
     return conn;
   }
-
+*/
   //
   // utilities
   //
@@ -650,6 +645,7 @@ public class ResinEmbed implements Closeable
   /**
    * Test HTTP connection
    */
+  /*
   private class TestConnection {
     ConnectionSocketStream _conn;
     RequestProtocolHttp _request;
@@ -666,7 +662,7 @@ public class ResinEmbed implements Closeable
       // _conn.setVirtualHost(_virtualHost);
 
       HttpProtocol httpProtocol = new HttpProtocol(_resin.getHttp());
-      _request = new RequestProtocolHttp(httpProtocol, _conn);
+      _request = null;//new RequestProtocolHttp(httpProtocol, _conn);
       _request.init();
 
       _vfsStream = new VfsStream(null, null);
@@ -732,7 +728,7 @@ public class ResinEmbed implements Closeable
         } catch (Exception e) {
         }
 
-        while (! _request.service().isClosed()) {
+        while (! _request.service().isClose()) {
           out.flush();
         }
       } catch (EOFException e) {
@@ -743,7 +739,7 @@ public class ResinEmbed implements Closeable
       }
     }
   }
-
+*/
   static class WebAppProgram extends ConfigProgram {
     private final WebAppEmbed _config;
 

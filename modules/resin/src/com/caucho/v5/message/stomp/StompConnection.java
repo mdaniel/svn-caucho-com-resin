@@ -43,9 +43,9 @@ import com.caucho.v5.nautilus.broker.ReceiverBroker;
 import com.caucho.v5.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
-import com.caucho.v5.network.port.ConnectionSocket;
-import com.caucho.v5.network.port.NextState;
-import com.caucho.v5.network.port.RequestProtocolBase;
+import com.caucho.v5.network.port.ConnectionProtocol;
+import com.caucho.v5.network.port.ConnectionTcp;
+import com.caucho.v5.network.port.StateConnection;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
@@ -53,7 +53,7 @@ import com.caucho.v5.vfs.WriteStream;
 /**
  * Custom serialization for the cache
  */
-public class StompConnection extends RequestProtocolBase
+public class StompConnection implements ConnectionProtocol
 {
   private static final Logger log
     = Logger.getLogger(StompConnection.class.getName());
@@ -92,7 +92,7 @@ public class StompConnection extends RequestProtocolBase
     = new NullSender();
   
   private StompProtocol _stomp;
-  private ConnectionSocket _link;
+  private ConnectionTcp _link;
   
   private HashMap<String,SenderBroker> _destinationMap
     = new HashMap<String,SenderBroker>();
@@ -118,24 +118,19 @@ public class StompConnection extends RequestProtocolBase
   private long _sessionId;
   private ArrayList<StompXaItem> _xaList;
   
-  StompConnection(StompProtocol stomp, ConnectionSocket link)
+  StompConnection(StompProtocol stomp, ConnectionTcp link)
   {
     _stomp = stomp;
     _link = link;
   }
   
   @Override
-  public String getProtocolRequestURL()
+  public String urlProtocolRequest()
   {
     return "stomp:";
   }
   
-  @Override
-  public void init()
-  {
-  }
-  
-  ConnectionSocket getLink()
+  ConnectionTcp getLink()
   {
     return _link;
   }
@@ -324,12 +319,12 @@ public class StompConnection extends RequestProtocolBase
   }
 
   @Override
-  public NextState service() throws IOException
+  public StateConnection service() throws IOException
   {
     ReadStream is = _link.getReadStream();
     
     if (! readMethod(is)) {
-      return NextState.CLOSE;
+      return StateConnection.CLOSE;
     }
     StompCommand cmd = _commandMap.get(_method);
     
@@ -343,7 +338,7 @@ public class StompConnection extends RequestProtocolBase
     
     WriteStream os = _link.getWriteStream();
     System.out.println("CMD: " + cmd + " " + os);
-    return cmd.doCommand(this, is, os) ? NextState.READ : NextState.CLOSE;
+    return cmd.doCommand(this, is, os) ? StateConnection.READ : StateConnection.CLOSE;
   }
   
   private void clearHeaders()
@@ -554,7 +549,7 @@ public class StompConnection extends RequestProtocolBase
   }
 
   @Override
-  public void onCloseConnection()
+  public void onClose()
   {
     ArrayList<SenderBroker> destList
       = new ArrayList<SenderBroker>(_destinationMap.values());
@@ -576,11 +571,6 @@ public class StompConnection extends RequestProtocolBase
     }
     
     _xaList = null;
-  }
-
-  @Override
-  public void onStartConnection()
-  {
   }
   
   static class ReceiptListener implements SenderSettleHandler {

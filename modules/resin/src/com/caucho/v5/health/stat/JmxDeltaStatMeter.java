@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import com.caucho.v5.env.meter.MeterBase;
+import com.caucho.v5.health.meter.MeterBase;
 
 /**
  * Statistics gathering attribute.  Each time period, the attribute is polled.

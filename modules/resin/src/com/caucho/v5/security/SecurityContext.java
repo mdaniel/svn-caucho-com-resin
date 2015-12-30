@@ -34,7 +34,7 @@ import java.security.Principal;
 import com.caucho.v5.http.security.SecurityContextException;
 import com.caucho.v5.http.security.SecurityContextProvider;
 import com.caucho.v5.network.port.ConnectionTcp;
-import com.caucho.v5.network.port.RequestProtocol;
+import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -174,7 +174,7 @@ public class SecurityContext {
    */
   public static SecurityContextProvider getProvider()
   {
-    RequestProtocol request = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol request = ConnectionTcp.getCurrentRequest();
 
     if (request instanceof SecurityContextProvider)
       return (SecurityContextProvider) request;
