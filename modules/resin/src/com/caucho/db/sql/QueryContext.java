@@ -34,13 +34,14 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.db.block.Block;
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
-import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
+import com.caucho.db.table.TableIterator;
 import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
@@ -542,12 +543,87 @@ public class QueryContext {
     if (_isNonLocking) {
       return;
     }
-    
+      
     if (_isLocked) {
       throw new IllegalStateException(L.l("blocks are already locked"));
     }
-    
+      
     _isLocked = true;
+
+    try {
+      Lock tableLock = _tableIterators[0].getTable().getTableLock();
+      
+      if (_isWrite) {
+        tableLock.tryLock(_xa.getTimeout(), TimeUnit.MILLISECONDS);
+      }
+      /*
+      else {
+        tableLock.tryLock(_xa.getTimeout(), TimeUnit.MILLISECONDS);
+      }
+      */
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
+  
+  public void unlock()
+      throws SQLException
+  {
+    if (_isNonLocking) {
+      return;
+    }
+      
+    if (! _isLocked) {
+      return;
+    }
+
+    _isLocked = false;
+
+    /*
+    if (_thread != null && _thread != Thread.currentThread())
+      throw new IllegalStateException(String.valueOf(_thread) + " current " + Thread.currentThread());
+      */
+
+    int len = _blockLocks.length;
+
+    Lock tableLock = _tableIterators[0].getTable().getTableLock();
+
+    if (_isWrite) {
+      tableLock.unlock();
+    }
+
+    try {
+      _xa.writeData();
+    } finally {
+      for (int i = len - 1; i >= 0; i--) {
+        Block block = _blockLocks[i];
+        _blockLocks[i] = null;
+
+        if (block == null) {
+        }
+        else if (_isWrite) {
+          try {
+            block.commit();
+          } catch (Exception e) {
+            log.log(Level.FINE, e.toString(), e);
+          }
+        }
+      }
+    }
+  }
+
+  public void lockOld()
+      throws SQLException
+    {
+      if (_isNonLocking) {
+        return;
+      }
+      
+      if (_isLocked) {
+        throw new IllegalStateException(L.l("blocks are already locked"));
+      }
+      
+      _isLocked = true;
 
     if (_thread != Thread.currentThread()) {
       throw new IllegalStateException();
@@ -608,7 +684,7 @@ public class QueryContext {
    *
    * @param isWrite if true, the block should be unlocked for writing
    */
-  public void unlock()
+  public void unlockOld()
     throws SQLException
   {
     if (_isNonLocking)
@@ -669,6 +745,10 @@ public class QueryContext {
     unlock();
 
     if (thread != null && thread != Thread.currentThread()) {
+      throw new IllegalStateException();
+    }
+    
+    if (_isLocked) {
       throw new IllegalStateException();
     }
     

@@ -75,7 +75,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private DataSourceImpl _dataSource;
   
   //private long _reaperTimeout = 5 * 60 * 1000;
-  private long _reaperTimeout = 15 * 60 * 1000;
+  private long _reaperTimeout = 5 * 60 * 1000;
 
   private long _reaperCycleMaxActiveDurationMs = 1 * 1000;
   private double _reaperCycleIdleToActiveUtilizationRatio = 2.0;

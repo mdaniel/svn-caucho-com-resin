@@ -361,6 +361,14 @@ public class BlockStore {
   }
 
   /**
+   * Returns the table's lock.
+   */
+  public Lock getTableLock()
+  {
+    return _rowWriteLock;
+  }
+
+  /**
    * Returns the block manager.
    */
   public BlockManager getBlockManager()

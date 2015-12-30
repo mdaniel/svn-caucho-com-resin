@@ -74,7 +74,8 @@ import com.caucho.vfs.WriteStream;
  * </pre>
  */
 @Module
-public class Table extends BlockStore {
+public class Table extends BlockStore
+{
   private final static Logger log
     = Logger.getLogger(Table.class.getName());
   private final static L10N L = new L10N(Table.class);
@@ -1097,6 +1098,7 @@ public class Table extends BlockStore {
         throw e;
       } finally {
         // xa.unlockWrite(_insertLock);
+        queryContext.unlock();
 
         if (! isOkay) {
           delete(xa, block, buffer, rowOffset, false);
