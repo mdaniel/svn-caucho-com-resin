@@ -55,7 +55,7 @@ public class ResponseAdapter extends ResponseWrapper
   private OutResponseBase _responseStream;
 
   private ServletOutputStreamImpl _os;
-  private ResponseWriter _writer;
+  private WriterHttp _writer;
 
   private boolean _hasError;
 
@@ -65,7 +65,7 @@ public class ResponseAdapter extends ResponseWrapper
     _responseStream = _originalResponseStream;
 
     _os = new ServletOutputStreamImpl();
-    _writer = new ResponseWriter();
+    _writer = new WriterHttp();
   }
 
   /**

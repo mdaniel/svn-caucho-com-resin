@@ -30,46 +30,68 @@
 package com.caucho.v5.http.protocol;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
-
+import com.caucho.v5.http.protocol2.OutHeader;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * User facade for http responses.
  */
-public interface ResponseCache extends ResponseFacade
+public interface ResponseFacade
 {
-  boolean isDisableCache();
+  void setStatus(int scNotModified);
   
-  void setPrivateCache(boolean isPrivate);
+  int getStatus();
 
-  ArrayList<String> getHeaderKeys();
-
-  ArrayList<String> getHeaderValues();
+  String getStatusMessage();
   
-  void reset();
-
-  void flushBuffer() throws IOException;
+  String getContentType();
   
-  void close() throws IOException;
-
-  OutResponseBase getResponseStream();
-
-  void completeCache();
-
-  FilterChainHttpCacheBase getCacheInvocation();
+  void setContentType(String value);
   
-  RequestHttpBase getAbstractHttpResponse();
+  String getContentTypeImpl();
+  
+  void fillHeaders();
 
-  void setContentLength(long contentLength);
+  String getCharacterEncodingImpl();
+  
+  void sendError(int statusError)
+    throws IOException;
+  
+  //
+  // caching
+  //
+  
+  void killCache();
 
-  void setHeader(String key, String value);
+  boolean isCaching();
 
-  String getHeader(String string);
-  void setCharacterEncoding(String charEncoding);
+  boolean isNoCache();
 
-  void addHeader(String key, String value);
+  boolean isPrivateCache();
 
-  void setCacheInvocation(FilterChainHttpCacheBase filterChainHttpCache);
+  void setCacheControl(boolean isCacheControl);
+  
+  boolean isCacheControl();
+
+  boolean isNoCacheUnlessVary();
+
+  default boolean handleNotModified() throws IOException
+  {
+    return false;
+  }
+  
+
+  default boolean isDisableCache()
+  {
+    return true;
+  }
+  
+  //
+  // http header writing
+  //
+
+  void writeCookies(WriteStream os) throws IOException;
+
+  void fillCookies(OutHeader out) throws IOException;
 }

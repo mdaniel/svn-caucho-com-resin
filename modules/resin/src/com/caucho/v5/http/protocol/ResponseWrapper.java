@@ -90,12 +90,15 @@ public class ResponseWrapper implements ServletResponse {
     return _response;
   }
 
-  public ResponseHttpBase getAbstractHttpResponse()
+  public RequestHttpBase getAbstractHttpResponse()
   {
+    /*
     if (_response instanceof ResponseHttpBase)
       return (ResponseHttpBase) _response;
     else
       return null;
+      */
+    return null;
   }
   
   /**

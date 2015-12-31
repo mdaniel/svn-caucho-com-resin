@@ -50,7 +50,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
   private static final L10N L = new L10N(OutResponseCache.class);
 
-  private ResponseHttpBase _response;
+  private RequestHttpBase _request;
   private ResponseCaucho _proxyCacheResponse;
 
   private FilterChainHttpCacheBase _cacheInvocation;
@@ -67,19 +67,24 @@ abstract public class OutResponseCache extends OutResponseToByte
   {
   }
 
-  protected OutResponseCache(ResponseHttpBase response)
+  protected OutResponseCache(RequestHttpBase response)
   {
     setResponse(response);
   }
 
-  public void setResponse(ResponseHttpBase response)
+  public void setResponse(RequestHttpBase response)
   {
-    _response = response;
+    _request = response;
   }
 
-  protected ResponseHttpBase getResponse()
+  protected RequestHttpBase getResponse()
   {
-    return _response;
+    return _request;
+  }
+
+  protected RequestHttpBase getRequest()
+  {
+    return _request;
   }
   
   public void setProxyCacheResponse(ResponseCaucho response)
@@ -128,7 +133,7 @@ abstract public class OutResponseCache extends OutResponseToByte
     if (cacheStream == null)
       return;
 
-    RequestHttpBase req = _response.getRequest();
+    RequestHttpBase req = getRequest();
     
     HttpContainerServlet http = (HttpContainerServlet) req.getHttp();
     
@@ -279,7 +284,7 @@ abstract public class OutResponseCache extends OutResponseToByte
       return;
     }
 
-    long contentLengthHeader = _response.getContentLength();
+    long contentLengthHeader = _request.contentLengthOut();
     // Can't write beyond the content length
     if (0 < contentLengthHeader
         && contentLengthHeader < length + _contentLength) {
@@ -324,7 +329,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
     startCaching();
 
-    _response.writeHeaders(length);
+    _request.writeHeaders(length);
 
     // server/2hf3
     toCommitted();
@@ -333,10 +338,10 @@ abstract public class OutResponseCache extends OutResponseToByte
   private boolean lengthException(byte []buf, int offset, int length,
                                   long contentLengthHeader)
   {
-    if (_response.isConnectionClosed() || isHead() || isClosed()) {
+    if (_request.isConnectionClosed() || isHead() || isClosed()) {
     }
     else if (contentLengthHeader < _contentLength) {
-      RequestHttpBase request = _response.getRequest();
+      RequestHttpBase request = getRequest();
       String msg = L.l("{0}: Can't write {1} extra bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
                        request.getRequestURI(),
                        "" + (length + _contentLength),
@@ -353,7 +358,7 @@ abstract public class OutResponseCache extends OutResponseToByte
       int ch = buf[i];
 
       if (ch != '\r' && ch != '\n' && ch != ' ' && ch != '\t') {
-        RequestHttpBase request = _response.getRequest();
+        RequestHttpBase request = getRequest();
         String graph = "";
 
         if (Character.isLetterOrDigit((char) ch))
@@ -426,7 +431,7 @@ abstract public class OutResponseCache extends OutResponseToByte
   protected void startCaching()
   {
     // server/1373 for getBufferSize()
-    ResponseFacade resFacade = _response.getRequest().getResponseFacade();
+    ResponseFacade resFacade = null;//getRequest().getResponseFacade();
 
     if (resFacade == null
         || resFacade.getStatus() != HttpServletResponse.SC_OK
@@ -447,7 +452,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
     _cacheInvocation = cacheInvocation;
 
-    RequestCache req = (RequestCache) _response.getRequest().getRequestFacade();
+    RequestCache req = (RequestCache) _request.getRequestFacade();
 
     ArrayList<String> keys = res.getHeaderKeys();
     ArrayList<String> values = res.getHeaderValues();
@@ -500,7 +505,7 @@ abstract public class OutResponseCache extends OutResponseToByte
     FilterChainHttpCacheBase cacheInvocation = _cacheInvocation;
     
     if (cacheInvocation != null) {
-      ResponseCache res = (ResponseCache) _response.getRequest().getResponseFacade();
+      ResponseCache res = (ResponseCache) null;//_request.getRequest().getResponseFacade();
       
       cacheInvocation.killCaching(res);
       setByteCacheStream(null);
@@ -510,8 +515,8 @@ abstract public class OutResponseCache extends OutResponseToByte
   @Override
   public void completeCache()
   {
-    RequestCache req = (RequestCache) _response.getRequest().getRequestFacade();
-    ResponseCache res = (ResponseCache) _response.getRequest().getResponseFacade();
+    RequestCache req = (RequestCache) null;//_request.getRequest().getRequestFacade();
+    ResponseCache res = (ResponseCache) null;//_request.getRequest().getResponseFacade();
     
     if (req == null) {
       return;
@@ -570,7 +575,7 @@ abstract public class OutResponseCache extends OutResponseToByte
       return;
     }
 
-    ResponseCache res = (ResponseCache) _response.getRequest().getResponseFacade();
+    ResponseCache res = (ResponseCache) null;//_request.getRequest().getResponseFacade();
     
     try {
       // flushBuffer();
@@ -612,11 +617,11 @@ abstract public class OutResponseCache extends OutResponseToByte
       
       isValid = true;
     } catch (ClientDisconnectException e) {
-      if (! _response.isIgnoreClientDisconnect())
+      if (! _request.isIgnoreClientDisconnect())
         throw e;
     } finally {
       if (! isValid)
-        _response.clientDisconnect();
+        _request.clientDisconnect();
     }
   }
 
@@ -633,7 +638,7 @@ abstract public class OutResponseCache extends OutResponseToByte
       isValid = true;
     } finally {
       if (! isValid) {
-        _response.clientDisconnect();
+        _request.clientDisconnect();
       }
     }
   }
@@ -664,7 +669,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
   protected String dbgId()
   {
-    Object request = _response.getRequest();
+    Object request = _request;//_request.getRequest();
 
     if (request instanceof RequestHttpBase) {
       RequestHttpBase req = (RequestHttpBase) request;
@@ -678,6 +683,6 @@ abstract public class OutResponseCache extends OutResponseToByte
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _response + "]";
+    return getClass().getSimpleName() + "[" + _request + "]";
   }
 }

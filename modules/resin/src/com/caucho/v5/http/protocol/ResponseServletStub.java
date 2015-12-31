@@ -298,7 +298,7 @@ public class ResponseServletStub implements ResponseCaucho {
   }
 
   @Override
-  public ResponseHttpBase getAbstractHttpResponse()
+  public RequestHttpBase getAbstractHttpResponse()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

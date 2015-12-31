@@ -56,20 +56,22 @@ import javax.servlet.http.HttpServletRequest;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.dispatch.InvocationServlet;
+import com.caucho.v5.http.protocol2.OutHeader;
 import com.caucho.v5.http.security.Login;
 import com.caucho.v5.http.security.LoginBase;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.StateConnection;
-import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.NullEnumeration;
 import com.caucho.v5.vfs.Path;
 import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.vfs.WriteStream;
 
 /**
  * User facade for http requests.
@@ -128,9 +130,16 @@ public final class RequestServlet extends RequestCauchoBase
   {
     _request = request;
 
+    if (true) {
+      throw new UnsupportedOperationException();
+    }
+    
+    _response = null;
+    /*
     _response = new ResponseServlet(request.getAbstractHttpResponse(),
                                     this);
-                                    
+
+                                    */
   }
 
   @Override
@@ -357,13 +366,13 @@ public final class RequestServlet extends RequestCauchoBase
   @Override
   public int getContentLength()
   {
-    return _request.getContentLength();
+    return (int) _request.contentLength();
   }
   
   @Override
   public long getContentLengthLong()
   {
-    return _request.getContentLengthLong();
+    return _request.contentLength();
   }
 
   /**
@@ -1378,7 +1387,8 @@ public final class RequestServlet extends RequestCauchoBase
   @Override
   public void completeCache()
   {
-    _request.completeAsync();
+    if (true) throw new UnsupportedOperationException();
+    //_request.completeAsync();
   }
 
   /**
@@ -1815,6 +1825,176 @@ public final class RequestServlet extends RequestCauchoBase
    * @param asyncContextImpl
    */
   public void startAsync(AsyncContextImpl asyncContextImpl)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#setStatus(int)
+   */
+  @Override
+  public void setStatus(int scNotModified)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#getStatus()
+   */
+  @Override
+  public int getStatus()
+  {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#getStatusMessage()
+   */
+  @Override
+  public String getStatusMessage()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#setContentType(java.lang.String)
+   */
+  @Override
+  public void setContentType(String value)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#getContentTypeImpl()
+   */
+  @Override
+  public String getContentTypeImpl()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#fillHeaders()
+   */
+  @Override
+  public void fillHeaders()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#getCharacterEncodingImpl()
+   */
+  @Override
+  public String getCharacterEncodingImpl()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#sendError(int)
+   */
+  @Override
+  public void sendError(int statusError) throws IOException
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#killCache()
+   */
+  @Override
+  public void killCache()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#isCaching()
+   */
+  @Override
+  public boolean isCaching()
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#isNoCache()
+   */
+  @Override
+  public boolean isNoCache()
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#isPrivateCache()
+   */
+  @Override
+  public boolean isPrivateCache()
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#setCacheControl(boolean)
+   */
+  @Override
+  public void setCacheControl(boolean isCacheControl)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#isCacheControl()
+   */
+  @Override
+  public boolean isCacheControl()
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#isNoCacheUnlessVary()
+   */
+  @Override
+  public boolean isNoCacheUnlessVary()
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#writeCookies(com.caucho.v5.vfs.WriteStream)
+   */
+  @Override
+  public void writeCookies(WriteStream os) throws IOException
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.RequestFacade#fillCookies(com.caucho.v5.http.protocol2.OutHeader)
+   */
+  @Override
+  public void fillCookies(OutHeader out) throws IOException
   {
     // TODO Auto-generated method stub
     

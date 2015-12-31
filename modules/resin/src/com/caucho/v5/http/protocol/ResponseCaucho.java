@@ -77,7 +77,7 @@ public interface ResponseCaucho extends HttpServletResponse
   
   void completeCache();
 
-  ResponseHttpBase getAbstractHttpResponse();
+  RequestHttpBase getAbstractHttpResponse();
   /**
    * Return wrapped response
    */

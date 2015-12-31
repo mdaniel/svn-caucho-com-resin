@@ -71,7 +71,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   private static final HashMap<Integer,String> _errors;
 
   private final RequestServlet _request;
-  private ResponseHttpBase _response;
+  private RequestHttpBase _response;
 
   private int _status = 200;
   private String _statusMessage = "OK";
@@ -80,7 +80,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   private ArrayList<Cookie> _cookiesOut;
 
   private ServletOutputStreamImpl _outputStream;
-  private ResponseWriter _writer;
+  private WriterHttp _writer;
   private OutResponseBase _responseStream;
 
   private String _setCharEncoding;
@@ -105,7 +105,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   // disable the cache
   private boolean _isDisableCache;
 
-  public ResponseServlet(ResponseHttpBase responseHttp,
+  public ResponseServlet(RequestHttpBase responseHttp,
                          RequestServlet request)
   {
     _response = responseHttp;
@@ -248,7 +248,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public final boolean isCommitted()
   {
-    return _response.isCommitted();
+    return _response.isOutCommitted();
   }
 
   /**
@@ -297,7 +297,7 @@ public final class ResponseServlet extends ResponseCauchoBase
     if (_cookiesOut != null)
       _cookiesOut.clear();
 
-    _response.reset();
+    _response.resetOut();
   }
 
   /**
@@ -332,7 +332,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   public void setContentLength(int len)
   {
     if (_outputStream == null && _writer == null) {
-      _response.setContentLength(len);
+      _response.contentLengthOut(len);
     }
   }
 
@@ -344,7 +344,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   public void setContentLengthLong(long length)
   {
     if (_outputStream == null && _writer == null) {
-      _response.setContentLength(length);
+      _response.contentLengthOut(length);
     }
   }
 
@@ -840,7 +840,7 @@ public final class ResponseServlet extends ResponseCauchoBase
       return;
     }
 
-    ContentType item = ResponseHttpBase.parseContentType(value);
+    ContentType item = null;//ResponseHttpBase.parseContentType(value);
 
     _contentType = item.getContentType();
     _charEncoding = null;
@@ -1211,7 +1211,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public void setHeader(String name, String value)
   {
-    _response.setHeader(name, value);
+    _response.setHeaderOut(name, value);
   }
 
   /**
@@ -1224,7 +1224,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public void addHeader(String name, String value)
   {
-    _response.addHeader(name, value);
+    _response.addHeaderOut(name, value);
   }
 
   /**
@@ -1234,7 +1234,7 @@ public final class ResponseServlet extends ResponseCauchoBase
    */
   public boolean containsHeader(String name)
   {
-    return _response.containsHeader(name);
+    return _response.containsHeaderOut(name);
   }
 
   /**
@@ -1850,19 +1850,19 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public String getHeader(String key)
   {
-    return _response.getHeader(key);
+    return _response.headerOut(key);
   }
 
   @Override
   public ArrayList<String> getHeaderKeys()
   {
-    return _response.getHeaderKeys();
+    return _response.headerKeysOut();
   }
 
   @Override
   public ArrayList<String> getHeaderValues()
   {
-    return _response.getHeaderValues();
+    return _response.headerValuesOut();
   }
 
   @Override
@@ -1896,7 +1896,7 @@ public final class ResponseServlet extends ResponseCauchoBase
     throws IOException
   {
     // tck - jsp include
-    ResponseHttpBase response = _response;
+    RequestHttpBase response = _response;
     
     if (response != null) {
       _response.close();
@@ -1958,11 +1958,13 @@ public final class ResponseServlet extends ResponseCauchoBase
   }
   */
 
+  /*
   @Override
-  public ResponseHttpBase getAbstractHttpResponse()
+  public RequestHttpBase getAbstractHttpResponse()
   {
     return _response;
   }
+  */
 
   @Override
   public int getStatus()
@@ -1978,13 +1980,13 @@ public final class ResponseServlet extends ResponseCauchoBase
   public Collection<String> getHeaders(String name)
   {
     // XXX: test
-    return _response.getHeaders(name);
+    return _response.headersOut(name);
   }
 
   public Collection<String> getHeaderNames()
   {
     // XXX: test
-    return _response.getHeaderNames();
+    return _response.headerNamesOut();
   }
 
   public void setForwardEnclosed(boolean isForwardEnclosed) {
@@ -1998,7 +2000,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   public void closeImpl()
     throws IOException
   {
-    ResponseHttpBase response = _response;
+    RequestHttpBase response = null;//_response;
 
     _response = null;
 
@@ -2061,5 +2063,15 @@ public final class ResponseServlet extends ResponseCauchoBase
   {
     // TODO Auto-generated method stub
     
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.v5.http.protocol.ResponseCaucho#getAbstractHttpResponse()
+   */
+  @Override
+  public RequestHttpBase getAbstractHttpResponse()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

@@ -426,7 +426,8 @@ public class AsyncContextImpl // extends RequestProtocolBase
     // _stateRef.compareAndSet(StateAsync.WAKE, StateAsync.IDLE);
     
     if (_stateRef.get() == StateAsync.COMPLETE) {
-      _reqHttp.completeAsync();
+      if (true) throw new UnsupportedOperationException();
+      //_reqHttp.completeAsync();
       onComplete();
     }
     

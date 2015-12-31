@@ -346,7 +346,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
         return;
 
       Form formParser = request.getFormParser();
-      long contentLength = request.getContentLengthLong();
+      long contentLength = request.contentLength();
 
       String charEncoding = getCharacterEncoding();
       if (charEncoding == null) {

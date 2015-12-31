@@ -29,16 +29,22 @@
 
 package com.caucho.v5.http.protocol;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.v5.http.cache.EntryHttpCacheBase;
 import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
-import com.caucho.v5.http.webapp.*;
-
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.v5.http.webapp.ErrorPageManager;
+import com.caucho.v5.http.webapp.WebApp;
 
 public class ResponseCauchoWrapper implements ResponseCaucho {
   private static final Logger log
@@ -475,10 +481,12 @@ public class ResponseCauchoWrapper implements ResponseCaucho {
       return null;
   }
 
-  public ResponseHttpBase getAbstractHttpResponse()
+  public RequestHttpBase getAbstractHttpResponse()
   {
+    /*
     if (_response instanceof ResponseCaucho)
       return ((ResponseCaucho) _response).getAbstractHttpResponse();
+      */
 
     return null;
   }
