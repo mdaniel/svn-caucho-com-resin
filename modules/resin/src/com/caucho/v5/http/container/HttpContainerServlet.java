@@ -61,11 +61,11 @@ import com.caucho.v5.http.host.DeployGeneratorHostExpand;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.host.HostContainer;
-import com.caucho.v5.http.log.AccessLogServlet;
 import com.caucho.v5.http.log.AccessLogBase;
+import com.caucho.v5.http.log.AccessLogServlet;
+import com.caucho.v5.http.protocol.ConnectionHttp;
 import com.caucho.v5.http.protocol.HttpBufferStore;
 import com.caucho.v5.http.protocol.RequestFacade;
-import com.caucho.v5.http.protocol.RequestHttpBase;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.protocol.ResponseServlet;
@@ -77,14 +77,12 @@ import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.jmx.server.EnvironmentMXBean;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.make.AlwaysModified;
-import com.caucho.v5.management.server.ServerMXBean;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
@@ -775,9 +773,10 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   */
 
   @Override
-  public RequestFacade createFacade(RequestHttpBase requestHttp)
+  public RequestFacade newRequest(ConnectionHttp connHttp)
   {
-    return new RequestServlet(requestHttp);
+    throw new UnsupportedOperationException();
+    //return new RequestServlet(requestHttp);
   }
 
   /**
@@ -1225,7 +1224,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
 
       // getCluster().startRemote();
 
-      _alarm.queue(ALARM_INTERVAL);
+      _alarm.runAfter(ALARM_INTERVAL);
 
       _lifecycle.toActive();
 
@@ -1278,7 +1277,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       }
     } finally {
       if (_lifecycle.isActive()) {
-        alarm.queue(ALARM_INTERVAL);
+        alarm.runAfter(ALARM_INTERVAL);
       }
     }
   }

@@ -343,7 +343,7 @@ abstract public class OutResponseCache extends OutResponseToByte
     else if (contentLengthHeader < _contentLength) {
       RequestHttpBase request = getRequest();
       String msg = L.l("{0}: Can't write {1} extra bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
-                       request.getRequestURI(),
+                       "uri", // XXX: request.getRequestURI(),
                        "" + (length + _contentLength),
                        "" + contentLengthHeader);
 
@@ -366,7 +366,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
         String msg
           = L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
-                request.getRequestURI(),
+                "uri", // XXX: request.get.uri(),
                 "" + (length + _contentLength),
                 "" + contentLengthHeader,
                 graph,
@@ -430,6 +430,7 @@ abstract public class OutResponseCache extends OutResponseToByte
    */
   protected void startCaching()
   {
+    /*
     // server/1373 for getBufferSize()
     ResponseFacade resFacade = null;//getRequest().getResponseFacade();
 
@@ -452,7 +453,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
     _cacheInvocation = cacheInvocation;
 
-    RequestCache req = (RequestCache) _request.getRequestFacade();
+    RequestCache req = (RequestCache) _request.request();
 
     ArrayList<String> keys = res.getHeaderKeys();
     ArrayList<String> values = res.getHeaderValues();
@@ -471,6 +472,7 @@ abstract public class OutResponseCache extends OutResponseToByte
     if (newCacheEntry != null) {
       setByteCacheStream(newCacheEntry.openOutputStream());
     }
+    */
   }
 
   private void writeCache(byte []buf, int offset, int length)

@@ -28,11 +28,9 @@
 
 package com.caucho.v5.http.webapp;
 
-import com.caucho.v5.http.protocol.RequestHttpBase;
-import com.caucho.v5.http.protocol.ResponseHttpBase;
-import com.caucho.v5.http.webapp.FilterChainContext;
-import com.caucho.v5.transaction.TransactionImpl;
-import com.caucho.v5.transaction.TransactionManagerImpl;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -41,9 +39,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Status;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.v5.transaction.TransactionImpl;
+import com.caucho.v5.transaction.TransactionManagerImpl;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will

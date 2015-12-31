@@ -1124,7 +1124,7 @@ public class ServletBuilder
 
       Alarm nextAlarm = _alarm;
       if (nextAlarm != null)
-        alarm.queue(nextTime - now);
+        alarm.runAfter(nextTime - now);
     }
   }
 
@@ -1268,7 +1268,7 @@ public class ServletBuilder
 
         if ((_runAt != null || _cron != null) && _alarm != null) {
           long nextTime = nextTimeout(CurrentTime.getCurrentTime());
-          _alarm.queue(nextTime - CurrentTime.getCurrentTime());
+          _alarm.runAfter(nextTime - CurrentTime.getCurrentTime());
         }
       }
 

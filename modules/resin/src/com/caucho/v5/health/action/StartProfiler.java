@@ -6,7 +6,7 @@
 
 package com.caucho.v5.health.action;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

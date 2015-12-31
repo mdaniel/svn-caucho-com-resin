@@ -6,9 +6,9 @@
 
 package com.caucho.v5.health.stat;
 
-import io.baratine.core.Result;
-import io.baratine.core.ResultFuture;
 import io.baratine.db.Cursor;
+import io.baratine.service.Result;
+import io.baratine.service.ResultFuture;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

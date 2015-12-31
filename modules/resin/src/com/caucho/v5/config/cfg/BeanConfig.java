@@ -29,7 +29,7 @@
 
 package com.caucho.v5.config.cfg;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

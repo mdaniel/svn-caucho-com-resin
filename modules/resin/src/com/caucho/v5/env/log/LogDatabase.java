@@ -6,9 +6,9 @@
 
 package com.caucho.v5.env.log;
 
-import io.baratine.core.Result;
-import io.baratine.core.ResultFuture;
 import io.baratine.db.Cursor;
+import io.baratine.service.Result;
+import io.baratine.service.ResultFuture;
 
 import java.io.InputStream;
 import java.util.ArrayList;

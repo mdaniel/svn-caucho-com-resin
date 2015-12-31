@@ -29,8 +29,8 @@
 
 package com.caucho.v5.ramp.nautilus;
 
-import io.baratine.core.ServiceInitializer;
-import io.baratine.core.ServiceManager;
+import io.baratine.service.ServiceInitializer;
+import io.baratine.service.ServiceManager;
 
 
 /**

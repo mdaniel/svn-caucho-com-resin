@@ -52,7 +52,6 @@ import com.caucho.v5.http.protocol.RequestFacade;
 import com.caucho.v5.http.protocol.RequestHttpBase;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseFacade;
-import com.caucho.v5.http.protocol.ResponseHttpBase;
 import com.caucho.v5.http.protocol.ResponseServlet;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -265,9 +264,9 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
 
     if (_alarm != null) {
       if (_autoFlushTime > 0)
-        _alarm.queue(_autoFlushTime);
+        _alarm.runAfter(_autoFlushTime);
       else
-        _alarm.queue(60000);
+        _alarm.runAfter(60000);
     }
     
 
@@ -363,12 +362,11 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
    * Logs a request using the current format.
    */
   @Override
-  public void log(RequestFacade requestFacade,
-                  ResponseFacade responseFacade)
+  public void log(RequestFacade requestFacade)
   //  throws IOException
   {
     RequestServlet req = (RequestServlet) requestFacade;
-    ResponseServlet res = (ResponseServlet) responseFacade;
+    ResponseServlet res = null;//(ResponseServlet) responseFacade;
     
     log(req, res, req.getServletContext());
   }
@@ -387,8 +385,9 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
     ResponseServlet responseImpl = (ResponseServlet) res;
 
     RequestHttpBase absRequest = cRequest.getAbstractHttpRequest();
-    RequestServlet request = (RequestServlet) absRequest.getRequestFacade();
-    ResponseHttpBase response = responseImpl.getAbstractHttpResponse();
+    RequestServlet request = null;//(RequestServlet) absRequest.request();
+    RequestHttpBase response = null;//responseImpl.getAbstractHttpResponse();
+    if (true) throw new UnsupportedOperationException();
 
     // skip excluded urls
     if (_excludes.length > 0) {
@@ -440,7 +439,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
    */
   private int log(RequestServlet request,
                   ResponseServlet responseFacade,
-                  final ResponseHttpBase response,
+                  final RequestHttpBase response,
                   byte []buffer, int offset, int length)
    // throws IOException
   {
@@ -470,7 +469,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
         if (responseFacade.getStatus() == 304)
           buffer[offset++] = (byte) '-';
         else
-          offset = print(buffer, offset, response.getContentLengthSent());
+          offset = print(buffer, offset, response.contentLengthSent());
         break;
 
         // cookie
@@ -494,7 +493,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
         
         int cookiesSize = cookies.size();
         
-        value = response.getHeader(segment._string);
+        value = response.headerOut(segment._string);
         
         if (cookies != null && cookiesSize > 0) {
           cb.clear();
@@ -572,7 +571,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
 
         // output header
       case 'o':
-        value = response.getHeader(segment._string);
+        value = response.headerOut(segment._string);
         if (value == null)
           buffer[offset++] = (byte) '-';
         else
@@ -824,7 +823,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
     } finally {
       alarm = _alarm;
       if (alarm != null && _isActive && _autoFlushTime > 0)
-        alarm.queue(_autoFlushTime);
+        alarm.runAfter(_autoFlushTime);
     }
   }
 

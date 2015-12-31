@@ -29,7 +29,7 @@
 
 package com.caucho.v5.nautilus.impl;
 
-import io.baratine.core.Direct;
+import io.baratine.service.Direct;
 
 import java.io.InputStream;
 

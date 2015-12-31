@@ -53,7 +53,7 @@ public class JniNetStat implements AlarmListener
     _netstatData = new long[NET_STAT_SIZE];
 
     _alarm = new Alarm(this);
-    _alarm.queue(0);
+    _alarm.runAfter(0);
   }
 
   public static JniNetStat create()
@@ -114,7 +114,7 @@ public class JniNetStat implements AlarmListener
         System.out.println("nativeNetSample FAILURE:");
       }
     } finally {
-      alarm.queue(_samplePeriod);
+      alarm.runAfter(_samplePeriod);
     }
   }
 

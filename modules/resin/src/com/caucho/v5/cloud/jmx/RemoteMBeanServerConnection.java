@@ -6,7 +6,7 @@
 
 package com.caucho.v5.cloud.jmx;
 
-import io.baratine.core.ServiceExceptionConnect;
+import io.baratine.service.ServiceExceptionConnect;
 
 import java.io.IOException;
 import java.util.HashMap;

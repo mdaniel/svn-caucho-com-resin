@@ -425,7 +425,7 @@ public class LogSystemImpl extends LogSystem
 
     _logReaper = new LogReaper();
     _alarm = new WeakAlarm(_logReaper);
-    _alarm.queue(60000);
+    _alarm.runAfter(60000);
 
     _admin = new LogSystemAdmin(this);
   }
@@ -455,7 +455,7 @@ public class LogSystemImpl extends LogSystem
         _logDatabase.deleteOldEntries(_expireTimeout);
       } finally {
         if (_isActive)
-          alarm.queue(24 * 3600 * 1000);
+          alarm.runAfter(24 * 3600 * 1000);
       }
     }
   }

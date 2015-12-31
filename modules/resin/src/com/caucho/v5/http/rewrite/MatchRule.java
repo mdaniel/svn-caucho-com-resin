@@ -335,7 +335,7 @@ public class MatchRule
         time = 5000;
 
       if (time > 0) {
-        alarm.queue(time);
+        alarm.runAfter(time);
       }
     }
   }

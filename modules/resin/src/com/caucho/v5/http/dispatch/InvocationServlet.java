@@ -319,7 +319,7 @@ public class InvocationServlet extends Invocation
     ConnectionProtocol req = ConnectionTcp.getCurrentRequest();
 
     if (req instanceof ConnectionHttp) {
-      return (ServletRequest) ((ConnectionHttp) req).requestFacade();
+      return (ServletRequest) ((ConnectionHttp) req).request();
     }
     else if (req instanceof ServletRequest) {
       return (ServletRequest) req;

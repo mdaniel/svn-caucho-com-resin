@@ -38,8 +38,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.http.protocol.RequestCaucho;
+import com.caucho.v5.http.protocol.RequestHttpBase;
 import com.caucho.v5.http.protocol.RequestServlet;
-import com.caucho.v5.http.protocol.ResponseHttpBase;
 
 public class SetFilterChain
   extends ContinueMapFilterChain
@@ -74,7 +74,7 @@ public class SetFilterChain
       request.setCharacterEncoding(_requestCharacterEncoding);
 
     RequestCaucho oldRequest = null;
-    ResponseHttpBase cauchoResponse = null;
+    RequestHttpBase cauchoResponse = null;
 
     if (_isRequestSecure == null) {
     }

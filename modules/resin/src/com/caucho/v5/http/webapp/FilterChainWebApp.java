@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.webapp;
 
-import io.baratine.core.ServiceRef;
+import io.baratine.service.ServiceRef;
 
 import java.io.IOException;
 import java.util.logging.Logger;

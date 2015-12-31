@@ -248,7 +248,7 @@ public class ImportRule
       if (! _isDestroyed) {
         long delta = _isError ? _errorCheckInterval : _dependencyCheckInterval;
 
-        alarm.queue(delta);
+        alarm.runAfter(delta);
       }
     }
   }

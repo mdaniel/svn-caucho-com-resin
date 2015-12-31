@@ -46,7 +46,7 @@ import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseWrapper;
-import com.caucho.v5.http.protocol.ResponseWriter;
+import com.caucho.v5.http.protocol.WriterHttp;
 import com.caucho.v5.http.protocol.ServletOutputStreamImpl;
 import com.caucho.v5.vfs.FlushBuffer;
 
@@ -63,7 +63,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   private final FilterWrapperResponseStream _originalStream;
   protected OutResponseBase _stream;
 
-  private ResponseWriter _writer;
+  private WriterHttp _writer;
   private ServletOutputStreamImpl _os;
   
   private boolean _hasError;
@@ -71,7 +71,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   public CauchoResponseWrapper()
   {
     _os = new ServletOutputStreamImpl();
-    _writer = new ResponseWriter();
+    _writer = new WriterHttp();
     
     _originalStream = new FilterWrapperResponseStream();
   }

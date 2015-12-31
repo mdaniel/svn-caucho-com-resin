@@ -2077,7 +2077,7 @@ public class WebApp extends ServletContextImpl
 
     if (accessLog != null) {
       try {
-        accessLog.log((RequestServlet) req, (ResponseServlet) res);
+        accessLog.log((RequestServlet) req);
       } catch (Exception e) {
         log.warning("AccessLog: " + e);
         

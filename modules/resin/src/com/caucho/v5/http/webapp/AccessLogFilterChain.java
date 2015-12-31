@@ -105,7 +105,7 @@ public class AccessLogFilterChain implements FilterChainCaucho {
         socketLink.requestShutdownBegin();
       }
       
-      _accessLog.log((RequestServlet) request, (ResponseServlet) response);
+      _accessLog.log((RequestServlet) request);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {

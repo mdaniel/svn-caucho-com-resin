@@ -44,7 +44,7 @@ import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseCauchoWrapper;
-import com.caucho.v5.http.protocol.ResponseWriter;
+import com.caucho.v5.http.protocol.WriterHttp;
 import com.caucho.v5.http.protocol.ServletOutputStreamImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
@@ -61,8 +61,8 @@ public class ResponseInclude extends ResponseCauchoWrapper
   
   private final ServletOutputStreamImpl _responseOutputStream
     = new ServletOutputStreamImpl();
-  private final ResponseWriter _responsePrintWriter
-    = new ResponseWriter();
+  private final WriterHttp _responsePrintWriter
+    = new WriterHttp();
 
   private RequestInclude _request;
 

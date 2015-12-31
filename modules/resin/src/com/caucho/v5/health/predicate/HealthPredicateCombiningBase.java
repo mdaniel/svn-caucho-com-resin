@@ -6,7 +6,7 @@
 
 package com.caucho.v5.health.predicate;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.util.ArrayList;
 import java.util.List;

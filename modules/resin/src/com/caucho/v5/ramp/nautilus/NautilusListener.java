@@ -29,7 +29,7 @@
 
 package com.caucho.v5.ramp.nautilus;
 
-import io.baratine.core.ServiceRef;
+import io.baratine.service.ServiceRef;
 
 import java.io.StringReader;
 

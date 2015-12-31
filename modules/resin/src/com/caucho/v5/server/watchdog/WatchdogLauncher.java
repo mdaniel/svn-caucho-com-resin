@@ -29,7 +29,7 @@
 
 package com.caucho.v5.server.watchdog;
 
-import io.baratine.core.ServiceExceptionConnect;
+import io.baratine.service.ServiceExceptionConnect;
 
 import java.io.File;
 import java.io.IOException;

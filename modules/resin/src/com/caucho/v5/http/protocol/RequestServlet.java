@@ -232,7 +232,7 @@ public final class RequestServlet extends RequestCauchoBase
   {
     RequestHttpBase request = _request;
 
-    return request != null ? request.getRemoteHost() : null;
+    return request != null ? request.remoteHost() : null;
   }
 
   /**
@@ -1443,7 +1443,8 @@ public final class RequestServlet extends RequestCauchoBase
   @Override
   public boolean hasRequest()
   {
-    return _request.hasRequest();
+    //return _request.hasRequest();
+    return true;
   }
 
   @Override
@@ -1526,9 +1527,11 @@ public final class RequestServlet extends RequestCauchoBase
 
     RequestHttpBase request = _request;
     
+    /*
     if (request != null) {
       request.finishInvocation();
     }
+    */
   }
   
   @Override

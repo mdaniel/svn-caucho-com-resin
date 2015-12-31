@@ -29,8 +29,8 @@
 
 package com.caucho.v5.nautilus.impl;
 
-import io.baratine.core.Result;
 import io.baratine.db.Cursor;
+import io.baratine.service.Result;
 
 import java.io.InputStream;
 import java.io.Serializable;

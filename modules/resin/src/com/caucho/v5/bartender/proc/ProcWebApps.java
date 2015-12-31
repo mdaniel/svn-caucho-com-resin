@@ -29,8 +29,8 @@
 
 package com.caucho.v5.bartender.proc;
 
-import io.baratine.core.Result;
 import io.baratine.files.BfsFileSync;
+import io.baratine.service.Result;
 
 import java.io.IOException;
 import java.util.ArrayList;

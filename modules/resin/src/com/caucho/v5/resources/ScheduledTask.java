@@ -28,7 +28,7 @@
  */
 package com.caucho.v5.resources;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.util.Date;
 import java.util.TimerTask;

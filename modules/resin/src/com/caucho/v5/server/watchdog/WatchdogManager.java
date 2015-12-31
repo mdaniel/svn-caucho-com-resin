@@ -29,7 +29,7 @@
 
 package com.caucho.v5.server.watchdog;
 
-import io.baratine.core.Result;
+import io.baratine.service.Result;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -246,7 +246,7 @@ public class WatchdogManager implements AlarmListener
       _lifecycle.toActive();
       
       // valid checker
-      new Alarm(this).queue(60000);
+      new Alarm(this).runAfter(60000);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -383,7 +383,7 @@ public class WatchdogManager implements AlarmListener
         System.exit(1);
       }
     } finally {
-      alarm.queue(60000);
+      alarm.runAfter(60000);
     }
   }
   

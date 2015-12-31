@@ -29,9 +29,9 @@
 
 package com.caucho.v5.server.watchdog;
 
-import io.baratine.core.Result;
-import io.baratine.core.Service;
-import io.baratine.core.ServiceRef;
+import io.baratine.service.Result;
+import io.baratine.service.Service;
+import io.baratine.service.ServiceRef;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -29,10 +29,10 @@
 
 package com.caucho.v5.server.watchdog;
 
-import io.baratine.core.OnDestroy;
-import io.baratine.core.Result;
-import io.baratine.core.Service;
-import io.baratine.core.ServiceManager;
+import io.baratine.service.OnDestroy;
+import io.baratine.service.Result;
+import io.baratine.service.Service;
+import io.baratine.service.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;

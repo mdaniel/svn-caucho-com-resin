@@ -29,7 +29,7 @@
 
 package com.caucho.v5.nautilus.impl;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.io.Closeable;
 import java.util.Map;

@@ -155,7 +155,7 @@ public class MailHandler extends LogHandlerBase implements AlarmListener
       if (delta < _delayTime)
         delta = _delayTime;
 
-      _alarm.queue(delta);
+      _alarm.runAfter(delta);
     }
   }
 

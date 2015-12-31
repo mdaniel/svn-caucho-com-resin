@@ -37,7 +37,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.RequestHttpBase;
-import com.caucho.v5.http.protocol.ResponseHttpBase;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will
@@ -111,14 +110,16 @@ public class FilterChainContext implements FilterChain {
       else
         throw e;
     } finally {
+      /*
       // needed for things like closing the session
       if (request instanceof RequestHttpBase) {
         ((RequestHttpBase) request).finishInvocation();
       }
       
-      if (response instanceof ResponseHttpBase) {
-        ((ResponseHttpBase) response).finishInvocation();
+      if (response instanceof RequestHttpBase) {
+        ((RequestHttpBase) response).finishInvocation();
       }
+      */
 
       thread.setContextClassLoader(oldLoader);
     }

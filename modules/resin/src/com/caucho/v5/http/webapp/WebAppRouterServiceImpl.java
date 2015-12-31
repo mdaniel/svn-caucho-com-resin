@@ -29,12 +29,12 @@
 
 package com.caucho.v5.http.webapp;
 
-import io.baratine.core.Cancel;
-import io.baratine.core.Direct;
-import io.baratine.core.OnInit;
-import io.baratine.core.Result;
-import io.baratine.core.Service;
 import io.baratine.files.Watch;
+import io.baratine.service.Cancel;
+import io.baratine.service.Direct;
+import io.baratine.service.OnInit;
+import io.baratine.service.Result;
+import io.baratine.service.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;

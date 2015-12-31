@@ -29,7 +29,6 @@ import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseCache;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseFacade;
-import com.caucho.v5.http.protocol.ResponseHttpBase;
 import com.caucho.v5.http.webapp.FilterChainCaucho;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.Base64Util;
@@ -245,11 +244,11 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
       OutResponseBase rs = res.getResponseStream();
 
       try {
-        rs.setCauchoResponse(res);
+        //rs.setCauchoResponse(res);
 
         _next.doFilter(cacheRequest, cacheResponse);
       } finally {
-        rs.setCauchoResponse(res);
+        //rs.setCauchoResponse(res);
         
         cacheResponse.close();
       }
@@ -1317,7 +1316,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
                           RequestCache req,
                           ResponseCache res)
   {
-    ResponseHttpBase absRes = res.getAbstractHttpResponse();
+    RequestHttpBase absRes = null;//res.getAbstractHttpResponse();
     
     /*
     WebApp webApp = req.getWebApp();
@@ -1350,15 +1349,15 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
     else if (internalCacheTimeout <= 0) {
     }
     else if (maxAge > 0 && sMaxAge > 0) {
-      absRes.addHeaderImpl("Cache-Control",
+      absRes.addHeaderOutImpl("Cache-Control",
                         "max-age=" + maxAge / 1000L +
                         ", s-maxage=" + sMaxAge / 1000L);
     }
     else if (maxAge > 0) {
-      absRes.addHeaderImpl("Cache-Control", "max-age=" + maxAge / 1000L);
+      absRes.addHeaderOutImpl("Cache-Control", "max-age=" + maxAge / 1000L);
     }
     else if (sMaxAge > 0) {
-      absRes.addHeaderImpl("Cache-Control", "s-maxage=" + sMaxAge / 1000L);
+      absRes.addHeaderOutImpl("Cache-Control", "s-maxage=" + sMaxAge / 1000L);
     }
 
     if (sMaxAge > 0) {

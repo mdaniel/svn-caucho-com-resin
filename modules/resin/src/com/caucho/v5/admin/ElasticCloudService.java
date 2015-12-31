@@ -6,7 +6,7 @@
 
 package com.caucho.v5.admin;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import javax.inject.Singleton;
 

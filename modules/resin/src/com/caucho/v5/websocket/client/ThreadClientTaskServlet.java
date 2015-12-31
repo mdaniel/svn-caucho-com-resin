@@ -29,7 +29,7 @@
 
 package com.caucho.v5.websocket.client;
 
-import io.baratine.core.ServiceRef;
+import io.baratine.service.ServiceRef;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

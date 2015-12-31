@@ -29,7 +29,7 @@
 
 package com.caucho.v5.server.watchdog;
 
-import io.baratine.core.ResultFuture;
+import io.baratine.service.ResultFuture;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;

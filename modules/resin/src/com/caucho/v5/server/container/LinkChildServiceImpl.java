@@ -29,9 +29,9 @@
 
 package com.caucho.v5.server.container;
 
-import io.baratine.core.OnDestroy;
-import io.baratine.core.Result;
-import io.baratine.core.Service;
+import io.baratine.service.OnDestroy;
+import io.baratine.service.Result;
+import io.baratine.service.Service;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

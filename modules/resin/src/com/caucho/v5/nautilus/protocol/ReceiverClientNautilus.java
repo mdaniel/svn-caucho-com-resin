@@ -190,7 +190,7 @@ public class ReceiverClientNautilus<T> extends ReceiverQueueImpl<T> {
     
     if (! isClosed()) {
       _reconnectCount = 0;
-      _reconnectAlarm.queue(10);
+      _reconnectAlarm.runAfter(10);
     }
   }
   
@@ -211,7 +211,7 @@ public class ReceiverClientNautilus<T> extends ReceiverQueueImpl<T> {
         log.log(Level.FINEST, e.toString(), e);
       } finally {
         if (! isClosed() && ! isValid && _reconnectCount++ <= 120) {
-          alarm.queue(1000);
+          alarm.runAfter(1000);
         }
       }
     }

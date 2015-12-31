@@ -520,7 +520,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     }
 
     if (_status == Status.STATUS_ACTIVE && _timeout > 0) {
-      _alarm.queue(_timeout + EXTRA_TIMEOUT);
+      _alarm.runAfter(_timeout + EXTRA_TIMEOUT);
     } else {
       _alarm.dequeue();
     }
@@ -640,7 +640,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       log.fine(this + " begin");
 
     if (_timeout > 0) {
-      _alarm.queue(_timeout + EXTRA_TIMEOUT);
+      _alarm.runAfter(_timeout + EXTRA_TIMEOUT);
     }
   }
 
@@ -685,7 +685,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
           .l("can't resume non-suspended transaction"));
 
     if (_timeout > 0)
-      _alarm.queue(_timeout + EXTRA_TIMEOUT);
+      _alarm.runAfter(_timeout + EXTRA_TIMEOUT);
 
     for (int i = _resourceCount - 1; i >= 0; i--) {
       if ((_resourceStates[i] & (RES_ACTIVE | RES_SUSPENDED)) == RES_ACTIVE) {

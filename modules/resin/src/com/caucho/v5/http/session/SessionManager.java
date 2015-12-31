@@ -1285,7 +1285,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void start()
     throws Exception
   {
-    _alarm.queue(60000);
+    _alarm.runAfter(60000);
   }
 
   /**
@@ -2062,7 +2062,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       }
     } finally {
       if (! _isClosed)
-        _alarm.queue(60000);
+        _alarm.runAfter(60000);
     }
   }
 

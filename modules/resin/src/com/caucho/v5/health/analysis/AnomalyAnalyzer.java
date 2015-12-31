@@ -5,7 +5,7 @@
 
 package com.caucho.v5.health.analysis;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

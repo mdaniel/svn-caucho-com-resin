@@ -6,7 +6,7 @@
 
 package com.caucho.v5.health.stat;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -362,7 +362,7 @@ public class StatServiceLocalImpl
     now = CurrentTime.getCurrentTime();
     sampleData(now, false);
 
-    _alarm.queue(_samplePeriod);
+    _alarm.runAfter(_samplePeriod);
   }
 
   public ArrayList<MeterBase> getCpuMeters()

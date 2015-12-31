@@ -66,7 +66,7 @@ public class StompProtocol extends ProtocolBase
   }
   
   @Override
-  public ConnectionProtocol createConnection(ConnectionTcp link)
+  public ConnectionProtocol newConnection(ConnectionTcp link)
   {
     return new StompConnection(this, link);
   }

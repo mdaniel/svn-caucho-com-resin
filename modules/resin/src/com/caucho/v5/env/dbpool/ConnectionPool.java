@@ -682,11 +682,11 @@ public class ConnectionPool extends ManagedObjectBase
       return;
 
     if (0 < _idleTimeout && _idleTimeout < 1000)
-      _alarm.queue(1000);
+      _alarm.runAfter(1000);
     else if (1000 < _idleTimeout && _idleTimeout < 60000)
-      _alarm.queue(_idleTimeout);
+      _alarm.runAfter(_idleTimeout);
     else
-      _alarm.queue(60000);
+      _alarm.runAfter(60000);
   }
 
   /**
@@ -1310,11 +1310,11 @@ public class ConnectionPool extends ManagedObjectBase
       if (! _lifecycle.isActive()) {
       }
       else if (0 < _idleTimeout && _idleTimeout < 1000)
-        _alarm.queue(1000);
+        _alarm.runAfter(1000);
       else if (1000 < _idleTimeout && _idleTimeout < 60000)
-        _alarm.queue(_idleTimeout);
+        _alarm.runAfter(_idleTimeout);
       else
-        _alarm.queue(60000);
+        _alarm.runAfter(60000);
     }
   }
   

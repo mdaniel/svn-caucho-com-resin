@@ -29,7 +29,7 @@
 
 package com.caucho.v5.nautilus.impl;
 
-import io.baratine.core.Result;
+import io.baratine.service.Result;
 
 import java.io.InputStream;
 import java.util.HashMap;

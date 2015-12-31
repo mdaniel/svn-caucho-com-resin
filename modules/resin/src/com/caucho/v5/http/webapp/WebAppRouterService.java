@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.webapp;
 
-import io.baratine.core.Result;
+import io.baratine.service.Result;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.deploy.DeployHandle;

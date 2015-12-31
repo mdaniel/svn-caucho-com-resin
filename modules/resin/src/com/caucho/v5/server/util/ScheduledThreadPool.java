@@ -876,7 +876,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
             _nextTime = CurrentTime.getCurrentTime() + _delay;
 
             if (! _isShutdown && ! _isDone && ! _isCancelled)
-              _alarm.queue(_delay);
+              _alarm.runAfter(_delay);
           }
           else if (_period > 0) {
             long now = CurrentTime.getCurrentTime();

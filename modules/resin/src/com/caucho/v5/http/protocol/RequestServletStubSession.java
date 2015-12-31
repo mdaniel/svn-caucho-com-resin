@@ -62,7 +62,7 @@ public class RequestServletStubSession extends RequestServletStub
     return _session;
   }
   @Override
-  public String urlProtocolRequest()
+  public String url()
   {
     return null;
   }

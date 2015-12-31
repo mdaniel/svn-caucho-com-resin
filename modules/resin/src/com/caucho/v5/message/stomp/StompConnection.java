@@ -125,7 +125,7 @@ public class StompConnection implements ConnectionProtocol
   }
   
   @Override
-  public String urlProtocolRequest()
+  public String url()
   {
     return "stomp:";
   }

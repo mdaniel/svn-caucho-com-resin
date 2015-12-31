@@ -29,7 +29,7 @@
 
 package com.caucho.v5.cli.resin;
 
-import io.baratine.core.ServiceExceptionConnect;
+import io.baratine.service.ServiceExceptionConnect;
 
 import java.util.Objects;
 

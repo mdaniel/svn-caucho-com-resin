@@ -196,7 +196,7 @@ public class SnmpProtocol extends ProtocolBase
   }
 
   @Override
-  public ConnectionProtocol createConnection(ConnectionTcp connection)
+  public ConnectionProtocol newConnection(ConnectionTcp connection)
   {
     OctetStringValue community;
     

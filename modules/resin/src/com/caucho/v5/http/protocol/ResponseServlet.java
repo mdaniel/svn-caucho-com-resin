@@ -674,7 +674,7 @@ public final class ResponseServlet extends ResponseCauchoBase
 
     try {
       if (code == SC_NOT_MODIFIED || code == SC_NO_CONTENT) {
-        _response.finishInvocation();
+        // XXX: _response.finishInvocation();
         return;
       }
       else if (errorManager != null) {
@@ -684,7 +684,7 @@ public final class ResponseServlet extends ResponseCauchoBase
         // _request.killKeepalive();
         // close, but don't force a flush
         // XXX: finish(false);
-        _response.finishInvocation();
+       // XXX: _response.finishInvocation();
         return;
       }
 
@@ -744,7 +744,7 @@ public final class ResponseServlet extends ResponseCauchoBase
 
     _request.killKeepalive("servlet error: " + code + " " + value);
     // close, but don't force a flush
-    _response.finishInvocation();
+    // XXX: _response.finishInvocation();
   }
   
   private boolean isProxyCacheFill()

@@ -29,8 +29,8 @@
 
 package com.caucho.v5.nautilus.impl;
 
-import io.baratine.core.Direct;
-import io.baratine.core.ServiceExceptionUnavailable;
+import io.baratine.service.Direct;
+import io.baratine.service.ServiceExceptionUnavailable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

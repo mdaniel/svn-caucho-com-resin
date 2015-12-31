@@ -28,10 +28,10 @@
 
 package com.caucho.v5.health.stat;
 
-import io.baratine.core.MethodRef;
-import io.baratine.core.ResultFuture;
-import io.baratine.core.ServiceManager;
-import io.baratine.core.ServiceRef;
+import io.baratine.service.MethodRef;
+import io.baratine.service.ResultFuture;
+import io.baratine.service.ServiceManager;
+import io.baratine.service.ServiceRef;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;

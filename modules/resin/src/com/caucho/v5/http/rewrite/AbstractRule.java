@@ -288,7 +288,7 @@ abstract public class AbstractRule
 
       _rule.setEnabled(_isEnable);
 
-      alarm.queue(nextTime - now);
+      alarm.runAfter(nextTime - now);
     }
 
     public void handleAlarm(Alarm alarm)

@@ -433,7 +433,8 @@ public class AsyncContextImpl // extends RequestProtocolBase
     
     _isActive = true;
     try {
-      return _reqHttp.handleResume();
+      //return _reqHttp.handleResume();
+      return null;
     } finally {
       _isActive = false;
     }
@@ -510,7 +511,7 @@ public class AsyncContextImpl // extends RequestProtocolBase
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName() + "[" + _reqHttp.getRequestURI()
+    return (getClass().getSimpleName() + "[" + "uri" //_reqHttp.getRequestURI()
             + "," + _stateRef.get()
             + "," + _connTcp.getId()
             + "," + _connTcp.getStateName() + "]");

@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.security;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.security.Principal;
 import java.util.ArrayList;

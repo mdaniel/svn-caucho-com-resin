@@ -6,7 +6,7 @@
 
 package com.caucho.v5.health.action;
 
-import io.baratine.core.Startup;
+import io.baratine.service.Startup;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ public class DumpJmx extends HealthActionBase
     throws Exception
   {
     if (_isAsync) {
-      new Alarm(new JmxTask()).queue(_delay);
+      new Alarm(new JmxTask()).runAfter(_delay);
       return new HealthActionResult(ResultStatus.OK, 
                                     L.l("JMX dump scheduled with a {0} ms delay", _delay));
     }
