@@ -27,55 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.v5.websocket.plain;
+package com.caucho.websocket.io;
 
 import java.io.IOException;
+import java.io.Reader;
 
-import javax.websocket.MessageHandler;
-
-import com.caucho.v5.vfs.TempCharBuffer;
 import com.caucho.v5.websocket.io.FrameInputStream;
-import com.caucho.websocket.io.WebSocketReader;
+import com.caucho.v5.websocket.io.WebSocketConstants;
 
 /**
- * Callback for reads.
+ * WebSocketReader reads a single WebSocket packet.
+ *
+ * <code><pre>
+ * 0x00 utf-8 data 0xff
+ * </pre></code>
  */
-class ReadPartialString extends ReadPlain
+public final class WebSocketReader extends Reader
+  implements WebSocketConstants
 {
-  private final MessageHandler.Partial<String> _handler;
-  
-  ReadPartialString(MessageHandler.Partial<String> handler)
+  private final FrameInputStream _is;
+
+  public WebSocketReader(FrameInputStream is)
+    throws IOException
   {
-    _handler = handler;
+    _is = is;
+  }
+
+  public void init()
+  {
+  }
+
+  public long getLength()
+  {
+    return _is.getLength();
+  }
+
+  @Override
+  public int read()
+    throws IOException
+  {
+    return _is.readText();
   }
   
   @Override
-  void onRead(FrameInputStream is)
+  public int read(char []charBuffer, int charOffset, int charLength)
     throws IOException
   {
-    WebSocketReader textIn = null;//is.initReader();
+    return _is.readText(charBuffer, charOffset, charLength);
+  }
 
-    try {
-      TempCharBuffer tBuf = TempCharBuffer.allocate();
-      char []buf = tBuf.getBuffer();
-      
-      do {
-        int len = textIn.read(buf, 0, buf.length);
-      
-        if (len < 0) {
-          TempCharBuffer.free(tBuf);
-          return;
-        }
-      
-        String value = new String(buf, 0, len);
-      
-        TempCharBuffer.free(tBuf);
-
-        _handler.onMessage(value, is.isFinal());
-      } while (! is.isFinal());
-    } finally {
-      textIn.close();
-    }
-
+  @Override
+  public void close()
+  throws IOException
+  {
+    _is.skipToFrameEnd();
   }
 }

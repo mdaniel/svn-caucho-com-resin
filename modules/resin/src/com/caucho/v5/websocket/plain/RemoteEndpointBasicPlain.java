@@ -50,7 +50,7 @@ import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.websocket.common.RemoteBasicWebSocketBase;
 import com.caucho.v5.websocket.io.WebSocketConstants;
 import com.caucho.v5.websocket.io.OutWebSocket;
-import com.caucho.v5.websocket.io.WebSocketWriter;
+import com.caucho.websocket.io.WebSocketWriter;
 
 /**
  * websocket writing endpoint.
@@ -173,7 +173,7 @@ public class RemoteEndpointBasicPlain extends RemoteBasicWebSocketBase
     
     if (_binaryOut == null) {
       _binaryOut = new OutWebSocket(out,
-                                             TempBuffer.allocate().getBuffer());
+                                             TempBuffer.allocate().buffer());
       _binaryOut.setMasked(_isMasked);
       
       _binaryOut.setBatching(_isBatching);
@@ -238,7 +238,7 @@ public class RemoteEndpointBasicPlain extends RemoteBasicWebSocketBase
     
     if (_textOut == null) {
       _textOut = new WebSocketWriter(out,
-                                     TempBuffer.allocate().getBuffer());
+                                     TempBuffer.allocate().buffer());
       
       _textOut.setBatching(isBatching());
     }

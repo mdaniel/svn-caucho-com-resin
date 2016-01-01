@@ -58,7 +58,7 @@ class StompXaSend extends StompXaItem
     long mid = 0;
     
     _dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
-                  _tBuf.getBuffer(), 0, _length, _tBuf, null);
+                  _tBuf.buffer(), 0, _length, _tBuf, null);
     
     return true;
   }

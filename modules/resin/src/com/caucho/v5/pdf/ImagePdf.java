@@ -330,7 +330,7 @@ public class ImagePdf extends ObjectPdf {
     out.println("stream");
 
     TempBuffer tb = TempBuffer.allocate();
-    byte []buffer = tb.getBuffer();
+    byte []buffer = tb.buffer();
     int sublen;
     
     InputStream is = _path.openRead();
@@ -349,7 +349,7 @@ public class ImagePdf extends ObjectPdf {
     int length = 0;
 
     for (TempBuffer ptr = _jpegHead; ptr != null; ptr = ptr.getNext())
-      length += ptr.getLength();
+      length += ptr.length();
 
     out.println("<< /Type /XObject");
     out.println("   /Subtype /Image");
@@ -363,7 +363,7 @@ public class ImagePdf extends ObjectPdf {
     out.println("stream");
 
     for (TempBuffer ptr = _jpegHead; ptr != null; ptr = ptr.getNext()) {
-      out.write(ptr.getBuffer(), 0, ptr.getLength());
+      out.write(ptr.buffer(), 0, ptr.length());
     }
     out.println();
     out.println("endstream");

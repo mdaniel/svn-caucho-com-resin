@@ -263,7 +263,7 @@ public class OutResponseInclude extends OutResponseToByte {
     for (TempBuffer ptr = head; ptr != null; ptr = ptr.getNext()) {
       boolean ptrEnd = isEnd && ptr.getNext() == null;
       
-      flushDataBuffer(ptr.getBuffer(), 0, ptr.getLength(), ptrEnd);
+      flushDataBuffer(ptr.buffer(), 0, ptr.length(), ptrEnd);
     }
     
     TempBuffer next = head.getNext();

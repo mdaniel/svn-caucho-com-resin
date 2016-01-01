@@ -172,7 +172,7 @@ public class HttpProxyClient
       InputStream is = req.getInputStream();
 
       TempBuffer tempBuffer = TempBuffer.allocate();
-      byte []buffer = tempBuffer.getBuffer();
+      byte []buffer = tempBuffer.buffer();
 
       boolean isFirst = true;
 

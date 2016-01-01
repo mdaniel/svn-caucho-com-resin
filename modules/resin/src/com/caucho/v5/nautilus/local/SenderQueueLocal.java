@@ -119,7 +119,7 @@ public class SenderQueueLocal<T> extends SenderQueueBase<T>
       _lastMessageId = mid;
       
       _sender.message(xid, mid, isDurable, priority, expireTime,
-                         tOut.getHead().getBuffer(), 0, tOut.getLength(), 
+                         tOut.getHead().buffer(), 0, tOut.getLength(), 
                          tOut.getHead(), null);
       
       return true;

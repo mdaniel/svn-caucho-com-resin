@@ -102,7 +102,7 @@ class FormMultipartParser {
         WriteStream os = tempFile.openWrite();
 
         TempBuffer tempBuffer = TempBuffer.allocate();
-        byte []buf = tempBuffer.getBuffer();
+        byte []buf = tempBuffer.buffer();
 
         int totalLength = 0;
 

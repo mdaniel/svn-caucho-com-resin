@@ -266,7 +266,7 @@ public class WebSocketClientServlet
 
     InetSocketAddress addr = new InetSocketAddress(_host, _port);
 
-    SocketSystem network = SocketSystem.getCurrent();
+    SocketSystem network = SocketSystem.current();
 
     QSocket s = network.connect(addr.getAddress(), addr.getPort(), connectTimeout);
 

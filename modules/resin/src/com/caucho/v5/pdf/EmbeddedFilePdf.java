@@ -79,7 +79,7 @@ public class EmbeddedFilePdf extends ObjectPdf {
     out.println("stream");
 
     TempBuffer tb = TempBuffer.allocate();
-    byte []buffer = tb.getBuffer();
+    byte []buffer = tb.buffer();
     int sublen;
     
     InputStream is = _path.openRead();

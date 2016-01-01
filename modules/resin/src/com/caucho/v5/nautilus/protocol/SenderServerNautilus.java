@@ -104,7 +104,7 @@ class SenderServerNautilus implements SenderSettleHandler
       else
         tBuf = TempBuffer.allocate();
       
-      byte []buffer = tBuf.getBuffer();
+      byte []buffer = tBuf.buffer();
       int len = buffer.length;
       
       len = is.read(buffer, 0, len);

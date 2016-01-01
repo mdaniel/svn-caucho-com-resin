@@ -108,7 +108,7 @@ public class WriterNautilusImpl implements WriterNautilus
     try (OutputStream os = _remote.getSendStream()) {
       os.write(OpcodeNautilus.SEND.ordinal());
     
-      byte []buffer = _tBuf.getBuffer();
+      byte []buffer = _tBuf.buffer();
       int len;
 
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {

@@ -58,7 +58,7 @@ class ReadPartialByteBuffer extends ReadPlain {
     TempBuffer tBuf = TempBuffer.allocate();
 
     try {
-      byte []buffer = tBuf.getBuffer();
+      byte []buffer = tBuf.buffer();
       int length = buffer.length;
 
       while (true) {

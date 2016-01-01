@@ -70,7 +70,7 @@ public class NautilusServiceImpl
     try (InputStream is = ss.getInputStream()) {
       TempBuffer tBuf = TempBuffer.allocate();
       
-      byte []buffer = tBuf.getBuffer();
+      byte []buffer = tBuf.buffer();
       
       int len = is.read(buffer, 0, buffer.length);
       

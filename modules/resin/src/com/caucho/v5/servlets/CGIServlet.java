@@ -230,7 +230,7 @@ public class CGIServlet extends GenericServlet {
       OutputStream outputStream = process.getOutputStream();
 
       TempBuffer tempBuf = TempBuffer.allocate();
-      byte []buf = tempBuf.getBuffer();
+      byte []buf = tempBuf.buffer();
       
       try {
         ServletInputStream sis = req.getInputStream();

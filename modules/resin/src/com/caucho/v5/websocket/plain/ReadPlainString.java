@@ -34,7 +34,7 @@ import java.io.IOException;
 import javax.websocket.MessageHandler;
 
 import com.caucho.v5.websocket.io.FrameInputStream;
-import com.caucho.v5.websocket.io.WebSocketReader;
+import com.caucho.websocket.io.WebSocketReader;
 
 /**
  * Callback for reads.
@@ -54,7 +54,7 @@ class ReadPlainString extends ReadPlain {
   void onRead(FrameInputStream is)
     throws IOException
   {
-    WebSocketReader textIn = is.initReader();
+    WebSocketReader textIn = null;//is.initReader();
 
     try {
       final char []charBuffer = _charBuffer;

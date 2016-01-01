@@ -47,7 +47,7 @@ import com.caucho.v5.vfs.TempBuffer;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.websocket.common.RemoteAsyncWebSocketBase;
 import com.caucho.v5.websocket.io.OutWebSocket;
-import com.caucho.v5.websocket.io.WebSocketWriter;
+import com.caucho.websocket.io.WebSocketWriter;
 
 /**
  * websocket writing endpoint.
@@ -106,7 +106,7 @@ public class RemoteEndpointAsyncPlain extends RemoteAsyncWebSocketBase
     
     if (_binaryOut == null)
       _binaryOut = new OutWebSocket(_os,
-                                             TempBuffer.allocate().getBuffer());
+                                             TempBuffer.allocate().buffer());
     
     _binaryOut.init();
     
@@ -126,7 +126,7 @@ public class RemoteEndpointAsyncPlain extends RemoteAsyncWebSocketBase
     
     if (_textOut == null) {
       _textOut = new WebSocketWriter(out,
-                                     TempBuffer.allocate().getBuffer());
+                                     TempBuffer.allocate().buffer());
       
       _textOut.setBatching(getBatchingAllowed());
     }

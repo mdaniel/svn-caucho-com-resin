@@ -65,7 +65,7 @@ public class StompSendCommand extends StompCommand
         int sublen = (int) (contentLength - offset);
         
         TempBuffer tBuf = TempBuffer.allocate();
-        byte []buffer = tBuf.getBuffer();
+        byte []buffer = tBuf.buffer();
         
         if (buffer.length < sublen)
           sublen = buffer.length;
@@ -83,7 +83,7 @@ public class StompSendCommand extends StompCommand
           long expireTime = 0;
           
           dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
-                       tBuf.getBuffer(), 0, sublen, tBuf, receipt);
+                       tBuf.buffer(), 0, sublen, tBuf, receipt);
         }
         else {
           xaSend = new StompXaSend(dest, tBuf, sublen);
@@ -96,7 +96,7 @@ public class StompSendCommand extends StompCommand
     }
     else {
       TempBuffer tBuf = TempBuffer.allocate();
-      byte []buffer = tBuf.getBuffer();
+      byte []buffer = tBuf.buffer();
       
       boolean isDurable = false;
       int priority = -1;
@@ -109,7 +109,7 @@ public class StompSendCommand extends StompCommand
         
         if (offset == buffer.length) {
           dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
-                       tBuf.getBuffer(), 0, offset, tBuf, receipt);
+                       tBuf.buffer(), 0, offset, tBuf, receipt);
 
           tBuf = TempBuffer.allocate();
           offset = 0;
@@ -118,7 +118,7 @@ public class StompSendCommand extends StompCommand
       
       if (xa == null) {
         dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
-                     tBuf.getBuffer(), 0, offset, tBuf, receipt);
+                     tBuf.buffer(), 0, offset, tBuf, receipt);
       }
       else {
         xaSend = new StompXaSend(dest, tBuf, offset);

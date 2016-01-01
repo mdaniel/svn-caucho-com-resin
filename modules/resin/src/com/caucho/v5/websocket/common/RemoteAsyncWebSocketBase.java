@@ -77,7 +77,7 @@ public class RemoteAsyncWebSocketBase
     
     try (OutputStream os = getSendStream()) {
       TempBuffer tBuf = TempBuffer.allocate();
-      byte []buffer = tBuf.getBuffer();
+      byte []buffer = tBuf.buffer();
       
       int len;
       
@@ -104,7 +104,7 @@ public class RemoteAsyncWebSocketBase
   {
     try (OutputStream os = getSendStream()) {
       TempBuffer tBuf = TempBuffer.allocate();
-      byte []buffer = tBuf.getBuffer();
+      byte []buffer = tBuf.buffer();
       
       int len;
       

@@ -1455,7 +1455,7 @@ public class XmlParser extends AbstractParser {
   private int parseXMLDeclaration(XmlReader oldReader)
     throws IOException, SAXException
   {
-    int startOffset = _is.getOffset();
+    int startOffset = _is.offset();
     boolean isEBCDIC = false;
     int ch = _is.read();
 
