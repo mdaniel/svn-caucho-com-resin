@@ -51,27 +51,27 @@ import com.caucho.v5.vfs.ByteToChar;
 /**
  * Form handling.
  */
-public class Form
+public class FormParser
 {
-  private static final L10N L = new L10N(Form.class);
-  private static final Logger log = Logger.getLogger(Form.class.getName());
+  private static final L10N L = new L10N(FormParser.class);
+  private static final Logger log = Logger.getLogger(FormParser.class.getName());
 
-  private static final FreeList<Form> _freeList = new FreeList<Form>(32);
+  private static final FreeList<FormParser> _freeList = new FreeList<FormParser>(32);
 
   private final ByteToChar _converter = ByteToChar.create();
 
 
-  public static Form allocate()
+  public static FormParser allocate()
   {
-    Form form = _freeList.allocate();
+    FormParser form = _freeList.allocate();
 
     if (form == null)
-      form = new Form();
+      form = new FormParser();
 
     return form;
   }
 
-  public static void free(Form form)
+  public static void free(FormParser form)
   {
     _freeList.free(form);
   }
@@ -81,7 +81,7 @@ public class Form
     try {
       HashMapImpl<String,String[]> map = new HashMapImpl<>();
     
-      new Form().parseQueryString(map, query, "UTF-8", true);
+      new FormParser().parseQueryString(map, query, "UTF-8", true);
     
       return map;
     } catch (IOException e) {

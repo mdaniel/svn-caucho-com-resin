@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.protocol.Form;
+import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.http.protocol.RequestCauchoDispatch;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.IntMap;
@@ -332,7 +332,7 @@ public class RequestInclude extends RequestCauchoDispatch {
     // server/053n
     String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
 
-    Form formParser = Form.allocate();
+    FormParser formParser = FormParser.allocate();
 
     try {
       String queryString = _invocation.getQueryString();

@@ -307,7 +307,7 @@ public class RequestCauchoAsync extends RequestCauchoWrapper {
 
     form.putAll(getRequest().getParameterMap());
     
-    Form formParser = Form.allocate();
+    FormParser formParser = FormParser.allocate();
 
     try {
       String queryString = _invocation.getQueryString();

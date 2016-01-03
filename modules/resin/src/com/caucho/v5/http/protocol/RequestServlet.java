@@ -29,6 +29,8 @@
 
 package com.caucho.v5.http.protocol;
 
+import io.baratine.web.HttpStatus;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.Principal;
@@ -53,7 +55,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.v5.baratine.web.HttpStatus;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.dispatch.InvocationServlet;
@@ -93,7 +94,7 @@ public final class RequestServlet extends RequestCauchoBase
 
   private InvocationServlet _invocation;
 
-  private final Form _formParser = new Form();
+  private final FormParser _formParser = new FormParser();
   private final HashMapImpl<String,String[]> _form
     = new HashMapImpl<String,String[]>();
 
@@ -386,7 +387,7 @@ public final class RequestServlet extends RequestCauchoBase
   @Override
   public String getContentType()
   {
-    return _request.getContentType();
+    return _request.contentType();
   }
 
   /**

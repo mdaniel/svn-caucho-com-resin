@@ -38,7 +38,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 
 import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.protocol.Form;
+import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.http.protocol.RequestCauchoWrapper;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseServlet;
@@ -306,7 +306,7 @@ public class RequestAsync extends RequestCauchoWrapper {
 
     form.putAll(getRequest().getParameterMap());
     
-    Form formParser = Form.allocate();
+    FormParser formParser = FormParser.allocate();
 
     try {
       String queryString = _invocation.getQueryString();

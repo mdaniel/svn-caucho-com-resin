@@ -37,7 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.http.protocol.Form;
+import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.i18n.CharacterEncoding;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.vfs.Encoding;
@@ -98,7 +98,7 @@ public class QueryParamCondition
 
     String javaEncoding = Encoding.getJavaName(charEncoding);
 
-    Form formParser = new Form();
+    FormParser formParser = new FormParser();
     HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
 
     try {

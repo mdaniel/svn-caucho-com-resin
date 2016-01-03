@@ -298,7 +298,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
       if (query == null)
         return;
 
-      Form formParser = new Form();
+      FormParser formParser = new FormParser();
       
       /*
       if (request != null)
@@ -348,7 +348,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
       if (contentType == null)
         return;
 
-      Form formParser = new Form(); // request.getFormParser();
+      FormParser formParser = new FormParser(); // request.getFormParser();
       long contentLength = request.contentLength();
 
       String charEncoding = getCharacterEncoding();

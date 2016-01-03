@@ -47,7 +47,7 @@ import javax.servlet.http.HttpSession;
 
 import com.caucho.v5.http.baratine.FormBaratine;
 import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.protocol.Form;
+import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.http.protocol.RequestAdapter;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseCaucho;
@@ -77,7 +77,7 @@ class RequestDispatchBase extends RequestAdapter
   private WebApp _webApp;
   private WebApp _oldWebApp;
   private InvocationServlet _invocation;
-  private Form _formParser;
+  private FormParser _formParser;
   private HashMapImpl<String,String[]> _form;
   protected ReadStream _readStream;
   protected ServletInputStreamImpl _is;
@@ -321,7 +321,7 @@ class RequestDispatchBase extends RequestAdapter
     if (_addedQuery != null) {
       try {
         if (_formParser == null)
-          _formParser = new Form();
+          _formParser = new FormParser();
         _formParser.parseQueryString(table, _addedQuery, javaEncoding, false);
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
