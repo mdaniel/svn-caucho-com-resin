@@ -34,7 +34,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.server.resin.Resin;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -47,7 +47,7 @@ public class TransactionManager
     = Logger.getLogger(TransactionManager.class.getName());
 
   private final Resin _resin;
-  private final Path _path;
+  private final PathImpl _path;
 
   private TransactionLog _transactionLog;
 
@@ -65,13 +65,13 @@ public class TransactionManager
   }
 
   @Deprecated
-  public TransactionManager(Path path)
+  public TransactionManager(PathImpl path)
   {
     _resin = null;
     _path = path;
   }
 
-  public Path getPath()
+  public PathImpl getPath()
   {
     if (_path != null)
       return _path;

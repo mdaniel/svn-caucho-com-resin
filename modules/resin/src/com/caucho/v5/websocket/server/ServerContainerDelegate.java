@@ -46,14 +46,14 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
 
 import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.ContainerWebSocketServer;
 
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class ServerContainerDelegate 
   extends ContainerWebSocketServer
   implements ServerContainer

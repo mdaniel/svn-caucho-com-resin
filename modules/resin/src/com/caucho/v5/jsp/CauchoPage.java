@@ -35,12 +35,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import com.caucho.v5.http.webapp.WebAppResin;
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.io.Dependency;
+import com.caucho.v5.vfs.PathImpl;
 
 public interface CauchoPage
 {
-  void init(Path path)
+  void init(PathImpl path)
     throws ServletException;
   
   void caucho_init(ServletConfig cxt)

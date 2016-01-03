@@ -45,7 +45,6 @@ import com.caucho.v5.env.health.HealthStatus;
 import com.caucho.v5.env.health.HealthStatusService;
 import com.caucho.v5.health.meter.MeterActiveTime;
 import com.caucho.v5.health.meter.MeterService;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.jmx.server.ConnectionPoolMXBean;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -57,12 +56,13 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.util.WeakAlarm;
 
 /**
  * Implementation of the connection manager.
  */
-@Module
+@ModulePrivate
 @SuppressWarnings("serial")
 public class ConnectionPool extends ManagedObjectBase
   implements ConnectionManager, AlarmListener, ConnectionPoolMXBean

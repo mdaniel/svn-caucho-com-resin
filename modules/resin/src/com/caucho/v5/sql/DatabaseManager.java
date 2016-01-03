@@ -160,7 +160,7 @@ public class DatabaseManager {
     } catch (SQLException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -194,7 +194,7 @@ public class DatabaseManager {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

@@ -48,7 +48,7 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
@@ -56,13 +56,13 @@ import com.caucho.v5.config.program.PropertyStringProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * Backward-compat configuration for the xml web bean component.
  */
-@Module
+@ModulePrivate
 public class BeanConfig
 {
   private static final L10N L = new L10N(BeanConfig.class);
@@ -298,7 +298,7 @@ public class BeanConfig
     if (_init == null)
       _init = new ContainerProgram();
     
-    Config config = Config.getCurrent();
+    ConfigContext config = ConfigContext.getCurrent();
 
     _init.addProgram(new PropertyStringProgram(config, name, value));
   }
@@ -322,7 +322,7 @@ public class BeanConfig
     if (_init == null)
       _init = new ContainerProgram();
 
-    Config config = Config.getCurrent();
+    ConfigContext config = ConfigContext.getCurrent();
     
     _init.addProgram(0, new PropertyStringProgram(config, name, value, true));
   }

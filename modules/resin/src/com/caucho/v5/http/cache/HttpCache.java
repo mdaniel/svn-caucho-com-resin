@@ -33,7 +33,7 @@ import com.caucho.v5.management.server.CacheItem;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.MemoryPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -52,7 +52,7 @@ public class HttpCache extends HttpCacheBase
 
   private LruCache<FilterChainHttpCache,FilterChainHttpCache> _cacheLruEntries;
 
-  private Path _path;
+  private PathImpl _path;
   // private Database _database;
   
   private BlockManagerHttpCache _store;
@@ -97,7 +97,7 @@ public class HttpCache extends HttpCacheBase
    * Sets the path to the cache directory.
    */
   @Override
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
@@ -106,7 +106,7 @@ public class HttpCache extends HttpCacheBase
    * Returns the path from the cache directory.
    */
   @Override
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }
@@ -187,7 +187,7 @@ public class HttpCache extends HttpCacheBase
   /**
    * Sets the path to the cache directory (backwards compatibility).
    */
-  public void setDir(Path path)
+  public void setDir(PathImpl path)
   {
     setPath(path);
   }
@@ -278,7 +278,7 @@ public class HttpCache extends HttpCacheBase
     else
       server = server.replace(':', '_'); //windows
 
-    Path path = _path.lookup("http-cache.store");
+    PathImpl path = _path.lookup("http-cache.store");
 
     try {
       if (path.exists())

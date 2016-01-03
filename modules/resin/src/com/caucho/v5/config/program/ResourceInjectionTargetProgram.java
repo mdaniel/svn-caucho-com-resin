@@ -33,10 +33,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.ResourceGroupConfig;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -59,7 +59,7 @@ public class ResourceInjectionTargetProgram extends ConfigProgram
                                         Class<?> targetClass,
                                         String targetName)
   {
-    super(Config.getCurrent());
+    super(ConfigContext.getCurrent());
     
     _resourceConfig = resourceConfig;
     

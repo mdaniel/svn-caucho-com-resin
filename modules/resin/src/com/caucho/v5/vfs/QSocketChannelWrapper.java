@@ -28,12 +28,12 @@
 
 package com.caucho.v5.vfs;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.IntMap;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.QSocket;
 import com.caucho.v5.vfs.SocketChannelStream;
 import com.caucho.v5.vfs.StreamImpl;
-import com.caucho.v5.vfs.TempBuffer;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -55,7 +55,7 @@ import java.util.logging.Logger;
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
-@Module
+@ModulePrivate
 public class QSocketChannelWrapper extends QSocket {
   private static final Logger log
     = Logger.getLogger(QSocketChannelWrapper.class.getName());

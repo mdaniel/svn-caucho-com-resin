@@ -60,12 +60,12 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.reflect.ReflectUtil;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.SessionWebSocketBase;
 
-@Module
+@ModulePrivate
 public class WebSocketEndpointSkeleton<T>
 {
   private static final L10N L = new L10N(WebSocketEndpointSkeleton.class);
@@ -320,7 +320,7 @@ public class WebSocketEndpointSkeleton<T>
     try {
       _openMethod = createMethodHandle(method);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -697,7 +697,7 @@ public class WebSocketEndpointSkeleton<T>
     try {
       _closeMethod = createMethodHandle(method);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -733,7 +733,7 @@ public class WebSocketEndpointSkeleton<T>
     try {
       _errorMethod = createMethodHandle(method);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

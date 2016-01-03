@@ -46,12 +46,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import com.caucho.v5.config.CompileException;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.UserMessage;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.DisplayableException;
-import com.caucho.v5.config.LineCompileException;
-import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.UserMessageLocation;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.attribute.AttributeConfig;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.core.ContextConfig;
@@ -61,13 +61,13 @@ import com.caucho.v5.config.program.RecoverableProgram;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.StringType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
-import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.inject.impl.InjectContext;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.xml.QAbstractNode;
 import com.caucho.v5.xml.QAttributedNode;
 import com.caucho.v5.xml.QDocument;
@@ -78,7 +78,7 @@ import com.caucho.v5.xml.XmlUtil;
 /**
  * The ConfigContext contains the state of the current configuration.
  */
-@Module
+@ModulePrivate
 public class ContextConfigXml extends ContextConfig
 {
   private final static L10N L = new L10N(ContextConfigXml.class);
@@ -98,7 +98,7 @@ public class ContextConfigXml extends ContextConfig
     super(parent);
   }
 
-  public ContextConfigXml(Config config)
+  public ContextConfigXml(ConfigContext config)
   {
     super(config);
   }
@@ -151,7 +151,7 @@ public class ContextConfigXml extends ContextConfig
    * @param bean the object to be configured.
    */
   public Object configure(Object bean, Node top)
-    throws LineConfigException
+    throws ConfigExceptionLocation
   {
     if (bean == null)
       throw new NullPointerException(L.l("unexpected null bean at node '{0}'", top));
@@ -168,7 +168,7 @@ public class ContextConfigXml extends ContextConfig
       type.init(bean);
 
       return type.replaceObject(bean);
-    } catch (LineConfigException e) {
+    } catch (ConfigExceptionLocation e) {
       throw e;
     } catch (Exception e) {
       throw error(e, top);
@@ -186,7 +186,7 @@ public class ContextConfigXml extends ContextConfig
    * @return the configured object, or the factory generated object
    */
   public void configureBean(Object bean, Node top)
-    throws LineConfigException
+    throws ConfigExceptionLocation
   {
     ContextConfigXml oldBuilder = getCurrent();
     String oldFile = getBaseUri();
@@ -222,10 +222,10 @@ public class ContextConfigXml extends ContextConfig
    *
    * @param bean the bean to be configured
    * @param attribute the node representing the configured attribute
-   * @throws LineConfigException
+   * @throws ConfigExceptionLocation
    */
   public void configureAttribute(Object bean, Node attribute)
-    throws LineConfigException
+    throws ConfigExceptionLocation
   {
     String attrName = attribute.getNodeName();
 
@@ -252,7 +252,7 @@ public class ContextConfigXml extends ContextConfig
 
       type.afterConfigure(this, bean);
     }
-    catch (LineConfigException e) {
+    catch (ConfigExceptionLocation e) {
       throw e;
     }
     catch (Exception e) {
@@ -271,12 +271,12 @@ public class ContextConfigXml extends ContextConfig
    * @param bean the bean instance
    * @param top the configuration top
    * @return the configured bean, possibly the replaced object
-   * @throws LineConfigException
+   * @throws ConfigExceptionLocation
    */
   public Object configureNode(Node node,
                               Object bean,
                               ConfigType<?> beanType)
-    throws LineConfigException
+    throws ConfigExceptionLocation
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -302,7 +302,7 @@ public class ContextConfigXml extends ContextConfig
         log.log(Level.ALL, "config end " + beanType);
 
       beanType.afterConfigure(this, bean);
-    } catch (LineConfigException e) {
+    } catch (ConfigExceptionLocation e) {
       throw e;
     } catch (Exception e) {
       throw error(e, node);
@@ -320,7 +320,7 @@ public class ContextConfigXml extends ContextConfig
    * @param bean the bean instance
    * @param top the configuration top
    * @return the configured bean, possibly the replaced object
-   * @throws LineConfigException
+   * @throws ConfigExceptionLocation
    */
   private void configureNodeAttributes(Node node,
                                        Object bean,
@@ -392,7 +392,7 @@ public class ContextConfigXml extends ContextConfig
                                 parentType, attrStrategy,
                                 allowParam);
       }
-    } catch (LineConfigException e) {
+    } catch (ConfigExceptionLocation e) {
       throw e;
     } catch (Exception e) {
       throw error(e, childNode);
@@ -503,7 +503,7 @@ public class ContextConfigXml extends ContextConfig
         try {
           attrStrategy.setValue(bean, qName, null);
         } catch (Exception e) {
-          throw ConfigException.create(L.l("{0} value must not be null.\n  ", text), e);
+          throw ConfigException.wrap(L.l("{0} value must not be null.\n  ", text), e);
         }
       }
 
@@ -772,9 +772,9 @@ public class ContextConfigXml extends ContextConfig
     try {
       return ctor.newInstance(args);
     } catch (InvocationTargetException e) {
-      throw ConfigException.create(ctor.getName(), e.getCause());
+      throw ConfigExceptionLocation.wrap(ctor, e.getCause());
     } catch (Exception e) {
-      throw ConfigException.create(ctor.getName(), e);
+      throw ConfigExceptionLocation.wrap(ctor, e);
     }
   }
 
@@ -837,7 +837,7 @@ public class ContextConfigXml extends ContextConfig
   {
     ConfigProgram program = new ProgramNodeChild(getConfig(), node);
     
-    if (Boolean.TRUE.equals(Config.getProperty(RecoverableProgram.ATTR))) {
+    if (Boolean.TRUE.equals(ConfigContext.getProperty(RecoverableProgram.ATTR))) {
       program = new RecoverableProgram(getConfig(), program);
     }
     
@@ -906,7 +906,7 @@ public class ContextConfigXml extends ContextConfig
         else
           return type.valueOf(textValue);
       }
-    } catch (LineConfigException e) {
+    } catch (ConfigExceptionLocation e) {
       throw e;
     } catch (Exception e) {
       throw error(e, childNode);
@@ -942,7 +942,7 @@ public class ContextConfigXml extends ContextConfig
 
       _dependDocument = doc;
 
-      ArrayList<Path> pathList;
+      ArrayList<PathImpl> pathList;
       pathList = doc.getDependList();
 
       if (pathList != null) {
@@ -1049,7 +1049,7 @@ public class ContextConfigXml extends ContextConfig
 
     //Object value = type.valueOf(elContext, expr);
     //Object value = expr.evalObject(elContext);
-    Object value = expr.eval(Config.getEnvironment());
+    Object value = expr.eval(ConfigContext.getEnvironment());
     
     value = type.valueOf(value);
 
@@ -1106,7 +1106,7 @@ public class ContextConfigXml extends ContextConfig
     throws ELException
   {
     if (exprString.indexOf("${") >= 0 && isEL()) {
-      return Config.eval(exprString);
+      return ConfigContext.eval(exprString);
       /*
       ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
@@ -1140,9 +1140,9 @@ public class ContextConfigXml extends ContextConfig
     }
 
     if (filename != null)
-      return new LineConfigException(filename, line, msg);
+      return new ConfigExceptionLocation(filename, line, msg);
     else
-      return new LineConfigException(msg);
+      return new ConfigExceptionLocation(msg);
   }
 
   private static RuntimeException error(Throwable e, Node node)
@@ -1166,18 +1166,18 @@ public class ContextConfigXml extends ContextConfig
     }
 
     for (; e.getCause() != null; e = e.getCause()) {
-      if (e instanceof LineCompileException)
+      if (e instanceof UserMessageLocation)
         break;
-      else if (e instanceof LineConfigException)
+      else if (e instanceof ConfigExceptionLocation)
         break;
-      else if (e instanceof CompileException)
+      else if (e instanceof UserMessage)
         break;
     }
 
-    if (e instanceof LineConfigException)
-      return (LineConfigException) e;
-    else if (e instanceof LineCompileException) {
-      return new LineConfigException(e.getMessage(), e);
+    if (e instanceof ConfigExceptionLocation)
+      return (ConfigExceptionLocation) e;
+    else if (e instanceof UserMessageLocation) {
+      return new ConfigExceptionLocation(e.getMessage(), e);
     }
     else if (e instanceof ConfigException
              && e.getMessage() != null
@@ -1188,12 +1188,12 @@ public class ContextConfigXml extends ContextConfig
         filename = systemId;
       }
 
-      return new LineConfigException(filename, line,
+      return new ConfigExceptionLocation(filename, line,
                                      e.getMessage() + sourceLines,
                                      e);
     }
-    else if (e instanceof CompileException && e.getMessage() != null) {
-      return new LineConfigException(filename, line, e);
+    else if (e instanceof UserMessage && e.getMessage() != null) {
+      return new ConfigExceptionLocation(filename, line, e);
     }
     else {
       String sourceLines = getSourceLines(systemId, line);
@@ -1201,15 +1201,15 @@ public class ContextConfigXml extends ContextConfig
       String msg = filename + ":" + line + ": " + e + sourceLines;
 
       if (e instanceof RuntimeException) {
-        throw new LineConfigException(msg, e);
+        throw new ConfigExceptionLocation(msg, e);
       }
       else if (e instanceof Error) {
         // server/1711
-        throw new LineConfigException(msg, e);
+        throw new ConfigExceptionLocation(msg, e);
         // throw (Error) e;
       }
       else
-        return new LineConfigException(msg, e);
+        return new ConfigExceptionLocation(msg, e);
     }
   }
 

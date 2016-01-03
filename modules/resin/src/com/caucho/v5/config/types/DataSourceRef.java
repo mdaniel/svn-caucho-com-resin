@@ -36,7 +36,7 @@ import javax.annotation.PostConstruct;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.jdbc.DatabaseFactory;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 
@@ -211,7 +211,7 @@ public class DataSourceRef extends ResourceGroupConfig {
       try {
         return JndiUtil.lookup(getLookupName());
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     
@@ -241,7 +241,7 @@ public class DataSourceRef extends ResourceGroupConfig {
 
       JndiUtil.bindDeepShort(_name, this);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }

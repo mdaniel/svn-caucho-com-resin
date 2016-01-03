@@ -30,7 +30,7 @@ package com.caucho.v5.servlets.webdav;
 
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.NullIterator;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -282,12 +282,12 @@ public class ApplicationPath extends AbstractPath {
   /**
    * Returns the underlying path.
    */
-  protected Path getPath(String path,
+  protected PathImpl getPath(String path,
                          HttpServletRequest request,
                          ServletContext app)
     throws IOException
   {
-    Path appDir = ((WebApp) app).getRootDirectory();
+    PathImpl appDir = ((WebApp) app).getRootDirectory();
 
     return appDir.lookup("./" + path);
   }

@@ -77,24 +77,24 @@ import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.inject.InjectManager;
+import com.caucho.v5.io.AlwaysModified;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.lifecycle.Lifecycle;
-import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoader;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.FreeRing;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ClientDisconnectException;
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
-  implements AlarmListener, ClassLoaderListener, 
+  implements AlarmListener, EnvLoaderListener, 
              InvocationRouter<InvocationServlet>, 
              Dependency
 {
@@ -248,7 +248,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       log.log(Level.WARNING, e.toString(), e);
 
       // exceptions here must throw to the top because they're non-recoverable
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
   
@@ -556,7 +556,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   /**
    * Sets the root directory.
    */
-  public void setRootDirectory(Path path)
+  public void setRootDirectory(PathImpl path)
   {
     _hostContainer.setRootDirectory(path);
 
@@ -566,7 +566,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   /**
    * Sets the root directory.
    */
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return _hostContainer.getRootDirectory();
   }
@@ -1576,7 +1576,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       
       //_podContainer.destroy();
     } finally {
-      DynamicClassLoader.setOldLoader(thread, oldLoader);
+      // DynamicClassLoader.setOldLoader(thread, oldLoader);
     }
   }
 

@@ -43,7 +43,7 @@ import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 
 /**
@@ -66,7 +66,7 @@ public class WebAppContainerResin extends WebAppContainer
    */
   public WebAppContainerResin(HttpContainerServlet server,
                          Host host,
-                         Path rootDirectory,
+                         PathImpl rootDirectory,
                          EnvironmentClassLoader loader,
                          Lifecycle lifecycle)
   {
@@ -126,7 +126,7 @@ public class WebAppContainerResin extends WebAppContainer
 
   @Override
   public WebAppController createWebAppController(String id,
-                                                 Path rootDirectory,
+                                                 PathImpl rootDirectory,
                                                  String urlPrefix)
   {
     // DeployHandle<WebApp> handle = createHandle(id);

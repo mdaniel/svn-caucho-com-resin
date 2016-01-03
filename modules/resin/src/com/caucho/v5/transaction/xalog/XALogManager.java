@@ -15,7 +15,7 @@ import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.XidImpl;
 import com.caucho.v5.util.ThreadTask;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Implements a single log stream.  Each log stream has two associated
@@ -56,7 +56,7 @@ public class XALogManager extends AbstractXALogManager implements ThreadTask
    * Adds a log path.
    */
   @Override
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
     throws IOException
   {
     _logStreamList.add(new XALogStream(this, path));

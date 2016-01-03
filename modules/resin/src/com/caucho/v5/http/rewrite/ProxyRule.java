@@ -117,7 +117,7 @@ public class ProxyRule
       _webApp.getBuilder().addServlet(_servlet);
     }
     catch (ServletException ex) {
-      throw ConfigException.create(ex);
+      throw ConfigException.wrap(ex);
     }
     catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);

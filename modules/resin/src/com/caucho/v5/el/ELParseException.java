@@ -28,13 +28,13 @@
 
 package com.caucho.v5.el;
 
-import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.UserMessage;
 
 /**
  * An expression language exception.
  */
 public class ELParseException extends javax.el.ELException
-  implements CompileException {
+  implements UserMessage {
   
   public ELParseException()
   {

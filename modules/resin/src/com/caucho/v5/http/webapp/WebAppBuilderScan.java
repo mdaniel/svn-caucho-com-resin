@@ -70,7 +70,7 @@ import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
 
@@ -120,7 +120,7 @@ public class WebAppBuilderScan
 
   void addScanListeners()
   {
-    getWebApp().getClassLoader().addScanListener(new WebFragmentScanner());
+    // XXX: getWebApp().getClassLoader().addScanListener(new WebFragmentScanner());
   }
 
   void loadInitializers()
@@ -129,7 +129,7 @@ public class WebAppBuilderScan
     // XXX: websockets forces this
     _classHierarchyScanListener = new ScanListenerClassHierarchy(getWebApp().getClassLoader());
     
-    getWebApp().getClassLoader().addScanListener(_classHierarchyScanListener);
+    // XXX: getWebApp().getClassLoader().addScanListener(_classHierarchyScanListener);
 
     Class<?> cl = ServletContainerInitializer.class;
     
@@ -159,7 +159,7 @@ public class WebAppBuilderScan
       if (_classHierarchyScanListener == null) {
         _classHierarchyScanListener = new ScanListenerClassHierarchy(getWebApp().getClassLoader());
         
-        getWebApp().getClassLoader().addScanListener(_classHierarchyScanListener);
+        // XXX: getWebApp().getClassLoader().addScanListener(_classHierarchyScanListener);
       }
       
       //_classHierarchyScanListener.addRoot(rootPath);
@@ -194,7 +194,7 @@ public class WebAppBuilderScan
     return list;
   }
   
-  private Path getRootPath(Path path, String name)
+  private PathImpl getRootPath(PathImpl path, String name)
   {
     if (path instanceof JarPath) {
       return ((JarPath) path).getContainer();
@@ -234,11 +234,11 @@ public class WebAppBuilderScan
           return -1;
         }
 
-        Path aPath = Vfs.lookup(aUrl.toString());
-        Path bPath = Vfs.lookup(bUrl.toString());
+        PathImpl aPath = Vfs.lookup(aUrl.toString());
+        PathImpl bPath = Vfs.lookup(bUrl.toString());
 
-        Path aRoot = getRootPath(aPath, aName);
-        Path bRoot = getRootPath(bPath, bName);
+        PathImpl aRoot = getRootPath(aPath, aName);
+        PathImpl bRoot = getRootPath(bPath, bName);
 
         int aIndex = fragmentIndexOf(aRoot);
         int bIndex = fragmentIndexOf(bRoot);
@@ -250,7 +250,7 @@ public class WebAppBuilderScan
       }
     }
 
-    private int fragmentIndexOf(Path root)
+    private int fragmentIndexOf(PathImpl root)
     {
       List<WebAppFragmentConfig> fragments = _builder.getBuilderFragment().getFragments();
       
@@ -456,13 +456,13 @@ public class WebAppBuilderScan
     }
 
     @Override
-    public boolean isRootScannable(Path root, String packageRoot)
+    public boolean isRootScannable(PathImpl root, String packageRoot)
     {
       return true;
     }
 
     @Override
-    public ScanClass scanClass(Path root, String packageRoot,
+    public ScanClass scanClass(PathImpl root, String packageRoot,
                                String name, int modifiers)
     {
       if (Modifier.isPublic(modifiers))
@@ -487,14 +487,14 @@ public class WebAppBuilderScan
 
     @Override
     public void classMatchEvent(ClassLoader loader,
-                                Path root,
+                                PathImpl root,
                                 String className)
     {
       _pendingClasses.add(className);
     }
 
     @Override
-    public void completePath(Path root)
+    public void completePath(PathImpl root)
     {
     }
   }

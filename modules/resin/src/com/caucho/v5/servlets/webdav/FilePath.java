@@ -28,7 +28,7 @@
 
 package com.caucho.v5.servlets.webdav;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -41,13 +41,13 @@ import java.util.logging.Level;
  */
 public class FilePath extends ApplicationPath
 {
-  private Path _root;
+  private PathImpl _root;
 
   public FilePath()
   {
   }
 
-  public FilePath(Path root)
+  public FilePath(PathImpl root)
   {
     try {
       root.mkdirs();
@@ -61,7 +61,7 @@ public class FilePath extends ApplicationPath
   /**
    * path the root path.
    */
-  public void setRoot(Path path)
+  public void setRoot(PathImpl path)
   {
     _root = path;
   }
@@ -69,7 +69,7 @@ public class FilePath extends ApplicationPath
   /**
    * Returns the root path.
    */
-  public Path getRoot()
+  public PathImpl getRoot()
   {
     return _root;
   }
@@ -77,7 +77,7 @@ public class FilePath extends ApplicationPath
   /**
    * Returns the underlying path.
    */
-  protected Path getPath(String path,
+  protected PathImpl getPath(String path,
                          HttpServletRequest request,
                          ServletContext app)
     throws IOException

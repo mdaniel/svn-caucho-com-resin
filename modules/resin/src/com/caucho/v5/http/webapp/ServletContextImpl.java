@@ -32,7 +32,7 @@ package com.caucho.v5.http.webapp;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.*;
 import javax.servlet.descriptor.JspConfigDescriptor;
@@ -60,7 +60,7 @@ public class ServletContextImpl extends ServletContextCompat
 
   private HashMap<String,String> _initParams = new HashMap<String,String>();
 
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     throw new UnsupportedOperationException();
   }
@@ -252,8 +252,8 @@ public class ServletContextImpl extends ServletContextCompat
     
     String realPath = getRealPath(name);
 
-    Path rootDirectory = getRootDirectory();
-    Path path = rootDirectory.lookupNative(realPath);
+    PathImpl rootDirectory = getRootDirectory();
+    PathImpl path = rootDirectory.lookupNative(realPath);
 
     URL url = new URL("jndi:/server" + getContextPath() + name);
 
@@ -302,8 +302,8 @@ public class ServletContextImpl extends ServletContextCompat
     }
 
     String realPath = getRealPath(file);
-    Path rootDirectory = getRootDirectory();
-    Path path = rootDirectory.lookup(realPath);
+    PathImpl rootDirectory = getRootDirectory();
+    PathImpl path = rootDirectory.lookup(realPath);
 
     if (path.exists())
       return new URL(path.getURL()).openConnection();
@@ -332,12 +332,12 @@ public class ServletContextImpl extends ServletContextCompat
     return new FileNotFoundURLConnection(url);
   }
   
-  public Path getCauchoPath(String name)
+  public PathImpl getCauchoPath(String name)
   {
     String realPath = getRealPath(name);
 
-    Path rootDirectory = getRootDirectory();
-    Path path = rootDirectory.lookupNative(realPath);
+    PathImpl rootDirectory = getRootDirectory();
+    PathImpl path = rootDirectory.lookupNative(realPath);
 
     return path;
   }
@@ -347,8 +347,8 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public InputStream getResourceAsStream(String uripath)
   {
-    Path rootDirectory = getRootDirectory();
-    Path path = rootDirectory.lookupNative(getRealPath(uripath));
+    PathImpl rootDirectory = getRootDirectory();
+    PathImpl path = rootDirectory.lookupNative(getRealPath(uripath));
 
     try {
       if (path.canRead())
@@ -373,7 +373,7 @@ public class ServletContextImpl extends ServletContextCompat
     if (! prefix.endsWith("/"))
       prefix = prefix + "/";
 
-    Path path = getRootDirectory().lookup(getRealPath(prefix));
+    PathImpl path = getRootDirectory().lookup(getRealPath(prefix));
 
     HashSet<String> set = new HashSet<String>();
 

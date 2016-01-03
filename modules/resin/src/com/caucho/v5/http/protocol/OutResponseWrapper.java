@@ -37,8 +37,8 @@ import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.TempBuffer;
 
 public class OutResponseWrapper extends OutResponseBase {
   private static final Logger log

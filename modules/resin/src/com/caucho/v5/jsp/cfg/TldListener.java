@@ -99,7 +99,7 @@ public class TldListener {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
   

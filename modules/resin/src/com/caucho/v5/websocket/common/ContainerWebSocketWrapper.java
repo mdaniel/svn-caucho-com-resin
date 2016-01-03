@@ -38,12 +38,12 @@ import javax.websocket.Extension;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for WebSocketContainer.
  */
-@Module
+@ModulePrivate
 abstract public class ContainerWebSocketWrapper implements WebSocketContainer
 {
   abstract protected WebSocketContainer getDelegate();

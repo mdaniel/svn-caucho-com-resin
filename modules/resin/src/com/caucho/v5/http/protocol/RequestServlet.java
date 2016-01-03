@@ -53,6 +53,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import com.caucho.v5.baratine.web.HttpStatus;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.Invocation;
 import com.caucho.v5.http.dispatch.InvocationServlet;
@@ -69,7 +70,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.NullEnumeration;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -91,6 +92,10 @@ public final class RequestServlet extends RequestCauchoBase
   private Boolean _isSecure;
 
   private InvocationServlet _invocation;
+
+  private final Form _formParser = new Form();
+  private final HashMapImpl<String,String[]> _form
+    = new HashMapImpl<String,String[]>();
 
   // session/cookies
   private Cookie []_cookiesIn;
@@ -118,7 +123,7 @@ public final class RequestServlet extends RequestCauchoBase
   private long _asyncTimeout;
   private AsyncContextImpl _asyncContext;
 
-  private ArrayList<Path> _closeOnExit;
+  private ArrayList<PathImpl> _closeOnExit;
 
   /**
    * Create a new Request.  Because the actual initialization occurs with
@@ -1394,10 +1399,10 @@ public final class RequestServlet extends RequestCauchoBase
   /**
    * Adds a file to be removed at the end.
    */
-  public void addCloseOnExit(Path path)
+  public void addCloseOnExit(PathImpl path)
   {
     if (_closeOnExit == null)
-      _closeOnExit = new ArrayList<Path>();
+      _closeOnExit = new ArrayList<PathImpl>();
 
     _closeOnExit.add(path);
   }
@@ -1747,7 +1752,7 @@ public final class RequestServlet extends RequestCauchoBase
 
     if (_closeOnExit != null) {
       for (int i = _closeOnExit.size() - 1; i >= 0; i--) {
-        Path path = _closeOnExit.get(i);
+        PathImpl path = _closeOnExit.get(i);
 
         try {
           path.remove();
@@ -1837,7 +1842,7 @@ public final class RequestServlet extends RequestCauchoBase
    * @see com.caucho.v5.http.protocol.RequestFacade#setStatus(int)
    */
   @Override
-  public void setStatus(int scNotModified)
+  public void setStatus(HttpStatus status)
   {
     // TODO Auto-generated method stub
     
@@ -1907,7 +1912,7 @@ public final class RequestServlet extends RequestCauchoBase
    * @see com.caucho.v5.http.protocol.RequestFacade#sendError(int)
    */
   @Override
-  public void sendError(int statusError) throws IOException
+  public void sendError(HttpStatus status)
   {
     // TODO Auto-generated method stub
     

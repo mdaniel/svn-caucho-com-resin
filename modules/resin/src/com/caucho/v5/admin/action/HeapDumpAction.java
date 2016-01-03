@@ -41,14 +41,14 @@ import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.profile.HeapDump;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 public class HeapDumpAction implements AdminAction
 {
   private static final L10N L = new L10N(HeapDumpAction.class);
   
-  public String execute(boolean isJvmHprof, String serverId, Path hprofPath)
+  public String execute(boolean isJvmHprof, String serverId, PathImpl hprofPath)
     throws ConfigException, JMException, IOException
   {
     if (isJvmHprof)
@@ -57,7 +57,7 @@ public class HeapDumpAction implements AdminAction
       return doProHeapDump();
   }
   
-  private String doJvmHprofHeapDump(String serverId, Path hprofPath)
+  private String doJvmHprofHeapDump(String serverId, PathImpl hprofPath)
     throws ConfigException, JMException, IOException
   {
     ObjectName name = new ObjectName(

@@ -84,7 +84,7 @@ public class DatabaseFactoryImpl extends DatabaseFactory {
       pool.init();
     } catch (Exception e) {
       e.printStackTrace();
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
     
     return pool;

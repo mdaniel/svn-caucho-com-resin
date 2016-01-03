@@ -18,7 +18,7 @@ import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.xalog.AbstractXALogManager;
 import com.caucho.v5.transaction.xalog.XALogManager;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Remote administration service for log
@@ -37,7 +37,7 @@ public class XaLogService
   {
   }
 
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     // backwards compat
   }
@@ -69,7 +69,7 @@ public class XaLogService
 
       _xaLog.start();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

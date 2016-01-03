@@ -62,7 +62,7 @@ public final class JmxAttributeMeter extends MeterBase {
     try {
       _objectName = JmxUtilResin.getServerObjectName(objectName);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
 
     _attribute = attribute;

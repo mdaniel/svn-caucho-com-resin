@@ -58,7 +58,7 @@ public class MemoryTenuredHealthCheckImpl extends AbstractMemoryHealthCheckImpl
     try {
       getMemoryPool().setTenuredName(new ObjectName(objectName));
     } catch (MalformedObjectNameException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

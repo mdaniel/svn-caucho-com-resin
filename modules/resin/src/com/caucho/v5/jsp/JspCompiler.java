@@ -41,7 +41,7 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspPage;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.xml.ConfigXml;
@@ -62,7 +62,7 @@ import com.caucho.v5.resin.ResinEmbed;
 import com.caucho.v5.resin.WebAppEmbed;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -85,8 +85,8 @@ public class JspCompiler implements EnvironmentBean {
 
   private WebAppResin _webApp;
 
-  private Path _classDir;
-  private Path _appDir;
+  private PathImpl _classDir;
+  private PathImpl _appDir;
 
   private JspResourceManager _resourceManager;
   private TaglibManager _taglibManager;
@@ -134,7 +134,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Sets the destination class directory.
    */
-  public void setClassDir(Path path)
+  public void setClassDir(PathImpl path)
   {
     _classDir = path;
   }
@@ -142,7 +142,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Sets the destination class directory.
    */
-  public void setClassDirectory(Path path)
+  public void setClassDirectory(PathImpl path)
   {
     setClassDir(path);
   }
@@ -150,7 +150,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Gets the destination class directory.
    */
-  public Path getClassDir()
+  public PathImpl getClassDir()
   {
     if (_classDir != null)
       return _classDir;
@@ -161,7 +161,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Sets the source webApp directory.
    */
-  public void setAppDir(Path path)
+  public void setAppDir(PathImpl path)
   {
     _appDir = path;
   }
@@ -169,7 +169,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Gets the source webApp directory.
    */
-  public Path getAppDir()
+  public PathImpl getAppDir()
   {
     if (_appDir != null)
       return _appDir;
@@ -242,7 +242,7 @@ public class JspCompiler implements EnvironmentBean {
       if (_taglibManager == null) {
         WebAppResin webApp = getWebApp();
 
-        Path appDir = getAppDir();
+        PathImpl appDir = getAppDir();
         if (appDir == null && webApp != null)
           appDir = webApp.getRootDirectory();
 
@@ -314,7 +314,7 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public WebApp createWebApp(Path rootDirectory)
+  public WebApp createWebApp(PathImpl rootDirectory)
   {
     if (_webApp == null) {
       if (rootDirectory == null)
@@ -434,7 +434,7 @@ public class JspCompiler implements EnvironmentBean {
    *
    * @return a JspPage instance
    */
-  public Page compile(Path jspPath, String uri)
+  public Page compile(PathImpl jspPath, String uri)
     throws Exception
   {
     return getCompilerInstance(jspPath, uri).compile();
@@ -443,7 +443,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Returns the compilation instance.
    */
-  public JspCompilerInstance getCompilerInstance(Path jspPath,
+  public JspCompilerInstance getCompilerInstance(PathImpl jspPath,
                                                  String uri)
     throws Exception
   {
@@ -459,7 +459,7 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Returns the compilation instance.
    */
-  public JspCompilerInstance getCompilerInstance(Path jspPath,
+  public JspCompilerInstance getCompilerInstance(PathImpl jspPath,
                                                  String uri,
                                                  String className)
     throws Exception
@@ -519,7 +519,7 @@ public class JspCompiler implements EnvironmentBean {
       if (autoCompile) {
         try {
           String pathName = className.replace('.', '/') + ".class";
-          Path classPath = getClassDir().lookup(pathName);
+          PathImpl classPath = getClassDir().lookup(pathName);
 
           classPath.remove();
         } catch (IOException e1) {
@@ -542,7 +542,7 @@ public class JspCompiler implements EnvironmentBean {
     // If the loading fails, remove the class because it may be corrupted
     String staticName = className.replace('.', '/') + ".static";
 
-    Path path = getClassDir().lookup(staticName);
+    PathImpl path = getClassDir().lookup(staticName);
 
     return new StaticPage(path, isSession);
   }
@@ -661,7 +661,7 @@ public class JspCompiler implements EnvironmentBean {
 
       while (i < args.length) {
         if (args[i].equals("-app-dir")) {
-          Path appDir = Vfs.lookup(args[i + 1]);
+          PathImpl appDir = Vfs.lookup(args[i + 1]);
 
           WebApp webApp = createWebApp(appDir);
 
@@ -682,7 +682,7 @@ public class JspCompiler implements EnvironmentBean {
           i += 2;
         }
         else if (args[i].equals("-conf")) {
-          Path path = Vfs.lookup(args[i + 1]);
+          PathImpl path = Vfs.lookup(args[i + 1]);
 
           new ConfigXml().configureBean(this, path);
           hasConf = true;
@@ -695,13 +695,13 @@ public class JspCompiler implements EnvironmentBean {
       
       WebApp webApp = getWebApp();
       if (webApp != null && ! hasConf) {
-        Path appDir = webApp.getRootDirectory();
+        PathImpl appDir = webApp.getRootDirectory();
 
         DynamicClassLoader dynLoader = webApp.getClassLoader();
         dynLoader.addLoader(new CompilingLoader(dynLoader, appDir.lookup("WEB-INF/classes")));
         dynLoader.addLoader(new DirectoryLoader(dynLoader, appDir.lookup("WEB-INF/lib")));
 
-        Path webXml = appDir.lookup("WEB-INF/web.xml");
+        PathImpl webXml = appDir.lookup("WEB-INF/web.xml");
 
         if (webXml.canRead()) {
           try {
@@ -712,7 +712,7 @@ public class JspCompiler implements EnvironmentBean {
         }
       }
 
-      Path appDir = null;
+      PathImpl appDir = null;
 
       if (webApp == null && getAppDir() != null) {
         webApp = createWebApp(null);
@@ -755,7 +755,7 @@ public class JspCompiler implements EnvironmentBean {
     try {
       thread.setContextClassLoader(getClassLoader());
     
-      Path path = Vfs.lookup(uri);
+      PathImpl path = Vfs.lookup(uri);
 
       if (path.isDirectory())
         compileDirectory(path, getAppDir(), this, pendingClasses);
@@ -784,8 +784,8 @@ public class JspCompiler implements EnvironmentBean {
     }
   }
 
-  private static void compileDirectory(Path path,
-                                       Path appDir,
+  private static void compileDirectory(PathImpl path,
+                                       PathImpl appDir,
                                        JspCompiler compiler,
                                        ArrayList<String> pendingClasses)
     throws Exception
@@ -794,7 +794,7 @@ public class JspCompiler implements EnvironmentBean {
       String []list = path.list();
 
       for (int i = 0; i < list.length; i++) {
-        Path subpath = path.lookup(list[i]);
+        PathImpl subpath = path.lookup(list[i]);
 
         compileDirectory(subpath, appDir, compiler, pendingClasses);
       }
@@ -807,8 +807,8 @@ public class JspCompiler implements EnvironmentBean {
     }
   }
 
-  private static void compileJsp(Path path,
-                                 Path appDir,
+  private static void compileJsp(PathImpl path,
+                                 PathImpl appDir,
                                  JspCompiler compiler,
                                  ArrayList<String> pendingClasses)
     throws Exception
@@ -833,7 +833,7 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   public class ApplicationConfig {
-    private Path _rootDir;
+    private PathImpl _rootDir;
     private ContainerProgram _program = new ContainerProgram();
 
     ApplicationConfig()
@@ -841,17 +841,17 @@ public class JspCompiler implements EnvironmentBean {
       _rootDir = Vfs.lookup();
     }
 
-    public void setRootDirectory(Path path)
+    public void setRootDirectory(PathImpl path)
     {
       _rootDir = path;
     }
 
-    public void setDocumentDirectory(Path path)
+    public void setDocumentDirectory(PathImpl path)
     {
       _rootDir = path;
     }
 
-    public void setAppDir(Path path)
+    public void setAppDir(PathImpl path)
     {
       _rootDir = path;
     }
@@ -871,7 +871,7 @@ public class JspCompiler implements EnvironmentBean {
         throw new NullPointerException();
       
       _program.configure(webApp);
-      Config.init(webApp);
+      ConfigContext.init(webApp);
 
       webApp.init();
       webApp.start();

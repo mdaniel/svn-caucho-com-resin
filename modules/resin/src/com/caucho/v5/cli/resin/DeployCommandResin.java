@@ -35,7 +35,7 @@ import com.caucho.v5.cli.daemon.ArgsDaemon;
 import com.caucho.v5.cli.server.ClientDeploy;
 import com.caucho.v5.cli.server.DeployCommand;
 import com.caucho.v5.server.config.ConfigBoot;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 
 public class DeployCommandResin extends DeployCommand
@@ -44,7 +44,7 @@ public class DeployCommandResin extends DeployCommand
   protected void deployDefault(ClientDeploy client,
                                ArgsDaemon args,
                                ConfigBoot config,
-                               ArrayList<Path> pathList)
+                               ArrayList<PathImpl> pathList)
   {
     deployWar(client, args, config, pathList.get(0));
   }

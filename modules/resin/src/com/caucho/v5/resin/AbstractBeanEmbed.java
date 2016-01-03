@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 
 /**
  * Abstract base class for bean-like embedding objects.

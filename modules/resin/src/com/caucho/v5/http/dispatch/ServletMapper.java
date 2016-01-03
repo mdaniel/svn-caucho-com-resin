@@ -43,12 +43,12 @@ import javax.servlet.ServletException;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.make.DependencyContainer;
+import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.servlets.FileServlet;
 import com.caucho.v5.util.ConcurrentArrayList;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Manages dispatching: servlets and filters.
@@ -199,7 +199,7 @@ public class ServletMapper {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -402,7 +402,7 @@ public class ServletMapper {
     WebApp webApp = (WebApp) _webApp;
 
     String uriRealPath = webApp.getRealPath(contextURI);
-    Path contextPath = webApp.getRootDirectory().lookup(uriRealPath);
+    PathImpl contextPath = webApp.getRootDirectory().lookup(uriRealPath);
 
     if (! contextPath.isDirectory())
       return;
@@ -413,7 +413,7 @@ public class ServletMapper {
 
       String realPath = webApp.getRealPath(contextURI + "/" + file);
 
-      Path path = webApp.getRootDirectory().lookup(realPath);
+      PathImpl path = webApp.getRootDirectory().lookup(realPath);
 
       dependencyList.add(new Depend(path));
     }

@@ -45,7 +45,7 @@ import com.caucho.v5.http.dispatch.FilterChainRewriteDispatch;
 import com.caucho.v5.http.dispatch.FilterChainRewriteInclude;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Manages the welcome-file as a rewrite-dispatch.
@@ -156,7 +156,7 @@ public class WelcomeFile extends DispatchRuleBase
     // String contextUri = invocation.getContextURI();
     
     try {
-      Path path = _webApp.getCauchoPath(uri);
+      PathImpl path = _webApp.getCauchoPath(uri);
 
       if (! path.exists())
         return null;

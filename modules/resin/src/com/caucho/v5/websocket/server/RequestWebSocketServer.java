@@ -33,17 +33,17 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.StateConnection;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.io.InWebSocket;
 import com.caucho.v5.websocket.io.WebSocketBaratine;
 
 /**
  * User facade for http requests.
  */
-@Module
+@ModulePrivate
 public class RequestWebSocketServer implements ConnectionProtocol
 {
   private static final Logger log = Logger.getLogger(RequestWebSocketServer.class.getName());

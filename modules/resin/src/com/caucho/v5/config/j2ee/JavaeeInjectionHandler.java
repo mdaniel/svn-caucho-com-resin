@@ -152,7 +152,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       
       JndiUtil.bindDeep(name, gen);
     } catch (NamingException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }
@@ -176,7 +176,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       
       JndiUtil.bindDeep(name, gen);
     } catch (NamingException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }
@@ -206,7 +206,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       
       JndiUtil.bindDeep(name, gen);
     } catch (NamingException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }

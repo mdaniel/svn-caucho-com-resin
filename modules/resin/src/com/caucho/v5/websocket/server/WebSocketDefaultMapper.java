@@ -38,12 +38,12 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.dispatch.ServletDefaultMapper;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 class WebSocketDefaultMapper implements ServletDefaultMapper {
   private static final Logger log
     = Logger.getLogger(WebSocketDefaultMapper.class.getName());

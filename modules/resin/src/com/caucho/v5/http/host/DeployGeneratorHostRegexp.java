@@ -37,10 +37,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployGenerator;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The generator for the web-app deploy
@@ -152,14 +152,14 @@ public class DeployGeneratorHostRegexp
 
       if (_config.getHostName() != null) {
         try {
-          hostName = Config.evalString(_config.getHostName(), x->varMap.get(x));
+          hostName = ConfigContext.evalString(_config.getHostName(), x->varMap.get(x));
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
       }
 
       String id = "host/" + name;
-      Path rootDirectory = _config.calculateRootDirectory(varMap);
+      PathImpl rootDirectory = _config.calculateRootDirectory(varMap);
       
       HostController controller
         = _container.createController(id, rootDirectory, name,
@@ -182,7 +182,7 @@ public class DeployGeneratorHostRegexp
 
       // controller.init();
     
-      Path rootDir = controller.getRootDirectory();
+      PathImpl rootDir = controller.getRootDirectory();
 
       if (rootDir == null || ! rootDir.isDirectory()) {
         // server/0522

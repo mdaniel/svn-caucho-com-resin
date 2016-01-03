@@ -32,7 +32,7 @@ import com.caucho.v5.config.*;
 
 import org.xml.sax.SAXException;
 
-public class XmlParseException extends LineConfigException
+public class XmlParseException extends ConfigExceptionLocation
 {
   XmlParseException()
   {

@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -61,7 +61,7 @@ import com.caucho.v5.util.L10N;
  * Scheduler for custom services.
  */
 public class ScheduledThreadPool implements ScheduledExecutorService,
-    EnvironmentListener, java.io.Serializable {
+    EnvLoaderListener, java.io.Serializable {
   private static final long serialVersionUID = 1L;
 
   private static Logger log

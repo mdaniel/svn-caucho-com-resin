@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 
 import javax.inject.Qualifier;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * The @BeanName annotation for EJB names
@@ -45,7 +45,7 @@ import com.caucho.v5.inject.Module;
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-@Module
+@ModulePrivate
 public @interface BeanName {
   String value() default "";
 }

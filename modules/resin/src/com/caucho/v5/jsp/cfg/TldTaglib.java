@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 import com.caucho.v5.config.DependencyBean;
 import com.caucho.v5.http.webapp.WebAppResin;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 /**
@@ -56,7 +56,7 @@ public class TldTaglib implements DependencyBean
   private ArrayList<TldTagFile> _tagFiles = new ArrayList<TldTagFile>();
   private ArrayList<TldFunction> _functionList = new ArrayList<TldFunction>();
 
-  private Path _jarPath;
+  private PathImpl _jarPath;
   private Throwable _configException;
 
   private ArrayList<PersistentDependency> _dependList
@@ -359,7 +359,7 @@ public class TldTaglib implements DependencyBean
   /**
    * Sets the jar path.
    */
-  public void setJarPath(Path path)
+  public void setJarPath(PathImpl path)
   {
     _jarPath = path;
   }
@@ -367,7 +367,7 @@ public class TldTaglib implements DependencyBean
   /**
    * Gets the jar path.
    */
-  public Path getJarPath()
+  public PathImpl getJarPath()
   {
     return _jarPath;
   }

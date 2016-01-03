@@ -30,7 +30,7 @@ package com.caucho.v5.xml.readers;
 
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.xml.XmlChar;
 import com.caucho.v5.xml.XmlParser;
@@ -50,7 +50,7 @@ public class XmlReader {
   protected XmlParser _parser;
   protected XmlReader _next;
 
-  protected Path _searchPath;
+  protected PathImpl _searchPath;
   protected ReadStream _is;
   protected String _filename;
   protected int _line;
@@ -151,7 +151,7 @@ public class XmlReader {
   /**
    * Sets the current search path.
    */
-  public void setSearchPath(Path searchPath)
+  public void setSearchPath(PathImpl searchPath)
   {
     _searchPath = searchPath;
   }
@@ -159,7 +159,7 @@ public class XmlReader {
   /**
    * Gets the current search path.
    */
-  public Path getSearchPath()
+  public PathImpl getSearchPath()
   {
     return _searchPath;
   }

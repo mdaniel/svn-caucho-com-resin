@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.amp.manager.AmpManager;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.javac.WorkDir;
@@ -47,7 +48,7 @@ import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.ResourceLoader;
 import com.caucho.v5.server.cdi.CdiProducerResin;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -106,7 +107,8 @@ import com.caucho.v5.vfs.Vfs;
  * </pre>
  */
 // TODO Add JNDI look-up and well as direct access to JNDI/CDI beans manager.
-public class ResinBeanContainer {
+public class ResinBeanContainer implements AutoCloseable
+{
   private static final Logger log
     = Logger.getLogger(ResinBeanContainer.class.getName());
   private static final L10N L = new L10N(ResinBeanContainer.class);
@@ -117,7 +119,7 @@ public class ResinBeanContainer {
   //private ThreadLocal<BeanContainerRequest> _localContext = new ThreadLocal<BeanContainerRequest>();
 
   // Path to the current module (typically the current directory)
-  private Path _modulePath;
+  private PathImpl _modulePath;
   
   private Lifecycle _lifecycle = new Lifecycle();
 
@@ -184,7 +186,7 @@ public class ResinBeanContainer {
    */
   public void addClassPath(String classPath)
   {
-    Path path = Vfs.lookup(classPath);
+    PathImpl path = Vfs.lookup(classPath);
 
     if (classPath.endsWith(".jar")) {
       _classLoader.addJar(path);
@@ -203,14 +205,14 @@ public class ResinBeanContainer {
    */
   public void addPackageModule(String modulePath, String packageName)
   {
-    Path root = Vfs.lookup(modulePath);
+    PathImpl root = Vfs.lookup(modulePath);
 
     try {
       URL url = new URL(root.getURL());
 
-      _classLoader.addScanPackage(url, packageName);
+      // XXX: _classLoader.addScanPackage(url, packageName);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -239,8 +241,8 @@ public class ResinBeanContainer {
 
         URL urlA = bestUrl;
 
-        Path pathA = Vfs.lookup(urlA);
-        Path pathB = Vfs.lookup(url);
+        PathImpl pathA = Vfs.lookup(urlA);
+        PathImpl pathB = Vfs.lookup(url);
 
         for (String name : pathA.list()) {
           if (name.endsWith(".class")) {
@@ -259,7 +261,7 @@ public class ResinBeanContainer {
 
       Objects.requireNonNull(bestUrl, packageName);
 
-      Path path = Vfs.lookup(bestUrl);
+      PathImpl path = Vfs.lookup(bestUrl);
 
       String moduleName = path.getNativePath();
 
@@ -271,7 +273,7 @@ public class ResinBeanContainer {
       addResourceRoot(path);
       addPackageModule(moduleName, packageName);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -290,7 +292,7 @@ public class ResinBeanContainer {
     try {
       thread.setContextClassLoader(getClassLoader());
 
-      Path path = Vfs.lookup(pathName);
+      PathImpl path = Vfs.lookup(pathName);
 
       // support/041a
       /*
@@ -306,7 +308,7 @@ public class ResinBeanContainer {
     }
   }
 
-  public void addResourceRoot(Path path)
+  public void addResourceRoot(PathImpl path)
   {
     ResourceLoader loader = new ResourceLoader(_classLoader, path);
     loader.init();
@@ -344,7 +346,7 @@ public class ResinBeanContainer {
         
         Amp.setContextManager(ampManager);
         
-        EnvLoader.addCloseListener(ampManager);
+        EnvLoader.addCloseListener((AmpManager) ampManager);
       }
 
       // env/0e81 vs env/0e3b

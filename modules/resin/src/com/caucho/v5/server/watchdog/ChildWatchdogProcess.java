@@ -74,7 +74,7 @@ import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WaitFuture;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.QServerSocket;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
@@ -542,8 +542,8 @@ class ChildWatchdogProcess
   {
     // watchdog/0210
     // Path pwd = rootDirectory;
-    Path chroot = _child.getChroot();
-    Path processPwd = _child.getPwd();
+    PathImpl chroot = _child.getChroot();
+    PathImpl processPwd = _child.getPwd();
 
     HashMap<String,String> env = buildEnv();
 
@@ -664,7 +664,7 @@ class ChildWatchdogProcess
       return Class.forName(className);
     } catch (Exception e) {
       //log.log(Level.FINER, e.toString(), e);
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
     
     //return Resin.class;
@@ -677,7 +677,7 @@ class ChildWatchdogProcess
 
     env.putAll(System.getenv());
     
-    Path homeDir = _child.getHomeDir();
+    PathImpl homeDir = _child.getHomeDir();
 
     ArrayList<String> classPathList = new ArrayList<String>();
     classPathList.addAll(_child.getJvmClasspath());
@@ -701,7 +701,7 @@ class ChildWatchdogProcess
    */
   private void buildMacosxLibraryPath(HashMap<String,String> env)
   {
-    Path path = Vfs.lookup("/usr/local/opt/openssl/lib");
+    PathImpl path = Vfs.lookup("/usr/local/opt/openssl/lib");
     
     if (path.isDirectory()) {
       String libpath = env.get("DYLD_LIBRARY_PATH");
@@ -766,8 +766,8 @@ class ChildWatchdogProcess
       jvmArgs.add("-Djava.system.class.loader=" + systemClassLoader);
     }
     
-    Path resinHome = _child.getHomeDir();
-    Path rootDir = _child.getRootDir();
+    PathImpl resinHome = _child.getHomeDir();
+    PathImpl rootDir = _child.getRootDir();
     
     if (! isEndorsed) {
       String endorsed = System.getProperty("java.endorsed.dirs");
@@ -883,7 +883,7 @@ class ChildWatchdogProcess
   {
     ArrayList<String> resinArgs = new ArrayList<String>();
 
-    Path resinRoot = _child.getRootDir();
+    PathImpl resinRoot = _child.getRootDir();
 
     if (resinRoot != null) {
       resinArgs.add("--root-dir");
@@ -1078,10 +1078,10 @@ class ChildWatchdogProcess
   private WriteStream createJvmOut()
     throws IOException
   {
-    Path jvmPath = _child.getLogPath();
+    PathImpl jvmPath = _child.getLogPath();
     
     try {
-      Path dir = jvmPath.getParent();
+      PathImpl dir = jvmPath.getParent();
 
       if (! dir.exists()) {
         dir.mkdirs();

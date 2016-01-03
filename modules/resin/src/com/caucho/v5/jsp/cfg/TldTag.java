@@ -28,13 +28,13 @@
 
 package com.caucho.v5.jsp.cfg;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.DependencyBean;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.jsp.JspLineParseException;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Dependency;
 import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.SimpleTag;
@@ -159,7 +159,7 @@ public class TldTag implements DependencyBean {
       
       tagClass = Class.forName(tagClassName, false, loader);
 
-      Config.checkCanInstantiate(tagClass);
+      ConfigContext.checkCanInstantiate(tagClass);
     } catch (ConfigException e) {
       throw e;
     } catch (Throwable e) {
@@ -221,7 +221,7 @@ public class TldTag implements DependencyBean {
       
       Class teiClass = Class.forName(teiClassName, false, loader);
 
-      Config.validate(teiClass, TagExtraInfo.class);
+      ConfigContext.validate(teiClass, TagExtraInfo.class);
     } catch (ConfigException e) {
       throw e;
     } catch (Throwable e) {

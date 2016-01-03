@@ -50,10 +50,10 @@ import com.caucho.v5.http.dispatch.InvocationRouter;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppConfig;
+import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.make.AlwaysModified;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -75,7 +75,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
   private String _url = "";
   
   // The root directory.
-  private Path _rootDir;
+  private PathImpl _rootDir;
 
   // List of default host configurations
   private ArrayList<HostConfig> _hostDefaultList = new ArrayList<HostConfig>();
@@ -169,7 +169,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
   /**
    * Gets the root directory.
    */
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return _rootDir;
   }
@@ -177,7 +177,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
   /**
    * Sets the root directory.
    */
-  public void setRootDirectory(Path path)
+  public void setRootDirectory(PathImpl path)
   {
     _rootDir = path;
   }
@@ -186,7 +186,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
    * Sets the root directory (obsolete).
    * @deprecated
    */
-  public void setRootDir(Path path)
+  public void setRootDir(PathImpl path)
   {
     setRootDirectory(path);
   }
@@ -461,7 +461,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
       thread.setContextClassLoader(_classLoader);
 
       String id = "hosts/error";
-      Path rootDirectory = Vfs.lookup("memory:/error");
+      PathImpl rootDirectory = Vfs.lookup("memory:/error");
       HostController controller
         = createController(id, rootDirectory, "error", 
                           null, null);
@@ -478,14 +478,14 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
 
       return host;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }
   }
 
   protected HostController createController(String id,
-                                            Path rootDir,
+                                            PathImpl rootDir,
                                             String hostName,
                                             HostConfig config,
                                             HashMap<String, Object> varMap)

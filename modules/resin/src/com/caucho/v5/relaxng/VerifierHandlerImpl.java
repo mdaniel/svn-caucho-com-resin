@@ -35,7 +35,7 @@ import com.caucho.v5.relaxng.program.Item;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 
@@ -721,7 +721,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     
     ReadStream is = null;
     try {
-      Path path = Vfs.lookup().lookup(filename);
+      PathImpl path = Vfs.lookup().lookup(filename);
 
       StringBuilder sb = new StringBuilder("\n\n");
 

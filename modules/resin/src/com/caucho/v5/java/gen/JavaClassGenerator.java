@@ -43,7 +43,7 @@ import com.caucho.v5.loader.SimpleLoader;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.MergePath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -63,10 +63,10 @@ public class JavaClassGenerator {
   private String _encoding;
 
   // The search path
-  private Path _searchPath;
+  private PathImpl _searchPath;
 
   // The work directory
-  private Path _workPath;
+  private PathImpl _workPath;
 
   private ArrayList<String> _pendingFiles = new ArrayList<String>();
 
@@ -97,7 +97,7 @@ public class JavaClassGenerator {
   /**
    * Returns the default merge path
    */
-  public static Path getDefaultSearchPath()
+  public static PathImpl getDefaultSearchPath()
   {
     MergePath mergePath = new MergePath();
 
@@ -110,7 +110,7 @@ public class JavaClassGenerator {
   /**
    * Sets the search path.
    */
-  public void setSearchPath(Path path)
+  public void setSearchPath(PathImpl path)
   {
     _searchPath = path;
   }
@@ -118,7 +118,7 @@ public class JavaClassGenerator {
   /**
    * Returns the assigned search path.
    */
-  public Path getSearchPath()
+  public PathImpl getSearchPath()
   {
     return _searchPath;
   }
@@ -198,7 +198,7 @@ public class JavaClassGenerator {
   /**
    * Sets the work path for the generated class.
    */
-  public void setWorkDir(Path workPath)
+  public void setWorkDir(PathImpl workPath)
   {
     _workPath = workPath;
   }
@@ -206,7 +206,7 @@ public class JavaClassGenerator {
   /**
    * Returns the class dir for the generated class.
    */
-  public Path getWorkDir()
+  public PathImpl getWorkDir()
   {
     if (_workPath == null)
       return CauchoUtil.getWorkPath();
@@ -268,7 +268,7 @@ public class JavaClassGenerator {
     }
   }
 
-  public Path getClassFilePath(String className)
+  public PathImpl getClassFilePath(String className)
   {
     String classPathName = className.replace('.', '/') + ".class";
 
@@ -285,8 +285,8 @@ public class JavaClassGenerator {
     String javaPathName = className.replace('.', '/') + ".java";
     String classPathName = className.replace('.', '/') + ".class";
 
-    Path javaPath = getWorkDir().lookup(javaPathName);
-    Path classPath = getWorkDir().lookup(classPathName);
+    PathImpl javaPath = getWorkDir().lookup(javaPathName);
+    PathImpl classPath = getWorkDir().lookup(classPathName);
 
     try {
       classPath.remove();
@@ -400,7 +400,7 @@ public class JavaClassGenerator {
    */
   public boolean preloadExists(String fullClassName)
   {
-    Path workDir = getWorkDir();
+    PathImpl workDir = getWorkDir();
 
     String classFile = fullClassName.replace('.', '/') + ".class";
 
@@ -424,7 +424,7 @@ public class JavaClassGenerator {
                                             getWorkDir(),
                                             fullClassName);
         // needed for cases like Amber enhancing
-        preloadLoader.setServletHack(true);
+        //preloadLoader.setServletHack(true);
         loader = preloadLoader;
       }
       else {
@@ -543,7 +543,7 @@ public class JavaClassGenerator {
    */
   public boolean isModified(Class<?> cl)
   {
-    Path searchPath = getSearchPath();
+    PathImpl searchPath = getSearchPath();
 
     if (searchPath == null)
       searchPath = getDefaultSearchPath();
@@ -554,7 +554,7 @@ public class JavaClassGenerator {
       if (_parentLoader != null)
         thread.setContextClassLoader(_parentLoader);
 
-      Method method = cl.getMethod(_initMethod, new Class[] { Path.class });
+      Method method = cl.getMethod(_initMethod, new Class[] { PathImpl.class });
       method.invoke(null, new Object[] { searchPath });
 
       method = cl.getMethod(_isModifiedMethod, new Class[0]);

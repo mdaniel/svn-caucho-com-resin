@@ -29,18 +29,18 @@
 
 package com.caucho.v5.config.core;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.NoAspect;
 import com.caucho.v5.config.core.ControlConfig;
 import com.caucho.v5.config.type.FlowBean;
 import com.caucho.v5.config.types.FileSetType;
 import com.caucho.v5.config.xml.XmlSchemaBean;
+import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.loader.EnvLoader;
-import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 
 import javax.annotation.PostConstruct;
@@ -61,7 +61,7 @@ public class ResinProperties extends ControlConfig implements FlowBean
   private static final Logger log
     = Logger.getLogger(ResinProperties.class.getName());
 
-  private Path _path;
+  private PathImpl _path;
   private FileSetType _fileSet;
   private boolean _isOptional;
   private boolean _isRecover;
@@ -70,7 +70,7 @@ public class ResinProperties extends ControlConfig implements FlowBean
   /**
    * Sets the resin:properties.
    */
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     if (path == null)
       throw new NullPointerException(L.l("'path' may not be null for resin:properties"));
@@ -121,17 +121,17 @@ public class ResinProperties extends ControlConfig implements FlowBean
         throw new ConfigException(L.l("'path' attribute missing from resin:properties."));
     }
 
-    ArrayList<Path> paths;
+    ArrayList<PathImpl> paths;
 
     if (_fileSet != null)
       paths = _fileSet.getPaths();
     else {
-      paths = new ArrayList<Path>();
+      paths = new ArrayList<PathImpl>();
       paths.add(_path);
     }
 
     for (int i = 0; i < paths.size(); i++) {
-      Path path = paths.get(i);
+      PathImpl path = paths.get(i);
 
       try {
         log.config(L.l("resin:properties '{0}'", path.getNativePath()));
@@ -150,7 +150,7 @@ public class ResinProperties extends ControlConfig implements FlowBean
     }
   }
   
-  private void readProperties(Path path)
+  private void readProperties(PathImpl path)
     throws IOException
   {
     ReadStream is = null;
@@ -209,7 +209,7 @@ public class ResinProperties extends ControlConfig implements FlowBean
           String key = line.substring(0, p).trim();
           String value = line.substring(p + 1).trim();
         
-          Config.setProperty(key, value, loader);
+          ConfigContext.setProperty(key, value, loader);
         }
       }
     } finally {

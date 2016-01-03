@@ -86,13 +86,13 @@ public class ConfigPropertiesResolver extends VariableResolverBase {
     Object value = null;
     
     for (String prop : PROPERTIES) {
-      String key = (String) Config.getProperty(prop);
+      String key = (String) ConfigContext.getProperty(prop);
 
       if (key == null) {
         break;
       }
       
-      value = Config.getProperty(key + '.' + var);
+      value = ConfigContext.getProperty(key + '.' + var);
       
       if (value != null) {
         break;
@@ -100,7 +100,7 @@ public class ConfigPropertiesResolver extends VariableResolverBase {
     }
     
     if (value == null) {
-      value = Config.getProperty(var);
+      value = ConfigContext.getProperty(var);
     }
 
     if (value != null) {

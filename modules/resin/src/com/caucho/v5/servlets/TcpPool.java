@@ -33,7 +33,7 @@ import com.caucho.v5.config.types.*;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.ReadWritePair;
 import com.caucho.v5.vfs.Vfs;
@@ -153,7 +153,7 @@ public class TcpPool {
   }
 
   class Server {
-    private Path _path;
+    private PathImpl _path;
     private long _lastFailTime;
 
     private int _connectionCount;
@@ -175,7 +175,7 @@ public class TcpPool {
       throws IOException
     {
       try {
-        Path path = _path.lookup(uri);
+        PathImpl path = _path.lookup(uri);
 
         ReadWritePair pair = path.openReadWrite();
 

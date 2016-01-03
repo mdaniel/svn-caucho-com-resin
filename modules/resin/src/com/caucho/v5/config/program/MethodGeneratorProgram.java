@@ -36,9 +36,9 @@ import java.util.logging.Logger;
 
 import javax.rmi.PortableRemoteObject;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.L10N;
 
 public class MethodGeneratorProgram extends ConfigProgram
@@ -50,7 +50,7 @@ public class MethodGeneratorProgram extends ConfigProgram
   private Method _method;
   private ValueGenerator _gen;
 
-  public MethodGeneratorProgram(Config config,
+  public MethodGeneratorProgram(ConfigContext config,
                                 Method method, 
                                 ValueGenerator gen)
   {

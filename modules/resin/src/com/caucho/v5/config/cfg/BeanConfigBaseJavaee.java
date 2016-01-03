@@ -53,7 +53,7 @@ abstract public class BeanConfigBaseJavaee extends BeanConfigBase {
       try {
         JndiUtil.bindDeepShort(getJndiName(), bean);
       } catch (NamingException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     

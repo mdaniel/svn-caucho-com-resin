@@ -40,10 +40,10 @@ import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 
-import com.caucho.v5.inject.Module;
-import com.caucho.v5.util.IoUtil;
+import com.caucho.v5.io.IoUtil;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.websocket.common.RemoteAsyncWebSocketBase;
 import com.caucho.v5.websocket.io.OutWebSocket;
@@ -52,7 +52,7 @@ import com.caucho.websocket.io.WebSocketWriter;
 /**
  * websocket writing endpoint.
  */
-@Module
+@ModulePrivate
 public class RemoteEndpointAsyncPlain extends RemoteAsyncWebSocketBase
 {
   private static final L10N L = new L10N(RemoteEndpointAsyncPlain.class);

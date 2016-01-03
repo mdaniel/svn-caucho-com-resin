@@ -33,12 +33,12 @@ import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpointConfig;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for WebSocketContainer.
  */
-@Module
+@ModulePrivate
 public class ContainerWebSocketServer 
   extends ContainerWebSocketBase
   implements ServerContainer

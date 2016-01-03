@@ -28,15 +28,15 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.CompileException;
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessage;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.javac.LineMapException;
 
 import javax.servlet.ServletException;
 
 public class JspParseException extends ServletException
-  implements CompileException, LineMapException
+  implements UserMessage, LineMapException
 {
   private String _errorPage;
   private LineMap _lineMap;
@@ -64,7 +64,7 @@ public class JspParseException extends ServletException
   {
     if (e instanceof JspParseException)
       return (JspParseException) e;
-    else if (e instanceof LineCompileException)
+    else if (e instanceof UserMessageLocation)
       return new JspLineParseException(e);
     else
       return new JspParseException(e);

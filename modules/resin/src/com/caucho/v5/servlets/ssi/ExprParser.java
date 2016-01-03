@@ -29,7 +29,7 @@
 
 package com.caucho.v5.servlets.ssi;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Parses an SSI expression
@@ -37,11 +37,11 @@ import com.caucho.v5.vfs.Path;
 public class ExprParser {
   private String _expr;
   private int _index;
-  private Path _path;
+  private PathImpl _path;
 
   private StringBuilder _sb = new StringBuilder();
 
-  private ExprParser(String expr, Path path)
+  private ExprParser(String expr, PathImpl path)
   {
     _expr = expr;
     _path = path;
@@ -50,7 +50,7 @@ public class ExprParser {
   /**
    * parse a string.
    */
-  public static SSIExpr parseString(String expr, Path path)
+  public static SSIExpr parseString(String expr, PathImpl path)
   {
     return new ExprParser(expr, path).parseString();
   }
@@ -58,7 +58,7 @@ public class ExprParser {
   /**
    * parse a string.
    */
-  public static SSIExpr parseConcat(String expr, Path path)
+  public static SSIExpr parseConcat(String expr, PathImpl path)
   {
     return new ExprParser(expr, path).parseConcat();
   }

@@ -39,7 +39,7 @@ import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.pdf.PdfException;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.QDate;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * pdf object oriented API facade
@@ -161,7 +161,7 @@ public class AdminPdfBuilder
     return this;
   }
   
-  public void build(Path path)
+  public void build(PathImpl path)
   {
     try (AdminPdf pdf = new AdminPdf(this, path)) {
       pdf.writeHeader();

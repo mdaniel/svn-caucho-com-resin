@@ -590,7 +590,7 @@ public class ManagementAdmin extends ManagedObjectBase
     ServerBartender server = getServer(serverId);
 
     if (server == null)
-      throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
+      throw ConfigException.wrap(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
 
     ManagerProxyApi proxy = null;//server.getData(ManagerProxyApi.class);
 

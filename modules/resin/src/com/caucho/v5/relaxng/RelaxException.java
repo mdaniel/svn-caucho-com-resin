@@ -28,12 +28,12 @@
 
 package com.caucho.v5.relaxng;
 
-import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.UserMessage;
 
 /**
  * A relax exception.
  */
-public class RelaxException extends Exception implements CompileException {
+public class RelaxException extends Exception implements UserMessage {
   public RelaxException()
   {
   }

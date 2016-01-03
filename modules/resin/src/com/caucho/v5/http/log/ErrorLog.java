@@ -28,7 +28,7 @@
 
 package com.caucho.v5.http.log;
 
-import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.UserMessage;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CurrentTime;
@@ -116,7 +116,7 @@ public class ErrorLog extends AbstractErrorLog {
 
     logStream.log(cb.close());
 
-    if (e != null && ! (e instanceof CompileException))
+    if (e != null && ! (e instanceof UserMessage))
       logStream.log(e);
 
     logStream.flush();

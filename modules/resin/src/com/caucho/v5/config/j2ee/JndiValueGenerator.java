@@ -34,6 +34,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.util.L10N;
 
@@ -62,7 +63,7 @@ public class JndiValueGenerator extends ValueGenerator {
     try {
       return new InitialContext().lookup(_jndiName);
     } catch (NamingException e) {
-      throw ConfigException.create(_location, e);
+      throw ConfigExceptionLocation.wrap(_location, e);
     }
   }
 

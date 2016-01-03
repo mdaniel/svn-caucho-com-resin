@@ -35,7 +35,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.watchdog.ArgsWatchdog;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 public class UndeployCommand extends DeployCommandRepositoryBase
@@ -80,7 +80,7 @@ public class UndeployCommand extends DeployCommandRepositoryBase
     }
   }
   
-  protected Path getDeployPath(ArgsWatchdog args)
+  protected PathImpl getDeployPath(ArgsWatchdog args)
   {
     String war = args.getDefaultArg();
     
@@ -89,7 +89,7 @@ public class UndeployCommand extends DeployCommandRepositoryBase
                                     getExtension()));
     }
     
-    Path path = Vfs.lookup(war);
+    PathImpl path = Vfs.lookup(war);
     
     if (! war.endsWith(getExtension()) && ! path.isDirectory()) {
       throw new ConfigException(L.l("Deploy expects to be used with a *{0} file or a directory at {1}",

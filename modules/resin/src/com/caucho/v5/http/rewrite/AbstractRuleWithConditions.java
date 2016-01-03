@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.rewrite;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.CaseInsensitive;
@@ -140,7 +140,7 @@ public abstract class AbstractRuleWithConditions
   {
     NotConditions not = new NotConditions();
     not.add(condition.getCondition());
-    Config.init(not);
+    ConfigContext.init(not);
 
     _conditionList.add(not);
   }

@@ -29,13 +29,13 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.jsp.java.JspNode;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.xml.XmlChar;
 
@@ -128,7 +128,7 @@ public class JspParser {
   // jsp/18cy, jsp/18cz
   private Set<String> _localPrefixes = new HashSet<String>();
 
-  private Path _jspPath;
+  private PathImpl _jspPath;
   private ReadStream _stream;
   private String _uriPwd;
 
@@ -241,7 +241,7 @@ public class JspParser {
    * @param path the JSP source file
    * @param uri the URI for the JSP source file.
    */
-  void parse(Path path, String uri)
+  void parse(PathImpl path, String uri)
     throws Exception
   {
     _parseState.pushNamespace("jsp", JSP_NS);
@@ -279,7 +279,7 @@ public class JspParser {
    * @param path the JSP source file
    * @param uri the URI for the JSP source file.
    */
-  void parseTag(Path path, String uri)
+  void parseTag(PathImpl path, String uri)
     throws Exception
   {
     _parseState.setTag(true);
@@ -661,7 +661,7 @@ public class JspParser {
   {
     addText();
 
-    Path jspPath = _jspPath;
+    PathImpl jspPath = _jspPath;
     String filename = _filename;
     int line = _line;
 
@@ -1848,7 +1848,7 @@ public class JspParser {
     if (value.equals(""))
       throw error("include directive needs 'file' attribute. Use either <%@ include file='myfile.jsp' %> or <jsp:directive.include file='myfile.jsp'/>");
 
-    Path include;
+    PathImpl include;
     if (value.length() > 0 && value.charAt(0) == '/')
       include = _parseState.resolvePath(value);
     else
@@ -2152,7 +2152,7 @@ public class JspParser {
     return -1;
   }
 
-  void clear(Path appDir, String errorPage)
+  void clear(PathImpl appDir, String errorPage)
   {
   }
 
@@ -2171,7 +2171,7 @@ public class JspParser {
 
     if (e instanceof JspLineParseException)
       return (JspLineParseException) e;
-    else if (e instanceof LineCompileException)
+    else if (e instanceof UserMessageLocation)
       return new JspLineParseException(e);
 
     if (_lineMap == null)
@@ -2244,7 +2244,7 @@ public class JspParser {
    * @param filename the filename
    * @param line the line in the source file
    */
-  private void setLocation(Path jspPath, String filename, int line)
+  private void setLocation(PathImpl jspPath, String filename, int line)
   {
     if (_lineMap == null) {
       _jspBuilder.setLocation(jspPath, filename, line);

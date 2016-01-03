@@ -30,7 +30,7 @@
 package com.caucho.v5.jsp;
 
 import com.caucho.v5.amp.thread.ThreadPool;
-import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.UserMessage;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.*;
 import com.caucho.v5.http.webapp.WebApp;
@@ -40,7 +40,7 @@ import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
@@ -125,7 +125,7 @@ public class JspPrecompileResource {
   public void init()
     throws ConfigException
   {
-    Path pwd = Vfs.lookup();
+    PathImpl pwd = Vfs.lookup();
 
     if (_fileSet == null) {
       createFileset().addInclude(new PathPatternType("**/*.jsp"));
@@ -154,7 +154,7 @@ public class JspPrecompileResource {
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
 
-    ArrayList<Path> paths = _fileSet.getPaths();
+    ArrayList<PathImpl> paths = _fileSet.getPaths();
     ArrayList<String> classes = new ArrayList<String>();
 
     for (int i = 0; i < _threadCount; i++) {
@@ -183,11 +183,11 @@ public class JspPrecompileResource {
 
   class CompileTask implements Runnable {
     private int _chunkCount;
-    private ArrayList<Path> _paths;
+    private ArrayList<PathImpl> _paths;
     private ArrayList<String> _classes;
     private JspCompiler _compiler;
 
-    CompileTask(ArrayList<Path> paths,
+    CompileTask(ArrayList<PathImpl> paths,
                 ArrayList<String> classes)
     {
       _paths = paths;
@@ -224,8 +224,8 @@ public class JspPrecompileResource {
       if (! contextPath.endsWith("/"))
         contextPath = contextPath + "/";
     
-      Path pwd = Vfs.lookup();
-      Path path = null;
+      PathImpl pwd = Vfs.lookup();
+      PathImpl path = null;
 
       synchronized (_paths) {
         if (_paths.size() == 0)
@@ -272,7 +272,7 @@ public class JspPrecompileResource {
           _classes.add(className.replace('.', '/') + ".java");
         }
       } catch (Exception e) {
-        if (e instanceof CompileException)
+        if (e instanceof UserMessage)
           log.warning(e.getMessage());
         else
           log.log(Level.WARNING, e.toString(), e);
@@ -300,7 +300,7 @@ public class JspPrecompileResource {
 
         javaCompiler.compileBatch(files);
       } catch (Exception e) {
-        if (e instanceof CompileException)
+        if (e instanceof UserMessage)
           log.warning(e.getMessage());
         else
           log.log(Level.WARNING, e.toString(), e);

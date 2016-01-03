@@ -34,12 +34,12 @@ import java.nio.ByteBuffer;
 
 import javax.websocket.RemoteEndpoint;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * Stub for RemoteEndpoint methods
  */
-@Module
+@ModulePrivate
 public class RemoteWebSocketBase implements RemoteEndpoint
 {
   private boolean _isBatching;

@@ -36,10 +36,10 @@ import java.io.Writer;
 
 import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.server.admin.JsonQueryReply;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;
-import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
 
 public class JmxDumpCommand extends JmxCommand

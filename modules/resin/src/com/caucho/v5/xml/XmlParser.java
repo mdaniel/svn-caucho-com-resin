@@ -30,7 +30,7 @@ package com.caucho.v5.xml;
 
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.ReaderWriterStream;
 import com.caucho.v5.vfs.Vfs;
@@ -274,7 +274,7 @@ public class XmlParser extends AbstractParser {
     _owner = null;
 
     // ioc/23l0
-    Path path = is.getPath();
+    PathImpl path = is.getPath();
     is.close();
     owner.addDepend(path);
       
@@ -937,13 +937,13 @@ public class XmlParser extends AbstractParser {
     if (filename.equals(""))
       throw error(L.l("<resin:include> expects a `path' attribute."));
 
-    Path pwd;
+    PathImpl pwd;
     if (_searchPath != null)
       pwd = _searchPath;
     else
       pwd = Vfs.lookup(_systemId).getParent();
 
-    Path dir = pwd.lookup(filename);
+    PathImpl dir = pwd.lookup(filename);
     if (! dir.isDirectory())
       throw error(L.l("`{0}' is not a directory for resin:include-directory.  The href for resin:include-directory must refer to a directory.",
                       dir.getNativePath()));
@@ -1230,8 +1230,8 @@ public class XmlParser extends AbstractParser {
     _filename = systemId;
     _systemId = systemId;
 
-    Path oldSearchPath = _searchPath;
-    Path path = is.getPath();
+    PathImpl oldSearchPath = _searchPath;
+    PathImpl path = is.getPath();
     if (path != null) {
       _owner.addDepend(path);
       
@@ -2857,8 +2857,8 @@ public class XmlParser extends AbstractParser {
     if (stream == null)
       throw new FileNotFoundException(systemId);
     _is = Vfs.openRead(stream);
-    Path oldSearchPath = _searchPath;
-    Path path = _is.getPath();
+    PathImpl oldSearchPath = _searchPath;
+    PathImpl path = _is.getPath();
     if (path != null) {
       _owner.addDepend(path);
       
@@ -2978,7 +2978,7 @@ public class XmlParser extends AbstractParser {
     StringBuilder lines = new StringBuilder();
 
     try {
-      Path path = Vfs.lookup(_systemId);
+      PathImpl path = Vfs.lookup(_systemId);
 
       if (path.canRead()) {
         ReadStream is = path.openRead();

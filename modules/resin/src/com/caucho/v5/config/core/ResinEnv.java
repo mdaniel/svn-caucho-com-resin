@@ -50,7 +50,7 @@ public class ResinEnv extends ControlConfig implements EnvironmentBean {
   public ResinEnv()
   {
     _loader = EnvironmentClassLoader.create();
-    _loader.setOwner(this);
+    //_loader.setOwner(this);
   }
 
   /**

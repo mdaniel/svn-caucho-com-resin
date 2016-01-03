@@ -33,7 +33,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.EnclosedWriteStream;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -233,7 +233,7 @@ public class XmlPrinter implements XMLWriter {
    *
    * @param node source DOM node
    */
-  public static void print(Path path, Node node)
+  public static void print(PathImpl path, Node node)
     throws IOException
   {
     WriteStream os = path.openWrite();
@@ -504,7 +504,7 @@ public class XmlPrinter implements XMLWriter {
     return _publicId;
   }
 
-  public Path getPath()
+  public PathImpl getPath()
   {
     if (_os instanceof WriteStream)
       return ((WriteStream) _os).getPath();

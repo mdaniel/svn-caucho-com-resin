@@ -31,7 +31,7 @@ package com.caucho.v5.server.resin;
 
 import java.util.Properties;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -49,7 +49,7 @@ public class JavaVar {
   /**
    * Returns the JDK home
    */
-  public Path getHome()
+  public PathImpl getHome()
   {
     return Vfs.lookup(System.getProperty("java.home"));
   }

@@ -114,7 +114,7 @@ public class Location extends DispatchRuleRegexpBase
 
       return rule.map(type, uri, queryString, next, chain);
     } catch (ServletException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

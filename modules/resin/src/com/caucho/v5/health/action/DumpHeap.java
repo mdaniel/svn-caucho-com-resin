@@ -33,7 +33,7 @@ import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -71,7 +71,7 @@ public class DumpHeap extends HealthActionBase
   private boolean _isLog = true;
   private boolean _isHprof = false;
 
-  private Path _hprofPath;
+  private PathImpl _hprofPath;
   private String _hprofPathFormat;
   
   private String _serverId;
@@ -133,14 +133,14 @@ public class DumpHeap extends HealthActionBase
    * Default log/heap.hprof  
    */
   @Configurable
-  public void setHprofPath(Path hprofPath)
+  public void setHprofPath(PathImpl hprofPath)
   {
     _hprofPath = hprofPath;
   }
   
   @Deprecated
   @Configurable
-  public void setHprofDir(Path hprofPath)
+  public void setHprofDir(PathImpl hprofPath)
   {
     setHprofPath(hprofPath);
   }
@@ -160,7 +160,7 @@ public class DumpHeap extends HealthActionBase
   {
     StringBuilder sb = new StringBuilder();
     
-    Path hprofPath = _hprofPath;
+    PathImpl hprofPath = _hprofPath;
     if (_isHprof && hprofPath == null && _hprofPathFormat != null) {
       long time = CurrentTime.getCurrentTime();
       String formattedPath = QDate.formatLocal(time, _hprofPathFormat);
@@ -197,7 +197,7 @@ public class DumpHeap extends HealthActionBase
     return new HealthActionResult(ResultStatus.OK, sb.toString());
   }
   
-  public String execute(boolean isJvmHprof, String serverId, Path hprofPath)
+  public String execute(boolean isJvmHprof, String serverId, PathImpl hprofPath)
     throws ConfigException, JMException, IOException
   {
     if (isJvmHprof)
@@ -206,7 +206,7 @@ public class DumpHeap extends HealthActionBase
       return doProHeapDump();
   }
   
-  private String doJvmHprofHeapDump(String serverId, Path hprofPath)
+  private String doJvmHprofHeapDump(String serverId, PathImpl hprofPath)
     throws ConfigException, JMException, IOException
   {
     ObjectName name = new ObjectName(

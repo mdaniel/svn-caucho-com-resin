@@ -121,7 +121,7 @@ public class Taglib extends TagLibraryInfo
   /**
    * Gets the path.
    */
-  public Path getPath()
+  public PathImpl getPath()
   {
     if (_tldTaglib != null)
       return _tldTaglib.getJarPath();

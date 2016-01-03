@@ -38,7 +38,7 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ContainerProgram;
@@ -74,7 +74,7 @@ public class ListenerConfig<T> extends DescriptionGroupConfig {
   public void setListenerClass(Class<T> cl)
     throws ConfigException
   {
-    Config.checkCanInstantiate(cl);
+    ConfigContext.checkCanInstantiate(cl);
 
     if (ServletContextListener.class.isAssignableFrom(cl)) {
     }

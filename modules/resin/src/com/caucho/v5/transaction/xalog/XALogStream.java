@@ -11,7 +11,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LongMap;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -42,10 +42,10 @@ public class XALogStream extends AbstractXALogStream {
 
   private XALogManager _manager;
 
-  private Path _pathA;
-  private Path _pathB;
+  private PathImpl _pathA;
+  private PathImpl _pathB;
   
-  private Path _currentPath;
+  private PathImpl _currentPath;
 
   private long _maxFileSize = 64L * 1024L * 1024L;
 
@@ -71,7 +71,7 @@ public class XALogStream extends AbstractXALogStream {
   /**
    * Creates the log stream.
    */
-  XALogStream(XALogManager manager, Path path)
+  XALogStream(XALogManager manager, PathImpl path)
     throws IOException
   {
     _manager = manager;
@@ -133,7 +133,7 @@ public class XALogStream extends AbstractXALogStream {
   /**
    * Recovers the file header.
    */
-  private long recoverFileHeader(Path path)
+  private long recoverFileHeader(PathImpl path)
   {
     ReadStream is = null;
     
@@ -181,7 +181,7 @@ public class XALogStream extends AbstractXALogStream {
   /**
    * Recovers the file header.
    */
-  private long recoverFile(Path path)
+  private long recoverFile(PathImpl path)
   {
     ReadStream is = null;
 

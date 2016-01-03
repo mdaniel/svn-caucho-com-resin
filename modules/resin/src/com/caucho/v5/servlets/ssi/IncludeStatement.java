@@ -29,7 +29,7 @@
 
 package com.caucho.v5.servlets.ssi;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.RequestDispatcher;
@@ -51,7 +51,7 @@ public class IncludeStatement extends Statement{
     _virtual = virtual;
   }
 
-  static Statement create(HashMap<String,String> attr, Path path)
+  static Statement create(HashMap<String,String> attr, PathImpl path)
   {
     String virtual = attr.get("virtual");
 

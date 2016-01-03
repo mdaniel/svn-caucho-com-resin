@@ -59,7 +59,7 @@ import com.caucho.v5.http.host.Host;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.util.ConcurrentArrayList.Match;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * A container of webapp deploy objects.

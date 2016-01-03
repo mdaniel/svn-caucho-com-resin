@@ -53,7 +53,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import com.caucho.v5.cli.resin.ResinCommandLineAgent;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.inject.InjectManager;
@@ -63,7 +63,7 @@ import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -188,7 +188,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   
   public void setProvider(Class<PersistenceProvider> cl)
   {
-    Config.validate(cl, PersistenceProvider.class);
+    ConfigContext.validate(cl, PersistenceProvider.class);
     
     _providerClass = cl;
   }
@@ -216,7 +216,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     
     for (String pathName : classPath.split("[" + File.pathSeparatorChar + "]")) {
       if (pathName.endsWith(jarFile)) {
-        Path path = Vfs.lookup(pathName);
+        PathImpl path = Vfs.lookup(pathName);
         
         try {
           URL url = new URL(path.getURL());
@@ -226,7 +226,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
           if (! _jarFiles.contains(url))
             _jarFiles.add(url);
         } catch (Exception e) {
-          throw ConfigException.create(e);
+          throw ConfigException.wrap(e);
         }
       }
     }
@@ -431,7 +431,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
   
@@ -649,9 +649,11 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
       }
     }
     
+    /*
     if (! isRootTransform) {
       loader.addTransformer(adapter);
     }
+    */
   }
 
   /**

@@ -33,12 +33,12 @@ import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerContainerProvider;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class ServerContainerProviderImpl extends ServerContainerProvider
 {
   @Override

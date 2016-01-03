@@ -40,7 +40,7 @@ import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.el.Expr;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 
@@ -159,7 +159,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
       try {
         return JndiUtil.lookup(getLookupName());
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     
@@ -190,7 +190,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
       JndiUtil.bindDeepShort(_name, this);
     } catch (Exception e) {
       e.printStackTrace();
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }
@@ -274,7 +274,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
         value = Class.forName(_value, false, loader);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     

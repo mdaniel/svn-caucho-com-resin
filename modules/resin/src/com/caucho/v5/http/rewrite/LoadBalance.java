@@ -145,7 +145,7 @@ public class LoadBalance extends DispatchRuleTargetBase
         _webApp.getBuilder().addServlet(_servlet);
     }
     catch (ServletException ex) {
-      throw ConfigException.create(ex);
+      throw ConfigException.wrap(ex);
     }
   }
 
@@ -160,7 +160,7 @@ public class LoadBalance extends DispatchRuleTargetBase
       return new LoadBalanceFilterChain(_servlet.createServletChain(),
                                         uri, queryString, target);
     } catch (ServletException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

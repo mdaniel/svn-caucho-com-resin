@@ -64,7 +64,7 @@ public class InlineBeanTypeResin<T> extends InlineBeanType<T>
       try {
         _setConfigNode.invoke(bean, node);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     

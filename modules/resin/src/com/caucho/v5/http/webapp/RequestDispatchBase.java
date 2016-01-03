@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.caucho.v5.http.baratine.FormBaratine;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.protocol.Form;
 import com.caucho.v5.http.protocol.RequestAdapter;

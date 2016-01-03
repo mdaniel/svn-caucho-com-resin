@@ -34,12 +34,12 @@ import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigPropertiesResolver;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 
@@ -63,7 +63,7 @@ public class ResinServerConfigLibrary {
       throw new ConfigException(L.l("file_lookup requires a pwd argument"));
     }
     
-    Path pwdPath = Vfs.lookup(pwd);
+    PathImpl pwdPath = Vfs.lookup(pwd);
     
     return pwdPath.lookup(resource).getFullPath();
   }     
@@ -109,7 +109,7 @@ public class ResinServerConfigLibrary {
         //BeanFactory factory = webBeans.createBeanFactory(m.getClass());
 
         // webBeans.addBean(factory.name(m.getName()).singleton(m));
-        Config.setProperty(m.getName(), m, loader);
+        ConfigContext.setProperty(m.getName(), m, loader);
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

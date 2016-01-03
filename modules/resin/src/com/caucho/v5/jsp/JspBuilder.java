@@ -32,14 +32,14 @@ package com.caucho.v5.jsp;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.java.JspNode;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Generates the nodes for JSP code.
  */
 abstract public class JspBuilder {
   // The current source
-  protected Path _sourcePath;
+  protected PathImpl _sourcePath;
   
   // The current filename
   protected String _filename;
@@ -195,7 +195,7 @@ abstract public class JspBuilder {
   /**
    * Sets the source line number.
    */
-  public void setLocation(Path sourcePath, String filename, int line)
+  public void setLocation(PathImpl sourcePath, String filename, int line)
   {
     _sourcePath = sourcePath;
     _filename = filename;

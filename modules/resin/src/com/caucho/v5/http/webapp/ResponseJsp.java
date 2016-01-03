@@ -30,9 +30,9 @@ package com.caucho.v5.http.webapp;
 
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseCauchoWrapper;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
-@Module
+@ModulePrivate
 public class ResponseJsp extends ResponseCauchoWrapper {
 
   public ResponseJsp()

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.naming.JndiUtil;
 
@@ -98,7 +98,7 @@ public class ResinConfigLibrary {
         //BeanFactory factory = webBeans.createBeanFactory(m.getClass());
 
         // webBeans.addBean(factory.name(m.getName()).singleton(m));
-        Config.setProperty(m.getName(), m);
+        ConfigContext.setProperty(m.getName(), m);
       }
     } catch (Exception e) {
       log().log(Level.FINE, e.toString(), e);

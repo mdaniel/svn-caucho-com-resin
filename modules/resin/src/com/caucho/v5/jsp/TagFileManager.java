@@ -33,7 +33,7 @@ import com.caucho.v5.jsp.java.TagTaglib;
 import com.caucho.v5.loader.SimpleLoader;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Log;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
@@ -115,12 +115,12 @@ public class TagFileManager {
     if (resourceManager == null)
       return null;
     
-    Path path = resourceManager.resolvePath(location);
+    PathImpl path = resourceManager.resolvePath(location);
     
     return getTag(path, location, taglib);
   }
 
-  public TagInfo getTag(Path path,
+  public TagInfo getTag(PathImpl path,
                         String prefix,
                         String location)
     throws JspParseException
@@ -130,7 +130,7 @@ public class TagFileManager {
     return getTag(path, location, taglib);
   }
 
-  public TagInfo getTag(Path path,
+  public TagInfo getTag(PathImpl path,
                         String location,
                         TagTaglib taglib)
     throws JspParseException
@@ -166,7 +166,7 @@ public class TagFileManager {
   public Class loadClass(String className)
     throws Exception
   {
-    Path classDir = _jspCompiler.getClassDir();
+    PathImpl classDir = _jspCompiler.getClassDir();
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
     ClassLoader jspLoader = SimpleLoader.create(parentLoader,

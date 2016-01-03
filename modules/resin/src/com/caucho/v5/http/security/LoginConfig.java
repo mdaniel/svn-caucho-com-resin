@@ -30,7 +30,7 @@ package com.caucho.v5.http.security;
 
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.inject.InjectManager;
@@ -91,7 +91,7 @@ public class LoginConfig {
   {
     _customType = type;
 
-    Config.validate(type, LoginBase.class);
+    ConfigContext.validate(type, LoginBase.class);
   }
 
   /**
@@ -192,7 +192,7 @@ public class LoginConfig {
 
       return login;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

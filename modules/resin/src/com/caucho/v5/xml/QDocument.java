@@ -30,7 +30,7 @@ package com.caucho.v5.xml;
 
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import org.w3c.dom.*;
 
@@ -57,7 +57,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   private transient HashMap<NameKey,NameCfg> _nameCache = new HashMap<NameKey,NameCfg>();
   private transient NameKey _nameKey = new NameKey();
-  private transient ArrayList<Path> _depends;
+  private transient ArrayList<PathImpl> _depends;
   private transient ArrayList<Depend> _dependList;
 
   int _changeCount;
@@ -799,7 +799,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
       return null;
   }
 
-  public ArrayList<Path> getDependList()
+  public ArrayList<PathImpl> getDependList()
   {
     return _depends;
   }
@@ -954,13 +954,13 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   // CAUCHO
 
-  public void addDepend(Path path)
+  public void addDepend(PathImpl path)
   {
     if (path == null)
       return;
 
     if (_depends == null)
-      _depends = new ArrayList<Path>();
+      _depends = new ArrayList<PathImpl>();
 
     if (! _depends.contains(path)) {
       _depends.add(path);

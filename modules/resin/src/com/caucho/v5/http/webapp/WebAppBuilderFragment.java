@@ -42,12 +42,12 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -167,7 +167,7 @@ public class WebAppBuilderFragment
     }
   }
   
-  private Path getRoot(Path path, String name)
+  private PathImpl getRoot(PathImpl path, String name)
   {
     if (path instanceof JarPath) {
       return ((JarPath) path).getContainer();

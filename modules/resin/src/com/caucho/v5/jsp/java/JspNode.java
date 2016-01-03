@@ -44,8 +44,8 @@ import javax.el.ValueExpression;
 import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 
-import com.caucho.v5.config.CompileException;
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessage;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.jsp.JspLineParseException;
@@ -57,7 +57,7 @@ import com.caucho.v5.jsp.ParseState;
 import com.caucho.v5.jsp.TagInstance;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.XmlChar;
 import com.caucho.xpath.NamespaceContext;
@@ -70,7 +70,7 @@ public abstract class JspNode {
 
   static final String JSP_NS = JspParser.JSP_NS;
 
-  protected Path _sourcePath;
+  protected PathImpl _sourcePath;
   protected String _filename;
   protected int _startLine;
   protected int _endAttributeLine;
@@ -155,7 +155,7 @@ public abstract class JspNode {
   /**
    * Sets the start location of the node.
    */
-  public void setStartLocation(Path sourcePath, String filename, int line)
+  public void setStartLocation(PathImpl sourcePath, String filename, int line)
   {
     _sourcePath = sourcePath;
     _filename = filename;
@@ -2019,12 +2019,12 @@ public abstract class JspNode {
   {
     if (e instanceof JspLineParseException)
       return (JspParseException) e;
-    else if (_filename == null || e instanceof LineCompileException)
+    else if (_filename == null || e instanceof UserMessageLocation)
       return new JspLineParseException(e);
 
     String msg;
     
-    if (e instanceof CompileException)
+    if (e instanceof UserMessage)
       msg = e.getMessage();
     else
       msg = String.valueOf(e);

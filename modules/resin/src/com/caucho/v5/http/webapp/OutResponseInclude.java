@@ -45,8 +45,8 @@ import javax.servlet.ServletResponse;
 import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.http.protocol.OutResponseToByte;
 import com.caucho.v5.http.protocol.ResponseCaucho;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.vfs.IOExceptionRuntime;
-import com.caucho.v5.vfs.TempBuffer;
 
 public class OutResponseInclude extends OutResponseToByte {
   private static final Logger log

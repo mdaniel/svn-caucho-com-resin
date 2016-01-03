@@ -34,7 +34,7 @@ import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.jsp.Namespace;
 import com.caucho.v5.jsp.ParseState;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.Xml;
 
@@ -82,7 +82,7 @@ public class JspDirectiveInclude extends JspNode {
       if (parseState.isXml()) {
         Xml xml = new Xml();
         xml.setContentHandler(new JspContentHandler(parseState.getBuilder()));
-        Path path = resolvePath(_file, parseState);
+        PathImpl path = resolvePath(_file, parseState);
 
         path.setUserPath(_file);
         xml.setNamespaceAware(true);
@@ -104,9 +104,9 @@ public class JspDirectiveInclude extends JspNode {
     }
   }
 
-  private Path resolvePath(String value, ParseState parseState)
+  private PathImpl resolvePath(String value, ParseState parseState)
   {
-    Path include;
+    PathImpl include;
     if (value.length() > 0 && value.charAt(0) == '/')
       include = parseState.resolvePath(value);
     else

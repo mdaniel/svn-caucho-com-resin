@@ -184,7 +184,7 @@ public class BeanEmbed
       }
       */
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

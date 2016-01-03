@@ -49,7 +49,7 @@ import com.caucho.v5.http.security.PasswordUser;
 import com.caucho.v5.http.security.PasswordUser2;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The Property authenticator reads a properties file for authentication.
@@ -79,7 +79,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
   private static final Logger log =
     Logger.getLogger(PropertiesAuthenticator.class.getName());
   
-  private Path _path;
+  private PathImpl _path;
   private Hashtable<String,PasswordUser> _userMap
     = new Hashtable<>();
 
@@ -89,7 +89,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
   /**
    * Sets the path to the property file.
    */
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
@@ -97,7 +97,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
   /**
    * Gets the path to the property file.
    */
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }
@@ -184,7 +184,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
 
         setValue(props);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
   }

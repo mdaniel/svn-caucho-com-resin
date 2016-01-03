@@ -30,7 +30,7 @@
 package com.caucho.v5.server.resin;
 
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.annotation.PostConstruct;
 
@@ -44,7 +44,7 @@ public class ManagementCompatConfig
   private String _configFile;
   private int _configLine;
 
-  private Path _path;
+  private PathImpl _path;
 
   public void setConfigLocation(String file, int line)
   {
@@ -52,12 +52,12 @@ public class ManagementCompatConfig
     _configLine = line;
   }
 
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
 
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }

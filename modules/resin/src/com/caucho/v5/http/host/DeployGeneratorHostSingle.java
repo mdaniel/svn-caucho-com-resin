@@ -35,10 +35,10 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployGenerator;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The generator for the host deploy
@@ -123,7 +123,7 @@ public class DeployGeneratorHostSingle
     String rawHostName = _config.getHostName();
 
     if (rawId != null) {
-      hostId = Config.evalString(rawId);
+      hostId = ConfigContext.evalString(rawId);
 
       if (hostId.startsWith("*")) { // server/1f20
         hostId = hostId.substring(1);
@@ -134,7 +134,7 @@ public class DeployGeneratorHostSingle
     String clusterName = server.getClusterId();
     
     if (rawHostName != null) {
-      hostName = Config.evalString(rawHostName);
+      hostName = ConfigContext.evalString(rawHostName);
 
       if (rawHostName.startsWith("*"))  // server/1f20
         hostName = rawHostName.substring(1);
@@ -154,7 +154,7 @@ public class DeployGeneratorHostSingle
       id = "hosts/" + hostName;
     }
     
-    Path rootDirectory = _config.calculateRootDirectory();
+    PathImpl rootDirectory = _config.calculateRootDirectory();
 
     if (hostName != null) {
       _controller = _container.createController(id, rootDirectory,
@@ -197,7 +197,7 @@ public class DeployGeneratorHostSingle
   public void generateController(String name, ArrayList<HostController> list)
   {
     if (_controller.isNameMatch(name)) {
-      Path rootDirectory = _config.calculateRootDirectory();
+      PathImpl rootDirectory = _config.calculateRootDirectory();
       
       HostController host;
       host = _container.createController(_controller.getId(), rootDirectory,

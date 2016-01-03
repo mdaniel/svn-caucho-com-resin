@@ -32,7 +32,7 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HTTPUtil;
 import com.caucho.v5.util.QDate;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
@@ -221,12 +221,12 @@ public class WebDavServlet extends GenericServlet {
     if (_path != null) {
     }
     else if (_root != null) {
-      Path pwd = ((WebApp) getServletContext()).getRootDirectory();
+      PathImpl pwd = ((WebApp) getServletContext()).getRootDirectory();
 
       _path = new FilePath(pwd.lookup(_root));
     }
     else if (root != null) {
-      Path pwd = ((WebApp) getServletContext()).getRootDirectory();
+      PathImpl pwd = ((WebApp) getServletContext()).getRootDirectory();
 
       _path = new FilePath(pwd.lookup(root));
     }
@@ -361,7 +361,7 @@ public class WebDavServlet extends GenericServlet {
     }
 
     WebApp app = (WebApp) getServletContext();
-    Path appDir = app.getRootDirectory();
+    PathImpl appDir = app.getRootDirectory();
 
     String pathInfo = req.getPathInfo();
     String uriPwd = app.getContextPath() + req.getServletPath();
@@ -414,7 +414,7 @@ public class WebDavServlet extends GenericServlet {
     }
     
     WebApp app = (WebApp) getServletContext();
-    Path appDir = app.getRootDirectory();
+    PathImpl appDir = app.getRootDirectory();
 
     String pathInfo = req.getPathInfo();
     String uriPwd = app.getContextPath() + req.getServletPath();
@@ -500,7 +500,7 @@ public class WebDavServlet extends GenericServlet {
     }
     
     WriteStream ws = Vfs.openWrite(os);
-    Path path =ws.getPath();
+    PathImpl path =ws.getPath();
     try {
       InputStream is = req.getInputStream();
       ws.writeStream(is);

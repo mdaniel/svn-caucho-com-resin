@@ -117,7 +117,7 @@ class WebAppListeners
       try {
         addListenerObject(listener.createListenerObject(), false);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 

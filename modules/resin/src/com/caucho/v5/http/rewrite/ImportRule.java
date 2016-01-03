@@ -46,7 +46,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 public class ImportRule
   extends AbstractRule
@@ -55,7 +55,7 @@ public class ImportRule
   private static L10N L = new L10N(ImportRule.class);
   private static Logger log = Logger.getLogger(ImportRule.class.getName());
 
-  private Path _path;
+  private PathImpl _path;
   private boolean _isOptional;
   private long _dependencyCheckInterval = 2 * 1000L;
   private long _errorCheckInterval = 2 * 1000L;
@@ -100,7 +100,7 @@ public class ImportRule
     _isOptional = isOptional;
   }
 
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
@@ -122,7 +122,7 @@ public class ImportRule
       throw e;
     }
     catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
 
     super.init();

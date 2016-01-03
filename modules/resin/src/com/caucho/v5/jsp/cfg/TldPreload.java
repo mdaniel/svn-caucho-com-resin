@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.http.webapp.WebAppResin;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Configuration for the taglib in the .tld
@@ -46,7 +46,7 @@ public class TldPreload {
 
   private ArrayList<TldListener> _listeners = new ArrayList<TldListener>();
 
-  private Path _path;
+  private PathImpl _path;
   private Throwable _configException;
 
   /**
@@ -92,7 +92,7 @@ public class TldPreload {
   /**
    * Sets the path to the tld.
    */
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
@@ -100,7 +100,7 @@ public class TldPreload {
   /**
    * Gets the path.
    */
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }

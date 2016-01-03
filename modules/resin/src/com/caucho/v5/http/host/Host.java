@@ -54,17 +54,17 @@ import com.caucho.v5.http.webapp.ErrorPageManager;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.inject.InjectManager;
+import com.caucho.v5.io.AlwaysModified;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.lifecycle.LifecycleState;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Resin's virtual host implementation.
@@ -86,7 +86,7 @@ public class Host
 
   // The Host entry
   private final HostController _controller;
-  private final Path _rootDirectory;
+  private final PathImpl _rootDirectory;
   
   private EnvironmentClassLoader _classLoader;
 
@@ -312,7 +312,7 @@ public class Host
         return "http://localhost";
       
       SystemManager resinSystem = server.getSystemManager();
-      NetworkSystem networkSystem = NetworkSystem.getCurrent();
+      NetworkSystem networkSystem = NetworkSystem.current();
 
       for (PortTcp port : networkSystem.getPorts()) {
         if ("http".equals(port.protocolName())) {
@@ -407,7 +407,7 @@ public class Host
     return _classLoader;
   }
 
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return _rootDirectory;
   }
@@ -535,7 +535,7 @@ public class Host
    * Sets the war-dir for backwards compatibility.
    */
   @Configurable
-  public void setWarDir(Path warDir)
+  public void setWarDir(PathImpl warDir)
     throws ConfigException
   {
     getWebAppContainer().setWarDir(warDir);
@@ -544,7 +544,7 @@ public class Host
   /**
    * Sets the war-expand-dir.
    */
-  public void setWarExpandDir(Path warDir)
+  public void setWarExpandDir(PathImpl warDir)
   {
     getWebAppContainer().setWarExpandDir(warDir);
   }

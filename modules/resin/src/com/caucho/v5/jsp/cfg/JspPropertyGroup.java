@@ -38,7 +38,7 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.jsp.JspServlet;
 import com.caucho.v5.jsp.JspXmlServlet;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
@@ -666,7 +666,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
   /**
    * Sets a restriction of the tld dir.
    */
-  public void setTldDir(Path tldDir)
+  public void setTldDir(PathImpl tldDir)
   {
     _tldFileSet = new FileSetType();
     _tldFileSet.setDir(tldDir);

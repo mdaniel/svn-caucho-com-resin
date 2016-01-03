@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 public class WebAppFragmentConfig extends WebAppConfig
 {
@@ -53,7 +53,7 @@ public class WebAppFragmentConfig extends WebAppConfig
   private String _jarPath;
 
   private Ordering _ordering;
-  private Path _rootPath;
+  private PathImpl _rootPath;
 
   public String getName()
   {
@@ -125,12 +125,12 @@ public class WebAppFragmentConfig extends WebAppConfig
   }
   */
 
-  public void setRootPath(Path rootPath)
+  public void setRootPath(PathImpl rootPath)
   {
     _rootPath = rootPath;
   }
 
-  public Path getRootPath()
+  public PathImpl getRootPath()
   {
     return _rootPath;
   }

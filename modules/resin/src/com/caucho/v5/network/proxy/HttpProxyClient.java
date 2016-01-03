@@ -42,11 +42,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.proxy.LoadBalanceManager;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.network.balance.ClientSocket;
 import com.caucho.v5.network.proxy.ProxyResult.ProxyStatus;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.TempBuffer;
 import com.caucho.v5.vfs.WriteStream;
 
 public class HttpProxyClient 

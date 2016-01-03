@@ -52,7 +52,7 @@ import com.caucho.v5.health.meter.ActiveTimeSensor;
 import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.management.server.JdbcDriverMXBean;
 import com.caucho.v5.sql.spy.SpyDataSource;
 import com.caucho.v5.util.Alarm;
@@ -108,7 +108,7 @@ import com.caucho.v5.util.SQLExceptionWrapper;
  * that they will be removed and closed.  This reduces the load on the DB
  * and also protects against the database dropping old connections.
  */
-public class DBPoolImpl implements AlarmListener, EnvironmentListener {
+public class DBPoolImpl implements AlarmListener, EnvLoaderListener {
   protected static final Logger log
     = Logger.getLogger(DBPoolImpl.class.getName());
   private static final L10N L = new L10N(DBPoolImpl.class);

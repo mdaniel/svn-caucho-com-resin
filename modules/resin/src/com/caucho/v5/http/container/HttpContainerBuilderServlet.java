@@ -38,7 +38,7 @@ import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Configuration for the <cluster> and <server> tags.
@@ -187,7 +187,7 @@ public class HttpContainerBuilderServlet extends HttpContainerBuilder
    * Sets the root directory.
    */
   @Configurable
-  public void setRootDirectory(Path path)
+  public void setRootDirectory(PathImpl path)
   {
   }
 
@@ -195,7 +195,7 @@ public class HttpContainerBuilderServlet extends HttpContainerBuilder
    * Sets the root directory.
    */
   @Configurable
-  public void setRootDir(Path path)
+  public void setRootDir(PathImpl path)
   {
     setRootDirectory(path);
   }

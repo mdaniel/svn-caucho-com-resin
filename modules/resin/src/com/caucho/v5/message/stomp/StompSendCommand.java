@@ -31,10 +31,10 @@ package com.caucho.v5.message.stomp;
 
 import java.io.IOException;
 
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.TempBuffer;
 import com.caucho.v5.vfs.WriteStream;
 
 /**

@@ -34,12 +34,12 @@ import java.util.ArrayList;
 
 import javax.websocket.Session;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * websocket client container
  */
-@Module
+@ModulePrivate
 public class ConnectionWebSocketBase
 {
   private ContainerWebSocketBase _container;

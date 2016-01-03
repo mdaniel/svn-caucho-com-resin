@@ -28,19 +28,18 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.program.ContainerProgram;
-import com.caucho.v5.loader.ClassLoaderListener;
-import com.caucho.v5.loader.EnvLoader;
-import com.caucho.v5.loader.EnvironmentListener;
-import com.caucho.v5.naming.JndiUtil;
-import com.caucho.v5.naming.LinkProxy;
-import com.caucho.v5.util.L10N;
+import java.util.Hashtable;
 
 import javax.annotation.PostConstruct;
 import javax.naming.spi.InitialContextFactory;
 
-import java.util.Hashtable;
+import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.loader.EnvLoader;
+import com.caucho.v5.loader.EnvLoaderListener;
+import com.caucho.v5.naming.JndiUtil;
+import com.caucho.v5.naming.LinkProxy;
+import com.caucho.v5.util.L10N;
 
 /**
  * Configuration for the init-param pattern.
@@ -127,14 +126,14 @@ public class JndiLink {
     TypeBuilderFactory.init(obj);
     */
 
-    if (obj instanceof ClassLoaderListener) {
-      ClassLoaderListener listener = (ClassLoaderListener) obj;
+    if (obj instanceof EnvLoaderListener) {
+      EnvLoaderListener listener = (EnvLoaderListener) obj;
 
       EnvLoader.addClassLoaderListener(listener);
     }
 
-    if (obj instanceof EnvironmentListener) {
-      EnvironmentListener listener = (EnvironmentListener) obj;
+    if (obj instanceof EnvLoaderListener) {
+      EnvLoaderListener listener = (EnvLoaderListener) obj;
 
       EnvLoader.addEnvironmentListener(listener);
     }

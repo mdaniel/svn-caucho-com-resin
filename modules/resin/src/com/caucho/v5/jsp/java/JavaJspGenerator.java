@@ -79,7 +79,7 @@ import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.Depend;
 import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.MergePath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.TempStream;
@@ -247,7 +247,7 @@ public class JavaJspGenerator extends JspGenerator {
     return "";
   }
 
-  Path getAppDir()
+  PathImpl getAppDir()
   {
     return _jspCompiler.getAppDir();
   }
@@ -333,7 +333,7 @@ public class JavaJspGenerator extends JspGenerator {
     return _parseState.getCharEncoding();
   }
 
-  Path getClassDir()
+  PathImpl getClassDir()
   {
     return _jspCompiler.getClassDir();
   }
@@ -622,7 +622,7 @@ public class JavaJspGenerator extends JspGenerator {
    * Generates the JSP page.
    */
   @Override
-  protected void generate(Path path, String className)
+  protected void generate(PathImpl path, String className)
     throws Exception
   {
     init(className);
@@ -657,7 +657,7 @@ public class JavaJspGenerator extends JspGenerator {
     }
 
     if (_lineMap != null) {
-      Path javaPath = getGeneratedPath();
+      PathImpl javaPath = getGeneratedPath();
       String tail = javaPath.getTail();
       tail = tail + ".smap";
       WriteStream os = javaPath.getParent().lookup(tail).openWrite();
@@ -668,9 +668,9 @@ public class JavaJspGenerator extends JspGenerator {
     }
   }
 
-  public void addDepend(Path path)
+  public void addDepend(PathImpl path)
   {
-    addDepend(path.createDepend());
+    addDepend((PersistentDependency) path.createDepend());
   }
 
   /**
@@ -798,12 +798,12 @@ public class JavaJspGenerator extends JspGenerator {
   {
     _isStatic = true;
 
-    Path javaPath = getGeneratedPath();
+    PathImpl javaPath = getGeneratedPath();
     String tail = javaPath.getTail();
     int p = tail.indexOf('.');
     tail = tail.substring(0, p);
 
-    Path staticPath = javaPath.getParent().lookup(tail + ".static");
+    PathImpl staticPath = javaPath.getParent().lookup(tail + ".static");
 
     WriteStream os = staticPath.openWrite();
     //os.setEncoding(_parseState.getCharEncoding());
@@ -817,7 +817,7 @@ public class JavaJspGenerator extends JspGenerator {
       os.close();
     }
 
-    Path dependPath = javaPath.getParent().lookup(tail + ".depend");
+    PathImpl dependPath = javaPath.getParent().lookup(tail + ".depend");
     StaticPage.writeDepend(dependPath, getDependList());
   }
 
@@ -2077,7 +2077,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("_jsp_init_strings();");
     }
 
-    out.println(Path.class.getName() + " resinHome = "
+    out.println(PathImpl.class.getName() + " resinHome = "
                 + CauchoUtil.class.getName() + ".getHomeDir();");
     out.println("com.caucho.v5.vfs.MergePath mergePath = new com.caucho.v5.vfs.MergePath();");
     out.println("mergePath.addMergePath(appDir);");
@@ -2106,7 +2106,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     out.println("com.caucho.v5.vfs.Depend depend;");
 
-    Path appDir = getAppDir();
+    PathImpl appDir = getAppDir();
     for (int i = 0; i < depends.size(); i++) {
       PersistentDependency dependency = depends.get(i);
 
@@ -2159,7 +2159,7 @@ public class JavaJspGenerator extends JspGenerator {
    * Prints an expression to lookup the path directory
    */
   private void printPathDir(JspJavaWriter out, Depend depend,
-                            String path, Path appDir, MergePath classPath)
+                            String path, PathImpl appDir, MergePath classPath)
     throws IOException
   {
     String resinHome = RootDirectorySystem.getCurrent().getRootDirectory().getPath();
@@ -2171,7 +2171,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     if (path.startsWith(prefix)) {
       String subPath = path.substring(prefix.length());
-      Path appPathTest = appDir.lookup(subPath);
+      PathImpl appPathTest = appDir.lookup(subPath);
 
       if (appPathTest.getCrc64() == depend.getPath().getCrc64()) {
         out.print("appDir.lookup(\"");
@@ -2181,10 +2181,10 @@ public class JavaJspGenerator extends JspGenerator {
       }
     }
 
-    ArrayList<Path> classPathList = classPath.getMergePaths();
+    ArrayList<PathImpl> classPathList = classPath.getMergePaths();
 
     for (int i = 0; i < classPathList.size(); i++) {
-      Path dir = classPathList.get(i);
+      PathImpl dir = classPathList.get(i);
       prefix = dir.getFullPath();
 
       if (! prefix.endsWith("/"))
@@ -2198,7 +2198,7 @@ public class JavaJspGenerator extends JspGenerator {
         if (tail.startsWith("/"))
           tail = tail.substring(1);
 
-        Path cpPath = appDir.lookup("classpath:" + tail);
+        PathImpl cpPath = appDir.lookup("classpath:" + tail);
 
         if (depend.getPath().getCrc64() == cpPath.getCrc64()) {
           out.print("appDir.lookup(\"classpath:");
@@ -2394,7 +2394,7 @@ public class JavaJspGenerator extends JspGenerator {
   WriteStream openWriteStream()
     throws IOException
   {
-    Path javaPath = getGeneratedPath();
+    PathImpl javaPath = getGeneratedPath();
 
     WriteStream os = javaPath.openWrite();
 
@@ -2403,13 +2403,13 @@ public class JavaJspGenerator extends JspGenerator {
     return os;
   }
 
-  Path getGeneratedPath()
+  PathImpl getGeneratedPath()
     throws IOException
   {
     // String name = _pkg + "." + _className;
 
-    Path dir = getJspCompiler().getClassDir().lookup(_workPath);
-    Path javaPath = dir.lookup(_className + ".java");
+    PathImpl dir = getJspCompiler().getClassDir().lookup(_workPath);
+    PathImpl javaPath = dir.lookup(_className + ".java");
 
     try {
       javaPath.getParent().mkdirs();
@@ -2465,7 +2465,7 @@ public class JavaJspGenerator extends JspGenerator {
     return _tagManager.addTaglib(qname);
   }
 
-  public String getSourceLines(Path source, int errorLine)
+  public String getSourceLines(PathImpl source, int errorLine)
   {
     if (source == null || errorLine < 1)
       return "";

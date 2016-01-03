@@ -41,7 +41,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.sql.DataSource;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.FieldGeneratorProgram;
@@ -159,7 +159,7 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
     
     bindJndi(javaField, gen);
     
-    return new FieldGeneratorProgram(Config.getCurrent(), javaField, gen);
+    return new FieldGeneratorProgram(ConfigContext.getCurrent(), javaField, gen);
   }
   
 
@@ -180,7 +180,7 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
     
     bindJndi(javaMethod, gen);
     
-    return new MethodGeneratorProgram(Config.getCurrent(), javaMethod, gen);
+    return new MethodGeneratorProgram(ConfigContext.getCurrent(), javaMethod, gen);
   }
   
   protected ValueGenerator bindGenerator(String location,

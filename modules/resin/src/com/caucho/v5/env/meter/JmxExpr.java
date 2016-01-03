@@ -114,7 +114,7 @@ abstract public class JmxExpr {
       try {
         _objectName = JmxUtilResin.getObjectName(name);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     
@@ -182,7 +182,7 @@ abstract public class JmxExpr {
       try {
         _objectName = JmxUtilResin.getObjectName(name);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     

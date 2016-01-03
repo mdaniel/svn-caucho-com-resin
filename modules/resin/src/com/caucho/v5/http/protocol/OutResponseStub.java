@@ -31,7 +31,7 @@ package com.caucho.v5.http.protocol;
 
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.OutputStreamWithBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import java.io.IOException;
 import java.io.OutputStream;

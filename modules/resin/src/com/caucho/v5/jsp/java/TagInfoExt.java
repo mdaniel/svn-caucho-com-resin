@@ -37,8 +37,8 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
 
-import com.caucho.v5.make.DependencyContainer;
-import com.caucho.v5.vfs.Dependency;
+import com.caucho.v5.io.Dependency;
+import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.vfs.PersistentDependency;
 
 /**

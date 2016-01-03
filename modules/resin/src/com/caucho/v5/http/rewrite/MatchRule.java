@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.make.DependencyContainer;
+import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.L10N;

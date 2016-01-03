@@ -82,7 +82,7 @@ public class Deny extends SecurityConstraint
     try {
       _patternList.add(Pattern.compile(regexpPattern, flags));
     } catch (PatternSyntaxException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

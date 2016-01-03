@@ -40,7 +40,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.FreeList;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * statistics
@@ -91,7 +91,7 @@ class StatDatabase
 
   private QueryKraken _nameSelect;
 
-  StatDatabase(Path path)
+  StatDatabase(PathImpl path)
   {
     try {
       ServerBartender server = BartenderSystem.getCurrentSelfServer();
@@ -117,7 +117,7 @@ class StatDatabase
       //_reaperTask = new ReaperTask();
       //new WeakAlarm(_reaperTask).queue(_reaperTimeout);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -285,7 +285,7 @@ class StatDatabase
         }
       }
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       conn.close();
     }
@@ -764,7 +764,7 @@ class StatDatabase
 
         return _insertSampleStmt;
       } catch (SQLException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 
@@ -782,7 +782,7 @@ class StatDatabase
 
         return _selectDataStmt;
       } catch (SQLException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 
@@ -799,7 +799,7 @@ class StatDatabase
 
         return _selectBaselineStmt;
       } catch (SQLException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 
@@ -815,7 +815,7 @@ class StatDatabase
 
         return _loadNameIdStmt;
       } catch (SQLException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 
@@ -832,7 +832,7 @@ class StatDatabase
 
         return _insertNameStmt;
       } catch (SQLException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 
@@ -847,7 +847,7 @@ class StatDatabase
 
         return _selectNamesStmt;
       } catch (SQLException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
 

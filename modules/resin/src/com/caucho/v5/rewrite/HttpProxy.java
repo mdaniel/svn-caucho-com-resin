@@ -176,7 +176,7 @@ public class HttpProxy extends DispatchRuleTargetBase
         webApp.getBuilder().addServlet(_servlet);
     }
     catch (ServletException ex) {
-      throw ConfigException.create(ex);
+      throw ConfigException.wrap(ex);
     }
   }
 
@@ -191,7 +191,7 @@ public class HttpProxy extends DispatchRuleTargetBase
       return new ProxyFilterChain(_servlet.createServletChain(),
                                   uri, queryString);
     } catch (ServletException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

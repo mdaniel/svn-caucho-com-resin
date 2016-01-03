@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.TempStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
@@ -82,7 +82,7 @@ public class PdfDocument implements AutoCloseable
   private PagePdf _page;
   private StreamPdf _stream;
 
-  public PdfDocument(Path path)
+  public PdfDocument(PathImpl path)
     throws IOException
   {
     WriteStream os = path.openWrite();
@@ -757,7 +757,7 @@ public class PdfDocument implements AutoCloseable
   /**
    * open image
    */
-  public ImagePdf open_image_file(String type, Path file)
+  public ImagePdf open_image_file(String type, PathImpl file)
     throws IOException
   {
     ImagePdf img = new ImagePdf(file);
@@ -772,7 +772,7 @@ public class PdfDocument implements AutoCloseable
   /**
    * open image
    */
-  public ImagePdf load_image(Path file)
+  public ImagePdf load_image(PathImpl file)
     throws IOException
   {
     ImagePdf img = new ImagePdf(file);
@@ -802,7 +802,7 @@ public class PdfDocument implements AutoCloseable
   /**
    * open image
    */
-  public EmbeddedFilePdf fit_embedded_file(Path path,
+  public EmbeddedFilePdf fit_embedded_file(PathImpl path,
                                            double x, double y,
                                            double width, double height)
     throws IOException
@@ -835,7 +835,7 @@ public class PdfDocument implements AutoCloseable
   /**
    * open image
    */
-  public ImageFilePdf embedLoad(Path path, double width, double height)
+  public ImageFilePdf embedLoad(PathImpl path, double width, double height)
     throws IOException
   {
     EmbeddedFilePdf file = new EmbeddedFilePdf(path);

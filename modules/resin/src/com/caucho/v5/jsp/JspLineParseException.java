@@ -31,12 +31,12 @@ package com.caucho.v5.jsp;
 import java.io.*;
 
 import com.caucho.v5.config.DisplayableException;
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.javac.LineMapException;
 import com.caucho.v5.util.*;
 
 public class JspLineParseException extends JspParseException
-  implements LineCompileException, LineMapException, DisplayableException {
+  implements UserMessageLocation, LineMapException, DisplayableException {
 
   public JspLineParseException()
   {

@@ -39,7 +39,7 @@ import com.caucho.v5.network.port.PollContext;
 import com.caucho.v5.network.port.PollTcpSystem;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
@@ -58,7 +58,7 @@ public class HttpStress
 
   private CharBuffer _key = new CharBuffer();
   private CharBuffer _value = new CharBuffer();
-  private Path _socketPath;
+  private PathImpl _socketPath;
   private int _count;
 
   private byte []_data = new byte[8 * 1024];
@@ -70,7 +70,7 @@ public class HttpStress
     try {
       parseArgs(args);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
 
     _keepaliveSystem = new PollTcpSystem();

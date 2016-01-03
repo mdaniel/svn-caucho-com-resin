@@ -35,7 +35,7 @@ import com.caucho.v5.i18n.CharacterEncoding;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.URLUtil;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 import javax.servlet.RequestDispatcher;
@@ -49,10 +49,10 @@ import java.util.Iterator;
 
 public class DirectoryServlet extends HttpServlet {
   WebApp _app;
-  Path _context;
+  PathImpl _context;
   private boolean _enable = true;
 
-  public DirectoryServlet(Path context)
+  public DirectoryServlet(PathImpl context)
   {
     _context = context;
   }
@@ -135,7 +135,7 @@ public class DirectoryServlet extends HttpServlet {
     
     String relPath = cb.toString();
     String filename = getServletContext().getRealPath(relPath);
-    Path path = _context.lookupNative(filename);
+    PathImpl path = _context.lookupNative(filename);
 
     if (CauchoUtil.isWindows() && path.isWindowsInsecure()) {
       res.sendError(HttpServletResponse.SC_NOT_FOUND);

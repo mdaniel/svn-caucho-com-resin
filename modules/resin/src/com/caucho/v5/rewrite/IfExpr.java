@@ -36,7 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.el.ELException;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.expr.ExprCfg;
@@ -108,7 +108,7 @@ public class IfExpr implements RequestPredicate
   public boolean isMatch(HttpServletRequest request)
   {
     try {
-      return _test.evalBoolean(Config.getEnvironment());
+      return _test.evalBoolean(ConfigContext.getEnvironment());
     } catch (ELException e) {
       log.log(Level.FINER, e.toString(), e);
       

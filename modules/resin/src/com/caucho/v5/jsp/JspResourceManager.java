@@ -29,7 +29,7 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Resolves resources and looks up *.tld
@@ -38,5 +38,5 @@ abstract public class JspResourceManager {
   /**
    * Resolves a path.
    */
-  abstract public Path resolvePath(String uri);
+  abstract public PathImpl resolvePath(String uri);
 }

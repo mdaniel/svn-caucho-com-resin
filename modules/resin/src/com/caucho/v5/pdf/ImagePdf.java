@@ -36,10 +36,10 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.TempBuffer;
 import com.caucho.v5.vfs.TempStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -51,7 +51,7 @@ public class ImagePdf extends ObjectPdf {
     = Logger.getLogger(ImagePdf.class.getName());
   private static final L10N L = new L10N(ImagePdf.class);
 
-  private Path _path;
+  private PathImpl _path;
   private ReadStream _is;
 
   private BufferedImage _image;
@@ -64,7 +64,7 @@ public class ImagePdf extends ObjectPdf {
   private int _bits;
   private TempBuffer _jpegHead;
 
-  public ImagePdf(Path path)
+  public ImagePdf(PathImpl path)
     throws IOException
   {
     _path = path;

@@ -31,7 +31,7 @@ package com.caucho.v5.jsp;
 
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.TagInfo;
@@ -157,10 +157,10 @@ abstract public class JspGenerator {
   /**
    * Generates the JSP page.
    */
-  abstract protected void generate(Path path, String className)
+  abstract protected void generate(PathImpl path, String className)
     throws Exception;
 
-  public String getSourceLines(Path source, int errorLine)
+  public String getSourceLines(PathImpl source, int errorLine)
   {
     return "";
   }

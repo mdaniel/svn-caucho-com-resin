@@ -33,10 +33,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.broker.BrokerNautilus;
 import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
-import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache

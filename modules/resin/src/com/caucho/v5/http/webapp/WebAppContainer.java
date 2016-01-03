@@ -57,30 +57,29 @@ import com.caucho.v5.http.dispatch.InvocationDecoder;
 import com.caucho.v5.http.dispatch.InvocationRouter;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.host.Host;
-import com.caucho.v5.http.log.AccessLogServlet;
 import com.caucho.v5.http.log.AccessLogBase;
+import com.caucho.v5.http.log.AccessLogServlet;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.WebAppRouter.WebAppUriMap;
+import com.caucho.v5.io.AlwaysModified;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.lifecycle.Lifecycle;
-import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoader;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.loader.EnvironmentListener;
-import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
-import com.caucho.v5.vfs.Dependency;
 import com.caucho.v5.vfs.MemoryPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
  * Resin's webApp implementation.
  */
 public class WebAppContainer
-  implements InvocationRouter<InvocationServlet>, ClassLoaderListener, EnvironmentListener
+  implements InvocationRouter<InvocationServlet>, EnvLoaderListener
 {
   private static final L10N L = new L10N(WebApp.class);
   private static final Logger log
@@ -95,10 +94,10 @@ public class WebAppContainer
   private final Lifecycle _lifecycle;
 
   // The root directory.
-  private Path _rootDir;
+  private PathImpl _rootDir;
 
   // The document directory.
-  private Path _docDir;
+  private PathImpl _docDir;
 
   // dispatch mapping
   // private RewriteDispatch _rewriteDispatch;
@@ -138,7 +137,7 @@ public class WebAppContainer
    */
   public WebAppContainer(HttpContainerServlet http,
                          Host host,
-                         Path rootDirectory,
+                         PathImpl rootDirectory,
                          EnvironmentClassLoader loader,
                          Lifecycle lifecycle)
   {
@@ -237,7 +236,7 @@ public class WebAppContainer
   /**
    * Gets the root directory.
    */
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return _rootDir;
   }
@@ -245,7 +244,7 @@ public class WebAppContainer
   /**
    * Sets the root directory.
    */
-  public void setRootDirectory(Path path)
+  public void setRootDirectory(PathImpl path)
   {
     _rootDir = path;
 
@@ -255,7 +254,7 @@ public class WebAppContainer
   /**
    * Gets the document directory.
    */
-  public Path getDocumentDirectory()
+  public PathImpl getDocumentDirectory()
   {
     if (_docDir != null)
       return _docDir;
@@ -266,7 +265,7 @@ public class WebAppContainer
   /**
    * Sets the document directory.
    */
-  public void setDocumentDirectory(Path path)
+  public void setDocumentDirectory(PathImpl path)
   {
     _docDir = path;
   }
@@ -274,7 +273,7 @@ public class WebAppContainer
   /**
    * Sets the document directory.
    */
-  public void setDocDir(Path path)
+  public void setDocDir(PathImpl path)
   {
     setDocumentDirectory(path);
   }
@@ -564,7 +563,7 @@ public class WebAppContainer
   /**
    * Sets the war-dir for backwards compatibility.
    */
-  public void setWarDir(Path warDir)
+  public void setWarDir(PathImpl warDir)
     throws ConfigException
   {
     getWarGenerator().setPath(warDir);
@@ -578,7 +577,7 @@ public class WebAppContainer
   /**
    * Gets the war-dir.
    */
-  public Path getWarDir()
+  public PathImpl getWarDir()
   {
     return getWarGenerator().getPath();
   }
@@ -586,7 +585,7 @@ public class WebAppContainer
   /**
    * Sets the war-expand-dir.
    */
-  public void setWarExpandDir(Path warDir)
+  public void setWarExpandDir(PathImpl warDir)
   {
     getWarGenerator().setExpandDirectory(warDir);
   }
@@ -594,7 +593,7 @@ public class WebAppContainer
   /**
    * Gets the war-expand-dir.
    */
-  public Path getWarExpandDir()
+  public PathImpl getWarExpandDir()
   {
     return getWarGenerator().getExpandDirectory();
   }
@@ -632,7 +631,7 @@ public class WebAppContainer
     try {
       _appDeploy.start();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -923,7 +922,7 @@ public class WebAppContainer
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
   
@@ -1030,7 +1029,7 @@ public class WebAppContainer
   }
 
   public WebAppController createWebAppController(String id,
-                                                 Path rootDirectory,
+                                                 PathImpl rootDirectory,
                                                  String urlPrefix)
   {
     return new WebAppController(id, rootDirectory, this, urlPrefix);
@@ -1244,7 +1243,7 @@ public class WebAppContainer
 
     if (accessLog != null) {
       try {
-        accessLog.destroy();
+        accessLog.close();
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);
       }
@@ -1282,7 +1281,7 @@ public class WebAppContainer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      Path errorRoot = new MemoryPath().lookup("/error-root");
+      PathImpl errorRoot = new MemoryPath().lookup("/error-root");
       errorRoot.mkdirs();
       
       String id = "webapps/" + getHostName()+ "/error";
@@ -1301,7 +1300,7 @@ public class WebAppContainer
       //return webAppController.request();
       return handle.request();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(loader);
     }

@@ -41,14 +41,14 @@ import javax.websocket.RemoteEndpoint;
 import javax.websocket.SendHandler;
 import javax.websocket.SendResult;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.BasicFuture;
-import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for RemoteEndpoint.Async
  */
-@Module
+@ModulePrivate
 public class RemoteAsyncWebSocketBase 
   extends RemoteWebSocketBase
   implements RemoteEndpoint.Async

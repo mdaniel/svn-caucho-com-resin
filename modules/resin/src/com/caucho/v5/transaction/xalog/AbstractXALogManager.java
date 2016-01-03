@@ -29,7 +29,7 @@
 package com.caucho.v5.transaction.xalog;
 
 import com.caucho.v5.transaction.XidImpl;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import java.io.IOException;
 
@@ -42,7 +42,7 @@ abstract public class AbstractXALogManager
   /**
    * Sets a log path.
    */
-  abstract public void setPath(Path path)
+  abstract public void setPath(PathImpl path)
     throws java.io.IOException;
 
   /**

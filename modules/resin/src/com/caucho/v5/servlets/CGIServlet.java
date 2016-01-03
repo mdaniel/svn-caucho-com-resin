@@ -29,14 +29,14 @@
 
 package com.caucho.v5.servlets;
 
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.TempBuffer;
 import com.caucho.v5.vfs.Vfs;
 
 import javax.servlet.GenericServlet;
@@ -164,7 +164,7 @@ public class CGIServlet extends GenericServlet {
 
     String realPath = getServletContext().getRealPath(scriptPath);
 
-    Path vfsPath = Vfs.lookup(realPath);
+    PathImpl vfsPath = Vfs.lookup(realPath);
 
     if (! vfsPath.canRead() || vfsPath.isDirectory()) {
       if (log.isLoggable(Level.FINE))
@@ -329,7 +329,7 @@ public class CGIServlet extends GenericServlet {
   private int findScriptPathIndex(HttpServletRequest req, String fullPath)
   {
     String realPath = req.getRealPath(fullPath);
-    Path path = Vfs.lookup(realPath);
+    PathImpl path = Vfs.lookup(realPath);
 
     if (log.isLoggable(Level.FINER))
       log.finer(L.l("real-path is `{0}'", path));

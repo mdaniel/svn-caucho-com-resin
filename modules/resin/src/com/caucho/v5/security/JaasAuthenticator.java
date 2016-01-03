@@ -48,7 +48,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.http.security.AbstractAuthenticator;
@@ -91,7 +91,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
   {
     _loginModuleClass = loginModuleClass;
 
-    Config.checkCanInstantiate(loginModuleClass);
+    ConfigContext.checkCanInstantiate(loginModuleClass);
 
     if (! LoginModule.class.isAssignableFrom(loginModuleClass))
       throw new ConfigException(L.l("'{0}' must implement javax.security.auth.spi.LoginModule",

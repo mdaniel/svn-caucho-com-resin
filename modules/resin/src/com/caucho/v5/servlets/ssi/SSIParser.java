@@ -30,7 +30,7 @@
 package com.caucho.v5.servlets.ssi;
 
 import com.caucho.v5.util.ByteArrayBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 
 import java.io.IOException;
@@ -55,7 +55,7 @@ public class SSIParser {
     _factory = factory;
   }
 
-  Statement parse(Path path)
+  Statement parse(PathImpl path)
     throws IOException
   {
     ReadStream is = path.openRead();

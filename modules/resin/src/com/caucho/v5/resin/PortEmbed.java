@@ -29,7 +29,7 @@
 
 package com.caucho.v5.resin;
 
-import com.caucho.v5.config.EnvConfig;
+import com.caucho.v5.config.Config;
 import com.caucho.v5.server.container.ServerBuilder;
 
 /**
@@ -40,9 +40,9 @@ abstract public class PortEmbed
   private int _port = -1;
   private String _address;
   
-  private EnvConfig _env = EnvConfig.env().get();
+  private Config _env = Config.config().get();
 
-  protected EnvConfig env()
+  protected Config env()
   {
     return _env;
   }

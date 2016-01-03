@@ -32,12 +32,12 @@ package com.caucho.v5.websocket.client;
 import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * websocket client container
  */
-@Module
+@ModulePrivate
 public class ContainerProviderImpl extends ContainerProvider
 {
   @Override

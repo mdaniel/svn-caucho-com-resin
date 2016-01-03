@@ -34,7 +34,7 @@ import java.util.HashMap;
 
 import javax.servlet.ServletException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.RawString;
@@ -148,14 +148,14 @@ public class ServletRegexp {
       rawName = rawClassName;
 
     try {
-      String servletName = Config.evalString(rawName);
+      String servletName = ConfigContext.evalString(rawName);
 
       /*
       if (manager.getServletConfig(servletName) != null)
         return servletName;
         */
       
-      String className = Config.evalString(rawClassName);
+      String className = ConfigContext.evalString(rawClassName);
 
       ServletBuilder config = new ServletBuilder();
 

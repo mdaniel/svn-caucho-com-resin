@@ -41,7 +41,7 @@ import java.util.zip.ZipInputStream;
 
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.deploy.ConfigInstanceBuilder;
 import com.caucho.v5.deploy.DeployController;
 import com.caucho.v5.deploy.DeployControllerAdmin;
@@ -52,10 +52,10 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.pod.PodConfigApp;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.Crc64;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.util.ModulePrivate;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -67,7 +67,7 @@ import com.caucho.v5.vfs.WriteStream;
  * Each WebAppController corresponds to a DeployNetworkService tag with the
  * name "WebApp/[host]/[context-path]"
  */
-@Module
+@ModulePrivate
 public class WebAppController
   extends DeployControllerEnvironment<WebApp,WebAppConfig>
 {
@@ -95,9 +95,9 @@ public class WebAppController
   
   private String _podName;
   private ArrayList<PodConfigApp> _podConfigList = new ArrayList<>();
-  private ArrayList<Path> _archivePathList = new ArrayList<>();
+  private ArrayList<PathImpl> _archivePathList = new ArrayList<>();
 
-  private ArrayList<Path> _dependPathList = new ArrayList<Path>();
+  private ArrayList<PathImpl> _dependPathList = new ArrayList<PathImpl>();
 
   private String _sourceType = "unknown";
 
@@ -112,7 +112,7 @@ public class WebAppController
   private WebAppAdmin _admin;
 
   public WebAppController(String id, 
-                          Path rootDirectory, 
+                          PathImpl rootDirectory, 
                           WebAppContainer container)
   {
     this(id, rootDirectory, container, "/");
@@ -131,7 +131,7 @@ public class WebAppController
   */
 
   public WebAppController(String id,
-                          Path rootDirectory,
+                          PathImpl rootDirectory,
                           WebAppContainer container,
                           String contextPath)
   {
@@ -206,12 +206,12 @@ public class WebAppController
   {
     _podConfigList.add(podConfig);
     
-    for (Path archivePath : podConfig.getArchivePaths()) {
+    for (PathImpl archivePath : podConfig.getArchivePaths()) {
       addArchivePath(archivePath);
     }
   }
   
-  private void addArchivePath(Path archivePath)
+  private void addArchivePath(PathImpl archivePath)
   {
     _archivePathList.add(archivePath);
     
@@ -457,7 +457,7 @@ public class WebAppController
   {
     long crc = super.calculateDigest();
     
-    for (Path path : _archivePathList) {
+    for (PathImpl path : _archivePathList) {
       crc = Crc64.generate(crc, path.getCrc64());
     }
     
@@ -465,17 +465,17 @@ public class WebAppController
   }
     
   @Override
-  protected void extractBartender(Path rootDir)
+  protected void extractBartender(PathImpl rootDir)
     throws IOException
   {
     super.extractBartender(rootDir);
 
-    for (Path path : _archivePathList) {
+    for (PathImpl path : _archivePathList) {
       expandBarToPath(path, rootDir);
     }
   }
   
-  private void expandBarToPath(Path src, Path dst)
+  private void expandBarToPath(PathImpl src, PathImpl dst)
     throws IOException
   {
     try (ReadStream is = src.openRead()) {
@@ -489,7 +489,7 @@ public class WebAppController
             continue;
           }
 
-          Path subPath;
+          PathImpl subPath;
           
           if (name.startsWith("web/")) {
             subPath = dst.lookup(name.substring("web/".length()));
@@ -681,7 +681,7 @@ public class WebAppController
   protected void protectedWebApp()
     throws Exception
   {
-    Path root = getRootDirectory();
+    PathImpl root = getRootDirectory();
     // XXX: need to re-add to control.
     root.lookup("WEB-INF").chmod(0750);
     root.lookup("META-INF").chmod(0750);
@@ -701,7 +701,7 @@ public class WebAppController
   /**
    * Adds a dependent file.
    */
-  public void addDepend(Path path)
+  public void addDepend(PathImpl path)
   {
     _dependPathList.add(path);
   }
@@ -765,8 +765,8 @@ public class WebAppController
     // XXX:
     // beanManager.addBean(factory.singleton(webApp));
 
-    Config.setProperty("webApp", getVar());
-    Config.setProperty("app", getVar());
+    ConfigContext.setProperty("webApp", getVar());
+    ConfigContext.setProperty("app", getVar());
 
     webAppBuilder.setRegexp(_regexpValues);
     webAppBuilder.setDynamicDeploy(isDynamicDeploy());
@@ -836,7 +836,7 @@ public class WebAppController
    * Override to prevent removing of special files.
    */
   @Override
-  protected void removeExpandFile(Path path, String relPath)
+  protected void removeExpandFile(PathImpl path, String relPath)
     throws IOException
   {
     if (relPath.equals("./WEB-INF/resin-web.xml"))
@@ -945,22 +945,22 @@ public class WebAppController
         return "/" + name;
     }
 
-    public Path getAppDir()
+    public PathImpl getAppDir()
     {
       return WebAppController.this.getRootDirectory();
     }
 
-    public Path getDocDir()
+    public PathImpl getDocDir()
     {
       return WebAppController.this.getRootDirectory();
     }
 
-    public Path getRoot()
+    public PathImpl getRoot()
     {
       return WebAppController.this.getRootDirectory();
     }
 
-    public Path getRootDir()
+    public PathImpl getRootDir()
     {
       return WebAppController.this.getRootDirectory();
     }

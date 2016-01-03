@@ -31,7 +31,7 @@ package com.caucho.v5.http.rewrite;
 
 import java.net.UnknownHostException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
@@ -152,7 +152,7 @@ public class ConditionConfig {
     if (_builderProgram != null)
       _builderProgram.configure(_condition);
     
-    Config.init(_condition);
+    ConfigContext.init(_condition);
     
     return _condition;
   }

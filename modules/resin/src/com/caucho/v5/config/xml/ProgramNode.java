@@ -31,11 +31,11 @@ package com.caucho.v5.config.xml;
 
 import org.w3c.dom.Node;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.program.FlowProgram;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.xml.QElement;
 import com.caucho.v5.xml.QNode;
@@ -47,11 +47,11 @@ public class ProgramNode extends FlowProgram {
   static final L10N L = new L10N(ProgramNode.class);
 
   public static final ProgramNode NULL
-    = new ProgramNode(Config.getDefaultConfig(), new QElement());
+    = new ProgramNode(ConfigContext.getDefaultConfig(), new QElement());
 
   private final Node _node;
 
-  private ProgramNode(Config config,
+  private ProgramNode(ConfigContext config,
                       Node node)
   {
     super(config);

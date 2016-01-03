@@ -13,7 +13,7 @@ import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.kelp.io.StoreBuilder;
 import com.caucho.v5.kelp.io.StoreReadWrite;
 import com.caucho.v5.util.ConcurrentArrayList;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * A block in the http cache.
@@ -30,7 +30,7 @@ class BlockManagerHttpCache
   
   private AtomicLong _tail = new AtomicLong();
   
-  public BlockManagerHttpCache(Path path)
+  public BlockManagerHttpCache(PathImpl path)
   {
     
     StoreBuilder storeBuilder = new StoreBuilder(path);

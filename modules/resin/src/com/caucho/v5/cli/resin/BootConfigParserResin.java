@@ -33,12 +33,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.server.BootConfigParser;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.lib.ResinConfigLibrary;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.server.cdi.ResinServerConfigLibrary;
 import com.caucho.v5.server.config.RootConfigBoot;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 public class BootConfigParserResin extends BootConfigParser
 {
@@ -59,7 +59,7 @@ public class BootConfigParserResin extends BootConfigParser
   }
   
   @Override
-  protected void configure(Config config, RootConfigBoot bean, Path path)
+  protected void configure(ConfigContext config, RootConfigBoot bean, PathImpl path)
   {
     if (path == null) {
       return;

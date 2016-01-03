@@ -35,7 +35,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.persistence.PersistenceUnit;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
@@ -122,7 +122,7 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
       */
     BeanValueGenerator gen = bind(location, pUnit);
     
-    return new MethodGeneratorProgram(Config.getCurrent(), javaMethod, gen);
+    return new MethodGeneratorProgram(ConfigContext.getCurrent(), javaMethod, gen);
   }
   
   private BeanValueGenerator bind(String location, PersistenceUnit pUnit)

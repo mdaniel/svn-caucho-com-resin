@@ -32,11 +32,11 @@ package com.caucho.v5.config.program;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.type.ConfigType;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.loader.EnvLoader;
 
 /**
@@ -50,7 +50,7 @@ public class RecoverableProgram extends FlowProgram {
   
   private ConfigProgram _program;
 
-  public RecoverableProgram(Config config,
+  public RecoverableProgram(ConfigContext config,
                             ConfigProgram program)
   {
     super(config);
@@ -68,17 +68,17 @@ public class RecoverableProgram extends FlowProgram {
   public <T> void inject(T bean, InjectContext cxt)
     throws ConfigException
   {
-    Object oldRecover = Config.getProperty(ATTR);
+    Object oldRecover = ConfigContext.getProperty(ATTR);
     
     try {
-      Config.setProperty(ATTR, true);
+      ConfigContext.setProperty(ATTR, true);
       
       _program.inject(bean, cxt);
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
       EnvLoader.setConfigException(e);
     } finally {
-      Config.setProperty(ATTR, oldRecover);
+      ConfigContext.setProperty(ATTR, oldRecover);
     }
   }
 

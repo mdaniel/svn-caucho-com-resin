@@ -33,25 +33,25 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Top <persistence> tag for the persistence.xml
  */
 public class ConfigPersistence {
-  private final Path _root;
+  private final PathImpl _root;
   
   private String _version;
   
   private ArrayList<ConfigPersistenceUnit> _unitList
     = new ArrayList<ConfigPersistenceUnit>();
 
-  public ConfigPersistence(Path root)
+  public ConfigPersistence(PathImpl root)
   {
     _root = root;
   }
 
-  public Path getRoot()
+  public PathImpl getRoot()
   {
     return _root;
   }
@@ -79,7 +79,7 @@ public class ConfigPersistence {
     
       return unit;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

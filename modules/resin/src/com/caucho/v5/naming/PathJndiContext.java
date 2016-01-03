@@ -29,7 +29,7 @@
 package com.caucho.v5.naming;
 
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.naming.*;
 
@@ -40,15 +40,15 @@ public class PathJndiContext implements Context {
   private static L10N L = new L10N(PathJndiContext.class);
 
   private PathJndiContext _root;
-  private Path _path;
+  private PathImpl _path;
 
-  public PathJndiContext(Path path)
+  public PathJndiContext(PathImpl path)
   {
     _root = this;
     _path = path;
   }
 
-  PathJndiContext(Path path, PathJndiContext root)
+  PathJndiContext(PathImpl path, PathJndiContext root)
   {
     _root = root;
     _path = path;
@@ -56,7 +56,7 @@ public class PathJndiContext implements Context {
       _root = root;
   }
 
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }
@@ -67,7 +67,7 @@ public class PathJndiContext implements Context {
     if (name == null || name.equals(""))
       return new PathJndiContext(_path.lookup((String) null), _root);
 
-    Path subpath = _path.lookup(name);
+    PathImpl subpath = _path.lookup(name);
 
     if (subpath == null) {
       throw new NamingException(L.l("bad path {0}", name));
@@ -100,9 +100,9 @@ public class PathJndiContext implements Context {
   public void bind(String name, Object obj)
     throws NamingException
   {
-    Path subpath = _path.lookup(name);
+    PathImpl subpath = _path.lookup(name);
 
-    Path parent = subpath.getParent();
+    PathImpl parent = subpath.getParent();
     if (! parent.exists()) {
       try {
         parent.mkdirs();
@@ -134,10 +134,10 @@ public class PathJndiContext implements Context {
   public void rebind(String name, Object obj)
     throws NamingException
   {
-    Path subpath = _path.lookup(name);
+    PathImpl subpath = _path.lookup(name);
 
     try {
-      Path parent = subpath.getParent();
+      PathImpl parent = subpath.getParent();
       if (! parent.exists())
         parent.mkdirs();
       subpath.setValue(obj);
@@ -155,7 +155,7 @@ public class PathJndiContext implements Context {
   public void unbind(String name)
     throws NamingException
   {
-    Path subpath = _path.lookup(name);
+    PathImpl subpath = _path.lookup(name);
 
     try {
       subpath.remove();
@@ -213,7 +213,7 @@ public class PathJndiContext implements Context {
   public void destroySubcontext(String name)
     throws NamingException
   {
-    Path subpath = _path.lookup(name);
+    PathImpl subpath = _path.lookup(name);
 
     if (! subpath.exists())
       throw new NameNotFoundException(name);
@@ -236,7 +236,7 @@ public class PathJndiContext implements Context {
   public Context createSubcontext(String name)
     throws NamingException
   {
-    Path subpath = _path.lookup(name);
+    PathImpl subpath = _path.lookup(name);
 
     if (! subpath.getParent().isDirectory())
       throw new NamingException(L.l("parent of `{0}' must be directory",

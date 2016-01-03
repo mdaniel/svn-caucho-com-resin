@@ -32,18 +32,18 @@ package com.caucho.v5.pdf;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.v5.vfs.Path;
-import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.io.TempBuffer;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * deals with an image
  */
 public class EmbeddedFilePdf extends ObjectPdf {
-  private Path _path;
+  private PathImpl _path;
   
   private int _id;
 
-  public EmbeddedFilePdf(Path path)
+  public EmbeddedFilePdf(PathImpl path)
     throws IOException
   {
     _path = path;

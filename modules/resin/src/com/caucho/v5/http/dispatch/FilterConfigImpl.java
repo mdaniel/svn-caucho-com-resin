@@ -45,7 +45,7 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.annotation.DisableConfig;
@@ -114,7 +114,7 @@ public class FilterConfigImpl
     
     _filterClass = CauchoUtil.loadClass(filterClassName);
 
-    Config.validate(_filterClass, Filter.class);
+    ConfigContext.validate(_filterClass, Filter.class);
   }
 
   @DisableConfig
@@ -122,7 +122,7 @@ public class FilterConfigImpl
   {
     _filterClass = filterClass;
 
-    Config.validate(_filterClass, Filter.class);
+    ConfigContext.validate(_filterClass, Filter.class);
   }
 
   /**
@@ -433,7 +433,7 @@ public class FilterConfigImpl
     throws ServletException
   {
     if (_filter != null) {
-      Config.inject(_filter);
+      ConfigContext.inject(_filter);
       _filter.init(this);
       return _filter;
     }

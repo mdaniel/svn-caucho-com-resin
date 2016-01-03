@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.PredicateCacheable;
 import com.caucho.v5.http.rewrite.RequestPredicate;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -68,7 +68,7 @@ public class IfFileExists implements RequestPredicate, PredicateCacheable
     else
       realPath = request.getServletContext().getRealPath(request.getPathInfo());
 
-    Path path = Vfs.lookup(realPath);
+    PathImpl path = Vfs.lookup(realPath);
 
     return path.exists() && path.isFile();
   }

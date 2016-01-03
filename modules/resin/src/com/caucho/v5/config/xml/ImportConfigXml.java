@@ -32,7 +32,7 @@ package com.caucho.v5.config.xml;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.NoAspect;
 import com.caucho.v5.config.core.ImportConfig;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Imports values from a separate file.
@@ -42,7 +42,7 @@ import com.caucho.v5.vfs.Path;
 public class ImportConfigXml extends ImportConfig
 {
   @Override
-  protected void configure(Object bean, Path path)
+  protected void configure(Object bean, PathImpl path)
   {
     ConfigXml config = new ConfigXml();
     // server/10hc
@@ -63,7 +63,7 @@ public class ImportConfigXml extends ImportConfig
       try {
         config.configureBean(bean, path, schema);
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
   }

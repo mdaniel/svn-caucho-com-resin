@@ -54,7 +54,7 @@ import com.caucho.v5.http.protocol.ResponseServletStub;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.server.util.ScheduledThreadPool;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -71,7 +71,7 @@ import com.caucho.v5.util.L10N;
 @Unbound
 @Configurable  
 public class ScheduledTask
-  implements AlarmListener, EnvironmentListener
+  implements AlarmListener, EnvLoaderListener
 {
   private static final L10N L = new L10N(ScheduledTask.class);
   private static final Logger log

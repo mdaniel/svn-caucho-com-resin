@@ -30,7 +30,7 @@ package com.caucho.v5.relaxng;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.vfs.MergePath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 
 import org.xml.sax.InputSource;
@@ -44,8 +44,8 @@ import java.util.HashMap;
  * JARV Verifier factory.
  */
 public class CompactVerifierFactoryImpl implements VerifierFactory {
-  private static HashMap<Path,SoftReference<Schema>> _schemaMap =
-    new HashMap<Path,SoftReference<Schema>>();
+  private static HashMap<PathImpl,SoftReference<Schema>> _schemaMap =
+    new HashMap<PathImpl,SoftReference<Schema>>();
 
   /**
    * Reads the schema from the classpath.
@@ -64,7 +64,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
   /**
    * Compile a schema.
    */
-  public static Schema compileFromPath(Path path)
+  public static Schema compileFromPath(PathImpl path)
     throws SAXException, IOException
   {
     return new CompactVerifierFactoryImpl().compileSchema(path);
@@ -73,7 +73,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
   /**
    * Compile a schema.
    */
-  public Schema compileSchema(Path path)
+  public Schema compileSchema(PathImpl path)
     throws SAXException, IOException
   {
     String nativePath = path.getNativePath();
@@ -122,7 +122,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
     } catch (SAXException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

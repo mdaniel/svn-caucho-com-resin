@@ -38,7 +38,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Endpoint;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.websocket.common.EndpointReaderWebSocket;
 import com.caucho.v5.websocket.io.FrameInputStream;
@@ -47,7 +47,7 @@ import com.caucho.v5.websocket.io.WebSocketConstants;
 /**
  * User facade for http requests.
  */
-@Module
+@ModulePrivate
 public class EndpointReaderPlain
   implements EndpointReaderWebSocket
 {

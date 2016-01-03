@@ -39,7 +39,7 @@ import com.caucho.v5.config.types.PathBuilder;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployGenerator;
 import com.caucho.v5.deploy.DeployHandle;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The generator for the web-app deploy
@@ -137,7 +137,7 @@ public class DeployGeneratorWebAppRegexp
 
     varMap.put("regexp", vars);
 
-    Path appDir = null;
+    PathImpl appDir = null;
     
     try {
       String appDirPath = _config.getRootDirectory();

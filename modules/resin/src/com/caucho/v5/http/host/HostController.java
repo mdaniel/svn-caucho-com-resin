@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.types.PathBuilder;
 import com.caucho.v5.deploy.DeployController;
 import com.caucho.v5.deploy.DeployControllerAdmin;
@@ -48,11 +48,11 @@ import com.caucho.v5.deploy.DeployControllerType;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.deploy.DeployInstanceBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -96,7 +96,7 @@ public class HostController
   private ArrayList<Dependency> _dependList = new ArrayList<Dependency>();
 
   HostController(String id,
-                 Path rootDirectory,
+                 PathImpl rootDirectory,
                  String hostName,
                  HostConfig config,
                  HostContainer container,
@@ -286,7 +286,7 @@ public class HostController
   /**
    * Adds a dependent file.
    */
-  public void addDepend(Path depend)
+  public void addDepend(PathImpl depend)
   {
     if (! _dependList.contains(depend))
       _dependList.add(new Depend(depend));
@@ -315,7 +315,7 @@ public class HostController
   }
   */
 
-  public Path getWarExpandDirectory()
+  public PathImpl getWarExpandDirectory()
   {
     return null;
   }
@@ -355,12 +355,12 @@ public class HostController
         _hostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
       }
       
-      Function<String, Object> env = Config.getEnvironment();
+      Function<String, Object> env = ConfigContext.getEnvironment();
       
       for (int i = 0; aliases != null && i < aliases.size(); i++) {
         String alias = aliases.get(i);
 
-        alias = Config.evalString(alias, env);
+        alias = ConfigContext.evalString(alias, env);
 
         addHostAlias(alias);
       }
@@ -425,7 +425,7 @@ public class HostController
       Matcher matcher = _regexp.matcher(name);
 
       if (matcher.matches()) {
-        Path rootDirectory = calculateRoot(matcher);
+        PathImpl rootDirectory = calculateRoot(matcher);
 
         if (getRootDirectory().equals(rootDirectory)) {
           return true;
@@ -436,7 +436,7 @@ public class HostController
     return false;
   }
 
-  private Path calculateRoot(Matcher matcher)
+  private PathImpl calculateRoot(Matcher matcher)
   {
     // XXX: duplicates HostRegexp
 
@@ -465,7 +465,7 @@ public class HostController
       varMap.put("regexp", vars);
       varMap.put("host", new HostRegexpVar(matcher.group(0), vars));
 
-      Path path = PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
+      PathImpl path = PathBuilder.lookupPath(_rootDirectoryPattern, varMap);
       
       return path;
     } catch (Exception e) {
@@ -582,21 +582,21 @@ public class HostController
     _hostAliases.addAll(_entryHostAliases);
     */
     
-    Config.setProperty("name", _hostName);
-    Config.setProperty("host", _hostVar);
+    ConfigContext.setProperty("name", _hostName);
+    ConfigContext.setProperty("host", _hostVar);
 
     for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
       Object value = entry.getValue();
       
       if (value != null) {
-        Config.setProperty(entry.getKey(), value);
+        ConfigContext.setProperty(entry.getKey(), value);
       }
     }
 
     _hostAliases.clear();
     
     for (String alias : _entryHostAliases) {
-      _hostAliases.add(Config.evalString(alias));
+      _hostAliases.add(ConfigContext.evalString(alias));
     }
 
     if (_container != null) {

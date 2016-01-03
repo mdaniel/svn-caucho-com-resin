@@ -342,7 +342,7 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
     try {
       JndiUtil.bindDeep("java:comp/env/" + contextRefName, obj);
     } catch (NamingException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

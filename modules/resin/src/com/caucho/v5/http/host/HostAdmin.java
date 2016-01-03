@@ -35,7 +35,7 @@ import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.management.server.WebAppMXBean;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The admin implementation for a host.
@@ -86,7 +86,7 @@ public class HostAdmin extends DeployControllerAdmin<Host,HostController>
   @Override
   public String getRootDirectory()
   {
-    Path path = null;
+    PathImpl path = null;
 
     Host host = getHost();
 
@@ -104,7 +104,7 @@ public class HostAdmin extends DeployControllerAdmin<Host,HostController>
    */
   public String getDocumentDirectory()
   {
-    Path path = null;
+    PathImpl path = null;
 
     Host host = getHost();
 
@@ -123,7 +123,7 @@ public class HostAdmin extends DeployControllerAdmin<Host,HostController>
   @Override
   public String getWarDirectory()
   {
-    Path path = null;
+    PathImpl path = null;
 
     Host host = getHost();
 
@@ -139,7 +139,7 @@ public class HostAdmin extends DeployControllerAdmin<Host,HostController>
   @Override
   public String getWarExpandDirectory()
   {
-    Path path = null;
+    PathImpl path = null;
 
     Host host = getHost();
 

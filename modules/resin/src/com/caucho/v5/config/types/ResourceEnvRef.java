@@ -28,7 +28,7 @@
 
 package com.caucho.v5.config.types;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Configuration for the init-param pattern.
@@ -41,7 +41,7 @@ public class ResourceEnvRef extends ResourceRef {
     //setResType(EJBContext.class);
   }
 
-  public ResourceEnvRef(Path modulePath, String sourceEjbName)
+  public ResourceEnvRef(PathImpl modulePath, String sourceEjbName)
   {
     // super(modulePath, sourceEjbName);
     

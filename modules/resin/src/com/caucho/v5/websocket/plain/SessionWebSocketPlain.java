@@ -51,8 +51,8 @@ import javax.websocket.MessageHandler;
 import javax.websocket.PongMessage;
 import javax.websocket.RemoteEndpoint;
 
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.websocket.common.ContainerWebSocketBase;
 import com.caucho.v5.websocket.common.EndpointConnection;
@@ -62,7 +62,7 @@ import com.caucho.v5.websocket.io.WebSocketConstants;
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class SessionWebSocketPlain extends SessionWebSocketBase
 {
   private static final L10N L = new L10N(SessionWebSocketPlain.class);

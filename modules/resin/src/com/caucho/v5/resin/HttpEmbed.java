@@ -103,13 +103,13 @@ public class HttpEmbed extends PortEmbed
       _port.init();
       
       //SystemManager system = server.getSystemManager();
-      NetworkSystem networkSystem = NetworkSystem.getCurrent(); 
+      NetworkSystem networkSystem = NetworkSystem.current(); 
 
       networkSystem.addPort(_port);
 
       // server.addPort(_port);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

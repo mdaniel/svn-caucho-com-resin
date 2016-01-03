@@ -30,13 +30,13 @@
 
 package com.caucho.v5.network.port;
 
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.jmx.server.*;
 import com.caucho.v5.management.server.PortMXBean;
 import com.caucho.v5.management.server.TcpConnectionInfo;
 import com.caucho.v5.network.port.PortTcp;
+import com.caucho.v5.util.ModulePrivate;
 
-@Module
+@ModulePrivate
 public class AdminPortTcp extends ManagedObjectBase
   implements PortMXBean
 {

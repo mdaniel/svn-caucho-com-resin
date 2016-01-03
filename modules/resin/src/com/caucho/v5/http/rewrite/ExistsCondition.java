@@ -46,7 +46,7 @@ public class ExistsCondition
 {
   private static final L10N L = new L10N(ExistsCondition.class);
 
-  private Path _pwd;
+  private PathImpl _pwd;
   
   private String _value;
   private Pattern _regexp;
@@ -74,7 +74,7 @@ public class ExistsCondition
     String servletPath = request.getServletPath();
     String realPath = request.getRealPath(servletPath);
 
-    Path path = _pwd.lookup(realPath);
+    PathImpl path = _pwd.lookup(realPath);
     
     return path.canRead();
   }

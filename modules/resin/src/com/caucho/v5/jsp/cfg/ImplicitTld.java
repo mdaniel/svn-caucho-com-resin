@@ -33,7 +33,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.DependencyBean;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 import java.util.ArrayList;

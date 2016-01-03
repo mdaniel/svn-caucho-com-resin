@@ -126,7 +126,7 @@ public class PasswordEncryptCommand extends ServerCommandBase<ArgsDaemon>
 
       return passwordApi.encrypt(password, salt);
     } catch (Exception e) {
-      throw ConfigException.create("password-encrypt requires Resin Pro\n",
+      throw ConfigException.wrap("password-encrypt requires Resin Pro\n",
                                    e);
       //return null;
     }

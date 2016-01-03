@@ -63,7 +63,7 @@ import com.caucho.v5.util.LruCache;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.RandomUtil;
 import com.caucho.v5.vfs.CaseInsensitive;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 
@@ -85,7 +85,7 @@ public class FileServlet extends GenericServlet {
   private final LruCache<String,Cache> _localCache
     = new LruCache<String,Cache>(16 * 1024);
 
-  private Path _context;
+  private PathImpl _context;
   private WebApp _app;
   private RequestDispatcher _dir;
 
@@ -260,7 +260,7 @@ public class FileServlet extends GenericServlet {
       }
       
       filename = getServletContext().getRealPath(relPath);
-      Path path = _context.lookupNative(filename);
+      PathImpl path = _context.lookupNative(filename);
 
       // only top-level requests are checked
       if (cauchoReq == null || cauchoReq.getRequestDepth(0) != 0) {
@@ -308,7 +308,7 @@ public class FileServlet extends GenericServlet {
       String mimeType = webApp.getMimeType(relPath);
 
       boolean isPathReadable = path.canRead();
-      Path jarPath = null;
+      PathImpl jarPath = null;
 
       if (! isPathReadable) {
         String resource = "META-INF/resources" + relPath;
@@ -699,9 +699,9 @@ public class FileServlet extends GenericServlet {
   }
 
   static class Cache {
-    private Path _path;
-    private Path _jarPath;
-    private Path _pathResolved;
+    private PathImpl _path;
+    private PathImpl _jarPath;
+    private PathImpl _pathResolved;
     private boolean _isDirectory;
     private boolean _canRead;
     private long _length;
@@ -711,7 +711,7 @@ public class FileServlet extends GenericServlet {
     private String _lastModifiedString;
     private String _mimeType;
 
-    Cache(Path path, Path jarPath, String relPath, String mimeType)
+    Cache(PathImpl path, PathImpl jarPath, String relPath, String mimeType)
     {
       _path = path;
       _jarPath = jarPath;
@@ -721,17 +721,17 @@ public class FileServlet extends GenericServlet {
       fillData();
     }
 
-    Path getPath()
+    PathImpl getPath()
     {
       return _pathResolved;
     }
 
-    Path getFilePath()
+    PathImpl getFilePath()
     {
       return _path;
     }
 
-    Path getJarPath()
+    PathImpl getJarPath()
     {
       return _jarPath;
     }

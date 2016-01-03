@@ -43,7 +43,7 @@ import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.ConnectionWebSocketBase;
 import com.caucho.v5.websocket.common.ContainerWebSocketBase;
 import com.caucho.v5.websocket.common.EndpointConnection;
@@ -52,7 +52,7 @@ import com.caucho.v5.websocket.io.FrameInputStream;
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class ConnectionPlain extends ConnectionWebSocketBase
 {
   private static final Logger log

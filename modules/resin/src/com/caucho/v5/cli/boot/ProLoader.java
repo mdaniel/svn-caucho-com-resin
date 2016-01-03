@@ -35,7 +35,7 @@ import java.security.SecureClassLoader;
 
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.vfs.JarPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 
 /**
@@ -48,8 +48,8 @@ import com.caucho.v5.vfs.ReadStream;
  */
 public class ProLoader extends SecureClassLoader
 {
-  private Path _resinHome;
-  private Path _libexec;
+  private PathImpl _resinHome;
+  private PathImpl _libexec;
   private JarPath _resinJar;
   
   /**
@@ -57,7 +57,7 @@ public class ProLoader extends SecureClassLoader
    *
    * @param parent parent class loader
    */
-  private ProLoader(Path resinHome, boolean is64bit)
+  private ProLoader(PathImpl resinHome, boolean is64bit)
   {
     super(ClassLoader.getSystemClassLoader());
 
@@ -71,7 +71,7 @@ public class ProLoader extends SecureClassLoader
     _resinJar = JarPath.create(_resinHome.lookup("lib/resin.jar"));
   }
 
-  public static ProLoader create(Path resinHome, boolean is64bit)
+  public static ProLoader create(PathImpl resinHome, boolean is64bit)
   {
     if (resinHome.lookup("lib/resin.jar").canRead())
       return new ProLoader(resinHome, is64bit);
@@ -93,7 +93,7 @@ public class ProLoader extends SecureClassLoader
   {
     String className = name.replace('.', '/') + ".class";
 
-    Path path = _resinJar.lookup(className);
+    PathImpl path = _resinJar.lookup(className);
 
     int length = (int) path.getLength();
 
@@ -144,7 +144,7 @@ public class ProLoader extends SecureClassLoader
   @Override
   public String findLibrary(String name)
   {
-    Path path = _libexec.lookup("lib" + name + ".so");
+    PathImpl path = _libexec.lookup("lib" + name + ".so");
 
     if (path.canRead()) {
       return path.getNativePath();

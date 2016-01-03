@@ -47,7 +47,7 @@ import com.caucho.v5.nautilus.broker.ReceiverBroker;
 import com.caucho.v5.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Simple stomp broker.
@@ -68,7 +68,7 @@ public class BrokerNautilusImpl extends BrokerNautilusBase implements Closeable
   }
   
   
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
   }
   

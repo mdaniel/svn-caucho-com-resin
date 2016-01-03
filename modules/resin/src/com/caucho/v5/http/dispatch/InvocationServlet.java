@@ -45,9 +45,9 @@ import com.caucho.v5.http.protocol.RequestFacade;
 import com.caucho.v5.http.protocol.ConnectionHttp;
 import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ConnectionProtocol;
-import com.caucho.v5.vfs.Dependency;
 
 /**
  * A repository for request information gleaned from the uri.

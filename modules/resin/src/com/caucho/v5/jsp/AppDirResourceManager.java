@@ -29,18 +29,18 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Resolves resources and looks up *.tld
  */
 public class AppDirResourceManager extends JspResourceManager {
-  private final Path _appDir;
+  private final PathImpl _appDir;
 
   /**
    * Sets the application directory.
    */
-  public AppDirResourceManager(Path appDir)
+  public AppDirResourceManager(PathImpl appDir)
   {
     _appDir = appDir;
 
@@ -51,7 +51,7 @@ public class AppDirResourceManager extends JspResourceManager {
   /**
    * Resolves a path.
    */
-  public Path resolvePath(String uri)
+  public PathImpl resolvePath(String uri)
   {
     if (uri.startsWith("file:"))
       return _appDir.lookup(uri);

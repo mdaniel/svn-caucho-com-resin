@@ -34,14 +34,14 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployControllerType;
 import com.caucho.v5.deploy.DeployGeneratorExpand;
 import com.caucho.v5.deploy.DeployMode;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The generator for the host deploy
@@ -175,7 +175,7 @@ public class DeployGeneratorHostExpand
       return null;
     */
     
-    Path rootDirectory = getExpandPath(key);
+    PathImpl rootDirectory = getExpandPath(key);
 
     String hostName = keyToName(key);
 
@@ -194,7 +194,7 @@ public class DeployGeneratorHostExpand
 
       //ELContext env = new ConfigELContext(resolver);
 
-      hostName = Config.evalString(hostNamePattern);
+      hostName = ConfigContext.evalString(hostNamePattern);
     }
 
     HostController controller
@@ -209,7 +209,7 @@ public class DeployGeneratorHostExpand
       controller.addConfigDefault(hostDefault);
     }
 
-    Path jarPath = getArchivePath(key);
+    PathImpl jarPath = getArchivePath(key);
     controller.setArchivePath(jarPath);
     
     /*
@@ -233,8 +233,8 @@ public class DeployGeneratorHostExpand
                                  String key)
   {
     try {
-      Path expandDirectory = getExpandDirectory();
-      Path rootDirectory = controller.getRootDirectory();
+      PathImpl expandDirectory = getExpandDirectory();
+      PathImpl rootDirectory = controller.getRootDirectory();
 
       if (! expandDirectory.equals(rootDirectory.getParent())) {
         return;
@@ -294,8 +294,8 @@ public class DeployGeneratorHostExpand
 
     DeployGeneratorHostExpand deploy = (DeployGeneratorHostExpand) o;
 
-    Path expandPath = getExpandDirectory();
-    Path deployExpandPath = deploy.getExpandDirectory();
+    PathImpl expandPath = getExpandDirectory();
+    PathImpl deployExpandPath = deploy.getExpandDirectory();
     if (expandPath != deployExpandPath &&
         (expandPath == null || ! expandPath.equals(deployExpandPath)))
       return false;

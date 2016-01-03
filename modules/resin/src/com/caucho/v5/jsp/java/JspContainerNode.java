@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.JspParseException;
 import com.caucho.v5.util.CharBuffer;
@@ -584,7 +584,7 @@ public abstract class JspContainerNode extends JspNode {
       try {
         child.generate(out);
       } catch (Exception e) {
-        if (e instanceof LineCompileException)
+        if (e instanceof UserMessageLocation)
           throw e;
         else
           throw child.error(e);

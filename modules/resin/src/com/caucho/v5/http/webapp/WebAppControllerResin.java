@@ -33,8 +33,8 @@ import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.http.webapp.WebAppController;
-import com.caucho.v5.inject.Module;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.util.ModulePrivate;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Manages the lifecycle of a web-app. The same WebAppController is used for
@@ -44,11 +44,11 @@ import com.caucho.v5.vfs.Path;
  * Each WebAppController corresponds to a DeployNetworkService tag with the
  * name "WebApp/[host]/[context-path]"
  */
-@Module
+@ModulePrivate
 public class WebAppControllerResin extends WebAppController
 {
   public WebAppControllerResin(String id,
-                               Path rootDirectory, 
+                               PathImpl rootDirectory, 
                                WebAppContainer container,
                                String urlPrefix)
   {

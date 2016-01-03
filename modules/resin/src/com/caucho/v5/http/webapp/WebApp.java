@@ -108,14 +108,15 @@ import com.caucho.v5.http.security.LoginConfig;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.i18n.CharacterEncoding;
 import com.caucho.v5.inject.InjectManager;
+import com.caucho.v5.io.AlwaysModified;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.javac.WorkDir;
 import com.caucho.v5.lifecycle.Lifecycle;
+import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.make.AlwaysModified;
-import com.caucho.v5.make.DependencyContainer;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ConnectionProtocol;
@@ -125,9 +126,8 @@ import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
-import com.caucho.v5.vfs.Dependency;
 import com.caucho.v5.vfs.Encoding;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
 
@@ -231,7 +231,7 @@ public class WebApp extends ServletContextImpl
   private DependencyContainer _invocationDependency;
 
   private AccessLogBase _accessLog;
-  private Path _tempDir;
+  private PathImpl _tempDir;
 
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
 
@@ -331,7 +331,7 @@ public class WebApp extends ServletContextImpl
     try {
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
 
-      Path rootDirectory = getRootDirectory();
+      PathImpl rootDirectory = getRootDirectory();
 
       Vfs.setPwd(rootDirectory, _classLoader);
       WorkDir.setLocalWorkDir(rootDirectory.lookup("WEB-INF/work"),
@@ -498,7 +498,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Gets the webApp directory.
    */
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return _controller.getRootDirectory();
   }
@@ -1020,7 +1020,7 @@ public class WebApp extends ServletContextImpl
    * Sets the temporary directory
    */
   @Configurable
-  public void setTempDir(Path path)
+  public void setTempDir(PathImpl path)
   {
     _tempDir = path;
   }
@@ -1243,7 +1243,7 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.setCheckInterval(getClassLoader().getDependencyCheckInterval());
 
       if (_tempDir == null) {
-        _tempDir = (Path) EnvLoader.getLevelAttribute("caucho.temp-dir");
+        _tempDir = (PathImpl) EnvLoader.getLevelAttribute("caucho.temp-dir");
       }
 
       try {
@@ -1491,7 +1491,7 @@ public class WebApp extends ServletContextImpl
 
       isOkay = true;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       if (! isOkay)
         _lifecycle.toError();
@@ -2216,7 +2216,7 @@ public class WebApp extends ServletContextImpl
 
           _sessionManager = new SessionManager(this);
         } catch (Throwable e) {
-          throw ConfigException.create(e);
+          throw ConfigException.wrap(e);
         } finally {
           thread.setContextClassLoader(oldLoader);
         }
@@ -2500,7 +2500,7 @@ public class WebApp extends ServletContextImpl
       if (accessLog != null) {
         try {
           accessLog.flush();
-          accessLog.destroy();
+          accessLog.close();
         } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }
@@ -2594,9 +2594,9 @@ public class WebApp extends ServletContextImpl
       } catch (TimeoutException e) {
         log.log(Level.FINER, e.toString(), e);
       } catch (ExecutionException e) {
-        throw ConfigException.create(e.getCause());
+        throw ConfigException.wrap(e.getCause());
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
     }
     

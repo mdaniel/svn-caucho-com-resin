@@ -49,7 +49,7 @@ import com.caucho.v5.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.Murmur64;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Interface for the transaction log.
@@ -62,7 +62,7 @@ public final class BrokerServiceImpl
   private static final Logger log
     = Logger.getLogger(BrokerServiceImpl.class.getName());
 
-  private Path _path;
+  private PathImpl _path;
   
   // private DataStoreNautilus _db;
 

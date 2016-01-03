@@ -36,7 +36,7 @@ import java.util.logging.Level;
 import javax.el.ELContext;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.webapp.WebApp;
@@ -219,11 +219,11 @@ public class ServletMapping extends ServletBuilder {
       rawClassName = rawName;
 
     try {
-      return Config.evalString(rawName);
+      return ConfigContext.evalString(rawName);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -247,7 +247,7 @@ public class ServletMapping extends ServletBuilder {
       rawClassName = rawName;
 
     try {
-      String className = Config.evalString(rawClassName);
+      String className = ConfigContext.evalString(rawClassName);
 
       try {
         WebApp app = (WebApp) getServletContext();
@@ -261,7 +261,7 @@ public class ServletMapping extends ServletBuilder {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -288,9 +288,9 @@ public class ServletMapping extends ServletBuilder {
       rawClassName = rawName;
 
     try {
-      String servletName = Config.evalString(rawName);
+      String servletName = ConfigContext.evalString(rawName);
       
-      String className = Config.evalString(rawClassName);
+      String className = ConfigContext.evalString(rawClassName);
       
       ServletMapping config = new ServletMapping();
       config.setServletContext(getServletContext());
@@ -317,7 +317,7 @@ public class ServletMapping extends ServletBuilder {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

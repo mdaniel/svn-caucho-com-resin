@@ -44,7 +44,7 @@ import com.caucho.v5.config.j2ee.BeanNameLiteral;
 import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Configuration for the ejb-ref.
@@ -89,13 +89,13 @@ public class EjbRef extends BaseRef
     _context = context;
   }
 
-  public EjbRef(Path modulePath)
+  public EjbRef(PathImpl modulePath)
   {
     super(modulePath);
   }
 
 
-  public EjbRef(Path modulePath, String sourceEjbName)
+  public EjbRef(PathImpl modulePath, String sourceEjbName)
   {
     super(modulePath, sourceEjbName);
   }
@@ -274,7 +274,7 @@ public class EjbRef extends BaseRef
     try {
       JndiUtil.bindDeepShort(_ejbRefName, this);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
     
     // new BeanJndiProxy(injectManager, bean));
@@ -468,7 +468,7 @@ public class EjbRef extends BaseRef
     }
 
     try {
-      Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
+      PathImpl path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
 
       if (true)
         throw new IllegalStateException();

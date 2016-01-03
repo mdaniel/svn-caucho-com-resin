@@ -46,7 +46,7 @@ import com.caucho.v5.bartender.heartbeat.ServerHeartbeatBuilder;
 import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.cloud.security.SecuritySystem;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.EnvConfig;
+import com.caucho.v5.config.Config;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.jni.JniBoot;
@@ -61,7 +61,7 @@ import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -110,7 +110,7 @@ public class WatchdogManager implements AlarmListener
 
     Vfs.setPwd(getRootDirectory());
     
-    Path logPath = getLogDirectory().lookup("watchdog-manager.log");
+    PathImpl logPath = getLogDirectory().lookup("watchdog-manager.log");
     
     try {
       getLogDirectory().mkdirs();
@@ -152,7 +152,7 @@ public class WatchdogManager implements AlarmListener
     boolean isLogDirectoryExists = getLogDirectory().exists();
 
     JniBoot boot = new JniBoot();
-    Path logDirectory = getLogDirectory();
+    PathImpl logDirectory = getLogDirectory();
 
     if (boot.isValid()) {
       if (! isLogDirectoryExists) {
@@ -195,7 +195,7 @@ public class WatchdogManager implements AlarmListener
       selfBuilder.pod("watchdog");
 
       BartenderBuilder bartenderBuilder
-        = BartenderSystem.createBuilder(EnvConfig.env().get(),
+        = BartenderSystem.createBuilder(Config.config().get(),
                                         address, port, false, 
                                         portBartender, 
                                         "watchdog", "watchdog", 
@@ -206,7 +206,7 @@ public class WatchdogManager implements AlarmListener
       
       ServerBartender selfServer = system.getServerSelf();
       
-      NetworkSystem.createAndAddSystem(systemManager, selfServer, serverConfig, _args);
+      NetworkSystem.createAndAddSystem(systemManager, selfServer, _args.config());
 
       //InjectManager cdiManager = InjectManager.create();
       //AuthenticatorRole auth = null;
@@ -299,17 +299,17 @@ public class WatchdogManager implements AlarmListener
     return _args;
   }
 
-  Path getRootDirectory()
+  PathImpl getRootDirectory()
   {
     return _serverConfig.getRootDirectory(_args);
   }
 
-  Path getHomeDirectory()
+  PathImpl getHomeDirectory()
   {
     return _args.getHomeDirectory();
   }
 
-  Path getLogDirectory()
+  PathImpl getLogDirectory()
   {
     return _serverConfig.getRoot().getLogDirectory(_args);
   }

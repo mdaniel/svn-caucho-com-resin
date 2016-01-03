@@ -32,9 +32,9 @@ package com.caucho.v5.vfs;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.vfs.Dependency;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.vfs.JarPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Class for keeping track of modifications.
@@ -43,7 +43,7 @@ public class PathExistsDependency implements Dependency {
   private static final Logger log
     = Logger.getLogger(PathExistsDependency.class.getName());
   
-  Path _source;
+  PathImpl _source;
   boolean _exists;
 
   /**
@@ -51,7 +51,7 @@ public class PathExistsDependency implements Dependency {
    *
    * @param source the source file
    */
-  public PathExistsDependency(Path source)
+  public PathExistsDependency(PathImpl source)
   {
     if (source instanceof JarPath)
       source = ((JarPath) source).getContainer();
@@ -65,7 +65,7 @@ public class PathExistsDependency implements Dependency {
    *
    * @param source the source file
    */
-  public PathExistsDependency(Path source, boolean exists)
+  public PathExistsDependency(PathImpl source, boolean exists)
   {
     _source = source;
     _exists = exists;
@@ -74,7 +74,7 @@ public class PathExistsDependency implements Dependency {
   /**
    * Returns the underlying source path.
    */
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _source;
   }

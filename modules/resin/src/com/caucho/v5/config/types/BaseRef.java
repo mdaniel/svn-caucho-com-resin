@@ -34,14 +34,14 @@ import java.lang.reflect.AccessibleObject;
 import com.caucho.v5.bytecode.JClass;
 import com.caucho.v5.bytecode.JClassLoader;
 import com.caucho.v5.bytecode.JClassLoaderWrapper;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
  * Base configuration for ejb-ref and resource-env-ref.
  */
 abstract public class BaseRef extends ResourceGroupConfig {
-  protected final Path _modulePath;
+  protected final PathImpl _modulePath;
 
   protected String _sourceEjbName;
 
@@ -53,12 +53,12 @@ abstract public class BaseRef extends ResourceGroupConfig {
     _modulePath = Vfs.getPwd();
   }
 
-  public BaseRef(Path modulePath)
+  public BaseRef(PathImpl modulePath)
   {
     _modulePath = modulePath;
   }
 
-  public BaseRef(Path modulePath, String sourceEjbName)
+  public BaseRef(PathImpl modulePath, String sourceEjbName)
   {
     _modulePath = modulePath;
     _sourceEjbName = sourceEjbName;

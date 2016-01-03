@@ -10,7 +10,7 @@ import io.baratine.service.Startup;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.expr.ExprCfg;
@@ -75,6 +75,6 @@ public class IfExpr extends HealthPredicateScheduledBase
     }
     
       //return _test.evalBoolean(ConfigELContext.EL_CONTEXT);
-    return _test.evalBoolean(Config.getEnvironment());
+    return _test.evalBoolean(ConfigContext.getEnvironment());
   }
 }

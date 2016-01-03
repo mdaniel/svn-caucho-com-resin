@@ -43,13 +43,14 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.inject.impl.InjectContext;
+import com.caucho.v5.util.ModulePrivate;
 
-@Module
+@ModulePrivate
 public class PostConstructProgramCandi extends ConfigProgram
 {
   private AnnotatedMethod<?> _annMethod;
@@ -57,13 +58,13 @@ public class PostConstructProgramCandi extends ConfigProgram
   private MethodHandle _initHandle;
   private ParamProgram []_program;
 
-  public PostConstructProgramCandi(Config config,
+  public PostConstructProgramCandi(ConfigContext config,
                               Method init)
   {
     this(config, null, init);
   }
 
-  public PostConstructProgramCandi(Config config,
+  public PostConstructProgramCandi(ConfigContext config,
                               AnnotatedMethod<?> annMethod, 
                               Method init)
   {
@@ -79,7 +80,7 @@ public class PostConstructProgramCandi extends ConfigProgram
     try {
       _initHandle = MethodHandles.lookup().unreflect(init);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
 
     introspect();
@@ -161,7 +162,7 @@ public class PostConstructProgramCandi extends ConfigProgram
       }
     } catch (Throwable e) {
       e.printStackTrace();
-      throw ConfigException.create(_init, e);
+      throw ConfigExceptionLocation.wrap(_init, e);
     }
   }
 

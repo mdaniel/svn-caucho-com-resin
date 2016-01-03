@@ -28,8 +28,8 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.io.Dependency;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.ServletConfig;
@@ -62,7 +62,7 @@ class WrapperPage extends Page {
       _childPage = (CauchoPage) child;
   }
 
-  public void init(Path path)
+  public void init(PathImpl path)
     throws ServletException
   {
     if (_childPage != null)

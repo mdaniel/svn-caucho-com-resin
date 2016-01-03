@@ -33,7 +33,7 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.logging.LogManager;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.types.RawString;
@@ -46,7 +46,7 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppContainer;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.server.container.ArgsServerBase;
@@ -279,7 +279,7 @@ public class ResinEmbed implements Closeable
       } catch (RuntimeException e) {
         throw e;
       } catch (Throwable e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -386,7 +386,7 @@ public class ResinEmbed implements Closeable
         deployWebApplication(webApplication);
       }
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -419,7 +419,7 @@ public class ResinEmbed implements Closeable
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
   
@@ -514,7 +514,7 @@ public class ResinEmbed implements Closeable
       
       // _resin.createServer();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
 
     /*
@@ -574,7 +574,7 @@ public class ResinEmbed implements Closeable
       container.addWebApp(deployGenerator);
       
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -745,7 +745,7 @@ public class ResinEmbed implements Closeable
 
     WebAppProgram(WebAppEmbed webAppConfig)
     {
-      super(Config.getCurrent());
+      super(ConfigContext.getCurrent());
       
       _config = webAppConfig;
     }

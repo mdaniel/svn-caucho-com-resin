@@ -27,17 +27,17 @@
 
 package com.caucho.v5.config.resin;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.core.ContextConfig;
 import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.config.type.TypeFactoryResin;
 import com.caucho.v5.config.xml.ContextConfigXml;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * The ConfigContext contains the state of the current configuration.
  */
-@Module
+@ModulePrivate
 public class ContextConfigResin extends ContextConfigXml
 {
   public ContextConfigResin(ContextConfigResin parent)
@@ -45,7 +45,7 @@ public class ContextConfigResin extends ContextConfigXml
     super(parent);
   }
 
-  public ContextConfigResin(Config config)
+  public ContextConfigResin(ConfigContext config)
   {
     super(config);
   }

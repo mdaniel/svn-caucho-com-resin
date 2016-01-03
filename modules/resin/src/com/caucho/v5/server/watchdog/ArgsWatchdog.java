@@ -38,7 +38,7 @@ import com.caucho.v5.cli.server.ProgramInfoDaemon;
 import com.caucho.v5.cli.server.ServerELContext;
 import com.caucho.v5.cli.shell.EnvCli;
 import com.caucho.v5.cli.spi.CommandManager;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 public class ArgsWatchdog extends ArgsDaemon
@@ -89,7 +89,7 @@ public class ArgsWatchdog extends ArgsDaemon
     return new ArgsWatchdog(envCli(), argv, getProgramInfo());
   }
 
-  static String calculateClassPath(Path homeDir,
+  static String calculateClassPath(PathImpl homeDir,
                             String programName)
     throws IOException
   {
@@ -99,14 +99,14 @@ public class ArgsWatchdog extends ArgsDaemon
   }
 
   static String calculateClassPath(ArrayList<String> classPath,
-                                   Path homeDir,
+                                   PathImpl homeDir,
                                    String programName)
     throws IOException
   {
     String oldClassPath = System.getProperty("java.class.path");
     if (oldClassPath != null) {
       for (String item : oldClassPath.split("[" + File.pathSeparatorChar + "]")) {
-        Path path = Vfs.lookup(item);
+        PathImpl path = Vfs.lookup(item);
         
         addClassPath(classPath, path.getNativePath());
       }
@@ -137,7 +137,7 @@ public class ArgsWatchdog extends ArgsDaemon
       addClassPath(classPath, javaHome.lookup("../lib/tools.jar").getNativePath());
       */
 
-    Path libDir = homeDir.lookup("lib");
+    PathImpl libDir = homeDir.lookup("lib");
 
     if (libDir.isDirectory()) {
       String jarName = programName + ".jar";
@@ -151,7 +151,7 @@ public class ArgsWatchdog extends ArgsDaemon
           continue;
         }
 
-        Path item = libDir.lookup(list[i]);
+        PathImpl item = libDir.lookup(list[i]);
 
         String pathName = item.getNativePath();
 
@@ -206,7 +206,7 @@ public class ArgsWatchdog extends ArgsDaemon
       super(args);
     }
 
-    public Path getHomeDir()
+    public PathImpl getHomeDir()
     {
       return getArgs().getHomeDirectory();
     }

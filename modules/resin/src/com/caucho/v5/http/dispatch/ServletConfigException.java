@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.dispatch;
 
-import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.UserMessage;
 import com.caucho.v5.config.DisplayableException;
 import com.caucho.v5.util.*;
 
@@ -41,7 +41,7 @@ import javax.servlet.ServletException;
  * Represents the final servlet in a filter chain.
  */
 public class ServletConfigException extends ServletException
-  implements CompileException, DisplayableException
+  implements UserMessage, DisplayableException
 {
   /**
    * Creates a servlet config exception.

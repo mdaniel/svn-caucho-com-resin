@@ -36,7 +36,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.Version;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,9 +81,9 @@ public class VarExpr extends SSIExpr {
   
   private final String _var;
 
-  private final Path _path;
+  private final PathImpl _path;
 
-  VarExpr(String var, Path path)
+  VarExpr(String var, PathImpl path)
   {
     int code = _varMap.get(var.toLowerCase(Locale.ENGLISH));
 

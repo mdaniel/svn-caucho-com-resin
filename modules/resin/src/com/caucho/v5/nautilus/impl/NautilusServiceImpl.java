@@ -36,13 +36,13 @@ import java.util.Map;
 
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.ReceiverMode;
 import com.caucho.v5.nautilus.broker.ReceiverBroker;
 import com.caucho.v5.nautilus.broker.ReceiverMessageHandler;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
 import com.caucho.v5.vfs.StreamSource;
 import com.caucho.v5.vfs.StreamSourceInputStream;
-import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * Service for remote queues.

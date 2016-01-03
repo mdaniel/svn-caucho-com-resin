@@ -53,7 +53,7 @@ import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.JarPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -282,10 +282,10 @@ abstract public class QServlet implements Servlet {
     else
       uri = RequestAdapter.getPageURI(req);
 
-    Path appDir = _webApp.getRootDirectory();
+    PathImpl appDir = _webApp.getRootDirectory();
 
     String realPath;
-    Path subcontext;
+    PathImpl subcontext;
 
     ServletConfig config = null;
 
@@ -351,7 +351,7 @@ abstract public class QServlet implements Servlet {
   public Page getPage(String uri, String pageURI, ServletConfig config)
     throws Exception
   {
-    Path path = getPagePath(pageURI);
+    PathImpl path = getPagePath(pageURI);
 
     if (path == null)
       return null;
@@ -362,11 +362,11 @@ abstract public class QServlet implements Servlet {
   /**
    * Returns the path to be used as the servlet name.
    */
-  private Path getPagePath(String pathName)
+  private PathImpl getPagePath(String pathName)
   {
-    Path rootDir = _webApp.getRootDirectory();
+    PathImpl rootDir = _webApp.getRootDirectory();
     String realPath = _webApp.getRealPath(pathName);
-    Path path = rootDir.lookupNative(realPath);
+    PathImpl path = rootDir.lookupNative(realPath);
 
     if (path.isFile() && path.canRead())
       return path;

@@ -38,14 +38,14 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerContainer;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.ContainerServerWebSocketWrapper;
 
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class ServerContainerImpl extends ContainerServerWebSocketWrapper
 {
   private static final EnvironmentLocal<ServerContainerDelegate> _currentContainer

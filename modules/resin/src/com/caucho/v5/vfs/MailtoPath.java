@@ -30,7 +30,7 @@ package com.caucho.v5.vfs;
 
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.StringCharCursor;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.StreamImpl;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ import java.util.Map;
  * Vfs.openWrite("mailto:nobody@foo.com?subject=dinner");
  * </pre></code>
  */
-public class MailtoPath extends Path {
+public class MailtoPath extends PathImpl {
   protected String url;
   private ArrayList<Recipient> _to;
   private ArrayList cc;
@@ -88,7 +88,7 @@ public class MailtoPath extends Path {
    * Parse the scheme for the recipient and the attributes.
    */
   @Override
-  public Path schemeWalk(String userPath, 
+  public PathImpl schemeWalk(String userPath, 
                          Map<String,Object> attributes,
                          String uri, 
                          int offset)

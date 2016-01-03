@@ -33,7 +33,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.PathBuilder;
 import com.caucho.v5.http.dispatch.UrlMap;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.annotation.PostConstruct;
 
@@ -50,14 +50,14 @@ public class RewriteRealPath {
   static final L10N L = new L10N(RewriteRealPath.class);
   static final Logger log = Logger.getLogger(RewriteRealPath.class.getName());
 
-  private Path _appDir;
+  private PathImpl _appDir;
 
   private final ArrayList<Program> _programList = new ArrayList<Program>();
   
   // path mapping (old path-mapping)
   private UrlMap<String> _pathMapping;
 
-  public RewriteRealPath(Path appDir)
+  public RewriteRealPath(PathImpl appDir)
   {
     _appDir = appDir;
   }
@@ -131,7 +131,7 @@ public class RewriteRealPath {
     
     String map = _pathMapping.map(uri, regexpVars);
 
-    Path path;
+    PathImpl path;
     if (map == null)
       path = _appDir.lookup("./" + uri);
     else {

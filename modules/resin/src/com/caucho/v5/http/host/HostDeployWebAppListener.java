@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -46,7 +46,7 @@ public class HostDeployWebAppListener
   private final static Logger log
     = Logger.getLogger(HostDeployWebAppListener.class.getName());
   
-  private final Path _deployPath;
+  private final PathImpl _deployPath;
   private final DeployGeneratorHostExpand _gen;
 
   private HostWatch _watch;
@@ -67,7 +67,7 @@ public class HostDeployWebAppListener
     // getRepository().addListener(_idPrefix, this);
   }
   
-  Path getExpandDirectory()
+  PathImpl getExpandDirectory()
   {
     return _gen.getExpandDirectory();
   }

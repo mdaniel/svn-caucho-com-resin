@@ -39,7 +39,7 @@ import com.caucho.v5.http.host.Host;
 import com.caucho.v5.server.config.ClusterConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.watchdog.ArgsWatchdog;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 public abstract class DeployCommandRepositoryBase extends RemoteCommandBase 
 {
@@ -89,7 +89,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
   
   protected String getDeployDir(ArgsCli args,
                                 ServerConfigBoot server,
-                                Path path)
+                                PathImpl path)
   {
     return getDeployDirWebApp(args, server, path);
   }
@@ -103,7 +103,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
 
   protected String getDeployDirWebApp(ArgsCli args,
                                       ServerConfigBoot server,
-                                      Path path)
+                                      PathImpl path)
   { 
     StringBuilder sb = new StringBuilder();
     
@@ -181,12 +181,12 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
     return sb.toString();
   }
   
-  protected String getName(ArgsWatchdog args, Path path)
+  protected String getName(ArgsWatchdog args, PathImpl path)
   {
     return getWebAppName(args, path);
   }
   
-  String getWebAppName(ArgsWatchdog args, Path path)
+  String getWebAppName(ArgsWatchdog args, PathImpl path)
   {
     String name = args.getArg("-name");
     

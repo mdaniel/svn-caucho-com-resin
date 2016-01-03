@@ -47,7 +47,7 @@ import com.caucho.v5.management.server.WatchdogMXBean;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Thread responsible for watching a backend server.
@@ -159,7 +159,7 @@ class ChildWatchdog
   /**
    * Returns the JAVA_HOME for the Resin instance
    */
-  public Path getJavaHome()
+  public PathImpl getJavaHome()
   {
     return _config.getJavaHome();
   }
@@ -223,7 +223,7 @@ class ChildWatchdog
   /**
    * Returns the jvm-foo-log.log file path
    */
-  public Path getLogPath()
+  public PathImpl getLogPath()
   {
     return _config.getLogPath();
   }
@@ -257,27 +257,27 @@ class ChildWatchdog
     return _config.getPorts();
   }
 
-  Path getChroot()
+  PathImpl getChroot()
   {
     return _config.getChroot();
   }
 
-  Path getPwd()
+  PathImpl getPwd()
   {
     return _config.getPwd();
   }
 
-  Path getHomeDir()
+  PathImpl getHomeDir()
   {
     return _config.getHomeDirectory();
   }
 
-  Path getRootDir()
+  PathImpl getRootDir()
   {
     return _config.getRootDir();
   }
   
-  Path getConfigPath()
+  PathImpl getConfigPath()
   {
     return _config.getResinConf();
   }

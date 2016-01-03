@@ -53,7 +53,7 @@ import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.java.JspTagSupport;
 import com.caucho.v5.jsp.java.TagTaglib;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 import com.caucho.v5.xml.Xml;
 
@@ -70,7 +70,7 @@ public class JspCompilerInstance {
   private JspCompiler _jspCompiler;
 
   // The path to the JSP source
-  private Path _jspPath;
+  private PathImpl _jspPath;
 
   // The JSP uri (user-name)
   private String _uri;
@@ -134,7 +134,7 @@ public class JspCompilerInstance {
   /**
    * Sets the path.
    */
-  void setJspPath(Path path)
+  void setJspPath(PathImpl path)
   {
     _jspPath = path;
   }
@@ -247,7 +247,7 @@ public class JspCompilerInstance {
       _parseState.setXml(true);
 
     WebAppResin webApp = (WebAppResin) _jspCompiler.getWebApp();
-    Path appDir = _jspCompiler.getAppDir();
+    PathImpl appDir = _jspCompiler.getAppDir();
     if (appDir == null && webApp != null) {
       appDir = webApp.getRootDirectory();
     }
@@ -628,7 +628,7 @@ public class JspCompilerInstance {
       _parseState.setTag(true);
       _isXml = isXml;
 
-      Path implicitTld = _jspPath.lookup(_jspPath.getParent() + "/implicit.tld");
+      PathImpl implicitTld = _jspPath.lookup(_jspPath.getParent() + "/implicit.tld");
 
       // jsp/10h4
       taglib.setJspVersion("2.0");
@@ -740,7 +740,7 @@ public class JspCompilerInstance {
     }
   }
 
-  private void compileJava(Path path, String className,
+  private void compileJava(PathImpl path, String className,
                            LineMap lineMap, String charEncoding)
     throws Exception
   {
@@ -762,9 +762,9 @@ public class JspCompilerInstance {
     }
     */
 
-    Path classDir = _jspCompiler.getClassDir();
-    Path classPath = classDir.lookup(className.replace('.', '/') + ".class");
-    Path smapPath =  classDir.lookup(fileName + ".smap");
+    PathImpl classDir = _jspCompiler.getClassDir();
+    PathImpl classPath = classDir.lookup(className.replace('.', '/') + ".class");
+    PathImpl smapPath =  classDir.lookup(fileName + ".smap");
 
     // jsp/18p1
     // compiler.mergeSmap(classPath, smapPath);

@@ -28,7 +28,7 @@
 
 package com.caucho.v5.util;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 import java.util.HashMap;

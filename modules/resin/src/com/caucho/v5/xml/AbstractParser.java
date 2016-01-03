@@ -30,7 +30,7 @@ package com.caucho.v5.xml;
 
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.VfsStream;
@@ -106,7 +106,7 @@ abstract public class AbstractParser implements XMLReader, Parser
 
   DOMBuilder _builder;
 
-  Path _searchPath;
+  PathImpl _searchPath;
   
   String _publicId;
   String _systemId;
@@ -427,7 +427,7 @@ abstract public class AbstractParser implements XMLReader, Parser
    *
    * @param path the path to search
    */
-  public void setSearchPath(Path path)
+  public void setSearchPath(PathImpl path)
   {
     _searchPath = path;
   }
@@ -438,7 +438,7 @@ abstract public class AbstractParser implements XMLReader, Parser
    *
    * @return the path to search
    */
-  public Path getSearchPath()
+  public PathImpl getSearchPath()
   {
     return _searchPath;
   }
@@ -688,7 +688,7 @@ abstract public class AbstractParser implements XMLReader, Parser
     _systemId = "stream";
     
     if (is instanceof ReadStream) {
-      Path path = ((ReadStream) is).getPath();
+      PathImpl path = ((ReadStream) is).getPath();
       _systemId = path.getURL();
       _filename = path.getUserPath();
       
@@ -732,7 +732,7 @@ abstract public class AbstractParser implements XMLReader, Parser
     throws IOException, SAXException
   {
     if (is instanceof ReadStream) {
-      Path path = ((ReadStream) is).getPath();
+      PathImpl path = ((ReadStream) is).getPath();
       
       if (_searchPath != null) {
       }
@@ -793,7 +793,7 @@ abstract public class AbstractParser implements XMLReader, Parser
   /**
    * SAX parsing from a VFS path
    */
-  public void parse(Path path)
+  public void parse(PathImpl path)
     throws IOException, SAXException
   {
     init();
@@ -879,7 +879,7 @@ abstract public class AbstractParser implements XMLReader, Parser
    *
    * @param path the VFS path containing the XML document.
    */
-  public Document parseDocument(Path path)
+  public Document parseDocument(PathImpl path)
     throws IOException, SAXException
   {
     if (_searchPath == null)
@@ -1005,7 +1005,7 @@ abstract public class AbstractParser implements XMLReader, Parser
     boolean isAbsolute = colon > 0 && (colon < slash || slash < 0);
     
     if (slash == 0 || ! isAbsolute) {
-      Path pwd;
+      PathImpl pwd;
 
       if (_searchPath != null)
         pwd = _searchPath;

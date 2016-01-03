@@ -87,7 +87,7 @@ public class ELFormatter extends MessageFormatter {
         
         _expr = ExprCfg.newParser(_format).parse();
       } catch (Exception ex) {
-        throw ConfigException.create(ex);
+        throw ConfigException.wrap(ex);
       }
     }
   }

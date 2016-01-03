@@ -325,7 +325,7 @@ public class WebAppEmbed
         webApp.addListener(config);
       }
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

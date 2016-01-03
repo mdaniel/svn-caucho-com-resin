@@ -48,13 +48,12 @@ import javax.management.ObjectName;
 import javax.management.loading.ClassLoaderRepository;
 
 import com.caucho.v5.lifecycle.Lifecycle;
-import com.caucho.v5.loader.CloseListener;
 import com.caucho.v5.loader.EnvLoader;
 
 /**
  * The context containing mbeans registered at a particular level.
  */
-public class MBeanContext
+public class MBeanContext implements AutoCloseable
 {
   private static final Logger log
     = Logger.getLogger(MBeanContext.class.getName());

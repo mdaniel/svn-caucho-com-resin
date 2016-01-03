@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.rewrite;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 
 import javax.annotation.PostConstruct;
 
@@ -62,7 +62,7 @@ abstract public class AbstractConditions
   {
     NotConditions not = new NotConditions();
     not.add(condition.getCondition());
-    Config.init(not);
+    ConfigContext.init(not);
 
     add(not);
   }

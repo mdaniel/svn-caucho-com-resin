@@ -205,7 +205,7 @@ public class FilterMappingEmbed
 
       // filterMapping.init();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

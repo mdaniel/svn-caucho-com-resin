@@ -49,15 +49,15 @@ import javax.el.ELException;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.ConfigRuntimeException;
 import com.caucho.v5.config.DisplayableException;
-import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.attribute.AttributeConfig;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.core.ContextConfig;
 import com.caucho.v5.config.expr.ExprCfg;
+import com.caucho.v5.config.impl.RuntimeExceptionConfig;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
@@ -70,7 +70,7 @@ import com.caucho.v5.relaxng.Schema;
 import com.caucho.v5.relaxng.Verifier;
 import com.caucho.v5.relaxng.VerifierFilter;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.xml.DOMBuilder;
@@ -80,7 +80,7 @@ import com.caucho.v5.xml.Xml;
 /**
  * The main configuration facade for XML configuration.
  */
-public class ConfigXml extends Config
+public class ConfigXml extends ConfigContext
 {
   private static final L10N L = new L10N(ConfigXml.class);
   private static final Logger log
@@ -250,7 +250,7 @@ public class ConfigXml extends Config
   /**
    * Configures a bean with a configuration file.
    */
-  public Object configure(Object obj, Path path)
+  public Object configure(Object obj, PathImpl path)
     throws ConfigException, IOException
   {
     try {
@@ -262,7 +262,7 @@ public class ConfigXml extends Config
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -309,7 +309,7 @@ public class ConfigXml extends Config
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public Object configure(Object obj, Path path, String schemaLocation)
+  public Object configure(Object obj, PathImpl path, String schemaLocation)
     throws ConfigException
   {
     try {
@@ -321,14 +321,14 @@ public class ConfigXml extends Config
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw LineConfigException.create(e);
+      throw ConfigExceptionLocation.wrap(e);
     }
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public Object configure(Object obj, Path path, Schema schema)
+  public Object configure(Object obj, PathImpl path, Schema schema)
     throws ConfigException
   {
     try {
@@ -338,7 +338,7 @@ public class ConfigXml extends Config
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -399,7 +399,7 @@ public class ConfigXml extends Config
       
       program.configure(obj);
       
-      return Config.replaceObject(obj);
+      return ConfigContext.replaceObject(obj);
       
       // return context.configure(obj, topNode);
     } finally {
@@ -413,7 +413,7 @@ public class ConfigXml extends Config
    * Configures a bean with a configuration file and schema.
    */
   public void configureBean(Object obj,
-                            Path path,
+                            PathImpl path,
                             String schemaLocation)
     throws Exception
   {
@@ -427,7 +427,7 @@ public class ConfigXml extends Config
   /**
    * Configures a bean with a configuration file and schema.
    */
-  public void configureBean(Object obj, Path path)
+  public void configureBean(Object obj, PathImpl path)
     throws Exception
   {
     QDocument doc = parseDocument(path, null);
@@ -478,7 +478,7 @@ public class ConfigXml extends Config
    * Configures a bean with a configuration file and schema.
    */
   public void configureBean(Object obj,
-                            Path path,
+                            PathImpl path,
                             Schema schema)
     throws Exception
   {
@@ -490,8 +490,8 @@ public class ConfigXml extends Config
   /**
    * Configures the bean from a path
    */
-  private QDocument parseDocument(Path path, Schema schema)
-    throws LineConfigException, IOException, org.xml.sax.SAXException
+  private QDocument parseDocument(PathImpl path, Schema schema)
+    throws ConfigExceptionLocation, IOException, org.xml.sax.SAXException
   {
     // server/2d33
     SoftReference<QDocument> docRef = null;//_parseCache.get(path);
@@ -521,7 +521,7 @@ public class ConfigXml extends Config
    * Configures the bean from an input stream.
    */
   private QDocument parseDocument(InputStream is, Schema schema)
-    throws LineConfigException,
+    throws ConfigExceptionLocation,
            IOException,
            org.xml.sax.SAXException
   {
@@ -531,7 +531,7 @@ public class ConfigXml extends Config
     builder.init(doc);
     String systemId = null;
     String filename = null;
-    Path path = null;
+    PathImpl path = null;
     if (is instanceof ReadStream) {
       path = ((ReadStream) is).getPath();
       systemId = path.getURL();
@@ -592,7 +592,7 @@ public class ConfigXml extends Config
       if (url == null)
         return null;
 
-      Path path = Vfs.lookup(URLDecoder.decode(url.toString()));
+      PathImpl path = Vfs.lookup(URLDecoder.decode(url.toString()));
 
       // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
 
@@ -603,7 +603,7 @@ public class ConfigXml extends Config
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -710,7 +710,7 @@ public class ConfigXml extends Config
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -724,7 +724,7 @@ public class ConfigXml extends Config
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -794,7 +794,7 @@ public class ConfigXml extends Config
   public static String evalString(String str)
     throws ELException
   {
-    return Config.evalString(str);
+    return ConfigContext.evalString(str);
   }
 
   /**
@@ -811,7 +811,7 @@ public class ConfigXml extends Config
    */
   public static boolean evalBoolean(String str)
   {
-    return ExprCfg.newParser(str).parse().evalBoolean(Config.getEnvironment());
+    return ExprCfg.newParser(str).parse().evalBoolean(ConfigContext.getEnvironment());
   }
 
   public static ELContext getEnvironment(HashMap<String,Object> varMap)
@@ -838,21 +838,21 @@ public class ConfigXml extends Config
     while (e.getCause() != null
            && (e instanceof InstantiationException
                || e instanceof InvocationTargetException
-               || e.getClass().equals(ConfigRuntimeException.class))) {
+               || e.getClass().equals(RuntimeExceptionConfig.class))) {
       e = e.getCause();
     }
 
-    if (e instanceof LineConfigException)
-      throw (LineConfigException) e;
+    if (e instanceof ConfigExceptionLocation)
+      throw (ConfigExceptionLocation) e;
 
     String lines = getSourceLines(systemId, line);
     String loc = systemId + ":" + line + ": ";
 
     if (e instanceof DisplayableException) {
-      return new LineConfigException(loc + e.getMessage() + "\n" + lines, e);
+      return new ConfigExceptionLocation(loc + e.getMessage() + "\n" + lines, e);
     }
     else
-      return new LineConfigException(loc + e + "\n" + lines, e);
+      return new ConfigExceptionLocation(loc + e + "\n" + lines, e);
   }
 
   public static String location(Field field)

@@ -61,7 +61,7 @@ import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WeakAlarm;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Represents an log of every top-level request to the server.
@@ -128,7 +128,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
    * Sets the log path
    */
   @Override
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     super.setPath(path);
 
@@ -831,10 +831,10 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
    * Closes the log, flushing the results.
    */
   @Override
-  public void destroy()
+  public void close()
     throws IOException
   {
-    super.destroy();
+    super.close();
 
     _isActive = false;
 

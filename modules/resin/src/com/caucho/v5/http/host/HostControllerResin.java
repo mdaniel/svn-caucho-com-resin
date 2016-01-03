@@ -34,7 +34,7 @@ import java.util.Map;
 import com.caucho.v5.http.host.HostBuilder;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.host.HostController;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * A configuration entry for a host
@@ -43,7 +43,7 @@ public class HostControllerResin
   extends HostController
 {
   HostControllerResin(String id,
-                 Path rootDirectory,
+                 PathImpl rootDirectory,
                  String hostName,
                  HostConfig config,
                  HostContainerResin container,
@@ -53,7 +53,7 @@ public class HostControllerResin
   }
 
   public HostControllerResin(String id,
-                             Path rootDirectory,
+                             PathImpl rootDirectory,
                              String hostName,
                              HostContainerResin container)
   {

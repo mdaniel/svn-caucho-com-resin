@@ -62,7 +62,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.FreeRing;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.MemoryPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 /**
@@ -82,7 +82,7 @@ abstract public class PageManager {
     = new FreeRing<PageContextWrapper>(256);
 
   private WebAppResin _webApp;
-  private Path _classDir;
+  private PathImpl _classDir;
   private long _updateInterval = 1000;
   private boolean _isAdapter;
   private boolean _omitInitLog;
@@ -132,16 +132,16 @@ abstract public class PageManager {
     _pageCacheMax = max;
   }
 
-  public Path getClassDir()
+  public PathImpl getClassDir()
   {
     if (_classDir != null)
       return _classDir;
     else {
-      Path appDir = _webApp.getRootDirectory();
+      PathImpl appDir = _webApp.getRootDirectory();
 
       if (appDir instanceof MemoryPath) {
         String workPathName = ("./" + _webApp.getURL());
-        Path path = CauchoUtil.getWorkPath().lookup(workPathName);
+        PathImpl path = CauchoUtil.getWorkPath().lookup(workPathName);
 
         return path;
       }
@@ -150,7 +150,7 @@ abstract public class PageManager {
     }
   }
 
-  public Path getAppDir()
+  public PathImpl getAppDir()
   {
     return _webApp.getRootDirectory();
   }
@@ -245,7 +245,7 @@ abstract public class PageManager {
    *
    * @return the compiled JSP (or XTP) page.
    */
-  public Page getPage(String uri, Path path)
+  public Page getPage(String uri, PathImpl path)
     throws Exception
   {
     return getPage(uri, uri, path, null);
@@ -261,7 +261,7 @@ abstract public class PageManager {
     * @return the compiled JSP (or XTP) page.
     */
   public Page getPage(String uri, String pageURI,
-                      Path path,
+                      PathImpl path,
                       ServletConfig config)
     throws Exception
   {
@@ -278,7 +278,7 @@ abstract public class PageManager {
     *
     * @return the compiled JSP (or XTP) page.
     */
-  public Page getPage(String uri, String pageURI, Path path,
+  public Page getPage(String uri, String pageURI, PathImpl path,
                       ServletConfig config,
                       ArrayList<PersistentDependency> dependList)
     throws Exception
@@ -330,7 +330,7 @@ abstract public class PageManager {
   private Page getPageEntry(Entry entry,
                             String uri,
                             String pageURI,
-                            Path path,
+                            PathImpl path,
                             ServletConfig config,
                             ArrayList<PersistentDependency> dependList)
      throws Exception
@@ -354,7 +354,7 @@ abstract public class PageManager {
                ") -> " + path);
     }
 
-    Path rootDir = getWebApp().getRootDirectory();
+    PathImpl rootDir = getWebApp().getRootDirectory();
 
     String rawClassName = pageURI;
 
@@ -409,7 +409,7 @@ abstract public class PageManager {
    * Implementation-specific method to create the actual page.  JspManager
    * and XtpManager define this for their specific needs.
    */
-  abstract Page createPage(Path path, String uri, String className,
+  abstract Page createPage(PathImpl path, String uri, String className,
                            ServletConfig config,
                            ArrayList<PersistentDependency> dependList)
     throws Exception;

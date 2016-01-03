@@ -34,20 +34,20 @@ import java.util.*;
 import com.caucho.v5.jmx.server.ConfigMXBean;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 public class ConfigAdmin extends ManagedObjectBase implements ConfigMXBean
 {
-  public static EnvironmentLocal<Map<Path, ConfigMXBean>> _environmentConfigs = 
-    new EnvironmentLocal<Map<Path, ConfigMXBean>>();
+  public static EnvironmentLocal<Map<PathImpl, ConfigMXBean>> _environmentConfigs = 
+    new EnvironmentLocal<Map<PathImpl, ConfigMXBean>>();
   
-  private Path _path;
+  private PathImpl _path;
   private String _url;
   private long _length;
   private long _lastModified;
   private long _crc64 = -1;
   
-  ConfigAdmin(Path path)
+  ConfigAdmin(PathImpl path)
   {
     _path = path;
     
@@ -58,15 +58,15 @@ public class ConfigAdmin extends ManagedObjectBase implements ConfigMXBean
     _crc64 = _path.getCrc64();
   }
 
-  public static void registerPath(Path path)
+  public static void registerPath(PathImpl path)
   {
     if (path.getURL().toLowerCase().endsWith(".license"))
       return;
     
-    Map<Path, ConfigMXBean> map = _environmentConfigs.getLevel();
+    Map<PathImpl, ConfigMXBean> map = _environmentConfigs.getLevel();
     
     if (map == null) {
-      map = new HashMap<Path, ConfigMXBean>();
+      map = new HashMap<PathImpl, ConfigMXBean>();
       _environmentConfigs.set(map);
     }
     
@@ -80,7 +80,7 @@ public class ConfigAdmin extends ManagedObjectBase implements ConfigMXBean
   
   public static Collection<ConfigMXBean> getMBeans()
   {
-    Map<Path, ConfigMXBean> map = _environmentConfigs.get();
+    Map<PathImpl, ConfigMXBean> map = _environmentConfigs.get();
     if (map == null)
       return Collections.emptyList();
     return Collections.unmodifiableCollection(map.values());
@@ -88,7 +88,7 @@ public class ConfigAdmin extends ManagedObjectBase implements ConfigMXBean
   
   public static Collection<ConfigMXBean> getMBeans(ClassLoader classLoader)
   {
-    Map<Path, ConfigMXBean> map = _environmentConfigs.get(classLoader);
+    Map<PathImpl, ConfigMXBean> map = _environmentConfigs.get(classLoader);
     if (map == null)
       return Collections.emptyList();
     return Collections.unmodifiableCollection(map.values());

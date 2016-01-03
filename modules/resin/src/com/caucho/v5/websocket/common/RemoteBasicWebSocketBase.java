@@ -37,13 +37,13 @@ import java.nio.ByteBuffer;
 import javax.websocket.EncodeException;
 import javax.websocket.RemoteEndpoint;
 
-import com.caucho.v5.inject.Module;
-import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.io.TempBuffer;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for RemoteEndpoint.Basic
  */
-@Module
+@ModulePrivate
 public class RemoteBasicWebSocketBase 
   extends RemoteWebSocketBase
   implements RemoteEndpoint.Basic

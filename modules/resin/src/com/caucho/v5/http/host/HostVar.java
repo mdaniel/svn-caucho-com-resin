@@ -32,7 +32,7 @@ package com.caucho.v5.http.host;
 import java.util.ArrayList;
 
 import com.caucho.v5.deploy.DeployHandle;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * A configuration entry for a host
@@ -93,7 +93,7 @@ public class HostVar
     return new ArrayList<>();
   }
 
-  public Path getRoot()
+  public PathImpl getRoot()
   {
     return _hostController.getRootDirectory();
     /*
@@ -122,7 +122,7 @@ public class HostVar
   /**
    * @deprecated
    */
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return getRoot();
   }
@@ -134,7 +134,7 @@ public class HostVar
   }
   */
 
-  public Path getWarDirectory()
+  public PathImpl getWarDirectory()
   {
     /*
     Host host = _hostController.getDeployInstance();
@@ -147,7 +147,7 @@ public class HostVar
     return getWarDir();
   }
 
-  public Path getWarDir()
+  public PathImpl getWarDir()
   {
     return _hostController.getWarExpandDirectory();
     //return getWarDirectory();

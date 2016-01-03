@@ -50,7 +50,7 @@ import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentProperties;
 import com.caucho.v5.server.container.ServerBuilder;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The ResinConfig class represents configuration for 
@@ -110,7 +110,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
   }
 
   @Configurable
-  public void setRootDirectory(Path root)
+  public void setRootDirectory(PathImpl root)
   {
     // _resin.setRootDirectory(root);
   }
@@ -224,7 +224,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
   public TempFileManager getTempFileManager()
   {
     if (_tempFileManager == null) {
-      Path path = RootDirectorySystem.getCurrent().getDataDirectory();
+      PathImpl path = RootDirectorySystem.getCurrent().getDataDirectory();
 
       _tempFileManager = new TempFileManager(path);
     }
@@ -266,7 +266,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
    */
   @Configurable
   @Deprecated
-  public void setAdminPath(Path path)
+  public void setAdminPath(PathImpl path)
   {
     // setResinDataDirectory(path);
   }
@@ -296,7 +296,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
       setEnable(enable);
     }
 
-    public void setPolicyFile(Path path)
+    public void setPolicyFile(PathImpl path)
       throws ConfigException
     {
       if (! path.canRead())

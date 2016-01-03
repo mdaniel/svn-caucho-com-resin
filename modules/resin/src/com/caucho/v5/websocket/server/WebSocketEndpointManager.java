@@ -33,13 +33,13 @@ import java.net.URI;
 
 import javax.websocket.server.ServerEndpointConfig;
 
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.ConcurrentArrayList;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class WebSocketEndpointManager
 {
   private final ConcurrentArrayList<WebSocketEndpointFactory> _endpointList
@@ -54,7 +54,7 @@ public class WebSocketEndpointManager
     _endpointList.add(endpointFactory);
   }
 
-  @Module
+  @ModulePrivate
   public WebSocketEndpointFactory findEndpoint(URI uri)
   {
     for (WebSocketEndpointFactory factory : _endpointList) {

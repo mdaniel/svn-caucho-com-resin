@@ -28,7 +28,7 @@
 
 package com.caucho.v5.servlets.ssi;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import java.util.HashMap;
 
@@ -45,7 +45,7 @@ public class SSIFactory
    *
    * @return the Statement, or null.
    */
-  public Statement createStatement(String cmd, HashMap<String,String> attr, Path path)
+  public Statement createStatement(String cmd, HashMap<String,String> attr, PathImpl path)
   {
     if ("config".equals(cmd))
       return ConfigStatement.create(attr, path);

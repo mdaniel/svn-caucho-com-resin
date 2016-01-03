@@ -29,8 +29,8 @@
 
 package com.caucho.v5.message.stomp;
 
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.broker.SenderBroker;
-import com.caucho.v5.vfs.TempBuffer;
 
 /**
  * xa item for a send

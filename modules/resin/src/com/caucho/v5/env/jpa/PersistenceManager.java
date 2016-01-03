@@ -45,27 +45,27 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentEnhancerListener;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.util.ModulePrivate;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 
 /**
  * Manages the JPA persistence contexts.
  */
-@Module
+@ModulePrivate
 public class PersistenceManager 
   implements ScanListenerByteCode, EnvironmentEnhancerListener
 {
@@ -89,7 +89,7 @@ public class PersistenceManager
   private HashMap<String, ArrayList<ConfigProgram>> _unitDefaultMap
     = new HashMap<String, ArrayList<ConfigProgram>>();
   
-  private ArrayList<Path> _pendingRootList = new ArrayList<Path>();
+  private ArrayList<PathImpl> _pendingRootList = new ArrayList<PathImpl>();
   
   private HashMap<String, EntityManager> _persistenceContextMap
     = new HashMap<String, EntityManager>();
@@ -104,7 +104,7 @@ public class PersistenceManager
 
     _tempLoader = _classLoader.getNewTempClassLoader();
 
-    _classLoader.addScanListener(this);
+    //_classLoader.addScanListener(this);
 
     EnvLoader.addEnvironmentListener(this, _classLoader);
 
@@ -114,7 +114,7 @@ public class PersistenceManager
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -246,14 +246,14 @@ public class PersistenceManager
 
   public void configurePersistenceRoots()
   {
-    ArrayList<Path> rootList = new ArrayList<Path>();
+    ArrayList<PathImpl> rootList = new ArrayList<PathImpl>();
 
     synchronized (_pendingRootList) {
       rootList.addAll(_pendingRootList);
       _pendingRootList.clear();
     }
 
-    for (Path root : rootList) {
+    for (PathImpl root : rootList) {
       parsePersistenceConfig(root);
     }
   }
@@ -261,9 +261,9 @@ public class PersistenceManager
   /**
    * Adds a persistence root.
    */
-  private void parsePersistenceConfig(Path root)
+  private void parsePersistenceConfig(PathImpl root)
   {
-    Path persistenceXml = root.lookup("META-INF/persistence.xml");
+    PathImpl persistenceXml = root.lookup("META-INF/persistence.xml");
     
     if (root.getFullPath().endsWith("WEB-INF/classes/")
         && ! persistenceXml.canRead()) {
@@ -304,7 +304,7 @@ public class PersistenceManager
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw LineConfigException.create(e);
+      throw ConfigExceptionLocation.wrap(e);
     } finally {
       try {
         if (is != null)
@@ -442,7 +442,7 @@ public class PersistenceManager
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -513,7 +513,7 @@ public class PersistenceManager
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -586,7 +586,7 @@ public class PersistenceManager
    * Returns true if the root is a valid scannable root.
    */
   @Override
-  public boolean isRootScannable(Path root, String packageRoot)
+  public boolean isRootScannable(PathImpl root, String packageRoot)
   {
     if (root.lookup("META-INF/persistence.xml").canRead()
         || (root.getFullPath().endsWith("WEB-INF/classes/")
@@ -598,7 +598,7 @@ public class PersistenceManager
   }
 
   @Override
-  public ScanClass scanClass(Path root, String packageRoot,
+  public ScanClass scanClass(PathImpl root, String packageRoot,
                              String className, int modifiers)
   {
     return null;

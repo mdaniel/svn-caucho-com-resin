@@ -56,6 +56,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
+import com.caucho.v5.http.baratine.FormBaratine;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
@@ -71,7 +72,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Encoding;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
@@ -93,7 +94,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
 
-  private ArrayList<Path> _removeOnExit;
+  private ArrayList<PathImpl> _removeOnExit;
 
   // form
   private HashMapImpl<String,String[]> _filledForm;
@@ -297,12 +298,14 @@ abstract public class RequestCauchoBase implements RequestCaucho
       if (query == null)
         return;
 
-      Form formParser;
+      Form formParser = new Form();
       
+      /*
       if (request != null)
         formParser = request.getFormParser();
       else
         formParser = new Form();
+        */
 
       String charEncoding = getCharacterEncoding();
       if (charEncoding == null) {
@@ -345,7 +348,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
       if (contentType == null)
         return;
 
-      Form formParser = request.getFormParser();
+      Form formParser = new Form(); // request.getFormParser();
       long contentLength = request.contentLength();
 
       String charEncoding = getCharacterEncoding();
@@ -470,7 +473,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   Part createPart(String name,
                   String contentType,
                   Map<String, List<String>> headers,
-                  Path tempFile,
+                  PathImpl tempFile,
                   String value)
   {
     return new PartImpl(name, contentType, headers, tempFile, value);
@@ -508,10 +511,10 @@ abstract public class RequestCauchoBase implements RequestCaucho
     }
   }
 
-  public void addCloseOnExit(Path path)
+  public void addCloseOnExit(PathImpl path)
   {
     if (_removeOnExit == null)
-      _removeOnExit = new ArrayList<Path>();
+      _removeOnExit = new ArrayList<PathImpl>();
 
     _removeOnExit.add(path);
   }
@@ -1087,7 +1090,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
 
     if (_removeOnExit != null) {
       for (int i = _removeOnExit.size() - 1; i >= 0; i--) {
-        Path path = _removeOnExit.get(i);
+        PathImpl path = _removeOnExit.get(i);
 
         try {
           path.remove();
@@ -1108,15 +1111,15 @@ abstract public class RequestCauchoBase implements RequestCaucho
   {
     private String _name;
     private Map<String, List<String>> _headers;
-    private Path _tempFile;
+    private PathImpl _tempFile;
     private String _value;
-    private Path _newPath;
+    private PathImpl _newPath;
     private String _contentType;
 
     private PartImpl(String name,
                      String contentType,
                      Map<String, List<String>> headers,
-                     Path tempFile,
+                     PathImpl tempFile,
                      String value)
     {
       Objects.requireNonNull(headers);
@@ -1299,7 +1302,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
       if (_newPath.exists())
         throw new IOException(L.l("File '{0}' already exists.", _newPath));
 
-      Path parent = _newPath.getParent();
+      PathImpl parent = _newPath.getParent();
 
       if (! parent.exists())
         if (! parent.mkdirs())

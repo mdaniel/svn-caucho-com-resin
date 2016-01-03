@@ -28,8 +28,8 @@
 
 package com.caucho.v5.jsp.java;
 
-import com.caucho.v5.config.CompileException;
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessage;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.jsp.*;
 import com.caucho.v5.jsp.cfg.*;
@@ -535,9 +535,9 @@ public class JavaJspBuilder extends JspBuilder {
 
   public JspParseException error(Throwable e)
   {
-    if (e instanceof LineCompileException)
+    if (e instanceof UserMessageLocation)
       return new JspLineParseException(e);
-    else if (e instanceof CompileException)
+    else if (e instanceof UserMessage)
       return new JspLineParseException(_filename + ":" + _line + ": "
                                        + e.getMessage()
                                        + _gen.getSourceLines(_sourcePath, _line),

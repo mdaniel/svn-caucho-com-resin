@@ -145,7 +145,7 @@ public class WebAppRouter
     try {
       _routerService.start(Result.ignore());
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

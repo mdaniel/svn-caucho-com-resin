@@ -35,7 +35,9 @@ import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.loader.EnvLoader;
 
 // TODO: service cleanup
-public class StatProbeManager extends MeterService { // implements Closeable {
+public class StatProbeManager extends MeterService
+  implements AutoCloseable
+{ // implements Closeable {
   private final Object _lock = new Object();
 
   private StatServiceLocal _statService;

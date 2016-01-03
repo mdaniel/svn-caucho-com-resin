@@ -34,12 +34,12 @@ import java.util.List;
 import javax.websocket.Extension;
 import javax.websocket.server.ServerEndpointConfig;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for WebSocketContainer.
  */
-@Module
+@ModulePrivate
 public class EndpointConfigServerWebSocketBase extends EndpointConfigWebSocketBase
    implements ServerEndpointConfig
 {

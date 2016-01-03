@@ -32,12 +32,12 @@ package com.caucho.websocket.decode;
 import javax.websocket.Decoder;
 import javax.websocket.MessageHandler;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * Callback for a binary stream decoder
  */
-@Module
+@ModulePrivate
 public class DecoderText<T> implements MessageHandler.Whole<String> {
   private final MessageHandler.Whole<T> _handler;
   private final Decoder.Text<T> _decoder;

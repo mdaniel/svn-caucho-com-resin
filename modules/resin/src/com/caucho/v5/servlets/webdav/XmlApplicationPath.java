@@ -30,7 +30,7 @@ package com.caucho.v5.servlets.webdav;
 
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -47,7 +47,7 @@ import java.util.Iterator;
  * Represents a virtual filesystem using xml files to store the attribute.
  */
 public class XmlApplicationPath extends ApplicationPath {
-  private Path _root;
+  private PathImpl _root;
   private HashMap _map = new HashMap();
 
   public XmlApplicationPath()
@@ -57,7 +57,7 @@ public class XmlApplicationPath extends ApplicationPath {
   /**
    * path the root path.
    */
-  public void setRoot(Path path)
+  public void setRoot(PathImpl path)
   {
     _root = path;
   }
@@ -65,7 +65,7 @@ public class XmlApplicationPath extends ApplicationPath {
   /**
    * Returns the root path.
    */
-  public Path getRoot()
+  public PathImpl getRoot()
   {
     return _root;
   }
@@ -219,17 +219,17 @@ public class XmlApplicationPath extends ApplicationPath {
   /**
    * Returns the underlying path.
    */
-  protected Path getPath(String path,
+  protected PathImpl getPath(String path,
                          HttpServletRequest request,
                          ServletContext app)
     throws IOException
   {
-    Path appDir = ((WebApp) app).getRootDirectory();
+    PathImpl appDir = ((WebApp) app).getRootDirectory();
 
     if (_root != null)
       appDir = _root;
 
-    Path filePath = appDir.lookup("./" + path);
+    PathImpl filePath = appDir.lookup("./" + path);
     String tail = filePath.getTail();
 
     if (tail.startsWith("."))

@@ -64,16 +64,16 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.ConcurrentArrayList;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.io.FrameListener;
 
 /**
  * websocket client container
  */
-@Module
+@ModulePrivate
 public class SessionWebSocketBase implements Session, FrameListener {
   private static final L10N L = new L10N(SessionWebSocketBase.class);
   private static final Logger log

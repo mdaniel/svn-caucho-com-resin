@@ -66,7 +66,7 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.StreamSource;
 import com.caucho.v5.vfs.Vfs;
 
@@ -79,7 +79,7 @@ public class ManagerServiceImpl
   private static final L10N L = new L10N(ManagerServiceImpl.class);
 
   private HttpContainerServlet _server;
-  private Path _hprofDir;
+  private PathImpl _hprofDir;
 
   private AtomicBoolean _isInit = new AtomicBoolean();
 
@@ -107,7 +107,7 @@ public class ManagerServiceImpl
     _adminAuthenticator = _server.getAdminAuthenticator();
   }
 
-  public Path getHprofDir()
+  public PathImpl getHprofDir()
   {
     return _hprofDir;
   }
@@ -117,7 +117,7 @@ public class ManagerServiceImpl
     if (hprofDir.isEmpty())
       throw new ConfigException("hprof-dir can not be set to an emtpy string");
 
-    Path path = Vfs.lookup(hprofDir);
+    PathImpl path = Vfs.lookup(hprofDir);
 
     _hprofDir = path;
   }

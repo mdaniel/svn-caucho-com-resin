@@ -56,7 +56,7 @@ import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.ZipScanner;
@@ -71,7 +71,7 @@ public class TldManager {
 
   private static ArrayList<TldPreload> _cauchoTaglibs;
   private static ArrayList<TldPreload> _globalTaglibs;
-  private static ArrayList<Path> _globalPaths;
+  private static ArrayList<PathImpl> _globalPaths;
 
   private static EnvironmentLocal<TldManager> _localManager
     = new EnvironmentLocal<TldManager>();
@@ -79,8 +79,8 @@ public class TldManager {
   private JspResourceManager _resourceManager;
   private WebAppResin _webApp;
 
-  private HashMap<Path,SoftReference<TldTaglib>> _tldMap
-    = new HashMap<Path,SoftReference<TldTaglib>>();
+  private HashMap<PathImpl,SoftReference<TldTaglib>> _tldMap
+    = new HashMap<PathImpl,SoftReference<TldTaglib>>();
 
   private JspParseException _loadAllTldException;
   private String _tldDir;
@@ -203,10 +203,10 @@ public class TldManager {
 
     taglibs.addAll(_globalTaglibs);
 
-    ArrayList<Path> paths = getClassPath();
+    ArrayList<PathImpl> paths = getClassPath();
 
     for (int i = 0; i < paths.size(); i++) {
-      Path subPath = paths.get(i);
+      PathImpl subPath = paths.get(i);
 
       if (_globalPaths.contains(subPath)) {
         continue;
@@ -266,7 +266,7 @@ public class TldManager {
       ClassLoader globalLoader = TldManager.class.getClassLoader();
       thread.setContextClassLoader(globalLoader);
       try {
-        ArrayList<Path> paths = getClassPath(globalLoader);
+        ArrayList<PathImpl> paths = getClassPath(globalLoader);
         _globalPaths = paths;
 
         loadClassPathTlds(globalTaglibs, paths, "");
@@ -295,12 +295,12 @@ public class TldManager {
   }
 
   private void loadClassPathTlds(ArrayList<TldPreload> taglibs,
-                                 ArrayList<Path> paths,
+                                 ArrayList<PathImpl> paths,
                                  String prefix)
     throws JspParseException, IOException
   {
     for (int i = 0; i < paths.size(); i++) {
-      Path subPath = paths.get(i);
+      PathImpl subPath = paths.get(i);
 
       // skip jre libraries
       String pathName = subPath.getFullPath();
@@ -331,7 +331,7 @@ public class TldManager {
                            FileSetType fileSet)
     throws JspParseException, IOException
   {
-    for (Path path : fileSet.getPaths()) {
+    for (PathImpl path : fileSet.getPaths()) {
       if (path.getPath().startsWith(".")) {
       }
       else if ((path.getPath().endsWith(".tld")
@@ -354,7 +354,7 @@ public class TldManager {
   }
 
   private void loadAllTlds(ArrayList<TldPreload> taglibs,
-                           Path path, int depth, String userPath)
+                           PathImpl path, int depth, String userPath)
     throws JspParseException, IOException
   {
     if (depth < 0)
@@ -395,10 +395,10 @@ public class TldManager {
       for (int i = 0; fileNames != null && i < fileNames.length; i++) {
         String name = fileNames[i];
 
-        ArrayList<Path> resources = path.getResources("./" + name);
+        ArrayList<PathImpl> resources = path.getResources("./" + name);
 
         for (int j = 0; resources != null && j < resources.size(); j++) {
-          Path subpath = resources.get(j);
+          PathImpl subpath = resources.get(j);
 
           loadAllTlds(taglibs, subpath, depth - 1, userPath + "/" + name);
         }
@@ -407,7 +407,7 @@ public class TldManager {
   }
 
   private void loadJarTlds(ArrayList<TldPreload> taglibs,
-                           Path jarBacking,
+                           PathImpl jarBacking,
                            String prefix)
     throws JspParseException, IOException
   {
@@ -416,7 +416,7 @@ public class TldManager {
 
     JarPath jar = JarPath.create(jarBacking);
 
-    ArrayList<Path> tldPaths = new ArrayList<Path>();
+    ArrayList<PathImpl> tldPaths = new ArrayList<PathImpl>();
 
     boolean isValidScan = false;
 
@@ -460,7 +460,7 @@ public class TldManager {
       }
     }
 
-    for (Path path : tldPaths) {
+    for (PathImpl path : tldPaths) {
       try {
         TldPreload taglib = parseTldPreload(path);
         taglibs.add(taglib);
@@ -558,7 +558,7 @@ public class TldManager {
   {
     InputStream is = null;
 
-    Path path;
+    PathImpl path;
 
     if (location.startsWith("file:")) {
       path = _resourceManager.resolvePath(location);
@@ -583,7 +583,7 @@ public class TldManager {
 
     path.setUserPath(location);
 
-    Path jar = null;
+    PathImpl jar = null;
 
     if (location.endsWith(".jar")) {
       path = findJar(location);
@@ -617,7 +617,7 @@ public class TldManager {
    *
    * @param is the input stream to the taglib
    */
-  private TldTaglib parseTld(Path path)
+  private TldTaglib parseTld(PathImpl path)
     throws JspParseException, IOException
   {
     SoftReference<TldTaglib> taglibRef = _tldMap.get(path);
@@ -657,7 +657,7 @@ public class TldManager {
     TldTaglib taglib = new TldTaglib();
 
     if (is instanceof ReadStream) {
-      Path path = ((ReadStream) is).getPath();
+      PathImpl path = ((ReadStream) is).getPath();
 
       path.setUserPath(path.getURL());
     }
@@ -703,7 +703,7 @@ public class TldManager {
    *
    * @param path location of the taglib
    */
-  private TldPreload parseTldPreload(Path path)
+  private TldPreload parseTldPreload(PathImpl path)
     throws JspParseException, IOException
   {
     try (ReadStream is = path.openRead()) {
@@ -732,7 +732,7 @@ public class TldManager {
     boolean isJsfTld = false;
 
     if (is instanceof ReadStream) {
-      Path path = ((ReadStream) is).getPath();
+      PathImpl path = ((ReadStream) is).getPath();
 
       isJsfTld = path.getPath().endsWith(".ftld");
 
@@ -782,9 +782,9 @@ public class TldManager {
    *
    * @return the found jar or null
    */
-  private Path findJar(String location)
+  private PathImpl findJar(String location)
   {
-    Path path;
+    PathImpl path;
 
     if (location.startsWith("file:"))
       path = Vfs.lookup(location);
@@ -831,7 +831,7 @@ public class TldManager {
   /**
    * Adds the classpath as paths in the MergePath.
    */
-  private ArrayList<Path> getClassPath()
+  private ArrayList<PathImpl> getClassPath()
   {
     return getClassPath(Thread.currentThread().getContextClassLoader());
   }
@@ -841,7 +841,7 @@ public class TldManager {
    *
    * @param loader class loader whose classpath should be used to search.
    */
-  private ArrayList<Path> getClassPath(ClassLoader loader)
+  private ArrayList<PathImpl> getClassPath(ClassLoader loader)
   {
     String classpath = null;
     
@@ -860,9 +860,9 @@ public class TldManager {
    *
    * @param classpath class loader whose classpath should be used to search.
    */
-  private ArrayList<Path> getClassPath(String classpath)
+  private ArrayList<PathImpl> getClassPath(String classpath)
   {
-    ArrayList<Path> list = new ArrayList<Path>();
+    ArrayList<PathImpl> list = new ArrayList<PathImpl>();
 
     char sep = CauchoUtil.getPathSeparatorChar();
     int head = 0;
@@ -881,7 +881,7 @@ public class TldManager {
       }
 
       if (! segment.equals("")) {
-        Path path = Vfs.lookup(segment);
+        PathImpl path = Vfs.lookup(segment);
 
         if (! list.contains(path))
           list.add(path);

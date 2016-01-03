@@ -75,7 +75,7 @@ public class JndiPath extends FilesystemPath {
    * @param path the normalized slash-separated path.
    * @return a new JndiPath representing the new path.
    */
-  public Path fsWalk(String userPath,
+  public PathImpl fsWalk(String userPath,
                      Map<String,Object> attributes,
                      String path)
   {

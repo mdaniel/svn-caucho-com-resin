@@ -37,14 +37,14 @@ import java.util.logging.Logger;
 import javax.servlet.http.Part;
 
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.MultipartStream;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.TempBuffer;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -81,7 +81,7 @@ class FormMultipartParser {
       String filename = getAttribute(attr, "filename");
       String contentType = getAttribute(attr, "content-type");
       String value = null;
-      Path tempFile = null;
+      PathImpl tempFile = null;
       
       if (contentType == null)
         contentType = ms.getAttribute("content-type");
@@ -91,7 +91,7 @@ class FormMultipartParser {
         continue;
       }
       else if (filename != null) {
-        Path tempDir = CauchoUtil.getWorkPath().lookup("form");
+        PathImpl tempDir = CauchoUtil.getWorkPath().lookup("form");
         try {
           tempDir.mkdirs();
         } catch (IOException e) {

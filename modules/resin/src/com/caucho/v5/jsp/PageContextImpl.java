@@ -103,7 +103,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.NullEnumeration;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.FlushBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.TempCharBuffer;
 import com.caucho.xpath.VarEnv;
 
@@ -1209,9 +1209,9 @@ public class PageContextImpl extends PageContext
     }
     else if (e instanceof Error) {
       try {
-        Path workDir = getApplication().getRootDirectory().lookup("WEB-INF/work");
+        PathImpl workDir = getApplication().getRootDirectory().lookup("WEB-INF/work");
         String className = _servlet.getClass().getName();
-        Path path = workDir.lookup(className.replace('.', '/') + ".class");
+        PathImpl path = workDir.lookup(className.replace('.', '/') + ".class");
 
         log.warning("Removing " + path + " due to " + e);
 

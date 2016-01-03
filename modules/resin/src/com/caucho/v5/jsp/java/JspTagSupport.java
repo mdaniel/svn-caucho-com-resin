@@ -29,7 +29,7 @@
 package com.caucho.v5.jsp.java;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 import javax.servlet.ServletException;
@@ -50,7 +50,7 @@ abstract public class JspTagSupport extends SimpleTagSupport
   
   abstract public String _caucho_getDynamicAttributes();
   
-  public void init(Path path)
+  public void init(PathImpl path)
     throws ServletException
   {
   }

@@ -79,7 +79,7 @@ public class ResinEmbed
 
       config.configure(_resin, is);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     } finally {
       try {
         is.close();
@@ -105,7 +105,7 @@ public class ResinEmbed
 
       _host.getWebAppContainer().addWebApp(config);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -131,7 +131,7 @@ public class ResinEmbed
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -145,7 +145,7 @@ public class ResinEmbed
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

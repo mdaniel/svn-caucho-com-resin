@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.health.check.AbstractHealthCheck;
 
@@ -23,7 +23,7 @@ public class ExprHealthCheckImpl extends AbstractHealthCheck
   public HealthCheckResult checkHealth()
   {
     try {
-      Function<String,Object> env = Config.getEnvironment();
+      Function<String,Object> env = ConfigContext.getEnvironment();
       
       for (ExprCfg test : _fatalTests) {
         if (test.evalBoolean(env)) {

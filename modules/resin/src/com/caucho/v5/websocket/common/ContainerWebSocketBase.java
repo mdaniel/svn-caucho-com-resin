@@ -41,12 +41,12 @@ import javax.websocket.Extension;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for WebSocketContainer.
  */
-@Module
+@ModulePrivate
 public class ContainerWebSocketBase implements WebSocketContainer
 {
   private final ConcurrentSkipListSet<Extension> _extensions

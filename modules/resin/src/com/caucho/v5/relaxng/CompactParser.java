@@ -34,7 +34,7 @@ import com.caucho.v5.relaxng.pattern.*;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.xml.XmlChar;
@@ -87,7 +87,7 @@ public class CompactParser {
   private String _ns = "";
   private HashMap<String,String> _nsMap;
 
-  private Path _pwd;
+  private PathImpl _pwd;
   private ReadStream _is;
   private String _filename;
   private int _line;
@@ -316,7 +316,7 @@ public class CompactParser {
   {
     String uri = parseLiteral();
 
-    Path sub = _pwd.lookup(uri);
+    PathImpl sub = _pwd.lookup(uri);
 
     ReadStream is = null;
     

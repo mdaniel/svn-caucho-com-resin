@@ -28,7 +28,7 @@
 
 package com.caucho.v5.util;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 import java.beans.BeanInfo;
@@ -133,7 +133,7 @@ public class BeanUtil {
    *
    * @return a real path corresponding to the path name
    */
-  public static Path lookupPath(String pathName, HashMap varMap, Path pwd)
+  public static PathImpl lookupPath(String pathName, HashMap varMap, PathImpl pwd)
   {
     if (pwd == null)
       pwd = Vfs.lookup();
@@ -153,8 +153,8 @@ public class BeanUtil {
       }
 
       Object value = varMap != null ? varMap.get(prefix) : null;
-      if (value instanceof Path) {
-        pwd = (Path) value;
+      if (value instanceof PathImpl) {
+        pwd = (PathImpl) value;
         pathName = suffix;
       }
     }

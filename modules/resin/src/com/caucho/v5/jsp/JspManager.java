@@ -49,7 +49,7 @@ import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.SimpleLoader;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 import com.caucho.v5.vfs.Vfs;
 
@@ -143,7 +143,7 @@ public class JspManager extends PageManager {
    *
    * @return the compiled JSP page
    */
-  Page createGeneratedPage(Path path, String uri, String className,
+  Page createGeneratedPage(PathImpl path, String uri, String className,
                            ServletConfig config,
                            ArrayList<PersistentDependency> dependList)
     throws Exception
@@ -162,7 +162,7 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   @Override
-  Page createPage(Path path, String uri, String className,
+  Page createPage(PathImpl path, String uri, String className,
                   ServletConfig config,
                   ArrayList<PersistentDependency> dependList)
     throws Exception
@@ -180,7 +180,7 @@ public class JspManager extends PageManager {
    *
    * @return the compiled JSP page
    */
-  private Page createPage(Path path, String uri, String className,
+  private Page createPage(PathImpl path, String uri, String className,
                           ServletConfig config,
                           ArrayList<PersistentDependency> dependList,
                           boolean isGenerated)
@@ -217,7 +217,7 @@ public class JspManager extends PageManager {
     }
   }
 
-  Page compile(Path path, String uri, String className,
+  Page compile(PathImpl path, String uri, String className,
                ServletConfig config,
                ArrayList<PersistentDependency> dependList,
                boolean isGenerated)
@@ -250,7 +250,7 @@ public class JspManager extends PageManager {
     if (path == null || path.isDirectory() || ! _autoCompile)
       return null;
 
-    Path jspJarPath = null;
+    PathImpl jspJarPath = null;
     boolean isPathReadable = path.canRead();
 
     if (! isPathReadable) {
@@ -278,13 +278,13 @@ public class JspManager extends PageManager {
 
     page = compilerInst.compile();
 
-    Path classPath = getClassDir().lookup(className.replace('.', '/') +
+    PathImpl classPath = getClassDir().lookup(className.replace('.', '/') +
                                           ".class");
 
     loadPage(page, config, null, uri);
 
     if (classPath.canRead())
-      page._caucho_addDepend(classPath.createDepend());
+      page._caucho_addDepend((PersistentDependency) classPath.createDepend());
 
     return page;
   }
@@ -298,7 +298,7 @@ public class JspManager extends PageManager {
    */
   Page preload(String className,
                ClassLoader parentLoader,
-               Path appDir,
+               PathImpl appDir,
                ServletConfig config)
     throws Exception
   {
@@ -307,7 +307,7 @@ public class JspManager extends PageManager {
     String fullClassName = className;
     String mangledName = fullClassName.replace('.', '/');
 
-    Path classPath = getClassDir().lookup(mangledName + ".class");
+    PathImpl classPath = getClassDir().lookup(mangledName + ".class");
 
     /*
     if (! classPath.exists())
@@ -370,7 +370,7 @@ public class JspManager extends PageManager {
     else
       page = new WrapperPage(jspPage);
 
-    page._caucho_addDepend(classPath.createDepend());
+    page._caucho_addDepend((PersistentDependency) classPath.createDepend());
 
     loadPage(page, config, null, className);
 

@@ -52,7 +52,7 @@ import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WeakAlarm;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * statistics
@@ -216,15 +216,15 @@ public class StatServiceLocalImpl
       return;
     }
     
-    Path dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
+    PathImpl dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
     
     _healthSystem = HealthSubSystem.getCurrent();
     
     _statDatabase = new StatDatabase(dataDirectory);
     _statService = new StatServiceCluster(this);
 
-    NetworkSystem clusterService = NetworkSystem.getCurrent();
-    ServerBartender selfServer = clusterService.getSelfServer();
+    NetworkSystem clusterService = NetworkSystem.current();
+    ServerBartender selfServer = clusterService.selfServer();
     _serverIndex = selfServer.getServerIndex();
     
     if (! isEnabled()) {
@@ -377,7 +377,7 @@ public class StatServiceLocalImpl
 
       return _mbeanServer.queryNames(objName, null);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -388,7 +388,7 @@ public class StatServiceLocalImpl
 
       addMeter(new JmxStatAttribute(name, _mbeanServer, objName, attribute));
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -413,7 +413,7 @@ public class StatServiceLocalImpl
 
       addMeter(new JmxDeltaStatMeter(name, _mbeanServer, objName, attribute));
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -424,7 +424,7 @@ public class StatServiceLocalImpl
 
       addMeter(new JmxPercentStatAttribute(name, _mbeanServer, objName, attribute));
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
   

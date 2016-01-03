@@ -32,7 +32,7 @@ import com.caucho.v5.javac.JavaWriter;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 import com.caucho.v5.vfs.Vfs;
 
@@ -48,7 +48,7 @@ public class DependencyComponent extends ClassComponent {
   private String _initMethod = "_caucho_init";
   private String _isModifiedMethod = "_caucho_is_modified";
 
-  private Path _searchPath;
+  private PathImpl _searchPath;
 
   private ArrayList<PersistentDependency> _dependList
     = new ArrayList<PersistentDependency>();
@@ -56,7 +56,7 @@ public class DependencyComponent extends ClassComponent {
   /**
    * Sets the search path.
    */
-  public void setSearchPath(Path searchPath)
+  public void setSearchPath(PathImpl searchPath)
   {
     _searchPath = searchPath;
   }
@@ -97,14 +97,14 @@ public class DependencyComponent extends ClassComponent {
     out.println("_caucho_depend = new com.caucho.v5.vfs.Dependency[" +
                 _dependList.size() + "];");
 
-    Path searchPath = _searchPath;
+    PathImpl searchPath = _searchPath;
 
     for (int i = 0; i < _dependList.size(); i++) {
       PersistentDependency dependency = _dependList.get(i);
 
       if (dependency instanceof Depend) {
         Depend depend = (Depend) _dependList.get(i);
-        Path path = depend.getPath();
+        PathImpl path = depend.getPath();
 
         out.print("_caucho_depend[" + i + "] = new com.caucho.v5.vfs.Depend(");
 
@@ -122,7 +122,7 @@ public class DependencyComponent extends ClassComponent {
 
         String relativePath;
         if (fullPath.startsWith(pwd)) {
-          char separatorChar = Path.getFileSeparatorChar();
+          char separatorChar = PathImpl.getFileSeparatorChar();
           int len = pwd.length();
 
           if (fullPath.charAt(len) == separatorChar) {

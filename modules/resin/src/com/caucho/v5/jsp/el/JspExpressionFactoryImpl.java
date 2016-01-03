@@ -34,14 +34,14 @@ import java.util.Map;
 
 import com.caucho.v5.el.ExpressionFactoryImpl;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 import javax.el.*;
 
 /**
  * Represents an EL expression factory
  */
-@Module 
+@ModulePrivate 
 class JspExpressionFactoryImpl extends ExpressionFactory 
 {
   private final JspApplicationContextImpl _jspApplicationContext;

@@ -30,7 +30,7 @@
 package com.caucho.v5.jsp;
 
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Resolves resources and looks up *.tld
@@ -46,7 +46,7 @@ public class AppResourceManager extends JspResourceManager {
   /**
    * Resolves a path.
    */
-  public Path resolvePath(String uri)
+  public PathImpl resolvePath(String uri)
   {
     if (uri.startsWith("file:"))
       return _app.getRootDirectory().lookup(uri);

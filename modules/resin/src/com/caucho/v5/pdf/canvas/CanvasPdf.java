@@ -33,7 +33,7 @@ import java.io.IOException;
 
 import com.caucho.v5.pdf.PagePdf;
 import com.caucho.v5.pdf.PdfDocument;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * pdf object oriented API facade
@@ -90,7 +90,7 @@ public class CanvasPdf implements AutoCloseable
 
   private boolean _isSectionPage;
 
-  public CanvasPdf(Path path)
+  public CanvasPdf(PathImpl path)
     throws IOException
   {
     _pdf = new PdfDocument(path);

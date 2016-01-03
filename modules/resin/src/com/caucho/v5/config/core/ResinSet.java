@@ -31,7 +31,7 @@ package com.caucho.v5.config.core;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.type.EnvBean;
 import com.caucho.v5.config.type.FlowBean;
 import com.caucho.v5.naming.JndiUtil;
@@ -91,7 +91,7 @@ public class ResinSet implements EnvBean, FlowBean {
 
     // webBeans.addBean(factory.singleton(value));
 
-    Config.setProperty(name, value);
+    ConfigContext.setProperty(name, value);
   }
 
   @PostConstruct
@@ -105,11 +105,11 @@ public class ResinSet implements EnvBean, FlowBean {
       // InjectManager webBeans = InjectManager.create();
 
       if (_value != null) {
-        Config.setProperty(_var, _value);
+        ConfigContext.setProperty(_var, _value);
       }
       else if (_default != null) {
-        if (Config.getProperty(_var) == null)
-          Config.setProperty(_var, _default);
+        if (ConfigContext.getProperty(_var) == null)
+          ConfigContext.setProperty(_var, _default);
       }
       
       /*

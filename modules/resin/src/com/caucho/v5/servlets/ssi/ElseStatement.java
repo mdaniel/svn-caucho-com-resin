@@ -29,7 +29,7 @@
 
 package com.caucho.v5.servlets.ssi;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.ServletException;
@@ -47,7 +47,7 @@ public class ElseStatement extends Statement{
   {
   }
 
-  static Statement create(HashMap<String,String> attr, Path path)
+  static Statement create(HashMap<String,String> attr, PathImpl path)
   {
     return new ElseStatement();
   }

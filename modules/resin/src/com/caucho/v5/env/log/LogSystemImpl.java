@@ -48,7 +48,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.WeakAlarm;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.StreamImpl;
 import com.caucho.v5.vfs.TempStream;
@@ -396,10 +396,10 @@ public class LogSystemImpl extends LogSystem
   public void start()
     throws SQLException
   {
-    NetworkSystem network = NetworkSystem.getCurrent();
+    NetworkSystem network = NetworkSystem.current();
     
     if (network != null) {
-      int index = network.getSelfServer().getServerIndex();
+      int index = network.selfServer().getServerIndex();
       
       _serverPrefix = String.format("%02d|", index);
     }
@@ -407,9 +407,9 @@ public class LogSystemImpl extends LogSystem
       _serverPrefix = "00|";
     }
     
-    Path dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
+    PathImpl dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
     
-    Path path = dataDirectory.lookup("log");
+    PathImpl path = dataDirectory.lookup("log");
     
     _nameDatabase = new NameDatabase();
     _logDatabase = new LogDatabase(_nameDatabase);

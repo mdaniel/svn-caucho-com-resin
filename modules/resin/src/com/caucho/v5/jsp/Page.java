@@ -47,14 +47,14 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.http.protocol.ResponseAdapterToChar;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.io.Dependency;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
-import com.caucho.v5.make.DependencyContainer;
+import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Dependency;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 
 /**
@@ -90,7 +90,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     _depends.setAsync(false);
   }
   
-  public void init(Path path)
+  public void init(PathImpl path)
     throws ServletException
   {
   }
@@ -178,9 +178,9 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    *
    * @param path the file the JSP page is dependent on.
    */
-  protected void _caucho_addDepend(Path path)
+  protected void _caucho_addDepend(PathImpl path)
   {
-    PersistentDependency depend = path.createDepend();
+    PersistentDependency depend = (PersistentDependency) path.createDepend();
     if (depend instanceof Depend)
       ((Depend) depend).setRequireSource(getRequireSource());
 
@@ -217,14 +217,14 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    * @param lastModified the last modified time
    * @param length the length of the file
    */
-  protected void _caucho_addDepend(Path path,
+  protected void _caucho_addDepend(PathImpl path,
                                    long lastModified,
                                    long length)
   {
     Depend depend = new Depend(path, lastModified, length);
     depend.setRequireSource(getRequireSource());
 
-    _caucho_addDepend(depend);
+    // XXX: _caucho_addDepend(depend);
   }
 
   public ArrayList<Dependency> _caucho_getDependList()
@@ -248,7 +248,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    * @param lastModified the last modified time
    * @param length the length of the file
    */
-  protected void _caucho_addCacheDepend(Path path,
+  protected void _caucho_addCacheDepend(PathImpl path,
                                         long lastModified,
                                         long length)
   {
@@ -267,11 +267,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    *
    * @param depends an array list of Depend
    */
-  void _caucho_setCacheable(ArrayList<Path> depends)
+  void _caucho_setCacheable(ArrayList<PathImpl> depends)
   {
     _cacheDepends = new ArrayList<Depend>();
     for (int i = 0; i < depends.size(); i++) {
-      Path path = depends.get(i);
+      PathImpl path = depends.get(i);
 
       Depend depend = new Depend(path);
       depend.setRequireSource(getRequireSource());

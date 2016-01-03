@@ -48,10 +48,10 @@ import javax.websocket.Endpoint;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.util.CauchoUtil;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.util.ModulePrivate;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.websocket.common.ContainerWebSocketBase;
 import com.caucho.v5.websocket.server.WebSocketEndpointSkeleton;
@@ -59,7 +59,7 @@ import com.caucho.v5.websocket.server.WebSocketEndpointSkeleton;
 /**
  * websocket client container
  */
-@Module
+@ModulePrivate
 public class WebSocketContainerClient extends ContainerWebSocketBase
   implements WebSocketContainer, Closeable
 {
@@ -75,7 +75,7 @@ public class WebSocketContainerClient extends ContainerWebSocketBase
   
   public WebSocketContainerClient()
   {
-    Path resinHome = CauchoUtil.getHomeDir();
+    PathImpl resinHome = CauchoUtil.getHomeDir();
     boolean is64Bit = CauchoUtil.is64Bit();
     
     Thread thread = Thread.currentThread();

@@ -31,7 +31,7 @@ package com.caucho.v5.jsp;
 
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.jsp.tagext.TagInfo;
 
@@ -138,7 +138,7 @@ public class ParseTagManager {
 
     if (tag == null) {
       String tagLocation = taglib.getTagFilePath(tail);
-      Path path = taglib.getPath();
+      PathImpl path = taglib.getPath();
 
       if (path != null && tagLocation != null) {
         path = path.lookup(tagLocation);

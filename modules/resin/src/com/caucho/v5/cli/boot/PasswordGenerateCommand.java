@@ -164,7 +164,7 @@ public class PasswordGenerateCommand extends ServerCommandBase<ArgsCli>
       
       return digest.digest();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

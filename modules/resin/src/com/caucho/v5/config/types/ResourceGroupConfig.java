@@ -38,15 +38,15 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.config.program.ResourceInjectionTargetProgram;
 import com.caucho.v5.config.program.ResourceProgram;
-import com.caucho.v5.inject.InjectContext;
 import com.caucho.v5.inject.InjectManager;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 
@@ -75,7 +75,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram
 
   public ResourceGroupConfig()
   {
-    super(Config.getCurrent());
+    super(ConfigContext.getCurrent());
   }
 
   public void setDefaultInjectionClass(String className)
@@ -265,7 +265,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram
   protected ConfigException error(String msg)
   {
     if (_location != null)
-      return new LineConfigException(_location + msg);
+      return new ConfigExceptionLocation(_location + msg);
     else
       return new ConfigException(msg);
   }

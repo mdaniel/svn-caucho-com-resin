@@ -31,14 +31,14 @@ package com.caucho.v5.vfs;
 import java.util.Map;
 
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.SchemeMap;
 import com.caucho.v5.vfs.Vfs;
 
 /**
  * ConfigPath implements remote configuration scheme.
  */
-public class ConfigPath extends Path {
+public class ConfigPath extends PathImpl {
   private static final EnvironmentLocal<RemotePwd> _remotePath
     = new EnvironmentLocal<RemotePwd>();
 
@@ -53,7 +53,7 @@ public class ConfigPath extends Path {
   /**
    * Sets the remote.
    */
-  public static void setRemote(Path remotePath)
+  public static void setRemote(PathImpl remotePath)
   {
     _remotePath.set(new RemotePwd(remotePath, Vfs.lookup()));
   }
@@ -69,7 +69,7 @@ public class ConfigPath extends Path {
    * @return the found path
    */
   @Override
-  public Path schemeWalk(String userPath,
+  public PathImpl schemeWalk(String userPath,
                          Map<String,Object> newAttributes,
                          String newPath, int offset)
   {
@@ -103,7 +103,7 @@ public class ConfigPath extends Path {
   @Override
   public String getScheme()
   {
-    Path path = Vfs.lookup();
+    PathImpl path = Vfs.lookup();
 
     return path.getScheme();
   }
@@ -113,27 +113,27 @@ public class ConfigPath extends Path {
    */
   public String getPath()
   {
-    Path path = Vfs.lookup();
+    PathImpl path = Vfs.lookup();
 
     return path.getPath();
   }
 
   static class RemotePwd {
-    Path _remote;
-    Path _pwd;
+    PathImpl _remote;
+    PathImpl _pwd;
 
-    RemotePwd(Path remote, Path pwd)
+    RemotePwd(PathImpl remote, PathImpl pwd)
     {
       _remote = remote;
       _pwd = pwd;
     }
 
-    Path getRemote()
+    PathImpl getRemote()
     {
       return _remote;
     }
 
-    Path getPwd()
+    PathImpl getPwd()
     {
       return _pwd;
     }

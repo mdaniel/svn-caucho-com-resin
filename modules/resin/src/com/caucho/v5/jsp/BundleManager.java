@@ -33,7 +33,7 @@ import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.TimedCache;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
@@ -268,7 +268,7 @@ public class BundleManager {
       InputStream is = loader.getResourceAsStream(name.replace('.', '/') + ".properties");
       
       if (is instanceof ReadStream) {
-        Path path = ((ReadStream) is).getPath();
+        PathImpl path = ((ReadStream) is).getPath();
         EnvLoader.addDependency(path.createDepend());
       }
 

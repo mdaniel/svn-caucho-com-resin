@@ -43,7 +43,7 @@ import com.caucho.v5.loader.SystemClassLoader;
 import com.caucho.v5.log.impl.RolloverLogBase;
 import com.caucho.v5.log.impl.RotateStream;
 import com.caucho.v5.server.config.ServerConfigBoot;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -53,24 +53,24 @@ public class ChildWatchdogConfig
 {
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
-  private Path _javaHome;
-  private Path _javaExe;
+  private PathImpl _javaHome;
+  private PathImpl _javaExe;
   private String _jvmMode;
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
   private ArrayList<String> _jvmClasspath = new ArrayList<String>();
   private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
   
-  private Path _homeDirectory;
-  private Path _rootDir;
-  private Path _resinConf;
+  private PathImpl _homeDirectory;
+  private PathImpl _rootDir;
+  private PathImpl _resinConf;
   private String _systemClassLoader = SystemClassLoader.class.getName();
 
   private boolean _is64bit;
   private boolean _hasXss;
   private boolean _hasXmx;
 
-  private Path _chroot;
-  private Path _pwd;
+  private PathImpl _chroot;
+  private PathImpl _pwd;
 
   private String _watchdogAddress = "127.0.0.1";
   private int _watchdogPort;
@@ -80,7 +80,7 @@ public class ChildWatchdogConfig
   private boolean _isRequireExplicitId;
 
   private WatchdogLog _watchdogLog;
-  private Path _logPath;
+  private PathImpl _logPath;
 
   private String _userName;
   private String _groupName;
@@ -119,17 +119,17 @@ public class ChildWatchdogConfig
     _isVerbose = isVerbose;
   }
   
-  public void setJavaExe(Path javaExe)
+  public void setJavaExe(PathImpl javaExe)
   {
     _javaExe = javaExe;
   }
   
-  public void setJavaHome(Path javaHome)
+  public void setJavaHome(PathImpl javaHome)
   {
     _javaHome = javaHome;
   }
   
-  public Path getJavaHome()
+  public PathImpl getJavaHome()
   {
     if (_javaHome != null)
       return _javaHome;
@@ -258,7 +258,7 @@ public class ChildWatchdogConfig
     return _groupName;
   }
   
-  public Path getLogPath()
+  public PathImpl getLogPath()
   {
     if (_logPath != null) {
       return _logPath;
@@ -285,14 +285,14 @@ public class ChildWatchdogConfig
     return getLogDirectory().lookup(name);
   }
 
-  public Path getRootDirectory()
+  public PathImpl getRootDirectory()
   {
     return _server.getRoot().getRootDirectory(_args);
   }
 
-  public Path getLogDirectory()
+  public PathImpl getLogDirectory()
   {
-    Path logDirectory = _args.getLogDirectory();
+    PathImpl logDirectory = _args.getLogDirectory();
 
     if (logDirectory != null) {
       return logDirectory;
@@ -434,23 +434,23 @@ public class ChildWatchdogConfig
     return _ports;
   }
 
-  Path getChroot()
+  PathImpl getChroot()
   {
     return _chroot;
   }
 
-  public void setChroot(Path chroot)
+  public void setChroot(PathImpl chroot)
   {
     _chroot = chroot;
   }
   
-  Path getPwd()
+  PathImpl getPwd()
   {
     // return _pwd;
     return getRootDir();
   }
 
-  Path getHomeDirectory()
+  PathImpl getHomeDirectory()
   {
     if (_homeDirectory != null)
       return _homeDirectory;
@@ -459,18 +459,18 @@ public class ChildWatchdogConfig
   }
 
   @Configurable
-  public void setResinRoot(Path root)
+  public void setResinRoot(PathImpl root)
   {
     setRootDirectory(root);
   }
 
   @Configurable
-  public void setRootDirectory(Path root)
+  public void setRootDirectory(PathImpl root)
   {
     _rootDir = root;
   }
 
-  Path getRootDir()
+  PathImpl getRootDir()
   {
     if (_rootDir != null)
       return _rootDir;
@@ -481,7 +481,7 @@ public class ChildWatchdogConfig
   /**
    * Sets the resin.conf
    */
-  public void setResinConf(Path resinConf)
+  public void setResinConf(PathImpl resinConf)
   {
     _resinConf = resinConf;
   }
@@ -489,7 +489,7 @@ public class ChildWatchdogConfig
   /**
    * Returns the resin.conf
    */
-  public Path getResinConf()
+  public PathImpl getResinConf()
   {
     if (_resinConf != null)
       return _resinConf;
@@ -535,7 +535,7 @@ public class ChildWatchdogConfig
     if (_javaExe != null)
       return _javaExe.getNativePath();
 
-    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+    PathImpl javaHome = Vfs.lookup(System.getProperty("java.home"));
 
     if (javaHome.getTail().equals("jre"))
       javaHome = javaHome.getParent();
@@ -566,18 +566,18 @@ public class ChildWatchdogConfig
   }
 
   public class WatchdogLog {
-    private Path _logDirectory;
+    private PathImpl _logDirectory;
     
     private Integer _rolloverCount;
     private Period _rolloverPeriod;
     private Bytes _rolloverSize;
 
-    public void setLogDirectory(Path dir)
+    public void setLogDirectory(PathImpl dir)
     {
       _logDirectory = dir;
     }
 
-    Path getLogDirectory()
+    PathImpl getLogDirectory()
     {
       return _logDirectory;
     }

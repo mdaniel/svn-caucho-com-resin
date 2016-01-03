@@ -29,19 +29,19 @@
 
 package com.caucho.v5.jsp;
 
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.util.CharScanner;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 import com.caucho.v5.vfs.TempCharBuffer;
 import com.caucho.v5.xml.Xml;
-
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Represents the current state of the parser.
@@ -760,9 +760,9 @@ public class ParseState {
   /**
    * Add a dependency.
    */
-  public void addDepend(Path path)
+  public void addDepend(PathImpl path)
   {
-    PersistentDependency depend = path.createDepend();
+    PersistentDependency depend = (PersistentDependency) path.createDepend();
     if (! _depends.contains(depend))
       _depends.add(depend);
   }
@@ -782,7 +782,7 @@ public class ParseState {
    *
    * @return the Path
    */
-  public Path resolvePath(String uri)
+  public PathImpl resolvePath(String uri)
   {
     return getResourceManager().resolvePath(uri);
   }

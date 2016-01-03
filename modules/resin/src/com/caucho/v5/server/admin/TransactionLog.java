@@ -113,7 +113,7 @@ public class TransactionLog
 
       _xaLog.start();
     } catch (IOException e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

@@ -31,13 +31,13 @@ package com.caucho.v5.websocket.common;
 
 import java.io.IOException;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.ReadStream;
 
 /**
  * websocket writing endpoint.
  */
-@Module
+@ModulePrivate
 public interface EndpointReaderWebSocket
 {
   void init(ReadStream is)

@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.spi.Command;
-import com.caucho.v5.config.CompileException;
+import com.caucho.v5.config.UserMessage;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.health.shutdown.ShutdownSystem;
@@ -91,7 +91,7 @@ public class ResinMain
       for (cause = e;
            cause != null && cause.getCause() != null;
            cause = cause.getCause()) {
-        if (cause instanceof CompileException) {
+        if (cause instanceof UserMessage) {
           break;
         }
       }

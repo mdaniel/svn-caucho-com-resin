@@ -30,8 +30,8 @@
 package com.caucho.v5.jsp.java;
 
 import com.caucho.v5.config.cf.NameCfg;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.jsp.JspParseException;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 /**
  * Represents a Java scriptlet.
  */
-@Module
+@ModulePrivate
 public class JspInclude extends JspNode {
   private static final NameCfg PAGE = new NameCfg("page");
   private static final NameCfg FLUSH = new NameCfg("flush");

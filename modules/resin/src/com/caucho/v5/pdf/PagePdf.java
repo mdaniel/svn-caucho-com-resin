@@ -38,7 +38,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * pdf object oriented API facade
@@ -613,13 +613,13 @@ public class PagePdf implements AutoCloseable
     return this;
   }
 
-  public ImagePdf imageLoad(Path path)
+  public ImagePdf imageLoad(PathImpl path)
     throws IOException
   {
     return _pdf.load_image(path);
   }
 
-  public PagePdf image(Path path, double x, double y)
+  public PagePdf image(PathImpl path, double x, double y)
     throws IOException
   {
     ImagePdf img = _pdf.load_image(path);
@@ -640,7 +640,7 @@ public class PagePdf implements AutoCloseable
   /**
    * open image
    */
-  public PagePdf embed(Path path,
+  public PagePdf embed(PathImpl path,
                        double x, double y,
                        double width, double height)
     throws IOException

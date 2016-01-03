@@ -34,7 +34,7 @@ import java.nio.ByteBuffer;
 
 import javax.websocket.MessageHandler;
 
-import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.websocket.io.FrameInputStream;
 import com.caucho.v5.websocket.io.WebSocketInputStream;
 

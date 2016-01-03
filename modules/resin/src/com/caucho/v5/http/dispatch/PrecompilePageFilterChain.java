@@ -32,9 +32,9 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.dispatch.FilterChainException;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.dispatch.Invocation;
+import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.jsp.Page;
 import com.caucho.v5.jsp.QServlet;
-import com.caucho.v5.make.AlwaysModified;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Log;
 

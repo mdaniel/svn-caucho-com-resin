@@ -29,9 +29,9 @@
 
 package com.caucho.v5.config.program;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.types.ResourceGroupConfig;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.inject.impl.InjectContext;
 
 /**
  * Resource program
@@ -41,7 +41,7 @@ public class ResourceProgram extends ConfigProgram {
   
   public ResourceProgram(ResourceGroupConfig resourceConfig)
   {
-    super(Config.getCurrent());
+    super(ConfigContext.getCurrent());
     
     _resourceConfig = resourceConfig;
   }

@@ -28,7 +28,7 @@
 
 package com.caucho.v5.http.dispatch;
 
-import com.caucho.v5.config.LineCompileException;
+import com.caucho.v5.config.UserMessageLocation;
 
 import javax.servlet.ServletException;
 
@@ -36,7 +36,7 @@ import javax.servlet.ServletException;
  * Represents the final servlet in a filter chain.
  */
 public class ServletLineConfigException extends ServletException
-  implements LineCompileException {
+  implements UserMessageLocation {
   /**
    * Creates a servlet config exception.
    */

@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.http.protocol.OutResponseToByte;
-import com.caucho.v5.vfs.TempBuffer;
+import com.caucho.v5.io.TempBuffer;
 
 public class FilterWrapperResponseStream extends OutResponseToByte
 {

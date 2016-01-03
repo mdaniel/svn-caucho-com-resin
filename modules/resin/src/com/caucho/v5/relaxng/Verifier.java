@@ -29,7 +29,7 @@
 
 package com.caucho.v5.relaxng;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.xml.Xml;
@@ -74,7 +74,7 @@ abstract public class Verifier {
   public boolean verify(String url)
     throws IOException, SAXException
   {
-    Path path = Vfs.lookup(url);
+    PathImpl path = Vfs.lookup(url);
 
     ReadStream is = path.openRead();
     

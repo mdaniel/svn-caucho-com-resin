@@ -219,7 +219,7 @@ public class ServletMappingEmbed
 
       servletMapping.init();
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 }

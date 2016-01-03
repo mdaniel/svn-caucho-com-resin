@@ -40,7 +40,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The XML role-map reads a static file for authentication.
@@ -64,7 +64,7 @@ public class XmlRoleMap extends RoleMapBase
   private static final Logger log =
     Logger.getLogger(XmlRoleMap.class.getName());
 
-  private Path _path;
+  private PathImpl _path;
   
   private Hashtable<String,Role> _roleMap
     = new Hashtable<String,Role>();
@@ -72,7 +72,7 @@ public class XmlRoleMap extends RoleMapBase
   /**
    * Sets the path to the XML file.
    */
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
@@ -80,7 +80,7 @@ public class XmlRoleMap extends RoleMapBase
   /**
    * Gets the path to the XML file.
    */
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }
@@ -145,7 +145,7 @@ public class XmlRoleMap extends RoleMapBase
       
       new ConfigXml().configureBean(this, _path);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 

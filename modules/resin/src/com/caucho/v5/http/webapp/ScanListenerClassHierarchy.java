@@ -40,7 +40,7 @@ import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * scans a class hierarchy.
@@ -53,27 +53,27 @@ class ScanListenerClassHierarchy implements ScanListenerByteCode
   private final ClassLoader _loader;
   private final ArrayList<Entry> _classList = new ArrayList<Entry>();
   
-  private final HashSet<Path> _rootPaths = new HashSet<>();
+  private final HashSet<PathImpl> _rootPaths = new HashSet<>();
   
   ScanListenerClassHierarchy(ClassLoader loader)
   {
     _loader = loader;
   }
 
-  public void addRoot(Path rootPath)
+  public void addRoot(PathImpl rootPath)
   {
     _rootPaths.add(rootPath);
   }
 
   @Override
-  public boolean isRootScannable(Path root, String packageRoot)
+  public boolean isRootScannable(PathImpl root, String packageRoot)
   {
     // return _rootPaths.contains(root);
     return true;
   }
 
   @Override
-  public ScanClass scanClass(Path root, 
+  public ScanClass scanClass(PathImpl root, 
                              String packageRoot, 
                              String name,
                              int modifiers)

@@ -31,24 +31,22 @@ package com.caucho.v5.config.types;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.Bean;
-import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.inject.InjectManager;
-import com.caucho.v5.loader.ClassLoaderListener;
 import com.caucho.v5.loader.DynamicClassLoader;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
@@ -222,11 +220,11 @@ public class ResourceRef extends ResourceGroupConfig
         String key = (String) iter.next();
         String value = (String) _params.get(key);
 
-        Config.setAttribute(obj, key, value);
+        ConfigContext.setAttribute(obj, key, value);
       }
 
-      if (obj instanceof ClassLoaderListener) {
-        ClassLoaderListener listener = (ClassLoaderListener) obj;
+      if (obj instanceof EnvLoaderListener) {
+        EnvLoaderListener listener = (EnvLoaderListener) obj;
 
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         for (; loader != null; loader = loader.getParent()) {
@@ -239,7 +237,7 @@ public class ResourceRef extends ResourceGroupConfig
       
       _value = obj;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
 
@@ -271,7 +269,7 @@ public class ResourceRef extends ResourceGroupConfig
     try {
       JndiUtil.bindDeepShort(_name, this);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
   }
  
@@ -324,7 +322,7 @@ public class ResourceRef extends ResourceGroupConfig
   public ConfigException error(String msg)
   {
     if (_location != null)
-      return new LineConfigException(_location + msg);
+      return new ConfigExceptionLocation(_location + msg);
     else
       return new ConfigException(msg);
   }

@@ -37,7 +37,7 @@ import com.caucho.v5.env.log.LogSystem;
 import com.caucho.v5.json.value.JsonValue;
 import com.caucho.v5.pdf.canvas.CanvasPdf;
 import com.caucho.v5.util.QDate;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * pdf object oriented API facade
@@ -47,7 +47,7 @@ public class AdminPdf implements AutoCloseable
   private CanvasPdf _canvas;
   private AdminPdfBuilder _builder;
 
-  public AdminPdf(AdminPdfBuilder builder, Path path)
+  public AdminPdf(AdminPdfBuilder builder, PathImpl path)
     throws IOException
   {
     _builder = builder;

@@ -40,7 +40,7 @@ import javax.rmi.PortableRemoteObject;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 public class MessageDestinationRef
@@ -49,7 +49,7 @@ public class MessageDestinationRef
   private final L10N L = new L10N(MessageDestinationRef.class);
   private final Logger log = Logger.getLogger(MessageDestinationRef.class.getName());
 
-  private final Path _modulePath;
+  private final PathImpl _modulePath;
   private final Context _context;
 
   private String _refName;
@@ -67,7 +67,7 @@ public class MessageDestinationRef
     _context = null;
   }
 
-  public MessageDestinationRef(Path modulePath)
+  public MessageDestinationRef(PathImpl modulePath)
   {
     _modulePath = modulePath;
     _context = null;

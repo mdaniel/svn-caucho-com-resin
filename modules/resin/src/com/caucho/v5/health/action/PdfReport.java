@@ -23,7 +23,7 @@ import com.caucho.v5.server.admin.AdminPdfBuilder;
 import com.caucho.v5.server.admin.GraphBuilderAdminPdf;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.QDate;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -129,7 +129,7 @@ public class PdfReport extends HealthActionBase
     try {
       String pathName = QDate.formatLocal(now, _pathFormat);
       
-      Path path = Vfs.lookup(pathName);
+      PathImpl path = Vfs.lookup(pathName);
       
       AdminPdfBuilder builder = new AdminPdfBuilder();
 

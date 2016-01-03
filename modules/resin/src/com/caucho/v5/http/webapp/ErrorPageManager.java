@@ -48,10 +48,9 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.config.CompileException;
 import com.caucho.v5.config.DisplayableException;
-import com.caucho.v5.config.LineCompileException;
-import com.caucho.v5.config.LineException;
+import com.caucho.v5.config.UserMessage;
+import com.caucho.v5.config.UserMessageLocation;
 import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
@@ -257,7 +256,7 @@ public class ErrorPageManager
           compileException = rootExn;
         }
       }
-      else if (rootExn instanceof CompileException) {
+      else if (rootExn instanceof UserMessage) {
         doStackTrace = false;
         isCompileException = true;
 
@@ -274,7 +273,7 @@ public class ErrorPageManager
         if (compileException == null) // ! isLineCompileException)
           compileException = rootExn;
       }
-      else if (rootExn instanceof LineException) {
+      else if (rootExn instanceof UserMessageLocation) {
         if (lineMessage == null)
           lineMessage = rootExn.getMessage();
       }
@@ -293,7 +292,7 @@ public class ErrorPageManager
       }
       else if (rootExn instanceof LineMapException
                && rootExn instanceof ServletException
-               && ! (rootExn instanceof LineCompileException)
+               && ! (rootExn instanceof UserMessageLocation)
                && rootExn.getCause() != null) {
         // hack to deal with JSP wrapping
       }
@@ -316,7 +315,7 @@ public class ErrorPageManager
 
       Throwable cause = null;
       if (rootExn instanceof ServletException
-          && ! (rootExn instanceof LineCompileException))
+          && ! (rootExn instanceof UserMessageLocation))
         cause = ((ServletException) rootExn).getRootCause();
       else {
         lookupErrorPage = false;
@@ -345,7 +344,7 @@ public class ErrorPageManager
     if (isBadRequest) {
       // server/05a0, server/0532
 
-      if (rootExn instanceof CompileException)
+      if (rootExn instanceof UserMessage)
         title = rootExn.getMessage();
       else
         title = String.valueOf(rootExn);

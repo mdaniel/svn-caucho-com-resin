@@ -43,7 +43,7 @@ import com.caucho.v5.jsp.cfg.TldTaglib;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -280,9 +280,9 @@ public class TaglibManager {
    *
    * @return the found jar or null
    */
-  private Path findJar(String location)
+  private PathImpl findJar(String location)
   {
-    Path path;
+    PathImpl path;
 
     if (location.startsWith("file:"))
       path = Vfs.lookup(location);

@@ -55,9 +55,9 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
 
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseServlet;
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.ConnectionWebSocketBase;
 import com.caucho.v5.websocket.io.FrameInputStream;
 import com.caucho.v5.websocket.io.WebSocketConstants;
@@ -66,7 +66,7 @@ import com.caucho.v5.websocket.plain.ConnectionPlain;
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class WebSocketServletDispatch
 {
   private static final L10N L = new L10N(WebSocketServletDispatch.class);

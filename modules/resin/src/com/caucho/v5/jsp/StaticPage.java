@@ -30,7 +30,7 @@ package com.caucho.v5.jsp;
 
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.TempCharBuffer;
@@ -50,7 +50,7 @@ import java.util.ArrayList;
  * A static page is a page that's just a static file.
  */
 public class StaticPage extends Page {
-  private Path _cacheEntry;
+  private PathImpl _cacheEntry;
   private long _lastModified;
   private int _contentLength;
   private boolean _hasSession;
@@ -61,7 +61,7 @@ public class StaticPage extends Page {
    * @param path the underlying file
    * @param hasSession if true, create a new session
    */
-  StaticPage(Path path, boolean hasSession)
+  StaticPage(PathImpl path, boolean hasSession)
     throws IOException
   {
     _cacheEntry = path;
@@ -71,7 +71,7 @@ public class StaticPage extends Page {
     _caucho_setCacheable();
   }
 
-  public void init(Path path)
+  public void init(PathImpl path)
     throws ServletException
   {
   }
@@ -136,7 +136,7 @@ public class StaticPage extends Page {
     return true;
   }
 
-  public static void writeDepend(Path dependPath,
+  public static void writeDepend(PathImpl dependPath,
                                  ArrayList<PersistentDependency> dependList)
     throws IOException
   {
@@ -160,7 +160,7 @@ public class StaticPage extends Page {
     }
   }
 
-  static ArrayList<Depend> parseDepend(Path dependPath)
+  static ArrayList<Depend> parseDepend(PathImpl dependPath)
     throws IOException
   {
     ReadStream is = dependPath.openRead();

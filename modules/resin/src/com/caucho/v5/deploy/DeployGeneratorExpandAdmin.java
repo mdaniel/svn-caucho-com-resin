@@ -30,7 +30,7 @@
 package com.caucho.v5.deploy;
 
 import com.caucho.v5.management.server.ArchiveDeployMXBean;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 abstract public class DeployGeneratorExpandAdmin<C extends DeployGeneratorExpand>
   extends DeployGeneratorAdmin<C>
@@ -43,9 +43,9 @@ abstract public class DeployGeneratorExpandAdmin<C extends DeployGeneratorExpand
 
   public String getName()
   {
-    Path containerRootDirectory = getDeployGenerator().getContainerRootDirectory();
+    PathImpl containerRootDirectory = getDeployGenerator().getContainerRootDirectory();
 
-    Path archiveDirectory = getDeployGenerator().getArchiveDirectory();
+    PathImpl archiveDirectory = getDeployGenerator().getArchiveDirectory();
 
     if (containerRootDirectory == null)
       return archiveDirectory.getNativePath();
@@ -80,7 +80,7 @@ abstract public class DeployGeneratorExpandAdmin<C extends DeployGeneratorExpand
 
   public String getExpandPath(String name)
   {
-    Path path =  getDeployGenerator().getExpandPath(name);
+    PathImpl path =  getDeployGenerator().getExpandPath(name);
 
     return path == null ? null : path.getNativePath();
   }

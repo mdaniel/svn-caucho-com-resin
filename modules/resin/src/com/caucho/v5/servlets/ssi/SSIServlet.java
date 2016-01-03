@@ -29,7 +29,7 @@
 
 package com.caucho.v5.servlets.ssi;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -98,7 +98,7 @@ public class SSIServlet extends HttpServlet
 
     String realPath = request.getRealPath(servletPath);
 
-    Path path = Vfs.lookup().lookup(realPath);
+    PathImpl path = Vfs.lookup().lookup(realPath);
 
     if (! path.canRead() || path.isDirectory()) {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);

@@ -64,7 +64,7 @@ public final class JmxDeltaMeter extends MeterBase {
     try {
       _objectName = JmxUtilResin.getServerObjectName(objectName);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.wrap(e);
     }
     
     Objects.requireNonNull(_objectName, objectName);

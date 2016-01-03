@@ -42,12 +42,12 @@ public class EjbLocalRef
   {
   }
 
-  public EjbLocalRef(Path path)
+  public EjbLocalRef(PathImpl path)
   {
     super(path);
   }
 
-  public EjbLocalRef(Path path, String sourceEjbName)
+  public EjbLocalRef(PathImpl path, String sourceEjbName)
   {
     super(path, sourceEjbName);
   }

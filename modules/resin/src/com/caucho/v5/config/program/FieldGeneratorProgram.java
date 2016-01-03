@@ -31,9 +31,10 @@ package com.caucho.v5.config.program;
 
 import java.lang.reflect.Field;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.inject.InjectContext;
+import com.caucho.v5.config.ConfigExceptionLocation;
+import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.L10N;
 
 
@@ -44,7 +45,7 @@ public class FieldGeneratorProgram extends ConfigProgram
   private Field _field;
   private ValueGenerator _gen;
 
-  public FieldGeneratorProgram(Config config, Field field, ValueGenerator gen)
+  public FieldGeneratorProgram(ConfigContext config, Field field, ValueGenerator gen)
   {
     super(config);
     
@@ -94,16 +95,11 @@ public class FieldGeneratorProgram extends ConfigProgram
     } catch (ConfigException e) {
       throw e;
     } catch (ClassCastException e) {
-      throw ConfigException.create(L.l("{0}: value {1} be cast to {2}",
-                                       location(), value, _field.getType().getName()),
+      throw ConfigExceptionLocation.wrap(_field, L.l("value {0} failed cast to {1}",
+                                                value, _field.getType().getName()),
                                    e);
     } catch (Exception e) {
-      throw ConfigException.create(location(), e);
+      throw ConfigExceptionLocation.wrap(_field, e);
     }
-  }
-
-  private String location()
-  {
-    return _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
   }
 }

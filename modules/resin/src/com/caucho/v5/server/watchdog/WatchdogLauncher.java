@@ -51,7 +51,7 @@ import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Client to a watchdog-manager, i.e. ResinBoot code to ask the
@@ -184,8 +184,8 @@ public class WatchdogLauncher
     
     log.fine(this + " starting " + mainClass.getSimpleName());
 
-    Path homeDir = _args.getHomeDirectory();
-    Path rootDir = _serverConfig.getRootDirectory(_args);
+    PathImpl homeDir = _args.getHomeDirectory();
+    PathImpl rootDir = _serverConfig.getRootDirectory(_args);
     
     ProcessBuilder builder = new ProcessBuilder();
 

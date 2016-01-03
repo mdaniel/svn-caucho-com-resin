@@ -31,7 +31,7 @@ package com.caucho.v5.http.cache;
 
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.FilterChain;
 
@@ -45,14 +45,14 @@ public class HttpCacheBase
   /**
    * Sets the path to the cache directory.
    */
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
   }
   
   /**
    * Returns the path from the cache directory.
    */
-  public Path getPath()
+  public PathImpl getPath()
   {
     return null;
   }
@@ -107,7 +107,7 @@ public class HttpCacheBase
   /**
    * Sets the path to the cache directory (backwards compatibility).
    */
-  public void setDir(Path path)
+  public void setDir(PathImpl path)
   {
   }
 

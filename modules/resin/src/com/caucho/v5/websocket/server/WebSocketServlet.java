@@ -38,12 +38,12 @@ import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseServlet;
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * websocket server container
  */
-@Module
+@ModulePrivate
 public class WebSocketServlet extends GenericServlet
 {
   private WebSocketServletDispatch _webSocket;

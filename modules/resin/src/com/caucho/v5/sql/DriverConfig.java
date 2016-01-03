@@ -49,7 +49,7 @@ import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XADataSource;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.program.ConfigProgram;
@@ -60,6 +60,7 @@ import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.env.dbpool.ManagedConnectionFactory;
+import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.management.server.JdbcDriverMXBean;
 import com.caucho.v5.naming.JndiUtil;
@@ -70,7 +71,6 @@ import com.caucho.v5.tools.profiler.ProfilerPoint;
 import com.caucho.v5.tools.profiler.ProfilerPointConfig;
 import com.caucho.v5.tools.profiler.XADataSourceWrapper;
 import com.caucho.v5.util.CurrentTime;
-import com.caucho.v5.util.IoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.SQLExceptionWrapper;
 import com.caucho.v5.vfs.ReadStream;
@@ -180,7 +180,7 @@ public class DriverConfig
       _driverType = TYPE_DATA_SOURCE;
     }
     else if (hasDriverTypeMethod(_driverClass)) {
-      Config config = Config.getCurrent();
+      ConfigContext config = ConfigContext.getCurrent();
       
       _init.addProgram(new PropertyStringProgram(config, "driverType", type));
     }
@@ -254,7 +254,7 @@ public class DriverConfig
                                     driverClass.getName()));
     }
 
-    Config.checkCanInstantiate(driverClass);
+    ConfigContext.checkCanInstantiate(driverClass);
   }
 
   public String getType()
@@ -747,7 +747,7 @@ public class DriverConfig
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       }
 
       setType(driverClass);
@@ -810,7 +810,7 @@ public class DriverConfig
         _init = null;
       }
 
-      Config.init(driverObject);
+      ConfigContext.init(driverObject);
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
       throw new SQLExceptionWrapper(e);

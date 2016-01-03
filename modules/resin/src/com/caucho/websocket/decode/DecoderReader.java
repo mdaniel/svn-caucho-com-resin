@@ -35,12 +35,12 @@ import java.io.IOException;
 import javax.websocket.Decoder;
 import javax.websocket.MessageHandler;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * Callback for a binary stream decoder
  */
-@Module
+@ModulePrivate
 public class DecoderReader<T> implements MessageHandler.Whole<Reader> {
   private final MessageHandler.Whole<T> _handler;
   private final Decoder.TextStream<T> _decoder;

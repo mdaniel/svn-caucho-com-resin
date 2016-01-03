@@ -38,16 +38,16 @@ import com.caucho.v5.config.types.PathBuilder;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployGenerator;
 import com.caucho.v5.loader.EnvLoader;
-import com.caucho.v5.loader.EnvironmentListener;
+import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The generator for the web-app deploy
  */
 public class DeployGeneratorWebAppSingle
   extends DeployGenerator<WebApp,WebAppController>
-  implements EnvironmentListener
+  implements EnvLoaderListener
 {
   private static final L10N L = new L10N(DeployGeneratorWebAppSingle.class);
   private static final Logger log
@@ -59,8 +59,8 @@ public class DeployGeneratorWebAppSingle
 
   private String _urlPrefix = "";
 
-  private Path _archivePath;
-  private Path _rootDirectory;
+  private PathImpl _archivePath;
+  private PathImpl _rootDirectory;
 
   private ArrayList<WebAppConfig> _defaultList = new ArrayList<WebAppConfig>();
   private WebAppConfig _config;
@@ -162,7 +162,7 @@ public class DeployGeneratorWebAppSingle
   /**
    * Sets the root directory.
    */
-  public void setRootDirectory(Path rootDirectory)
+  public void setRootDirectory(PathImpl rootDirectory)
   {
     _rootDirectory = rootDirectory;
   }

@@ -36,12 +36,12 @@ import javax.websocket.Decoder;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;
 
-import com.caucho.v5.inject.Module;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * stub/adapter for WebSocketContainer.
  */
-@Module
+@ModulePrivate
 abstract public class EndpointConfigWebSocketBase implements EndpointConfig
 {
   abstract protected EndpointConfig getDelegate();

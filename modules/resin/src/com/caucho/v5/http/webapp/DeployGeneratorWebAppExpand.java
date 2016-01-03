@@ -43,15 +43,15 @@ import com.caucho.v5.deploy.DeployGeneratorExpand;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.deploy.DeployMode;
 import com.caucho.v5.loader.EnvLoader;
-import com.caucho.v5.loader.EnvironmentListener;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.loader.EnvLoaderListener;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * The generator for the web-app deploy
  */
 public class DeployGeneratorWebAppExpand
   extends DeployGeneratorExpand<WebApp,WebAppController>
-  implements EnvironmentListener
+  implements EnvLoaderListener
 {
   private static final Logger log
     = Logger.getLogger(DeployGeneratorWebAppExpand.class.getName());
@@ -67,12 +67,12 @@ public class DeployGeneratorWebAppExpand
   private ArrayList<WebAppConfig> _webAppDefaults
     = new ArrayList<WebAppConfig>();
 
-  private HashMap<Path,WebAppConfig> _webAppConfigMap
-    = new HashMap<Path,WebAppConfig>();
+  private HashMap<PathImpl,WebAppConfig> _webAppConfigMap
+    = new HashMap<PathImpl,WebAppConfig>();
 
   // Maps from the context-path to the webapps directory
-  private HashMap<String,Path> _contextPathMap
-    = new HashMap<String,Path>();
+  private HashMap<String,PathImpl> _contextPathMap
+    = new HashMap<String,PathImpl>();
   
   private HashMap<String,String> _nameToKeyMap
     = new HashMap<String,String>();
@@ -177,7 +177,7 @@ public class DeployGeneratorWebAppExpand
   {
     String docDir = config.getRootDirectory();
 
-    Path appDir = getExpandDirectory().lookup(docDir);
+    PathImpl appDir = getExpandDirectory().lookup(docDir);
 
     _webAppConfigMap.put(appDir, config);
 
@@ -236,9 +236,9 @@ public class DeployGeneratorWebAppExpand
   }
   
   @Override
-  public Path getArchivePath(String name)
+  public PathImpl getArchivePath(String name)
   {
-    Path path = getArchiveDirectory().lookup(name + getExtension());
+    PathImpl path = getArchiveDirectory().lookup(name + getExtension());
     
     if (! path.exists() && "root".equals(name)) {
       path = getArchiveDirectory().lookup("ROOT" + getExtension());
@@ -257,14 +257,14 @@ public class DeployGeneratorWebAppExpand
     // String baseKey = key;
     String contextPath = keyToName(key);
     
-    Path rootDirectory = getExpandPath(key);
+    PathImpl rootDirectory = getExpandPath(key);
 
     if (rootDirectory == null) {
       return null;
     }
     Objects.requireNonNull(rootDirectory);
     
-    Path archivePath = getArchivePath(key);
+    PathImpl archivePath = getArchivePath(key);
  
     String id = getId() + "/" + key;
     
@@ -309,8 +309,8 @@ public class DeployGeneratorWebAppExpand
                                              String key)
   {
     try {
-      Path expandDirectory = getExpandDirectory();
-      Path rootDirectory = controller.getRootDirectory();
+      PathImpl expandDirectory = getExpandDirectory();
+      PathImpl rootDirectory = controller.getRootDirectory();
 
       if (! expandDirectory.equals(rootDirectory.getParent())) {
         return;
@@ -321,7 +321,7 @@ public class DeployGeneratorWebAppExpand
       if (controller.getArchivePath() == null) {
         String archiveName = rootDirectory.getTail() + ".war";
 
-        Path jarPath = getArchiveDirectory().lookup(archiveName);
+        PathImpl jarPath = getArchiveDirectory().lookup(archiveName);
 
         if (! jarPath.isDirectory()) {
           controller.setArchivePath(jarPath);

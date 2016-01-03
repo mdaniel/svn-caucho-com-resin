@@ -35,7 +35,7 @@ import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.CharBuffer;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * scans a class hierarchy.

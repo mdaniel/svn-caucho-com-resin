@@ -42,8 +42,8 @@ import javax.transaction.Transaction;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.Xid;
 
-import com.caucho.v5.inject.Module;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.util.ModulePrivate;
 
 /**
  * Implementation of the UserTransactionImpl for a thread instance.
@@ -177,7 +177,7 @@ public class UserTransactionImpl
     _resources.remove(resource);
   }
   
-  @Module
+  @ModulePrivate
   public ArrayList<ManagedXAResource> getXaResources()
   {
     return _xaResources;

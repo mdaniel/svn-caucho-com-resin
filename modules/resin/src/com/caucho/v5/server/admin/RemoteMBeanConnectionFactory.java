@@ -92,7 +92,7 @@ public class RemoteMBeanConnectionFactory {
       } catch (RuntimeException e) {
         throw e;
       } catch (InvocationTargetException e) {
-        throw ConfigException.create(e);
+        throw ConfigException.wrap(e);
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
 

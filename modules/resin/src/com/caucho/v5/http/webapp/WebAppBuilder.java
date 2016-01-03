@@ -84,7 +84,7 @@ import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 
 /**
@@ -340,7 +340,7 @@ public class WebAppBuilder<T extends WebApp>
   /**
    * app-dir (compat)
    */
-  public void setAppDir(Path appDir)
+  public void setAppDir(PathImpl appDir)
   {
     setRootDirectory(appDir);
   }
@@ -426,7 +426,7 @@ public class WebAppBuilder<T extends WebApp>
    * document-directory (compat)
    */
   @Configurable
-  public void setDocumentDirectory(Path appDir)
+  public void setDocumentDirectory(PathImpl appDir)
   {
     throw new ConfigException(L.l("Use <root-directory> instead of <document-directory>, because <document-directory> has been removed for Resin 4.0"));
   }
@@ -695,7 +695,7 @@ public class WebAppBuilder<T extends WebApp>
    * root-directory is the web-app root
    */
   @Configurable
-  public void setRootDirectory(Path appDir)
+  public void setRootDirectory(PathImpl appDir)
   {
   }
 
@@ -1326,7 +1326,7 @@ public class WebAppBuilder<T extends WebApp>
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     try {
-      Path path = Vfs.lookup("META-INF/permissions.xml");
+      PathImpl path = Vfs.lookup("META-INF/permissions.xml");
       
       initPermissions(path);
       
@@ -1348,7 +1348,7 @@ public class WebAppBuilder<T extends WebApp>
     }
   }
   
-  private void initPermissions(Path path)
+  private void initPermissions(PathImpl path)
     throws IOException
   {
     if (! path.canRead()) {

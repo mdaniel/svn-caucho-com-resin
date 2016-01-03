@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.TempOutputStream;
 
@@ -48,7 +48,7 @@ public class X509Parser {
   /**
    * Parses the certificate in pkcs#10
    */
-  public String parseCertificate(Path path)
+  public String parseCertificate(PathImpl path)
     throws IOException
   {
     ReadStream is = path.openRead();

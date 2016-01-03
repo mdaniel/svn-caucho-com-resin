@@ -43,7 +43,7 @@ import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.webapp.AccessLogFilterChain;
 import com.caucho.v5.http.webapp.FilterChainWebApp;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Resin's host container implementation.
@@ -90,7 +90,7 @@ public class HostContainerResin extends HostContainer
 
   @Override
   protected HostController createController(String id, 
-                                            Path rootDir,
+                                            PathImpl rootDir,
                                             String hostName,
                                             HostConfig config,
                                             HashMap<String, Object> varMap)

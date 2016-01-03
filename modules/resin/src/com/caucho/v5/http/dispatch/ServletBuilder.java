@@ -61,11 +61,11 @@ import javax.servlet.UnavailableException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.ServletSecurity;
 
-import com.caucho.v5.config.CompileException;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.UserMessage;
+import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.LineConfigException;
+import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.annotation.DisableConfig;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
@@ -559,7 +559,7 @@ public class ServletBuilder
         
         EnvironmentClassLoader envLoader = EnvLoader.getEnvironmentClassLoader();
 
-        if (e instanceof ClassNotFoundException && e.getCause() instanceof CompileException) {
+        if (e instanceof ClassNotFoundException && e.getCause() instanceof UserMessage) {
           msg = e.toString();
         }
         else if (e instanceof ClassNotFoundException
@@ -998,7 +998,7 @@ public class ServletBuilder
       try {
         _servletClass = Class.forName(_servletClassName, false, loader);
       } catch (ClassNotFoundException e) {
-        if (e instanceof CompileException) {
+        if (e instanceof UserMessage) {
           throw error(e);
         }
 
@@ -1028,7 +1028,7 @@ public class ServletBuilder
         return;
       }
 
-      Config.checkCanInstantiate(_servletClass);
+      ConfigContext.checkCanInstantiate(_servletClass);
 
       if (Servlet.class.isAssignableFrom(_servletClass)) {
       }
@@ -1449,7 +1449,7 @@ public class ServletBuilder
       init.configure(servlet);
     }
     else {
-      Config.init(servlet);
+      ConfigContext.init(servlet);
     }
   }
 
@@ -1494,7 +1494,7 @@ public class ServletBuilder
     ConfigException e;
 
     if (_location != null)
-      e = ConfigException.createLine(_location, msg);
+      e = new ConfigExceptionLocation(_location, msg);
     else
       e = new ConfigException(msg);
 
@@ -1508,7 +1508,7 @@ public class ServletBuilder
     ConfigException e1;
 
     if (_location != null)
-      e1 = new LineConfigException(_location + msg, e);
+      e1 = new ConfigExceptionLocation(_location + msg, e);
     else
       e1 = new ConfigException(msg, e);
 
@@ -1522,9 +1522,9 @@ public class ServletBuilder
     RuntimeException e1;
 
     if (_location != null)
-      e1 = new LineConfigException(_location + e.getMessage(), e);
+      e1 = new ConfigExceptionLocation(_location + e.getMessage(), e);
     else
-      e1 = ConfigException.create(e);
+      e1 = ConfigException.wrap(e);
 
     log.warning(e1.toString());
 

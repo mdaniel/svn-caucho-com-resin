@@ -28,18 +28,18 @@
 
 package com.caucho.xpath;
 
-import com.caucho.v5.vfs.Path;
+import com.caucho.v5.vfs.PathImpl;
 
 public class StylesheetEnv {
-  private Path _path;
+  private PathImpl _path;
   private String _systemId;
 
-  public Path getPath()
+  public PathImpl getPath()
   {
     return _path;
   }
 
-  public void setPath(Path path)
+  public void setPath(PathImpl path)
   {
     _path = path;
   }
