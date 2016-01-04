@@ -45,10 +45,11 @@ import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.config.program.ResourceInjectionTargetProgram;
 import com.caucho.v5.config.program.ResourceProgram;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the resource group

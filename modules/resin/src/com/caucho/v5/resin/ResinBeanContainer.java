@@ -39,7 +39,6 @@ import com.caucho.v5.amp.Amp;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.amp.manager.AmpManager;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.javac.WorkDir;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.CompilingLoader;
@@ -50,6 +49,8 @@ import com.caucho.v5.server.cdi.CdiProducerResin;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Embeddable Resin context for testing of bean container components (CDI

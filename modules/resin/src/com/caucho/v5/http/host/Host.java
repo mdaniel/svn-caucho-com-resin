@@ -53,7 +53,6 @@ import com.caucho.v5.http.webapp.ErrorPage;
 import com.caucho.v5.http.webapp.ErrorPageManager;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppContainer;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -65,6 +64,8 @@ import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Resin's virtual host implementation.

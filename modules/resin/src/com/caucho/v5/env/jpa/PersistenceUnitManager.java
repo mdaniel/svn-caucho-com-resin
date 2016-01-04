@@ -56,7 +56,6 @@ import com.caucho.v5.cli.resin.ResinCommandLineAgent;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoader;
@@ -65,6 +64,8 @@ import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Manages a single persistence unit

@@ -50,12 +50,13 @@ import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.dbpool.ConnectionPool;
 import com.caucho.v5.env.dbpool.ManagedConnectionFactory;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.JdbcDriverMXBean;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Manages a pool of database connections.  In addition, DBPool configures

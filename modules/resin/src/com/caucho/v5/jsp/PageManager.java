@@ -36,9 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.spi.InjectionTarget;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletRequest;
@@ -52,7 +50,7 @@ import javax.servlet.jsp.PageContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
-import com.caucho.v5.inject.InjectManager;
+import com.caucho.v5.inject.impl.InjectManagerImpl;
 import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.EnvLoader;
@@ -378,7 +376,7 @@ abstract public class PageManager {
     page._caucho_isModified();
 
     try {
-      InjectManager injectManager = InjectManager.create();
+      InjectManagerImpl injectManager = InjectManagerImpl.create();
 
       /*
       InjectionTarget inject = injectManager.createInjectionTarget(page.getClass());

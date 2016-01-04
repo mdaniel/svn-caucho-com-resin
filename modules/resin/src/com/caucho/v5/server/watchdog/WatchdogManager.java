@@ -29,8 +29,6 @@
 
 package com.caucho.v5.server.watchdog;
 
-import io.baratine.service.Result;
-
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +44,7 @@ import com.caucho.v5.bartender.heartbeat.ServerHeartbeatBuilder;
 import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.cloud.security.SecuritySystem;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.Configs;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.jni.JniBoot;
@@ -64,6 +62,8 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
+
+import io.baratine.service.Result;
 
 /**
  * Process responsible for watching a backend watchdog.
@@ -195,7 +195,7 @@ public class WatchdogManager implements AlarmListener
       selfBuilder.pod("watchdog");
 
       BartenderBuilder bartenderBuilder
-        = BartenderSystem.createBuilder(Config.config().get(),
+        = BartenderSystem.createBuilder(Configs.config().get(),
                                         address, port, false, 
                                         portBartender, 
                                         "watchdog", "watchdog", 

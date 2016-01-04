@@ -29,10 +29,11 @@
 
 package com.caucho.v5.websocket.common;
 
-import com.caucho.v5.baratine.web.WebSocket;
 import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
+
+import io.baratine.web.WebSocket;
 
 /**
  * websocket base container

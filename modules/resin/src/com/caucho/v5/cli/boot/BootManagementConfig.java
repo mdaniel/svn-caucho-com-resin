@@ -34,9 +34,10 @@ import javax.annotation.PostConstruct;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.http.security.AuthenticatorRole;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.security.AdminAuthenticator;
 import com.caucho.v5.security.XmlAuthenticator;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for management.

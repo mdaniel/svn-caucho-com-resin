@@ -46,9 +46,10 @@ import javax.inject.Qualifier;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigExceptionLocation;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.ModulePrivate;
+
+import io.baratine.inject.InjectManager;
 
 @ModulePrivate
 public class PostConstructProgramCandi extends ConfigProgram

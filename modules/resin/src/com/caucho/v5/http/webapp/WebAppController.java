@@ -51,13 +51,14 @@ import com.caucho.v5.deploy.DeployInstanceBuilder;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.pod.PodConfigApp;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.Crc64;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Manages the lifecycle of a web-app. The same WebAppController is used for

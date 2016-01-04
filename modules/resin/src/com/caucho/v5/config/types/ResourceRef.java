@@ -44,12 +44,13 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the init-param pattern.

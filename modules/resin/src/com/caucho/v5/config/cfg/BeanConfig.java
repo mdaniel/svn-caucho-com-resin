@@ -29,6 +29,7 @@
 
 package com.caucho.v5.config.cfg;
 
+import io.baratine.inject.InjectManager;
 import io.baratine.service.Startup;
 
 import java.lang.annotation.Annotation;
@@ -55,7 +56,6 @@ import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyStringProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.type.TypeFactoryConfig;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 

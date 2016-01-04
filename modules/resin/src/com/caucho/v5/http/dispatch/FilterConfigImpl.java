@@ -52,8 +52,9 @@ import com.caucho.v5.config.annotation.DisableConfig;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.CauchoUtil;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for a filter.

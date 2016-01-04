@@ -33,8 +33,9 @@ import java.util.logging.Logger;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ContainerProgram;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the login-config.

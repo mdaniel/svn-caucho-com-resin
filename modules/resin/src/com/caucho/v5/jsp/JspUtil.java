@@ -38,10 +38,11 @@ import javax.el.ValueExpression;
 
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.MethodExpressionImpl;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 import com.caucho.v5.jsp.el.JspELParser;
 import com.caucho.v5.util.ModulePrivate;
+
+import io.baratine.inject.InjectManager;
 
 @ModulePrivate
 public class JspUtil

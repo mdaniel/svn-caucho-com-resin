@@ -107,7 +107,6 @@ import com.caucho.v5.http.security.Login;
 import com.caucho.v5.http.security.LoginConfig;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.i18n.CharacterEncoding;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.javac.WorkDir;
@@ -130,6 +129,8 @@ import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Resin's webApp implementation.

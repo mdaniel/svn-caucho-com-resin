@@ -41,10 +41,11 @@ import javax.rmi.PortableRemoteObject;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.j2ee.BeanNameLiteral;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the ejb-ref.

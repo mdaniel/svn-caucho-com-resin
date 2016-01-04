@@ -42,8 +42,9 @@ import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Manages the servlets.

@@ -40,8 +40,9 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Handles the @PersistenceUnit annotation for JavaEE

@@ -29,9 +29,9 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/baratine"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/baratine-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hessian"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/baratine-core"/>
-	<classpathentry kind="output" path="target/classes"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/api"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/framework"/>
+	<classpathentry kind="output" path="build/classes"/>
 </classpath>

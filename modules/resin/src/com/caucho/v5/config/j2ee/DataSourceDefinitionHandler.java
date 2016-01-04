@@ -50,9 +50,10 @@ import com.caucho.v5.config.program.NullProgram;
 import com.caucho.v5.config.program.SingletonValueGenerator;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.env.jdbc.DatabaseFactory;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Handles the @EJB annotation for JavaEE

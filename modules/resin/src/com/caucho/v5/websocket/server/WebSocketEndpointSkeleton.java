@@ -59,11 +59,12 @@ import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.reflect.ReflectUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.SessionWebSocketBase;
+
+import io.baratine.inject.InjectManager;
 
 @ModulePrivate
 public class WebSocketEndpointSkeleton<T>

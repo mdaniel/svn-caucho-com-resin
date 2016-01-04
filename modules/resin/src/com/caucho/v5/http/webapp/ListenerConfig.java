@@ -44,8 +44,9 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.types.DescriptionGroupConfig;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the listener

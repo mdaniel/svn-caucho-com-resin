@@ -70,11 +70,12 @@ import com.caucho.v5.http.dispatch.ServletMapper;
 import com.caucho.v5.http.dispatch.ServletMapping;
 import com.caucho.v5.http.dispatch.SubInvocation;
 import com.caucho.v5.http.rewrite.WelcomeFile;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * servlet/filter dispatching.

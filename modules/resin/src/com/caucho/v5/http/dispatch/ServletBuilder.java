@@ -76,7 +76,6 @@ import com.caucho.v5.http.protocol.ResponseServletStub;
 import com.caucho.v5.http.security.BasicPrincipal;
 import com.caucho.v5.http.security.ConstraintManager;
 import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.inject.InjectManager;
 import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
@@ -84,6 +83,8 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for a servlet.

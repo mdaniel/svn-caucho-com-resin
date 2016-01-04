@@ -29,8 +29,10 @@
 
 package com.caucho.v5.resin;
 
-import com.caucho.v5.config.Config;
+import com.caucho.v5.config.Configs;
 import com.caucho.v5.server.container.ServerBuilder;
+
+import io.baratine.config.Config;
 
 /**
  * Embeddable version of a Resin port
@@ -40,7 +42,7 @@ abstract public class PortEmbed
   private int _port = -1;
   private String _address;
   
-  private Config _env = Config.config().get();
+  private Config _env = Configs.config().get();
 
   protected Config env()
   {
