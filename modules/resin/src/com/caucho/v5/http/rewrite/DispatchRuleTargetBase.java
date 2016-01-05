@@ -32,9 +32,8 @@ package com.caucho.v5.http.rewrite;
 import java.util.regex.Matcher;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.config.Configurable;
 
 @Configurable
 abstract public class DispatchRuleTargetBase extends DispatchRuleRegexpBase

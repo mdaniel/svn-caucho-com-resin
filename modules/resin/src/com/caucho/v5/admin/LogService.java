@@ -6,7 +6,6 @@
 
 package com.caucho.v5.admin;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.logging.Level;
@@ -15,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.log.LogSystem;
 import com.caucho.v5.util.L10N;

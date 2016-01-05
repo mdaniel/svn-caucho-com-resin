@@ -6,9 +6,9 @@
 
 package com.caucho.v5.health.predicate;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.health.event.HealthEvent;
 import com.caucho.v5.health.event.StartHealthEvent;
 

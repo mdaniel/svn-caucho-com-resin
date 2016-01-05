@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import io.baratine.config.Configurable;
+import com.caucho.v5.config.Configurable;
 
 
 /**

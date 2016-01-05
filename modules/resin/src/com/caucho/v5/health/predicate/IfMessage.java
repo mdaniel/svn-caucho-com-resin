@@ -8,10 +8,9 @@ package com.caucho.v5.health.predicate;
 
 import java.util.regex.Pattern;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.*;
 import com.caucho.v5.health.event.HealthEvent;
-
-import io.baratine.config.Configurable;
 
 /**
  * Qualifies an action to match health result message to a regular expression.

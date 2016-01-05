@@ -31,7 +31,7 @@ package com.caucho.v5.http.webapp;
 
 import java.util.List;
 
-import io.baratine.config.Configurable;
+import com.caucho.v5.config.Configurable;
 
 import java.util.ArrayList;
 

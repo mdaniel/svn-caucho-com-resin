@@ -51,6 +51,7 @@ import javax.servlet.annotation.WebInitParam;
 import javax.servlet.descriptor.TaglibDescriptor;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.types.Icon;
 import com.caucho.v5.config.types.InitParam;
@@ -85,8 +86,6 @@ import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
-
-import io.baratine.config.Configurable;
 
 /**
  * Builder for the webapp to encapsulate the configuration process.

@@ -40,6 +40,7 @@ import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.j2ee.PersistenceContextRefConfig;
 import com.caucho.v5.config.types.EjbLocalRef;
 import com.caucho.v5.config.types.EjbRef;
@@ -63,8 +64,6 @@ import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.security.RoleMapManager;
 import com.caucho.v5.security.XmlRoleMap;
-
-import io.baratine.config.Configurable;
 
 
 /**

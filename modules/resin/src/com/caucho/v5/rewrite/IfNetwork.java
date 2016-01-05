@@ -30,12 +30,11 @@
 package com.caucho.v5.rewrite;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.util.InetNetwork;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
-
-import io.baratine.config.Configurable;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;

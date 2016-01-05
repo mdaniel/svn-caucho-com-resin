@@ -31,12 +31,11 @@ package com.caucho.v5.http.container;
 
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.http.rewrite.DispatchRuleBase2;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.config.Configurable;
 
 /**
  * Configuration for the <cluster> and <server> tags.

@@ -35,9 +35,8 @@ import java.util.regex.Pattern;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
-
-import io.baratine.config.Configurable;
 
 /*
  * Redirect a request using a HTTP redirect.

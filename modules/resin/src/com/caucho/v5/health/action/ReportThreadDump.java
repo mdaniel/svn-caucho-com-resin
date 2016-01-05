@@ -6,7 +6,6 @@
 
 package com.caucho.v5.health.action;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.logging.Logger;
@@ -14,6 +13,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
 import com.caucho.v5.env.log.LogSystem;

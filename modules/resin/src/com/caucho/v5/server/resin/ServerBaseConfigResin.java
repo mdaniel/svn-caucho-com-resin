@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.cloud.security.SecuritySystem;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.Bytes;
@@ -50,8 +51,6 @@ import com.caucho.v5.loader.EnvironmentProperties;
 import com.caucho.v5.server.container.ServerBuilder;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-
-import io.baratine.config.Configurable;
 
 /**
  * The ResinConfig class represents configuration for 

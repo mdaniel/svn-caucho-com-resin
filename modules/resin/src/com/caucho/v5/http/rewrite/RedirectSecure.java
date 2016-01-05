@@ -32,9 +32,8 @@ package com.caucho.v5.http.rewrite;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainRedirectSecure;
-
-import io.baratine.config.Configurable;
 
 /*
  * Redirect a request using a HTTP redirect.

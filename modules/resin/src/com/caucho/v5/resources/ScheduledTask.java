@@ -28,7 +28,6 @@
  */
 package com.caucho.v5.resources;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.Date;
@@ -45,6 +44,7 @@ import javax.inject.Singleton;
 import javax.servlet.RequestDispatcher;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.Unbound;
 import com.caucho.v5.config.types.CronType;
 import com.caucho.v5.config.types.Period;

@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.bartender.network.NetworkSystem;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.health.check.AbstractHealthCheck;
 import com.caucho.v5.health.meter.MeterActiveTime;
 import com.caucho.v5.health.meter.MeterService;
@@ -29,8 +30,6 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
-
-import io.baratine.config.Configurable;
 
 public class HttpStatusHealthCheckImpl extends AbstractHealthCheck
 {

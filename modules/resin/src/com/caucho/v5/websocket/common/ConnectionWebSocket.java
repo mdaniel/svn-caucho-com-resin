@@ -33,7 +33,7 @@ import com.caucho.v5.http.protocol.OutResponseBase;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
-import io.baratine.web.WebSocket;
+import io.baratine.web.websocket.WebSocket;
 
 /**
  * websocket base container

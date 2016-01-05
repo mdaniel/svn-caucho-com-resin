@@ -6,13 +6,13 @@
 
 package com.caucho.v5.health.meter;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.util.L10N;
 

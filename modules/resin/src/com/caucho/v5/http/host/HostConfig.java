@@ -30,12 +30,11 @@
 package com.caucho.v5.http.host;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.ConfigDeploy;
 import com.caucho.v5.deploy.DeployMode;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.config.Configurable;
 
 import javax.annotation.PostConstruct;
 

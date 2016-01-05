@@ -5,7 +5,6 @@
 
 package com.caucho.v5.health.analysis;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.logging.Level;
@@ -14,6 +13,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigArg;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthStatus;
 import com.caucho.v5.env.log.LogSystem;
 import com.caucho.v5.health.HealthSystemFacade;

@@ -32,14 +32,13 @@ package com.caucho.v5.http.container;
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-
-import io.baratine.config.Configurable;
 
 /**
  * Configuration for the <cluster> and <server> tags.

@@ -6,7 +6,6 @@
 
 package com.caucho.v5.health.action;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.Arrays;
@@ -21,6 +20,7 @@ import javax.mail.internet.InternetAddress;
 
 import com.caucho.v5.amp.misc.MailService;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthCheckResult;
 import com.caucho.v5.env.health.HealthSubSystem;

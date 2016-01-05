@@ -31,9 +31,8 @@ package com.caucho.v5.rewrite;
 
 import javax.servlet.FilterChain;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.SetRequestSecureFilterChain;
-
-import io.baratine.config.Configurable;
 
 @Configurable
 public class SetRequestSecure extends RewriteFilterBase

@@ -29,7 +29,7 @@
 
 package com.caucho.v5.http.webapp;
 
-import io.baratine.config.Configurable;
+import com.caucho.v5.config.Configurable;
 
 /**
  * Resin's webApp implementation.

@@ -32,10 +32,9 @@ package com.caucho.v5.rewrite;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainError;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
-
-import io.baratine.config.Configurable;
 
 /**
  * Sends a HTTP error response using response.sendError(code)

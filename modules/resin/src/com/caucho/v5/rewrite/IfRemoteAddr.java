@@ -34,10 +34,9 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.config.ConfigArg;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.util.InetNetwork;
-
-import io.baratine.config.Configurable;
 
 @Configurable
 public class IfRemoteAddr implements RequestPredicate

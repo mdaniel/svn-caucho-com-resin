@@ -80,6 +80,7 @@ import com.caucho.v5.amp.spi.OutboxAmp;
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.config.CauchoBean;
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.types.Validator;
 import com.caucho.v5.deploy.DeployInstanceEnvironment;
@@ -129,7 +130,6 @@ import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
 
-import io.baratine.config.Configurable;
 import io.baratine.inject.InjectManager;
 
 /**

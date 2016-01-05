@@ -6,7 +6,6 @@
 
 package com.caucho.v5.health.action;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.LinkedList;
@@ -23,6 +22,7 @@ import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
 import com.caucho.v5.env.system.SystemManager;

@@ -41,14 +41,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.proxy.LoadBalanceBackend;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.servlets.HttpProxyServlet;
-
-import io.baratine.config.Configurable;
 
 /**
  * Dispatches a request to a backend server using HTTP as the proxy

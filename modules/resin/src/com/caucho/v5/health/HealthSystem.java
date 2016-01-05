@@ -6,11 +6,11 @@
 
 package com.caucho.v5.health;
 
-import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import javax.inject.Singleton;
 
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.env.system.SystemManager;

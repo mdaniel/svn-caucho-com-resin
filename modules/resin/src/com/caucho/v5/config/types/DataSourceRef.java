@@ -34,12 +34,11 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.jdbc.DatabaseFactory;
 import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.config.Configurable;
 
 /**
  * Configuration for the env-entry pattern.
