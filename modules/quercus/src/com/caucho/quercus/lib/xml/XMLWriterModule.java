@@ -95,7 +95,7 @@ public class XMLWriterModule extends AbstractQuercusModule {
     if (w == null)
       return NullValue.NULL;
     
-    return w.outputMemory();
+    return w.outputMemory(true);
   }
 
   /**

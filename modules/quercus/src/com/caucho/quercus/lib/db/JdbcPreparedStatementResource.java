@@ -202,7 +202,7 @@ public class JdbcPreparedStatementResource
         _preparedStmt.setBinaryStream(i + 1, value.toInputStream());
       }
       else if (type == ColumnType.STRING) {
-        _preparedStmt.setString(i + 1, value.toString());
+        _preparedStmt.setString(i + 1, value.toString(env).toString());
       }
       else if (type == ColumnType.LOB) {
         setLobParameter(env, i + 1, value);
