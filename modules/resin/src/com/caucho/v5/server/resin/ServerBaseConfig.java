@@ -31,13 +31,14 @@ package com.caucho.v5.server.resin;
 
 import java.io.IOException;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.log.impl.LogConfig;
 import com.caucho.v5.log.impl.LogHandlerConfig;
 import com.caucho.v5.log.impl.LoggerConfig;
 import com.caucho.v5.log.impl.StdoutLog;
 import com.caucho.v5.util.CurrentTime;
+
+import io.baratine.config.Configurable;
 
 /**
  * The ResinConfig class represents configuration for 

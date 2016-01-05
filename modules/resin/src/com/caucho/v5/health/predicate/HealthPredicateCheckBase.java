@@ -11,6 +11,8 @@ import com.caucho.v5.env.health.*;
 import com.caucho.v5.health.check.HealthCheck;
 import com.caucho.v5.util.L10N;
 
+import io.baratine.config.Configurable;
+
 @Configurable
 public abstract class HealthPredicateCheckBase 
   extends HealthPredicateScheduledBase

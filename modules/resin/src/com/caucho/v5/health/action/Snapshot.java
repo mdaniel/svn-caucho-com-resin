@@ -6,12 +6,12 @@
 
 package com.caucho.v5.health.action;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.health.action.ActionSequence;
 import com.caucho.v5.health.action.DumpHeap;

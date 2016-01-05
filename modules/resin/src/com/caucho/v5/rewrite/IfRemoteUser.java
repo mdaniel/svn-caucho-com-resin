@@ -33,9 +33,10 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 /**
 * A rewrite condition that passes if the client has been authenticated

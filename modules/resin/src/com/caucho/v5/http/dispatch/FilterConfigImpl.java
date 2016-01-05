@@ -47,13 +47,13 @@ import javax.servlet.ServletException;
 
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.annotation.DisableConfig;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.CauchoUtil;
 
+import io.baratine.config.Configurable;
 import io.baratine.inject.InjectManager;
 
 /**

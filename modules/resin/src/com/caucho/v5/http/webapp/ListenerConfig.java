@@ -40,12 +40,12 @@ import javax.servlet.http.HttpSessionListener;
 
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.types.DescriptionGroupConfig;
 import com.caucho.v5.util.L10N;
 
+import io.baratine.config.Configurable;
 import io.baratine.inject.InjectManager;
 
 /**

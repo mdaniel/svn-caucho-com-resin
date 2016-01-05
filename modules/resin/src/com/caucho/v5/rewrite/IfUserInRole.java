@@ -35,8 +35,9 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.RequestPredicate;
+
+import io.baratine.config.Configurable;
 
 /**
  * Match if the user is in any of the given roles,

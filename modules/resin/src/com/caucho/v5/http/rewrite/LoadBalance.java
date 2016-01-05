@@ -41,13 +41,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.InlineConfig;
 import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.proxy.HashGeneratorStickyRequest;
 import com.caucho.v5.http.proxy.ProxyLoadBalanceServlet;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
 import com.caucho.v5.http.webapp.WebApp;
+
+import io.baratine.config.Configurable;
 
 /**
  * Dispatches a request to the load balancer.

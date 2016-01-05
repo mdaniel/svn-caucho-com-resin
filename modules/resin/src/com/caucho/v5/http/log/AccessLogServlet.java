@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.CronType;
 import com.caucho.v5.config.types.Period;
@@ -62,6 +61,8 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WeakAlarm;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.config.Configurable;
 
 /**
  * Represents an log of every top-level request to the server.

@@ -30,12 +30,13 @@
 package com.caucho.v5.rewrite;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.CronType;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.annotation.PostConstruct;

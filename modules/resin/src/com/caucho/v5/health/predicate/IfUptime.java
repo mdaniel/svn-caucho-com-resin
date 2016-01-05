@@ -6,12 +6,12 @@
 
 package com.caucho.v5.health.predicate;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.event.HealthEvent;

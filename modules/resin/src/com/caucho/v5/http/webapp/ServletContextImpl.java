@@ -29,10 +29,11 @@
 
 package com.caucho.v5.http.webapp;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.config.Configurable;
 
 import javax.servlet.*;
 import javax.servlet.descriptor.JspConfigDescriptor;

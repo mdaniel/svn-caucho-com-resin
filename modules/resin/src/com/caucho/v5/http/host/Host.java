@@ -40,7 +40,6 @@ import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.bartender.ClusterBartender;
 import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.deploy.DeployInstanceEnvironment;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.http.container.HttpContainerServlet;
@@ -65,6 +64,7 @@ import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 
+import io.baratine.config.Configurable;
 import io.baratine.inject.InjectManager;
 
 /**

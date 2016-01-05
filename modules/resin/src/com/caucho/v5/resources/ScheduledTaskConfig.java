@@ -34,7 +34,6 @@ import javax.el.MethodExpression;
 import javax.enterprise.context.Dependent;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.ResinService;
 import com.caucho.v5.config.Unbound;
 import com.caucho.v5.config.cfg.BeanConfig;
@@ -42,6 +41,8 @@ import com.caucho.v5.config.types.Period;
 import com.caucho.v5.loader.AbstractEnvironmentListener;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
+
+import io.baratine.config.Configurable;
 
 /**
  * The cron resources starts application Work tasks at cron-specified

@@ -6,6 +6,7 @@
 
 package com.caucho.v5.health.predicate;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,7 +15,6 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.CronType;
 import com.caucho.v5.health.event.HealthEvent;
 import com.caucho.v5.util.CurrentTime;

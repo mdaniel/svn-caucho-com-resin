@@ -34,12 +34,13 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.ConfigDeploy;
 import com.caucho.v5.deploy.DeployMode;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 /**
  * The configuration for a web-app in the resin.conf

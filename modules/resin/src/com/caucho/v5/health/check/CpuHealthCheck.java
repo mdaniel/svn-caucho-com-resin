@@ -5,6 +5,7 @@
 
 package com.caucho.v5.health.check;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.ArrayList;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.health.meter.MeterBase;
 

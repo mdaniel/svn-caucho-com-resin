@@ -29,9 +29,10 @@
 
 package com.caucho.v5.http.webapp;
 
-import com.caucho.v5.config.Configurable;
-
 import java.util.List;
+
+import io.baratine.config.Configurable;
+
 import java.util.ArrayList;
 
 public class Ordering

@@ -6,13 +6,14 @@
 
 package com.caucho.v5.health.predicate;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.*;
 import com.caucho.v5.health.check.HealthCheck;
 import com.caucho.v5.health.event.HealthEvent;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
+
+import io.baratine.config.Configurable;
 
 @Configurable
 public class IfHealthStatus extends HealthPredicateCheckBase

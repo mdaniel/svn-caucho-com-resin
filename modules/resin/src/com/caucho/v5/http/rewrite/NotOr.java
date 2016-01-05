@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.v5.config.Configurable;
+import io.baratine.config.Configurable;
 
 /**
  * Matches if none of the child predicates match.

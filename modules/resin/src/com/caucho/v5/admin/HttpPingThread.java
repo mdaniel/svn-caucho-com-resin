@@ -5,11 +5,11 @@
  */
 package com.caucho.v5.admin;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.Unbound;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthSubSystem;

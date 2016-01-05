@@ -10,11 +10,12 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.InlineConfig;
 import com.caucho.v5.health.stat.ServiceMeterImpl;
 import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 @Configurable
 @InlineConfig

@@ -6,9 +6,10 @@
 
 package com.caucho.v5.health.predicate;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthStatus;
 import com.caucho.v5.health.check.HealthCheck;
+
+import io.baratine.config.Configurable;
 
 /**
  * Qualifies an action to match only after the required number of rechecks

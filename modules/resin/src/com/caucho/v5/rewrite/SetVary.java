@@ -32,9 +32,10 @@ package com.caucho.v5.rewrite;
 import javax.servlet.FilterChain;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.AddHeaderFilterChain;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 /**
  * Sets a response Vary header to control caching based on input headers,

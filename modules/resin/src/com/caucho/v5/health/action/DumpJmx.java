@@ -6,6 +6,7 @@
 
 package com.caucho.v5.health.action;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.lang.management.ManagementFactory;
@@ -29,7 +30,6 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeType;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;

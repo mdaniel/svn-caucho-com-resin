@@ -6,6 +6,7 @@
 
 package com.caucho.v5.health.predicate;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.logging.Level;
@@ -13,7 +14,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.health.action.HealthAction;
 import com.caucho.v5.health.event.HealthEvent;

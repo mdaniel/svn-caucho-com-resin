@@ -5,6 +5,7 @@
 
 package com.caucho.v5.health.check;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.Set;
@@ -16,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthCheckResult;
 import com.caucho.v5.env.health.HealthSubSystem;

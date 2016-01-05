@@ -5,6 +5,7 @@
 
 package com.caucho.v5.health.action;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.io.File;
@@ -22,7 +23,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;

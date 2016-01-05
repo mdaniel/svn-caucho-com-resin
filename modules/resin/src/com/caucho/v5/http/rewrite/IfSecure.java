@@ -31,7 +31,7 @@ package com.caucho.v5.http.rewrite;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.v5.config.Configurable;
+import io.baratine.config.Configurable;
 
 /**
  * Match if the request is secure, i.e. if request.isSecure() matches.

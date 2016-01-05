@@ -6,11 +6,10 @@
 
 package com.caucho.v5.health.action;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import javax.inject.Singleton;
-
-import com.caucho.v5.config.Configurable;
 
 /**
  * Health action to create a HPROF format heap dump.  The heap 

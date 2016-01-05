@@ -33,9 +33,10 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainMoved;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
+
+import io.baratine.config.Configurable;
 
 /**
  * Sends a HTTP moved-permanently response

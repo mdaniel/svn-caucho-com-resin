@@ -6,6 +6,7 @@
 
 package com.caucho.v5.health.predicate;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.health.action.HealthAction;
 import com.caucho.v5.util.L10N;
 

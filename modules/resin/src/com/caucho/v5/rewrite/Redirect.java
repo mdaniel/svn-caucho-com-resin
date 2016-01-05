@@ -32,9 +32,10 @@ package com.caucho.v5.rewrite;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainRedirect;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
+
+import io.baratine.config.Configurable;
 
 /*
  * Redirect a request using a HTTP redirect.

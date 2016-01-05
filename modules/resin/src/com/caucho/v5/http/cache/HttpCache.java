@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 import javax.servlet.FilterChain;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.http.container.HttpContainerServlet;
@@ -35,6 +34,8 @@ import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.MemoryPath;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
+
+import io.baratine.config.Configurable;
 
 /**
  * Cached response.

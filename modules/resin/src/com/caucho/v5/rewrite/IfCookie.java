@@ -37,9 +37,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.RequestPredicateVary;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 
 /**

@@ -6,6 +6,7 @@
 
 package com.caucho.v5.health.meter;
 
+import io.baratine.config.Configurable;
 import io.baratine.service.Startup;
 
 import java.beans.ConstructorProperties;
@@ -16,7 +17,6 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.jmx.server.MeterGraphPageInfo;

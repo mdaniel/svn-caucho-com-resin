@@ -38,10 +38,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 /**
  * Passes if the named header exists and has a value

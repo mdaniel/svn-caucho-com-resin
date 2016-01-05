@@ -29,6 +29,7 @@
 
 package com.caucho.v5.http.session;
 
+import io.baratine.config.Configurable;
 import io.baratine.db.Cursor;
 
 import java.io.IOException;
@@ -58,7 +59,6 @@ import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.bartender.pod.PodBartender;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.health.meter.AverageSensor;
 import com.caucho.v5.health.meter.MeterService;

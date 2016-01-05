@@ -37,9 +37,10 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.util.L10N;
+
+import io.baratine.config.Configurable;
 
 abstract public class JmxExpr {
   private static final L10N L = new L10N(JmxCalculationMeterImpl.class);

@@ -39,13 +39,14 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainForward;
 import com.caucho.v5.http.dispatch.FilterChainRewriteDispatch;
 import com.caucho.v5.http.dispatch.FilterChainRewriteInclude;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.config.Configurable;
 
 /**
  * Manages the welcome-file as a rewrite-dispatch.

@@ -29,8 +29,9 @@
 
 package com.caucho.v5.http.proxy;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
+
+import io.baratine.config.Configurable;
 
 @Configurable
 public class LoadBalanceBackend

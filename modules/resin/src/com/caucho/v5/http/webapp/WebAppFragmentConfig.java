@@ -31,9 +31,10 @@ package com.caucho.v5.http.webapp;
 
 import java.util.logging.Logger;
 
-import com.caucho.v5.config.Configurable;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.config.Configurable;
 
 public class WebAppFragmentConfig extends WebAppConfig
 {
