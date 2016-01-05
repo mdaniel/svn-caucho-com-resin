@@ -39,6 +39,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.SyncCacheListener;
@@ -87,7 +89,7 @@ public final class Block implements SyncCacheListener {
   private boolean _isCopy;
   private boolean _isLoad;
   private boolean _isDirty;
-
+  
   Block(BlockStore store, long blockId)
   {
     store.validateBlockId(blockId);
@@ -153,9 +155,26 @@ public final class Block implements SyncCacheListener {
 
     int allocCode = getStore().getAllocation(blockIndex);
 
-    if (allocCode != BlockStore.ALLOC_INDEX)
-      throw new IllegalStateException(L.l("block {0} is not an index code={1}",
+    if (allocCode != BlockStore.ALLOC_INDEX) {
+      RuntimeException exn;
+      exn = new IllegalStateException(L.l("block {0} is not an index code={1}",
                                           this, allocCode));
+      exn.fillInStackTrace();
+      
+      throw exn;
+      /*
+      if (_isValidation) {
+        log.warning(exn.toString()));
+      }
+      else {
+        log.log(Level.WARNING, exn.toString(), exn);
+        
+        ShutdownSystem.shutdownActive(ExitCode.HEALTH, 
+                                      L.l("Internal database issue: forcing restart {0}",
+                                          exn.toString()));
+      }
+      */
+    }
   }
 
   /**

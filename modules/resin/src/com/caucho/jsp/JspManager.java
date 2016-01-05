@@ -29,6 +29,17 @@
 
 package com.caucho.jsp;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.SingleThreadModel;
+import javax.servlet.jsp.HttpJspPage;
+import javax.servlet.jsp.JspFactory;
+
 import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.DynamicClassLoader;
@@ -37,19 +48,9 @@ import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.Vfs;
-
-import javax.servlet.*;
-import javax.servlet.jsp.HttpJspPage;
-import javax.servlet.jsp.JspFactory;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages JSP templates.
@@ -64,6 +65,8 @@ public class JspManager extends PageManager {
   private boolean _isXml;
   private boolean _isLoadTldOnInit;
   private boolean _precompile = true;
+  
+  private DynamicClassLoader _tagsLoader;
 
   public JspManager()
   {
@@ -223,7 +226,8 @@ public class JspManager extends PageManager {
   {
     WebApp webApp = getWebApp();
     JspCompiler compiler = new JspCompiler();
-
+    
+    compiler.setJspManager(this);
     compiler.setWebApp(_webApp);
     compiler.setXml(_isXml);
 
@@ -231,7 +235,7 @@ public class JspManager extends PageManager {
 
     try {
       if (_precompile || _autoCompile) {
-        page = preload(className, webApp.getClassLoader(), webApp.getRootDirectory(),
+        page = preload(className, getParentLoader(), webApp.getRootDirectory(),
                        config);
       }
     } catch (Throwable e) {
@@ -274,7 +278,15 @@ public class JspManager extends PageManager {
     compilerInst.setGeneratedSource(isGenerated);
     compilerInst.addDependList(dependList);
 
+    //compiler.setParentLoader(getParentLoader());
+    
+    //page = compilerInst.compile();
     page = compilerInst.compile();
+    
+    // second set required because tag class might change
+    //compiler.setParentLoader(getParentLoader());
+    
+    //page = compilerInst.load();
 
     Path classPath = getClassDir().lookup(className.replace('.', '/') +
                                           ".class");
@@ -311,7 +323,7 @@ public class JspManager extends PageManager {
     if (! classPath.exists())
       return preloadStatic(mangledName);
     */
-
+    
     loader = SimpleLoader.create(parentLoader, getClassDir(), null);
     Class<?> cl = null;
 
@@ -395,6 +407,29 @@ public class JspManager extends PageManager {
     page.caucho_init(config);
 
     return page;
+  }
+  
+  ClassLoader getParentLoader()
+  {
+    return getTagsLoader();
+  }
+  
+  ClassLoader getTagsLoader()
+  {
+    DynamicClassLoader tagsLoader = _tagsLoader;
+    
+    if (tagsLoader != null && ! tagsLoader.isModifiedNow()) {
+      return tagsLoader;
+    }
+    
+    ClassLoader parentLoader = getWebApp().getClassLoader();
+    
+    tagsLoader = SimpleLoader.create(parentLoader, getClassDir(), 
+                                     "_jsp/_web_22dinf/_tags");
+    
+    _tagsLoader = tagsLoader;
+    
+    return tagsLoader;
   }
 
   void unload(Page page)

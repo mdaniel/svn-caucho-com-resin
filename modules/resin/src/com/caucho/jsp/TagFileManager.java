@@ -29,16 +29,16 @@
 
 package com.caucho.jsp;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.jsp.tagext.TagInfo;
+
 import com.caucho.jsp.java.TagTaglib;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
-
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 /**
  * Stores the information for the .tags
  */
@@ -162,16 +162,21 @@ public class TagFileManager {
     }
   }
 
-  public Class loadClass(String className)
+  public Class<?> loadClass(String className)
     throws Exception
   {
-    Path classDir = _jspCompiler.getClassDir();
+    /*
+     Path classDir = _jspCompiler.getClassDir();
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+
     ClassLoader jspLoader = SimpleLoader.create(parentLoader,
                                                 classDir,
                                                 null);
+    */
     
-    return Class.forName(className, false, jspLoader);
+    ClassLoader loader = _jspCompiler.getParentLoader();
+    
+    return Class.forName(className, false, loader);
   }
 }

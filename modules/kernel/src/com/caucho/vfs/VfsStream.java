@@ -38,7 +38,7 @@ import java.io.OutputStream;
 public class VfsStream extends StreamImpl {
   private static byte []UNIX_NEWLINE = new byte[] { (byte) '\n' };
 
-  private InputStream is;
+  private InputStream _is;
   private OutputStream _os;
   private boolean _flushOnNewline;
   private boolean _closeChildOnClose = true;
@@ -76,7 +76,7 @@ public class VfsStream extends StreamImpl {
    */
   public void init(InputStream is, OutputStream os)
   {
-    this.is = is;
+    this._is = is;
     _os = os;
     setPath(null);
     _flushOnNewline = false;
@@ -129,15 +129,15 @@ public class VfsStream extends StreamImpl {
 
   public boolean canRead()
   {
-    return is != null;
+    return _is != null;
   }
 
   public int read(byte []buf, int offset, int length) throws IOException
   {
-    if (is == null)
+    if (_is == null)
       return -1;
 
-    int len = is.read(buf, offset, length);
+    int len = _is.read(buf, offset, length);
 
     if (len > 0)
       _position += len;
@@ -153,15 +153,15 @@ public class VfsStream extends StreamImpl {
   public long skip(long n)
     throws IOException
   {
-    return is.skip(n);
+    return _is.skip(n);
   }
 
   public int getAvailable() throws IOException
   {
-    if (is == null)
+    if (_is == null)
       return -1;
     else
-      return is.available();
+      return _is.available();
   }
 
   public long getReadPosition()
@@ -227,10 +227,16 @@ public class VfsStream extends StreamImpl {
         _os = null;
       }
     } finally {
-      if (is != null && _closeChildOnClose) {
-        is.close();
-        is = null;
+      if (_is != null && _closeChildOnClose) {
+        _is.close();
+        _is = null;
       }
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _is + "," + _os + "]";
   }
 }

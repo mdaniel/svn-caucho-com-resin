@@ -81,17 +81,26 @@ public final class Utf8 {
     throws IOException
   {
     int ch1 = is.read();
+    
+    return read(is, ch1);
+  }
 
-    if (ch1 < 0x80)
+  public static int read(InputStream is, int ch1)
+    throws IOException
+  {
+    if (ch1 < 0x80) {
       return ch1;
+    }
 
     if ((ch1 & 0xe0) == 0xc0) {
       int ch2 = is.read();
 
-      if (ch2 < 0)
+      if (ch2 < 0) {
         return -1;
-      else if ((ch2 & 0x80) != 0x80)
+      }
+      else if ((ch2 & 0x80) != 0x80) {
         return 0xfdff;
+      }
 
       return (((ch1 & 0x1f) << 6)
               | (ch2 & 0x3f));
@@ -100,20 +109,25 @@ public final class Utf8 {
       int ch2 = is.read();
       int ch3 = is.read();
 
-      if (ch2 < 0)
+      if (ch2 < 0) {
         return -1;
-      else if ((ch2 & 0x80) != 0x80)
+      }
+      else if ((ch2 & 0x80) != 0x80) {
         return 0xfdff;
-      else if ((ch3 & 0x80) != 0x80)
+      }
+      else if ((ch3 & 0x80) != 0x80) {
         return 0xfdff;
+      }
 
       return (((ch1 & 0xf) << 12)
               | ((ch2 & 0x3f) << 6)
               | ((ch3 & 0x3f) << 6));
     }
-    else if (ch1 == 0xff)
+    else if (ch1 == 0xff) {
       return 0xffff;
-    else
+    }
+    else {
       return 0xfdff;
+    }
   }
 }

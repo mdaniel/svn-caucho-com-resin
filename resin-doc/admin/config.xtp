@@ -8,7 +8,7 @@
         Many sites can modify the <var>resin.properties</var> and use
         the standard <var>resin.xml</var> for configuration of their
         servers, JVMs, clusters, and applications.
-        More complicates sites can modify the <var>resin.xml</var>
+        More complicated sites can modify the <var>resin.xml</var>
         itself. The xml configuration file
         <var>resin.xml</var> supports CDI custom services, EL expressions
         and variables variables, imports and control structures.

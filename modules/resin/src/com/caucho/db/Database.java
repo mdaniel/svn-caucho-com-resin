@@ -345,8 +345,9 @@ public class Database
    */
   public void close()
   {
-    if (! _lifecycle.toDestroy())
+    if (! _lifecycle.toDestroy()) {
       return;
+    }
 
     for (Table table : _tables.values()) {
       try {

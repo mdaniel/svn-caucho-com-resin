@@ -1387,7 +1387,7 @@ public class TcpSocketLink extends AbstractSocketLink
     TcpPort port = _port;
 
     _idleStartTime = CurrentTime.getCurrentTimeActual();
-    _idleExpireTime = _idleStartTime + _idleTimeout;
+    _idleExpireTime = _idleStartTime + getIdleTimeout();
     
     // quick timed read to see if data is already available
     int available;
@@ -1447,7 +1447,10 @@ public class TcpSocketLink extends AbstractSocketLink
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + " keepalive (thread)");
 
-    long timeout = getPort().getKeepaliveTimeout();
+    // long timeout = getPort().getKeepaliveTimeout();
+    
+    long timeout = getIdleTimeout();
+    
     long expires = timeout + CurrentTime.getCurrentTimeActual();
 
     do {

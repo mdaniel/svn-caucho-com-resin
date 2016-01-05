@@ -193,7 +193,7 @@ in.</p>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a javadoc="com.caucho.http.log.AccessLog"/>.  
-<a href="admin/config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
+<a doc="admin/config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 
@@ -568,11 +568,11 @@ becomes &lt;mycom:FooBean xmlns:mycom="urn:com.mycom">.</p>
 
 </defun>
 
-<defun title="&lt;cache>" version="Resin 3.1" name="cache">
+<defun title="&lt;proxy-cache>" name="proxy-cache">
 <parents>cluster</parents>
 
 <description>
-<p>&lt;cache> configures the proxy cache (requires Resin Professional).  The
+<p>&lt;proxy-cache&gt; configures the proxy cache (requires Resin Professional).  The
 proxy cache improves performance by caching the output of servlets,
 jsp and php pages.  For database-heavy pages, this caching can improve
 performance and reduce database load by several orders of magnitude.</p>
@@ -618,7 +618,7 @@ and proxy-cache bugs (particularly IE).</td>
 </attributes>
 
 <schema>
-element cache {
+element proxy-cache {
   disk-size?
   &amp; enable?
   &amp; enable-range?
@@ -633,7 +633,7 @@ element cache {
 <example title="Example: enabling proxy cache">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
-        &lt;cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
+        &lt;proxy-cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
 
         &lt;server id="a" address="192.168.0.10"/&gt;
 
@@ -642,27 +642,48 @@ element cache {
 &lt;/resin&gt;
 </example>
 
+<s2 title="rewrite-vary-as-private">
+
+<p>Because not all browsers understand the Vary header, Resin can rewrite
+Vary to a Cache-Control: private.  This rewriting will cache the page
+with the Vary in Resin's proxy cache, and also cache the page in the browser.
+Any other proxy caches, however, will not be able to cache the page.</p>
+
+<p>The underlying issue is a limitation of browsers such as IE.  When IE
+sees a Vary header it doesn't understand, it marks the page as uncacheable.
+Since IE only understands "Vary: User-Agent", this would mean IE would
+refuse to cache gzipped pages or "Vary: Cookie" pages.</p>
+
+<p>With the &lt;rewrite-vary-as-private> tag, IE will cache the page
+since it's rewritten as "Cache-Control: private" with no Vary at all.
+Resin will continue to cache the page as normal.</p>
+
+</s2>
+
 </defun>
-<defun title="&lt;cache-mapping>" name="cache-mapping" version="Resin 1.1">
+
+
+<defun title="&lt;cache-mapping>" name="cache-mapping">
 <parents>web-app</parents>
 
 <description>
-<p>&lt;cache-mapping> specifies <var>max-age</var> and <var>Expires</var> times for cacheable pages.</p>
+<p>&lt;cache-mapping&gt; specifies <var>max-age</var> and <var>Expires</var> times for cacheable pages.</p>
 
-<p>See <a href="admin/http-proxy-cache.xtp">caching</a> for more information.</p>
+<p>See <a doc="admin/http-proxy-cache.xtp">proxy-cache</a> for more information.</p>
 
-<p>&lt;cache-mapping> is intended to provide Expires times for pages that
+<p>&lt;cache-mapping&gt; is intended to provide Expires times for pages that
 have ETags or Last-Modified specified, but do not wish to hard-code the
 max-age timeout in the servlet.  For example, Resin's FileServlet relies
 on cache-mapping to set the expires times for static pages.  Using
 cache-mapping lets cacheable pages be configured in a standard manner.</p>
 
-<p>&lt;cache-mapping> does not automatically make pages cacheable.  Your
+<p>&lt;cache-mapping&gt; does not automatically make dynamic (non-static) pages cacheable.  Your
 servlets must already set the <var>ETag</var> (or Last-Modified) header
-to activate &lt;cache-mapping>.</p>
+to activate &lt;cache-mapping&gt;.  For static resources, Resin's FileServlet
+sets the <var>ETag</var> header.</p>
 
 <ul>
-<li>cache-mapping requires an enabled &lt;cache&gt;.  If the cache is disabled,
+<li>cache-mapping requires an enabled &lt;proxy-cache&gt;.  If the cache is disabled,
 cache-mapping will be ignored.</li>
 <li>cache-mapping does not automatically make a page cacheable.  Only
 cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-Modified.</li>
@@ -715,7 +736,7 @@ element cache-mapping {
 }
 </schema>
 
-<example title="Example: cache-mapping in resin-web.xml">
+<example title="Example: caching .gif files for 15 minutes">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
   &lt;cache-mapping url-pattern='/*'
@@ -1480,16 +1501,13 @@ copied to the log.</p>
 
 </defun>
 
-<defun title="&lt;database>" name="database" occur="*" version="Resin 3.0">
+<defun title="&lt;database>" name="database" occur="*">
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.sql.DBPool -->
 
 <description>
-<p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
+<p>&lt;database&gt; defines a database (i.e. DataSource) resource.</p>
 
-<p>The <a href="admin/database.xtp">database configuration</a> section has
-more details on the configuration.  
-</p>
 </description>
 
 <attributes>
@@ -1509,6 +1527,11 @@ any of the main drivers, it will use one of the. backups</td>
   <td>If an application does not close a Connection by the end of the
 request, Resin will close it automatically an issue a warning.</td>
   <td>true</td>
+</tr>
+<tr>
+  <td>commit-on-timeout</td>
+  <td>true to commit the transaction on timeout, false to rollback</td>
+  <td>false</td>
 </tr>
 <tr>
   <td><a config-tag="connection"/></td>
@@ -1531,14 +1554,14 @@ as well as its JDBC URL and any other configuration.</td>
 <tr>
   <td>jndi-name</td>
   <td>The JNDI name to register the connection's <code>DataSource</code>
-under.  If the name can be relative to <var>java:comp/env</var>.</td>
+under.  The name can be relative to <var>java:comp/env</var>.</td>
   <td></td>
 </tr>
 <tr>
   <td>max-active-time</td>
   <td>The maximum time Resin will allow a connection to remain open
 before forcing a close.</td>
-  <td>6 hours</td>
+  <td>6h</td>
 </tr>
 <tr>
   <td>max-close-statements</td>
@@ -1663,6 +1686,7 @@ not properly implement the XAResource API.</td>
 database = element database {
   backup-driver*
   &amp; close-dangling-connections?
+  &amp; commit-on-timeout?
   &amp; connection?
   &amp; connection-wait-time?
   &amp; driver+
@@ -6693,17 +6717,17 @@ the command line, typically -X memory parameters and -D defines.</p>
 </description>
 
 <example title="adding a classpath">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-  &lt;cluster id="web-tier">
-    &lt;server-default>
-      &lt;jvm-classpath>/tmp/test-classpath;/jvm-classpath>
-    &lt;/server-default>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default&gt;
+      &lt;jvm-classpath&gt;/tmp/test-classpath&lt;/jvm-classpath&gt;
+    &lt;/server-default&gt;
 
-    &lt;server id="app-a" address="192.168.2.10"/>
+    &lt;server id="app-a" address="192.168.2.10"/&gt;
 
     ...
-  &lt;/cluster>
-&lt;/resin>
+  &lt;/cluster&gt;
+&lt;/resin&gt;
 </example>
 
 </defun>
@@ -7403,17 +7427,47 @@ javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
 </example>
 
 <deftable title="log EL variable 'log' is a LogRecord">
-<tr><th>Accessor</th><th>Value
-</th></tr><tr><td>${log.level}</td><td>The level of the log record
-</td></tr><tr><td>${log.name}</td><td>The source loggers name
-</td></tr><tr><td>${log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
-</td></tr><tr><td>${log.message}</td><td>The message, with no formatting or localization
-</td></tr><tr><td>${log.millis}</td><td>event time in milliseconds since 1970
-</td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${log.thrown}</td><td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
-</td></tr></deftable>
+<tr>
+  <th>Accessor</th>
+  <th>Value</th>
+</tr>
+<tr>
+  <td>${log.level}</td>
+  <td>The level of the log record</td>
+</tr>
+<tr>
+  <td>${log.name}</td>
+  <td>The source loggers name</td>
+</tr>
+<tr>
+  <td>${log.shortName}</td>
+  <td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"</td>
+</tr>
+<tr>
+  <td>${log.message}</td>
+  <td>The message, with no formatting or localization</td>
+</tr>
+<tr>
+  <td>${log.millis}</td>
+  <td>event time in milliseconds since 1970</td>
+</tr>
+<tr>
+  <td>${log.sourceClassName}</td>
+  <td>Get the name of the class that issued the logging request (may not be available at runtime)</td>
+</tr>
+<tr>
+  <td>${log.sourceMethodName}</td>
+  <td>Get the name of the method that issued the logging request (may not be available at runtime)</td>
+</tr>
+<tr>
+  <td>${log.threadID}</td>
+  <td>Get an <var>int</var> identifier of the thread where the logging request originated</td>
+</tr>
+<tr>
+  <td>${log.thrown}</td>
+  <td>Get any <code>java.lang.Throwable</code> associated with the logging request</td>
+</tr>
+</deftable>
 
 <p>You can also use the <a href="admin/config-el.xtp">Environment EL variables</a> in your format string:</p>
 
@@ -8907,10 +8961,177 @@ element resin:otherwise {
 <defun title="&lt;resin:ClusterCache>" name="resin:ClusterCache">
 <javadoc class="com.caucho.distcache.ClusterCache"/>
 <description>
-<p>
-  JCache-style distributed object cache across a cluster pod (java.util.Map).
-</p>
+<p>Distributed caching is a useful technique to reduce
+database load and increase application performance. Resin provides a
+javax.cache.Cache (JSR-107 JCache) based distributed caching API. Distributed
+caching in Resin uses the underlying infrastructure
+used to support load balancing, clustering and session/state
+replication.</p>
 </description>
+
+<deftable title="ClusterCache attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Type</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>a name is mandatory and must be unique among open caches</td>
+  <td>String</td>
+  <td>(required)</td>
+</tr>
+<tr>
+  <td>manager-name</td>
+  <td>the manager-name and the name forms the unique name for the cache within
+      Resin</td>
+  <td>String</td>
+  <td></td>
+</tr>
+<tr>
+  <td>cache-loader</td>
+  <td>upon a cache miss, the cache will call the cache-loader to populate the
+      value</td>
+  <td>javax.cache.CacheLoader</td>
+  <td></td>
+</tr>
+<tr>
+  <td>cache-writer</td>
+  <td>upon a write, the cache will call the cache-writer to save the value to
+      a backing database</td>
+  <td>javax.cache.CacheWriter</td>
+  <td></td>
+</tr>
+<tr>
+  <td>cache-reader-writer</td>
+  <td>sets both the cache-reader and cache-writer</td>
+  <td>an object that implements both javax.cache.CacheLoader and
+      javax.cache.CacheWriter</td>
+  <td></td>
+</tr>
+<tr>
+  <td>serializer</td>
+  <td>assign the serializer used for serializing values values</td>
+  <td>com.caucho.distcache.CacheSerializer</td>
+  <td></td>
+</tr>
+<tr>
+  <td>accessed-expire-timeout</td>
+  <td>the maximum idle time for an item, which is typically used for temporary
+      data like sessions. For example, session data might be removed if idle
+      over 30 minutes. Cached data would have infinite idle time because it
+      doesn't depend on how often it's accessed.</td>
+  <td>Period</td>
+  <td>-1</td>
+</tr>
+<tr>
+  <td>accessed-expire-timeout-window</td>
+  <td>idle check window, used to minimize traffic when updating access times</td>
+  <td>Period</td>
+  <td>accessed-expire-timeout / 4</td>
+</tr>
+<tr>
+  <td>modified-expire-timeout</td>
+  <td>the maximum valid time for an item. Items stored in the cache for longer
+      than the expire time are no longer valid and will return null from a
+      get</td>
+  <td>Period</td>
+  <td>(infinity)</td>
+</tr>
+<tr>
+  <td>lease-expire-timeout</td>
+  <td>the lease timeout is the time a server can use the local version if it
+      owns it, before a timeout</td>
+  <td>Period</td>
+  <td>5m</td>
+</tr>
+<tr>
+  <td>local-expire-timeout</td>
+  <td>the local read timeout is how long a local copy of a cache item can be
+      reused before checking with the master copy. A read-only item could be
+      infinite (-1). A slow changing item like a list of bulletin-board comments
+      could be 10s. Even a relatively quickly changing item can be 10ms or
+      100ms.</td>
+  <td>Period</td>
+  <td>250ms</td>
+</tr>
+<tr>
+  <td>scope-model</td>
+  <td>persistence of the cache</td>
+  <td>TRANSIENT or LOCAL or CLUSTER	</td>
+  <td>CLUSTER</td>
+</tr>
+</deftable>
+
+<deftable title="Period format">
+<tr>
+  <td>ms</td>
+  <td>milliseconds</td>
+</tr>
+<tr>
+  <td>s</td>
+  <td>seconds</td>
+</tr>
+<tr>
+  <td>m</td>
+  <td>minutes</td>
+</tr>
+<tr>
+  <td>h</td>
+  <td>hours</td>
+</tr>
+<tr>
+  <td>D</td>
+  <td>days</td>
+</tr>
+<tr>
+  <td>W</td>
+  <td>weeks</td>
+</tr>
+<tr>
+  <td>M</td>
+  <td>months</td>
+</tr>
+<tr>
+  <td>Y</td>
+  <td>years</td>
+</tr>
+</deftable>
+
+<example title="resin-web.xml: Configuring Resin Distributed Cache">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:distcache="urn:java:com.caucho.distcache"&gt;
+          
+  &lt;distcache:ClusterCache ee:Named="myCacheEE"&gt;
+    &lt;name&gt;myCache&lt;/name&gt;
+  &lt;/distcache:ClusterCache>&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<p>
+You may then inject the cache through CDI and use it in your application
+via the JCache API:
+</p>
+
+<example title="Using Resin Distributed Cache">
+import javax.cache.*;
+import javax.inject.*;
+
+public class MyService
+{
+  @Inject @Named("myCacheEE")
+  private Cache&lt;String,String&gt; _cache;
+  
+  public void test()
+  {
+    _cache.putIfAbsent("foo", "bar");
+  }
+}
+
+</example>
+
 </defun>
 
 <defun title="&lt;resin:ClusterQueue>" name="resin:ClusterQueue">
@@ -10524,7 +10745,7 @@ The following example shows the usage of the <code>jndi-env</code> configuration
 </tr>
 <tr>
   <td>strategy</td>
-  <td>round-robin or adaptive</td>
+  <td>round-robin or adaptive based on load</td>
   <td>adaptive</td>
 </tr>
 </attributes>
@@ -11105,6 +11326,25 @@ element set {
 &lt;/web-app>
 </example>
 </defun>
+
+
+<defun title="&lt;resin:SetRequestCharacterEncoding>" name="resin:SetRequestCharacterEncoding">
+<javadoc class="com.caucho.rewrite.SetRequestCharacterEncoding"/>
+<description>
+<p>Sets the character encoding of the request parameters.</p>
+</description>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin"&gt;
+
+  &lt;resin:SetRequestCharacterEncoding value="ISO-8859-15"/&gt;
+
+&lt;/web-app&gt;
+</example>
+
+</defun>
+
 
 <defun title="&lt;resin:SetRequestSecure>" name="resin:SetRequestSecure">
 <javadoc class="com.caucho.rewrite.SetRequestSecure"/>

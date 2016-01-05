@@ -67,7 +67,7 @@
     
     <s1 title="Startup Options">
       <p>As of Resin 4.0, startup options should be declared in the
-        configuration file using &lt;<a config-tag="jvm-arg"/>&gt;. However, some 
+        configuration file using <a config-tag="jvm-arg"/>. However, some 
         startup options are available via the command line.</p>
       <s2 name="command-line" title="Command-line arguments">
 
@@ -153,7 +153,7 @@
       <s1 title="JDK arguments">
 
       <p>Resin 4.0 has moved all JDK arguments into the resin.xml
-        file, in the &lt;<a config-tag="jvm-arg"/>&gt;
+        file, in the <a config-tag="jvm-arg"/>
       tag. Because the Resin 4.0 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration

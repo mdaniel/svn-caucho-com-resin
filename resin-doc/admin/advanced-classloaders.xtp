@@ -25,9 +25,9 @@ configuration tags.
 
 <p>Adds dynamic classloaders to the current environment.</p>
 
-<p>Each environment (&lt;server&gt;, &lt;host&gt;, &lt;web-app&gt;) etc,
+<p>Each environment (<code>&lt;server&gt;</code>, <code>&lt;host&gt;</code>, <code>&lt;web-app&gt;</code>) etc,
 can add dynamic classloaders.  The environment will inherit the parent
-classloaders.  Each &lt;class-loader&gt; is comprised of several implementing
+classloaders.  Each <code>&lt;class-loader&gt;</code> is comprised of several implementing
 loader items: library-loader for WEB-INF/lib, compiling-loader for
 WEB-INF/classes, even make-loader for more complex auto-compilation.</p>
 
@@ -60,13 +60,36 @@ files loading them.</p>
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>args</td><td>Additional arguments to be passed to the Java compiler. Resin 3.0</td><td>none
-</td></tr><tr><td>batch</td><td>If true, multiple changed *.java files will be compiled in a single batch. Resin 3.0.7</td><td>true
-</td></tr><tr><td>encoding</td><td>I18N encoding for the Java compiler. Since Resin 3.0</td><td>none
-</td></tr><tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
-</td></tr><tr><td>source</td><td>Java source directory. Since Resin 3.0</td><td>value of path
-</td></tr><tr><td>require-source</td><td>If true, .class files without matching .java files will be deleted. Since Resin 3.0</td><td>false
-</td></tr>
+<tr>
+  <td>args</td>
+  <td>Additional arguments to be passed to the Java compiler</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>batch</td>
+  <td>If true, multiple changed *.java files will be compiled in a single batch</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>encoding</td>
+  <td>I18N encoding for the Java compiler</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Filesystem path for the class loader</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>source</td>
+  <td>Java source directory</td>
+  <td>value of path</td>
+</tr>
+<tr>
+  <td>require-source</td>
+  <td>If true, .class files without matching .java files will be deleted</td>
+  <td>false</td>
+</tr>
 </attributes>
 
 </defun>
@@ -86,8 +109,11 @@ Jar files are recognized when they have a filename extension of
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td>
-<td>required</td></tr>
+<tr>
+  <td>path</td>
+  <td>Filesystem path for the class loader</td>
+  <td>required</td>
+</tr>
 </attributes>
 
 <p>See <a javadoc="com.caucho.loader.DirectoryLoader"/>.</p>
@@ -108,8 +134,11 @@ Jar files are recognized when they have a filename extension of
   <th>Default</th>
 </tr>
 
-<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
-</td></tr>
+<tr>
+  <td>path</td>
+  <td>Filesystem path for the class loader</td>
+  <td>required</td>
+</tr>
 </attributes>
 
 <p>See <a javadoc="com.caucho.loader.TreeLoader"/>.</p>
@@ -150,9 +179,16 @@ special compilation steps (in contrast with compiling-loader.)</p>
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
-</td></tr><tr><td>prefix</td><td>Class package prefix to only load to a subset of classes. Resin 3.0</td><td>none
-</td></tr>
+<tr>
+  <td>path</td>
+  <td>Filesystem path for the class loader</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>prefix</td>
+  <td>Class package prefix to only load to a subset of classes</td>
+  <td>none</td>
+</tr>
 </attributes>
 
 </defun>

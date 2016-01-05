@@ -47,6 +47,8 @@ public class Anchor extends FormattedText {
   private String _configTag;
   private String _javadoc;
   private String _href;
+  
+  private String _doc;
 
   public Anchor(Document document)
   {
@@ -55,26 +57,36 @@ public class Anchor extends FormattedText {
 
   public void setJavadoc(String javadoc)
   {
-    if (_configTag != null || _href != null)
-      throw new ConfigException("Anchors must have exactly one of href, config-tag, or javadoc attributes");
+    check();
 
     _javadoc = javadoc;
   }
 
   public void setConfigTag(String configTag)
   {
-    if (_javadoc != null || _href != null)
-      throw new ConfigException("Anchors must have exactly one of href, config-tag, or javadoc attributes");
+    check();
 
     _configTag = configTag;
   }
 
   public void setHref(String href)
   {
-    if (_configTag != null || _javadoc != null)
-      throw new ConfigException("Anchors must have exactly one of href, config-tag, or javadoc attributes");
+    check();
 
     _href = href;
+  }
+  
+  public void setDoc(String href)
+  {
+    check();
+    
+    _doc = href;
+  }
+  
+  private void check()
+  {
+    if (_configTag != null || _javadoc != null || _href != null || _doc != null)
+      throw new ConfigException("Anchors must have exactly one of href, config-tag, javadoc, or doc attributes");
   }
 
   private void setDefaultText(String text)
@@ -87,7 +99,7 @@ public class Anchor extends FormattedText {
   @PostConstruct
   public void init()
   {
-    if (_javadoc == null && _configTag == null && _href == null)
+    if (_javadoc == null && _configTag == null && _href == null && _doc == null)
       throw new ConfigException("Anchors must have exactly one of href, config-tag, or javadoc attributes");
   }
 
@@ -113,7 +125,10 @@ public class Anchor extends FormattedText {
       }
     }
 
-    setDefaultText(_configTag);
+    if (_configTag != null) {      
+      setDefaultText("<" + _configTag + ">");
+    }
+    
     super.writeHtml(out);
 
     if (isLinked)
@@ -129,7 +144,7 @@ public class Anchor extends FormattedText {
     int i = path.indexOf('#');
 
     if (i >= 0) {
-      path = path.substring(0, i) + ".html" + path.substring(i + 1);
+      path = path.substring(0, i) + "." + path.substring(i + 1) + ".html";
     }
     else {
       path = path + ".html";
@@ -151,6 +166,11 @@ public class Anchor extends FormattedText {
 
       if (_javadoc != null) {
         writeJavadocHtml(out);
+      }
+      else if (_doc != null) {
+        String href  = getDocument().getContextPath() + '/' + _doc;
+
+        out.writeAttribute("href", href);
       }
       // XXX we should deprecate this syntax
       else if (_href.indexOf('|') >= 0) {

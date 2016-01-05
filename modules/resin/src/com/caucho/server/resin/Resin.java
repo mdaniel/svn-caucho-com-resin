@@ -173,6 +173,7 @@ public class Resin
   
   private final ArrayList<StartInfoListener> _startInfoListeners
     = new ArrayList<StartInfoListener>();
+  private boolean _isIgnoreLock;
 
   /**
    * Creates a new resin server.
@@ -249,6 +250,14 @@ public class Resin
     if (! isWatchdog()) {
       configureFile(_resinConf);
     }
+  }
+
+  /**
+   * @param _isIgnoreLock
+   */
+  public void setIgnoreLock(boolean isIgnoreLock)
+  {
+    _isIgnoreLock = isIgnoreLock;
   }
 
   /**
@@ -561,8 +570,14 @@ public class Resin
         String serverName = getDisplayServerId();
 
         serverName = serverName.replace(':', '_');
+        
+        String dirPath = serverName;
+        if (getDynamicServerPort() > 0 && dirPath.equals("dyn")) {
+          dirPath = dirPath + "-" + getDynamicServerPort();
+        }
+        //port = getSelfServer().getPort();
   
-        _serverDataDirectory = dataDirectory.lookup("./" + serverName);
+        _serverDataDirectory = dataDirectory.lookup("./" + dirPath);
       }
     }
 
@@ -1027,7 +1042,10 @@ public class Resin
   {
     Path dataDirectory = getServerDataDirectory();
 
-    RootDirectorySystem.createAndAddService(_rootDirectory, dataDirectory);
+    RootDirectorySystem system
+      = RootDirectorySystem.createAndAddService(_rootDirectory, dataDirectory);
+    
+    system.setIgnoreLock(_isIgnoreLock);
   }
   
   /**

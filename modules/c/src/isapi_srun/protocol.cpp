@@ -207,13 +207,17 @@ connection_error(config_t *config, EXTENSION_CONTROL_BLOCK *r)
 	  DWORD size = strlen(config->error_page);
 	  DWORD type = 0;
 
-          cse_printf(r, "HTTP/1.0 302 Redirect\r\n");
-          cse_printf(r, "Location: %s\r\n", config->error_page);
-          cse_printf(r, "\r\n");
+	  r->dwHttpStatusCode = 302;
+
+	  cse_printf(r, "HTTP/1.0 302 Redirect\r\n");
+	  cse_printf(r, "Location: %s\r\n", config->error_page);
+	  cse_printf(r, "\r\n");
           
 	  return 1;
   }
 
+  r->dwHttpStatusCode = 503;
+  
   cse_printf(r, "HTTP/1.0 503 Busy\n\n");
   cse_printf(r, "<html><body bgcolor='white'>\n");
   cse_printf(r, "<h1>Server is currently unavailable or down for maintenance\n");
@@ -222,7 +226,7 @@ connection_error(config_t *config, EXTENSION_CONTROL_BLOCK *r)
   
   cse_pad(r);
 
-   return 1;
+  return 1;
 }
 
 static int

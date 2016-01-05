@@ -29,8 +29,22 @@
 
 package com.caucho.vfs;
 
+import com.caucho.config.ConfigException;
+import com.caucho.env.service.RootDirectorySystem;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.security.GeneralSecurityException;
@@ -41,19 +55,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-
-import com.caucho.config.ConfigException;
-import com.caucho.env.service.RootDirectorySystem;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
@@ -62,7 +63,10 @@ public class JsseSSLFactory implements SSLFactory {
     = Logger.getLogger(JsseSSLFactory.class.getName());
   
   private static final L10N L = new L10N(JsseSSLFactory.class);
-  
+
+  private static Method _honorCipherOrderMethod;
+  private static Method _getSSLParametersMethod;
+
   private Path _keyStoreFile;
   private String _alias;
   private String _password;
@@ -75,6 +79,8 @@ public class JsseSSLFactory implements SSLFactory {
   private String []_protocols;
 
   private String _selfSignedName;
+
+  private Boolean _isHonorCipherOrder;
 
   private KeyStore _keyStore;
   
@@ -205,6 +211,19 @@ public class JsseSSLFactory implements SSLFactory {
     _protocols = protocol.split("[\\s,]+");
   }
 
+  public Boolean getHonorCipherOrder()
+  {
+    return _isHonorCipherOrder;
+  }
+
+  public void setHonorCipherOrder(Boolean isHonorCipherOrder)
+  {
+    if (_honorCipherOrderMethod == null)
+      log.log(Level.WARNING, "honor-cipher-order requires JDK 1.8");
+
+    _isHonorCipherOrder = isHonorCipherOrder;
+  }
+
   /**
    * Initialize
    */
@@ -297,7 +316,7 @@ public class JsseSSLFactory implements SSLFactory {
       serverSocket = factory.createServerSocket(port, listen, host);
 
     SSLServerSocket sslServerSocket = (SSLServerSocket) serverSocket;
-    
+
     if (_cipherSuites != null) {
       sslServerSocket.setEnabledCipherSuites(_cipherSuites);
     }
@@ -331,7 +350,30 @@ public class JsseSSLFactory implements SSLFactory {
     else if ("optional".equals(_verifyClient))
       sslServerSocket.setWantClientAuth(true);
 
+    setHonorCipherOrder(sslServerSocket);
+
     return new QServerSocketWrapper(serverSocket);
+  }
+
+  private void setHonorCipherOrder(SSLServerSocket serverSocket)
+  {
+    if (_isHonorCipherOrder == null)
+      return;
+
+    if (_honorCipherOrderMethod == null)
+      return;
+
+    try {
+      SSLParameters params
+        = (SSLParameters) _getSSLParametersMethod.invoke(serverSocket);
+
+      _honorCipherOrderMethod.invoke(params, _isHonorCipherOrder);
+
+      log.log(Level.FINER, L.l("setting honor-cipher-order {0}",
+                               _isHonorCipherOrder));
+    } catch (Throwable t) {
+      log.log(Level.WARNING, t.getMessage(), t);
+    }
   }
   
   private boolean isCipherForbidden(String cipher,
@@ -407,8 +449,9 @@ public class JsseSSLFactory implements SSLFactory {
           cert = (SelfSignedCert) hIn.readObject(SelfSignedCert.class);
           
           hIn.close();
-                    
-          return cert;
+
+          if (! cert.isExpired())
+            return cert;
         } finally {
           IoUtil.close(is);
         }
@@ -449,6 +492,23 @@ public class JsseSSLFactory implements SSLFactory {
     throws ConfigException, IOException, GeneralSecurityException
   {
     throw new ConfigException(L.l("jsse is not allowed here"));
+  }
+
+  static {
+    try {
+      Method method = SSLServerSocket.class.getMethod("getSSLParameters");
+
+      method.setAccessible(true);
+      _getSSLParametersMethod = method;
+
+      method = SSLParameters.class.getMethod("setUseCipherSuitesOrder",
+                                             boolean.class);
+      method.setAccessible(true);
+
+      _honorCipherOrderMethod = method;
+    } catch (Exception e) {
+      log.log(Level.FINER, e.getMessage(), e);
+    }
   }
 }
 

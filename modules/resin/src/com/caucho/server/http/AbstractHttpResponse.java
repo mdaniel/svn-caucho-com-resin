@@ -894,14 +894,16 @@ abstract public class AbstractHttpResponse {
   public final boolean writeHeaders(int length)
     throws IOException
   {
-    if (isHeaderWritten())
+    if (isHeaderWritten()) {
       return false;
+    }
 
     HttpServletRequestImpl req = _request.getRequestFacade();
     HttpServletResponseImpl res = _request.getResponseFacade();
 
-    if (res == null)
+    if (res == null) {
       return false;
+    }
 
     if (res.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
       res.handleNotModified();
@@ -924,8 +926,10 @@ abstract public class AbstractHttpResponse {
 
     if (req != null) {
       HttpSession session = req.getMemorySession();
-      if (session instanceof SessionImpl)
+      
+      if (session instanceof SessionImpl) {
         ((SessionImpl) session).saveBeforeHeaders();
+      }
 
       res.addServletCookie(webApp);
     }

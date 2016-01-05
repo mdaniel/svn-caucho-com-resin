@@ -41,9 +41,13 @@ import java.util.ArrayList;
  */
 public class CustomSimpleTag extends GenericTag
 {
-  JspBody _body;
+  private JspBody _body;
   private boolean _oldLocalScriptingInvalid;
 
+  public CustomSimpleTag()
+  {
+  }
+  
   /**
    * Simple tags can't be reused.
    */
@@ -120,12 +124,15 @@ public class CustomSimpleTag extends GenericTag
   /**
    * Set true if the node contains a child tag.
    */
+  @Override
   public boolean hasCustomTag()
   {
-    if (_body != null && _body.hasCustomTag())
+    if (_body != null && _body.hasCustomTag()) {
       return true;
-    else
+    }
+    else{
       return super.hasCustomTag();
+    }
   }
   
   /**

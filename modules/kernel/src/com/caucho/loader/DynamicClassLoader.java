@@ -63,7 +63,6 @@ import com.caucho.make.MakeContainer;
 import com.caucho.management.server.DynamicClassLoaderMXBean;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ByteBuffer;
-import com.caucho.util.Crc64;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.TimedCache;

@@ -564,6 +564,9 @@ public class JspParser {
                 if ((ch = read()) == '\n')
                   ch = read();
               }
+              else {
+                addText('\\');
+              }
             }
           }
           break;

@@ -29,23 +29,25 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Crc64;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.RandomUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.RandomUtil;
 
 /**
  * A virtual filesystem path, essentially represented by a URL.
@@ -1259,6 +1261,11 @@ public abstract class Path implements Comparable<Path> {
   {
     clearStatusCache();
 
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public FileChannel openFileChannel(OpenOption... options) throws IOException
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 

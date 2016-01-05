@@ -169,18 +169,15 @@
 &lt;configuration>
   &lt;system.webServer>
     &lt;handlers>
-      <b>&lt;add name="ResinHandlerFactory"</b> &lt;!--Name used by resin handler. Can be changed.-->
-           &lt;!-- Requests path to invoke the handler on-->
-           <b>path="*"</b>
-           &lt;!-- HTTP Method. possible values: 'GET', 'POST', 'HEAD' or combination 'GET,POST' -->
-           <b>verb="*"</b>
-            &lt;!-- Resin Handler Factory that supplies one reusable handler instance-->
-           <b>type="Caucho.IIS.ResinHandlerFactory"</b>
-           <b>preCondition="integratedMode"/></b>
+      &lt;add name="ResinHandlerFactory"
+           path="*"
+           verb="*"
+           type="Caucho.IIS.ResinHandlerFactory"
+           preCondition="integratedMode"/>
     &lt;/handlers>
   &lt;/system.webServer>
   &lt;appSettings>
-    <b>&lt;add key="resin.servers" value="127.0.0.1:6800"/></b> &lt;!-- Address and port to Resin server(s)-->
+    &lt;add key="resin.servers" value="127.0.0.1:6800"/>
     &lt;!-- logging level used by Resin IIS Handler. Use 'None' for silent operation-->
     &lt;add key="resin.log-level" value="Information"/> 
   &lt;/appSettings>
@@ -302,14 +299,11 @@
 &lt;configuration>
   &lt;system.webServer>
     &lt;handlers>
-      <b>&lt;add name="ResinHandlerFactory"</b> &lt;!--Name used by resin handler. Can be changed.-->
-           &lt;!-- Requests path to invoke the handler on-->
-           <b>path="*"</b>
-           &lt;!-- HTTP Method. possible values: 'GET', 'POST', 'HEAD' or combination 'GET,POST' -->
-           <b>verb="*"</b>
-           &lt;!-- Resin Handler Factory that supplies one reusable handler instance-->
-           <b>type="Caucho.IIS.ResinHandlerFactory"</b>
-           <b>preCondition="integratedMode"/></b>
+      &lt;add name="ResinHandlerFactory"
+           path="*"
+           verb="*"
+           type="Caucho.IIS.ResinHandlerFactory"
+           preCondition="integratedMode"/>
     &lt;/handlers>
   &lt;/system.webServer>
   &lt;appSettings>

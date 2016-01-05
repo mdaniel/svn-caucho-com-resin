@@ -188,10 +188,10 @@ function findElementTop(element)
     var left = findElementLeft(caller);
     var windowWidth = document.documentElement.clientWidth;
 
-    _.element.style.top = top + caller.offsetHeight + "px";
+    _.element.style.top = top + caller.offsetHeight + 30 + "px";
 
     if (left + _.MAX_WIDTH > windowWidth - 30) {
-      _.element.style.left = windowWidth - _.MAX_WIDTH - 30 + "px";
+      _.element.style.left = windowWidth - _.MAX_WIDTH - 40 + "px";
     }
     else {
       _.element.style.left = left + "px";
@@ -234,7 +234,7 @@ function findElementTop(element)
         _.fetchReference(tag, reference);
       };
 
-      _.showTimer.set(showTimeoutHandler, 1000);
+      _.showTimer.set(showTimeoutHandler, 0);
     }
   };
 
@@ -249,7 +249,7 @@ function findElementTop(element)
   _.mouseOutHandler = function() {
     _.showTimer.clear();
 
-    _.hideTimer.set(_.hide, 1000);
+    _.hideTimer.set(_.hide, 200);
   };
 }
 

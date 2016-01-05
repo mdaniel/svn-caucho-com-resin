@@ -68,6 +68,16 @@ public class BlockWriter extends AbstractTaskWorker {
 
     wake();
   }
+  
+  /**
+   * Close is not automatic on environment shutdown because of timing.
+   */
+  @Override
+  protected boolean isWeakClose()
+  {
+    return false;
+  }
+  
   /**
    * Adds a block that's needs to be flushed.
    */

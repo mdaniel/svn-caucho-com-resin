@@ -74,7 +74,7 @@ public class BlockReadWrite {
     = new FreeRing<RandomAccessWrapper>(4);
 
   private final Semaphore _rowFileSemaphore = new Semaphore(8);
-
+  
   /**
    * Creates a new store.
    *
@@ -292,6 +292,9 @@ public class BlockReadWrite {
       RandomAccessStream os = wrapper.getFile();
 
       os.fsync();
+
+      freeRowFile(wrapper, isPriority);
+      wrapper = null;
     } finally {
       closeRowFile(wrapper, isPriority);
     }
@@ -402,9 +405,11 @@ public class BlockReadWrite {
     RandomAccessStream file = _mmapFile.get();
 
     if (file != null) {
+      /*
       if (file.getLength() < fileSize) {
         file = null;
       }
+      */
     }
     else {
       RandomAccessWrapper wrapper = _cachedRowFile.allocate();
@@ -414,7 +419,8 @@ public class BlockReadWrite {
       }
     }
 
-    while (file == null || ! file.allocate()) {
+    int count = 10;
+    for (; count > 0 && (file == null || ! file.allocate()); count--) {
       Path path = _path;
 
       file = null;
@@ -422,10 +428,10 @@ public class BlockReadWrite {
       if (path != null) {
         file = streamOpen(fileSize);
       }
-
-      if (file == null)
-        throw new IllegalStateException("Cannot open file");
     }
+
+    if (file == null)
+      throw new IllegalStateException("Cannot open file");
 
     return new RandomAccessWrapper(file);
   }
@@ -453,7 +459,7 @@ public class BlockReadWrite {
       synchronized (_mmapFile) {
         mmapFile = _mmapFile.get();
 
-        if (mmapFile != null && fileSize <= mmapFile.getLength()) {
+        if (mmapFile != null) { // && fileSize <= mmapFile.getLength()) {
           return mmapFile;
         }
 
@@ -506,7 +512,7 @@ public class BlockReadWrite {
         _mmapFile.compareAndSet(mmapFile, null);
 
         mmapFile.close();
-
+        
         long timeout = 15000L;
         long expires = CurrentTime.getCurrentTimeActual() + timeout;
 
@@ -551,7 +557,9 @@ public class BlockReadWrite {
       _rowFileSemaphore.release();
     }
 
+    // This is a forced close. Normal close is a free()
     wrapper.closeFromException();
+    // wrapper.close();
   }
 
   /**
@@ -560,7 +568,6 @@ public class BlockReadWrite {
   void close()
   {
     _path = null;
-
     RandomAccessStream mmap = _mmapFile.getAndSet(null);
 
     if (mmap != null) {
@@ -583,7 +590,7 @@ public class BlockReadWrite {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _store.getId() + "]";
+    return getClass().getSimpleName() + "[" + _store.getId() + "," + _store + "]";
   }
 
   static class RandomAccessWrapper {
@@ -613,7 +620,7 @@ public class BlockReadWrite {
     {
       RandomAccessStream file = _file;
       _file = null;
-
+      
       if (file != null) {
         file.close();
       }

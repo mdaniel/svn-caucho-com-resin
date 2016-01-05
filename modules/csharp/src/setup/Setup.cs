@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2015 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -49,6 +49,10 @@ namespace Caucho
       ((System.ComponentModel.ISupportInitialize)(log)).BeginInit();
       log.Log = "Application";
       log.Source = "caucho/Setup.cs";
+
+      log.WriteEntry("Setup.exe using .NET Version: " + Environment.Version.ToString());
+
+      LogStartupError("starting Setup.exe version : " + Version.FULL_VERSION, null);
     }
 
     public static String REG_SERVICES = "SYSTEM\\CurrentControlSet\\Services";
@@ -105,21 +109,28 @@ namespace Caucho
     public void FindResin()
     {
       DriveInfo[] drives = DriveInfo.GetDrives();
-      foreach (DriveInfo drive in drives) {
+      foreach (DriveInfo drive in drives)
+      {
         if (DriveType.Fixed != drive.DriveType && DriveType.Ram != drive.DriveType)
           continue;
         DirectoryInfo root = drive.RootDirectory;
         DirectoryInfo[] directories = root.GetDirectories();
-        foreach (DirectoryInfo directory in directories) {
+        foreach (DirectoryInfo directory in directories)
+        {
           if (directory.Name.StartsWith("resin", StringComparison.CurrentCultureIgnoreCase)
-            && Util.IsResinHome(directory.FullName)) {
+            && Util.IsResinHome(directory.FullName))
+          {
             Resin resin = new Resin(Util.Canonicalize(directory.FullName));
             if (!HasResin(resin))
               AddResin(resin);
-          } else if (directory.Name.Contains("appservers")) {
+          }
+          else if (directory.Name.Contains("appservers"))
+          {
             DirectoryInfo[] appserverDirectories = directory.GetDirectories();
-            foreach (DirectoryInfo appserverDir in appserverDirectories) {
-              if (Util.IsResinHome(appserverDir.FullName)) {
+            foreach (DirectoryInfo appserverDir in appserverDirectories)
+            {
+              if (Util.IsResinHome(appserverDir.FullName))
+              {
                 String home = Util.Canonicalize(appserverDir.FullName);
                 Resin resin = new Resin(home);
                 if (!HasResin(resin))
@@ -132,7 +143,8 @@ namespace Caucho
 
       String currentResin = Util.GetCurrentResinFromRegistry();
       Resin resinInRegistry = null;
-      if (currentResin != null) {
+      if (currentResin != null)
+      {
         currentResin = Util.Canonicalize(currentResin);
         resinInRegistry = new Resin(currentResin);
 
@@ -141,40 +153,57 @@ namespace Caucho
       }
 
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
-      foreach (String name in services.GetSubKeyNames()) {
+
+      foreach (String name in services.GetSubKeyNames())
+      {
         RegistryKey key = services.OpenSubKey(name);
-        Object imagePathObj = key.GetValue("ImagePath");
-        if (imagePathObj == null && !"".Equals(imagePathObj))
-          continue;
+        try
+        {
+          Object imagePathObj = key.GetValue("ImagePath");
+          if (imagePathObj == null && !"".Equals(imagePathObj))
+            continue;
 
-        String imagePath = (String)imagePathObj;
-        String lowerCaseImagePath = imagePath.ToLower();
+          String imagePath = (String)imagePathObj;
+          String lowerCaseImagePath = imagePath.ToLower();
 
-        if (imagePath.IndexOf("resin.exe") != -1) {
-          ResinArgs resinArgs = new ResinArgs(imagePath);
-          Resin resin = null;
-          if (resinArgs.ResinHome != null) {
-            resin = new Resin(resinArgs.ResinHome);
-          } else if (resinArgs.Exe != null) {
-            String exe = resinArgs.Exe;
-            String home = exe.Substring(0, exe.Length - 10);
-            if (Util.IsResinHome(home))
-              resin = new Resin(home);
+          if (imagePath.IndexOf("resin.exe") != -1)
+          {
+            ResinArgs resinArgs = new ResinArgs(imagePath);
+            Resin resin = null;
+            if (resinArgs.ResinHome != null)
+            {
+              resin = new Resin(resinArgs.ResinHome);
+            }
+            else if (resinArgs.Exe != null)
+            {
+              String exe = resinArgs.Exe;
+              String home = exe.Substring(0, exe.Length - 10);
+              if (Util.IsResinHome(home))
+                resin = new Resin(home);
+            }
+
+            if (resin != null && !HasResin(resin))
+              AddResin(resin);
           }
-
-          if (resin != null && !HasResin(resin))
-            AddResin(resin);
         }
-
-        key.Close();
+        catch (Exception e)
+        {
+          LogStartupError(e.Message, e);
+        }
+        finally
+        {
+          key.Close();
+        }
       }
 
       services.Close();
 
       String resinHome = Util.GetResinHome(null, System.Reflection.Assembly.GetExecutingAssembly().Location);
 
-      foreach (Resin resin in _resinList) {
-        if (resin.Home.Equals(resinHome)) {
+      foreach (Resin resin in _resinList)
+      {
+        if (resin.Home.Equals(resinHome))
+        {
           Resin = resin;
 
           return;
@@ -184,7 +213,8 @@ namespace Caucho
       if (Resin == null && resinInRegistry != null)
         Resin = resinInRegistry;
 
-      if (Resin == null && resinHome != null) {
+      if (Resin == null && resinHome != null)
+      {
         Resin = new Resin(resinHome);
 
         AddResin(Resin);
@@ -197,67 +227,93 @@ namespace Caucho
     public void FindResinServices()
     {
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
-      foreach (String name in services.GetSubKeyNames()) {
+
+      if (services == null)
+        return;
+
+      foreach (String name in services.GetSubKeyNames())
+      {
         RegistryKey key = services.OpenSubKey(name);
-        Object imagePathObj = key.GetValue("ImagePath");
-        if (imagePathObj == null && !"".Equals(imagePathObj))
+
+        if (key == null) 
           continue;
 
-        String imagePath = (String)imagePathObj;
-        String lowerCaseImagePath = imagePath.ToLower();
+        try
+        {
+          Object imagePathObj = key.GetValue("ImagePath");
 
-        if ((imagePath.IndexOf("resin.exe") > 0 || imagePath.IndexOf("httpd.exe") > 0) && imagePath.IndexOf("-service") > 0) {
-          ResinArgs resinArgs = new ResinArgs(imagePath);
+          if (imagePathObj == null || "".Equals(imagePathObj))
+            continue;
 
-          ResinService resin = null;
-          if (resinArgs.ResinHome != null) {
-            resin = new ResinService();
-            resin.Home = resinArgs.ResinHome;
-          } else if (resinArgs.Exe != null) {
-            String exe = resinArgs.Exe;
-            String home = exe.Substring(0, exe.Length - 10);
-            if (Util.IsResinHome(home)) {
+          String imagePath = (String)imagePathObj;
+
+          String lowerCaseImagePath = imagePath.ToLower();
+
+          if ((imagePath.IndexOf("resin.exe") > 0
+            || imagePath.IndexOf("httpd.exe") > 0)
+            && imagePath.IndexOf("-service") > 0)
+          {
+            ResinArgs resinArgs = new ResinArgs(imagePath);
+
+            ResinService resin = null;
+            if (resinArgs.ResinHome != null)
+            {
               resin = new ResinService();
-              resin.Home = home;
+              resin.Home = resinArgs.ResinHome;
             }
-          } else {
-            continue;
+            else if (resinArgs.Exe != null)
+            {
+              String exe = resinArgs.Exe;
+              String home = exe.Substring(0, exe.Length - 10);
+              if (Util.IsResinHome(home))
+              {
+                resin = new ResinService();
+                resin.Home = home;
+              }
+            }
+
+            if (resin == null)
+              continue;
+
+            resin.Exe = resinArgs.Exe;
+
+            resin.Name = name;
+            resin.Server = resinArgs.Server;
+            resin.DynamicServer = resinArgs.DynamicServer;
+            resin.ElasticServer = resinArgs.ElasticServer;
+            resin.Cluster = resinArgs.Cluster;
+            resin.Root = resinArgs.ResinRoot;
+            resin.Conf = resinArgs.Conf;
+            resin.Log = resinArgs.Log;
+            resin.User = "************";
+            resin.JavaHome = resinArgs.JavaHome;
+            resin.ElasticServerAddress = resinArgs.ElasticServerAddress;
+            resin.ElasticServerPort = resinArgs.ElasticServerPort;
+
+            if (resinArgs.JmxPort != null && !"".Equals(resinArgs.JmxPort))
+              resin.JmxPort = int.Parse(resinArgs.JmxPort);
+
+            if (resinArgs.DebugPort != null && !"".Equals(resinArgs.DebugPort))
+              resin.DebugPort = int.Parse(resinArgs.DebugPort);
+
+            if (resinArgs.WatchDogPort != null && !"".Equals(resinArgs.WatchDogPort))
+              resin.WatchdogPort = int.Parse(resinArgs.WatchDogPort);
+
+            resin.IsPreview = resinArgs.IsPreview;
+
+            resin.ExtraParams = resinArgs.ResinArguments;
+
+            AddResinService(resin);
           }
-
-          resin.Exe = resinArgs.Exe;
-
-          if (resin == null)
-            continue;
-
-          resin.Name = name;
-          resin.Server = resinArgs.Server;
-          resin.DynamicServer = resinArgs.DynamicServer;
-          resin.ElasticServer = resinArgs.ElasticServer;
-          resin.Cluster = resinArgs.Cluster;
-          resin.Root = resinArgs.ResinRoot;
-          resin.Conf = resinArgs.Conf;
-          resin.Log = resinArgs.Log;
-          resin.User = "************";
-          resin.JavaHome = resinArgs.JavaHome;
-          resin.ElasticServerAddress = resinArgs.ElasticServerAddress;
-          resin.ElasticServerPort = resinArgs.ElasticServerPort;
-          if (resinArgs.JmxPort != null && !"".Equals(resinArgs.JmxPort))
-            resin.JmxPort = int.Parse(resinArgs.JmxPort);
-
-          if (resinArgs.DebugPort != null && !"".Equals(resinArgs.DebugPort))
-            resin.DebugPort = int.Parse(resinArgs.DebugPort);
-
-          if (resinArgs.WatchDogPort != null && !"".Equals(resinArgs.WatchDogPort))
-            resin.WatchdogPort = int.Parse(resinArgs.WatchDogPort);
-
-          resin.IsPreview = resinArgs.IsPreview;
-
-          resin.ExtraParams = resinArgs.ResinArguments;
-
-          AddResinService(resin);
         }
-
-        key.Close();
+        catch (Exception e)
+        {
+          LogStartupError(e.Message, e);
+        }
+        finally
+        {
+          key.Close();
+        }
       }
 
       services.Close();
@@ -290,12 +346,14 @@ namespace Caucho
 
       Resin result = null;
 
-      foreach (Resin resin in _resinList) {
+      foreach (Resin resin in _resinList)
+      {
         if (home.Equals(resin.Home))
           result = resin;
       }
 
-      if (result == null) {
+      if (result == null)
+      {
         result = new Resin(home);
         AddResin(result);
       }
@@ -316,7 +374,8 @@ namespace Caucho
     public IList<ResinService> GetResinServices(Resin resin)
     {
       IList<ResinService> result = new List<ResinService>();
-      foreach (ResinService resinService in _resinServices) {
+      foreach (ResinService resinService in _resinServices)
+      {
         if (resin.Home.Equals(resinService.Home))
           result.Add(resinService);
       }
@@ -347,13 +406,15 @@ namespace Caucho
 
     public List<String> GetUsers()
     {
-      if (_users == null) {
+      if (_users == null)
+      {
         List<String> users = new List<String>();
         users.Add("Local Service");
         DirectoryEntry groupEntry = new DirectoryEntry("WinNT://.");
         groupEntry.Children.SchemaFilter.Add("User");
         IEnumerator e = groupEntry.Children.GetEnumerator();
-        while (e.MoveNext()) {
+        while (e.MoveNext())
+        {
           String name = ((DirectoryEntry)e.Current).Name;
           if (!"Guest".Equals(name))
             users.Add(name);
@@ -367,7 +428,8 @@ namespace Caucho
 
     public void InstallService(ResinService resinService, bool isNew)
     {
-      if (isNew) {
+      if (isNew)
+      {
         Installer installer = InitInstaller(resinService);
         Hashtable installState = new Hashtable();
         installer.Install(installState);
@@ -406,11 +468,14 @@ namespace Caucho
       txInst.Context.Parameters["assemblypath"] = resinService.Exe;
 
       ServiceProcessInstaller spInst = new ServiceProcessInstaller();
-      if (resinService.User != null) {
+      if (resinService.User != null)
+      {
         spInst.Username = resinService.User;
         spInst.Password = resinService.Password;
         spInst.Account = ServiceAccount.User;
-      } else {
+      }
+      else
+      {
         spInst.Account = ServiceAccount.LocalSystem;
       }
 
@@ -437,7 +502,8 @@ namespace Caucho
     {
       String dir = GetStateDirectory();
       DirectoryInfo info;
-      if ((info = Directory.CreateDirectory(dir)) != null && info.Exists) {
+      if ((info = Directory.CreateDirectory(dir)) != null && info.Exists)
+      {
         String file = dir + @"\" + serviceName + ".srv";
 
         FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write);
@@ -451,14 +517,17 @@ namespace Caucho
     private Hashtable LoadState(String serviceName)
     {
       String file = GetStateDirectory() + '\\' + serviceName + ".srv";
-      if (File.Exists(file) && false) {
+      if (File.Exists(file) && false)
+      {
         Hashtable state = null;
         FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
         BinaryFormatter serializer = new BinaryFormatter();
         state = (Hashtable)serializer.Deserialize(fs);
         fs.Close();
         return state;
-      } else {
+      }
+      else
+      {
         return FakeState();
       }
     }
@@ -466,20 +535,26 @@ namespace Caucho
     [STAThread]
     public static void Main(String[] args)
     {
-      try {
+      try
+      {
         Util.TestDotNetCapability();
-      } catch (Exception e) {
+      }
+      catch (Exception e)
+      {
         String message = ".NET Version 3.5 is required.";
         LogStartupError(message, e);
         MessageBox.Show(message);
         Environment.Exit(1);
       }
-      try {
+      try
+      {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
         SetupForm setupForm = new SetupForm(new Setup());
         Application.Run(setupForm);
-      } catch (Exception e) {
+      }
+      catch (Exception e)
+      {
         LogStartupError(null, e);
       }
     }
@@ -488,12 +563,14 @@ namespace Caucho
     {
       StringBuilder text = new StringBuilder();
       text.Append(DateTime.Now.ToString());
-      if (message != null) {
+      if (message != null)
+      {
         text.Append(message);
         text.Append("\r\n");
       }
 
-      if (e != null) {
+      if (e != null)
+      {
         text.Append(e.Message);
         text.Append("\r\n");
         text.Append(e.StackTrace);
@@ -636,7 +713,7 @@ namespace Caucho
     public int JmxPort { get; set; }
     public int WatchdogPort { get; set; }
     public String ExtraParams { get; set; }
-    
+
     public ResinService()
     {
       JmxPort = -1;
@@ -671,15 +748,18 @@ namespace Caucho
       if (ElasticServer)
         sb.Append(" --elastic-server ");
 
-      if (! String.IsNullOrEmpty(ElasticServerAddress))
+      if (!String.IsNullOrEmpty(ElasticServerAddress))
         sb.Append(" --elastic-server-address ").Append(ElasticServerAddress);
 
       if (!String.IsNullOrEmpty(ElasticServerPort))
         sb.Append(" --elastic-server-port ").Append(ElasticServerPort);
 
-      if (DynamicServer) {
+      if (DynamicServer)
+      {
         sb.Append(" -server ").Append("dyn-").Append(Cluster).Append('-').Append(Server);
-      } else if (Server != null && !"".Equals(Server)) {
+      }
+      else if (Server != null && !"".Equals(Server))
+      {
         sb.Append(" -server ").Append(Server);
       }
 

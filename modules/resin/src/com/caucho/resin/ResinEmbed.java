@@ -114,6 +114,8 @@ public class ResinEmbed
   private boolean _isDevelopmentMode;
   private boolean _isIgnoreClientDisconnect;
 
+  private boolean _isIgnoreLock;
+
   /**
    * Creates a new resin server.
    */
@@ -300,6 +302,14 @@ public class ResinEmbed
     _isScanRoot = true;
   }
 
+  /**
+   * @param b
+   */
+  public void setIgnoreLock(boolean isIgnoreLock)
+  {
+    _isIgnoreLock = isIgnoreLock;
+  }
+
   //
   // Lifecycle
   //
@@ -321,6 +331,10 @@ public class ResinEmbed
 
       _resin = new ResinEmbedded(_args);
       // _resin.preConfigureInit();
+      
+      if (_isIgnoreLock) {
+        _resin.setIgnoreLock(_isIgnoreLock);
+      }
       
       thread.setContextClassLoader(_resin.getClassLoader());
       

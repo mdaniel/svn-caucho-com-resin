@@ -377,8 +377,9 @@ public class DbTransaction extends StoreTransaction {
    */
   public void addDeleteInode(Inode inode)
   {
-    if (_deleteInodes == null)
+    if (_deleteInodes == null) {
       _deleteInodes = new ArrayList<Inode>();
+    }
     
     _deleteInodes.add(inode);
   }

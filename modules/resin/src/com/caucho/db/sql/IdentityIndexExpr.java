@@ -97,14 +97,15 @@ class IdentityIndexExpr extends RowIterateExpr {
     if (rowAddr == 0)
       return false;
 
-    context.unlock();
+    //context.unlock();
     
-    if (! tableIter.isValidRow(rowAddr))
+    if (! tableIter.isValidRow(rowAddr)) {
       return false;
+    }
 
     tableIter.setRow(rowAddr);
 
-    context.lock();
+    //context.lock();
 
     return true;
   }

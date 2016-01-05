@@ -41,6 +41,8 @@ abstract public class SessionSerializer {
   abstract public void writeObject(Object v)
     throws IOException;
 
+  abstract public void flush();
+
   public void close()
   {
   }

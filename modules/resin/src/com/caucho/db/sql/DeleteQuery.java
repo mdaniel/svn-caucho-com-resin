@@ -53,6 +53,7 @@ class DeleteQuery extends Query {
     setFromItems(new FromItem[] { new FromItem(table, table.getName()) });
   }
 
+  @Override
   public boolean isReadOnly()
   {
     return false;
@@ -77,9 +78,17 @@ class DeleteQuery extends Query {
       }
 
       do {
-        rows[0].delete();
-
-        context.setRowUpdateCount(++count);
+        context.lock();
+        
+        try {
+          if (isSelect(context) && rows[0].delete()) {
+            context.setRowUpdateCount(++count);
+          }
+        } finally {
+          context.unlock();
+        }
+        
+        xa.commit();
       } while (nextTuple(rows, rows.length, context, xa));
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

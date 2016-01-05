@@ -100,6 +100,7 @@ public class MemoryPoolAdapter
     _poolNamesMap.put(PoolType.EDEN, edenName);
   }
 
+  /*
   public ObjectName getPermGenName()
   {
     return _poolNamesMap.get(PoolType.PERM_GEN);
@@ -109,6 +110,7 @@ public class MemoryPoolAdapter
   {
     _poolNamesMap.put(PoolType.PERM_GEN, permGenName);
   }
+  */
 
   public ObjectName getSurvivorName()
   {
@@ -218,6 +220,7 @@ public class MemoryPoolAdapter
     return usage.getMax() - usage.getUsed();
   }
 
+  /*
   public long getPermGenCommitted()
     throws JMException
   {
@@ -271,6 +274,30 @@ public class MemoryPoolAdapter
     MemoryUsage usage = MemoryUsage.from(data);
 
     return new MemUsage(usage.getMax(), usage.getCommitted(), usage.getUsed());
+  }
+  */
+  public long getPermGenCommitted()
+    throws JMException
+  {
+    return 0;
+  }
+
+  public long getPermGenMax()
+    throws JMException
+  {
+    return 0;
+  }
+
+  public long getPermGenUsed()
+    throws JMException
+  {
+    return 0;
+  }
+
+  public long getPermGenFree()
+    throws JMException
+  {
+    return 0;
   }
 
   public long getSurvivorCommitted()
@@ -451,8 +478,10 @@ public class MemoryPoolAdapter
                 "class storage","class memory","code cache","class","code"),
     EDEN ("java.lang:type=MemoryPool,name=Eden Space", 
           "eden"),
+          /*
     PERM_GEN("java.lang:type=MemoryPool,name=Perm Gen", 
              "perm gen","perm"),
+             */
     SURVIVOR ("java.lang:type=MemoryPool,name=Survivor Space", 
               "survivor"),
     TENURED ("java.lang:type=MemoryPool,name=Tenured Gen", 

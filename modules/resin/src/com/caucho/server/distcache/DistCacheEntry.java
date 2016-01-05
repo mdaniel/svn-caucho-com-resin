@@ -442,8 +442,15 @@ public class DistCacheEntry {
     if (modifiedExpireTime < 0)
       modifiedExpireTime = config.getModifiedExpireTimeout();
     
-    if (valueHash == getMnodeEntry().getValueHash()
-        && flags == getMnodeEntry().getFlags()) {
+    long now = CurrentTime.getCurrentTime();
+    long delta = now - mnodeEntry.getLastAccessedTime();
+    
+    if (valueHash == mnodeEntry.getValueHash()
+        && flags == mnodeEntry.getFlags()
+        && delta < modifiedExpireTime
+        && delta < accessedExpireTime) {
+      // server/01nx
+      return;
     }
     
     int leaseOwner = getMnodeEntry().getLeaseOwner();
@@ -1205,8 +1212,9 @@ public class DistCacheEntry {
     
     MnodeEntry mnodeValue = loadMnodeValue(); // , false);
 
-    if (mnodeValue == null)
+    if (mnodeValue == null) {
       return false;
+    }
 
     updateAccessTime(mnodeValue, now);
 

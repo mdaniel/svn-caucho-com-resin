@@ -44,12 +44,12 @@ import javax.ejb.TimerService;
 import com.caucho.config.timer.CronExpression;
 import com.caucho.config.timer.CronTrigger;
 import com.caucho.config.timer.EjbTimer;
+import com.caucho.config.timer.EjbTimerContainer;
 import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.config.timer.TimerTask;
 import com.caucho.config.types.Trigger;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.resources.TimerTrigger;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
@@ -59,7 +59,7 @@ import com.caucho.util.L10N;
 // TODO This should probably be a application/server/cluster managed bean
 // itself - would get rid of the boilerplate factory code; I could not figure
 // out how to make that happen - tried @ApplicationScoped.
-public class EjbTimerService implements TimerService {
+public class EjbTimerService implements TimerService, EjbTimerContainer {
   private static final L10N L = new L10N(EjbTimerService.class);
   @SuppressWarnings("unused")
   private static final Logger log = Logger.getLogger(EjbTimerService.class
@@ -531,7 +531,7 @@ public class EjbTimerService implements TimerService {
   {
     EjbTimer timer = new EjbTimer();
     TimerTask scheduledTask
-      = new TimerTask(_timeout, timer, null, trigger, info);
+      = new TimerTask(this, _timeout, timer, null, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     synchronized (_timers) {
@@ -563,8 +563,8 @@ public class EjbTimerService implements TimerService {
     Trigger trigger = new TimerTrigger(expiration.getTime(), interval);
     EjbTimer timer = new EjbTimer();
 
-    TimerTask scheduledTask = new TimerTask(_timeout, timer, null, trigger,
-        info);
+    TimerTask scheduledTask
+      = new TimerTask(this, _timeout, timer, null, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     synchronized (_timers) {
@@ -612,8 +612,8 @@ public class EjbTimerService implements TimerService {
 
     Trigger trigger = new CronTrigger(cronExpression, start, end, timezone);
     EjbTimer timer = new EjbTimer();
-    TimerTask scheduledTask = new TimerTask(_timeout, timer, cronExpression,
-        trigger, info);
+    TimerTask scheduledTask
+      = new TimerTask(this, _timeout, timer, cronExpression, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     synchronized (_timers) {
@@ -623,6 +623,17 @@ public class EjbTimerService implements TimerService {
     scheduledTask.start();
 
     return timer;
+  }
+
+  /**
+   * @param timerTask
+   */
+  public void removeTimer(TimerTask timerTask)
+  {
+    synchronized (_timers) {
+      _timers.remove(timerTask);
+    }
+    
   }
 
   /**

@@ -6,7 +6,7 @@
   <p>
 Resin configuration can directly access Resin-IoC/WebBeans-configured
 beans and variables using EL expressions in the configuration files.
-Predefines variables include webApp, host, and resin variables.
+Predefined variables include webApp, host, and resin variables.
   </p>
   </description>
 </header>

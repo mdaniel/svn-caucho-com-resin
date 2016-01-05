@@ -29,18 +29,23 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.db.Database;
-import com.caucho.db.table.TableIterator;
-import com.caucho.db.xa.DbTransaction;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.SQLExceptionWrapper;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.db.Database;
+import com.caucho.db.table.TableIterator;
+import com.caucho.db.xa.DbTransaction;
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 public class SelectQuery extends Query {
+  private static final L10N L = new L10N(SelectQuery.class);
   private static final Logger log
     = Logger.getLogger(SelectQuery.class.getName());
 
@@ -175,6 +180,12 @@ public class SelectQuery extends Query {
       context.setResult(result);
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
+    } catch (IllegalStateException exn) {
+      log.log(Level.WARNING, exn.toString(), exn);
+      
+      ShutdownSystem.shutdownActive(ExitCode.HEALTH, 
+                                    L.l("Internal database issue: forcing restart {0}",
+                                        exn.toString()));
     } finally {
       // autoCommitRead must be before freeRows in case freeRows
       // throws an exception
@@ -203,8 +214,9 @@ public class SelectQuery extends Query {
 
     int limit = _limit;
     int contextLimit = context.getLimit();
-    if (contextLimit > 0)
+    if (contextLimit > 0) {
       limit = contextLimit;
+    }
 
     if (start(rows, rowLength, context, xa)) {
       do {

@@ -39,7 +39,6 @@ import javax.ejb.ScheduleExpression;
 import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 

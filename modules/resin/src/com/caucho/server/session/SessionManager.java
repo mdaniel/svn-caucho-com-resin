@@ -377,10 +377,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    */
   ByteStreamCache getCache()
   {
-    if (_isPersistenceEnabled)
+    if (_isPersistenceEnabled) {
       return _sessionStore;
-    else
+    }
+    else {
       return null;
+    }
   }
 
   /**
@@ -624,8 +626,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    */
   public void addListener(HttpSessionListener listener)
   {
-    if (_listeners == null)
+    if (_listeners == null) {
       _listeners = new ArrayList<HttpSessionListener>();
+    }
 
     _listeners.add(listener);
   }
@@ -1235,10 +1238,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public SessionDeserializer createSessionDeserializer(InputStream is)
     throws IOException
   {
-    if (_isHessianSerialization)
+    if (_isHessianSerialization) {
       return new HessianSessionDeserializer(is, getClassLoader());
-    else
+    }
+    else {
       return new JavaSessionDeserializer(is, getClassLoader());
+    }
   }
 
   /**
@@ -1397,13 +1402,21 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
                                    long now,
                                    boolean fromCookie)
   {
-    if (_sessions == null)
+    if (_sessions == null) {
       return null;
+    }
 
     SessionImpl session = _sessions.get(sessionId);
     
-    if (session != null && ! session.isValid()) {
-      session = null;
+    if (session != null) {
+      if (! session.isValid()) {
+        session = null;
+      }
+      else if (! session.getId().equals(sessionId)) {
+        log.warning("Session creation issue. Old session " + session.getId() + " " + sessionId);
+        
+        session = null;
+      }
     }
     
     boolean isNew = false;
@@ -1421,42 +1434,45 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     }
 
     if (session != null) {
-      if (session.isTimeout(now)) {
-        session.invalidateTimeout();
-        session = null;
-      }
-      else if (session.load(isNew)) {
-        session.addUse();
-
-        if (isCreate) {
-          // TCK only set access on create
-          session.setAccess(now);
+      synchronized (session) {
+        if (session.isTimeout(now)) {
+          session.invalidateTimeout();
+          session = null;
         }
+        else if (session.load(isNew)) {
+          session.addUse();
 
-        return session;
-      }
-      else {
-        // if the load failed, then the session died out from underneath
-        if (! isNew) {
-          if (log.isLoggable(Level.FINER))
-            log.fine(session + " load failed for existing session");
+          if (isCreate) {
+            // TCK only set access on create
+            session.setAccess(now);
+          }
 
-          // server/0174
-          session.reset(0);
-          /*
+          return session;
+        }
+        else {
+          // if the load failed, then the session died out from underneath
+          if (! isNew) {
+            if (log.isLoggable(Level.FINER))
+              log.fine(session + " load failed for existing session");
+
+            // server/0174
+            session.reset(0);
+            /*
           session.setModified();
 
           // Return the existing session for timing reasons, e.g.
           // if a second request hits before the first has finished saving
 
           return session;
-          */
+             */
+          }
         }
       }
     }
 
-    if (! isCreate)
+    if (! isCreate) {
       return null;
+    }
 
     if (sessionId == null
         || sessionId.length() <= 6
@@ -1509,8 +1525,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (session != null && ! session.getId().equals(key))
       throw new IllegalStateException(key + " != " + session.getId());
 
-    if (now <= 0) // just generating id
+    if (now <= 0) { // just generating id
       return session;
+    }
     
     if (session != null) {
       if (! session.addUse()) {
@@ -1532,21 +1549,24 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       isNew = true;
     }
 
-    if (session == null)
+    if (session == null) {
       return null;
-
-    if (isNew) {
-      killSession = ! load(session, now, create);
-      isNew = killSession;
     }
-    else if (! session.load(isNew)) {
-      // if the load failed, then the session died out from underneath
-      if (log.isLoggable(Level.FINER))
-        log.fine(session + " load failed for existing session");
 
-      session.setModified();
+    synchronized (session) {
+      if (isNew) {
+        killSession = ! load(session, now, create);
+        isNew = killSession;
+      }
+      else if (! session.load(isNew)) {
+        // if the load failed, then the session died out from underneath
+        if (log.isLoggable(Level.FINER))
+          log.fine(session + " load failed for existing session");
 
-      isNew = true;
+        session.setModified();
+
+        isNew = true;
+      }
     }
 
     if (killSession && (! create || ! reuseSessionId(fromCookie))) {

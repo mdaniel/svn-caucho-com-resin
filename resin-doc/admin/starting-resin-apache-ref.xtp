@@ -128,7 +128,7 @@ the web-app.  The servlet-mapping only applies to URLs matching the prefix.
 ..
 </example>
 
-<p>In the exaple, mod_caucho will match any URL matching /prefix/url/*.foo.
+<p>In the example, mod_caucho will match any URL matching /prefix/url/*.foo.
 /prefix/url/bar.foo will match, but /test/bar.foo will not match.</p>
 
 <note>Resin standalone allows a <var>regexp</var> attribute instead of an
@@ -142,7 +142,7 @@ in the resin.xml.</note>
 
 <s2 title="&lt;host&gt;">
 
-  <p>&lt;<a config-tag="host"/>&gt; blocks configure
+  <p><a config-tag="host"/> blocks configure
 <a href="http-virtual-hosts.xtp">virtual hosts</a>.  There's a bit of
 extra work for virtual hosts that we'll ignore here.  (Basically, you
 need to add Apache <var>ServerName</var> directives so Resin knows the name

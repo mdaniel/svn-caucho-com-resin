@@ -38,6 +38,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +49,7 @@ import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.ConcurrentArrayList;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.IoUtil;
 import com.caucho.util.JdbcUtil;
@@ -76,13 +78,17 @@ public class DataStore {
   // private long _expireTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 24 * 60L * 60L * 1000L;
   
+  //private long _expireOrphanTimeout = 60 * 60L * 1000L;
   private long _expireOrphanTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
 
   private final String _insertQuery;
   private final String _loadQuery;
-  private final String _selectOrphanQuery;
+  
+  private final String _selectMnodeDataIdQuery;
+  private final String _selectDataIdQuery;
+  
   private final String _deleteQuery;
   private final String _validateQuery;
 
@@ -117,28 +123,24 @@ public class DataStore {
                   + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _dataTableName
-                    + " (data) "
-                    + "VALUES(?)");
+                    + " (data,time) "
+                    + "VALUES(?,now())");
 
+    /*
     _selectOrphanQuery = ("SELECT d.id, m.value_data_id"
                               + " FROM " + _dataTableName + " AS d"
                               + " LEFT OUTER JOIN " + _mnodeTableName + " AS m"
                               + " ON(m.value_data_id=d.id)"
                               + " WHERE d.resin_oid>?"
                               + " LIMIT 1024");
+                              */
+    _selectMnodeDataIdQuery = ("SELECT value_data_id"
+                        + " FROM " + _mnodeTableName);
 
-    /*
-    _selectOrphanQuery = ("SELECT d.id, m.value_data_id"
-        + " FROM " + _mnodeTableName + " AS m"
-        + " LEFT JOIN " + _dataTableName + " AS d"
-        + " ON(m.value_data_id=d.id)"
-        + " WHERE d.resin_oid>?"
-        + " LIMIT 1024");
-        */
-    /*
-    _deleteTimeoutQuery = ("DELETE FROM " + _tableName
-                           + " WHERE expire_time < ?");
-                           */
+    _selectDataIdQuery = ("SELECT id"
+                     + " FROM " + _dataTableName
+                     + " WHERE time < ?");
+
     _deleteQuery = ("DELETE FROM " + _dataTableName
                     + " WHERE id = ?");
 
@@ -164,8 +166,9 @@ public class DataStore {
     }
 
     _alarm = new Alarm(new DeleteAlarm());
-    _alarm.queue(_expireOrphanTimeout);
-
+    //_alarm.queue(_expireOrphanTimeout);
+    _alarm.queue(60000);
+    
     //_alarm.queue(0);
   }
 
@@ -198,7 +201,7 @@ public class DataStore {
 
       if (! isOld) {
         try {
-          String sql = ("SELECT id, data"
+          String sql = ("SELECT id, data, time"
               + " FROM " + _dataTableName + " WHERE 1=0");
 
           ResultSet rs = stmt.executeQuery(sql);
@@ -220,8 +223,8 @@ public class DataStore {
 
       String sql = ("CREATE TABLE " + _dataTableName + " (\n"
                     + "  id IDENTITY,\n"
-                    + "  data BLOB)");
-
+                    + "  data BLOB,\n"
+                    + "  time BIGINT)");
 
       log.fine(sql);
 
@@ -310,8 +313,6 @@ public class DataStore {
 
       if (log.isLoggable(Level.FINER))
         log.finer(this + " no blob data loaded for " + id);
-
-      Thread.dumpStack();
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -385,7 +386,11 @@ public class DataStore {
         InputStream is = rs.getBinaryStream(1);
 
         if (is == null) {
-          System.out.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: " + Long.toHexString(id));
+          System.err.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: 0x" + Long.toHexString(id));
+          
+          if (log.isLoggable(Level.FINE)) { 
+            Thread.dumpStack();
+          }
 
           return null;
         }
@@ -454,8 +459,9 @@ public class DataStore {
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBinaryStream(1, is, length);
 
-      int count = stmt.executeUpdate();
+      stmt.setLong(2, CurrentTime.getCurrentTime());
 
+      int count = stmt.executeUpdate();
 
       // System.out.println("INSERT: " + id);
 
@@ -465,7 +471,7 @@ public class DataStore {
         ResultSet keys = stmt.getGeneratedKeys();
         if (keys.next()) {
           long id = keys.getLong("id");
-
+          
           return id;
         }
 
@@ -620,13 +626,14 @@ public class DataStore {
   public void destroy()
   {
     _dataSource = null;
-    _freeConn = null;
+    // _freeConn = null;
 
     Alarm alarm = _alarm;
     _alarm = null;
 
-    if (alarm != null)
+    if (alarm != null) {
       alarm.dequeue();
+    }
   }
 
   private DataConnection getConnection()
@@ -650,14 +657,26 @@ public class DataStore {
 
   private class DeleteAlarm implements AlarmListener {
     private long _lastOid;
-    
+   
+    @Override
     public void handleAlarm(Alarm alarm)
     {
       if (_dataSource != null) {
         try {
           deleteOrphans();
         } finally {
-          _alarm.queue(_expireOrphanTimeout);
+          long timeout;
+          
+          if (_lastOid < 0) { 
+            timeout = _expireOrphanTimeout;
+          }
+          else {
+            timeout = 60000L;
+          }
+
+          if (_alarm != null) {
+            _alarm.queue(timeout);
+          }
         }
       }
     }
@@ -667,51 +686,31 @@ public class DataStore {
       DataConnection conn = null;
       ResultSet rs = null;
       
-      ArrayList<Long> orphanList = new ArrayList<Long>();
-
       boolean isValid = false;
 
       try {
         conn = getConnection();
 
-        PreparedStatement pstmt = conn.prepareSelectOrphan();
-        pstmt.setLong(1, _lastOid);
-
-        rs = pstmt.executeQuery();
-
-        try {
-          boolean isValue = false;
-          
-          while (rs.next()) {
-            isValue = true;
-            long did = rs.getLong(1);
-            long mid = rs.getLong(2);
-
-            _lastOid = Math.max(_lastOid, did);
-
-            if (did != mid) {
-              if (log.isLoggable(Level.FINER)) {
-                log.finer(this + " delete orphan " + Long.toHexString(did));
-              }
-
-              // rs.deleteRow();
-              orphanList.add(did);
-            }
-          }
-          
-          if (! isValue) {
-            _lastOid = -1;
-          }
-        } finally {
-          rs.close();
+        HashSet<Long> mnodeDataIds = selectMnodeDataIds(conn);
+        HashSet<Long> orphanList = selectDataIds(conn);
+        
+        for (Long mnodeDataId : mnodeDataIds) {
+          orphanList.remove(mnodeDataId);
+        }
+        
+        if (orphanList.size() > 0) {
+          log.info("DataStore removing " + orphanList.size() + " orphans");
         }
         
         for (Long did : orphanList) {
           PreparedStatement pStmt = conn.prepareDelete();
           pStmt.setLong(1, did);
-          pStmt.execute();
+          
+          if (pStmt.executeUpdate() > 0) {
+            _entryCount.addAndGet(-1);
+          }
         }
-
+        
         isValid = true;
       } catch (SQLException e) {
         e.printStackTrace();
@@ -725,6 +724,41 @@ public class DataStore {
         else
           conn.destroy();
       }
+    }
+    
+    private HashSet<Long> selectMnodeDataIds(DataConnection conn)
+      throws SQLException
+    {
+      HashSet<Long> dataIds = new HashSet<Long>();
+      
+      PreparedStatement pStmt = conn.prepareSelectMnodeDataIds();
+      
+      ResultSet rs = pStmt.executeQuery();
+      
+      while (rs.next()) {
+        dataIds.add(rs.getLong(1));
+      }
+      
+      return dataIds;
+    }
+    
+    private HashSet<Long> selectDataIds(DataConnection conn)
+      throws SQLException
+    {
+      HashSet<Long> dataIds = new HashSet<Long>();
+      
+      PreparedStatement pStmt = conn.prepareSelectDataIds();
+      long time = CurrentTime.getCurrentTime() - 2 * 60000;
+      
+      pStmt.setLong(1, time);
+      
+      ResultSet rs = pStmt.executeQuery();
+      
+      while (rs.next()) {
+        dataIds.add(rs.getLong(1));
+      }
+      
+      return dataIds;
     }
   }
 
@@ -775,6 +809,12 @@ public class DataStore {
       if (conn != null)
         conn.close();
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _is + "]";
+    }
   }
 
   private class DataConnection {
@@ -782,7 +822,8 @@ public class DataStore {
 
     private PreparedStatement _loadStatement;
     private PreparedStatement _insertStatement;
-    private PreparedStatement _selectOrphanStatement;
+    private PreparedStatement _selectMnodeDataIdStatement;
+    private PreparedStatement _selectDataIdStatement;
     private PreparedStatement _deleteStatement;
     private PreparedStatement _validateStatement;
 
@@ -813,13 +854,22 @@ public class DataStore {
       return _insertStatement;
     }
 
-    PreparedStatement prepareSelectOrphan()
+    PreparedStatement prepareSelectMnodeDataIds()
       throws SQLException
     {
-      if (_selectOrphanStatement == null)
-        _selectOrphanStatement = _conn.prepareStatement(_selectOrphanQuery);
+      if (_selectMnodeDataIdStatement == null)
+        _selectMnodeDataIdStatement = _conn.prepareStatement(_selectMnodeDataIdQuery);
 
-      return _selectOrphanStatement;
+      return _selectMnodeDataIdStatement;
+    }
+
+    PreparedStatement prepareSelectDataIds()
+      throws SQLException
+    {
+      if (_selectDataIdStatement == null)
+        _selectDataIdStatement = _conn.prepareStatement(_selectDataIdQuery);
+
+      return _selectDataIdStatement;
     }
 
     PreparedStatement prepareDelete()

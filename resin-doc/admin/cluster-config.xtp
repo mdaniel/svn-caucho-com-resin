@@ -655,13 +655,18 @@ the command line, typically -X memory parameters and -D defines.</p>
 <defun title="&lt;jvm-classpath>" version="Resin 3.1.6">
 <parents>server</parents>
 
-<p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.</p>
+<p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.
+This classpath has priority over Resin's classpath (allowing you to use
+JPA 2.1+ instead of Reisn's JPA 2.0, for example).  To check the
+server's classpath order, start Resin with the --verbose flag or
+use jconsole.</p>
 
 <example title="adding a classpath">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="web-tier">
     &lt;server-default>
-      &lt;jvm-classpath>/tmp/test-classpath;/jvm-classpath>
+      &lt;jvm-classpath>/tmp/jpa-2.1-api.jar&lt;/jvm-classpath>
+      &lt;jvm-classpath>/tmp/jpa-2.1-impl.jar&lt;/jvm-classpath>
     &lt;/server-default>
 
     &lt;server id="app-a" address="192.168.2.10"/>

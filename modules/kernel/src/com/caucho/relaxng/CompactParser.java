@@ -325,7 +325,7 @@ public class CompactParser {
 
       InputSource source = new InputSource(is);
       source.setSystemId(uri);
-
+      
       CompactParser parser = new CompactParser();
       parser.setGeneratedId(_generatedId);
       parser.parse(source);

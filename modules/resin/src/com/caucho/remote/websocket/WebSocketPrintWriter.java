@@ -40,7 +40,7 @@ import java.io.PrintWriter;
  */
 public class WebSocketPrintWriter extends PrintWriter
 {
-  private WebSocketWriter _out;
+  private final WebSocketWriter _out;
   
   public WebSocketPrintWriter(WebSocketWriter out)
     throws IOException
@@ -53,6 +53,16 @@ public class WebSocketPrintWriter extends PrintWriter
   @Override
   public void close()
   {
+    // WebSocketPrintWriter is reused
+    /*
+    WebSocketWriter out = _out;
+    _out = null;
+    
+    if (out != null) {
+      out.close();
+    }
+    */
+    
     _out.close();
   }
 }

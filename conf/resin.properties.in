@@ -90,6 +90,10 @@ setuid_group  : @SETUID_GROUP@
 # jvm_args  : -Xmx2048m -XX:MaxPermSize=256m
 # jvm_mode    : -server
 
+# This classpath has priority over the default classpath, like when you want to
+# use a third party library like Hibernate's JPA
+# jvm_classpath :
+
 # Local URLs for the watchdog to check to ensure the server is up,
 # space separated
 # http_ping_urls : http://127.0.0.1/test.jsp

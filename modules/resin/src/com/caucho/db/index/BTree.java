@@ -161,6 +161,7 @@ public final class BTree {
   {
   }
 
+  synchronized
   public long lookup(byte []keyBuffer,
                      int keyOffset,
                      int keyLength)
@@ -175,6 +176,7 @@ public final class BTree {
     }
   }
 
+  synchronized
   private long lookup(byte []keyBuffer,
                      int keyOffset,
                      int keyLength,
@@ -225,6 +227,7 @@ public final class BTree {
    *
    * @return false if the block needs to be split
    */
+  synchronized
   public void insert(byte []keyBuffer,
                      int keyOffset,
                      int keyLength,
@@ -626,8 +629,9 @@ public final class BTree {
       leftBlock.setDirty(0, BlockStore.BLOCK_SIZE);
       parentBlock.setDirty(0, BlockStore.BLOCK_SIZE);
     } finally {
-      if (leftBlock != null)
+      if (leftBlock != null) {
         leftBlock.free();
+      }
 
       block.setDirty(0, BlockStore.BLOCK_SIZE);
     }
@@ -760,6 +764,7 @@ public final class BTree {
     }
   }
 
+  synchronized
   public void remove(byte []keyBuffer,
                       int keyOffset,
                       int keyLength)
@@ -886,6 +891,7 @@ public final class BTree {
             if (childBlock.getUseCount() > 2) {
               System.out.println("USE: " + childBlock.getUseCount() + " " + block);
             }
+            //log.info("BTree deallocate block: " + childBlock);
             childBlock.deallocate();
           }
 
@@ -1840,6 +1846,7 @@ public final class BTree {
   /**
    * Testing: returns the keys for a block
    */
+  synchronized
   public ArrayList<String> getBlockKeys(long blockIndex)
     throws IOException
   {
@@ -1939,6 +1946,7 @@ public final class BTree {
     throw e;
   }
 
+  synchronized
   public void close()
   {
     Block rootBlock = _rootBlock;

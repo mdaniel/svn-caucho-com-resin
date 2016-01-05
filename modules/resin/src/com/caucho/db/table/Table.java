@@ -32,6 +32,7 @@ package com.caucho.db.table;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -433,7 +434,7 @@ public class Table extends BlockStore {
     throws IOException
   {
     int offset = SHUTDOWN_TIMESTAMP_OFFSET;
-
+    
     writeTimestamp(offset, _startupTimestamp);
   }
 
@@ -465,8 +466,6 @@ public class Table extends BlockStore {
 
     try {
       byte []buffer = metaBlock.getBuffer();
-
-      int startupOffset = STARTUP_TIMESTAMP_OFFSET;
 
       long startupTimestamp
         = BitsUtil.readLong(buffer, STARTUP_TIMESTAMP_OFFSET);
@@ -1128,17 +1127,17 @@ public class Table extends BlockStore {
     }
   }
 
-  void delete(DbTransaction xa, Block block,
-              byte []buffer, int rowOffset,
-              boolean isDeleteIndex)
+  boolean delete(DbTransaction xa, Block block,
+                 byte []buffer, int rowOffset,
+                 boolean isDeleteIndex)
     throws SQLException
   {
     byte rowState = buffer[rowOffset];
 
-    /*
-    if ((rowState & ROW_MASK) == 0)
-      return;
-    */
+    //if ((rowState & ROW_MASK) == 0) {
+    if (rowState == 0) {
+      return false;
+    }
 
     buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
 
@@ -1158,9 +1157,12 @@ public class Table extends BlockStore {
       }
     }
 
+    Arrays.fill(buffer, rowOffset, rowOffset + _row.getLength(), (byte) 0); 
     buffer[rowOffset] = 0;
 
     _rowDeleteCount.incrementAndGet();
+    
+    return true;
   }
 
   /**
@@ -1177,10 +1179,12 @@ public class Table extends BlockStore {
     if (! _lifecycle.toDestroy()) {
       return;
     }
-    
+
     try {
       if (fsync()) {
         writeShutdownTimestamp();
+                
+        fsync();
       }
       else {
         log.warning(this + " fsync on close failed.");

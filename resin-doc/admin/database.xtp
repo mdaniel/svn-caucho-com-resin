@@ -15,17 +15,6 @@ obtain connections to databases.
 <body>
 <localtoc/>
 
-<s1 title="See also">
-
-<ul>
-<li><a href="http://wiki.caucho.com/">The Caucho Wiki</a> contains sample configurations for several database drivers
-</li><li>
-<a href="http://wiki4.caucho.com/Java_EE_Servlet_tutorial_:_Adding_MySQL_and_JDBC_to_bookstore_example#Configure_Resin_to_use_the_JDBC_driver">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="http://wiki4.caucho.com/Java_EE_Servlet_tutorial_:_Adding_MySQL_and_JDBC_to_bookstore_example#BookRepositoryJDBCImpl.java">Java Injection for Databases</a>
-</li></ul>
-
-</s1>
-
 <s1 title="Basic Configuration">
 
 <p>A basic &lt;database&gt; configuration specifies the following:
@@ -158,7 +147,7 @@ update is no longer valid.</p>
  --------                 --------
  read value A=1           read value A=1
  calculate  A=A+1         calculate A=A+1
-                         update A=2
+                          update A=2
  update     A=2
 </example>
 
@@ -213,113 +202,7 @@ them.</p>
 
 <s1 title="Core Configuration">
 
-<defun title="database" version="Resin 3.0">
-<parents>server, host-default, host, web-app-default, web-app</parents>
-
-<p>Configure a <var>database</var> resource, which is a database pool that manages
-and provides connections to a database.</p>
-      
-<deftable-childtags>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>JNDI name to store the pool under.  Servlets, jsp, and
-other java code use this name.  The path is relative to
-<code>java:comp/env</code></td>
-  <td> </td>
-</tr>
-<tr>
-  <td>driver</td>
-  <td>Configure the database <a href="#driver">driver</a>.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>backup-driver</td>
-  <td>Configure a backup <a href="#driver">driver</a>.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>max-connections</td>
-  <td><a href="#pooling">Pooling parameter</a> - maximum number of allowed connections</td>
-  <td>1024</td>
-</tr>
-<tr>
-  <td>max-idle-time</td>
-  <td><a href="#pooling">Pooling parameter</a> - maximum time an idle connection is kept in
-the pool</td>
-  <td>30 sec</td>
-</tr>
-<tr>
-  <td>max-active-time</td>
-  <td><a href="#pooling">Pooling parameter</a> - maximum time a connection allowed to be active</td>
-  <td>6 hours</td>
-</tr>
-<tr>
-  <td>max-pool-time</td>
-  <td><a href="#pooling">Pooling parameter</a> - maximum time a connection is kept in the pool</td>
-  <td>24 hours</td>
-</tr>
-<tr>
-  <td>connection-wait-time</td>
-  <td><a href="#pooling">Pooling parameter</a> - how long to wait for an idle connection (Resin 1.2.3)</td>
-  <td>30 sec</td>
-</tr>
-<tr>
-  <td>max-overflow-connections</td>
-  <td><a href="#pooling">Pooling parameter</a> - how many "overflow" connection are allowed if the connection wait times out.</td>
-  <td>1024</td>
-</tr>
-<tr>
- <td>ping-table</td>
- <td><a href="#reliability">Reliability parameter</a> - The database table used to "ping", checking that the connection is still live.</td>
- <td>n/a</td>
-</tr>
-<tr>
-  <td>ping</td>
-  <td><a href="#reliability">Reliability parameter</a> - test for live connections before allocating them from the pool.</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>ping-interval</td>
-  <td><a href="#reliability">Reliability parameter</a> - set the minimum interval for pings, instead of doing a ping every time</td>
-  <td>1s</td>
-</tr>
-<tr>
-  <td>prepared-statement-cache-size</td>
-  <td>A cache that holds prepared statements, a reused prepared statement avoids the overhead of the driver making the prepared statement</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>spy</td>
-  <td>A debugging aid, if true, generate <code>info</code> level log events that reveal the SQL that is used with the connections.</td>
-  <td>false
-<!--
-<tr><td>xa<td><td>Set true o
--->
-
-</td></tr></deftable-childtags>
-
-<p>All times default to seconds, but can use longer time periods:</p>
-
-<deftable title="Time suffixes">
-<tr>
- <th>Suffix</th>
- <th>Description</th>
-</tr>
-<tr><td>s</td><td>seconds
-</td></tr><tr><td>m</td><td>minutes
-</td></tr><tr><td>h</td><td>hours
-</td></tr><tr><td>D</td><td>days
-</td></tr></deftable>
-
-<p>The class that corresponds to &lt;database&gt; is <a javadoc="com.caucho.sql.DBPool"/></p>
-
-</defun>
-
+<include-defun name="database"/>
 
 </s1>
 
@@ -542,7 +425,9 @@ the caller.
 &lt;/database&gt;
 </example>
 
-<s3 name="backup-driver" title="&lt;backup-driver> list">
+</s2> <!-- driver-list -->
+
+<s2 name="backup-driver" title="&lt;backup-driver> list">
 <p>
 Drivers in a driver list can be marked as backups.  The drivers configured with
 &lt;backup-driver&gt; are used only if all of the drivers configured with
@@ -597,9 +482,7 @@ the <a href="#pooling">Pooling configuration</a>, thus even if the main
 &lt;/database&gt;
 </example>
 
-</s3>
-
-</s2> <!-- driver-list -->
+</s2>
 
 </s1> <!-- reliability -->
 
@@ -776,5 +659,33 @@ was a secure solution.
 </p>
 
 </s1>
+
+<s1 title="Hibernate">
+
+<p>Resin comes with JPA 2.0 interfaces that are not compatible with Hibernate
+and JPA 2.1+.  To override Resin's classes, add the Hibernate jar to the
+directory that you can specify in <a config-tag="jvm-classpath"/>.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server-default&gt;
+      &lt;jvm-classpath&gt;/tmp/test-classpath&lt;/jvm-classpath&gt;
+    &lt;/server-default&gt;
+
+    &lt;server id="app-a" address="192.168.2.10"/&gt;
+
+    ...
+  &lt;/cluster&gt;
+&lt;/resin&gt;
+
+</example>
+
+<p>An alternative is to reverse the normal classloading order by adding
+<a config-tag="servlet-hack"/> to your resin-web.xml, which gives webapp classes priority over Resin's
+classpath classes.</p>
+
+</s1> <!-- Hibernate -->
+
 </body>
 </document>

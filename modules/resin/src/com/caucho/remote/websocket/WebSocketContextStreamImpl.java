@@ -109,8 +109,15 @@ public class WebSocketContextStreamImpl
     throws IOException
   {
     if (_textOut == null) {
-      _textOut = new WebSocketWriter(getWriteStream(),
+      WriteStream os = getWriteStream();
+      
+      if (os == null) {
+        throw new IllegalStateException(L.l("{0} is closed for writing."));
+      }
+      
+      _textOut = new WebSocketWriter(os,
                                      TempBuffer.allocate().getBuffer());
+      
       _textWriter = new WebSocketPrintWriter(_textOut);
     }
     

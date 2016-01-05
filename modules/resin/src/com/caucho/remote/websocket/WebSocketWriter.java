@@ -42,7 +42,7 @@ import java.io.Writer;
 public class WebSocketWriter extends Writer
   implements WebSocketConstants
 {
-  private OutputStream _os;
+  private final OutputStream _os;
   private byte []_buffer;
   private int _offset;
   
@@ -54,6 +54,10 @@ public class WebSocketWriter extends Writer
   public WebSocketWriter(OutputStream os, byte []buffer)
     throws IOException
   {
+    if (os == null) {
+      throw new NullPointerException();
+    }
+    
     _os = os;
     _buffer = buffer;
   }
@@ -193,16 +197,18 @@ public class WebSocketWriter extends Writer
   @Override
   public void close()
   {
-    if (_state == MessageState.IDLE)
+    if (_state == MessageState.IDLE) {
       return;
+    }
 
     try {
       complete(true);
     
       _state = MessageState.IDLE;
     
-      if (_isAutoFlush)
+      if (_isAutoFlush) {
         _os.flush();
+      }
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

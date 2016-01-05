@@ -35,14 +35,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
 import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.db.io.RandomAccessStreamNio;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -58,6 +61,8 @@ public class FilePath extends FilesystemPath {
 
   private static Method _isSymlink;
   private static Method _toPath;
+
+  private static Method _fileChannelOpen;
 
   private File _file;
   protected boolean _isWindows;
@@ -650,7 +655,34 @@ public class FilePath extends FilesystemPath {
 
     return new FileRandomAccessStream(new RandomAccessFile(getFile(), "rw"));
   }
+  
+  @Override
+  public RandomAccessStream openMemoryMappedFile(long fileSize)
+    throws IOException
+  {
+    if (CauchoSystem.isJdk7()) {
+      return RandomAccessStreamNio.open(this, fileSize);
+    }
+    else {
+      return null;
+    }
+  }
 
+  @Override
+  public FileChannel openFileChannel(OpenOption... options) throws IOException
+  {
+    try {
+      java.nio.file.Path jdkPath;
+      
+      jdkPath = (java.nio.file.Path) _toPath.invoke(getFile());
+      return (FileChannel) _fileChannelOpen.invoke(null, jdkPath, options);
+    } catch (Exception e) {
+      log.finer(e.toString());
+      
+      return null;
+    }
+  }
+  
   @Override
   public Path copy()
   {
@@ -727,17 +759,20 @@ public class FilePath extends FilesystemPath {
   static {
     Method isSymlink = null;
     Method toPath = null;
+    Method fileChannelOpen = null;
     
     try {
       Class<?> path = Class.forName("java.nio.file.Path");
       Class<?> files = Class.forName("java.nio.file.Files");
-      
+            
       isSymlink = files.getMethod("isSymbolicLink", path);
       toPath = File.class.getMethod("toPath");
+      fileChannelOpen = FileChannel.class.getMethod("open", java.nio.file.Path.class, OpenOption[].class);
     } catch (Throwable e) {
     }
     
     _isSymlink = isSymlink;
     _toPath = toPath;
+    _fileChannelOpen = fileChannelOpen;
   }
 }

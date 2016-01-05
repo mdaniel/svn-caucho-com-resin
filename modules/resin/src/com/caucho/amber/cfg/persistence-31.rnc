@@ -4,8 +4,6 @@ namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-start = pst31_persistence
-
 t_boolean = string
 t_class = string
 t_jndi = string

@@ -91,10 +91,12 @@ public class SocketLinkDuplexController extends AsyncController {
    */
   public void setIdleTimeMax(long idleTime)
   {
-    if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
+    if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime) {
       idleTime = Long.MAX_VALUE / 2;
+    }
 
     TcpSocketLink conn = _conn;
+    
     if (conn != null) {
       conn.setIdleTimeout(idleTime);
     }

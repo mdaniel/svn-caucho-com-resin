@@ -335,9 +335,10 @@ abstract public class PageManager {
      throws Exception
   {
     Page page = entry.getPage();
-
-    if (page != null && ! page._caucho_isModified())
+    
+    if (page != null && ! page._caucho_isModified()) {
       return page;
+    }
     else if (page != null && ! page.isDead()) {
       try {
         page.destroy();

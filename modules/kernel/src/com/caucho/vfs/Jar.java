@@ -95,6 +95,7 @@ public class Jar implements CacheListener {
     = new AtomicReference<ZipFile>();
 
   private Boolean _isSigned;
+  private Certificate[] _certificates;
 
   /**
    * Creates a new Jar.
@@ -282,11 +283,17 @@ public class Jar implements CacheListener {
    */
   public Certificate []getCertificates(String path)
   {
-    if (! isSigned())
+    if (! isSigned()) {
       return null;
+    }
     
-    if (path.length() > 0 && path.charAt(0) == '/')
+    if (_certificates != null) {
+      return _certificates;
+    }
+    
+    if (path.length() > 0 && path.charAt(0) == '/') {
       path = path.substring(1);
+    }
 
     try {
       if (! _backing.canRead())
@@ -307,7 +314,7 @@ public class Jar implements CacheListener {
 
           is.close();
 
-          return entry.getCertificates();
+          _certificates = entry.getCertificates();
         }
       } finally {
         closeJarFile(jarFile);
@@ -318,7 +325,7 @@ public class Jar implements CacheListener {
       return null;
     }
 
-    return null;
+    return _certificates;
   }
 
   /**

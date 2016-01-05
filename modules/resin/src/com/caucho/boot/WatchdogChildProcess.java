@@ -713,11 +713,13 @@ class WatchdogChildProcess
 
     jvmArgs.add("-Dresin.home=" + resinHome.getFullPath());
     
+    /*
     if (! _watchdog.hasXss())
       jvmArgs.add("-Xss1m");
 
     if (! _watchdog.hasXmx())
       jvmArgs.add("-Xmx256m");
+      */
     
     // #4308, #4585
     if (CauchoSystem.isWindows())

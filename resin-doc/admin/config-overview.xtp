@@ -81,7 +81,7 @@ admin_user     : my-admin
 admin_password : {SSHA}G3UOLv0dkJHTZxAwmhrIC2CRBZ4VJgTB
 </example>
 
-<p>The properties in resin.properties are convered into JSP EL variable
+<p>The properties in resin.properties are converted into JSP EL variable
 used by the resin.xml, like <em>port="${http}"</em>.</p>
 
 <p>Properties can be qualified by the server's name or by its

@@ -29,10 +29,15 @@
 
 package com.caucho.security.x509;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempOutputStream;
 
 /**
  * pkcs#10 is in PEM format, DER with base64  and --- BEGIN ---

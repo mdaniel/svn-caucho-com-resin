@@ -766,19 +766,19 @@ and reliability.</p>
 
 </s1>
 
-<defun title="&lt;access-log>">
+<defun title="&lt;access-log&gt;">
 
-<p>&lt;access-log> configures a HTTP access log for all virtual hosts
+<p>&lt;access-log&gt; configures a HTTP access log for all virtual hosts
 in the cluster.
 See <a href="http-virtual-hosts-ref.xtp#%3caccess-log%3d">access-log</a>
-in the &lt;host> tag for more information.</p>
+in the &lt;host&gt; tag for more information.</p>
 
 </defun>
 
-<defun title="&lt;cache>" version="Resin 3.1">
+<defun title="&lt;cache&gt;" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>&lt;cache> configures the proxy cache (requires Resin Professional).  The
+<p>&lt;cache&gt; configures the proxy cache (requires Resin Professional).  The
 proxy cache improves performance by caching the output of servlets,
 jsp and php pages.  For database-heavy pages, this caching can improve
 performance and reduce database load by several orders of magnitude.</p>
@@ -789,7 +789,7 @@ cache to save large amounts of data with little overhead.</p>
 <p>Management of the proxy cache uses the
 <a javadoc="com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
 
-<deftable title="&lt;cache> Attributes">
+<deftable title="&lt;cache&gt; Attributes">
 <tr>
   <th>Attribute</th>
   <th>Description</th>

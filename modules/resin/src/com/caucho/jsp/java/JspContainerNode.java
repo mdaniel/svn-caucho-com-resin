@@ -286,11 +286,13 @@ public abstract class JspContainerNode extends JspNode {
     for (int i = 0; _children != null && i < _children.size(); i++) {
       JspNode child = _children.get(i);
 
-      if (child instanceof CustomTag)
+      if (child instanceof CustomTag) {
         return true;
+      }
 
-      if (child.hasCustomTag())
+      if (child.hasCustomTag()) {
         return true;
+      }
     }
     
     for (int i = 0;
@@ -298,11 +300,13 @@ public abstract class JspContainerNode extends JspNode {
          i++) {
       Object value = _attributeValues.get(i);
 
-      if (value instanceof CustomTag)
+      if (value instanceof CustomTag) {
         return true;
+      }
       else if (value instanceof JspNode &&
-               ((JspNode) value).hasCustomTag())
+               ((JspNode) value).hasCustomTag()) {
         return true;
+      }
     }
 
     return false;
@@ -390,6 +394,7 @@ public abstract class JspContainerNode extends JspNode {
   /**
    * True if the node has scripting
    */
+  @Override
   public boolean hasScripting()
   {
     for (int i = 0; _children != null && i < _children.size(); i++) {

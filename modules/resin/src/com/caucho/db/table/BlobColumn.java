@@ -208,8 +208,9 @@ class BlobColumn extends Column {
     if (! isNull(block, rowOffset)) {
       long length = Inode.readLong(block, rowOffset + _columnOffset);
 
-      if (length < Table.INLINE_BLOB_SIZE)
+      if (length < Table.INLINE_BLOB_SIZE) {
         return;
+      }
       
       Inode inode = new Inode();
       inode.init(getTable(), xa, block, rowOffset + _columnOffset);

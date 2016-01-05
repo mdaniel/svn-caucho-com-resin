@@ -416,15 +416,19 @@ public class FileServlet extends GenericServlet {
     res.addHeader("ETag", etag);
     res.addHeader("Last-Modified", lastModified);
 
-    if (_isEnableRange && cauchoReq != null && cauchoReq.isTop())
+    if (_isEnableRange && cauchoReq != null && cauchoReq.isTop()) {
       res.addHeader("Accept-Ranges", "bytes");
-
-    if (_characterEncoding != null)
-      res.setCharacterEncoding(_characterEncoding);
-
+    }
+    
     String mime = cache.getMimeType();
-    if (mime != null)
+
+    if (_characterEncoding != null && isText(mime)) {
+      res.setCharacterEncoding(_characterEncoding);
+    }
+    
+    if (mime != null) {
       res.setContentType(mime);
+    }
 
     if (method.equalsIgnoreCase("HEAD")) {
       if (res instanceof CauchoResponse) {
@@ -468,6 +472,21 @@ public class FileServlet extends GenericServlet {
 
       OutputStream os = res.getOutputStream();
       cache.getPath().writeToStream(os);
+    }
+  }
+  
+  private boolean isText(String contentType)
+  {
+    if (contentType == null) {
+      return false;
+    }
+    else if (contentType.startsWith("text/")
+            || contentType.equals("application/json")
+            || contentType.startsWith("multipart/")) {
+      return true;
+    }
+    else {
+      return false;
     }
   }
 

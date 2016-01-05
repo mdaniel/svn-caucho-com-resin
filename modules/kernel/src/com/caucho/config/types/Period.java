@@ -229,10 +229,14 @@ public class Period {
    */
   private static long periodEnd(long now, long period, QDate cal)
   {
-    if (period < 0)
+    if (period < 0) {
       return Long.MAX_VALUE;
-    else if (period == 0)
+    }
+    else if (period == 0) {
       return now;
+    }
+    
+    long periodEnd;
 
     if (period < 30 * DAY) {
       cal.setGMTTime(now);
@@ -243,10 +247,10 @@ public class Period {
 
       cal.setLocalTime(localTime);
 
-      return cal.getGMTTime();
+      periodEnd =  cal.getGMTTime();
     }
 
-    if (period % (30 * DAY) == 0) {
+    else if (period % (30 * DAY) == 0) {
       int months = (int) (period / (30 * DAY));
 
       cal.setGMTTime(now);
@@ -257,10 +261,10 @@ public class Period {
       
       cal.setDate(year, month + months, 1);
 
-      return cal.getGMTTime();
+      periodEnd = cal.getGMTTime();
     }
 
-    if (period % (365 * DAY) == 0) {
+    else if (period % (365 * DAY) == 0) {
       long years = (period / (365 * DAY));
 
       cal.setGMTTime(now);
@@ -272,18 +276,25 @@ public class Period {
       
       cal.setDate(newYear, 0, 1);
 
-      return cal.getGMTTime();
+      periodEnd = cal.getGMTTime();
     }
+    else {
+      cal.setGMTTime(now);
 
-    cal.setGMTTime(now);
+      long localTime = cal.getLocalTime();
 
-    long localTime = cal.getLocalTime();
+      localTime = localTime + (period - (localTime + 4 * DAY) % period);
 
-    localTime = localTime + (period - (localTime + 4 * DAY) % period);
+      cal.setLocalTime(localTime);
 
-    cal.setLocalTime(localTime);
-
-    return cal.getGMTTime();
+      periodEnd = cal.getGMTTime();
+    }
+    
+    if (periodEnd <= now || now + 2 * period <= periodEnd) {
+      periodEnd = now + period;
+    }
+    
+    return periodEnd;
   }
 
   public String toString()

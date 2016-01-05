@@ -329,7 +329,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       DataStore dataStore = _dataStore;
       
       if (dataStore != null) {
-        return _dataStore.save(source, length);
+        return dataStore.save(source, length);
       }
       else {
         return -1;
@@ -600,6 +600,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       long removeCount = 0;
 
       ArrayList<Mnode> mnodeList = _expireState.selectExpiredData();
+      
+      if (mnodeList.size() > 0) {
+        log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items");
+      }
       
       // mnodeCount += mnodeList.size();
 

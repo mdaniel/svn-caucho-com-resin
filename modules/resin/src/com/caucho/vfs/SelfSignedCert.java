@@ -59,13 +59,13 @@ public class SelfSignedCert implements Serializable {
   private X509Certificate _cert;
   private PrivateKey _key;
   private transient KeyManagerFactory _kmf;
-  
+
   private SelfSignedCert(X509Certificate cert, PrivateKey key)
     throws Exception
   {
     _cert = cert;
     _key = key;
-    
+
     _kmf = getKeyManagerFactory();
   }
 
@@ -73,9 +73,6 @@ public class SelfSignedCert implements Serializable {
                                       String []cipherSuites)
   {
     try {
-      //String keyAlgName = "DSA";
-      //String sigAlgName = "SHA1WithDSA";
-      
       String keyAlgName = null;
       String sigAlgName = null;
 
@@ -99,10 +96,10 @@ public class SelfSignedCert implements Serializable {
       }
 
       if (sigAlgName == null) {
-        keyAlgName = "DSA";
-        sigAlgName = "SHA1WithDSA";
+        keyAlgName = "RSA";
+        sigAlgName = "SHA1WithRSA";
       }
-      
+
       String providerName = null;
       int keysize = 1024;
       int days = 365;
@@ -114,7 +111,7 @@ public class SelfSignedCert implements Serializable {
 
       PrivateKey privKey = keypair.getPrivateKey();
       X500Name x500name = new X500Name("CN=" + name);
-      
+
       X509Certificate cert
         = keypair.getSelfCertificate(x500name, days * 24 * 3600);
 
@@ -142,6 +139,15 @@ public class SelfSignedCert implements Serializable {
     return new X509Certificate[] { _cert };
   }
 
+  public boolean isExpired()
+  {
+    long expiry = _cert.getNotAfter().getTime() - 12 * 60 * 60 * 1000;
+
+    boolean isExpired = expiry < System.currentTimeMillis();
+
+    return isExpired;
+  }
+
   public KeyManager []getKeyManagers()
   {
     try {
@@ -150,7 +156,7 @@ public class SelfSignedCert implements Serializable {
       throw new RuntimeException(e);
     }
   }
-  
+
   private KeyManagerFactory getKeyManagerFactory()
     throws NoSuchAlgorithmException, IOException, GeneralSecurityException
   {
@@ -161,15 +167,15 @@ public class SelfSignedCert implements Serializable {
 
       ks.load(null, "password".toCharArray());
 
-        
+
       ks.setKeyEntry("anonymous", getPrivateKey(),
                      "key-password".toCharArray(), getCertificateChain());
-      
+
       kmf.init(ks, "key-password".toCharArray());
 
       _kmf = kmf;
     }
-      
+
     return _kmf;
   }
 
@@ -178,57 +184,57 @@ public class SelfSignedCert implements Serializable {
   {
     return getClass().getSimpleName() + "[" + _cert.getSubjectX500Principal() + "]";
   }
-  
+
   static class CertAndKeyGen {
     private Class<?> _cls;
     private Object _obj;
-    
+
     public CertAndKeyGen(String keyAlgName, String sigAlgName, String providerName)
       throws Exception
     {
       String clsName = "sun.security.x509.CertAndKeyGen";
       String clsName2 = "sun.security.tools.keytool.CertAndKeyGen";
-            
+
       try {
         _cls = Class.forName(clsName);
       }
-      catch (Exception e) {        
+      catch (Exception e) {
         _cls = Class.forName(clsName2);
       }
-      
+
       if (_cls == null) {
         throw new ConfigException(L.l("cannot find {0} nor {1}", clsName, clsName2));
       }
-            
+
       Constructor<?> cons = _cls.getConstructor(String.class, String.class, String.class);
       _obj = cons.newInstance(keyAlgName, sigAlgName, providerName);
     }
-    
+
     public void generate(int keySize)
       throws Exception
     {
       Method method = _cls.getMethod("generate", int.class);
-      
+
       method.invoke(_obj, keySize);
     }
-    
+
     public PrivateKey getPrivateKey()
       throws Exception
     {
       Method method = _cls.getMethod("getPrivateKey");
-      
+
       Object result = method.invoke(_obj);
-      
+
       return (PrivateKey) result;
     }
-    
+
     public X509Certificate getSelfCertificate(X500Name name, long days)
       throws Exception
     {
       Method method = _cls.getMethod("getSelfCertificate", X500Name.class, long.class);
-      
+
       Object result = method.invoke(_obj, name, days);
-      
+
       return (X509Certificate) result;
     }
   }

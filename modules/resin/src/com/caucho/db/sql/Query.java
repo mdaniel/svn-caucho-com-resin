@@ -709,7 +709,7 @@ abstract public class Query {
         return true;
       }
       
-      queryContext.lock();
+      // queryContext.lock();
 
       for (int i = rowLength - 1; i >= 0; i--) {
         TableIterator row = rows[i];
@@ -761,6 +761,22 @@ abstract public class Query {
     }
 
     return nextBlock(rowLength - 1, rows, rowLength, queryContext);
+  }
+  
+  protected boolean isSelect(QueryContext queryContext)
+    throws SQLException
+  {
+    Expr[] whereExprs = _whereExprs;
+    
+    for (int i = 0; i < whereExprs.length; i++) {
+      Expr whereExpr = whereExprs[i];
+      
+      if (whereExpr != null && ! whereExpr.isSelect(queryContext)) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   /**

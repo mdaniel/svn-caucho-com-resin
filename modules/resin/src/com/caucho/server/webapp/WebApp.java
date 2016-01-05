@@ -361,10 +361,6 @@ public class WebApp extends ServletContextImpl
   private ArrayList<ServletContextListener> _webAppListeners
     = new ArrayList<ServletContextListener>();
 
-  // List of the ServletContextAttributeListeners from the configuration file
-  private ArrayList<ServletContextAttributeListener> _attributeListeners
-    = new ArrayList<ServletContextAttributeListener>();
-
   // List of the ServletRequestListeners from the configuration file
   private ArrayList<ServletRequestListener> _requestListeners
     = new ArrayList<ServletRequestListener>();
@@ -1438,13 +1434,14 @@ public class WebApp extends ServletContextImpl
       config.setServletContext(this);
 
       config.setFilterName(filterName);
+
+      if (filter != null)
+        config.setFilter(filter);
+
       config.setFilterClass(className);
 
       if (filterClass != null)
         config.setFilterClass(filterClass);
-
-      if (filter != null)
-        config.setFilter(filter);
 
       addFilter(config);
 
@@ -2147,17 +2144,21 @@ public class WebApp extends ServletContextImpl
   {
     if (listenerObj instanceof ServletContextListener) {
       ServletContextListener scListener = (ServletContextListener) listenerObj;
-      _webAppListeners.add(scListener);
       
-      if (isStart) {
-        ServletContextEvent event = new ServletContextEvent(this);
+      if (! hasListener(_webAppListeners, listenerObj.getClass())) {
+        _webAppListeners.add(scListener);
+      
+        if (isStart) {
+          ServletContextEvent event = new ServletContextEvent(this);
 
-        scListener.contextInitialized(event);
+          scListener.contextInitialized(event);
+        }
       }
     }
 
-    if (listenerObj instanceof ServletContextAttributeListener)
+    if (listenerObj instanceof ServletContextAttributeListener) {
       addAttributeListener((ServletContextAttributeListener) listenerObj);
+    }
 
     if (listenerObj instanceof ServletRequestListener) {
       _requestListeners.add((ServletRequestListener) listenerObj);
@@ -2173,14 +2174,34 @@ public class WebApp extends ServletContextImpl
       _requestAttributeListeners.toArray(_requestAttributeListenerArray);
     }
 
-    if (listenerObj instanceof HttpSessionListener)
+    if (listenerObj instanceof HttpSessionListener) {
       getSessionManager().addListener((HttpSessionListener) listenerObj);
+    }
 
-    if (listenerObj instanceof HttpSessionAttributeListener)
+    if (listenerObj instanceof HttpSessionAttributeListener) {
       getSessionManager().addAttributeListener((HttpSessionAttributeListener) listenerObj);
+    }
 
-    if (listenerObj instanceof HttpSessionActivationListener)
+    if (listenerObj instanceof HttpSessionActivationListener) {
       getSessionManager().addActivationListener((HttpSessionActivationListener) listenerObj);
+    }
+  }
+
+  /**
+   * Returns true if a listener with the given type exists.
+   */
+  
+  public boolean hasListener(ArrayList<?> listeners, Class<?> listenerClass)
+  {
+    for (int i = 0; i < listeners.size(); i++) {
+      Object listener = _listeners.get(i);
+
+      if (listener.getClass().equals(listenerClass)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -5300,6 +5321,11 @@ public class WebApp extends ServletContextImpl
         isValid = true;
       } catch (RuntimeException exn) {
         _future.complete(exn);
+        isValid = true;
+      } catch (Error exn) {
+        log.log(Level.FINER, exn.toString(), exn);
+        
+        _future.complete(new IllegalStateException(exn));
         isValid = true;
       } finally {
         if (! isValid) {

@@ -54,6 +54,7 @@ import javax.annotation.*;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspPage;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -86,6 +87,7 @@ public class JspCompiler implements EnvironmentBean {
   private Path _classDir;
   private Path _appDir;
 
+  private JspManager _jspManager;
   private JspResourceManager _resourceManager;
   private TaglibManager _taglibManager;
   private final TagFileManager _tagFileManager;
@@ -107,6 +109,7 @@ public class JspCompiler implements EnvironmentBean {
   private HashSet<String> _fileExtensionSet = new HashSet<String>();
 
   private boolean _isVerbose;
+  private ClassLoader _parentLoader;
 
   public JspCompiler()
   {
@@ -118,6 +121,27 @@ public class JspCompiler implements EnvironmentBean {
     _loader = _system.getClassLoader();
 
     _tagFileManager = new TagFileManager(this);
+    _parentLoader = Thread.currentThread().getContextClassLoader();
+  }
+  
+  public void setJspManager(JspManager jspManager)
+  {
+    _jspManager = jspManager;
+  }
+  
+  public void setParentLoader(ClassLoader parentLoader)
+  {
+    _parentLoader = parentLoader;
+  }
+
+  public ClassLoader getParentLoader()
+  {
+    if (_jspManager != null) {
+      return _jspManager.getParentLoader();
+    }
+    else {
+      return _parentLoader;
+    }
   }
 
   /**
@@ -346,6 +370,7 @@ public class JspCompiler implements EnvironmentBean {
 
       _resin = new ResinEmbed();
       _resin.setRootDirectory(rootDirectory.getURL());
+      _resin.setIgnoreLock(true);
 
       WebAppEmbed webAppEmbed = new WebAppEmbed();
       webAppEmbed.setRootDirectory(rootDirectory.getURL());
@@ -528,7 +553,7 @@ public class JspCompiler implements EnvironmentBean {
   public Object loadClass(String className, boolean autoCompile)
     throws Throwable
   {
-    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+    ClassLoader parentLoader = getParentLoader();
     ClassLoader jspLoader = SimpleLoader.create(parentLoader,
                                                 getClassDir(), null);
 

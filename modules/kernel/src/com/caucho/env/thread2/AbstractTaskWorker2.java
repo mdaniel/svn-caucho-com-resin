@@ -69,7 +69,14 @@ abstract public class AbstractTaskWorker2
   {
     _classLoaderRef = new WeakReference<ClassLoader>(classLoader);
     
-    Environment.addWeakCloseListener(this, classLoader);
+    if (isWeakClose()) {    
+      Environment.addWeakCloseListener(this, classLoader);
+    }
+  }
+  
+  protected boolean isWeakClose()
+  {
+    return true;
   }
 
   protected boolean isPermanent()

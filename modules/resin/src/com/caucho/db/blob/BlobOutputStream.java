@@ -29,15 +29,16 @@
 
 package com.caucho.db.blob;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import com.caucho.db.block.BlockStore;
+import com.caucho.db.xa.DbTransaction;
 import com.caucho.db.xa.RawTransaction;
 import com.caucho.db.xa.StoreTransaction;
-import com.caucho.db.xa.DbTransaction;
+import com.caucho.util.Hex;
 import com.caucho.vfs.TempBuffer;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
 
 public class BlobOutputStream extends OutputStream {
   private StoreTransaction _xa;
@@ -113,6 +114,7 @@ public class BlobOutputStream extends OutputStream {
   /**
    * Writes a byte.
    */
+  @Override
   public void write(int v)
     throws IOException
   {

@@ -59,6 +59,8 @@ public class TimerTask implements AlarmListener, Closeable {
   private Serializable _data;
   private AtomicBoolean _isCancelled = new AtomicBoolean();
 
+  private EjbTimerContainer _timerService;
+
   /**
    * Constructs a new scheduled task.
    *
@@ -81,10 +83,15 @@ public class TimerTask implements AlarmListener, Closeable {
    * @param data
    *          The data to be passed to the invocation target.
    */
-  public TimerTask(TimeoutInvoker invoker, EjbTimer task,
-                   CronExpression cronExpression, Trigger trigger,
+  public TimerTask(EjbTimerContainer timerService,
+                   TimeoutInvoker invoker, 
+                   EjbTimer task,
+                   CronExpression cronExpression, 
+                   Trigger trigger,
                    Serializable data)
   {
+    _timerService = timerService;
+    
     _taskId = _currentTaskId.incrementAndGet();
 
     _invoker = invoker;
@@ -162,6 +169,10 @@ public class TimerTask implements AlarmListener, Closeable {
     Scheduler.removeTimerTask(this);
     _isCancelled.set(true);
     _alarm.dequeue();
+    
+    if (_timerService != null) {
+      _timerService.removeTimer(this);
+    }
   }
 
   /**

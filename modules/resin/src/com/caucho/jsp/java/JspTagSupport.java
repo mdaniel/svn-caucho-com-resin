@@ -28,16 +28,17 @@
 
 package com.caucho.jsp.java;
 
+import java.util.ArrayList;
+
+import javax.servlet.ServletException;
+import javax.servlet.jsp.tagext.JspFragment;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+
 import com.caucho.config.ConfigException;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
-
-import javax.servlet.ServletException;
-import javax.servlet.jsp.tagext.SimpleTagSupport;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-import java.util.ArrayList;
 
 /**
  * Represents the body for a SimpleTag
@@ -66,6 +67,12 @@ abstract public class JspTagSupport extends SimpleTagSupport
   public boolean _caucho_isModified()
   {
     return false;
+  }
+  
+  @Override
+  public JspFragment getJspBody()
+  {
+    return super.getJspBody();
   }
 
   @Override

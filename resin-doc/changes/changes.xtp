@@ -6,11 +6,67 @@
 
 <s1 title="Resin Change Log">
 
+<s2 title="4.0.47 - in progress">
 <ul>
-<li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
+<li>session: fixes related to Java deserialization (#5947, rep by Shinomiya Nobuaki)</li>
+<li>distcache: locking overhead reduced (#5962, rep by snicolai)</li>
+<li>distcache: update remove query and locking (#5952)</li>
+<li>session: fixes related to session removal/timeout (#5952, rep by S. Catna)</li>
+<li>compile: jdk5 compile issues (#6940, rep by anton_kg)</li>
+<li>cache/mmap: jdk6 compatibility issues (#5959, #5960, rep by S. Gavandi)</li>
 </ul>
+</s2>
 
-<s2 title="4.0.43 - in progress">
+<s2 title="4.0.46 - Oct 4, 2015">
+<ul>
+<li>jsp: tag loading issue due to WEB-INF case (#5936, rep by libor)</li>
+<li>table: improper early closing of file on shutdown (#5946)</li>
+<li>servlet: drop instantiation check for instances of servlets and filters (#5934, rep by msouthall)</li>
+<li>jsse-ssl: add support for honor-cipher-order (#5939)</li>
+<li>jsp: reflection not properly scoped to class-loader context (#5944, rep by Andreas Buchele)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.45 - Aug 6, 2015">
+<ul>
+<li>session: change shutdown state machine to allow getAttribute on invalidating session (#5919, rep by Shinomiya Nobuaki)</li>
+<li>build: remove LoadTimeWeaver (#5923, rep by M. Barker)</li>
+<li>watchdog: change default -Xss to 1m (#5927, rep by anupmondal)</li>
+<li>servlet: check for dual registration of ServletContextListener (#5893, rep by Matias Lagerwall)</li>
+<li>jsp: share classloading of .tag files (#5914, rep by nfedorov)</li>
+<li>dyn-server: on server restart, allow same address:port (#5903, rep by Tom Pohl)</li>
+<li>dyn-server: added lock in resin-data to ensure multiple servers cannot use same data (#5902, rep by Tom Pohl)</li>
+<li>ssl: allow OpenSSL ECC support for forward secrecy (#5906, rep by Nick Stephens)</li>
+<li>db: add validation and restart for corrupted BTree index (#5912, rep by wesleywu)</li>
+<li>build: allow for JDK 8 build (#5901, rep by dave)</li>
+<li>health: removed perm gen checks (#5910)</li>
+<li>ejb: ejbTimer.cancel() needs to remove timer from getTimers() (#5891, rep by bbik)</li>
+<li>servlet: FileService character-encoding should exclude images (#5907, rep by Mathias Lagerwall)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.44 - 2015-04-22">
+<ul>
+<li>jsee: self signed cert should support Firefox and Chrome default cipher-suites(#5884)</li>
+<li>jsee: self signed cert should check expire (#5885)</li>
+<li>class-loader: excessive reread of jar certificates (#5850, rep by konfetov)</li>
+<li>log: add sanity check for log rollover (#5845, rep by Keith F.)</li>
+<li>deploy (git): use utf-8 to store path names (#5874, rep by alpor9)</li>
+<li>websocket: setTimeout was being overridden by Port keepaliveTimeout (#5841, rep by A. Durairaju)</li>
+<li>jni: on windows, skip JNI for File metadata like length (#5865, rep by Mathias Lagerwall)</li>
+<li>db: isNull issues with left join (#5853, rep by Thomas Rogan)</li>
+<li>websocket: check for socket close on startTextMessage (#5837, rep by samadams)</li>
+<li>log: when log rollover fails, log to stderr (#5855, rep by Rock)</li>
+<li>filter: allow private instantiation (#5839, rep by V. Selvaggio)</li>
+<li>rewrite: added SetRequestCharacterEncoding (#5862, rep by Yoon)</li>
+<li>health: change health check timeout to critical instead of fatal to allow for development sleep (#5867)</li>
+<li>alarm: timing issue with warnings and alarm extraction (#4854, rep by SHinomiya Nobuaki)</li>
+<li>session: orphan deletion throttling needs faster retry time (rep by Thomas Rogan)</li>
+<li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.43 - 2015-02-10">
 <ul>
 <li>openssl: use SSL_free in connection close</li>
 <li>mod_caucho: slow PUT/POST uploads with Apache 2.4 (#5846, rep by Stegard)</li>
@@ -1660,6 +1716,11 @@ expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>
 </s2>
 
 <p>
+
+<ul>
+<li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
+</ul>
+
 <a href="changes-3.xtp">Resin 3 changes</a>
 <a href="changes-31.xtp">Resin 3.1 changes</a>
 <a href="changes-2.xtp">Resin 1.2 changes</a>

@@ -239,7 +239,14 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   @Override
   public final boolean isCommitted()
   {
-    return _response.isCommitted();
+    AbstractHttpResponse response = _response;
+    
+    if (response != null) {
+      return response.isCommitted();
+    }
+    else {
+      return true;
+    }
   }
 
   /**

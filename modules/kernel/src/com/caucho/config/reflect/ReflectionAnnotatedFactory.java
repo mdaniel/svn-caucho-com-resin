@@ -29,12 +29,14 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.loader.EnvironmentLocal;
-
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.util.WeakHashMap;
+
+import com.caucho.config.inject.InjectManager;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentLocal;
 
 /**
  * Factory for introspecting reflected types.
@@ -49,6 +51,10 @@ public class ReflectionAnnotatedFactory
 
   private WeakHashMap<Type,SoftReference<ReflectionAnnotatedType<?>>> _typeMap
     = new WeakHashMap<Type,SoftReference<ReflectionAnnotatedType<?>>>();
+  
+  private ReflectionAnnotatedFactory(ClassLoader loader)
+  {
+  }
 
   /**
    * Returns the factory for the given loader.
@@ -56,10 +62,10 @@ public class ReflectionAnnotatedFactory
   private static ReflectionAnnotatedFactory create(ClassLoader loader)
   {
     synchronized (_current) {
-      ReflectionAnnotatedFactory factory = _current.get(loader);
+      ReflectionAnnotatedFactory factory = _current.getLevel(loader);
 
       if (factory == null) {
-        factory = new ReflectionAnnotatedFactory();
+        factory = new ReflectionAnnotatedFactory(loader);
         _current.set(factory, loader);
       }
 
@@ -89,17 +95,18 @@ public class ReflectionAnnotatedFactory
 
     ReflectionSimpleAnnotatedType<T> annType = null;
 
-    if (typeRef != null)
+    if (typeRef != null) {
       annType = (ReflectionSimpleAnnotatedType<T>) typeRef.get();
+    }
 
-    if (type == null) {
+    if (annType == null) {
       InjectManager inject = InjectManager.create();
       BaseType baseType = inject.createSourceBaseType(type);
       
       annType = new ReflectionSimpleAnnotatedType(inject, baseType);
 
       typeRef = new SoftReference<ReflectionSimpleAnnotatedType<?>>(annType);
-
+      
       _simpleTypeMap.put(type, typeRef);
     }
 
@@ -142,8 +149,9 @@ public class ReflectionAnnotatedFactory
 
     ReflectionAnnotatedType<?> annType = null;
 
-    if (typeRef != null)
+    if (typeRef != null) {
       annType = typeRef.get();
+    }
 
     if (annType == null) {
       InjectManager inject = InjectManager.create();
@@ -156,7 +164,7 @@ public class ReflectionAnnotatedFactory
 
       _typeMap.put(type, typeRef);
     }
-
+    
     return (ReflectionAnnotatedType<X>) annType;
   }
 

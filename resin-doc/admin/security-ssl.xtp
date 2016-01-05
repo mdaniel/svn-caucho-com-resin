@@ -4,7 +4,7 @@
   <title>Resin 4.0 SSL support</title>
   <description>
   <p>Resin supports SSL for both HTTP transport level encryption as well as server 
-  authentication. Both Apache OpenSSL and JSSE aere supported as SSL implementations.</p>
+  authentication. Both Apache OpenSSL and JSSE are supported as SSL implementations.</p>
   </description>
 </header>
 
@@ -312,6 +312,9 @@ certificates (and documentation) from mod_ssl for Resin.</p>
         &lt;certificate-file&gt;keys/gryffindor.crt&lt;/certificate-file&gt;
         &lt;certificate-key-file&gt;keys/gryffindor.key&lt;/certificate-key-file&gt;
         &lt;password&gt;my-password&lt;/password&gt;
+        
+        &lt;!-- disables SSLv3 --&gt;
+        &lt;protocol&gt;-sslv3&lt;/protocol&gt;
       &lt;/openssl&gt;
    &lt;/http&gt;
   &lt;/server>
@@ -441,10 +444,7 @@ $ cat your_domain.crt ComodoSecurityServicesCA.crt GTECyberTrustRoot.crt &gt; ch
 
 <p>We recommend avoiding JSSE if possible. It is slower than using
 Resin's OpenSSL support and does not appear to be as stable as Apache
-or IIS (or Netscape/Zeus) for SSL support. In addition, JSSE is far
-more complicated to configure. While we've never received any problems
-with Resin using OpenSSL, or SSL from Apache or IIS, JSSE issues are
-fairly frequent.</p>
+or IIS for SSL support.</p>
 
 <s2 title="Install JSSE from Sun">
 
@@ -537,6 +537,9 @@ elements.</p>
        &lt;key-store-type&gt;jks&lt;/key-store-type&gt;
        &lt;key-store-file&gt;keys/server.keystore&lt;/key-store-file&gt;
        &lt;password&gt;changeit&lt;/password&gt;
+       
+       &lt;!-- set enabled protocols --&gt;
+       &lt;protocol&gt;tlsv1 tls1.1 tls1.2&lt;/protocol&gt;
      &lt;/jsse-ssl&gt;
     &lt;/http&gt;
 

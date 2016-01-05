@@ -102,7 +102,8 @@ public class FilterConfigImpl
     
     _filterClass = CauchoSystem.loadClass(filterClassName);
 
-    Config.validate(_filterClass, Filter.class);
+    if (_filter == null)
+      Config.validate(_filterClass, Filter.class);
   }
 
   @DisableConfig
@@ -110,7 +111,8 @@ public class FilterConfigImpl
   {
     _filterClass = filterClass;
 
-    Config.validate(_filterClass, Filter.class);
+    if (_filter == null)
+      Config.validate(_filterClass, Filter.class);
   }
 
   /**

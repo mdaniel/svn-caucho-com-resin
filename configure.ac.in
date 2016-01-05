@@ -921,12 +921,24 @@ if test -z "${jni_ld_shlib}"; then
         if test -n "$b64"; then
           CFLAGS="$CFLAGS -m64"
           plugin_cflags_shlib="-m64"
-          plugin_ldflags_shlib="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
+          
+          case $target_cpu in
+            *86*)
+              plugin_ldflags_shlib="-m64 -R /usr/sfw/lib/64";;
+            *)
+              plugin_ldflags_shlib="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9";;
+          esac
         fi
 
         if test -n "${b64_jni}"; then
           jni_cflags="$jni_cflags -m64"
-          jni_ldflags_shlib="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
+          
+          case $target_cpu in
+            *86*)
+              jni_ldflags_shlib="-m64 -R /usr/sfw/lib/64";;
+            *)
+              jni_ldflags_shlib="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9";;
+          esac
         fi
 
         jni_ldflags_shlib="$jni_ldflags_shlib -shared"
@@ -1048,7 +1060,11 @@ fi
 
 if test -z "${apache_ldflags_shlib}"; then
   apache_cflags_shlib=$plugin_cflags_shlib
-  apache_ld_shlib=$plugin_ld_shlib
+  
+  if test -n "$(plugin_ld_shlib)"; then
+    apache_ld_shlib=$plugin_ld_shlib
+  fi
+
 #  apache_ldflags_shlib=$plugin_ldflags_shlib
   apache_libs_shlib=$plugin_libs_shlib
 fi    

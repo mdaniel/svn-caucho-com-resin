@@ -45,6 +45,7 @@ import com.caucho.db.Database;
 import com.caucho.env.health.HealthSystemFacade;
 // import com.caucho.db.lock.Lock;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
@@ -181,7 +182,7 @@ public class BlockStore {
   private long _blockLockTimeout = 120000;
 
   private final Lifecycle _lifecycle = new Lifecycle();
-
+  
   public BlockStore(Database database,
                     String name,
                     ReadWriteLock tableLock)
@@ -251,11 +252,14 @@ public class BlockStore {
 
     _writer = new BlockWriter(this);
 
-    if (rowLock == null)
+    if (rowLock == null) {
       rowLock = new ReentrantReadWriteLock();
+    }
 
     rowLock.readLock();
     _rowWriteLock = rowLock.writeLock();
+    
+    Environment.addCloseListener(this);
   }
 
   /**
@@ -775,14 +779,17 @@ public class BlockStore {
       if (_freeAllocIndex < _blockCount)
         return;
 
-      if (_blockCount < 256)
+      if (_blockCount < 256) {
         newBlockCount = _blockCount + 1;
-      else
+      }
+      else {
         newBlockCount = _blockCount + 256;
+      }
 
-      if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize())
+      if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize()) {
         newBlockCount = _readWrite.getFileSize() / BLOCK_SIZE;
-
+      }
+      
       while (_allocationTable.length / ALLOC_BYTES_PER_BLOCK
              < newBlockCount) {
         // expand the allocation table
@@ -933,7 +940,7 @@ public class BlockStore {
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
-    if (_allocationTable.length <= allocOffset) {
+    if (allocOffset < 0 || _allocationTable.length <= allocOffset) {
       return -1;
     }
 
@@ -1892,8 +1899,9 @@ public class BlockStore {
    */
   public void close()
   {
-    if (! _lifecycle.toDestroy())
+    if (! _lifecycle.toDestroy()) {
       return;
+    }
 
     log.finer(this + " closing");
     BlockManager blockManager = _blockManager;
@@ -2017,6 +2025,6 @@ public class BlockStore {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "]";
+    return getClass().getSimpleName() + "[" + _id + "," + _path + "]";
   }
 }
