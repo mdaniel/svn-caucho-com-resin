@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.statement;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.BreakValue;
 import com.caucho.quercus.env.ContinueValue;
@@ -36,9 +39,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.AbstractVarExpr;
 import com.caucho.quercus.expr.Expr;
-
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Represents a foreach statement.
@@ -87,6 +87,7 @@ public class ForeachStatement
 
   public Value execute(Env env)
   {
+    env.notifyNewDebugLocation(getLocation());
     Value origObj = _objExpr.eval(env);
     Value obj = origObj.copy(); // php/0669
 
