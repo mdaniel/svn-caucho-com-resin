@@ -852,6 +852,9 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static String phpversion(Env env, @Optional StringValue module)
   {
+    if (module != null && module.equalsString("xdebug")) {
+      return "2.2.7";
+    }
     return env.getQuercus().getPhpVersion();
   }
 

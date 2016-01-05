@@ -3301,7 +3301,7 @@ public class Env
     
     if (_xdebugConnection == null) {
       _xdebugConnection = new XdebugConnection(this);
-      _xdebugConnection.connect(call.getLocation());
+      _xdebugConnection.connect(call.getLocation(), this);
     }
     notifyNewDebugLocation(call.getLocation());
 

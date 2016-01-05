@@ -59,5 +59,7 @@ com.caucho.quercus.lib.zip.ZipModule
 com.caucho.quercus.lib.zlib.ZlibModule
 com.caucho.quercus.lib.bam.BamModule
 com.caucho.quercus.lib.ResinModule
+com.caucho.quercus.lib.ResinModule
+com.caucho.quercus.env.xdebug.XdebugModule
 
 

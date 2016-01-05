@@ -32,7 +32,7 @@ public class XdebugConnection
   private final static String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
 
   public static enum State {
-    STARTING("starting"), RUNNING("running"), BREAK("break"), STOPPED("stopped"), STOPPING(
+    DISABLED("disabled"), STARTING("starting"), RUNNING("running"), BREAK("break"), STOPPED("stopped"), STOPPING(
         "stopping");
     private String name;
 
@@ -49,7 +49,7 @@ public class XdebugConnection
   private Map<String, XdebugCommand> commandsMap;
   private Socket _socket;
   private Env _env;
-  private State _state = State.STARTING;
+  private State _state = State.DISABLED;
   private String _lastCommand;
   private XdebugResponse _lastStateChangingResponse;
   private int nextBreakpointId = 1000000;
@@ -68,9 +68,10 @@ public class XdebugConnection
 
   public XdebugConnection(Env env) {
     _env = env;
-    if (!isXdebugSessionActivated()) {
+    if (!isXdebugSessionActivated(env)) {
       return;
     }
+    _state = State.STARTING;
     commandsMap = new HashMap<String, XdebugCommand>();
     commandsMap.put("feature_set", new FeatureSetCommand());
     commandsMap.put("feature_get", new FeatureGetCommand());
@@ -90,7 +91,7 @@ public class XdebugConnection
     commandsMap.put("breakpoint_remove", new BreakpointRemoveCommand());
     commandsMap.put("stop", new StopCommand());
     try {
-      _socket = new Socket("localhost", 9000);
+      _socket = new Socket(XdebugModule.INI_REMOTE_HOST.getAsString(env), (int) XdebugModule.INI_REMOTE_PORT.getAsLong(env));
 
       new Thread("xdebug reader") {
         public void run() {
@@ -132,27 +133,42 @@ public class XdebugConnection
     }
   }
 
-  private boolean isXdebugSessionActivated() {
-    boolean isActive = false;
+  private boolean isXdebugSessionActivated(Env env) {
     if (System.getenv("XDEBUG_CONFIG") != null) {
-      isActive = true;
-    } else {
-      Value sessionStart = eval("isset($_GET['XDEBUG_SESSION_START']) ? $_GET['XDEBUG_SESSION_START'] : null");
-      if (sessionStart != null && !sessionStart.isNull()) {
-        eval("$_COOKIE['XDEBUG_SESSION'] = '" + sessionStart + "'");
-        isActive = true;
-      } else {
-        Value xdebugSession = eval("isset($_COOKIE['XDEBUG_SESSION']) ? $_COOKIE['XDEBUG_SESSION'] : null");
-        if (xdebugSession != null && !xdebugSession.isNull() && xdebugSession.length() > 0) {
-          isActive = true;
+      // XDEBUG_CONFIG is something like "idekey=session_name remote_host=localhost profiler_enable=1"
+      for (String spaceSeparatedPart : System.getenv("XDEBUG_CONFIG").split(" ")) {
+        if (spaceSeparatedPart.trim().length() > 0) {
+          // spaceSeparatedPart is something like "idekey=session_name"
+          String[] equalSignSeparatedParts = spaceSeparatedPart.trim().split("=");
+          if (equalSignSeparatedParts.length == 2) {
+            if (equalSignSeparatedParts[0].toLowerCase().equals("idekey")) {
+              XdebugModule.INI_IDEKEY.set(env, equalSignSeparatedParts[1]);
+            }
+          }
         }
       }
+      return true;
     }
-    return isActive;
+
+    Value sessionStart = eval("isset($_GET['XDEBUG_SESSION_START']) ? $_GET['XDEBUG_SESSION_START'] : null");
+    if (sessionStart != null && !sessionStart.isNull()) {
+      eval("$_COOKIE['XDEBUG_SESSION'] = '" + sessionStart + "'");
+      XdebugModule.INI_IDEKEY.set(env, sessionStart);
+      return true;
+    } else {
+      Value xdebugSession = eval("isset($_COOKIE['XDEBUG_SESSION']) ? $_COOKIE['XDEBUG_SESSION'] : null");
+      if (xdebugSession != null && !xdebugSession.isNull()
+          && xdebugSession.length() > 0) {
+        XdebugModule.INI_IDEKEY.set(env, xdebugSession);
+        return true;
+      }
+    }
+
+    return XdebugModule.INI_REMOTE_ENABLE.getAsBoolean(env);
   }
 
-  public void connect(Location location) {
-    if (!isConnected() || !isXdebugSessionActivated()) {
+  public void connect(Location location, Env env) {
+    if (!isConnected() || _state == State.DISABLED) {
       return;
     }
     _state = State.STARTING;
@@ -164,7 +180,7 @@ public class XdebugConnection
     String fileuri = getFileURI(location.getFileName());
     final String initMsg = "<init xmlns=\"urn:debugger_protocol_v1\" xmlns:xdebug=\"http://xdebug.org/dbgp/xdebug\" fileuri=\""
         + fileuri
-        + "\" language=\"PHP\" protocol_version=\"1.0\" appid=\"15986\" idekey=\"XDEBUG_ECLIPSE\"><engine version=\"2.2.7\"><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2015 by Derick Rethans]]></copyright></init>";
+        + "\" language=\"PHP\" protocol_version=\"1.0\" appid=\"15986\" idekey=\"" + XdebugModule.INI_IDEKEY.getAsString(env) + "\"><engine version=\"2.2.7\"><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2015 by Derick Rethans]]></copyright></init>";
     try {
       sendPacket(initMsg);
     } catch (IOException e) {

@@ -32,7 +32,8 @@ package com.caucho.quercus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.QuercusPage;
@@ -40,7 +41,6 @@ import com.caucho.vfs.InputStreamStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StdoutStream;
-import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.StringPath;
 import com.caucho.vfs.WriteStream;
 
@@ -122,8 +122,15 @@ public class Quercus
 
     int i = 0;
     for (; i < args.length; i++) {
-      if ("-d".equals(args[i])) {
-        String arg = args[i + 1];
+      if (args[i].startsWith("-d")) {
+        String arg;
+        if ("-d".equals(args[i])) {
+          arg = args[i + 1];
+          i++;
+        } else {
+          // e.g. -dxdebug.remote_enable=1
+          arg = args[i].substring(2);
+        }
         int eqIndex = arg.indexOf('=');
 
         String name;
@@ -138,7 +145,6 @@ public class Quercus
           value = "";
         }
 
-        i++;
         setIni(name, value);
       }
       else if ("-f".equals(args[i])) {
