@@ -5000,22 +5000,23 @@ public class Env
 
     StringValue message = createString(e.getMessage());
     
-    if ((e instanceof QuercusException) && e.getCause() != null) {
-      for (StackTraceElement element : e.getCause().getStackTrace()) {
-        if (element.getClassName().startsWith("com.caucho.quercus")) {
-          break;
-        }
-        message.append("\n  at ");
-        message.append(element.getClassName());
-        message.append(".");
-        message.append(element.getMethodName());
-        message.append("(");
-        message.append(element.getFileName());
-        message.append(":");
-        message.append(element.getLineNumber());
-        message.append(")");
+    Throwable cause = ((e instanceof QuercusException) && e.getCause() != null) ? e.getCause() : e;
+    
+    for (StackTraceElement element : cause.getStackTrace()) {
+      if (element.getClassName() != null && element.getClassName().startsWith("com.caucho.quercus")) {
+        break;
       }
+      message.append("\n  at ");
+      message.append(element.getClassName() != null ? element.getClassName() : "");
+      message.append(".");
+      message.append(element.getMethodName() != null ? element.getMethodName() : "");
+      message.append("(");
+      message.append(element.getFileName() != null ? element.getFileName() : "");
+      message.append(":");
+      message.append(element.getLineNumber());
+      message.append(")");
     }
+
 
     Value []args = { message };
 
