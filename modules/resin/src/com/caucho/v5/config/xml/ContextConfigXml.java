@@ -61,6 +61,7 @@ import com.caucho.v5.config.program.RecoverableProgram;
 import com.caucho.v5.config.type.ConfigType;
 import com.caucho.v5.config.type.StringType;
 import com.caucho.v5.config.type.TypeFactoryConfig;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.util.L10N;
@@ -73,8 +74,6 @@ import com.caucho.v5.xml.QDocument;
 import com.caucho.v5.xml.QElement;
 import com.caucho.v5.xml.QNode;
 import com.caucho.v5.xml.XmlUtil;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * The ConfigContext contains the state of the current configuration.
@@ -563,7 +562,7 @@ public class ContextConfigXml extends ContextConfig
       qualifier = configureChildBean(qualifier, qualifierType,
                                      childNode, attrStrategy);
       
-      InjectManager cdiManager = InjectManager.current();
+      InjectManagerAmp cdiManager = InjectManagerAmp.current();
       
       Class<?> attrType = attrStrategy.getConfigType().getType();
       

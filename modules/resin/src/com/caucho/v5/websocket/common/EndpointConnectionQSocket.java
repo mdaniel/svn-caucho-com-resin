@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.io.IoUtil;
-import com.caucho.v5.vfs.QSocket;
+import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -45,20 +45,20 @@ public class EndpointConnectionQSocket implements EndpointConnection {
   private static final Logger log
     = Logger.getLogger(EndpointConnectionQSocket.class.getName());
   
-  private QSocket _s;
+  private SocketBar _s;
   private ReadStream _is;
   private WriteStream _os;
 
   private long _idleTimeout;
   
-  public EndpointConnectionQSocket(QSocket s) throws IOException
+  public EndpointConnectionQSocket(SocketBar s) throws IOException
   {
     _s = s;
     _is = new ReadStream(_s.getStream());
     _os = new WriteStream(_s.getStream());
   }
   
-  public QSocket getQSocket()
+  public SocketBar getQSocket()
   {
     return _s;
   }
@@ -97,7 +97,7 @@ public class EndpointConnectionQSocket implements EndpointConnection {
   public void disconnect()
   {
     synchronized (this) {
-      QSocket s = _s;
+      SocketBar s = _s;
       _s = null;
 
       ReadStream is = _is;
@@ -124,7 +124,7 @@ public class EndpointConnectionQSocket implements EndpointConnection {
   public void closeWrite()
   {
     synchronized (this) {
-      QSocket s = _s;
+      SocketBar s = _s;
 
       WriteStream os = _os;
       _os = null;

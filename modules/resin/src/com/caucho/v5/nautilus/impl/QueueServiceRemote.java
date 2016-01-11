@@ -227,7 +227,7 @@ class QueueServiceRemote extends QueueServiceBase
       
       String url = "champ://" + server.getId() + NautilusService.PATH;
       
-      _nautilusService = rampManager.lookup(url).as(NautilusService.class);
+      _nautilusService = rampManager.service(url).as(NautilusService.class);
     }
     
     return _nautilusService;

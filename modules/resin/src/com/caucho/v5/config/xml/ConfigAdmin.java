@@ -53,7 +53,7 @@ public class ConfigAdmin extends ManagedObjectBase implements ConfigMXBean
     
     // caching for efficiency... can Path attributes change?
     _url = _path.getURL();
-    _length = _path.getLength();
+    _length = _path.length();
     _lastModified = _path.getLastModified();
     _crc64 = _path.getCrc64();
   }

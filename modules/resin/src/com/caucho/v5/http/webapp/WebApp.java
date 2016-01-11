@@ -107,6 +107,7 @@ import com.caucho.v5.http.security.Login;
 import com.caucho.v5.http.security.LoginConfig;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.javac.WorkDir;
@@ -129,8 +130,6 @@ import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Resin's webApp implementation.
@@ -171,7 +170,7 @@ public class WebApp extends ServletContextImpl
   private WebAppController _controller;
 
   // The inject container
-  private InjectManager _injectManager;
+  private InjectManagerAmp _injectManager;
 
   private InvocationDecoder _invocationDecoder;
 
@@ -349,7 +348,7 @@ public class WebApp extends ServletContextImpl
       
       _invocationDependency.add(_controller);
 
-      _injectManager = InjectManager.create(_classLoader);
+      _injectManager = InjectManagerAmp.create(_classLoader);
       
       // validation
       if (CauchoUtil.isTesting()) {
@@ -479,7 +478,7 @@ public class WebApp extends ServletContextImpl
     return _invocationDecoder;
   }
   
-  public InjectManager getInjectManager()
+  public InjectManagerAmp getInjectManager()
   {
     return _injectManager;
   }
@@ -1282,7 +1281,7 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getId());
 
-      _injectManager = InjectManager.current();
+      _injectManager = InjectManagerAmp.current();
       
       // env/0e3a
       // _cdiManager.update();

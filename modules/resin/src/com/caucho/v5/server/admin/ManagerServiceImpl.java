@@ -89,7 +89,7 @@ public class ManagerServiceImpl
   {
     ServiceManagerAmp manager = AmpSystem.getCurrentManager();
     
-    manager.service(this).address("/manager").ref();
+    manager.newService(this).address("/manager").ref();
   }
 
   @PostConstruct

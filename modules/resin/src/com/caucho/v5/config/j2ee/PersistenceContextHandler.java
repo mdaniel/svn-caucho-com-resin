@@ -35,9 +35,8 @@ import javax.persistence.PersistenceContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Handles the @PersistenceContext annotation for JavaEE
@@ -45,7 +44,7 @@ import io.baratine.inject.InjectManager;
 public class PersistenceContextHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(PersistenceContextHandler.class);
 
-  public PersistenceContextHandler(InjectManager manager)
+  public PersistenceContextHandler(InjectManagerAmp manager)
   {
     super(manager);
   }

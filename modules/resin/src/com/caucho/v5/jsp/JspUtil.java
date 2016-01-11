@@ -29,20 +29,18 @@
 
 package com.caucho.v5.jsp;
 
-import java.util.function.Supplier;
-
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
+import javax.inject.Provider;
 
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.MethodExpressionImpl;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 import com.caucho.v5.jsp.el.JspELParser;
 import com.caucho.v5.util.ModulePrivate;
-
-import io.baratine.inject.InjectManager;
 
 @ModulePrivate
 public class JspUtil
@@ -70,9 +68,9 @@ public class JspUtil
     return parser.parse();
   }
   
-  public static <T> Supplier<T> getInjectFactory(Class<T> cl)
+  public static <T> Provider<T> getInjectFactory(Class<T> cl)
   {
-    InjectManager cdiManager = InjectManager.create();
+    InjectManagerAmp cdiManager = InjectManagerAmp.create();
     
     //Bean<T> bean = cdiManager.createManagedBean(cl);
     

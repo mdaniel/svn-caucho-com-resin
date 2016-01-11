@@ -75,7 +75,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WaitFuture;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.QServerSocket;
+import com.caucho.v5.vfs.ServerSocketBar;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -509,7 +509,7 @@ class ChildWatchdogProcess
     
     _linkWatchdogImpl = new LinkWatchdogServiceImpl(this, _child.getService(), link);
 
-    _linkWatchdog = link.service(_linkWatchdogImpl)
+    _linkWatchdog = link.newService(_linkWatchdogImpl)
                         .address("public:///watchdog")
                         .as(LinkWatchdogService.class);
     
@@ -573,12 +573,12 @@ class ChildWatchdogProcess
     if (boot != null) {
       boot.clearSaveOnExec();
 
-      ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
+      ArrayList<ServerSocketBar> boundSockets = new ArrayList<ServerSocketBar>();
 
       try {
         if (_child.getUserName() != null) {
           for (OpenPort port : _child.getPorts()) {
-            QServerSocket ss = port.bindForWatchdog();
+            ServerSocketBar ss = port.bindForWatchdog();
 
             if (ss == null)
               continue;

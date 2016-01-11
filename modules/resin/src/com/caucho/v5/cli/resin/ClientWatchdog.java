@@ -100,7 +100,7 @@ public class ClientWatchdog implements AutoCloseable
   public WatchdogService getWatchdogService()
   {
     if (_watchdog == null) {
-      _watchdog = _client.lookup("remote:///watchdog")
+      _watchdog = _client.service("remote:///watchdog")
           .as(WatchdogService.class);
     }
     

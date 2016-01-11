@@ -31,7 +31,7 @@ package com.caucho.v5.websocket.common;
 
 import java.io.IOException;
 
-import com.caucho.v5.vfs.QSocket;
+import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -40,7 +40,7 @@ import com.caucho.v5.vfs.WriteStream;
  */
 public interface EndpointConnection
 {
-  QSocket getQSocket();
+  SocketBar getQSocket();
   
   ReadStream getInputStream()
     throws IOException;

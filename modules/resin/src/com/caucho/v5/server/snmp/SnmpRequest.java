@@ -121,7 +121,7 @@ public class SnmpRequest implements ConnectionProtocol
   public StateConnection service() 
     throws IOException
   {
-    ReadStream in = _connection.getReadStream();
+    ReadStream in = null;//_connection.getReadStream();
     
     SnmpParser parser = new SnmpParser(in);
     SnmpMessageValue req = parser.readMessage();
@@ -161,7 +161,7 @@ public class SnmpRequest implements ConnectionProtocol
   final protected void sendResponse(SnmpValue response)
     throws IOException
   {
-    OutputStream out = _connection.getWriteStream();
+    OutputStream out = _connection.writeStream();
     
     StringBuilder sb = new StringBuilder();
     response.toAsn1(sb);

@@ -62,7 +62,7 @@ public class ResponseAdapterToChar extends ResponseAdapter {
   }
 
   @Override
-  protected OutResponseBase createWrapperResponseStream()
+  protected OutResponseBase2 createWrapperResponseStream()
   {
     if (_responseStream == null) {
       _responseStream = new ToCharResponseStreamWrapper();

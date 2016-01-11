@@ -41,7 +41,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseCauchoWrapper;
 import com.caucho.v5.http.protocol.WriterHttp;
@@ -67,7 +67,7 @@ public class ResponseInclude extends ResponseCauchoWrapper
   private RequestInclude _request;
 
   private QDate _calendar = new QDate();
-  private OutResponseBase _stream;
+  private OutResponseBase2 _stream;
   private FilterChainHttpCacheBase _cacheInvocation;
   
   private boolean _isForwardEnclosed;
@@ -269,7 +269,7 @@ public class ResponseInclude extends ResponseCauchoWrapper
   /**
    * Sets the ResponseStream
    */
-  public void setResponseStream(OutResponseBase responseStream)
+  public void setResponseStream(OutResponseBase2 responseStream)
   {
     _stream = responseStream;
 
@@ -280,7 +280,7 @@ public class ResponseInclude extends ResponseCauchoWrapper
   /**
    * Gets the response stream.
    */
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
     return _stream;
   }
@@ -288,7 +288,7 @@ public class ResponseInclude extends ResponseCauchoWrapper
   /**
    * Gets the response stream.
    */
-  public OutResponseBase getOriginalStream()
+  public OutResponseBase2 getOriginalStream()
   {
     return _originalStream;
   }

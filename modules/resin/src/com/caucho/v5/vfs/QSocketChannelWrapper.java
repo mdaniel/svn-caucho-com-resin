@@ -31,7 +31,7 @@ package com.caucho.v5.vfs;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.ModulePrivate;
-import com.caucho.v5.vfs.QSocket;
+import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.SocketChannelStream;
 import com.caucho.v5.vfs.StreamImpl;
 
@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 @ModulePrivate
-public class QSocketChannelWrapper extends QSocket {
+public class QSocketChannelWrapper extends SocketBar {
   private static final Logger log
     = Logger.getLogger(QSocketChannelWrapper.class.getName());
   private static Class<?> sslSocketClass;

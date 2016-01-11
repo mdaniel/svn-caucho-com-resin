@@ -87,7 +87,7 @@ public class LinkChildServiceImpl
   {
     _linkServer = linkServer;
     
-    _linkWatchdog = _linkServer.lookup("remote:///watchdog")
+    _linkWatchdog = _linkServer.service("remote:///watchdog")
                                .as(LinkWatchdogService.class);
   }
   

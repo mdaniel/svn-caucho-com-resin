@@ -69,7 +69,7 @@ class EndpointNautilusBase extends Endpoint
     
     ServiceManagerAmp ampManager = Amp.newManager();
     
-    _writer = ampManager.service(writerImpl).as(WriterNautilus.class);
+    _writer = ampManager.newService(writerImpl).as(WriterNautilus.class);
   }
 
   @Override

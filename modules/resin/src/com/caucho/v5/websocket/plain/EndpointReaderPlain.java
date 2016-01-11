@@ -82,7 +82,7 @@ public class EndpointReaderPlain
   {
     Objects.requireNonNull(is);
 
-    _is.init(_session, is);
+    //_is.init(_session, is);
   }
   
   @Override

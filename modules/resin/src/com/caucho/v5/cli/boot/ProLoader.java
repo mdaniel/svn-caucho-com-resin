@@ -95,7 +95,7 @@ public class ProLoader extends SecureClassLoader
 
     PathImpl path = _resinJar.lookup(className);
 
-    int length = (int) path.getLength();
+    int length = (int) path.length();
 
     if (length > 0
         && (className.startsWith("com/caucho/bootjni")

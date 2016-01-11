@@ -47,7 +47,7 @@ import javax.websocket.Session;
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.QSocket;
+import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.vfs.net.SocketSystem;
@@ -268,7 +268,7 @@ public class WebSocketClientServlet
 
     SocketSystem network = SocketSystem.current();
 
-    QSocket s = network.connect(addr.getAddress(), addr.getPort(), connectTimeout);
+    SocketBar s = network.connect(addr.getAddress(), addr.getPort(), connectTimeout);
 
     /*
     Socket s = new Socket();

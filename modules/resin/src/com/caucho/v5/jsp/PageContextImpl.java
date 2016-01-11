@@ -81,7 +81,7 @@ import org.w3c.dom.Node;
 import com.caucho.v5.config.DisplayableException;
 import com.caucho.v5.el.Expr;
 import com.caucho.v5.el.ExprEnv;
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.http.protocol.RequestAdapter;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseAdapterToChar;
@@ -133,7 +133,7 @@ public class PageContextImpl extends PageContext
   private String _errorPage;
   protected boolean _isFilled;
 
-  private OutResponseBase _responseStream;
+  private OutResponseBase2 _responseStream;
 
   private BodyResponseStream _bodyResponseStream;
 
@@ -812,7 +812,7 @@ public class PageContextImpl extends PageContext
   {
     ResponseCaucho response = getCauchoResponse();
 
-    OutResponseBase currentStream = response.getResponseStream();
+    OutResponseBase2 currentStream = response.getResponseStream();
 
     response.setResponseStream(_responseStream);
 

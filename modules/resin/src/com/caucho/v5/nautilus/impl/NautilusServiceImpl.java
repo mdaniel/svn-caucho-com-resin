@@ -145,7 +145,7 @@ public class NautilusServiceImpl
       
       String url = "champ://" + _serverId + NautilusService.PATH;
       
-      _nautilusRemote = _rampManager.lookup(url)
+      _nautilusRemote = _rampManager.service(url)
                                     .as(NautilusService.class);
       
       ReceiverMode mode = ReceiverMode.CONSUME;

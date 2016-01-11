@@ -52,9 +52,8 @@ import com.caucho.v5.config.annotation.DisableConfig;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.CauchoUtil;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for a filter.
@@ -430,7 +429,7 @@ public class FilterConfigImpl
   {
   }
 
-  public Filter create(InjectManager inject)
+  public Filter create(InjectManagerAmp inject)
     throws ServletException
   {
     if (_filter != null) {

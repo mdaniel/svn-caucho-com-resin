@@ -61,7 +61,7 @@ public class LinkServer extends LinkHamp
     
     serverLinkImpl.initLink(this);
     
-    service(serverLinkImpl).address("public:///server")
+    newService(serverLinkImpl).address("public:///server")
                            .ref();
   }
 

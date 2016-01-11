@@ -76,7 +76,7 @@ public class LinkWatchdogServiceImpl
                 .build();
                 */
     
-    _serverLinkService = _rampManager.lookup("remote:///server")
+    _serverLinkService = _rampManager.service("remote:///server")
                                      .as(LinkChildService.class);
     
     _child = child;

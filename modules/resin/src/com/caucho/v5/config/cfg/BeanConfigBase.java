@@ -39,9 +39,8 @@ import javax.inject.Qualifier;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.custom.CustomBean;
 import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Backwards compatibility class for 3.1-style &lt;jms-queue>, etc.
@@ -229,7 +228,7 @@ abstract public class BeanConfigBase {
   
   protected <X> Bean<X> deploy()
   {
-    InjectManager beanManager = InjectManager.create();
+    InjectManagerAmp beanManager = InjectManagerAmp.create();
 
     //AnnotatedTypeImpl<X> beanType = buildAnnotatedType();
 

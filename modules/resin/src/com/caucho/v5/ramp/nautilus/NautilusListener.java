@@ -78,7 +78,7 @@ class NautilusListener
   }
 
   @Override
-  public ServiceRefAmp lookup(String address)
+  public ServiceRefAmp service(String address)
   {
     return _consumer;
   }

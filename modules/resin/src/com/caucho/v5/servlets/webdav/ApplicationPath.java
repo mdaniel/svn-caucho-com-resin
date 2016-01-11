@@ -106,7 +106,7 @@ public class ApplicationPath extends AbstractPath {
                         ServletContext app)
     throws IOException
   {
-    return getPath(path, request, app).getLength();
+    return getPath(path, request, app).length();
   }
   
   /**

@@ -48,7 +48,7 @@ public abstract class ManagementCommandBase extends RemoteCommandBase
     throws BootArgumentException
   {
     ManagerClientApi managerClient
-      = client.lookup("remote:///manager").as(ManagerClientApi.class);
+      = client.service("remote:///manager").as(ManagerClientApi.class);
 
     return doCommand(args, server, managerClient);
   }

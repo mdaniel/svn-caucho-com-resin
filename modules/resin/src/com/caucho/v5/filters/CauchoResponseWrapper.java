@@ -43,7 +43,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseWrapper;
 import com.caucho.v5.http.protocol.WriterHttp;
@@ -61,7 +61,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
   private FlushBuffer _flushBuffer;
   
   private final FilterWrapperResponseStream _originalStream;
-  protected OutResponseBase _stream;
+  protected OutResponseBase2 _stream;
 
   private WriterHttp _writer;
   private ServletOutputStreamImpl _os;
@@ -140,7 +140,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
    * Sets the ResponseStream
    */
   @Override
-  public void setResponseStream(OutResponseBase stream)
+  public void setResponseStream(OutResponseBase2 stream)
   {
     _stream = stream;
 
@@ -152,7 +152,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
    * Gets the response stream.
    */
   @Override
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
     return _stream;
   }

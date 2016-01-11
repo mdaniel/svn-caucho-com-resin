@@ -47,7 +47,7 @@ public class JmxClient
 
     ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
     //_conn = broker.getConnection("admin.resin", cookie, "jmx");
-    _client = rampManager.lookup(_address).as(JmxActorApi.class);
+    _client = rampManager.service(_address).as(JmxActorApi.class);
   }
 
   JmxClient(String host, int port, String user, String password)
@@ -60,7 +60,7 @@ public class JmxClient
     // client.connect(user, password);
     _rampClient.connect();
 
-    _client = _rampClient.lookup("remote:///jmx").as(JmxActorApi.class);
+    _client = _rampClient.service("remote:///jmx").as(JmxActorApi.class);
   }
 
   protected void initExtSerializerFactory(ExtSerializerFactory factory)

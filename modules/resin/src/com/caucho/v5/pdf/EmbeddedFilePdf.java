@@ -71,7 +71,7 @@ public class EmbeddedFilePdf extends ObjectPdf {
   public void writeObject(OutPdf out)
     throws IOException
   {
-    long length = _path.getLength();
+    long length = _path.length();
 
     out.println("<< /Type /EmbeddedFile");
     out.println("   /Length " + length);

@@ -39,8 +39,8 @@ import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 public interface ResponseCaucho extends HttpServletResponse
 {
   /* caucho methods */
-  OutResponseBase getResponseStream();
-  void setResponseStream(OutResponseBase os);
+  OutResponseBase2 getResponseStream();
+  void setResponseStream(OutResponseBase2 os);
 
   boolean isCauchoResponseStream();
   String getHeader(String key);

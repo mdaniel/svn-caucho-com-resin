@@ -34,9 +34,8 @@ import javax.enterprise.context.ApplicationScoped;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Embeddable version of a singleton bean
@@ -153,7 +152,7 @@ public class BeanEmbed
   protected void configure()
   {
     try {
-      InjectManager cdiManager = InjectManager.create();
+      InjectManagerAmp cdiManager = InjectManagerAmp.create();
       
       /*
       if (_value != null) {

@@ -120,26 +120,26 @@ class FormMultipartParser {
           tempBuffer = null;
         }
 
-        if (uploadMax > 0 && uploadMax < tempFile.getLength()) {
+        if (uploadMax > 0 && uploadMax < tempFile.length()) {
           String msg = L.l("multipart form data '{0}' too large",
-                           "" + tempFile.getLength());
+                           "" + tempFile.length());
           
-          long fileLength = tempFile.getLength();
+          long fileLength = tempFile.length();
           tempFile.remove();
 
           throw formError(msg, fileLength, request);
-        } else if (fileUploadMax > 0 && fileUploadMax < tempFile.getLength()){
+        } else if (fileUploadMax > 0 && fileUploadMax < tempFile.length()){
           String msg = L.l("multipart form data part '{0}':'{1}' is greater then the accepted value of '{2}'",
-                           name, "" + tempFile.getLength(), fileUploadMax);
+                           name, "" + tempFile.length(), fileUploadMax);
 
           tempFile.remove();
 
           throw new IllegalStateException(msg);
         }
-        else if (tempFile.getLength() != totalLength) {
+        else if (tempFile.length() != totalLength) {
           String msg = L.l("multipart form upload failed (possibly due to full disk).");
           
-          long fileLength = tempFile.getLength();
+          long fileLength = tempFile.length();
           tempFile.remove();
           
           throw formError(msg, fileLength, request);

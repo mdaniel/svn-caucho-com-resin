@@ -29,7 +29,7 @@
 
 package com.caucho.v5.websocket.common;
 
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -44,5 +44,5 @@ public interface ConnectionWebSocket extends WebSocket
 
   boolean service();
 
-  void init(ReadStream is, OutResponseBase outResponseBase);
+  void init(ReadStream is, OutResponseBase2 outResponseBase);
 }

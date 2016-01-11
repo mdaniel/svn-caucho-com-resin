@@ -36,12 +36,12 @@ import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Encoding;
 
-public class BodyResponseStream extends OutResponseBase
+public class BodyResponseStream extends OutResponseBase2
 {
   private static final Logger log
     = Logger.getLogger(BodyResponseStream.class.getName());

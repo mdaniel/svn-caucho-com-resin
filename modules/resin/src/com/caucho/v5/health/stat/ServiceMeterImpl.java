@@ -66,7 +66,7 @@ public final class ServiceMeterImpl extends MeterBase {
     _address = address;
     _methodName = methodName;
     
-    _serviceRef = manager.lookup(_address);
+    _serviceRef = manager.service(_address);
     _methodRef = _serviceRef.getMethod(methodName);
   }
 

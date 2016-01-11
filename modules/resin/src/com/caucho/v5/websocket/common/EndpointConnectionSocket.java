@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.io.IoUtil;
-import com.caucho.v5.vfs.QSocket;
+import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.Vfs;
 import com.caucho.v5.vfs.WriteStream;
@@ -64,7 +64,7 @@ public class EndpointConnectionSocket implements EndpointConnection {
     return _s;
   }
   
-  public QSocket getQSocket()
+  public SocketBar getQSocket()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

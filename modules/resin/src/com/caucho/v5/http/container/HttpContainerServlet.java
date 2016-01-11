@@ -76,6 +76,7 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppController;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -91,8 +92,6 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
-
-import io.baratine.inject.InjectManager;
 
 public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   implements AlarmListener, EnvLoaderListener, 
@@ -116,7 +115,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   private ServerAuthManager _authManager;
   private AuthenticatorRole _adminAuth;
 
-  private InjectManager _injectManager;
+  private InjectManagerAmp _injectManager;
 
   private HostContainer _hostContainer;
   
@@ -279,7 +278,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
 
   protected void preInit()
   {
-    _injectManager = InjectManager.create();
+    _injectManager = InjectManagerAmp.create();
     
     BartenderSystem bartender = BartenderSystem.getCurrent();
     

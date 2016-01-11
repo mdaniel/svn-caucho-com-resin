@@ -60,7 +60,7 @@ public class StatServiceCluster
     
     ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
     
-    rampManager.service(this).address("public:///stat").ref();
+    rampManager.newService(this).address("public:///stat").ref();
     
     ServiceManagerAmp champManager = AmpSystem.getCurrentManager();
     

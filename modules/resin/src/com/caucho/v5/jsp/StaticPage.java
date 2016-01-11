@@ -65,7 +65,7 @@ public class StaticPage extends Page {
     throws IOException
   {
     _cacheEntry = path;
-    _contentLength = (int) _cacheEntry.getLength();
+    _contentLength = (int) _cacheEntry.length();
     _hasSession = hasSession;
 
     _caucho_setCacheable();

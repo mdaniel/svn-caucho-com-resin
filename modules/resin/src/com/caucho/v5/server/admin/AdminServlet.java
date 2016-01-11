@@ -46,7 +46,7 @@ public class AdminServlet // extends JampServletBase
   {
     _ampManager = Amp.newManager();
     
-    _ampManager.service(new AdminRestServiceImpl())
+    _ampManager.newService(new AdminRestServiceImpl())
                .address("public:///manager")
                .ref();
   }

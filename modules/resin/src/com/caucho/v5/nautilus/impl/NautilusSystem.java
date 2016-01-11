@@ -90,12 +90,12 @@ public class NautilusSystem extends SubSystemBase
     Objects.requireNonNull(kraken);
     
     _brokerServiceImpl = new BrokerServiceImpl(kraken);
-    _brokerService = rampManager.service(_brokerServiceImpl)
+    _brokerService = rampManager.newService(_brokerServiceImpl)
                                 .as(BrokerService.class);
     
     _nautilusServiceImpl = new NautilusServiceImpl(this);
     
-    rampManager.service(_nautilusServiceImpl)
+    rampManager.newService(_nautilusServiceImpl)
                .address("public://" + NautilusService.PATH)
                .ref();
   }

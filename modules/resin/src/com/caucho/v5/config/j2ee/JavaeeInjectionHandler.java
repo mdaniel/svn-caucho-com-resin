@@ -36,22 +36,21 @@ import javax.naming.NamingException;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.naming.JndiUtil;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Common JavaEE injection handler
  */
 abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
-  private InjectManager _manager;
+  private InjectManagerAmp _manager;
   
-  protected JavaeeInjectionHandler(InjectManager manager)
+  protected JavaeeInjectionHandler(InjectManagerAmp manager)
   {
     _manager = manager;
   }
 
-  protected InjectManager getManager()
+  protected InjectManagerAmp getManager()
   {
     return _manager;
   }

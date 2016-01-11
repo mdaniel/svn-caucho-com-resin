@@ -40,7 +40,7 @@ import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.IOExceptionRuntime;
 import com.caucho.v5.vfs.TempCharBuffer;
 
-abstract public class OutResponseToChar extends OutResponseBase {
+abstract public class OutResponseToChar extends OutResponseBase2 {
   private static final Logger log
     = Logger.getLogger(OutResponseToChar.class.getName());
   

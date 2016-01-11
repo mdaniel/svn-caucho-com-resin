@@ -63,7 +63,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
     throws BootArgumentException
   {
     FilesDeployService filesService
-      = client.lookup("remote:///bartender-files")
+      = client.service("remote:///bartender-files")
               .as(FilesDeployService.class);
     
     doCommand(args, server, filesService);

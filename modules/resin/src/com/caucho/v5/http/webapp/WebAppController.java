@@ -51,14 +51,13 @@ import com.caucho.v5.deploy.DeployInstanceBuilder;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.pod.PodConfigApp;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.Crc64;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Manages the lifecycle of a web-app. The same WebAppController is used for
@@ -624,7 +623,7 @@ public class WebAppController
     ServiceManagerAmp manager = AmpSystem.getCurrentManager();
 
     OnWebAppStart onStart
-      = manager.lookup("event:///" + OnWebAppStart.class.getName())
+      = manager.service("event:///" + OnWebAppStart.class.getName())
                .as(OnWebAppStart.class);
 
     onStart.onWebAppStart(getId());
@@ -751,7 +750,7 @@ public class WebAppController
   @Override
   protected void configureInstanceVariables(DeployInstanceBuilder<WebApp> builder)
   {
-    InjectManager inject = InjectManager.current();
+    InjectManagerAmp inject = InjectManagerAmp.current();
     
     //CandiManager beanManager = CandiManager.create();
     //BeanBuilder<WebApp> factory = beanManager.createBeanBuilder(WebApp.class);

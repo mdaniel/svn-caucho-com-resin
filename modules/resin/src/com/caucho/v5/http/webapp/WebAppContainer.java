@@ -162,7 +162,7 @@ public class WebAppContainer
     
     ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
     
-    _appDeploy = ampManager.service(deployServiceImpl)
+    _appDeploy = ampManager.newService(deployServiceImpl)
                           .start()
                           .as(DeployContainerService.class);
     

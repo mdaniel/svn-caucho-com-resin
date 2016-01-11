@@ -65,7 +65,7 @@ public class StatSystem extends SubSystemBase
     
     ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
     
-    _statService = ampManager.service(statServiceImpl).as(StatServiceLocal.class);
+    _statService = ampManager.newService(statServiceImpl).as(StatServiceLocal.class);
   }
 
   public static StatSystem createAndAddSystem()

@@ -395,7 +395,7 @@ public final class BrokerServiceImpl
   
   void addQueue(QueueServiceBase queueImpl)
   {
-    QueueService queue = _rampManager.service(queueImpl)
+    QueueService queue = _rampManager.newService(queueImpl)
                                      .as(QueueService.class);
     
     _queueNameMap.put(queueImpl.getName(), queue);

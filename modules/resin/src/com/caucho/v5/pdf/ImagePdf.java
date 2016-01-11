@@ -316,7 +316,7 @@ public class ImagePdf extends ObjectPdf {
   public void writeObjectNew(OutPdf out)
     throws IOException
   {
-    long length = _path.getLength();
+    long length = _path.length();
 
     out.println("<< /Type /XObject");
     out.println("   /Subtype /Image");

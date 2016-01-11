@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.http.protocol.OutResponseToByte;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.io.TempBuffer;
@@ -54,7 +54,7 @@ public class OutResponseInclude extends OutResponseToByte {
 
   private final ResponseInclude _response;
 
-  private OutResponseBase _stream;
+  private OutResponseBase2 _stream;
   
   private ServletOutputStream _os;
   private PrintWriter _writer;

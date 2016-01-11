@@ -50,10 +50,9 @@ import com.caucho.v5.config.program.NullProgram;
 import com.caucho.v5.config.program.SingletonValueGenerator;
 import com.caucho.v5.config.program.ValueGenerator;
 import com.caucho.v5.env.jdbc.DatabaseFactory;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Handles the @EJB annotation for JavaEE
@@ -64,7 +63,7 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
   
   private static final L10N L = new L10N(DataSourceDefinitionHandler.class);
   
-  public DataSourceDefinitionHandler(InjectManager manager)
+  public DataSourceDefinitionHandler(InjectManagerAmp manager)
   {
     super(manager);
   }

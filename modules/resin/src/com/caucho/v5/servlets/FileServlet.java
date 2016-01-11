@@ -779,7 +779,7 @@ public class FileServlet extends GenericServlet {
     boolean isModified()
     {
       long lastModified = _pathResolved.getLastModified();
-      long length = _pathResolved.getLength();
+      long length = _pathResolved.length();
 
       // server/1t06
       if (_path != _pathResolved && _path.canRead())
@@ -796,7 +796,7 @@ public class FileServlet extends GenericServlet {
         _pathResolved = _jarPath;
 
       long lastModified = _pathResolved.getLastModified();
-      long length = _pathResolved.getLength();
+      long length = _pathResolved.length();
 
       _lastModified = lastModified;
       _length = length;

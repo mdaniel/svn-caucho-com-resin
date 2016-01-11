@@ -36,12 +36,11 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.jsp.Page;
 import com.caucho.v5.jsp.QServlet;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for a servlet.

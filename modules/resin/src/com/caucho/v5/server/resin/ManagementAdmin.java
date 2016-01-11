@@ -617,7 +617,7 @@ public class ManagementAdmin extends ManagedObjectBase
 
     ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
     
-    return rampManager.lookup("/manager").as(ManagerServiceApi.class);
+    return rampManager.service("/manager").as(ManagerServiceApi.class);
   }
 
   /*

@@ -124,7 +124,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
     
     ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
     
-    _hostDeploy = ampManager.service(deployServiceImpl)
+    _hostDeploy = ampManager.newService(deployServiceImpl)
                             .start()
                             .as(DeployContainerService.class);
   }

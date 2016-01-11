@@ -43,7 +43,7 @@ public class NautilusBindingProvider implements ServiceInitializer
   {
     NautilusActor nautilus = new NautilusActor("queue:");
     
-    manager.service(nautilus)
+    manager.newService(nautilus)
            .address("queue:")
            .ref();
   }

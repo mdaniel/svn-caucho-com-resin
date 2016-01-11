@@ -95,7 +95,7 @@ public class WebAppRouter
     
     WebAppRouterServiceImpl routerServiceImpl = new WebAppRouterServiceImpl(this);
 
-    _routerService = ampManager.service(routerServiceImpl)
+    _routerService = ampManager.newService(routerServiceImpl)
                                .start()
                                .as(WebAppRouterService.class);
   }

@@ -76,6 +76,7 @@ import com.caucho.v5.http.protocol.ResponseServletStub;
 import com.caucho.v5.http.security.BasicPrincipal;
 import com.caucho.v5.http.security.ConstraintManager;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
@@ -83,8 +84,6 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for a servlet.
@@ -152,7 +151,7 @@ public class ServletBuilder
   private FragmentMode _fragmentMode = FragmentMode.IN_WEBXML;
   private boolean _isAnnotation;
 
-  private InjectManager _cdiManager;
+  private InjectManagerAmp _cdiManager;
 
   /**
    * Creates a new servlet configuration object.
@@ -446,10 +445,10 @@ public class ServletBuilder
   }
   */
 
-  private InjectManager getBeanManager()
+  private InjectManagerAmp getBeanManager()
   {
     if (_cdiManager == null) {
-      _cdiManager = InjectManager.current();
+      _cdiManager = InjectManagerAmp.current();
     }
 
     return _cdiManager;
@@ -1342,7 +1341,7 @@ public class ServletBuilder
   protected Object createServletInstance()
     throws Exception
   {
-    InjectManager injectManager = getBeanManager();
+    InjectManagerAmp injectManager = getBeanManager();
 
     /*
     Bean bean = resolveBean();

@@ -44,13 +44,12 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigExceptionLocation;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ObjectFactoryNaming;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvLoaderListener;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the init-param pattern.
@@ -257,7 +256,7 @@ public class ResourceRef extends ResourceGroupConfig
     }
     
     if (_value == null && getLookupName() == null) {
-      InjectManager cdiManager = InjectManager.current();
+      InjectManagerAmp cdiManager = InjectManagerAmp.current();
       
       /*
       Set<Bean<?>> beans = cdiManager.getBeans(_type);
@@ -286,7 +285,7 @@ public class ResourceRef extends ResourceGroupConfig
       return JndiUtil.lookup(getLookupName());
     }
     else if (_type != null) {
-      InjectManager cdiManager = InjectManager.current();
+      InjectManagerAmp cdiManager = InjectManagerAmp.current();
       
       value = cdiManager.instance(_type);
       //value = cdiManager..create(_bean);

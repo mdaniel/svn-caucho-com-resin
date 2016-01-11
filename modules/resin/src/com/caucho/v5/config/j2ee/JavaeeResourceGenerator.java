@@ -40,10 +40,9 @@ import javax.rmi.PortableRemoteObject;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ValueGenerator;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Generator for the JavaEE JNDI Resources
@@ -63,7 +62,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
   private final String _mappedName;
   private final String _beanName;
 
-  private InjectManager _beanManager;
+  private InjectManagerAmp _beanManager;
   private Bean<?> _bean;
 
   JavaeeResourceGenerator(String location,
@@ -73,7 +72,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
                           String mappedName,
                           String beanName)
   {
-    _beanManager = InjectManager.create();
+    _beanManager = InjectManagerAmp.create();
     
     if (! fieldType.isAssignableFrom(type))
       type = fieldType;
@@ -206,7 +205,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
 
   public Bean bind(String location, Class type, String name)
   {
-    InjectManager webBeans = _beanManager;
+    InjectManagerAmp webBeans = _beanManager;
 
     Set<Bean<?>> beans = null;
 

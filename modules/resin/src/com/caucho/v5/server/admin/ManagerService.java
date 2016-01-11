@@ -91,6 +91,6 @@ public class ManagerService
     
     ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
     
-    rampManager.service(managerActor).address("/manager").ref();
+    rampManager.newService(managerActor).address("/manager").ref();
   }
 }

@@ -42,9 +42,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
 
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Manages the servlets.
@@ -66,7 +65,7 @@ public class FilterManager {
   private Map<String, Set<String>> _servletNames
     = new HashMap<String, Set<String>>();
 
-  private InjectManager _injectManager;
+  private InjectManagerAmp _injectManager;
   // private Bean _bean;
 
   /**
@@ -178,7 +177,7 @@ public class FilterManager {
           return filter;
         }
 
-        InjectManager cdiManager = getCdiManager();
+        InjectManagerAmp cdiManager = getCdiManager();
 
         // ioc/0p2e
        // _filterInjectionTarget = beanManager.discoverInjectionTarget(filterClass);
@@ -202,10 +201,10 @@ public class FilterManager {
     }
   }
 
-  private InjectManager getCdiManager()
+  private InjectManagerAmp getCdiManager()
   {
     if (_injectManager == null) {
-      _injectManager = InjectManager.current();
+      _injectManager = InjectManagerAmp.current();
     }
 
     return _injectManager;

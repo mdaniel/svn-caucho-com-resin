@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * API for handling the PrintWriter/ServletOutputStream
  */
-public class OutResponseStub extends OutResponseBase {
+public class OutResponseStub extends OutResponseBase2 {
   private final byte []_byteBuffer = new byte[16];
   private final char []_charBuffer = new char[16];
   

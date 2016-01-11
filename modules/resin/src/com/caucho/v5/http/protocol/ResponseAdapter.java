@@ -51,8 +51,8 @@ public class ResponseAdapter extends ResponseWrapper
 
   private FlushBuffer _flushBuffer;
 
-  private OutResponseBase _originalResponseStream;
-  private OutResponseBase _responseStream;
+  private OutResponseBase2 _originalResponseStream;
+  private OutResponseBase2 _responseStream;
 
   private ServletOutputStreamImpl _os;
   private WriterHttp _writer;
@@ -89,7 +89,7 @@ public class ResponseAdapter extends ResponseWrapper
     _request = request;
   }
 
-  protected OutResponseBase createWrapperResponseStream()
+  protected OutResponseBase2 createWrapperResponseStream()
   {
     return new OutResponseWrapper();
   }
@@ -112,7 +112,7 @@ public class ResponseAdapter extends ResponseWrapper
   }
 
   @Override
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
     return _responseStream;
   }
@@ -124,7 +124,7 @@ public class ResponseAdapter extends ResponseWrapper
   }
 
   @Override
-  public void setResponseStream(OutResponseBase responseStream)
+  public void setResponseStream(OutResponseBase2 responseStream)
   {
     _responseStream = responseStream;
 
@@ -367,7 +367,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     ServletResponse response = getResponse();
 
-    OutResponseBase responseStream = _responseStream;
+    OutResponseBase2 responseStream = _responseStream;
     _responseStream = _originalResponseStream;
 
     if (responseStream != null)

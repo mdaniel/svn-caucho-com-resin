@@ -35,6 +35,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -71,6 +72,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.NullEnumeration;
+import com.caucho.v5.util.StringCharCursor;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
@@ -119,6 +121,7 @@ public final class RequestServlet extends RequestCauchoBase
 
   // proxy caching
   private boolean _isSyntheticCacheHeader;
+  private ArrayList<Locale> _locales;
 
   // comet
   private long _asyncTimeout;
@@ -312,7 +315,7 @@ public final class RequestServlet extends RequestCauchoBase
   public void setCharacterEncoding(String encoding)
     throws java.io.UnsupportedEncodingException
   {
-    _request.setCharacterEncoding(encoding);
+    //_request.setCharacterEncoding(encoding);
   }
 
   /**
@@ -348,7 +351,8 @@ public final class RequestServlet extends RequestCauchoBase
 
     _hasReader = true;
 
-    return _request.getReader();
+    //return _request.getReader();
+    return null;
   }
 
   /**
@@ -357,7 +361,7 @@ public final class RequestServlet extends RequestCauchoBase
   @Override
   public String getCharacterEncoding()
   {
-    return _request.getCharacterEncoding();
+    return _request.encoding();
   }
 
   /**
@@ -390,23 +394,85 @@ public final class RequestServlet extends RequestCauchoBase
     return _request.contentType();
   }
 
-  /**
-   * Returns the request's preferred locale, based on the Accept-Language
-   * header.  If unspecified, returns the server's default locale.
+  /*
+   * jsdk 2.2
    */
-  @Override
+
   public Locale getLocale()
   {
-    return _request.getLocale();
+    fillLocales();
+
+    return _locales.get(0);
   }
 
-  /**
-   * Returns an enumeration of all locales acceptable by the client.
-   */
-  @Override
   public Enumeration<Locale> getLocales()
   {
-    return _request.getLocales();
+    fillLocales();
+
+    return Collections.enumeration(_locales);
+  }
+  
+  /**
+   * Fill the locale array from the request's headers.
+   */
+  private void fillLocales()
+  {
+    if (_locales.size() > 0)
+      return;
+
+    Enumeration<String> headers = getHeaders("Accept-Language");
+    if (headers == null) {
+      _locales.add(Locale.getDefault());
+      return;
+    }
+
+    CharBuffer cb = new CharBuffer();
+    while (headers.hasMoreElements()) {
+      String header = headers.nextElement();
+      StringCharCursor cursor = new StringCharCursor(header);
+
+      while (cursor.current() != CharacterIterator.DONE) {
+        char ch;
+        for (; Character.isWhitespace(cursor.current()); cursor.next()) {
+        }
+
+        cb.clear();
+        for (; (ch = cursor.current()) >= 'a' && ch <= 'z' ||
+               ch >= 'A' && ch <= 'Z' ||
+               ch >= '0' && ch <= '0';
+             cursor.next()) {
+          cb.append(cursor.current());
+        }
+
+        String language = cb.toString();
+        String country = "";
+        if (cursor.current() == '_' || cursor.current() == '-') {
+          cb.clear();
+          for (cursor.next();
+               (ch = cursor.current()) >= 'a' && ch <= 'z' ||
+               ch >= 'A' && ch <= 'Z' ||
+               ch >= '0' && ch <= '9';
+               cursor.next()) {
+            cb.append(cursor.current());
+          }
+          country = cb.toString();
+        }
+
+        if (language.length() > 0) {
+          Locale locale = new Locale(language, country);
+          _locales.add(locale);
+        }
+
+        for (;
+             cursor.current() != CharacterIterator.DONE && cursor.current() != ',';
+             cursor.next()) {
+        }
+        cursor.next();
+      }
+    }
+
+    if (_locales.size() == 0)
+      _locales.add(Locale.getDefault());
   }
 
   /**
@@ -1302,14 +1368,16 @@ public final class RequestServlet extends RequestCauchoBase
   public ReadStream getStream()
     throws IOException
   {
-    return _request.getStream();
+    //return _request.getStream();
+    return null;
   }
 
   @Override
   public ReadStream getStream(boolean isFlush)
     throws IOException
   {
-    return _request.getStream(isFlush);
+    //return _request.getStream(isFlush);
+    return null;
   }
 
   public int getRequestDepth(int depth)
@@ -1718,10 +1786,13 @@ public final class RequestServlet extends RequestCauchoBase
   public int getAvailable()
     throws IOException
   {
+    /*
     if (_request != null)
       return _request.getAvailable();
     else
       return -1;
+      */
+    return -1;
   }
 
   public DispatcherType getDispatcherType()
@@ -1805,7 +1876,7 @@ public final class RequestServlet extends RequestCauchoBase
 
   public final HttpContainer getServer()
   {
-    return _request.getHttp();
+    return _request.http();
   }
 
   /**

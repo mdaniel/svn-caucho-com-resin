@@ -376,7 +376,7 @@ class WatchdogServiceImpl
       ChildWatchdogServiceImpl serviceImpl
         = new ChildWatchdogServiceImpl(_manager, port);
       
-      child = serviceManager.service(serviceImpl)
+      child = serviceManager.newService(serviceImpl)
                             .start()
                             .as(ChildWatchdogService.class);
       

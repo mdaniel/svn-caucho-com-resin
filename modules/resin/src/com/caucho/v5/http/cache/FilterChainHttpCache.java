@@ -20,7 +20,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.http.protocol.RequestCache;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.RequestFacade;
@@ -241,7 +241,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
       ResponseHttpCache cacheResponse
         = new ResponseHttpCache(cacheRequest, res, this);
 
-      OutResponseBase rs = res.getResponseStream();
+      OutResponseBase2 rs = res.getResponseStream();
 
       try {
         //rs.setCauchoResponse(res);
@@ -707,7 +707,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
     boolean hasMore = range.indexOf(',') > 0;
 
     int head = 0;
-    OutResponseBase os = res.getResponseStream();
+    OutResponseBase2 os = res.getResponseStream();
     boolean isFirstChunk = true;
     String boundary = null;
     int off = range.indexOf("bytes=", head);

@@ -373,7 +373,7 @@ public class ResponseCauchoDispatch extends ResponseCauchoBase
   //
 
   @Override
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
     if (_response instanceof ResponseCaucho) {
       ResponseCaucho cResponse = (ResponseCaucho) _response;
@@ -385,7 +385,7 @@ public class ResponseCauchoDispatch extends ResponseCauchoBase
   }
 
   @Override
-  public void setResponseStream(OutResponseBase os)
+  public void setResponseStream(OutResponseBase2 os)
   {
     if (_response instanceof ResponseCaucho)
       ((ResponseCaucho) _response).setResponseStream(os);

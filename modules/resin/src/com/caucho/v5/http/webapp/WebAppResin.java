@@ -37,12 +37,11 @@ import java.util.logging.Logger;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.jsp.cfg.JspConfig;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.cfg.JspTaglib;
 import com.caucho.v5.jsp.el.JspApplicationContextImpl;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Resin's webApp implementation.
@@ -58,7 +57,7 @@ public class WebAppResin extends WebApp
   // private RestContainer _restContainer;
   private WebAppBuilderResin _builder;
 
-  private InjectManager _injectManager;
+  private InjectManagerAmp _injectManager;
 
   private boolean _isContainerInit;
 
@@ -155,7 +154,7 @@ public class WebAppResin extends WebApp
     
     //_jspApplicationContext.addELResolver(getBeanManager().getELResolver());
 
-    _injectManager = InjectManager.create(getClassLoader());
+    _injectManager = InjectManagerAmp.create(getClassLoader());
   }
   
   @Override
@@ -174,7 +173,7 @@ public class WebAppResin extends WebApp
     }
   }
   
-  private InjectManager getBeanManager()
+  private InjectManagerAmp getBeanManager()
   {
     //return InjectManager.getCurrent(getClassLoader());
     return _injectManager;

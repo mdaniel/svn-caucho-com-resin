@@ -34,10 +34,9 @@ import javax.annotation.PostConstruct;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.http.security.AuthenticatorRole;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.security.AdminAuthenticator;
 import com.caucho.v5.security.XmlAuthenticator;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for management.
@@ -111,7 +110,7 @@ public class BootManagementConfig
       if (_auth != null) {
         _auth.init();
       
-        InjectManager manager = InjectManager.create();
+        InjectManagerAmp manager = InjectManagerAmp.create();
 
         /*
         manager.newBean(_auth)

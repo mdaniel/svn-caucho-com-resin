@@ -29,7 +29,6 @@
 
 package com.caucho.v5.config.cfg;
 
-import io.baratine.inject.InjectManager;
 import io.baratine.service.Startup;
 
 import java.lang.annotation.Annotation;
@@ -56,6 +55,7 @@ import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyStringProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.type.TypeFactoryConfig;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 
@@ -79,7 +79,7 @@ public class BeanConfig
 
   //private ConfigCustomBean _customBean;
 
-  private InjectManager _injectManager;
+  private InjectManagerAmp _injectManager;
 
   private Class<?> _cl;
 
@@ -105,7 +105,7 @@ public class BeanConfig
 
   public BeanConfig()
   {
-    _injectManager = InjectManager.create();
+    _injectManager = InjectManagerAmp.create();
 
     if (getDefaultScope() != null)
       setScope(getDefaultScope());
@@ -113,7 +113,7 @@ public class BeanConfig
     setService(isDefaultService());
   }
 
-  public InjectManager getBeanManager()
+  public InjectManagerAmp getBeanManager()
   {
     return _injectManager;
   }
@@ -490,7 +490,7 @@ public class BeanConfig
 
     introspect();
 
-    InjectManager beanManager = InjectManager.create();
+    InjectManagerAmp beanManager = InjectManagerAmp.create();
     /*
     BeanBuilder builder =  beanManager.createBeanBuilder(_cl);
 

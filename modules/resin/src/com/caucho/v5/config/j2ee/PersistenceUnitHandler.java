@@ -40,9 +40,8 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.BeanValueGenerator;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.MethodGeneratorProgram;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Handles the @PersistenceUnit annotation for JavaEE
@@ -50,7 +49,7 @@ import io.baratine.inject.InjectManager;
 public class PersistenceUnitHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(PersistenceUnitHandler.class);
   
-  public PersistenceUnitHandler(InjectManager manager)
+  public PersistenceUnitHandler(InjectManagerAmp manager)
   {
     super(manager);
   }

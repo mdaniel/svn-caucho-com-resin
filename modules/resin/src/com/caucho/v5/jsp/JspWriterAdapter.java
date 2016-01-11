@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
-import com.caucho.v5.http.protocol.OutResponseBase;
+import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 
 /**
@@ -46,7 +46,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   private static final Logger log
     = Logger.getLogger(JspWriterAdapter.class.getName());
   // the underlying writer
-  private OutResponseBase _out;
+  private OutResponseBase2 _out;
   private HttpServletResponse _response;
   
   private boolean _isClosed;
@@ -76,7 +76,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
    */
   void init(JspWriter parent,
             HttpServletResponse response,
-            OutResponseBase out)
+            OutResponseBase2 out)
   {
     _out = out;
     
@@ -288,7 +288,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     _isClosed = true;
 
-    OutResponseBase out = _out;
+    OutResponseBase2 out = _out;
     _out = null;
     
     if (out != null && ! out.isCauchoResponseStream()) {

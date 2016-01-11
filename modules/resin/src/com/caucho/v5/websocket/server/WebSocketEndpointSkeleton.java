@@ -43,6 +43,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.inject.Provider;
 import javax.websocket.CloseReason;
 import javax.websocket.Decoder;
 import javax.websocket.Encoder;
@@ -59,12 +60,11 @@ import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig;
 
 import com.caucho.v5.config.ConfigException;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.reflect.ReflectUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.SessionWebSocketBase;
-
-import io.baratine.inject.InjectManager;
 
 @ModulePrivate
 public class WebSocketEndpointSkeleton<T>
@@ -78,7 +78,7 @@ public class WebSocketEndpointSkeleton<T>
 
   private final Class<T> _beanClass;
 
-  private final Supplier<T> _beanSupplier;
+  private final Provider<T> _beanSupplier;
 
   private ResolvingMethodHandle _openMethod;
   private ResolvingMethodHandle _closeMethod;
@@ -96,7 +96,7 @@ public class WebSocketEndpointSkeleton<T>
   {
     _beanClass = beanClass;
 
-    _beanSupplier = InjectManager.create().supplierCreate(beanClass);
+    _beanSupplier = InjectManagerAmp.create().supplierCreate(beanClass);
 
     introspect();
   }
@@ -110,7 +110,7 @@ public class WebSocketEndpointSkeleton<T>
       _config = (ServerEndpointConfig) config;
     }
 
-    _beanSupplier = InjectManager.create().supplierCreate(beanClass);
+    _beanSupplier = InjectManagerAmp.create().supplierCreate(beanClass);
 
     introspect();
   }
@@ -141,7 +141,7 @@ public class WebSocketEndpointSkeleton<T>
   createEndpointSupplier(Class<T> endpointClass,
                          ServerEndpointConfig config)
   {
-    InjectManager injectManager = InjectManager.create();
+    InjectManagerAmp injectManager = InjectManagerAmp.create();
 
     Supplier<T> supplier = injectManager.supplierNew(endpointClass);
 

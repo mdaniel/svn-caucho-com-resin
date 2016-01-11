@@ -48,7 +48,7 @@ public class ResponseServletStub implements ResponseCaucho {
   {
   }
 
-  protected OutResponseBase createResponseStream()
+  protected OutResponseBase2 createResponseStream()
   {
     return new OutResponseStub();
   }
@@ -353,12 +353,12 @@ public class ResponseServletStub implements ResponseCaucho {
   }
 
   @Override
-  public void setResponseStream(OutResponseBase stream)
+  public void setResponseStream(OutResponseBase2 stream)
   {
   }
 
   @Override
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
     return new OutResponseWrapper();
   }

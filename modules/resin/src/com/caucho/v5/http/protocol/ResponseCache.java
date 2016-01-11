@@ -54,7 +54,7 @@ public interface ResponseCache extends ResponseFacade
   
   void close() throws IOException;
 
-  OutResponseBase getResponseStream();
+  OutResponseBase2 getResponseStream();
 
   void completeCache();
 

@@ -40,7 +40,7 @@ import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.vfs.ClientDisconnectException;
-import com.caucho.v5.vfs.QSocket;
+import com.caucho.v5.vfs.SocketBar;
 
 public class FilterChainStatistics implements FilterChain
 {
@@ -71,7 +71,7 @@ public class FilterChainStatistics implements FilterChain
         long readBytes = -1;
         long writeBytes = -1;
         
-        QSocket socket = tcpConnection.socket();
+        SocketBar socket = tcpConnection.socket();
 
         readBytes = socket.getTotalReadBytes();
         writeBytes = socket.getTotalWriteBytes();

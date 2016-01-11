@@ -275,7 +275,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
 
   public HttpContainer getServer()
   {
-    return (HttpContainer) getAbstractHttpRequest().getHttp();
+    return (HttpContainer) getAbstractHttpRequest().http();
   }
 
   protected HashMapImpl<String,String[]> parseQueryImpl()
@@ -521,7 +521,8 @@ abstract public class RequestCauchoBase implements RequestCaucho
 
   public ReadStream getStream(boolean isFlush) throws IOException
   {
-    return getAbstractHttpRequest().getStream();
+    //return getAbstractHttpRequest().getStream();
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -1259,7 +1260,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
     public long getSize()
     {
       if (_tempFile != null)
-        return _tempFile.getLength();
+        return _tempFile.length();
       else if (_value != null) {
         return _value.length();
       }

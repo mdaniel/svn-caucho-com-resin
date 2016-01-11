@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.L10N;
 
-public class OutResponseWrapper extends OutResponseBase {
+public class OutResponseWrapper extends OutResponseBase2 {
   private static final Logger log
     = Logger.getLogger(OutResponseWrapper.class.getName());
   

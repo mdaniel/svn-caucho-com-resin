@@ -137,12 +137,13 @@ public class StompConnection implements ConnectionProtocol
   
   ReadStream getReadStream()
   {
-    return _link.getReadStream();
+    //return _link.getReadStream();
+    throw new UnsupportedOperationException();
   }
   
   WriteStream getWriteStream()
   {
-    return _link.getWriteStream();
+    return _link.writeStream();
   }
   
   public long getSessionId()
@@ -321,7 +322,7 @@ public class StompConnection implements ConnectionProtocol
   @Override
   public StateConnection service() throws IOException
   {
-    ReadStream is = _link.getReadStream();
+    ReadStream is = null;//_link.getReadStream();
     
     if (! readMethod(is)) {
       return StateConnection.CLOSE;
@@ -336,7 +337,7 @@ public class StompConnection implements ConnectionProtocol
     while (readHeader(is)) {
     }
     
-    WriteStream os = _link.getWriteStream();
+    WriteStream os = _link.writeStream();
     System.out.println("CMD: " + cmd + " " + os);
     return cmd.doCommand(this, is, os) ? StateConnection.READ : StateConnection.CLOSE;
   }
@@ -483,7 +484,7 @@ public class StompConnection implements ConnectionProtocol
   void receipt(String receipt)
   {
     try {
-      WriteStream out = _link.getWriteStream();
+      WriteStream out = _link.writeStream();
       
       out.print("RECEIPT\nreceipt-id:");
       out.print(receipt);
@@ -501,7 +502,7 @@ public class StompConnection implements ConnectionProtocol
                long contentLength)
     throws IOException
   {
-    WriteStream out = _link.getWriteStream();
+    WriteStream out = _link.writeStream();
     
     out.print("MESSAGE");
     out.print("\nsubscription:");

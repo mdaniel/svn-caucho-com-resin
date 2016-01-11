@@ -345,7 +345,7 @@ public class ResponseCauchoWrapper implements ResponseCaucho {
   // CauchoResponse
   //
 
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
     if (_response instanceof ResponseCaucho) {
       ResponseCaucho cResponse = (ResponseCaucho) _response;
@@ -356,7 +356,7 @@ public class ResponseCauchoWrapper implements ResponseCaucho {
       return null;
   }
 
-  public void setResponseStream(OutResponseBase os)
+  public void setResponseStream(OutResponseBase2 os)
   {
     if (_response instanceof ResponseCaucho)
       ((ResponseCaucho) _response).setResponseStream(os);

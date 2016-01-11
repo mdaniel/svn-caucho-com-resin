@@ -46,10 +46,9 @@ import javax.inject.Qualifier;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ConfigExceptionLocation;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.ModulePrivate;
-
-import io.baratine.inject.InjectManager;
 
 @ModulePrivate
 public class PostConstructProgramCandi extends ConfigProgram
@@ -116,7 +115,7 @@ public class PostConstructProgramCandi extends ConfigProgram
     
     Annotation [][]paramAnns = _init.getParameterAnnotations();
 
-    InjectManager inject = InjectManager.create();
+    InjectManagerAmp inject = InjectManagerAmp.create();
     
     for (int i = 0; i < paramTypes.length; i++) {
       Annotation []bindings = createBindings(paramAnns[i]);
@@ -210,10 +209,10 @@ public class PostConstructProgramCandi extends ConfigProgram
   }
 
   private static class ParamProgram {
-    private final InjectManager _inject;
+    private final InjectManagerAmp _inject;
     //private final InjectionPointBase _injectionPoint;
 
-    ParamProgram(InjectManager inject,
+    ParamProgram(InjectManagerAmp inject,
                  Type type,
                  Annotation []bindings,
                  Annotation []annList)

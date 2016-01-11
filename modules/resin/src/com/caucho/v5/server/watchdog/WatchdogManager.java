@@ -237,7 +237,7 @@ public class WatchdogManager implements AlarmListener
       
       ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
       
-      _service = rampManager.service(service)
+      _service = rampManager.newService(service)
                             .address("public:///watchdog")
                             .as(WatchdogService.class);
       

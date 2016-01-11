@@ -135,7 +135,7 @@ abstract public class OutResponseCache extends OutResponseToByte
 
     RequestHttpBase req = getRequest();
     
-    HttpContainerServlet http = (HttpContainerServlet) req.getHttp();
+    HttpContainerServlet http = (HttpContainerServlet) req.http();
     
     _cacheMaxLength = http.getCacheMaxLength();
   }
@@ -278,7 +278,7 @@ abstract public class OutResponseCache extends OutResponseToByte
     if (! isAutoFlush() && ! isEnd)
       throw new IOException(L.l("auto-flushing has been disabled"));
     
-    writeHeaders(isEnd ? length : -1);
+    //writeHeaders(isEnd ? length : -1);
 
     if (length == 0 && ! isEnd) {
       return;
@@ -308,6 +308,7 @@ abstract public class OutResponseCache extends OutResponseToByte
   }
 
   //@Override
+  /*
   protected void writeHeaders(int length)
     throws IOException
   {
@@ -334,6 +335,7 @@ abstract public class OutResponseCache extends OutResponseToByte
     // server/2hf3
     toCommitted();
   }
+  */
 
   private boolean lengthException(byte []buf, int offset, int length,
                                   long contentLengthHeader)

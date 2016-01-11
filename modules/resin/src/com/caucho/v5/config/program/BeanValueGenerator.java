@@ -33,9 +33,8 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.caucho.v5.config.custom.CustomBean;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Generator for a component value.
@@ -45,7 +44,7 @@ public class BeanValueGenerator extends ValueGenerator {
     = Logger.getLogger(BeanValueGenerator.class.getName());
   private static final L10N L = new L10N(BeanValueGenerator.class);
 
-  private final InjectManager _beanManager;
+  private final InjectManagerAmp _beanManager;
   private final CustomBean _bean;
 
   private final String _location;
@@ -56,7 +55,7 @@ public class BeanValueGenerator extends ValueGenerator {
 
     _location = location;
 
-    _beanManager = InjectManager.create();
+    _beanManager = InjectManagerAmp.create();
     _bean = bean;
   }
 

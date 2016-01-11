@@ -102,7 +102,7 @@ public class WebAppRouterServiceImpl implements WebAppRouterService
   {
     ServiceManagerAmp ampManager = ServiceManagerAmp.current();
     
-    ServiceRefAmp onStartRef = ampManager.lookup("event:///" + OnWebAppStart.class.getName());
+    ServiceRefAmp onStartRef = ampManager.service("event:///" + OnWebAppStart.class.getName());
     
     _onStartCancel = onStartRef.subscribe((OnWebAppStart) id->onWebAppStart(id));
     

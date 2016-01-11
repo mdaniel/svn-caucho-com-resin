@@ -81,7 +81,7 @@ public final class ResponseServlet extends ResponseCauchoBase
 
   private ServletOutputStreamImpl _outputStream;
   private WriterHttp _writer;
-  private OutResponseBase _responseStream;
+  private OutResponseBase2 _responseStream;
 
   private String _setCharEncoding;
   private String _charEncoding;
@@ -141,7 +141,7 @@ public final class ResponseServlet extends ResponseCauchoBase
     if (_writer != null)
       throw new IllegalStateException(L.l("getOutputStream() can't be called after getWriter()."));
     
-    OutResponseBase stream = getResponseStream();
+    OutResponseBase2 stream = getResponseStream();
     
     try {
       // jsp/0510
@@ -274,7 +274,7 @@ public final class ResponseServlet extends ResponseCauchoBase
       throw new IllegalStateException(L.l("response cannot be reset() after committed"));
     }
 
-    OutResponseBase responseStream = getResponseStream();
+    OutResponseBase2 responseStream = getResponseStream();
     
     responseStream.clearBuffer();
 
@@ -309,7 +309,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   @Override
   public void resetBuffer()
   {
-    OutResponseBase responseStream = getResponseStream();
+    OutResponseBase2 responseStream = getResponseStream();
     
     responseStream.clearBuffer();
 
@@ -1787,9 +1787,9 @@ public final class ResponseServlet extends ResponseCauchoBase
   //
 
   @Override
-  public OutResponseBase getResponseStream()
+  public OutResponseBase2 getResponseStream()
   {
-    OutResponseBase stream = getRawResponseStream();
+    OutResponseBase2 stream = getRawResponseStream();
     
     // jsp/(1cie, 1civ, 1ciw, 1cir), server/053y
     if (stream.getEncoding() == null) {
@@ -1804,19 +1804,19 @@ public final class ResponseServlet extends ResponseCauchoBase
     return stream;
   }
 
-  private OutResponseBase getRawResponseStream()
+  private OutResponseBase2 getRawResponseStream()
   {
-    OutResponseBase stream = _responseStream;
+    OutResponseBase2 stream = _responseStream;
     
     if (stream == null) {
-      stream = _response.getOut();
+      stream = null;//_response.getOut();
     }
     
     return stream;
   }
 
   @Override
-  public void setResponseStream(OutResponseBase responseStream)
+  public void setResponseStream(OutResponseBase2 responseStream)
   {
     _responseStream = responseStream;
 

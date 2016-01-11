@@ -44,9 +44,8 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.program.PropertyValueProgram;
 import com.caucho.v5.config.types.DescriptionGroupConfig;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.L10N;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the listener
@@ -63,7 +62,7 @@ public class ListenerConfig<T> extends DescriptionGroupConfig {
 
   private ContainerProgram _init;
 
-  private InjectManager _beanManager;
+  private InjectManagerAmp _beanManager;
 
   //private Bean<T> _bean;
 
@@ -142,7 +141,7 @@ public class ListenerConfig<T> extends DescriptionGroupConfig {
     if (_object != null)
       return _object;
 
-    InjectManager cdiManager = getInjectManager();
+    InjectManagerAmp cdiManager = getInjectManager();
 
     _object = cdiManager.lookup(_listenerClass);
     
@@ -215,10 +214,10 @@ public class ListenerConfig<T> extends DescriptionGroupConfig {
     */
   }
 
-  private InjectManager getInjectManager()
+  private InjectManagerAmp getInjectManager()
   {
     if (_beanManager == null)
-      _beanManager = InjectManager.current();
+      _beanManager = InjectManagerAmp.current();
 
     return _beanManager;
   }

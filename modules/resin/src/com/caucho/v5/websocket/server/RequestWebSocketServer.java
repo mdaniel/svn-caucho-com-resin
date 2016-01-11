@@ -168,7 +168,7 @@ public class RequestWebSocketServer implements ConnectionProtocol
   }
 
   @Override
-  public void onCloseRead()
+  public StateConnection onCloseRead()
   {
     InWebSocket reader = _reader;
     _reader = null;
@@ -179,6 +179,8 @@ public class RequestWebSocketServer implements ConnectionProtocol
     
     _wsConn.onDisconnectRead();
     */
+    
+    return StateConnection.CLOSE;
   }
 
   @Override

@@ -41,11 +41,10 @@ import javax.rmi.PortableRemoteObject;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.j2ee.BeanNameLiteral;
+import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-
-import io.baratine.inject.InjectManager;
 
 /**
  * Configuration for the ejb-ref.
@@ -303,7 +302,7 @@ public class EjbRef extends BaseRef
     
     Class<?> type = calculateType();
     
-    InjectManager injectManager = InjectManager.current();
+    InjectManagerAmp injectManager = InjectManagerAmp.current();
     
     Set<Bean<?>> beans = null;
     Object value = null;
