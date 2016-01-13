@@ -35,7 +35,6 @@ import com.caucho.v5.cli.resin.ProgramInfoResin;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.container.ServerBase;
-import com.caucho.v5.server.container.ServerBuilderResin;
 
 /**
  * The parsed resin command-line arguments
@@ -62,7 +61,8 @@ public class ArgsServerResin extends ArgsServerBase
   @Override
   public ServerBase createServer(String programName, ServerConfigBoot server)
   {
-    return new ServerBuilderResin(this, server).build();
+    //return new ServerBuilderResin(this, server).build();
+    return null;
   }
 
   @Override

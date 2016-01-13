@@ -66,7 +66,7 @@ import com.caucho.v5.server.admin.PdfReportQueryReply;
 import com.caucho.v5.server.admin.RemoveUserQueryReply;
 import com.caucho.v5.server.admin.StatServiceValuesQueryReply;
 import com.caucho.v5.server.admin.StringQueryReply;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
@@ -78,7 +78,7 @@ public class ManagementAdmin extends ManagedObjectBase
   private static final L10N L = new L10N(ManagementAdmin.class);
   private static Logger log = Logger.getLogger(ManagementAdmin.class.getName());
 
-  private final ServerBase _server;
+  private final ServerBaseOld _server;
   
   //private final ConcurrentHashMap<String,ActorSender> _senderCache
 //    = new ConcurrentHashMap<String,ActorSender>();
@@ -86,7 +86,7 @@ public class ManagementAdmin extends ManagedObjectBase
   /**
    * Creates the admin object and registers with JMX.
    */
-  public ManagementAdmin(ServerBase resin)
+  public ManagementAdmin(ServerBaseOld resin)
   {
     _server = resin;
 

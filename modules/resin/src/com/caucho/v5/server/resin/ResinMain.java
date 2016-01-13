@@ -40,7 +40,7 @@ import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.server.container.ServerBuilder;
+import com.caucho.v5.server.container.ServerBuilderOld;
 
 /**
  * The Resin class represents the top-level container for Resin.

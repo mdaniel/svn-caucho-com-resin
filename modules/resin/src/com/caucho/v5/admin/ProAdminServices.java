@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import com.caucho.v5.server.admin.SnapshotService;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 
 /**
  * Convenience collection of the standard administration services.
@@ -26,7 +26,7 @@ public class ProAdminServices extends AdminServices
   {
     super.initImpl();
 
-    ServerBase resin = ServerBase.current();
+    ServerBaseOld resin = ServerBaseOld.current();
    
     if (resin != null) {
       StatService statService = new StatService();

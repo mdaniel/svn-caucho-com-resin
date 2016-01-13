@@ -497,10 +497,10 @@ public class AsyncContextImpl // extends RequestProtocolBase
     case IDLE:
       return nextState;
     case START:
-      return StateConnection.SUSPEND;
+      return StateConnection.SLEEP;
     case COMPLETE:
     case WAKE:
-      return StateConnection.WAKE;
+      return StateConnection.ACTIVE;
     case CLOSED:
       return nextState;
     default:

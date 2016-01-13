@@ -24,70 +24,52 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.v5.resin;
+package com.caucho.v5.bartender.files;
 
-import com.caucho.v5.config.Configs;
-import com.caucho.v5.server.container.ServerBuilderOld;
+import java.util.ArrayList;
 
-import io.baratine.config.Config;
+import com.caucho.v5.baratine.ServiceServer;
 
-/**
- * Embeddable version of a Resin port
- */
-abstract public class PortEmbed
+public class BfsClientBuilder
 {
-  private int _port = -1;
-  private String _address;
-  
-  private Config _env = Configs.config().get();
+  private ArrayList<Seed> _seedList;
 
-  protected Config env()
+  public BfsClientBuilder()
   {
-    return _env;
-  }
-  
-  /**
-   * The TCP port
-   */
-  public void setPort(int port)
-  {
-    _port = port;
+    _seedList = new ArrayList<Seed>();
   }
 
-  /**
-   * The TCP port
-   */
-  public int getPort()
+  public BfsClientBuilder seed(String address, int port)
   {
-    return _port;
+    _seedList.add(new Seed(address, port));
+
+    return this;
   }
 
-  /**
-   * Returns the local, bound port
-   */
-  abstract public int getLocalPort();
-
-  /**
-   * The binding address
-   */
-  public void setAddress(String address)
+  public BfsClient connect()
   {
-    _address = address;
+    ServiceServer.Builder b = ServiceServer.newServer();
+
+    for (Seed seed : _seedList) {
+      b.seed(seed._address, seed._port);
+    }
+
+    ServiceServer server = b.build();
+
+    return new BfsClientImpl(server);
   }
 
-  /**
-   * The binding address
-   */
-  public String getAddress()
-  {
-    return _address;
-  }
+  static class Seed {
+    String _address;
+    int _port;
 
-  /**
-   * Binds the port to the server
-   */
-  abstract public void bindTo(ServerBuilderOld serverBuilder);
+    Seed(String address, int port)
+    {
+      _address = address;
+      _port = port;
+    }
+  }
 }

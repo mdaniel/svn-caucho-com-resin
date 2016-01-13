@@ -31,19 +31,19 @@ package com.caucho.v5.server.resin;
 
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.server.container.ServerBase;
-import com.caucho.v5.server.container.ServerBuilder;
+import com.caucho.v5.server.container.ServerBaseOld;
+import com.caucho.v5.server.container.ServerBuilderOld;
 
 /**
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class Resin extends ServerBase
+public class Resin extends ServerBaseOld
 {
   /**
    * Creates a new resin server.
    */
-  public Resin(ServerBuilder builder, 
+  public Resin(ServerBuilderOld builder, 
                SystemManager systemManager,
                ServerBartender serverSelf)
     throws Exception

@@ -50,7 +50,7 @@ import com.caucho.v5.server.resin.ServerBaseConfigResin;
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class ServerBuilderResin extends ServerBuilder
+public class ServerBuilderResin extends ServerBuilderOld
 {
   /**
    * Creates a new resin server.
@@ -79,7 +79,7 @@ public class ServerBuilderResin extends ServerBuilder
   /**
    * Creates a new Resin instance
    */
-  public static ServerBuilder create(ArgsServerBase args,
+  public static ServerBuilderOld create(ArgsServerBase args,
                                      ServerConfigBoot serverConfig)
   {
     return new ServerBuilderResin(args, serverConfig);

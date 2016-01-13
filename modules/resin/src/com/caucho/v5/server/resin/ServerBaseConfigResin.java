@@ -48,7 +48,7 @@ import com.caucho.v5.http.cache.TempFileManager;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentProperties;
-import com.caucho.v5.server.container.ServerBuilder;
+import com.caucho.v5.server.container.ServerBuilderOld;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -61,7 +61,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
   private static Logger log = Logger.getLogger(ServerBaseConfigResin.class.getName());
   private static L10N L = new L10N(ServerBaseConfigResin.class);
 
-  private final ServerBuilder _builder;
+  private final ServerBuilderOld _builder;
   private final SystemManager _system;
 
   private long _minFreeMemory = 2 * 1024L * 1024L;
@@ -73,7 +73,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
   /**
    * Creates a new resin server.
    */
-  public ServerBaseConfigResin(ServerBuilder builder)
+  public ServerBaseConfigResin(ServerBuilderOld builder)
   {
     _builder = builder;
     _system = SystemManager.getCurrent();

@@ -120,7 +120,7 @@ import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ConnectionProtocol;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.BasicFuture;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
@@ -1117,7 +1117,7 @@ public class WebApp extends ServletContextImpl
   {
     _shutdownWaitTime = wait.getPeriod();
 
-    ServerBase server = ServerBase.current();
+    ServerBaseOld server = ServerBaseOld.current();
     if (server!= null &&
         server.getShutdownWaitMax() < _shutdownWaitTime) {
       log.warning(L.l("web-app shutdown-wait-max '{0}' is longer than server shutdown-wait-max '{1}'.",

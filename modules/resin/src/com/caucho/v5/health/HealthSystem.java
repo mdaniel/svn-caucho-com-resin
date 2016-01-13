@@ -14,7 +14,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -43,7 +43,7 @@ public class HealthSystem
   
   public HealthSystem()
   {
-    ServerBase resin = ServerBase.current();
+    ServerBaseOld resin = ServerBaseOld.current();
 
     _healthService = SystemManager.getCurrentSystem(HealthSubSystem.class);
     if (_healthService == null && resin == null) {

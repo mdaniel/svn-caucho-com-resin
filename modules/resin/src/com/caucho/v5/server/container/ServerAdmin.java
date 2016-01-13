@@ -49,13 +49,13 @@ import com.caucho.v5.util.Version;
 public class ServerAdmin extends ManagedObjectBase
   implements ResinMXBean
 {
-  private final ServerBase _server;
+  private final ServerBaseOld _server;
   private ThreadPoolAdmin _threadPoolAdmin;
 
   /**
    * Creates the admin object and registers with JMX.
    */
-  public ServerAdmin(ServerBase resin)
+  public ServerAdmin(ServerBaseOld resin)
   {
     _server = resin;
 

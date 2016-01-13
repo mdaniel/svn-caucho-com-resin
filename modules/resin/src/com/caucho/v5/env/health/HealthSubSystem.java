@@ -35,7 +35,7 @@ import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.lifecycle.LifecycleListener;
 import com.caucho.v5.lifecycle.LifecycleState;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.server.container.StartInfoListener;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -384,7 +384,7 @@ public class HealthSubSystem extends SubSystemBase
     
     _lifecycle.toActive();
     
-    ServerBase resin = ServerBase.current();
+    ServerBaseOld resin = ServerBaseOld.current();
     if (resin != null) {
       resin.addStartInfoListener(new ResinRestartListener());
     }

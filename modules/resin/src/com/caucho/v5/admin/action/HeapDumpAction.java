@@ -39,7 +39,7 @@ import javax.management.ObjectName;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.profile.HeapDump;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.Vfs;
@@ -64,7 +64,7 @@ public class HeapDumpAction implements AdminAction
       "com.sun.management:type=HotSpotDiagnostic");
     
     if (hprofPath == null) {
-      ServerBase resin = ServerBase.current();
+      ServerBaseOld resin = ServerBaseOld.current();
       
       if (resin == null)
         hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));

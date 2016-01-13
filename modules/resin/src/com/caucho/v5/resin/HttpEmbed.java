@@ -34,7 +34,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.protocol.ProtocolHttp;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.network.port.PortTcpBuilder;
-import com.caucho.v5.server.container.ServerBuilder;
+import com.caucho.v5.server.container.ServerBuilderOld;
 
 /**
  * Embeddable version of a HTTP port
@@ -88,7 +88,7 @@ public class HttpEmbed extends PortEmbed
    * Binds the port to the server
    */
   @Override
-  public void bindTo(ServerBuilder serverBuilder)
+  public void bindTo(ServerBuilderOld serverBuilder)
   {
     try {
       PortTcpBuilder portBuilder = new PortTcpBuilder(env());

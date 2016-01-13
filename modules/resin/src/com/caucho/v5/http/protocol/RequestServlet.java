@@ -1522,7 +1522,7 @@ public final class RequestServlet extends RequestCauchoBase
   }
 
   @Override
-  public void setInvocation(Invocation invocation)
+  public void invocation(Invocation invocation)
   {
     _invocation = (InvocationServlet) invocation;
   }

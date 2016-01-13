@@ -50,7 +50,7 @@ import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.server.container.ServerBuilderResin;
 import com.caucho.v5.server.resin.EmbedArgs;
 import com.caucho.v5.util.L10N;
@@ -82,7 +82,7 @@ public class ResinEmbed implements Closeable
     = "classpath:com/caucho/resin/resin-embed.xml";
 
   private final ArgsServerBase _args;
-  private ServerBase _resin;
+  private ServerBaseOld _resin;
   
   private String _configFile = EMBED_CONF;
 

@@ -64,14 +64,14 @@ public class LinkChildServiceImpl
 
   private static final L10N L = new L10N(LinkChildServiceImpl.class);
 
-  private ServerBase _serverContainer;
+  private ServerBaseOld _serverContainer;
   
   private ShutdownSystem _shutdown;
 
   private LinkServer _linkServer;
   private LinkWatchdogService _linkWatchdog;
   
-  LinkChildServiceImpl(ServerBase server)
+  LinkChildServiceImpl(ServerBaseOld server)
   {
     _serverContainer = server;
     
