@@ -70,13 +70,13 @@ public abstract class StartCommandBase extends ServerCommandBase<ArgsDaemon>
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args, ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args) // , ConfigBoot boot)
     throws BootArgumentException
   {
-    ServerConfigBoot server = boot.findWatchdogServer(args);
+    ServerConfigBoot server = null;//boot.findWatchdogServer(args);
     
     if (server == null) {
-      String clusterId = boot.getHomeCluster(args);
+      String clusterId = null;//boot.getHomeCluster(args);
       
       throw new ConfigException(L.l("Can't find a watchdog server matching a local IP address in cluster '{0}'",
                                     clusterId));

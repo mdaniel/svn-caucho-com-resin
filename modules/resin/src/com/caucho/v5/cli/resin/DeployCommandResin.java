@@ -29,17 +29,9 @@
 
 package com.caucho.v5.cli.resin;
 
-import java.util.ArrayList;
-
-import com.caucho.v5.cli.daemon.ArgsDaemon;
-import com.caucho.v5.cli.server.ClientDeploy;
-import com.caucho.v5.cli.server.DeployCommand;
-import com.caucho.v5.server.config.ConfigBoot;
-import com.caucho.v5.vfs.PathImpl;
-
-
-public class DeployCommandResin extends DeployCommand
+public class DeployCommandResin // extends DeployCommand
 {
+  /*
   @Override
   protected void deployDefault(ClientDeploy client,
                                ArgsDaemon args,
@@ -66,4 +58,5 @@ public class DeployCommandResin extends DeployCommand
   {
     return " <war-file>";
   }
+  */
 }

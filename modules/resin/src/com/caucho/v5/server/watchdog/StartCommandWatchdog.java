@@ -77,11 +77,13 @@ public class StartCommandWatchdog
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args, ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args)
     throws BootArgumentException
   {
     try {
-      ServerConfigBoot server = boot.findServer(args);
+      ConfigBoot boot = null;
+      
+      ServerConfigBoot server = null;//boot.findServer(args);
       
       ArgsWatchdog argsWatchdog = (ArgsWatchdog) args;
 

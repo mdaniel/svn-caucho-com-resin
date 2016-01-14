@@ -38,7 +38,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.RawString;
-import com.caucho.v5.deploy.DeployMode;
+import com.caucho.v5.deploy2.DeployMode;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.HostConfig;

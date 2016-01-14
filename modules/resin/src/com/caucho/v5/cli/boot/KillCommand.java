@@ -37,7 +37,6 @@ import com.caucho.v5.cli.resin.ClientWatchdog;
 import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.server.ServerCommandBase;
 import com.caucho.v5.health.shutdown.ExitCode;
-import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.watchdog.WatchdogService;
 import com.caucho.v5.util.L10N;
@@ -60,11 +59,10 @@ public class KillCommand extends ServerCommandBase<ArgsDaemon>
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args, 
-                            ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args)
     throws BootArgumentException
   {
-    ServerConfigBoot server = boot.findWatchdogServer(args);
+    ServerConfigBoot server = null;//boot.findWatchdogServer(args);
     
     try (ClientWatchdog client = new ClientWatchdog(args, server)) {
       WatchdogService watchdog = client.getWatchdogService();

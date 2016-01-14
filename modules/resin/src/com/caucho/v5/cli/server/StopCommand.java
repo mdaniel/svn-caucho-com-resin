@@ -57,10 +57,10 @@ public class StopCommand extends ServerCommandBase<ArgsDaemon>
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args,
-                            ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args)
     throws BootArgumentException
   {
+    ConfigBoot boot = null;
     ServerConfigBoot server = boot.findWatchdogServer(args);
     
     if (stopBackground(args, server)) {

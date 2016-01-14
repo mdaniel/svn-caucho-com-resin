@@ -55,15 +55,12 @@ import com.caucho.v5.cli.boot.StatusCommand;
 import com.caucho.v5.cli.boot.StoreLoadCommand;
 import com.caucho.v5.cli.boot.ThreadDumpCommand;
 import com.caucho.v5.cli.boot.UndeployCommand;
-import com.caucho.v5.cli.boot.WebAppDeployCommand;
-import com.caucho.v5.cli.boot.WebAppUndeployCommand;
 import com.caucho.v5.cli.server.BfsCatCommand;
 import com.caucho.v5.cli.server.BfsGetCommand;
 import com.caucho.v5.cli.server.BfsLsCommand;
 import com.caucho.v5.cli.server.BfsPutCommand;
 import com.caucho.v5.cli.server.BfsRmCommand;
 import com.caucho.v5.cli.server.BootConfigParser;
-import com.caucho.v5.cli.server.DeployCommandService;
 import com.caucho.v5.cli.server.ProgramInfoDaemon;
 import com.caucho.v5.cli.server.ShutdownCommand;
 import com.caucho.v5.cli.server.StopCommand;
@@ -104,7 +101,7 @@ public class ArgsResinCli extends ArgsCli
   }
   
 
-  @Override
+  //@Override
   protected BootConfigParser createParser()
   {
     return new BootConfigParserResin();
@@ -138,7 +135,7 @@ public class ArgsResinCli extends ArgsCli
     //manager.addCommand(new ServerCommandConsole());
     //manager.addCommand(new ConsoleCommand());
     
-    manager.addCommand(new DeployCommandResin());
+    //manager.addCommand(new DeployCommandResin());
     
     manager.addCommand(new DisableCommand().hide());
     manager.addCommand(new EnableCommand().hide());
@@ -170,7 +167,7 @@ public class ArgsResinCli extends ArgsCli
 
     manager.addCommand(new ScoreboardCommand().hide());
     
-    manager.addCommand("deploy-pod", new DeployCommandService().hide());
+    //manager.addCommand("deploy-pod", new DeployCommandService().hide());
     
     manager.addCommand(new ShutdownCommand());
     manager.addCommand(new SleepCommand().hide());
@@ -190,12 +187,12 @@ public class ArgsResinCli extends ArgsCli
     //addCommand(new UserListCommand());
     //addCommand(new UserRemoveCommand());
 
-    manager.addCommand(new WebAppDeployCommand().hide());
+    //manager.addCommand(new WebAppDeployCommand().hide());
     //manager.addCommand(new WebAppRestartCommand().hide());
     //manager.addCommand(new WebAppRestartClusterCommand().hide());
     //manager.addCommand(new WebAppStartCommand().hide());
     //manager.addCommand(new WebAppStopCommand().hide());
-    manager.addCommand(new WebAppUndeployCommand().hide());
+    //manager.addCommand(new WebAppUndeployCommand().hide());
 
     /*
     manager.addCommand("deploy-start", new WebAppStartCommand());

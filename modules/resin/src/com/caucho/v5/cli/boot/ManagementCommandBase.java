@@ -42,11 +42,11 @@ public abstract class ManagementCommandBase extends RemoteCommandBase
   public static final int RETURN_CODE_SERVER_ERROR = 32;
 
   @Override
-  public ExitCode doCommand(ArgsCli args,
-                            ServerConfigBoot server,
+  public ExitCode doCommandImpl(ArgsCli args,
                             ServiceManagerClient client)
     throws BootArgumentException
   {
+    ServerConfigBoot server = null;
     ManagerClientApi managerClient
       = client.service("remote:///manager").as(ManagerClientApi.class);
 

@@ -72,10 +72,11 @@ public class ShutdownCommand extends ServerCommandBase<ArgsDaemon>
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args,
-                            ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args)
     throws BootArgumentException
   {
+    ConfigBoot boot = null;
+    
     if (shutdownBackground(args)) {
       return ExitCode.OK;
     }

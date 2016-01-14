@@ -78,7 +78,7 @@ public class ArgsWatchdog extends ArgsDaemon
     return (CommandWatchdog) getCommand();
   }
 
-  @Override
+  //@Override
   public ServerELContext<? extends ArgsWatchdog> getELContext()
   {
     return new ELContextConfig<ArgsWatchdog>(this);

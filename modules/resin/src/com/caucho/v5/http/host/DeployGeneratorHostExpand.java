@@ -40,7 +40,7 @@ import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy.DeployContainerService;
 import com.caucho.v5.deploy.DeployControllerType;
 import com.caucho.v5.deploy.DeployGeneratorExpand;
-import com.caucho.v5.deploy.DeployMode;
+import com.caucho.v5.deploy2.DeployMode;
 import com.caucho.v5.vfs.PathImpl;
 
 /**

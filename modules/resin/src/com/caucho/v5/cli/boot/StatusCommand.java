@@ -70,10 +70,10 @@ public class StatusCommand extends ServerCommandBase<ArgsDaemon>
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args,
-                              ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args)
     throws BootArgumentException
   {
+    ConfigBoot boot = null;
     ServerConfigBoot server = boot.findWatchdogServer(args);
     
     try (ClientWatchdog client = new ClientWatchdog(args, server)) {

@@ -67,7 +67,7 @@ public class PodBuilderServiceImpl
   PodBuilderServiceImpl(PodContainer podContainer)
   {
     // _serviceCluster = new PodsServiceClusterImpl();
-    _podsDeployService = podContainer.getDeployService();
+    _podsDeployService = null;//podContainer.getDeployService();
   }
   
   @OnInit

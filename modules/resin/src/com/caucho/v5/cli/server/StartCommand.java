@@ -31,26 +31,18 @@ package com.caucho.v5.cli.server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.daemon.ArgsDaemon;
-import com.caucho.v5.cli.server.ClientDeploy.ServiceManifest;
 import com.caucho.v5.cli.shell.EnvCli;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.health.shutdown.ExitCode;
-import com.caucho.v5.http.pod.PodBuilderService;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.container.ArgsServerBase;
 import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
-
-import io.baratine.service.ServiceExceptionConnect;
-import io.baratine.service.ServiceExceptionNotFound;
 
 /**
  * Command to start Resin server
@@ -103,10 +95,12 @@ public class StartCommand extends StartCommandBase
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args, ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args) // , ConfigBoot boot)
       throws BootArgumentException
   {
-    validateRootDirectory(args, boot.getRoot());
+    ConfigBoot boot = null;
+    
+    // validateRootDirectory(args, boot.getRoot());
     validateArgs(args);
     
     if (args.getArgFlag("foreground")) {
@@ -116,7 +110,7 @@ public class StartCommand extends StartCommandBase
       return startBackground(args, boot);
     }
     else {
-      return super.doCommand(args, boot);
+      return super.doCommandImpl(args);
     }
   }
 
@@ -290,8 +284,11 @@ public class StartCommand extends StartCommandBase
 
     ArgsServerBase serverArgs = buildServerArgs(args, serverConfig);
     
-    ServerBase server = serverArgs.createServer(args.getProgramName(),
+    ServerBase server = null;//
+    /*
+    serverArgs.createServer(args.getProgramName(),
                                                 serverConfig);
+                                                */
     
     try {
       // resin.start();
@@ -318,10 +315,10 @@ public class StartCommand extends StartCommandBase
     ServerConfigBoot serverConfig = servers.get(0);
 
     ArgsServerBase serverArgs = buildServerArgs(args, serverConfig);
-    
+    /*
     ServerBase server = serverArgs.createServer(args.getProgramName(),
                                                 serverConfig);
-    
+    */
     try {
       //addServer(args.envCli(), server);
       
@@ -382,6 +379,7 @@ public class StartCommand extends StartCommandBase
     
     RuntimeException lastException = null;
     
+    /*
     try (ClientDeploy client = new ClientDeploy(args, boot)) {
       for (int i = 0; i < retryCount; i++) {
         try {
@@ -405,6 +403,7 @@ public class StartCommand extends StartCommandBase
         }
       }
     }
+    */
     
     if (lastException != null) {
       throw lastException;
@@ -413,6 +412,7 @@ public class StartCommand extends StartCommandBase
     return deployCode;
   }
   
+  /*
   private ExitCode doDeploy(ClientDeploy client, 
                             ArgsDaemon args,
                             ConfigBoot boot,
@@ -450,7 +450,9 @@ public class StartCommand extends StartCommandBase
     
     return ExitCode.OK;
   }
+  */
   
+  /*
   protected String getAddress(ClientDeploy client, ArgsDaemon args, PathImpl path)
   {
     String tail = path.getTail();
@@ -482,4 +484,5 @@ public class StartCommand extends StartCommandBase
     
     return "/usr/lib/" + manifest.getPodName() + ".bar";
   }
+  */
 }

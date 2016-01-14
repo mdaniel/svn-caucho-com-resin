@@ -64,8 +64,7 @@ public class PasswordEncryptCommand extends ServerCommandBase<ArgsDaemon>
   }
 
   @Override
-  public ExitCode doCommand(ArgsDaemon args, 
-                            ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsDaemon args)
     throws BootArgumentException
   {
     // validateArgs(args.getArgv());

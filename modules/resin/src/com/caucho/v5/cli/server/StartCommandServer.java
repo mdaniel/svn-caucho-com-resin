@@ -94,9 +94,10 @@ public class StartCommandServer extends ServerCommandBase<ArgsServerBase>
   */
 
   @Override
-  public ExitCode doCommand(ArgsServerBase args, ConfigBoot resinBoot)
+  public ExitCode doCommandImpl(ArgsServerBase args)
       throws BootArgumentException
   {
+    ConfigBoot resinBoot = null;
     ServerBaseOld server = null;
     
     try {

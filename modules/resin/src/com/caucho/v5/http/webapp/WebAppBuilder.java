@@ -57,7 +57,7 @@ import com.caucho.v5.config.types.Icon;
 import com.caucho.v5.config.types.InitParam;
 import com.caucho.v5.deploy.DeployGenerator;
 import com.caucho.v5.deploy.DeployInstanceBuilder;
-import com.caucho.v5.deploy.DeployMode;
+import com.caucho.v5.deploy2.DeployMode;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.FilterChainBuilder;
 import com.caucho.v5.http.dispatch.FilterConfigImpl;

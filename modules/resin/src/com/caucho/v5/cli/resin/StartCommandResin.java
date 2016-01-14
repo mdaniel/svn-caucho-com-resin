@@ -29,10 +29,7 @@
 
 package com.caucho.v5.cli.resin;
 
-import com.caucho.v5.cli.daemon.ArgsDaemon;
-import com.caucho.v5.cli.server.ClientDeploy;
 import com.caucho.v5.cli.server.StartCommand;
-import com.caucho.v5.vfs.PathImpl;
 
 
 /**
@@ -41,9 +38,11 @@ import com.caucho.v5.vfs.PathImpl;
  */
 public class StartCommandResin extends StartCommand
 {
+  /*
   @Override
   protected String getAddressDefault(ClientDeploy client, ArgsDaemon args, PathImpl path)
   {
     return getAddressWar(client, args, path);
   }
+  */
 }

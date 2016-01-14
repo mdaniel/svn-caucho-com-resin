@@ -84,7 +84,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.types.Validator;
 import com.caucho.v5.deploy.DeployInstanceEnvironment;
-import com.caucho.v5.deploy.DeployMode;
+import com.caucho.v5.deploy2.DeployMode;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.FilterMapper;

@@ -77,9 +77,10 @@ public class JspcCommand extends ServerCommandBase<ArgsCli>
   }
 
   @Override
-  public ExitCode doCommand(ArgsCli args, ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsCli args)
     throws BootArgumentException
   {
+    ConfigBoot boot = null;
     List<String> jspcArgs = new ArrayList<String>();
 
     final String appDir = args.getArg("-app-dir");

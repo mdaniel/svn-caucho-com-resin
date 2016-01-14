@@ -39,7 +39,6 @@ import com.caucho.v5.cli.server.BootArgumentException;
 import com.caucho.v5.cli.server.ServerCommandBase;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.health.shutdown.ExitCode;
-import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
@@ -70,8 +69,7 @@ public class PasswordGenerateCommand extends ServerCommandBase<ArgsCli>
   }
 
   @Override
-  public ExitCode doCommand(ArgsCli args, 
-                            ConfigBoot boot)
+  public ExitCode doCommandImpl(ArgsCli args)
     throws BootArgumentException
   {
     // validateArgs(args.getArgv());

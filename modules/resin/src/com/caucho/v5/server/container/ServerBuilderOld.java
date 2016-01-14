@@ -547,7 +547,7 @@ public class ServerBuilderOld
       serverConfigBoot.getServerProgram().configure(config);
     }
 
-    _args.getProgram().configure(config);
+    //_args.getProgram().configure(config);
     // _bootServerConfig.getServerProgram().configure(config);
 
     serverConfig.init();

@@ -57,8 +57,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
   }
 
   @Override
-  public final ExitCode doCommand(ArgsCli args,
-                                  ServerConfigBoot server,
+  public final ExitCode doCommandImpl(ArgsCli args,
                                   ServiceManagerClient client)
     throws BootArgumentException
   {
@@ -66,7 +65,7 @@ public abstract class DeployCommandRepositoryBase extends RemoteCommandBase
       = client.service("remote:///bartender-files")
               .as(FilesDeployService.class);
     
-    doCommand(args, server, filesService);
+    //doCommand(args, filesService);
     
     return ExitCode.OK;
   }
