@@ -44,7 +44,7 @@ import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.MergePath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -101,7 +101,7 @@ public class JavaClassGenerator {
   {
     MergePath mergePath = new MergePath();
 
-    mergePath.addMergePath(Vfs.lookup());
+    mergePath.addMergePath(VfsOld.lookup());
     mergePath.addClassPath();
 
     return mergePath;

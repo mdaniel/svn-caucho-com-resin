@@ -34,7 +34,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.MemoryPath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Cached response.
@@ -258,7 +258,7 @@ public class HttpCache extends HttpCacheBase
       if (_path instanceof MemoryPath) {
         String userName = System.getProperty("user.name");
 
-        _path = Vfs.lookup("file:/tmp/" + userName + "/qa/cache");
+        _path = VfsOld.lookup("file:/tmp/" + userName + "/qa/cache");
       }
     }
 

@@ -36,7 +36,7 @@ import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 public class ThreadDumpCommand extends ManagementCommandBase
@@ -70,7 +70,7 @@ public class ThreadDumpCommand extends ManagementCommandBase
       return ExitCode.OK;
     }
 
-    PathImpl path = Vfs.lookup(fileName);
+    PathImpl path = VfsOld.lookup(fileName);
 
     try (WriteStream out = path.openWrite()) {
       out.print(result);

@@ -55,7 +55,7 @@ import com.caucho.v5.jstl.NameValueTag;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class CoreImportTag extends BodyTagSupport implements NameValueTag {
   private static L10N L = new L10N(CoreImportTag.class);
@@ -417,7 +417,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
 
     InputStream is = conn.getInputStream();
     try {
-      ReadStream in = Vfs.openRead(is);
+      ReadStream in = VfsOld.openRead(is);
       String encoding = conn.getContentEncoding();
       String contentType = conn.getContentType();
 

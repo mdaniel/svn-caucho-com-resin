@@ -51,7 +51,7 @@ public class ServicesUtil
     while (e.hasMoreElements()) {
       URL url = (URL) e.nextElement();
 
-      ReadStream is = Vfs.lookup(url.toString()).openRead();
+      ReadStream is = VfsOld.lookup(url.toString()).openRead();
 
       try {
         String line;

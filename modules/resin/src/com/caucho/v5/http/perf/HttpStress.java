@@ -41,7 +41,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -88,7 +88,7 @@ public class HttpStress
 
       switch (arg) {
       case "--unix-socket":
-        _socketPath = Vfs.lookup().lookup(args[i + 1]);
+        _socketPath = VfsOld.lookup().lookup(args[i + 1]);
         i++;
         break;
 

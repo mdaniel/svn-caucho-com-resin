@@ -41,7 +41,7 @@ import com.caucho.v5.config.program.ObjectFactoryNaming;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class MessageDestinationRef
   implements ObjectFactoryNaming
@@ -63,7 +63,7 @@ public class MessageDestinationRef
 
   public MessageDestinationRef()
   {
-    _modulePath = Vfs.lookup();
+    _modulePath = VfsOld.lookup();
     _context = null;
   }
 
@@ -76,7 +76,7 @@ public class MessageDestinationRef
   public MessageDestinationRef(Context context)
   {
     _context = context;
-    _modulePath = Vfs.getPwd();
+    _modulePath = VfsOld.getPwd();
   }
 
   public void setDescription(String description)

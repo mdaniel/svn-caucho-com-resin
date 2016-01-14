@@ -34,7 +34,7 @@ import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.EnclosedWriteStream;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 import org.w3c.dom.*;
@@ -165,7 +165,7 @@ public class XmlPrinter implements XMLWriter {
       init(((EnclosedWriteStream) os).getWriteStream());
     else {
       _isEnclosedStream = true;
-      WriteStream ws = Vfs.openWrite(os);
+      WriteStream ws = VfsOld.openWrite(os);
       try {
         ws.setEncoding("UTF-8");
       } catch (UnsupportedEncodingException e) {
@@ -185,7 +185,7 @@ public class XmlPrinter implements XMLWriter {
       init(((EnclosedWriteStream) writer).getWriteStream());
     else {
       _isEnclosedStream = true;
-      WriteStream ws = Vfs.openWrite(writer);
+      WriteStream ws = VfsOld.openWrite(writer);
       init(ws);
     }
   }
@@ -304,7 +304,7 @@ public class XmlPrinter implements XMLWriter {
   {
     CharBuffer cb = CharBuffer.allocate();
 
-    _os = Vfs.openWrite(cb);
+    _os = VfsOld.openWrite(cb);
     init(_os);
     try {
       ((QAbstractNode) node).print(this);

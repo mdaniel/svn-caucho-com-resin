@@ -44,7 +44,7 @@ import com.caucho.v5.log.impl.RolloverLogBase;
 import com.caucho.v5.log.impl.RotateStream;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Thread responsible for watching a backend server.
@@ -535,7 +535,7 @@ public class ChildWatchdogConfig
     if (_javaExe != null)
       return _javaExe.getNativePath();
 
-    PathImpl javaHome = Vfs.lookup(System.getProperty("java.home"));
+    PathImpl javaHome = VfsOld.lookup(System.getProperty("java.home"));
 
     if (javaHome.getTail().equals("jre"))
       javaHome = javaHome.getParent();
@@ -547,7 +547,7 @@ public class ChildWatchdogConfig
     else if (javaHome.lookup("bin/java").canRead())
       return javaHome.lookup("bin/java").getNativePath();
 
-    javaHome = Vfs.lookup(System.getProperty("java.home"));
+    javaHome = VfsOld.lookup(System.getProperty("java.home"));
 
     if (javaHome.lookup("bin/javaw.exe").canRead())
       return javaHome.lookup("bin/javaw").getNativePath();

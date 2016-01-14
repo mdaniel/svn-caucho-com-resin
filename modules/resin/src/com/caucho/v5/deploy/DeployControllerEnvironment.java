@@ -45,7 +45,7 @@ import com.caucho.v5.config.types.PathBuilder;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * A deploy controller for an environment.
@@ -469,7 +469,7 @@ abstract public class
 
       //ClassLoader loader = builder.getClassLoader();
       //thread.setContextClassLoader(loader);
-      Vfs.setPwd(getRootDirectory());
+      VfsOld.setPwd(getRootDirectory());
 
       initDependencies();
 
@@ -599,7 +599,7 @@ abstract public class
     else
       throw new ConfigException(L.l("root-directory `{0}' may not be a file.  root-directory must specify a directory.",
                                     rootDirectory.getPath()));
-    Vfs.setPwd(rootDirectory);
+    VfsOld.setPwd(rootDirectory);
 
     if (log.isLoggable(Level.FINEST)) {
       log.fine("root-directory=" + rootDirectory + " " + builder);

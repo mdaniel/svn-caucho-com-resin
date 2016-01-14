@@ -51,7 +51,7 @@ import com.caucho.v5.bartender.pod.PodBartender;
 import com.caucho.v5.bartender.pod.UpdatePod;
 import com.caucho.v5.bartender.pod.PodBartender.PodType;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Contains Baratine service pod deployments.
@@ -242,7 +242,7 @@ class PodBuilderImpl implements ServiceServer.PodBuilder
   @Override
   public PodBuilder deploy(String pathName)
   {
-    PathImpl path = Vfs.lookup(pathName);
+    PathImpl path = VfsOld.lookup(pathName);
     
     _pathList.add(path);
     

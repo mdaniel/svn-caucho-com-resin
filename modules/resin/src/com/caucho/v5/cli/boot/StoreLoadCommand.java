@@ -38,7 +38,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.StreamSource;
 import com.caucho.v5.vfs.StreamSourcePath;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class StoreLoadCommand extends ManagementCommandBase
 {
@@ -87,7 +87,7 @@ public class StoreLoadCommand extends ManagementCommandBase
     
     String value = null;
     
-    PathImpl path = Vfs.lookup(fileName);
+    PathImpl path = VfsOld.lookup(fileName);
     
     if (! path.canRead()) {
       throw new ConfigException(L.l("{0} is an unreadable path", path));

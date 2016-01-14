@@ -54,7 +54,7 @@ import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Resin's host container implementation.
@@ -110,7 +110,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
     _server = server;
     _classLoader = server.classLoader();
 
-    _rootDir = Vfs.lookup();
+    _rootDir = VfsOld.lookup();
 
     /*
     _errorHost = createErrorHost();
@@ -461,7 +461,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
       thread.setContextClassLoader(_classLoader);
 
       String id = "hosts/error";
-      PathImpl rootDirectory = Vfs.lookup("memory:/error");
+      PathImpl rootDirectory = VfsOld.lookup("memory:/error");
       HostController controller
         = createController(id, rootDirectory, "error", 
                           null, null);

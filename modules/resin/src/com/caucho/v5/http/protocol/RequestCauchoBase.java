@@ -74,7 +74,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 abstract public class RequestCauchoBase implements RequestCaucho
@@ -1298,7 +1298,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
       else
         file = location + fileName;
 
-      _newPath = Vfs.lookup(file);
+      _newPath = VfsOld.lookup(file);
 
       if (_newPath.exists())
         throw new IOException(L.l("File '{0}' already exists.", _newPath));

@@ -36,7 +36,7 @@ import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.URLUtil;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
@@ -59,7 +59,7 @@ public class DirectoryServlet extends HttpServlet {
 
   public DirectoryServlet()
   {
-    this(Vfs.lookup());
+    this(VfsOld.lookup());
   }
 
   public void setEnable(boolean enable)

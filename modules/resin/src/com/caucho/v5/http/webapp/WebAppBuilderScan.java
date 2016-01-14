@@ -71,7 +71,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
 
 /**
@@ -234,8 +234,8 @@ public class WebAppBuilderScan
           return -1;
         }
 
-        PathImpl aPath = Vfs.lookup(aUrl.toString());
-        PathImpl bPath = Vfs.lookup(bUrl.toString());
+        PathImpl aPath = VfsOld.lookup(aUrl.toString());
+        PathImpl bPath = VfsOld.lookup(bUrl.toString());
 
         PathImpl aRoot = getRootPath(aPath, aName);
         PathImpl bRoot = getRootPath(bPath, bName);

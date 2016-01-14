@@ -38,7 +38,7 @@ import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 
 /**
@@ -61,7 +61,7 @@ public class ConfigLibraryBaratine {
       throw new ConfigException(L.l("file_lookup requires a pwd argument"));
     }
     
-    PathImpl pwdPath = Vfs.lookup(pwd);
+    PathImpl pwdPath = VfsOld.lookup(pwd);
     
     return pwdPath.lookup(resource).getFullPath();
   }     

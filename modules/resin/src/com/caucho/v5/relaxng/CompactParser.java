@@ -36,7 +36,7 @@ import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.xml.XmlChar;
 
 import org.xml.sax.InputSource;
@@ -145,16 +145,16 @@ public class CompactParser {
       _pwd = _is.getPath().getParent();
     }
     if (is != null)
-      _is = Vfs.openRead(is);
+      _is = VfsOld.openRead(is);
     else
-      _is = Vfs.openRead(source.getSystemId());
+      _is = VfsOld.openRead(source.getSystemId());
 
     if (_filename == null)
       _filename = source.getSystemId();
     _line = 1;
 
     if (_pwd == null)
-      _pwd = Vfs.lookup(_filename).getParent();
+      _pwd = VfsOld.lookup(_filename).getParent();
 
     try {
       parse();

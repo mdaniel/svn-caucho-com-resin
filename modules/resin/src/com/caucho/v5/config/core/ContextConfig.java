@@ -40,7 +40,7 @@ import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * The ConfigContext contains the state of the current configuration.
@@ -117,7 +117,7 @@ public class ContextConfig
    */
   public String getBaseUriDecoded()
   {
-    return Vfs.decode(_baseUri);
+    return VfsOld.decode(_baseUri);
   }
 
   /**
@@ -209,7 +209,7 @@ public class ContextConfig
 
     ReadStream is = null;
     try {
-      is = Vfs.lookup().lookup(systemId).openRead();
+      is = VfsOld.lookup().lookup(systemId).openRead();
       int line = 0;
       StringBuilder sb = new StringBuilder("\n\n");
       String text;

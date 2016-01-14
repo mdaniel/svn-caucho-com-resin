@@ -34,7 +34,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -115,7 +115,7 @@ public class DependencyComponent extends ClassComponent {
           pwd = searchPath.getFullPath();
         }
         else {
-          pwd = Vfs.lookup().getFullPath();
+          pwd = VfsOld.lookup().getFullPath();
         }
 
         String fullPath = path.getFullPath();

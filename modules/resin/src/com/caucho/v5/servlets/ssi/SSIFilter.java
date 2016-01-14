@@ -32,7 +32,7 @@ import com.caucho.v5.filters.CauchoResponseWrapper;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.TempStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.Filter;
@@ -149,7 +149,7 @@ public class SSIFilter implements Filter {
       }
 
       try {
-        WriteStream out = Vfs.openWrite(res.getOutputStream());
+        WriteStream out = VfsOld.openWrite(res.getOutputStream());
         stmt.apply(out, req, res);
         out.close();
       } catch (Exception e) {

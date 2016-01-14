@@ -70,7 +70,7 @@ import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class ManagementAdmin extends ManagedObjectBase
   implements ManagementMXBean
@@ -111,7 +111,7 @@ public class ManagementAdmin extends ManagedObjectBase
 
     StringBuilder cb = new StringBuilder();
     
-    try (ReadStream is = Vfs.openRead(in.openRead())) {
+    try (ReadStream is = VfsOld.openRead(in.openRead())) {
       int ch;
       while ((ch = is.read()) >= 0)
         cb.append((char) ch);

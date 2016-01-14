@@ -54,7 +54,7 @@ import com.caucho.v5.bytecode.scan.ScanManagerByteCode;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 
 /**
@@ -97,7 +97,7 @@ public class EmbedBuilder
    */
   public EmbedBuilder config(String pathName)
   {
-    _config = Vfs.lookup(pathName);
+    _config = VfsOld.lookup(pathName);
     
     return this;
   }
@@ -139,14 +139,14 @@ public class EmbedBuilder
 
   public EmbedBuilder root(String dataPath)
   {
-    _root = Vfs.lookup(dataPath);
+    _root = VfsOld.lookup(dataPath);
     
     return this;
   }
 
   public EmbedBuilder data(String dataPath)
   {
-    _data = Vfs.lookup(dataPath);
+    _data = VfsOld.lookup(dataPath);
     
     return this;
   }
@@ -229,7 +229,7 @@ public class EmbedBuilder
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     for (URL url : _scanList) {
-      PathImpl root = Vfs.lookup(url.toString());
+      PathImpl root = VfsOld.lookup(url.toString());
       
       scanManager.scan(loader, root, null);
     }
@@ -282,7 +282,7 @@ public class EmbedBuilder
     // ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     for (URL url : _scanList) {
-      PathImpl root = Vfs.lookup(url.toString());
+      PathImpl root = VfsOld.lookup(url.toString());
       
       scanManager.scan(loader, root, null);
     }

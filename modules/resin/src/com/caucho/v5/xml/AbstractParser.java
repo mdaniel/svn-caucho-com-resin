@@ -32,7 +32,7 @@ import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.VfsStream;
 
 import org.w3c.dom.Document;
@@ -637,7 +637,7 @@ abstract public class AbstractParser implements XMLReader, Parser
     
     if (_searchPath == null) {
       if (source.getSystemId() != null)
-        _searchPath = Vfs.lookup(source.getSystemId()).getParent();
+        _searchPath = VfsOld.lookup(source.getSystemId()).getParent();
     }
 
     _systemId = source.getSystemId();
@@ -646,20 +646,20 @@ abstract public class AbstractParser implements XMLReader, Parser
     String encoding = null;
 
     if (source.getByteStream() != null) {
-      stream = Vfs.openRead(source.getByteStream());
+      stream = VfsOld.openRead(source.getByteStream());
       encoding = source.getEncoding();
     }
     else if (source.getCharacterStream() != null) {
       encoding = "UTF-8";
       _isStaticEncoding = true;
-      stream = Vfs.openRead(source.getCharacterStream());
+      stream = VfsOld.openRead(source.getCharacterStream());
     }
     else if (source.getSystemId() != null) {
       InputStream is = openStream(source.getSystemId(),
                                   source.getPublicId(),
                                   null,
                                   true);
-      stream = Vfs.openRead(is);
+      stream = VfsOld.openRead(is);
       encoding = source.getEncoding();
     }
     else
@@ -742,7 +742,7 @@ abstract public class AbstractParser implements XMLReader, Parser
           _searchPath = _searchPath.lookup(systemId).getParent();
       }
       else if (systemId != null)
-        _searchPath = Vfs.lookup(systemId).getParent();
+        _searchPath = VfsOld.lookup(systemId).getParent();
 
       if (systemId == null) {
         systemId = path.getURL();
@@ -760,7 +760,7 @@ abstract public class AbstractParser implements XMLReader, Parser
         _systemId = "anonymous.xml";
       }
       else {
-        _searchPath = Vfs.lookup(systemId).getParent();
+        _searchPath = VfsOld.lookup(systemId).getParent();
         _systemId = systemId;
       }
 
@@ -819,7 +819,7 @@ abstract public class AbstractParser implements XMLReader, Parser
   {
     init();
     
-    ReadStream is = Vfs.openString(string);
+    ReadStream is = VfsOld.openString(string);
 
     try {
       parseInt(is);
@@ -953,7 +953,7 @@ abstract public class AbstractParser implements XMLReader, Parser
   public Document parseDocumentString(String string)
     throws IOException, SAXException
   {
-    ReadStream is = Vfs.openString(string);
+    ReadStream is = VfsOld.openString(string);
 
     try {
       _isStaticEncoding = true;
@@ -1010,7 +1010,7 @@ abstract public class AbstractParser implements XMLReader, Parser
       if (_searchPath != null)
         pwd = _searchPath;
       else
-        pwd = Vfs.lookup(systemId).getParent();
+        pwd = VfsOld.lookup(systemId).getParent();
       
       String newId = pwd.lookup(systemId).getURL();
       if (! newId.startsWith("error:"))
@@ -1055,7 +1055,7 @@ abstract public class AbstractParser implements XMLReader, Parser
       return _searchPath.lookup(systemId).openRead();
     }
     else
-      return Vfs.lookup(systemId).openRead();
+      return VfsOld.lookup(systemId).openRead();
   }
 
   /**
@@ -1068,10 +1068,10 @@ abstract public class AbstractParser implements XMLReader, Parser
       return source.getByteStream();
     }
     else if (source.getCharacterStream() != null) {
-      return Vfs.openRead(source.getCharacterStream());
+      return VfsOld.openRead(source.getCharacterStream());
     }
     else if (source.getSystemId() != null) {
-      return Vfs.openRead(source.getSystemId());
+      return VfsOld.openRead(source.getSystemId());
     }
     else
       throw new FileNotFoundException(L.l("invalid InputSource {0}", source));

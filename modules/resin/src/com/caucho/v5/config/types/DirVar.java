@@ -32,7 +32,7 @@ import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.core.ContextConfig;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Variable for __DIR__
@@ -55,9 +55,9 @@ public class DirVar {
       String file = env.getBaseUri();
 
       if (file != null) {
-        String dir = Vfs.lookup(file).getParent().getURL();
+        String dir = VfsOld.lookup(file).getParent().getURL();
 
-        return Vfs.decode(dir);
+        return VfsOld.decode(dir);
       }
       else
         return null;

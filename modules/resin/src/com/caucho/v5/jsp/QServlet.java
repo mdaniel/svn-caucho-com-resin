@@ -54,7 +54,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.JarPath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Base servlet for both JSP and XTP.  It's primarily responsible for
@@ -380,9 +380,9 @@ abstract public class QServlet implements Servlet {
 
       path = null;
       if (url != null && (name.endsWith(".jar") || name.endsWith(".zip")))
-        path = JarPath.create(Vfs.lookup(url.toString())).lookup(pathName);
+        path = JarPath.create(VfsOld.lookup(url.toString())).lookup(pathName);
       else if (url != null)
-        path = Vfs.lookup(url.toString());
+        path = VfsOld.lookup(url.toString());
 
       if (path != null && path.isFile() && path.canRead())
         return path;
@@ -393,9 +393,9 @@ abstract public class QServlet implements Servlet {
 
       path = null;
     if (url != null && (name.endsWith(".jar") || name.endsWith(".zip")))
-      path = JarPath.create(Vfs.lookup(url.toString())).lookup(pathName);
+      path = JarPath.create(VfsOld.lookup(url.toString())).lookup(pathName);
     else if (url != null)
-      path = Vfs.lookup(url.toString());
+      path = VfsOld.lookup(url.toString());
 
     if (path != null && path.isFile() && path.canRead())
       return path;

@@ -44,7 +44,7 @@ import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Stores the entire information for a tag library.
@@ -285,7 +285,7 @@ public class TaglibManager {
     PathImpl path;
 
     if (location.startsWith("file:"))
-      path = Vfs.lookup(location);
+      path = VfsOld.lookup(location);
     else if (location.startsWith("/"))
       path = _resourceManager.resolvePath("." + location);
     else
@@ -305,7 +305,7 @@ public class TaglibManager {
     while ((tail = classPath.indexOf(sep, head)) >= 0) {
       String sub = classPath.substring(head, tail);
 
-      path = Vfs.lookup(sub);
+      path = VfsOld.lookup(sub);
       
       if (sub.endsWith(location) && path.exists())
         return path;
@@ -318,7 +318,7 @@ public class TaglibManager {
     
     String sub = classPath.substring(head);
 
-    path = Vfs.lookup(sub);
+    path = VfsOld.lookup(sub);
       
     if (sub.endsWith(location) && path.exists())
       return path;

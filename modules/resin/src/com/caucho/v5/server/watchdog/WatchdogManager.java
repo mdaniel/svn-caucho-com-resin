@@ -60,7 +60,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 import io.baratine.service.Result;
@@ -108,7 +108,7 @@ public class WatchdogManager implements AlarmListener
     
     _system = new SystemManager("watchdog");
 
-    Vfs.setPwd(getRootDirectory());
+    VfsOld.setPwd(getRootDirectory());
     
     PathImpl logPath = getLogDirectory().lookup("watchdog-manager.log");
     

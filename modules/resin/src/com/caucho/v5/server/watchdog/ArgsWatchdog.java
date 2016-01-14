@@ -39,7 +39,7 @@ import com.caucho.v5.cli.server.ServerELContext;
 import com.caucho.v5.cli.shell.EnvCli;
 import com.caucho.v5.cli.spi.CommandManager;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class ArgsWatchdog extends ArgsDaemon
 {
@@ -106,7 +106,7 @@ public class ArgsWatchdog extends ArgsDaemon
     String oldClassPath = System.getProperty("java.class.path");
     if (oldClassPath != null) {
       for (String item : oldClassPath.split("[" + File.pathSeparatorChar + "]")) {
-        PathImpl path = Vfs.lookup(item);
+        PathImpl path = VfsOld.lookup(item);
         
         addClassPath(classPath, path.getNativePath());
       }

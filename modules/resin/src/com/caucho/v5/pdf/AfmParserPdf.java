@@ -33,7 +33,7 @@ import java.io.IOException;
 
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * parses afm
@@ -58,7 +58,7 @@ public class AfmParserPdf {
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    try (ReadStream is = Vfs.openRead(loader.getResourceAsStream(path))) {
+    try (ReadStream is = VfsOld.openRead(loader.getResourceAsStream(path))) {
       _is = is;
       
       if (is == null) {

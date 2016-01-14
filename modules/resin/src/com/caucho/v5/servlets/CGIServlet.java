@@ -37,7 +37,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.RequestDispatcher;
@@ -164,7 +164,7 @@ public class CGIServlet extends GenericServlet {
 
     String realPath = getServletContext().getRealPath(scriptPath);
 
-    PathImpl vfsPath = Vfs.lookup(realPath);
+    PathImpl vfsPath = VfsOld.lookup(realPath);
 
     if (! vfsPath.canRead() || vfsPath.isDirectory()) {
       if (log.isLoggable(Level.FINE))
@@ -192,7 +192,7 @@ public class CGIServlet extends GenericServlet {
     Alarm alarm = null;
 
     try {
-      File dir = new File(Vfs.lookup(realPath).getParent().getNativePath());
+      File dir = new File(VfsOld.lookup(realPath).getParent().getNativePath());
 
       if (log.isLoggable(Level.FINE)) {
         CharBuffer argsBuf = new CharBuffer();
@@ -250,7 +250,7 @@ public class CGIServlet extends GenericServlet {
       TempBuffer.free(tempBuf);
       tempBuf = null;
 
-      ReadStream rs = Vfs.openRead(inputStream);
+      ReadStream rs = VfsOld.openRead(inputStream);
       boolean hasStatus = false;
 
       try {
@@ -329,7 +329,7 @@ public class CGIServlet extends GenericServlet {
   private int findScriptPathIndex(HttpServletRequest req, String fullPath)
   {
     String realPath = req.getRealPath(fullPath);
-    PathImpl path = Vfs.lookup(realPath);
+    PathImpl path = VfsOld.lookup(realPath);
 
     if (log.isLoggable(Level.FINER))
       log.finer(L.l("real-path is `{0}'", path));
@@ -344,7 +344,7 @@ public class CGIServlet extends GenericServlet {
       String subPath = fullPath.substring(0, head);
 
       realPath = req.getRealPath(subPath);
-      path = Vfs.lookup(realPath);
+      path = VfsOld.lookup(realPath);
 
       if (log.isLoggable(Level.FINEST))
         log.finest(L.l("trying script path {0}", path));
@@ -365,7 +365,7 @@ public class CGIServlet extends GenericServlet {
 
     ReadStream is = null;
     try {
-      is = Vfs.lookup(path).openRead();
+      is = VfsOld.lookup(path).openRead();
 
       int ch;
       if (is.read() != '#')

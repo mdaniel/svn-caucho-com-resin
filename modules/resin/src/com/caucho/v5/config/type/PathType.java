@@ -34,7 +34,7 @@ import java.util.function.Function;
 import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class PathType extends ConfigType<PathImpl>
 {
@@ -88,7 +88,7 @@ public class PathType extends ConfigType<PathImpl>
   public static PathImpl lookupPath(String string)
   {
     return lookupPath(string,
-                      Vfs.lookup());
+                      VfsOld.lookup());
   }
 
   public static PathImpl lookupPath(String string, PathImpl pwd)
@@ -117,7 +117,7 @@ public class PathType extends ConfigType<PathImpl>
       return pwd.lookup(value);
     }
     else {
-      return Vfs.lookup(value);
+      return VfsOld.lookup(value);
     }
   }
 

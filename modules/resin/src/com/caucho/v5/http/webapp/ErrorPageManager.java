@@ -71,7 +71,7 @@ import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.Encoding;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Represents the final servlet in a filter chain.
@@ -662,7 +662,7 @@ public class ErrorPageManager
       } catch (IllegalStateException e) {
         log.log(Level.ALL, e.toString(), e);
 
-        out = Vfs.openWrite(response.getOutputStream()).getPrintWriter();
+        out = VfsOld.openWrite(response.getOutputStream()).getPrintWriter();
         isOutputStreamWrapper = true;
       }
 

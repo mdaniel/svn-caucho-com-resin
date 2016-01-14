@@ -60,7 +60,7 @@ import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Facade for the config parser.
@@ -593,7 +593,7 @@ public class ConfigContext
 
     ReadStream is = null;
     try {
-      is = Vfs.lookup().lookup(systemId).openRead();
+      is = VfsOld.lookup().lookup(systemId).openRead();
       int line = 0;
       StringBuilder sb = new StringBuilder("\n\n");
       String text;

@@ -41,7 +41,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.jsp.JspFactory;
@@ -85,7 +85,7 @@ public class JspPrecompileResource {
   {
     if (_fileSet == null) {
       _fileSet = new FileSetType();
-      _fileSet.setDir(Vfs.lookup());
+      _fileSet.setDir(VfsOld.lookup());
     }
 
     return _fileSet;
@@ -125,7 +125,7 @@ public class JspPrecompileResource {
   public void init()
     throws ConfigException
   {
-    PathImpl pwd = Vfs.lookup();
+    PathImpl pwd = VfsOld.lookup();
 
     if (_fileSet == null) {
       createFileset().addInclude(new PathPatternType("**/*.jsp"));
@@ -224,7 +224,7 @@ public class JspPrecompileResource {
       if (! contextPath.endsWith("/"))
         contextPath = contextPath + "/";
     
-      PathImpl pwd = Vfs.lookup();
+      PathImpl pwd = VfsOld.lookup();
       PathImpl path = null;
 
       synchronized (_paths) {

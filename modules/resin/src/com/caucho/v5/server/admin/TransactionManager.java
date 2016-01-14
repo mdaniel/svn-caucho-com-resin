@@ -35,7 +35,7 @@ import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.server.resin.Resin;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Configures the transaction manager.
@@ -76,7 +76,7 @@ public class TransactionManager
     if (_path != null)
       return _path;
     else
-      return Vfs.lookup("resin-data");
+      return VfsOld.lookup("resin-data");
   }
 
   /**

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -65,7 +65,7 @@ public class OutPdf {
 
   OutPdf(OutputStream os)
   {
-    _out = Vfs.openWrite(os);
+    _out = VfsOld.openWrite(os);
   }
 
   public void setCreator(String creator)

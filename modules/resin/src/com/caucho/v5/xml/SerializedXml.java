@@ -38,7 +38,7 @@ import org.w3c.dom.Node;
 
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * QAbstractNode is an abstract implementation for any DOM node.
@@ -76,7 +76,7 @@ public class SerializedXml implements java.io.Externalizable {
     Xml parser = Xml.create();
 
     try {
-      ReadStream is = Vfs.openRead(new InputStreamWrapper(in));
+      ReadStream is = VfsOld.openRead(new InputStreamWrapper(in));
       _node = parser.parseDocument(is);
       is.close();
     } catch (IOException e) {

@@ -76,7 +76,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WaitFuture;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ServerSocketBar;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -701,7 +701,7 @@ class ChildWatchdogProcess
    */
   private void buildMacosxLibraryPath(HashMap<String,String> env)
   {
-    PathImpl path = Vfs.lookup("/usr/local/opt/openssl/lib");
+    PathImpl path = VfsOld.lookup("/usr/local/opt/openssl/lib");
     
     if (path.isDirectory()) {
       String libpath = env.get("DYLD_LIBRARY_PATH");

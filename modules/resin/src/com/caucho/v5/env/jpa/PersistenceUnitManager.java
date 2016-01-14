@@ -64,7 +64,7 @@ import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.naming.JndiUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Manages a single persistence unit
@@ -216,7 +216,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     
     for (String pathName : classPath.split("[" + File.pathSeparatorChar + "]")) {
       if (pathName.endsWith(jarFile)) {
-        PathImpl path = Vfs.lookup(pathName);
+        PathImpl path = VfsOld.lookup(pathName);
         
         try {
           URL url = new URL(path.getURL());

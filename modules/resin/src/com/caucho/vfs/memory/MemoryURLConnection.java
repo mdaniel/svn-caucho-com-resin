@@ -34,7 +34,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * URL memory handler.
@@ -52,12 +52,12 @@ class MemoryURLConnection extends URLConnection {
   public InputStream getInputStream()
     throws IOException
   {
-    return Vfs.lookup().lookup(url.toString()).openRead();
+    return VfsOld.lookup().lookup(url.toString()).openRead();
   }
   
   public OutputStream getOutputStream()
     throws IOException
   {
-    return Vfs.lookup().lookup(url.toString()).openWrite();
+    return VfsOld.lookup().lookup(url.toString()).openWrite();
   }
 }

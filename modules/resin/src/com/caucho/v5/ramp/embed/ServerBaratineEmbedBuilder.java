@@ -40,7 +40,7 @@ import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBuilderBaratine;
 import com.caucho.v5.server.main.ArgsServerBaratine;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class ServerBaratineEmbedBuilder implements ServiceServer.Builder
 {
@@ -62,7 +62,7 @@ public class ServerBaratineEmbedBuilder implements ServiceServer.Builder
   @Override
   public ServerBaratineEmbedBuilder root(String path)
   {
-    _args.setRootDirectory(Vfs.lookup(path));
+    _args.setRootDirectory(VfsOld.lookup(path));
 
     return this;
   }
@@ -86,7 +86,7 @@ public class ServerBaratineEmbedBuilder implements ServiceServer.Builder
   @Override
   public ServerBaratineEmbedBuilder data(String path)
   {
-    _args.setDataDirectory(Vfs.lookup(path));
+    _args.setDataDirectory(VfsOld.lookup(path));
 
     return this;
   }
@@ -106,7 +106,7 @@ public class ServerBaratineEmbedBuilder implements ServiceServer.Builder
   @Override
   public ServerBaratineEmbedBuilder conf(String path)
   {
-    _args.setConfigPath(Vfs.lookup(path));
+    _args.setConfigPath(VfsOld.lookup(path));
 
     // baratine/8805
     if (_port <= 0) {

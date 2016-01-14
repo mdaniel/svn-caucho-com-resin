@@ -37,7 +37,7 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.xalog.AbstractXALogManager;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class TransactionLog
 {
@@ -105,7 +105,7 @@ public class TransactionLog
       if (_manager.getPath() != null)
         _xaLog.setPath(_manager.getPath().lookup(_path));
       else
-        _xaLog.setPath(Vfs.lookup(_path));
+        _xaLog.setPath(VfsOld.lookup(_path));
 
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 

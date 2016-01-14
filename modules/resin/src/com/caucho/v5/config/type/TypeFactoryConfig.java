@@ -82,7 +82,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Factory for returning type strategies.
@@ -588,7 +588,7 @@ public class TypeFactoryConfig // implements AddLoaderListener
         is = loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
 
         if (is != null) {
-          ReadStream in = Vfs.openRead(is);
+          ReadStream in = VfsOld.openRead(is);
           String line;
           while ((line = in.readLine()) != null) {
             for (String name : line.split("[ \t\r\n]+")) {

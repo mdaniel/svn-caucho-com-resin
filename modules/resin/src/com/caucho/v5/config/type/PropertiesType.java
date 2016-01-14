@@ -35,7 +35,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Represents a Properties type.
@@ -83,7 +83,7 @@ public final class PropertiesType extends ConfigType
     try {
       Properties props = new Properties();
 
-      ReadStream is = Vfs.openString(text);
+      ReadStream is = VfsOld.openString(text);
 
       props.load(is);
 

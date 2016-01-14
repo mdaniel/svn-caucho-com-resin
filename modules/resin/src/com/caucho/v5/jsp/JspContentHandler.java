@@ -29,7 +29,7 @@
 package com.caucho.v5.jsp;
 
 import com.caucho.v5.config.cf.NameCfg;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -269,7 +269,7 @@ public class JspContentHandler extends DefaultHandler {
   private void setLocation()
   {
     if (_locator != null) {
-      _builder.setLocation(Vfs.lookup(_locator.getSystemId()),
+      _builder.setLocation(VfsOld.lookup(_locator.getSystemId()),
                            _locator.getSystemId(),
                            _locator.getLineNumber());
     }

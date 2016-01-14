@@ -36,7 +36,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.ReadWritePair;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 import javax.servlet.GenericServlet;
@@ -161,9 +161,9 @@ public class TcpPool {
     Server(String host)
     {
       if (host.startsWith("http"))
-        _path = Vfs.lookup(host);
+        _path = VfsOld.lookup(host);
       else
-        _path = Vfs.lookup("http://" + host);
+        _path = VfsOld.lookup("http://" + host);
     }
 
     String getURL()

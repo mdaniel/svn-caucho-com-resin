@@ -48,7 +48,7 @@ import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Builder to manage the webapp fragments.
@@ -175,7 +175,7 @@ public class WebAppBuilderFragment
     else {
       String url = path.getURL();
       
-      return Vfs.lookup(url.substring(0, url.length() - name.length()));
+      return VfsOld.lookup(url.substring(0, url.length() - name.length()));
     }
   }
 

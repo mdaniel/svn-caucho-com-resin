@@ -60,7 +60,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Manages the JPA persistence contexts.
@@ -547,7 +547,7 @@ public class PersistenceManager
     try {
       is = url.openStream();
 
-      ReadStream in = Vfs.openRead(is);
+      ReadStream in = VfsOld.openRead(is);
       String line;
       while ((line = in.readLine()) != null) {
         line = line.trim();

@@ -36,7 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * The generator for the host deploy
@@ -57,7 +57,7 @@ public class HostDeployWebAppListener
     
     // String clusterId = gen.getContainer().getClusterId();
     
-    _deployPath = Vfs.lookup("bfs:///system/webapps");
+    _deployPath = VfsOld.lookup("bfs:///system/webapps");
 
     _watch = new HostWatch();
 

@@ -65,7 +65,7 @@ import com.caucho.v5.util.RandomUtil;
 import com.caucho.v5.vfs.CaseInsensitive;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Serves static files.  The cache headers are automatically set on these
@@ -315,7 +315,7 @@ public class FileServlet extends GenericServlet {
         URL url = webApp.getClassLoader().getResource(resource);
 
         if (url != null)
-          jarPath = Vfs.lookup(url);
+          jarPath = VfsOld.lookup(url);
       }
 
       cache = new Cache(path, jarPath, relPath, mimeType);

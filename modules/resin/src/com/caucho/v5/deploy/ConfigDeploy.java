@@ -45,7 +45,7 @@ import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.types.RawString;
 import com.caucho.v5.deploy2.DeployMode;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * The configuration for a deployable instance.
@@ -329,7 +329,7 @@ public class ConfigDeploy {
         return rootDir;
       }
 
-      return Vfs.lookup();
+      return VfsOld.lookup();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 

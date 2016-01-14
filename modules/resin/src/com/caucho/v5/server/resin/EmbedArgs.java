@@ -30,7 +30,7 @@
 package com.caucho.v5.server.resin;
 
 import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 
 /**
@@ -53,6 +53,6 @@ public class EmbedArgs extends ArgsServerBase
   {
     super.initDefaults();
     
-    setConfigPath(Vfs.lookup("classpath:com/caucho/resin/resin-embed.xml"));
+    setConfigPath(VfsOld.lookup("classpath:com/caucho/resin/resin-embed.xml"));
   }
 }

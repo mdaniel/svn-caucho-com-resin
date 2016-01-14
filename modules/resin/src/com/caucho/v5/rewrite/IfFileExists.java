@@ -35,7 +35,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.rewrite.PredicateCacheable;
 import com.caucho.v5.http.rewrite.RequestPredicate;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Match if the file specified by getRealPath() exists in the filesystem.
@@ -68,7 +68,7 @@ public class IfFileExists implements RequestPredicate, PredicateCacheable
     else
       realPath = request.getServletContext().getRealPath(request.getPathInfo());
 
-    PathImpl path = Vfs.lookup(realPath);
+    PathImpl path = VfsOld.lookup(realPath);
 
     return path.exists() && path.isFile();
   }

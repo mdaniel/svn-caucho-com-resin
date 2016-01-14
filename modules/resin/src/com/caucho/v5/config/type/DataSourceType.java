@@ -37,7 +37,7 @@ import com.caucho.v5.el.Expr;
 import com.caucho.v5.naming.*;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import org.w3c.dom.Node;
 

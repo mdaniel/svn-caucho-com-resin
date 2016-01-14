@@ -40,7 +40,7 @@ import com.caucho.v5.config.ConfigPropertiesResolver;
 import com.caucho.v5.config.xml.ConfigXml;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 
 /**
@@ -63,7 +63,7 @@ public class ResinServerConfigLibrary {
       throw new ConfigException(L.l("file_lookup requires a pwd argument"));
     }
     
-    PathImpl pwdPath = Vfs.lookup(pwd);
+    PathImpl pwdPath = VfsOld.lookup(pwd);
     
     return pwdPath.lookup(resource).getFullPath();
   }     

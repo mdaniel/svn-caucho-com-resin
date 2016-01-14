@@ -50,7 +50,7 @@ import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Configuration for the <cluster> and <server> tags.
@@ -536,7 +536,7 @@ public class ServerContainerConfig implements EnvironmentBean
     {
       ServerBaseOld server =  ServerBaseOld.current();
 
-      return server == null ? Vfs.getPwd() : server.getHomeDirectory();
+      return server == null ? VfsOld.getPwd() : server.getHomeDirectory();
     }
 
     /**

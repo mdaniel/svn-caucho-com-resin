@@ -34,7 +34,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Health action to create a heap dump.  The heap 
@@ -164,7 +164,7 @@ public class DumpHeap extends HealthActionBase
     if (_isHprof && hprofPath == null && _hprofPathFormat != null) {
       long time = CurrentTime.getCurrentTime();
       String formattedPath = QDate.formatLocal(time, _hprofPathFormat);
-      hprofPath = Vfs.lookup(formattedPath);
+      hprofPath = VfsOld.lookup(formattedPath);
     }
     
     if (hprofPath != null)
@@ -216,7 +216,7 @@ public class DumpHeap extends HealthActionBase
       ServerBaseOld resin = ServerBaseOld.current();
       
       if (resin == null)
-        hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));
+        hprofPath = VfsOld.lookup(System.getProperty("java.io.tmpdir"));
       else
         hprofPath = resin.getLogDirectory();
       

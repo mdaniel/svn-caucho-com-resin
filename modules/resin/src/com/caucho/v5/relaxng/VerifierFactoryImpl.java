@@ -30,7 +30,7 @@ package com.caucho.v5.relaxng;
 
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.xml.Xml;
 
 import org.xml.sax.InputSource;
@@ -49,7 +49,7 @@ public class VerifierFactoryImpl implements VerifierFactory {
   public Schema compileSchema(String url)
     throws SAXException, IOException
   {
-    PathImpl path = Vfs.lookup(url);
+    PathImpl path = VfsOld.lookup(url);
 
     ReadStream is = path.openRead();
     try {

@@ -53,7 +53,7 @@ import com.caucho.v5.management.server.HostMXBean;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * A configuration entry for a host
@@ -448,7 +448,7 @@ public class HostController
 
       if (_rootDirectoryPattern == null) {
         // server/129p
-        return Vfs.lookup();
+        return VfsOld.lookup();
       }
       
       int length = matcher.end() - matcher.start();
@@ -472,7 +472,7 @@ public class HostController
       log.log(Level.FINE, e.toString(), e);
 
       // XXX: not quite right
-      return Vfs.lookup(_rootDirectoryPattern);
+      return VfsOld.lookup(_rootDirectoryPattern);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

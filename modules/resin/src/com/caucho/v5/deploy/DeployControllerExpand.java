@@ -60,7 +60,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.Depend;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -124,7 +124,7 @@ abstract public class DeployControllerExpand<I extends DeployInstance>
     super(id, loader);
 
     if (rootDirectory == null) {
-      rootDirectory = Vfs.getPwd(getParentClassLoader());
+      rootDirectory = VfsOld.getPwd(getParentClassLoader());
     }
 
     _rootDirectory = rootDirectory;
@@ -163,7 +163,7 @@ abstract public class DeployControllerExpand<I extends DeployInstance>
     }
     */
     
-    _bartenderPath = Vfs.lookup("bfs:///system/" + type + "/" + tail + ext);
+    _bartenderPath = VfsOld.lookup("bfs:///system/" + type + "/" + tail + ext);
 
     // _bartenderWatch = new BartenderWatch();
   }

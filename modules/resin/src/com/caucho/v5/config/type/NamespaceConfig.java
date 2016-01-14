@@ -51,7 +51,7 @@ import com.caucho.v5.log.impl.StdoutLog;
 import com.caucho.v5.make.DependencyConfig;
 import com.caucho.v5.vfs.CaseInsensitive;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 // configuration types
 class NamespaceConfig {
@@ -103,9 +103,9 @@ class NamespaceConfig {
   public void setPath(String path)
   {
     if (path.indexOf(':') < 0)
-      _path = Vfs.lookup("classpath:" + path);
+      _path = VfsOld.lookup("classpath:" + path);
     else
-      _path = Vfs.lookup(path);
+      _path = VfsOld.lookup(path);
   }
 
   public PathImpl getPath()

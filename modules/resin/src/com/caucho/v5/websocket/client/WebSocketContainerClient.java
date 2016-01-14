@@ -52,7 +52,7 @@ import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.websocket.common.ContainerWebSocketBase;
 import com.caucho.v5.websocket.server.WebSocketEndpointSkeleton;
 
@@ -97,7 +97,7 @@ public class WebSocketContainerClient extends ContainerWebSocketBase
 
       // Environment.init();
 
-      Vfs.initJNI();
+      VfsOld.initJNI();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     } finally {

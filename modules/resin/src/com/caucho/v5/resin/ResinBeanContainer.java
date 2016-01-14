@@ -49,7 +49,7 @@ import com.caucho.v5.loader.ResourceLoader;
 import com.caucho.v5.server.cdi.CdiProducerResin;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Embeddable Resin context for testing of bean container components (CDI
@@ -178,7 +178,7 @@ public class ResinBeanContainer implements AutoCloseable
   
   public void setModule(String modulePath)
   {
-    _modulePath = Vfs.lookup(modulePath);    
+    _modulePath = VfsOld.lookup(modulePath);    
   }  
 
   /**
@@ -186,7 +186,7 @@ public class ResinBeanContainer implements AutoCloseable
    */
   public void addClassPath(String classPath)
   {
-    PathImpl path = Vfs.lookup(classPath);
+    PathImpl path = VfsOld.lookup(classPath);
 
     if (classPath.endsWith(".jar")) {
       _classLoader.addJar(path);
@@ -205,7 +205,7 @@ public class ResinBeanContainer implements AutoCloseable
    */
   public void addPackageModule(String modulePath, String packageName)
   {
-    PathImpl root = Vfs.lookup(modulePath);
+    PathImpl root = VfsOld.lookup(modulePath);
 
     try {
       URL url = new URL(root.getURL());
@@ -241,8 +241,8 @@ public class ResinBeanContainer implements AutoCloseable
 
         URL urlA = bestUrl;
 
-        PathImpl pathA = Vfs.lookup(urlA);
-        PathImpl pathB = Vfs.lookup(url);
+        PathImpl pathA = VfsOld.lookup(urlA);
+        PathImpl pathB = VfsOld.lookup(url);
 
         for (String name : pathA.list()) {
           if (name.endsWith(".class")) {
@@ -261,7 +261,7 @@ public class ResinBeanContainer implements AutoCloseable
 
       Objects.requireNonNull(bestUrl, packageName);
 
-      PathImpl path = Vfs.lookup(bestUrl);
+      PathImpl path = VfsOld.lookup(bestUrl);
 
       String moduleName = path.getNativePath();
 
@@ -292,7 +292,7 @@ public class ResinBeanContainer implements AutoCloseable
     try {
       thread.setContextClassLoader(getClassLoader());
 
-      PathImpl path = Vfs.lookup(pathName);
+      PathImpl path = VfsOld.lookup(pathName);
 
       // support/041a
       /*
@@ -319,7 +319,7 @@ public class ResinBeanContainer implements AutoCloseable
    */
   public void setWorkDirectory(String path)
   {
-    WorkDir.setLocalWorkDir(Vfs.lookup(path), _classLoader);
+    WorkDir.setLocalWorkDir(VfsOld.lookup(path), _classLoader);
   }
 
   /**

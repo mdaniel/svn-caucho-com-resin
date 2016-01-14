@@ -91,7 +91,7 @@ import com.caucho.v5.util.FreeRing;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   implements AlarmListener, EnvLoaderListener, 
@@ -560,7 +560,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   {
     _hostContainer.setRootDirectory(path);
 
-    Vfs.setPwd(path, classLoader());
+    VfsOld.setPwd(path, classLoader());
   }
 
   /**

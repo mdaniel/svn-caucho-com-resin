@@ -232,7 +232,7 @@ public class DatabaseManager {
 
         ReadStream is = null;
         try {
-          is = Vfs.lookup(url.toString()).openRead();
+          is = VfsOld.lookup(url.toString()).openRead();
 
           String filename;
 

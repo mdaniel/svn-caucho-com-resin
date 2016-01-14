@@ -42,7 +42,7 @@ import com.caucho.v5.profile.HeapDump;
 import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class HeapDumpAction implements AdminAction
 {
@@ -67,7 +67,7 @@ public class HeapDumpAction implements AdminAction
       ServerBaseOld resin = ServerBaseOld.current();
       
       if (resin == null)
-        hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));
+        hprofPath = VfsOld.lookup(System.getProperty("java.io.tmpdir"));
       else
         hprofPath = resin.getLogDirectory();
       

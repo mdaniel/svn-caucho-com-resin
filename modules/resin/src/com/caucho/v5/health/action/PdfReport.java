@@ -24,7 +24,7 @@ import com.caucho.v5.server.admin.GraphBuilderAdminPdf;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * A specific sequence of health actions: thread dump, heap dump, jmx dump, 
@@ -129,7 +129,7 @@ public class PdfReport extends HealthActionBase
     try {
       String pathName = QDate.formatLocal(now, _pathFormat);
       
-      PathImpl path = Vfs.lookup(pathName);
+      PathImpl path = VfsOld.lookup(pathName);
       
       AdminPdfBuilder builder = new AdminPdfBuilder();
 

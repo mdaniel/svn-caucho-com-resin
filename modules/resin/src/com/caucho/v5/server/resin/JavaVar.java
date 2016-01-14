@@ -32,7 +32,7 @@ package com.caucho.v5.server.resin;
 import java.util.Properties;
 
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Java variables in Resin configuration ${java}.
@@ -51,7 +51,7 @@ public class JavaVar {
    */
   public PathImpl getHome()
   {
-    return Vfs.lookup(System.getProperty("java.home"));
+    return VfsOld.lookup(System.getProperty("java.home"));
   }
 
   /**

@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Custom serialization for the cache
@@ -51,7 +51,7 @@ class EndpointReceiverClientNautilus<T> extends EndpointNautilusBase
   protected void receiveStart(InputStream is)
     throws IOException
   {
-    ReadStream in = Vfs.openRead(is);
+    ReadStream in = VfsOld.openRead(is);
     
     String line;
     

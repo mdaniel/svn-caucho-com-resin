@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -76,8 +76,8 @@ public class StompClient
   {
     _s = new Socket(_address, _port);
     
-    _is = Vfs.openRead(_s.getInputStream());
-    _os = Vfs.openWrite(_s.getOutputStream());
+    _is = VfsOld.openRead(_s.getInputStream());
+    _os = VfsOld.openWrite(_s.getOutputStream());
     
     _os.print("CONNECT\n");
     _os.print("user:" + user + "\n");

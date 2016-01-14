@@ -33,7 +33,7 @@ import java.util.Map;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.SchemeMap;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * ConfigPath implements remote configuration scheme.
@@ -55,7 +55,7 @@ public class ConfigPath extends PathImpl {
    */
   public static void setRemote(PathImpl remotePath)
   {
-    _remotePath.set(new RemotePwd(remotePath, Vfs.lookup()));
+    _remotePath.set(new RemotePwd(remotePath, VfsOld.lookup()));
   }
 
   /**
@@ -103,7 +103,7 @@ public class ConfigPath extends PathImpl {
   @Override
   public String getScheme()
   {
-    PathImpl path = Vfs.lookup();
+    PathImpl path = VfsOld.lookup();
 
     return path.getScheme();
   }
@@ -113,7 +113,7 @@ public class ConfigPath extends PathImpl {
    */
   public String getPath()
   {
-    PathImpl path = Vfs.lookup();
+    PathImpl path = VfsOld.lookup();
 
     return path.getPath();
   }

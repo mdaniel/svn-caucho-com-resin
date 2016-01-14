@@ -73,7 +73,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.MemoryPath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Resin's webApp implementation.
@@ -248,7 +248,7 @@ public class WebAppContainer
   {
     _rootDir = path;
 
-    Vfs.setPwd(path, getClassLoader());
+    VfsOld.setPwd(path, getClassLoader());
   }
 
   /**

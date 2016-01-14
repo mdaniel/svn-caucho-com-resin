@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -55,8 +55,8 @@ public class EndpointConnectionSocket implements EndpointConnection {
   public EndpointConnectionSocket(Socket s) throws IOException
   {
     _s = s;
-    _is = Vfs.openRead(_s.getInputStream());
-    _os = Vfs.openWrite(_s.getOutputStream());
+    _is = VfsOld.openRead(_s.getInputStream());
+    _os = VfsOld.openWrite(_s.getOutputStream());
   }
 
   public Socket getSocket()

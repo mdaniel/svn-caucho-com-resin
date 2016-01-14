@@ -33,7 +33,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.ReaderWriterStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.readers.MacroReader;
 import com.caucho.v5.xml.readers.Utf16Reader;
@@ -941,7 +941,7 @@ public class XmlParser extends AbstractParser {
     if (_searchPath != null)
       pwd = _searchPath;
     else
-      pwd = Vfs.lookup(_systemId).getParent();
+      pwd = VfsOld.lookup(_systemId).getParent();
 
     PathImpl dir = pwd.lookup(filename);
     if (! dir.isDirectory())
@@ -1206,9 +1206,9 @@ public class XmlParser extends AbstractParser {
       source = _entityResolver.resolveEntity(publicId, systemId);
 
     if (source != null && source.getByteStream() != null)
-      is = Vfs.openRead(source.getByteStream());
+      is = VfsOld.openRead(source.getByteStream());
     else if (source != null && source.getCharacterStream() != null)
-      is = Vfs.openRead(source.getCharacterStream());
+      is = VfsOld.openRead(source.getCharacterStream());
     else if (source != null && source.getSystemId() != null &&
              _searchPath.lookup(source.getSystemId()).isFile()) {
       _owner.addDepend(_searchPath.lookup(source.getSystemId()));
@@ -2856,7 +2856,7 @@ public class XmlParser extends AbstractParser {
     InputStream stream = openStream(systemId, publicId);
     if (stream == null)
       throw new FileNotFoundException(systemId);
-    _is = Vfs.openRead(stream);
+    _is = VfsOld.openRead(stream);
     PathImpl oldSearchPath = _searchPath;
     PathImpl path = _is.getPath();
     if (path != null) {
@@ -2978,7 +2978,7 @@ public class XmlParser extends AbstractParser {
     StringBuilder lines = new StringBuilder();
 
     try {
-      PathImpl path = Vfs.lookup(_systemId);
+      PathImpl path = VfsOld.lookup(_systemId);
 
       if (path.canRead()) {
         ReadStream is = path.openRead();

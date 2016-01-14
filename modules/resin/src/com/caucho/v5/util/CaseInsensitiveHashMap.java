@@ -29,7 +29,7 @@
 package com.caucho.v5.util;
 
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import java.util.HashMap;
 import java.util.Locale;

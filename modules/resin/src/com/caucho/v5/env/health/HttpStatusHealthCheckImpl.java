@@ -28,7 +28,7 @@ import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 public class HttpStatusHealthCheckImpl extends AbstractHealthCheck
@@ -214,14 +214,14 @@ public class HttpStatusHealthCheckImpl extends AbstractHealthCheck
       s = new Socket(address, _pingPort);
       s.setSoTimeout((int) _socketTimeout);
       
-      os = Vfs.openWrite(s.getOutputStream());
+      os = VfsOld.openWrite(s.getOutputStream());
       
       os.print("HEAD ");
       os.print(url);
       os.print(" HTTP/1.0\r\n\r\n");
       os.flush();
 
-      is = Vfs.openRead(s.getInputStream());
+      is = VfsOld.openRead(s.getInputStream());
       
       String status = is.readLine();
       

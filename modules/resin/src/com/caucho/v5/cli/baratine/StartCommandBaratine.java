@@ -42,7 +42,7 @@ import com.caucho.v5.cli.server.StartCommand;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Command to start a Baratine application.
@@ -124,7 +124,7 @@ public class StartCommandBaratine extends StartCommand
     
     String fileName = urlName.substring(4, p);
     
-    try (ReadStream is = Vfs.lookup(fileName).openRead()) {
+    try (ReadStream is = VfsOld.lookup(fileName).openRead()) {
       try (ZipInputStream zIn = new ZipInputStream(is)) {
         ZipEntry entry;
         

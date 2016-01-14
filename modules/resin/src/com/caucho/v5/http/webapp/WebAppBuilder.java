@@ -85,7 +85,7 @@ import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Builder for the webapp to encapsulate the configuration process.
@@ -1326,7 +1326,7 @@ public class WebAppBuilder<T extends WebApp>
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     try {
-      PathImpl path = Vfs.lookup("META-INF/permissions.xml");
+      PathImpl path = VfsOld.lookup("META-INF/permissions.xml");
       
       initPermissions(path);
       
@@ -1339,7 +1339,7 @@ public class WebAppBuilder<T extends WebApp>
       while (e.hasMoreElements()) {
         URL url = e.nextElement();
       
-        path = Vfs.lookup(url);
+        path = VfsOld.lookup(url);
         
         initPermissions(path);
       }

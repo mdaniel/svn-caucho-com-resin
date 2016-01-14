@@ -68,7 +68,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.StreamSource;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 @Remote
 public class ManagerServiceImpl
@@ -117,7 +117,7 @@ public class ManagerServiceImpl
     if (hprofDir.isEmpty())
       throw new ConfigException("hprof-dir can not be set to an emtpy string");
 
-    PathImpl path = Vfs.lookup(hprofDir);
+    PathImpl path = VfsOld.lookup(hprofDir);
 
     _hprofDir = path;
   }

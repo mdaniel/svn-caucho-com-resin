@@ -55,7 +55,7 @@ public class ExistsCondition
   {
     _value = value;
 
-    _pwd = Vfs.lookup();
+    _pwd = VfsOld.lookup();
   }
   
   public String getTagName()

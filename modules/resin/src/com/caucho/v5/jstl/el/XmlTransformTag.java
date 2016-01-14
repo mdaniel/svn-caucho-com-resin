@@ -34,7 +34,7 @@ import com.caucho.v5.jsp.PageContextImpl;
 import com.caucho.v5.jstl.NameValueTag;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -256,7 +256,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
     throws JspException
   {
     if (xmlObj instanceof String) {
-      ReadStream is = Vfs.openString((String) xmlObj);
+      ReadStream is = VfsOld.openString((String) xmlObj);
 
       return new StreamSource(is, systemId);
     }

@@ -84,7 +84,7 @@ import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.MemoryPath;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ServerSocketBar;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.net.SocketSystem;
 
 import io.baratine.config.Config;
@@ -347,7 +347,7 @@ public class ServerBuilderOld
     try {
       thread.setContextClassLoader(systemManager.getClassLoader());
       
-      Vfs.setPwd(getRootDirectory());
+      VfsOld.setPwd(getRootDirectory());
       
       if (! isEmbedded()) {
         logCopyright();

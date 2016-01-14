@@ -43,7 +43,7 @@ import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 public class BootConfigParser
 {
@@ -67,9 +67,9 @@ public class BootConfigParser
 
     EnvLoader.init();
 
-    Vfs.initJNI();
+    VfsOld.initJNI();
 
-    homeDir = Vfs.lookup(homeDir.getFullPath());
+    homeDir = VfsOld.lookup(homeDir.getFullPath());
 
     // watchdog/0210
     // Vfs.setPwd(_rootDirectory);

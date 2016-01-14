@@ -72,7 +72,7 @@ import com.caucho.v5.relaxng.VerifierFilter;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.xml.DOMBuilder;
 import com.caucho.v5.xml.QDocument;
 import com.caucho.v5.xml.Xml;
@@ -390,7 +390,7 @@ public class ConfigXml extends ConfigContext
 
       setProperty("__FILE__", FileVar.__FILE__);
       setProperty("__DIR__", DirVar.__DIR__);
-      setProperty("__PATH__", Vfs.lookup(topNode.getBaseURI()));
+      setProperty("__PATH__", VfsOld.lookup(topNode.getBaseURI()));
       // context.setBaseUri(topNode.getBaseURI());
       
       
@@ -458,7 +458,7 @@ public class ConfigXml extends ConfigContext
       
       setProperty("__FILE__", FileVar.__FILE__);
       setProperty("__DIR__", DirVar.__DIR__);
-      setProperty("__PATH__", Vfs.lookup(topNode.getBaseURI()));
+      setProperty("__PATH__", VfsOld.lookup(topNode.getBaseURI()));
 
       // context.configureBean(obj, topNode);
       
@@ -592,7 +592,7 @@ public class ConfigXml extends ConfigContext
       if (url == null)
         return null;
 
-      PathImpl path = Vfs.lookup(URLDecoder.decode(url.toString()));
+      PathImpl path = VfsOld.lookup(URLDecoder.decode(url.toString()));
 
       // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
 
@@ -876,7 +876,7 @@ public class ConfigXml extends ConfigContext
 
     ReadStream is = null;
     try {
-      is = Vfs.lookup().lookup(systemId).openRead();
+      is = VfsOld.lookup().lookup(systemId).openRead();
       int line = 0;
       StringBuilder sb = new StringBuilder("\n\n");
       String text;

@@ -37,7 +37,7 @@ import java.util.function.Function;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.expr.ExprCfg;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Special builder for path variables.
@@ -99,7 +99,7 @@ public class PathBuilder {
 
   public static PathImpl lookupPath(String string, Function<String,Object> env)
   {
-    return lookupPath(string, env, Vfs.lookup());
+    return lookupPath(string, env, VfsOld.lookup());
   }
 
   public static PathImpl lookupPath(String string, Function<String,Object> env, PathImpl pwd)
@@ -125,7 +125,7 @@ public class PathBuilder {
       return pwd.lookup(value);
     }
     else {
-      return Vfs.lookup(value);
+      return VfsOld.lookup(value);
     }
   }
   

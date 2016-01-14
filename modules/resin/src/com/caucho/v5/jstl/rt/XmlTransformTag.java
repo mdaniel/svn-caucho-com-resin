@@ -257,7 +257,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
     Source source = null;
 
     if (xmlObj instanceof String) {
-      ReadStream is = Vfs.openString((String) xmlObj);
+      ReadStream is = VfsOld.openString((String) xmlObj);
 
       source = new StreamSource(is, systemId);
     }

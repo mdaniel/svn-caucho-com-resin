@@ -33,7 +33,7 @@ import com.caucho.v5.jsp.BodyContentImpl;
 import com.caucho.v5.jsp.PageContextImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.TempCharReader;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -148,7 +148,7 @@ public class XmlParseTag extends BodyTagSupport {
           is = new InputSource(reader);
         }
         else if (obj instanceof String) {
-          reader = Vfs.openString((String) obj).getReader();
+          reader = VfsOld.openString((String) obj).getReader();
 
           is = new InputSource(reader);
         } else if (obj instanceof XMLReader) {

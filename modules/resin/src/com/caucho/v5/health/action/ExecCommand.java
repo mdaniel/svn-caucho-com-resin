@@ -31,7 +31,7 @@ import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Health action to execute a shell command.  
@@ -167,7 +167,7 @@ public class ExecCommand extends HealthActionBase
     Process process = _processBuilder.start();
     
     InputStream inputStream = process.getInputStream();
-    ReadStream readStream = Vfs.openRead(inputStream);
+    ReadStream readStream = VfsOld.openRead(inputStream);
     
     TimeoutAlarm timeout = new TimeoutAlarm(process, readStream);
     Alarm alarm = new Alarm(timeout, _timeout);

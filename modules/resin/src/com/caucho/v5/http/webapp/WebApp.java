@@ -128,7 +128,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.websocket.server.ServerContainerImpl;
 
 /**
@@ -333,7 +333,7 @@ public class WebApp extends ServletContextImpl
 
       PathImpl rootDirectory = getRootDirectory();
 
-      Vfs.setPwd(rootDirectory, _classLoader);
+      VfsOld.setPwd(rootDirectory, _classLoader);
       WorkDir.setLocalWorkDir(rootDirectory.lookup("WEB-INF/work"),
                               _classLoader);
       

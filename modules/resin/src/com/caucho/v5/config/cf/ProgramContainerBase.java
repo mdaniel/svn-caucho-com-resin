@@ -37,7 +37,7 @@ import com.caucho.v5.config.types.DirVar;
 import com.caucho.v5.inject.impl.InjectContext;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Program to assign parameters.
@@ -76,7 +76,7 @@ abstract public class ProgramContainerBase extends ContainerProgram
       return null;
     }
     
-    return Vfs.lookup(loc.substring(0, p));
+    return VfsOld.lookup(loc.substring(0, p));
   }
   
   public String getLocation()

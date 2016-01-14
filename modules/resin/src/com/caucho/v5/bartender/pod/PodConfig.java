@@ -52,7 +52,7 @@ import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.Depend;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Configuration for a pod.cf file
@@ -228,7 +228,7 @@ public class PodConfig extends ConfigDeploy
   @Configurable
   public void addArchive(String path)
   {
-    PathImpl libPath = Vfs.lookup("bfs://").lookup(path);
+    PathImpl libPath = VfsOld.lookup("bfs://").lookup(path);
     
     _archivePaths.add(libPath);
     
@@ -246,7 +246,7 @@ public class PodConfig extends ConfigDeploy
   @Configurable
   public void addLibrary(String path)
   {
-    PathImpl libPath = Vfs.lookup("bfs://").lookup(path);
+    PathImpl libPath = VfsOld.lookup("bfs://").lookup(path);
     
     _libraryPaths.add(libPath);
     

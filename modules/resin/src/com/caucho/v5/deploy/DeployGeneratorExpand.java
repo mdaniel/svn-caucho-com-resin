@@ -55,7 +55,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WeakAlarm;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * The generator for the deploy
@@ -178,7 +178,7 @@ abstract public class DeployGeneratorExpand<I extends DeployInstance,
   
   protected PathImpl lookupBartender(String id)
   {
-    return Vfs.lookup("bfs:///system/" + id);
+    return VfsOld.lookup("bfs:///system/" + id);
   }
   
   public String getId()

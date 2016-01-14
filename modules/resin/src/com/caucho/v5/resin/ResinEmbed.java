@@ -54,7 +54,7 @@ import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.server.container.ServerBuilderResin;
 import com.caucho.v5.server.resin.EmbedArgs;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Embeddable version of the Resin server.
@@ -117,7 +117,7 @@ public class ResinEmbed implements Closeable
     _args = new EmbedArgs(new String[] { "start" });
     // args.setServerId("embed");
     _args.setServerId("default");
-    _args.setRootDirectory(Vfs.lookup());
+    _args.setRootDirectory(VfsOld.lookup());
     
     _args.initHomeClassPath();
   }
@@ -141,7 +141,7 @@ public class ResinEmbed implements Closeable
    */
   public void setRootDirectory(String rootUrl)
   {
-    _args.setRootDirectory(Vfs.lookup(rootUrl));
+    _args.setRootDirectory(VfsOld.lookup(rootUrl));
   }
   
   /**

@@ -51,7 +51,7 @@ import com.caucho.v5.loader.SimpleLoader;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Manages JSP templates.
@@ -260,7 +260,7 @@ public class JspManager extends PageManager {
       URL url = getWebApp().getClassLoader().getResource(resource);
 
       if (url != null)
-        jspJarPath = Vfs.lookup(url);
+        jspJarPath = VfsOld.lookup(url);
     }
 
     if (! isPathReadable && jspJarPath == null) {

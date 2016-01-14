@@ -34,7 +34,7 @@ import com.caucho.v5.util.HTTPUtil;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.xml.XmlParser;
 
@@ -278,7 +278,7 @@ public class WebDavServlet extends GenericServlet {
     int depth = Integer.MAX_VALUE;
 
     OutputStream os = res.getOutputStream();
-    WriteStream out = Vfs.openWrite(os);
+    WriteStream out = VfsOld.openWrite(os);
     out.setEncoding("UTF-8");
 
     if (_addCrLf)
@@ -499,7 +499,7 @@ public class WebDavServlet extends GenericServlet {
       return;
     }
     
-    WriteStream ws = Vfs.openWrite(os);
+    WriteStream ws = VfsOld.openWrite(os);
     PathImpl path =ws.getPath();
     try {
       InputStream is = req.getInputStream();
@@ -940,7 +940,7 @@ public class WebDavServlet extends GenericServlet {
 
     if (_path.isFile(pathInfo, req, app)) {
       OutputStream os = _path.openWrite(destPath, req, app);
-      WriteStream ws = Vfs.openWrite(os);
+      WriteStream ws = VfsOld.openWrite(os);
       try {
         InputStream is = _path.openRead(pathInfo, req, app);
         try {
@@ -1004,7 +1004,7 @@ public class WebDavServlet extends GenericServlet {
     }
     else {
       OutputStream os = _path.openWrite(destPath, req, app);
-      WriteStream ws = Vfs.openWrite(os);
+      WriteStream ws = VfsOld.openWrite(os);
       try {
         InputStream is = _path.openRead(srcPath, req, app);
         try {
@@ -1095,7 +1095,7 @@ public class WebDavServlet extends GenericServlet {
     else if (_path.isFile(pathInfo, req, app)) {
       HashMap<AttributeName,String> props = getProperties(pathInfo, req, app);
       OutputStream os = _path.openWrite(destPath, req, app);
-      WriteStream ws = Vfs.openWrite(os);
+      WriteStream ws = VfsOld.openWrite(os);
       
       try {
         InputStream is = _path.openRead(pathInfo, req, app);
@@ -1162,7 +1162,7 @@ public class WebDavServlet extends GenericServlet {
     else {
       HashMap<AttributeName,String> props = getProperties(srcPath, req, app);
       OutputStream os = _path.openWrite(destPath, req, app);
-      WriteStream rs = Vfs.openWrite(os);
+      WriteStream rs = VfsOld.openWrite(os);
       
       try {
         InputStream is = _path.openRead(srcPath, req, app);
@@ -1260,7 +1260,7 @@ public class WebDavServlet extends GenericServlet {
 
     OutputStream os = res.getOutputStream();
     InputStream is = _path.openRead(pathInfo, req, app);
-    ReadStream rs = Vfs.openRead(is);
+    ReadStream rs = VfsOld.openRead(is);
     try {
       rs.writeToStream(os);
     } finally {

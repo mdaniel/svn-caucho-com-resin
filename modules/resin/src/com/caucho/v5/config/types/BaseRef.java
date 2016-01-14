@@ -35,7 +35,7 @@ import com.caucho.v5.bytecode.JClass;
 import com.caucho.v5.bytecode.JClassLoader;
 import com.caucho.v5.bytecode.JClassLoaderWrapper;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Base configuration for ejb-ref and resource-env-ref.
@@ -50,7 +50,7 @@ abstract public class BaseRef extends ResourceGroupConfig {
 
   public BaseRef()
   {
-    _modulePath = Vfs.getPwd();
+    _modulePath = VfsOld.getPwd();
   }
 
   public BaseRef(PathImpl modulePath)

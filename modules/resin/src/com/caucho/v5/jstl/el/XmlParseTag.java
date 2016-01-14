@@ -136,7 +136,7 @@ public class XmlParseTag extends BodyTagSupport {
         if (obj instanceof Reader)
           reader = (Reader) obj;
         else if (obj instanceof String)
-          reader = Vfs.openString((String) obj).getReader();
+          reader = VfsOld.openString((String) obj).getReader();
         else
           throw new JspException(L.l("'doc' attribute must be a Reader or String at `{0}'",
                                      obj));

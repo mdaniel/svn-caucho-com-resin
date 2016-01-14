@@ -37,7 +37,7 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.FlushBuffer;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -337,7 +337,7 @@ public class ImportTag extends BodyTagSupport implements NameValueTag {
 
     InputStream is = conn.getInputStream();
     try {
-      ReadStream in = Vfs.openRead(is);
+      ReadStream in = VfsOld.openRead(is);
       String encoding = conn.getContentEncoding();
       String contentType = conn.getContentType();
 

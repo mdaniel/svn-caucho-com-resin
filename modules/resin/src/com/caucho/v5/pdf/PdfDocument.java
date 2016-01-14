@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.TempStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 /**
@@ -101,7 +101,7 @@ public class PdfDocument implements AutoCloseable
   {
     Objects.requireNonNull(os);
     
-    _os = Vfs.openWrite(os);
+    _os = VfsOld.openWrite(os);
     
     _out = new OutPdf(_os);
     _out.beginDocument();

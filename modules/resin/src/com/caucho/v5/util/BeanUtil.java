@@ -29,7 +29,7 @@
 package com.caucho.v5.util;
 
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 import java.beans.BeanInfo;
 import java.beans.PropertyDescriptor;
@@ -136,7 +136,7 @@ public class BeanUtil {
   public static PathImpl lookupPath(String pathName, HashMap varMap, PathImpl pwd)
   {
     if (pwd == null)
-      pwd = Vfs.lookup();
+      pwd = VfsOld.lookup();
     
     if (pathName.startsWith("$")) {
       int p = pathName.indexOf('/');

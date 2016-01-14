@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.nautilus.broker.BrokerNautilus;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Custom serialization for the cache
@@ -74,7 +74,7 @@ public class EndpointServerNautilus extends EndpointNautilusBase
   protected void publishStart(InputStream is)
     throws IOException
   {
-    ReadStream in = Vfs.openRead(is);
+    ReadStream in = VfsOld.openRead(is);
     
     SenderServerNautilus publish = new SenderServerNautilus(this);
     
@@ -110,7 +110,7 @@ public class EndpointServerNautilus extends EndpointNautilusBase
   protected void receiveStart(InputStream is)
     throws IOException
   {
-    ReadStream in = Vfs.openRead(is);
+    ReadStream in = VfsOld.openRead(is);
     
     ReceiverServerNautilus receive = new ReceiverServerNautilus(this);
     

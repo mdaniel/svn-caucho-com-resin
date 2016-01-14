@@ -58,7 +58,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.ZipScanner;
 
 /**
@@ -787,7 +787,7 @@ public class TldManager {
     PathImpl path;
 
     if (location.startsWith("file:"))
-      path = Vfs.lookup(location);
+      path = VfsOld.lookup(location);
     else if (location.startsWith("/"))
       path = _resourceManager.resolvePath("." + location);
     else
@@ -807,7 +807,7 @@ public class TldManager {
     while ((tail = classPath.indexOf(sep, head)) >= 0) {
       String sub = classPath.substring(head, tail);
 
-      path = Vfs.lookup(sub);
+      path = VfsOld.lookup(sub);
 
       if (sub.endsWith(location) && path.exists())
         return path;
@@ -820,7 +820,7 @@ public class TldManager {
 
     String sub = classPath.substring(head);
 
-    path = Vfs.lookup(sub);
+    path = VfsOld.lookup(sub);
 
     if (sub.endsWith(location) && path.exists())
       return path;
@@ -881,7 +881,7 @@ public class TldManager {
       }
 
       if (! segment.equals("")) {
-        PathImpl path = Vfs.lookup(segment);
+        PathImpl path = VfsOld.lookup(segment);
 
         if (! list.contains(path))
           list.add(path);

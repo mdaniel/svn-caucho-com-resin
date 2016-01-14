@@ -63,7 +63,7 @@ import com.caucho.v5.resin.WebAppEmbed;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Compilation interface for JSP pages.
@@ -661,7 +661,7 @@ public class JspCompiler implements EnvironmentBean {
 
       while (i < args.length) {
         if (args[i].equals("-app-dir")) {
-          PathImpl appDir = Vfs.lookup(args[i + 1]);
+          PathImpl appDir = VfsOld.lookup(args[i + 1]);
 
           WebApp webApp = createWebApp(appDir);
 
@@ -673,7 +673,7 @@ public class JspCompiler implements EnvironmentBean {
           i += 2;
         }
         else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
-          setClassDirectory(Vfs.lookup(args[i + 1]));
+          setClassDirectory(VfsOld.lookup(args[i + 1]));
           i += 2;
         }
         else if (args[i].equals("-compiler")) {
@@ -682,7 +682,7 @@ public class JspCompiler implements EnvironmentBean {
           i += 2;
         }
         else if (args[i].equals("-conf")) {
-          PathImpl path = Vfs.lookup(args[i + 1]);
+          PathImpl path = VfsOld.lookup(args[i + 1]);
 
           new ConfigXml().configureBean(this, path);
           hasConf = true;
@@ -730,7 +730,7 @@ public class JspCompiler implements EnvironmentBean {
       }
 
       if (appDir == null) {
-        appDir = Vfs.lookup();
+        appDir = VfsOld.lookup();
 
         if (getAppDir() == null && getWebApp() == null) {
           System.err.println(L.l("-app-dir must be specified for JspCompiler"));
@@ -755,7 +755,7 @@ public class JspCompiler implements EnvironmentBean {
     try {
       thread.setContextClassLoader(getClassLoader());
     
-      PathImpl path = Vfs.lookup(uri);
+      PathImpl path = VfsOld.lookup(uri);
 
       if (path.isDirectory())
         compileDirectory(path, getAppDir(), this, pendingClasses);
@@ -838,7 +838,7 @@ public class JspCompiler implements EnvironmentBean {
 
     ApplicationConfig()
     {
-      _rootDir = Vfs.lookup();
+      _rootDir = VfsOld.lookup();
     }
 
     public void setRootDirectory(PathImpl path)

@@ -74,7 +74,7 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.SQLExceptionWrapper;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.Vfs;
+import com.caucho.v5.vfs.VfsOld;
 
 /**
  * Configures the database driver.
@@ -851,7 +851,7 @@ public class DriverConfig
     try {
       is = serviceURL.openStream();
 
-      ReadStream in = Vfs.openRead(is);
+      ReadStream in = VfsOld.openRead(is);
       String line;
       while ((line = in.readLine()) != null) {
         int p = line.indexOf('#');
