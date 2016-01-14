@@ -347,6 +347,12 @@ public class Mysqli extends JdbcConnectionResource
         urlBuilder.append("characterEncoding=ISO8859_1");
       }
     }
+    
+    {
+      // allow multi queries
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+      urlBuilder.append(sep).append("allowMultiQueries=true");
+    }
 
     if (! isEmulatePrepares) {
       char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
