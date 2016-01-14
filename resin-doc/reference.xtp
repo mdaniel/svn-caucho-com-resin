@@ -264,14 +264,14 @@ see <a href="admin/logging.xtp#path">"Log Paths"</a>.</td>
         kb (128kb), or megabytes (10mb).  
         See <a href="admin/logging.xtp#rollover">"Rollovers"</a>.
   </td>
-  <td>1mb</td>
+  <td>1gb</td>
 </tr>
 <tr>
   <td>rollover-count</td>
   <td>maximum number of rollover files before the oldest ones get overwritten. 
         See <a href="admin/logging.xtp#rollover">"Rollovers"</a>.
   </td>
-  <td>1mb</td>
+  <td>none</td>
 </tr>
 <tr>
   <td>resin:type</td>
