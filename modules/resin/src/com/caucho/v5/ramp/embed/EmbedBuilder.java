@@ -29,8 +29,6 @@
 
 package com.caucho.v5.ramp.embed;
 
-import io.baratine.service.Service;
-
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -51,10 +49,11 @@ import com.caucho.v5.baratine.ServiceServer;
 import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.bytecode.scan.ScanManagerByteCode;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.VfsOld;
+
+import io.baratine.service.Service;
 
 
 /**
@@ -373,7 +372,7 @@ public class EmbedBuilder
      * Returns true if the string matches an annotation class.
      */
     @Override
-    public boolean isScanMatchAnnotation(CharBuffer name)
+    public boolean isScanMatchAnnotation(StringBuilder name)
     {
       return false;
     }

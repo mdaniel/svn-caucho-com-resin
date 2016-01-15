@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.caucho.v5.io.TempOutputStream;
 import com.caucho.v5.nautilus.EncoderMessage;
 import com.caucho.v5.nautilus.MessageException;
 import com.caucho.v5.nautilus.MessagePropertiesFactory;
@@ -42,7 +43,6 @@ import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.nautilus.common.SenderQueueBase;
 import com.caucho.v5.nautilus.encode.StringEncoder;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.TempOutputStream;
 import com.caucho.v5.vfs.WriteStream;
 
 /**

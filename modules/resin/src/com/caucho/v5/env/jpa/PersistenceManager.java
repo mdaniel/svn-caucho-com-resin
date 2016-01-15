@@ -55,7 +55,6 @@ import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentEnhancerListener;
 import com.caucho.v5.loader.EnvironmentLocal;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.PathImpl;
@@ -605,7 +604,7 @@ public class PersistenceManager
   }
 
   @Override
-  public boolean isScanMatchAnnotation(CharBuffer annotationName)
+  public boolean isScanMatchAnnotation(StringBuilder annotationName)
   {
     return false;
   }

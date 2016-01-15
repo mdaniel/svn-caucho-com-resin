@@ -67,7 +67,6 @@ import javax.websocket.server.ServerEndpointConfig;
 import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanClassBase;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.JarPath;
 import com.caucho.v5.vfs.PathImpl;
@@ -472,8 +471,10 @@ public class WebAppBuilderScan
     }
 
     @Override
-    public boolean isScanMatchAnnotation(CharBuffer string)
+    public boolean isScanMatchAnnotation(StringBuilder sb)
     {
+      String string = sb.toString();
+      
       if (string.startsWith("javax.servlet.annotation.")) {
         return true;
       }

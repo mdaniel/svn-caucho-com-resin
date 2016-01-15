@@ -67,6 +67,7 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.protocol.RequestCauchoBase;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.io.TempOutputStream;
 import com.caucho.v5.json.io.JsonWriter;
 import com.caucho.v5.management.server.SessionManagerMXBean;
 import com.caucho.v5.util.Alarm;
@@ -77,7 +78,6 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.util.RandomUtil;
 import com.caucho.v5.util.WeakAlarm;
-import com.caucho.v5.vfs.TempOutputStream;
 
 /**
  * Manages sessions in a web-webApp.

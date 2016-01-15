@@ -28,13 +28,19 @@
 
 package com.caucho.v5.filters;
 
-import java.security.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.util.*;
+import com.caucho.v5.util.Base64Util;
 
 /**
  * Calculates a HTTP Content-MD5 footer following RFC 1864
@@ -175,7 +181,7 @@ public class MD5Filter implements Filter
     {
       byte []bytes = _digest.digest();
 
-      CharBuffer cb = new CharBuffer();
+      StringBuilder cb = new StringBuilder();
       Base64Util.encode(cb, bytes, 0, bytes.length);
 
       return cb.toString();

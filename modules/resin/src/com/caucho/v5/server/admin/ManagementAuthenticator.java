@@ -33,7 +33,6 @@ import java.util.TreeMap;
 import com.caucho.v5.http.security.AbstractAuthenticator;
 import com.caucho.v5.http.security.PasswordUser;
 import com.caucho.v5.util.Base64Util;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.Crc64;
 
 /**
@@ -94,7 +93,7 @@ public class ManagementAuthenticator extends AbstractAuthenticator
       }
 
       if (crc64 != 0) {
-        CharBuffer cb = new CharBuffer();
+        StringBuilder cb = new StringBuilder();
         Base64Util.encode(cb, crc64);
 
         _remoteCookie = cb.toString();

@@ -782,7 +782,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
 
       if (hasMore) {
         if (isFirstChunk) {
-          CharBuffer cb1 = new CharBuffer();
+          StringBuilder cb1 = new StringBuilder();
 
           cb1.append("--");
           Base64Util.encode(cb1, RandomUtil.getRandomLong());

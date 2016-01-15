@@ -51,7 +51,6 @@ import com.caucho.v5.io.Dependency;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.util.Base64Util;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.vfs.Depend;
 import com.caucho.v5.vfs.PathImpl;
@@ -509,11 +508,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
       String etag = _etag;
       if (lastModified != _lastModified) {
-        CharBuffer cb = new CharBuffer();
+        StringBuilder cb = new StringBuilder();
         cb.append('"');
         Base64Util.encode(cb, lastModified);
         cb.append('"');
-        etag = cb.close();
+        etag = cb.toString();
         _etag = etag;
 
         synchronized (_calendar) {

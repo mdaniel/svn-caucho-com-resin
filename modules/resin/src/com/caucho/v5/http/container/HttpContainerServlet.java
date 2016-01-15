@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.v5.amp.manager.ServerAuthManager;
+import com.caucho.v5.amp.remote.ServerAuthManager;
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.bartender.BartenderSystem;

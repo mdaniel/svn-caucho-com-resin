@@ -30,14 +30,15 @@
 package com.caucho.v5.security.x509;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 
+import com.caucho.v5.io.TempOutputStream;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.TempOutputStream;
 
 /**
  * pkcs#10 is in PEM format, DER with base64  and --- BEGIN ---
@@ -81,7 +82,7 @@ public class X509Parser {
       if (line.startsWith("-----END CERTIFICATE-----")) {
         System.out.println("TOTAL-LEN: " + os.getLength());
 
-        return parseCertificateDer(os.openRead());
+        return parseCertificateDer(os.openInputStream());
       }
 
       reader.init(line);
@@ -99,14 +100,18 @@ public class X509Parser {
    *   signature
    * }
    */
-  private String parseCertificateDer(ReadStream is)
+  private String parseCertificateDer(InputStream is)
     throws IOException
   {
+    if (true) throw new UnsupportedOperationException();
+    
+    /*
     int len = parseSequenceHeader(is);
 
     parseTbsCertificate(is);
     parseSignatureAlgorithm(is);
     parseSignature(is);
+    */
     
     return "ok";
   }

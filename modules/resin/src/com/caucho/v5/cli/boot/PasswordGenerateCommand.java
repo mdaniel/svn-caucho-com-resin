@@ -40,7 +40,6 @@ import com.caucho.v5.cli.server.ServerCommandBase;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.util.Base64Util;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.RandomUtil;
 
@@ -109,7 +108,7 @@ public class PasswordGenerateCommand extends ServerCommandBase<ArgsCli>
                                (byte) RandomUtil.getRandomLong(),
                                (byte) RandomUtil.getRandomLong() };
       
-    CharBuffer cb = new CharBuffer();
+    StringBuilder cb = new StringBuilder();
     
     byte []digest = sha1(password, salt);
     byte []hash = new byte[salt.length + digest.length];

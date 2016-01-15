@@ -43,8 +43,8 @@ import javax.crypto.spec.SecretKeySpec;
 import com.caucho.v5.hessian.io.Hessian2Input;
 import com.caucho.v5.hessian.io.Hessian2Output;
 import com.caucho.v5.http.security.SecurityException;
+import com.caucho.v5.io.TempOutputStream;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.TempOutputStream;
 
 /**
  * Self-encrypted cookie for server to server authentication.
