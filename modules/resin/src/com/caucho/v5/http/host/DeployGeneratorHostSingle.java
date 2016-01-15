@@ -130,7 +130,7 @@ public class DeployGeneratorHostSingle
       }
     }
 
-    ServerBartender server = BartenderSystem.getCurrent().getServerSelf();
+    ServerBartender server = BartenderSystem.current().serverSelf();
     String clusterName = server.getClusterId();
     
     if (rawHostName != null) {

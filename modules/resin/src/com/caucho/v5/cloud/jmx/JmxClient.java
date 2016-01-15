@@ -38,7 +38,7 @@ public class JmxClient
   JmxClient(String serverId)
   {
     ServerBartender server
-      = BartenderSystem.getCurrent().findServerByName(serverId);
+      = BartenderSystem.current().findServerByName(serverId);
 
     if (server == null)
       throw new IllegalArgumentException(L.l("'{0}' is an unknown remote server in the cluster",

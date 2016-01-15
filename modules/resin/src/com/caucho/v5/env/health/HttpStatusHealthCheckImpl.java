@@ -126,7 +126,7 @@ public class HttpStatusHealthCheckImpl extends AbstractHealthCheck
     
     if (_pingUrls.isEmpty()) {
       ServerBartender cloudServer =
-        BartenderSystem.getCurrent().getServerSelf();
+        BartenderSystem.current().serverSelf();
       
       /* XXX:
       ClusterServer selfServer = cloudServer.getData(ClusterServer.class);

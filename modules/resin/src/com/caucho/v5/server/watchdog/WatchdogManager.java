@@ -195,7 +195,7 @@ public class WatchdogManager implements AlarmListener
       selfBuilder.pod("watchdog");
 
       BartenderBuilder bartenderBuilder
-        = BartenderSystem.createBuilder(Configs.config().get(),
+        = BartenderSystem.newSystem(Configs.config().get(),
                                         address, port, false, 
                                         portBartender, 
                                         "watchdog", "watchdog", 
@@ -204,7 +204,7 @@ public class WatchdogManager implements AlarmListener
 
       BartenderSystem system = bartenderBuilder.build();
       
-      ServerBartender selfServer = system.getServerSelf();
+      ServerBartender selfServer = system.serverSelf();
       
       NetworkSystem.createAndAddSystem(systemManager, selfServer, _args.config());
 

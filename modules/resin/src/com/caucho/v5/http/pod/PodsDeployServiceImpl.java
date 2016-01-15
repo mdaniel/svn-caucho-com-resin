@@ -93,8 +93,8 @@ public class PodsDeployServiceImpl
 
     _lifecycle.toActive();
     
-    _bartender = BartenderSystem.getCurrent();
-    _serverSelf = _bartender.getServerSelf();
+    _bartender = BartenderSystem.current();
+    _serverSelf = _bartender.serverSelf();
     
     _podService = _bartender.getPodService();
     _podContainer = podContainer;

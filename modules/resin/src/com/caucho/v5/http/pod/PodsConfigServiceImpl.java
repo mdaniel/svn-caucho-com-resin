@@ -88,8 +88,8 @@ public class PodsConfigServiceImpl
     _podContainer = podContainer;
     _expandPath = podContainer.getPodExpandPath();
 
-    _bartender = BartenderSystem.getCurrent();
-    _serverSelf = _bartender.getServerSelf();
+    _bartender = BartenderSystem.current();
+    _serverSelf = _bartender.serverSelf();
     
     _podService = _bartender.getPodService();
     

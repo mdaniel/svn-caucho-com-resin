@@ -211,7 +211,7 @@ public class LoadBalanceBuilder
 
     HttpContainerServlet httpContainer = HttpContainerServlet.current();
     
-    BartenderSystem bartender = BartenderSystem.getCurrent();
+    BartenderSystem bartender = BartenderSystem.current();
     ServerBartender server = bartender.getServerHandle(host, port);
 
     boolean isSecure = false;

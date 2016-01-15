@@ -179,7 +179,7 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
       _isStickySessions = false;
     }
     
-    BartenderSystem bartender = BartenderSystem.getCurrent();
+    BartenderSystem bartender = BartenderSystem.current();
     
     _pod = bartender.findPod(_clusterId); 
     

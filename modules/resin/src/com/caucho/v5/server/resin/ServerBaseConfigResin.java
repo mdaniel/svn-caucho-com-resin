@@ -44,11 +44,11 @@ import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.env.system.SystemManager;
-import com.caucho.v5.http.cache.TempFileManager;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentProperties;
 import com.caucho.v5.server.container.ServerBuilderOld;
+import com.caucho.v5.tempfile.TempFileManager;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 

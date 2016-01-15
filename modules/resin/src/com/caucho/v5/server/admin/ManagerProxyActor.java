@@ -69,7 +69,7 @@ public class ManagerProxyActor
   
   public String disableSoft()
   {
-    ServerBartender server = BartenderSystem.getCurrent().getServerSelf();
+    ServerBartender server = BartenderSystem.current().serverSelf();
 
     server.disableSoft();
 

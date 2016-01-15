@@ -280,7 +280,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   {
     _injectManager = InjectManagerAmp.create();
     
-    BartenderSystem bartender = BartenderSystem.getCurrent();
+    BartenderSystem bartender = BartenderSystem.current();
     
     // _podContainer = new PodContainer(bartender, this);
     _hostContainer = createHostContainer();
@@ -1585,7 +1585,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   {
     return (getClass().getSimpleName()
             + "[id=" + getServerDisplayName()
-            + ",cluster=" + getSelfServer().getCluster().getId() + "]");
+            + ",cluster=" + getSelfServer().getCluster().id() + "]");
   }
 
   /*

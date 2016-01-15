@@ -68,7 +68,7 @@ public class ProcWebApps extends ProcFileBase
     ArrayList<String> clusterNames = new ArrayList<>();
     
     for (ClusterBartender cluster :_bartender.getRoot().getClusters()) {
-      clusterNames.add(cluster.getId());
+      clusterNames.add(cluster.id());
     }
     
     Collections.sort(clusterNames);

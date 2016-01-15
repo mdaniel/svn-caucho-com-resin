@@ -74,7 +74,7 @@ abstract public class LoadBalanceManagerCustom extends LoadBalanceManager {
 
     boolean isSecure = false;
     
-    BartenderSystem bartender = BartenderSystem.getCurrent();
+    BartenderSystem bartender = BartenderSystem.current();
     
     ServerBartender server = bartender.getServerHandle(host, port);
 

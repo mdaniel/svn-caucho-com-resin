@@ -169,7 +169,7 @@ public class PodBuilderServiceImpl
   
   public PodBartender findPod(String podName)
   {
-    BartenderSystem bartender = BartenderSystem.getCurrent();
+    BartenderSystem bartender = BartenderSystem.current();
     
     return bartender.findPod(podName);
   }

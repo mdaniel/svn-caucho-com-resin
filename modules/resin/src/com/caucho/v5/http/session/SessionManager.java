@@ -231,9 +231,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
                                           Thread.currentThread().getContextClassLoader()));
     }
     
-    BartenderSystem system = BartenderSystem.getCurrent();
+    BartenderSystem system = BartenderSystem.current();
     
-    _selfServer = system.getServerSelf();
+    _selfServer = system.serverSelf();
     String clusterId = _selfServer.getClusterId();
     
     _clusterPod = system.findPod("cluster");

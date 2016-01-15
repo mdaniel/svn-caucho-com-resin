@@ -60,7 +60,6 @@ import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.health.warning.WarningSystem;
-import com.caucho.v5.http.cache.TempFileSystem;
 import com.caucho.v5.http.container.HttpContainerBuilder;
 import com.caucho.v5.http.container.HttpSystem;
 import com.caucho.v5.http.container.ServerConfig;
@@ -75,6 +74,7 @@ import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.PodConfigBoot;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.tempfile.TempFileSystem;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.JmxUtil;
 import com.caucho.v5.util.L10N;
@@ -870,7 +870,7 @@ public class ServerBuilderOld
     }
 
     BartenderBuilder builder
-      = BartenderSystem.createBuilder(_args.config(),
+      = BartenderSystem.newSystem(_args.config(),
                                       getServerAddress(),
                                       getServerPort(),
                                       isSSL(),
@@ -891,7 +891,7 @@ public class ServerBuilderOld
                  _serverConfig.getPort());
                  */
     
-    return system.getServerSelf();
+    return system.serverSelf();
   }
 
   private void initTopologyStatic(BartenderBuilder rootBuilder)

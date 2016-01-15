@@ -112,7 +112,7 @@ public final class BrokerServiceImpl
     Objects.requireNonNull(kraken);
     _kraken = kraken;
     
-    _bartender = BartenderSystem.getCurrent();
+    _bartender = BartenderSystem.current();
     Objects.requireNonNull(_bartender);
     
     _pod = _bartender.getLocalPod();
@@ -374,7 +374,7 @@ public final class BrokerServiceImpl
     
     ServerBartender server = pod.getNode(0).getServer(0);
     
-    if (server == _bartender.getServerSelf()) {
+    if (server == _bartender.serverSelf()) {
       QueueServiceLocal queueImpl = new QueueServiceLocal(this, name, qid);
     
       addQueue(queueImpl);

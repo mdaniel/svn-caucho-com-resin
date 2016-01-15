@@ -57,7 +57,7 @@ public class HeartbeatService
   @Configurable
   public void setHeartbeatPeriod(Period period)
   {
-    BartenderSystem bartenderSystem = BartenderSystem.getCurrent();
+    BartenderSystem bartenderSystem = BartenderSystem.current();
     
     if (bartenderSystem != null) {
       // bartenderSystem.setHeartbeatPeriod(period.getPeriod());
@@ -72,7 +72,7 @@ public class HeartbeatService
   @Configurable
   public void setHeartbeatTimeout(Period period)
   {
-    BartenderSystem bartenderSystem = BartenderSystem.getCurrent();
+    BartenderSystem bartenderSystem = BartenderSystem.current();
     
     if (bartenderSystem != null) {
       // bartenderSystem.setHeartbeatTimeout(period.getPeriod());

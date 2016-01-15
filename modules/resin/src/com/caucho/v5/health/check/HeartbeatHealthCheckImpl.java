@@ -29,7 +29,7 @@ public class HeartbeatHealthCheckImpl extends AbstractHealthCheck
   
   public HeartbeatHealthCheckImpl()
   {
-    _selfServer = BartenderSystem.getCurrent().getServerSelf();
+    _selfServer = BartenderSystem.current().serverSelf();
     
     if (_selfServer == null) {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
