@@ -22,7 +22,6 @@ import javax.servlet.FilterChain;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Bytes;
-import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.webapp.FilterChainCaucho;
@@ -30,6 +29,7 @@ import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.CacheItem;
+import com.caucho.v5.subsystem.RootDirectorySystem;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.LruCache;
 import com.caucho.v5.vfs.MemoryPath;
@@ -252,7 +252,7 @@ public class HttpCache extends HttpCacheBase
     }
 
     if (_path == null) {
-      _path = RootDirectorySystem.getCurrentDataDirectory();
+      _path = null;//RootDirectorySystem.getCurrentDataDirectory();
 
       // special cased for testing
       if (_path instanceof MemoryPath) {
@@ -295,7 +295,7 @@ public class HttpCache extends HttpCacheBase
     _cacheLruEntries
       = new LruCache<FilterChainHttpCache,FilterChainHttpCache>(entries);
 
-    _store = new BlockManagerHttpCache(path);
+    _store = null;//new BlockManagerHttpCache(path);
   }
 
   /**

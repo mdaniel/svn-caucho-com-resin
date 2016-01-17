@@ -29,8 +29,6 @@
 
 package com.caucho.v5.http.protocol;
 
-import io.baratine.web.HttpStatus;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.Principal;
@@ -65,6 +63,7 @@ import com.caucho.v5.http.security.LoginBase;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.io.WriteBuffer;
 import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.StateConnection;
@@ -72,10 +71,12 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.NullEnumeration;
+import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.StringCharCursor;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.WriteStream;
+
+import io.baratine.web.HttpStatus;
 
 /**
  * User facade for http requests.
@@ -692,7 +693,7 @@ public final class RequestServlet extends RequestCauchoBase
 
       int p = cb.lastIndexOf('/');
       if (p >= 0)
-        cb.setLength(p);
+        cb.length(p);
       cb.append('/');
       cb.append(path);
 
@@ -985,10 +986,45 @@ public final class RequestServlet extends RequestCauchoBase
    * @param name the header name
    * @return the header value converted to an date
    */
+  /*
   @Override
   public long getDateHeader(String name)
   {
     return _request.getDateHeader(name);
+  }
+  */
+
+  /**
+   * Returns a header interpreted as a date.
+   *
+   * @param key the header key.
+   *
+   * @return the value of the header as an integer.
+   */
+  public long getDateHeader(String key)
+  {
+    String value = getHeader(key);
+    if (value == null)
+      return -1;
+
+    long date = -1;
+    
+    try {
+      QDate calendar = QDate.allocateGmtDate();
+      
+      date = calendar.parseDate(value);
+      
+      QDate.freeGmtDate(calendar);
+
+      if (date == Long.MAX_VALUE)
+        throw new IllegalArgumentException("getDateHeader(" + value + ")");
+
+      return date;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   //
@@ -2064,7 +2100,7 @@ public final class RequestServlet extends RequestCauchoBase
    * @see com.caucho.v5.http.protocol.RequestFacade#writeCookies(com.caucho.v5.vfs.WriteStream)
    */
   @Override
-  public void writeCookies(WriteStream os) throws IOException
+  public void writeCookies(WriteBuffer os) throws IOException
   {
     // TODO Auto-generated method stub
     

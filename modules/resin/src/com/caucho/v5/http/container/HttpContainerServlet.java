@@ -78,6 +78,7 @@ import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.io.AlwaysModified;
+import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DynamicClassLoader;
@@ -89,7 +90,6 @@ import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.FreeRing;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.VfsOld;
 

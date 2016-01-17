@@ -8,8 +8,8 @@ package com.caucho.v5.http.cache;
 
 import java.io.IOException;
 
+import com.caucho.v5.io.OutputStreamWithBuffer;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.OutputStreamWithBuffer;
 
 /**
  * A block in the http cache.

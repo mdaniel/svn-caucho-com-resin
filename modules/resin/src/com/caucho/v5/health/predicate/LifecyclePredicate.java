@@ -12,9 +12,9 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthSubSystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.lifecycle.LifecycleListener;
 import com.caucho.v5.lifecycle.LifecycleState;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 
 @Startup

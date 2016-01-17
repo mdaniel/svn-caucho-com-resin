@@ -34,9 +34,9 @@ import java.util.Objects;
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
-import com.caucho.v5.env.system.SubSystemBase;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.kraken.KrakenSystem;
+import com.caucho.v5.subsystem.SubSystemBase;
+import com.caucho.v5.subsystem.SystemManager;
 
 /**
  * The local cache repository.
@@ -83,7 +83,7 @@ public class NautilusSystem extends SubSystemBase
   @Override
   public void start()
   {
-    ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp rampManager = AmpSystem.currentManager();
     
     KrakenSystem kraken = KrakenSystem.getCurrent();
     

@@ -29,12 +29,12 @@
 
 package com.caucho.v5.server.container;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ClusterBartender;
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.jmx.server.ConfigMXBean;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
@@ -43,6 +43,7 @@ import com.caucho.v5.management.server.ResinMXBean;
 import com.caucho.v5.management.server.ServerMXBean;
 import com.caucho.v5.management.server.ThreadPoolMXBean;
 import com.caucho.v5.profile.MemoryUtil;
+import com.caucho.v5.subsystem.RootDirectorySystem;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.Version;
 
@@ -153,7 +154,11 @@ public class ServerAdmin extends ManagedObjectBase
   @Override
   public String getDataDirectory()
   {
-    return RootDirectorySystem.getCurrentDataDirectory().getNativePath();
+    try {
+      return RootDirectorySystem.getCurrentDataDirectory().toRealPath().toString();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

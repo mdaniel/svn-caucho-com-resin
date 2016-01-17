@@ -32,11 +32,11 @@ package com.caucho.v5.cli.boot;
 import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.io.StreamSource;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.StreamSource;
 import com.caucho.v5.vfs.StreamSourcePath;
 import com.caucho.v5.vfs.VfsOld;
 

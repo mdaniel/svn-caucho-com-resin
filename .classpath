@@ -33,5 +33,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/framework"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/web"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

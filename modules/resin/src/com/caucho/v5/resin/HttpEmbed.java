@@ -29,9 +29,9 @@
 
 package com.caucho.v5.resin;
 
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.protocol.ProtocolHttp;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.network.port.PortTcpBuilder;
 import com.caucho.v5.server.container.ServerBuilderOld;
@@ -103,7 +103,7 @@ public class HttpEmbed extends PortEmbed
       _port.init();
       
       //SystemManager system = server.getSystemManager();
-      NetworkSystem networkSystem = NetworkSystem.current(); 
+      NetworkSystemBartender networkSystem = NetworkSystemBartender.current(); 
 
       networkSystem.addPort(_port);
 

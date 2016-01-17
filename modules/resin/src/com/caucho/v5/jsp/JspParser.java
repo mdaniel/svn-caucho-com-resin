@@ -1398,7 +1398,7 @@ public class JspParser {
       for (ch = read(); ch >= 0; ch = read()) {
         _text.append((char) ch);
         if (_text.endsWith(tail)) {
-          _text.setLength(_text.length() - tail.length());
+          _text.length(_text.length() - tail.length());
           addText();
           _jspBuilder.endElement(qname.getName());
           return;
@@ -1871,9 +1871,11 @@ public class JspParser {
       throw error(L.l("circular include of '{0}' forbidden.  A JSP file may not include itself.", include));
     for (int i = 0; i < _includes.size(); i++) {
       Include inc = _includes.get(i);
+      /*
       if (inc._stream != null && inc._stream.getPath() != null
           && inc._stream.getPath().equals(include) && ! allowDuplicate)
         throw error(L.l("circular include of '{0}'.  A JSP file may not include itself.", include));
+        */
     }
 
     try {
@@ -1913,7 +1915,7 @@ public class JspParser {
       _localPrefixes = new HashSet<String>();
     }
 
-    _parseState.addDepend(stream.getPath());
+    //_parseState.addDepend(stream.getPath());
 
     try {
       String encoding = _stream.getEncoding();
@@ -1923,8 +1925,10 @@ public class JspParser {
     }
     _stream = stream;
 
+    /*
     _filename = stream.getUserPath();
     _jspPath = stream.getPath();
+    */
     _line = 1;
     _lineStart = _line;
     _uriPwd = newUrlPwd;
@@ -2134,8 +2138,10 @@ public class JspParser {
       _includes.remove(_includes.size() - 1);
 
       _stream = include._stream;
+      /*
       _filename = _stream.getUserPath();
       _jspPath = _stream.getPath();
+      */
       _line = include._line;
       _lineStart = _line;
       _uriPwd = include._uriPwd;

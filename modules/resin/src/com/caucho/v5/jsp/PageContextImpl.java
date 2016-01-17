@@ -89,6 +89,7 @@ import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.el.ExpressionEvaluatorImpl;
 import com.caucho.v5.jsp.el.ImplicitVariableMapper;
@@ -101,7 +102,6 @@ import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.NullEnumeration;
-import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.FlushBuffer;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.TempCharBuffer;
@@ -1707,7 +1707,7 @@ public class PageContextImpl extends PageContext
   {
     JspWriter out = body.getEnclosingWriter();
     CharBuffer string = body.getCharBuffer();
-    char []cBuf = string.getBuffer();
+    char []cBuf = string.buffer();
 
     int length = string.length() - 1;
 

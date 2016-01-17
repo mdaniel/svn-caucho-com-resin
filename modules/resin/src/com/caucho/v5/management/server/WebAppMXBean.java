@@ -159,7 +159,7 @@ public interface WebAppMXBean extends DeployControllerMXBean {
 
   /**
    * Returns the number of connections that have ended with a
-   * {@link com.caucho.v5.vfs.ClientDisconnectException} for this web-app in it's lifetime.
+   * {@link com.caucho.v5.io.ClientDisconnectException} for this web-app in it's lifetime.
    */
   @Description("The total number of times a client has disconnected before a request completed")
   @Counter

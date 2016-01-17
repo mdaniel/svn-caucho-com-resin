@@ -532,11 +532,14 @@ public class ConfigXml extends ConfigContext
     String systemId = null;
     String filename = null;
     PathImpl path = null;
+    
+    /*
     if (is instanceof ReadStream) {
       path = ((ReadStream) is).getPath();
       systemId = path.getURL();
       filename = path.getUserPath();
     }
+    */
 
     doc.setSystemId(systemId);
     builder.setSystemId(systemId);

@@ -29,11 +29,9 @@
 
 package com.caucho.v5.log;
 
-import com.caucho.v5.log.TimestampFormatter;
-
 /**
  * Formats a log message.
  */
-public class TimestampLogFormatter extends TimestampFormatter
+public class TimestampLogFormatter //extends TimestampFormatter
 {
 }

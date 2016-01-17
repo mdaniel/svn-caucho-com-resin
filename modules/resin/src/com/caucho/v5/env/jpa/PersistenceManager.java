@@ -31,6 +31,7 @@ package com.caucho.v5.env.jpa;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -585,19 +586,21 @@ public class PersistenceManager
    * Returns true if the root is a valid scannable root.
    */
   @Override
-  public boolean isRootScannable(PathImpl root, String packageRoot)
+  public boolean isRootScannable(Path root, String packageRoot)
   {
+    /*
     if (root.lookup("META-INF/persistence.xml").canRead()
         || (root.getFullPath().endsWith("WEB-INF/classes/")
             && root.lookup("../persistence.xml").canRead())) {
       _pendingRootList.add(root);
     }
+  */
 
     return false;
   }
 
   @Override
-  public ScanClass scanClass(PathImpl root, String packageRoot,
+  public ScanClass scanClass(Path root, String packageRoot,
                              String className, int modifiers)
   {
     return null;

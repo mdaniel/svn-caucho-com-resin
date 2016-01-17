@@ -9,9 +9,9 @@ package com.caucho.v5.http.cache;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-import com.caucho.v5.kelp.io.InStore;
-import com.caucho.v5.kelp.io.OutStore;
-import com.caucho.v5.kelp.io.StoreReadWrite;
+import com.caucho.v5.store.io.InStore;
+import com.caucho.v5.store.io.OutStore;
+import com.caucho.v5.store.io.StoreReadWrite;
 import com.caucho.v5.util.FreeRing;
 import com.caucho.v5.util.L10N;
 

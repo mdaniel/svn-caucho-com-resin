@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.logging.Level;
 
 import com.caucho.v5.health.action.JmxSetQueryReply;
-import com.caucho.v5.vfs.StreamSource;
+import com.caucho.v5.io.StreamSource;
 
 public interface ManagerServiceApi
 {

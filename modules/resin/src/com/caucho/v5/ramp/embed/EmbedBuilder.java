@@ -32,6 +32,7 @@ package com.caucho.v5.ramp.embed;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -49,6 +50,7 @@ import com.caucho.v5.baratine.ServiceServer;
 import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
 import com.caucho.v5.bytecode.scan.ScanManagerByteCode;
+import com.caucho.v5.io.Vfs;
 import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.VfsOld;
@@ -228,7 +230,7 @@ public class EmbedBuilder
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     for (URL url : _scanList) {
-      PathImpl root = VfsOld.lookup(url.toString());
+      Path root = Vfs.path(url.toString());
       
       scanManager.scan(loader, root, null);
     }
@@ -281,7 +283,7 @@ public class EmbedBuilder
     // ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     for (URL url : _scanList) {
-      PathImpl root = VfsOld.lookup(url.toString());
+      Path root = Vfs.path(url.toString());
       
       scanManager.scan(loader, root, null);
     }
@@ -354,7 +356,7 @@ public class EmbedBuilder
   private class ScanListenerEmbed implements ScanListenerByteCode
   {
     @Override
-    public ScanClass scanClass(PathImpl root, String packageRoot, 
+    public ScanClass scanClass(Path root, String packageRoot, 
                                 String name, int modifiers)
     {
       if (! Modifier.isPublic(modifiers)) {
@@ -378,7 +380,7 @@ public class EmbedBuilder
     }
 
     @Override
-    public void classMatchEvent(ClassLoader loader, PathImpl root,
+    public void classMatchEvent(ClassLoader loader, Path root,
                                 String className)
     {
     }

@@ -31,8 +31,8 @@ package com.caucho.v5.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.io.ReadBuffer;
+import com.caucho.v5.io.WriteBuffer;
 
 /**
  * Custom serialization for the cache
@@ -40,7 +40,7 @@ import com.caucho.v5.vfs.WriteStream;
 public class StompConnectCommand extends StompCommand
 {
   @Override
-  boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
+  boolean doCommand(StompConnection conn, ReadBuffer is, WriteBuffer os)
     throws IOException
   {
     if (! skipToEnd(is))

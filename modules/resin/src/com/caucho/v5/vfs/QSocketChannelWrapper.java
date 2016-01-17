@@ -28,12 +28,12 @@
 
 package com.caucho.v5.vfs;
 
+import com.caucho.v5.io.SocketBar;
+import com.caucho.v5.io.StreamImpl;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.ModulePrivate;
-import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.SocketChannelStream;
-import com.caucho.v5.vfs.StreamImpl;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;

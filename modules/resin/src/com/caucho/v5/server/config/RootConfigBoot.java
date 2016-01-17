@@ -44,13 +44,13 @@ import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
+import com.caucho.v5.io.SocketSystem;
 import com.caucho.v5.loader.SystemProperty;
 import com.caucho.v5.log.impl.LogConfig;
 import com.caucho.v5.log.impl.LogHandlerConfig;
 import com.caucho.v5.log.impl.LoggerConfig;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.net.SocketSystem;
 
 public class RootConfigBoot
 {

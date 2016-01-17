@@ -41,26 +41,26 @@ import com.caucho.v5.bartender.BartenderBuilder;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.bartender.heartbeat.ServerHeartbeatBuilder;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.cloud.security.SecuritySystem;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configs;
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.io.Vfs;
 import com.caucho.v5.jni.JniBoot;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.loader.DependencyCheckInterval;
 import com.caucho.v5.log.impl.EnvironmentStream;
 import com.caucho.v5.log.impl.LogHandlerConfig;
 import com.caucho.v5.log.impl.RotateStream;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
 import io.baratine.service.Result;
@@ -108,7 +108,7 @@ public class WatchdogManager implements AlarmListener
     
     _system = new SystemManager("watchdog");
 
-    VfsOld.setPwd(getRootDirectory());
+    //Vfs.setPwd(getRootDirectory());
     
     PathImpl logPath = getLogDirectory().lookup("watchdog-manager.log");
     
@@ -127,10 +127,10 @@ public class WatchdogManager implements AlarmListener
                                 + " required for Watchdog start. Please check permissions");
     }
 
-    RotateStream logStream = RotateStream.create(logPath);
+    RotateStream logStream = null;//RotateStream.create(logPath);
     logStream.setRolloverSize(64L * 1024 * 1024);
     logStream.init();
-    WriteStream out = logStream.getStream();
+    WriteStream out = null;//logStream.getStream();
     out.setDisableClose(true);
 
     EnvironmentStream.setStdout(out);
@@ -138,7 +138,7 @@ public class WatchdogManager implements AlarmListener
 
     LogHandlerConfig log = new LogHandlerConfig();
     log.addName("");
-    log.setPath(logPath);
+    //log.setPath(logPath);
     log.init();
     
     if (args.isVerbose()) {
@@ -206,7 +206,7 @@ public class WatchdogManager implements AlarmListener
       
       ServerBartender selfServer = system.serverSelf();
       
-      NetworkSystem.createAndAddSystem(systemManager, selfServer, _args.config());
+      NetworkSystemBartender.createAndAddSystem(systemManager, selfServer, _args.config());
 
       //InjectManager cdiManager = InjectManager.create();
       //AuthenticatorRole auth = null;
@@ -235,7 +235,7 @@ public class WatchdogManager implements AlarmListener
       
       WatchdogServiceImpl service = new WatchdogServiceImpl(this);
       
-      ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+      ServiceManagerAmp rampManager = AmpSystem.currentManager();
       
       _service = rampManager.newService(service)
                             .address("public:///watchdog")

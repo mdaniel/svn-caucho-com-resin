@@ -35,8 +35,8 @@ import java.io.Reader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.IOExceptionRuntime;
 import com.caucho.v5.vfs.TempCharBuffer;
 

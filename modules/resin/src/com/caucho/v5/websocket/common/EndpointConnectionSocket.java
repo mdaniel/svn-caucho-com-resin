@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.io.IoUtil;
-import com.caucho.v5.vfs.SocketBar;
+import com.caucho.v5.io.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;

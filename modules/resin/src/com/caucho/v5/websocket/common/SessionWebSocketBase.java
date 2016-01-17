@@ -977,7 +977,7 @@ public class SessionWebSocketBase implements Session, FrameListener {
    * @see com.caucho.v5.websocket.io.FrameListener#onClose(com.caucho.v5.websocket.common.CloseReason)
    */
   @Override
-  public void onClose(com.caucho.v5.websocket.common.CloseReason closeReason)
+  public void onClose(com.caucho.v5.websocket.io.CloseReason closeReason)
   {
     // TODO Auto-generated method stub
     

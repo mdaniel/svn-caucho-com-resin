@@ -35,7 +35,6 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
@@ -43,11 +42,12 @@ import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.env.system.RootDirectorySystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentClassLoader;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PortTcp;
+import com.caucho.v5.subsystem.RootDirectorySystem;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.VfsOld;
@@ -488,7 +488,7 @@ public class ServerContainerConfig implements EnvironmentBean
 
     private PortTcp getFirstPort(String protocol, boolean isSSL)
     {
-      NetworkSystem listenService = NetworkSystem.current(); 
+      NetworkSystemBartender listenService = NetworkSystemBartender.current(); 
       
       for (PortTcp port : listenService.getPorts()) {
         if (protocol.equals(port.protocolName()) && (port.isSSL() == isSSL))
@@ -546,7 +546,7 @@ public class ServerContainerConfig implements EnvironmentBean
     {
       RootDirectorySystem dirSystem = _system.getSystem(RootDirectorySystem.class);
       
-      return dirSystem.getRootDirectory();
+      return null;//dirSystem.getRootDirectory();
 
       // return server == null ? Vfs.getPwd() : server.getRootDirectory();
     }
@@ -560,7 +560,7 @@ public class ServerContainerConfig implements EnvironmentBean
       
       // ServerBase server =  ServerBase.getCurrent();
       
-      return dirSystem.getDataDirectory();
+      return null;//dirSystem.getDataDirectory();
       
       //return server == null ? Vfs.getPwd() : server.getDataDirectory();
     }

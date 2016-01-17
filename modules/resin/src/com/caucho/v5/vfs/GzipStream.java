@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 
-import com.caucho.v5.vfs.OutputStreamWithBuffer;
+import com.caucho.v5.io.OutputStreamWithBuffer;
 
 /**
  * Underlying stream handling HTTP requests.

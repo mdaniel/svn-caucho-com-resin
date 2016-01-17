@@ -395,7 +395,7 @@ public class Sprintf {
       expt = 1;
 
     while (digits.length() > 0 && digits.charAt(digits.length() - 1) == '0')
-      digits.setLength(digits.length() - 1);
+      digits.length(digits.length() - 1);
 
     if (type == 'f') {
       if (roundDigits(digits, expt + prec)) {

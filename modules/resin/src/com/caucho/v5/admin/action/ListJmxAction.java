@@ -47,8 +47,8 @@ import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.server.admin.ListJmxQueryReply;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 
 public class ListJmxAction extends AbstractJmxAction implements AdminAction

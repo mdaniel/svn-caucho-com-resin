@@ -38,8 +38,8 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.ConfigurableDeprecated;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
-import com.caucho.v5.vfs.ServerSocketJni;
-import com.caucho.v5.vfs.ServerSocketBar;
+import com.caucho.v5.io.ServerSocketBar;
+import com.caucho.v5.jni.ServerSocketJni;
 
 @Configurable
 public class ClusterConfigBoot

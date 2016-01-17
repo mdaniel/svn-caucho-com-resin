@@ -267,10 +267,12 @@ public class BundleManager {
     try {
       InputStream is = loader.getResourceAsStream(name.replace('.', '/') + ".properties");
       
+      /*
       if (is instanceof ReadStream) {
         PathImpl path = ((ReadStream) is).getPath();
         EnvLoader.addDependency(path.createDepend());
       }
+      */
 
       ResourceBundle bundle = new PropertyResourceBundle(is);
 

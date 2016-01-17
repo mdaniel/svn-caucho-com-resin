@@ -37,9 +37,7 @@ import com.caucho.v5.util.NullIterator;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.StringCharCursor;
 import com.caucho.v5.vfs.MemoryStream;
-import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.ReadWritePair;
-import com.caucho.v5.vfs.VfsStream;
 import com.caucho.v5.vfs.WriteStream;
 
 import java.io.IOException;
@@ -484,7 +482,7 @@ class SmtpStream extends MemoryStream {
     ReadStream is = null;
     WriteStream os = null;
     try {
-      ReadWritePair s = VfsStream.openReadWrite(sock.getInputStream(),
+      ReadWritePair s = VfsStreamOld.openReadWrite(sock.getInputStream(),
                                                 sock.getOutputStream());
       is = s.getReadStream();
       os = s.getWriteStream();

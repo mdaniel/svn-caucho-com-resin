@@ -57,9 +57,9 @@ import com.caucho.v5.bartender.hamp.LinkHamp;
 import com.caucho.v5.cli.server.OpenPort;
 import com.caucho.v5.cli.spi.CommandManager;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.HealthSystemFacade;
 import com.caucho.v5.health.shutdown.ExitCode;
+import com.caucho.v5.io.ServerSocketBar;
 import com.caucho.v5.jmx.MBeanServerBuilderImpl;
 import com.caucho.v5.jni.Boot;
 import com.caucho.v5.jni.JniBoot;
@@ -70,12 +70,12 @@ import com.caucho.v5.log.LogManagerImpl;
 import com.caucho.v5.log.impl.RotateLog;
 import com.caucho.v5.log.impl.RotateStream;
 import com.caucho.v5.server.container.LinkChildService;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WaitFuture;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.ServerSocketBar;
 import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -1103,7 +1103,7 @@ class ChildWatchdogProcess
     }
     
     RotateLog log = new RotateLog();
-    log.setPath(jvmPath);
+    //log.setPath(jvmPath);
     log.setRolloverSizeBytes(64L * 1024 * 1024);
     
     if (_child.getStdoutLog() != null) {
@@ -1117,7 +1117,8 @@ class ChildWatchdogProcess
     // _watchdog.getConfig().logInit(rotateStream);
     
     // rotateStream.init();
-    return rotateStream.getStream();
+    //return rotateStream.getStream();
+    return null;
   }
 
   @Override

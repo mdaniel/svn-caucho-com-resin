@@ -31,6 +31,7 @@ package com.caucho.v5.env.log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,18 +40,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.InlineConfig;
-import com.caucho.v5.env.system.RootDirectorySystem;
-import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.io.StreamImpl;
 import com.caucho.v5.management.server.LogMessage;
+import com.caucho.v5.network.NetworkSystemBartender;
+import com.caucho.v5.subsystem.RootDirectorySystem;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.WeakAlarm;
-import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.StreamImpl;
 import com.caucho.v5.vfs.TempStream;
 import com.caucho.v5.vfs.WriteStream;
 
@@ -396,7 +396,7 @@ public class LogSystemImpl extends LogSystem
   public void start()
     throws SQLException
   {
-    NetworkSystem network = NetworkSystem.current();
+    NetworkSystemBartender network = NetworkSystemBartender.current();
     
     if (network != null) {
       int index = network.selfServer().getServerIndex();
@@ -407,9 +407,9 @@ public class LogSystemImpl extends LogSystem
       _serverPrefix = "00|";
     }
     
-    PathImpl dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
+    Path dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
     
-    PathImpl path = dataDirectory.lookup("log");
+    Path path = dataDirectory.resolve("log");
     
     _nameDatabase = new NameDatabase();
     _logDatabase = new LogDatabase(_nameDatabase);

@@ -29,6 +29,7 @@
 
 package com.caucho.v5.http.webapp;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,8 +39,6 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.bytecode.scan.ScanClass;
 import com.caucho.v5.bytecode.scan.ScanListenerByteCode;
-import com.caucho.v5.loader.EnvironmentClassLoader;
-import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.PathImpl;
 
 /**
@@ -66,14 +65,14 @@ class ScanListenerClassHierarchy implements ScanListenerByteCode
   }
 
   @Override
-  public boolean isRootScannable(PathImpl root, String packageRoot)
+  public boolean isRootScannable(Path root, String packageRoot)
   {
     // return _rootPaths.contains(root);
     return true;
   }
 
   @Override
-  public ScanClass scanClass(PathImpl root, 
+  public ScanClass scanClass(Path root, 
                              String packageRoot, 
                              String name,
                              int modifiers)

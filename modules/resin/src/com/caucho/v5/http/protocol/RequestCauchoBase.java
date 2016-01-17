@@ -65,13 +65,13 @@ import com.caucho.v5.http.session.SessionImpl;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.VfsOld;
@@ -123,7 +123,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
 
       int p = cb.lastIndexOf('/');
       if (p >= 0)
-        cb.setLength(p);
+        cb.length(p);
       cb.append('/');
       cb.append(path);
 

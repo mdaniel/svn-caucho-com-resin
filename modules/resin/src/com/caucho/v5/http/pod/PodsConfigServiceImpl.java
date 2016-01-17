@@ -93,7 +93,7 @@ public class PodsConfigServiceImpl
     
     _podService = _bartender.getPodService();
     
-    ServiceManagerAmp manager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp manager = AmpSystem.currentManager();
     
     /*
     _configDir = manager.service("bfs://" + PodBuilderService.CONFIG_DIR)

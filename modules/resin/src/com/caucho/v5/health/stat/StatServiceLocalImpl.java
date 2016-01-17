@@ -6,8 +6,6 @@
 
 package com.caucho.v5.health.stat;
 
-import io.baratine.service.Startup;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,12 +23,10 @@ import javax.management.ObjectName;
 
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthStatus;
 import com.caucho.v5.env.health.HealthSubSystem;
-import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.health.analysis.HealthAnalyzer;
 import com.caucho.v5.health.meter.MeterBase;
 import com.caucho.v5.health.meter.MeterService;
@@ -46,6 +42,7 @@ import com.caucho.v5.management.server.BaselineQueryResult;
 import com.caucho.v5.management.server.DownTime;
 import com.caucho.v5.management.server.StatServiceMXBean;
 import com.caucho.v5.management.server.StatServiceValue;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.profile.MemoryUtil;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -53,6 +50,8 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WeakAlarm;
 import com.caucho.v5.vfs.PathImpl;
+
+import io.baratine.service.Startup;
 
 /**
  * statistics
@@ -216,14 +215,14 @@ public class StatServiceLocalImpl
       return;
     }
     
-    PathImpl dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
+    PathImpl dataDirectory = null;//RootDirectorySystem.getCurrentDataDirectory();
     
     _healthSystem = HealthSubSystem.getCurrent();
     
     _statDatabase = new StatDatabase(dataDirectory);
     _statService = new StatServiceCluster(this);
 
-    NetworkSystem clusterService = NetworkSystem.current();
+    NetworkSystemBartender clusterService = NetworkSystemBartender.current();
     ServerBartender selfServer = clusterService.selfServer();
     _serverIndex = selfServer.getServerIndex();
     

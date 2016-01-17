@@ -609,8 +609,10 @@ public class ChildWatchdogConfig
       if (_rolloverCount != null)
         log.setRolloverCount(_rolloverCount);
       
+      /*
       if (_rolloverPeriod != null)
         log.setRolloverPeriod(_rolloverPeriod);
+        */
       
       if (_rolloverSize != null)
         log.setRolloverSize(_rolloverSize);

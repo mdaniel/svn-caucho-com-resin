@@ -32,8 +32,8 @@ package com.caucho.v5.http.protocol;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.ClientDisconnectException;
 
 abstract public class OutResponseHttpBase extends OutResponseToByte
 {

@@ -177,7 +177,7 @@ public class DomainName {
   {
     int length = seq.length();
     int b = 0;
-    cb.setLength(0);
+    cb.length(0);
 
     for (int i = 0; i < length; i++) {
       char ch = seq.charAt(i);
@@ -228,7 +228,7 @@ public class DomainName {
       i %= (out + 1);
 
       cb.append(' ');
-      char []cBuf = cb.getBuffer();
+      char []cBuf = cb.buffer();
 
       System.arraycopy(cBuf, i, cBuf, i + 1, out - i);
       cBuf[i++] = Character.toLowerCase((char) n);

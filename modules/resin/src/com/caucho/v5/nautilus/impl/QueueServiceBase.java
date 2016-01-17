@@ -33,10 +33,10 @@ import io.baratine.service.Direct;
 
 import java.io.InputStream;
 
+import com.caucho.v5.io.StreamSource;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
 import com.caucho.v5.util.ConcurrentArrayList;
-import com.caucho.v5.vfs.StreamSource;
 
 /**
  * Service for an individual queue, managing its messages.

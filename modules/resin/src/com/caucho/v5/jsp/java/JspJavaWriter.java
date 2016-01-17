@@ -100,7 +100,7 @@ public class JspJavaWriter extends JavaWriter {
     if (_cb.length() > 0) {
       int length = _cb.length();
       _cb.clear();
-      generateText(_cb.getBuffer(), 0, length);
+      generateText(_cb.buffer(), 0, length);
     }
 
     if (filename != null)

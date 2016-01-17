@@ -656,11 +656,13 @@ public class TldManager {
   {
     TldTaglib taglib = new TldTaglib();
 
+    /*
     if (is instanceof ReadStream) {
       PathImpl path = ((ReadStream) is).getPath();
 
       path.setUserPath(path.getURL());
     }
+    */
 
     String schema = null;
 
@@ -731,6 +733,7 @@ public class TldManager {
   {
     boolean isJsfTld = false;
 
+    /*
     if (is instanceof ReadStream) {
       PathImpl path = ((ReadStream) is).getPath();
 
@@ -738,6 +741,7 @@ public class TldManager {
 
       path.setUserPath(path.getURL());
     }
+    */
 
     String schema = null;
 

@@ -36,7 +36,6 @@ import com.caucho.v5.cli.resin.BootConfigParserResin;
 import com.caucho.v5.cli.server.BootConfigParser;
 import com.caucho.v5.env.health.HealthStatusService;
 import com.caucho.v5.env.health.HealthSubSystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.http.container.HttpContainerBuilder;
 import com.caucho.v5.http.container.HttpContainerBuilderResin;
 import com.caucho.v5.nautilus.impl.NautilusSystem;
@@ -45,6 +44,7 @@ import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.resin.Resin;
 import com.caucho.v5.server.resin.ServerBaseConfigResin;
+import com.caucho.v5.subsystem.SystemManager;
 
 /**
  * The Resin class represents the top-level container for Resin.

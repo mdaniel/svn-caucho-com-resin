@@ -14,10 +14,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import com.caucho.v5.io.OutputStreamWithBuffer;
+import com.caucho.v5.io.SendfileOutputStream;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.OutputStreamWithBuffer;
 import com.caucho.v5.vfs.RandomAccessStream;
-import com.caucho.v5.vfs.SendfileOutputStream;
 
 /**
  * Represents the final servlet in a filter chain.

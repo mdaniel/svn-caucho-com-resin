@@ -29,10 +29,10 @@
 
 package com.caucho.v5.mail.smtp;
 
+import com.caucho.v5.io.SocketStream;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.SocketStream;
 import com.caucho.v5.vfs.WriteStream;
 
 import javax.mail.Address;
@@ -92,7 +92,7 @@ public class SmtpTransport extends Transport {
       SocketStream s = new SocketStream(_socket);
     
       _os = new WriteStream(s);
-      _is = new ReadStream(s, _os);
+      _is = new ReadStream(s);
 
       String line = _is.readLine();
       

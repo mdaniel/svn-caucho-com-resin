@@ -8,11 +8,11 @@ package com.caucho.v5.health.stat;
 
 import com.caucho.v5.health.meter.MeterBase;
 import com.caucho.v5.jni.JniFilePathImpl;
+import com.caucho.v5.jni.JniTroubleshoot;
+import com.caucho.v5.jni.JniUtil;
+import com.caucho.v5.jni.JniUtil.JniLoad;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
-import com.caucho.v5.util.JniTroubleshoot;
-import com.caucho.v5.util.JniUtil;
-import com.caucho.v5.util.JniUtil.JniLoad;
 
 /**
  * Statistics gathering attribute.  Each time period, the attribute is polled.

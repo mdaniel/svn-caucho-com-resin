@@ -455,8 +455,8 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
 
   private Cookie parseCookie(CharBuffer rawCookie)
   {
-    char []buf = rawCookie.getBuffer();
-    int j = rawCookie.getOffset();
+    char []buf = rawCookie.buffer();
+    int j = rawCookie.offset();
     int end = j + rawCookie.length();
     Cookie cookie = null;
 

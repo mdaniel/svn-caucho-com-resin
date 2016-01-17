@@ -120,7 +120,7 @@ public final class BrokerServiceImpl
     // _path = path;
     _threadName = toString();
     
-    _rampManager = AmpSystem.getCurrentManager();
+    _rampManager = AmpSystem.currentManager();
     Objects.requireNonNull(_rampManager);
     
     initImpl();

@@ -160,7 +160,7 @@ public class WebAppContainer
     DeployContainerServiceImpl<WebApp, WebAppController> deployServiceImpl
       = new DeployContainerServiceImpl<>(WebAppController.class);
     
-    ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp ampManager = AmpSystem.currentManager();
     
     _appDeploy = ampManager.newService(deployServiceImpl)
                           .start()

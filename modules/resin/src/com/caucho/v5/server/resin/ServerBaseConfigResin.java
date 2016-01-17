@@ -29,6 +29,7 @@
 
 package com.caucho.v5.server.resin;
 
+import java.nio.file.Path;
 import java.security.Provider;
 import java.security.Security;
 import java.util.logging.Logger;
@@ -42,13 +43,13 @@ import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.env.system.RootDirectorySystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentProperties;
 import com.caucho.v5.server.container.ServerBuilderOld;
-import com.caucho.v5.tempfile.TempFileManager;
+import com.caucho.v5.store.temp.TempFileManager;
+import com.caucho.v5.subsystem.RootDirectorySystem;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -224,7 +225,7 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
   public TempFileManager getTempFileManager()
   {
     if (_tempFileManager == null) {
-      PathImpl path = RootDirectorySystem.getCurrent().getDataDirectory();
+      Path path = RootDirectorySystem.getCurrent().getDataDirectory();
 
       _tempFileManager = new TempFileManager(path);
     }

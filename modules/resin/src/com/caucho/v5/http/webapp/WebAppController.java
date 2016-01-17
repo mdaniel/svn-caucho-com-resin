@@ -620,7 +620,7 @@ public class WebAppController
   {
     super.onStartComplete();
     
-    ServiceManagerAmp manager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp manager = AmpSystem.currentManager();
 
     OnWebAppStart onStart
       = manager.service("event:///" + OnWebAppStart.class.getName())

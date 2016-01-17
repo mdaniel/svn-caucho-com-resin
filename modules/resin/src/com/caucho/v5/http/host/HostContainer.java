@@ -122,7 +122,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
     DeployContainerServiceImpl<Host, HostController> deployServiceImpl
       = new DeployContainerServiceImpl<Host,HostController>(HostController.class);
     
-    ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp ampManager = AmpSystem.currentManager();
     
     _hostDeploy = ampManager.newService(deployServiceImpl)
                             .start()

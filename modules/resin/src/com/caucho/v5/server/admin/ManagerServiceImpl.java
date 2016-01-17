@@ -59,15 +59,15 @@ import com.caucho.v5.baratine.Remote;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.action.JmxSetQueryReply;
 import com.caucho.v5.health.stat.StatSystem;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
+import com.caucho.v5.io.StreamSource;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.StreamSource;
 import com.caucho.v5.vfs.VfsOld;
 
 @Remote
@@ -87,7 +87,7 @@ public class ManagerServiceImpl
 
   public ManagerServiceImpl()
   {
-    ServiceManagerAmp manager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp manager = AmpSystem.currentManager();
     
     manager.newService(this).address("/manager").ref();
   }

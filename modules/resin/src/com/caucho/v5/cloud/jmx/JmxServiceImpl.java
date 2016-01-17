@@ -54,7 +54,7 @@ public class JmxServiceImpl
     
     String address = "/jmx";
 
-    ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp rampManager = AmpSystem.currentManager();
     
     rampManager.newService(_actor).address("public:///jmx").ref();
     // log.info(L.l("JMX management service '{0}' started", SERVICE_NAME));

@@ -286,7 +286,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
                                     _url));
 
     int p;
-    if (_query == null || _query.getLength() == 0) {
+    if (_query == null || _query.length() == 0) {
     }
     else if ((p = url.indexOf('?')) > 0) {
       // jsp/1cip

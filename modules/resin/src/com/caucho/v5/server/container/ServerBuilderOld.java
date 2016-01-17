@@ -32,6 +32,7 @@ package com.caucho.v5.server.container;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -50,14 +51,11 @@ import com.caucho.v5.bartender.files.BartenderFileSystem;
 import com.caucho.v5.bartender.heartbeat.RackHeartbeat;
 import com.caucho.v5.bartender.heartbeat.ServerHeartbeatBuilder;
 import com.caucho.v5.bartender.journal.JournalSystem;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.cli.server.BootConfigParser;
 import com.caucho.v5.cloud.security.SecuritySystem;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.deploy.DeploySystem;
-import com.caucho.v5.env.system.RootDirectorySystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.shutdown.ShutdownSystem;
 import com.caucho.v5.health.warning.WarningSystem;
 import com.caucho.v5.http.container.HttpContainerBuilder;
@@ -65,16 +63,21 @@ import com.caucho.v5.http.container.HttpSystem;
 import com.caucho.v5.http.container.ServerConfig;
 import com.caucho.v5.http.pod.PodSystem;
 import com.caucho.v5.inject.InjectManagerAmp;
+import com.caucho.v5.io.ServerSocketBar;
+import com.caucho.v5.io.SocketSystem;
 import com.caucho.v5.javac.WorkDir;
 import com.caucho.v5.kraken.KrakenSystem;
 import com.caucho.v5.loader.EnvLoader;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.profile.HeapDump;
 import com.caucho.v5.server.config.ClusterConfigBoot;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.PodConfigBoot;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
-import com.caucho.v5.tempfile.TempFileSystem;
+import com.caucho.v5.store.temp.TempFileSystem;
+import com.caucho.v5.subsystem.RootDirectorySystem;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.JmxUtil;
 import com.caucho.v5.util.L10N;
@@ -83,9 +86,7 @@ import com.caucho.v5.util.ThreadDump;
 import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.MemoryPath;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.ServerSocketBar;
 import com.caucho.v5.vfs.VfsOld;
-import com.caucho.v5.vfs.net.SocketSystem;
 
 import io.baratine.config.Config;
 
@@ -605,7 +606,7 @@ public class ServerBuilderOld
   {
     _dataDirectory = calculateDataDirectory();
 
-    RootDirectorySystem.createAndAddSystem(getRootDirectory(), _dataDirectory);
+    //RootDirectorySystem.createAndAddSystem(getRootDirectory(), _dataDirectory);
   }
 
   protected PathImpl getDataDirectory()
@@ -668,7 +669,7 @@ public class ServerBuilderOld
     for (int i = 0; i < 10000; i++) {
       PathImpl dir = root.lookup("data-dyn-" + i);
       
-      if (! dir.exists() || RootDirectorySystem.isFree(dir)) {
+      if (! dir.exists()) {// || RootDirectorySystem.isFree(dir)) {
         try {
           dir.mkdirs();
         } catch (Exception e) {
@@ -701,13 +702,13 @@ public class ServerBuilderOld
           continue;
         }
         
-        PathImpl dir = root.lookup(path);
+        Path dir = null;//root.lookup(path);
         
         if (! RootDirectorySystem.isFree(dir)) {
           continue;
         }
         
-        dir.removeAll();
+        //dir.removeAll();
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
       }
@@ -722,9 +723,11 @@ public class ServerBuilderOld
       return;
     }
     
+    /*
     if (! RootDirectorySystem.isFree(path)) {
       return;
     }
+    */
     
     try {
       path.removeAll();
@@ -759,7 +762,7 @@ public class ServerBuilderOld
     
     ServerBartender serverSelf = initBartender();
     
-    NetworkSystem networkSystem = NetworkSystem.createAndAddSystem(systemManager,
+    NetworkSystemBartender networkSystem = NetworkSystemBartender.createAndAddSystem(systemManager,
                                                                    serverSelf,
                                                                    getArgs().config());
     
@@ -1000,7 +1003,7 @@ public class ServerBuilderOld
     
     if (rootService != null && _mbeanServer != null) {
       try {
-        String pathName = rootService.getDataDirectory().lookup("resin.hprof").getNativePath();
+        String pathName = rootService.getDataDirectory().resolve("resin.hprof").toString();
 
         _mbeanServer.invoke(_hotSpotName, "dumpHeap", 
                             new Object[] { pathName, true },
@@ -1017,11 +1020,11 @@ public class ServerBuilderOld
     }
   }
 
-  protected NetworkSystem createNetworkSystem(SystemManager systemManager,
+  protected NetworkSystemBartender createNetworkSystem(SystemManager systemManager,
                                               ServerBartender selfServer,
                                               RootConfigBoot rootConfig)
   {
-    return new NetworkSystem(systemManager,
+    return new NetworkSystemBartender(systemManager,
                                     selfServer,
                                     _args.config());
   }

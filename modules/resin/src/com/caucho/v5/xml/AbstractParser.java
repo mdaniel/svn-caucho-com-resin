@@ -33,7 +33,7 @@ import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.VfsOld;
-import com.caucho.v5.vfs.VfsStream;
+import com.caucho.v5.vfs.VfsStreamOld;
 
 import org.w3c.dom.Document;
 import org.xml.sax.*;
@@ -688,19 +688,21 @@ abstract public class AbstractParser implements XMLReader, Parser
     _systemId = "stream";
     
     if (is instanceof ReadStream) {
+      /*
       PathImpl path = ((ReadStream) is).getPath();
       _systemId = path.getURL();
       _filename = path.getUserPath();
-      
+        
       if (_searchPath != null) {
       }
       else if (path != null)
         _searchPath = path.getParent();
+*/
 
       parseInt((ReadStream) is);
     }
     else {
-      ReadStream rs = VfsStream.openRead(is);
+      ReadStream rs = VfsStreamOld.openRead(is);
       try {
         parseInt(rs);
       } finally {
@@ -732,6 +734,7 @@ abstract public class AbstractParser implements XMLReader, Parser
     throws IOException, SAXException
   {
     if (is instanceof ReadStream) {
+      /*
       PathImpl path = ((ReadStream) is).getPath();
       
       if (_searchPath != null) {
@@ -750,6 +753,7 @@ abstract public class AbstractParser implements XMLReader, Parser
       }
       else
         _filename = systemId;
+        */
 
       _systemId = systemId;
       
@@ -764,7 +768,7 @@ abstract public class AbstractParser implements XMLReader, Parser
         _systemId = systemId;
       }
 
-      ReadStream rs = VfsStream.openRead(is);
+      ReadStream rs = VfsStreamOld.openRead(is);
       try {
         parseInt(rs);
       } finally {

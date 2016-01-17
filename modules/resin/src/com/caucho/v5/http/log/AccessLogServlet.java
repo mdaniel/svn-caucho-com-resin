@@ -31,6 +31,7 @@ package com.caucho.v5.http.log;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,7 +52,6 @@ import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.RequestFacade;
 import com.caucho.v5.http.protocol.RequestHttpBase;
 import com.caucho.v5.http.protocol.RequestServlet;
-import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.protocol.ResponseServlet;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -61,7 +61,6 @@ import com.caucho.v5.util.CharSegment;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.WeakAlarm;
-import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Represents an log of every top-level request to the server.
@@ -128,7 +127,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
    * Sets the log path
    */
   @Override
-  public void setPath(PathImpl path)
+  public void setPath(Path path)
   {
     super.setPath(path);
 
@@ -187,7 +186,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
   @Configurable
   public void setRolloverPeriod(Period period)
   {
-    _logWriter.setRolloverPeriod(period);
+    // _logWriter.setRolloverPeriod(period);
   }
 
   /**
@@ -505,7 +504,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
           for (int j = 0; j < cookiesSize; j++) {
             cookie = cookies.get(j);
             
-            if (cb.getLength() > 0) {
+            if (cb.length() > 0) {
               cb.append(",");
             }
 
@@ -514,7 +513,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
             cb.append(cookie.getValue());
           }
 
-          offset = print(buffer, offset, cb.getBuffer(), 0, cb.getLength());
+          offset = print(buffer, offset, cb.buffer(), 0, cb.length());
         }
         else if (value != null) {
           int p = value.indexOf(';');
@@ -697,13 +696,12 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
    */
   private int print(byte []buffer, int offset, CharSegment cb)
   {
-    char []charBuffer = cb.getBuffer();
-    int cbOffset = cb.getOffset();
-    int length = cb.getLength();
+    char []charBuffer = cb.buffer();
+    int cbOffset = cb.offset();
+    int length = cb.length();
 
     // truncate for hacker attacks
-    if (buffer.length - offset - 256 < length)
-      length =  buffer.length - offset - 256;
+    length =  Math.min(length, buffer.length - offset - 256);
 
     for (int i = length - 1; i >= 0; i--)
       buffer[offset + i] = (byte) charBuffer[cbOffset + i];
@@ -724,7 +722,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
     int length = s.length();
 
     _cb.ensureCapacity(length);
-    char []cBuf = _cb.getBuffer();
+    char []cBuf = _cb.buffer();
 
     s.getChars(0, length, cBuf, 0);
 
@@ -737,7 +735,7 @@ public class AccessLogServlet extends AccessLogBase implements AlarmListener
   private int print(byte []buffer, int offset, String s, int sOff, int sLen)
   {
     _cb.ensureCapacity(sLen);
-    char []cBuf = _cb.getBuffer();
+    char []cBuf = _cb.buffer();
 
     s.getChars(sOff, sLen, cBuf, 0);
 

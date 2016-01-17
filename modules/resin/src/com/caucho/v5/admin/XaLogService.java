@@ -13,7 +13,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.ResinService;
-import com.caucho.v5.env.system.RootDirectorySystem;
+import com.caucho.v5.subsystem.RootDirectorySystem;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.xalog.AbstractXALogManager;
 import com.caucho.v5.transaction.xalog.XALogManager;
@@ -61,7 +61,7 @@ public class XaLogService
     _xaLog = new XALogManager();
 
     try {
-      _xaLog.setPath(rootService.getDataDirectory().lookup(_path));
+      _xaLog.setPath(null); // rootService.getDataDirectory().resolve(_path));
 
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 

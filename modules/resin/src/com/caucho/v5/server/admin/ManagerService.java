@@ -89,7 +89,7 @@ public class ManagerService
 
     ManagerServiceImpl managerActor = _managerActor;
     
-    ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp rampManager = AmpSystem.currentManager();
     
     rampManager.newService(managerActor).address("/manager").ref();
   }

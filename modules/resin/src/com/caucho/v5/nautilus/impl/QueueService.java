@@ -29,9 +29,9 @@
 
 package com.caucho.v5.nautilus.impl;
 
+import com.caucho.v5.io.StreamSource;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
-import com.caucho.v5.vfs.StreamSource;
 
 /**
  * Service for an individual queue, managing its messages.

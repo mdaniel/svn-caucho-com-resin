@@ -309,7 +309,7 @@ public class RequestCauchoWrapper implements RequestCaucho
 
       int p = cb.lastIndexOf('/');
       if (p >= 0)
-        cb.setLength(p);
+        cb.length(p);
       cb.append('/');
       cb.append(path);
 

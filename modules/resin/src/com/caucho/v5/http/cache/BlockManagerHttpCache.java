@@ -7,13 +7,13 @@
 package com.caucho.v5.http.cache;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.v5.amp.AmpSystem;
-import com.caucho.v5.kelp.io.StoreBuilder;
-import com.caucho.v5.kelp.io.StoreReadWrite;
+import com.caucho.v5.store.io.StoreBuilder;
+import com.caucho.v5.store.io.StoreReadWrite;
 import com.caucho.v5.util.ConcurrentArrayList;
-import com.caucho.v5.vfs.PathImpl;
 
 /**
  * A block in the http cache.
@@ -30,11 +30,10 @@ class BlockManagerHttpCache
   
   private AtomicLong _tail = new AtomicLong();
   
-  public BlockManagerHttpCache(PathImpl path)
+  public BlockManagerHttpCache(Path path)
   {
-    
     StoreBuilder storeBuilder = new StoreBuilder(path);
-    storeBuilder.ampManager(AmpSystem.getCurrentManager());
+    storeBuilder.ampManager(AmpSystem.currentManager());
     
     try {
       _store = storeBuilder.build();

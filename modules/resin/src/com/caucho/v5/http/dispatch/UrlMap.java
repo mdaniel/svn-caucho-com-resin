@@ -170,7 +170,7 @@ public class UrlMap<E> {
         isExact = false;
 
         if (pattern.charAt(i - 1) == '/') {
-          cb.setLength(cb.length() - 1);
+          cb.length(cb.length() - 1);
 
           if (prefixLength < 0)
             prefixLength = i - 1;
@@ -248,7 +248,7 @@ public class UrlMap<E> {
         isExact = false;
 
         if (pattern.charAt(i - 1) == '/') {
-          cb.setLength(cb.length() - 1);
+          cb.length(cb.length() - 1);
         }
       }
       else if (ch == '*') {

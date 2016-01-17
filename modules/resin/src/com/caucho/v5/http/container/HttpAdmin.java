@@ -37,8 +37,6 @@ import java.util.HashMap;
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.bartender.network.NetworkSystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.meter.MeterService;
 import com.caucho.v5.health.meter.TotalMeter;
 import com.caucho.v5.http.dispatch.InvocationManager;
@@ -52,7 +50,9 @@ import com.caucho.v5.management.server.PortMXBean;
 import com.caucho.v5.management.server.ServerMXBean;
 import com.caucho.v5.management.server.TcpConnectionInfo;
 import com.caucho.v5.management.server.ThreadPoolMXBean;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PortTcp;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.CurrentTime;
 
 public class HttpAdmin extends AbstractEmitterObject
@@ -376,7 +376,7 @@ public class HttpAdmin extends AbstractEmitterObject
 
   /**
    * The total number of connections that have terminated with
-   * {@link com.caucho.v5.vfs.ClientDisconnectException}.
+   * {@link com.caucho.v5.io.ClientDisconnectException}.
    */
   @Override
   public long getClientDisconnectCountTotal()
@@ -549,14 +549,14 @@ public class HttpAdmin extends AbstractEmitterObject
   
   private Collection<PortTcp> getNetworkListeners()
   {
-    NetworkSystem listenService
-      = _httpContainer.getSystemManager().getSystem(NetworkSystem.class);
+    NetworkSystemBartender listenService
+      = _httpContainer.getSystemManager().getSystem(NetworkSystemBartender.class);
   
     return listenService.getPorts();
   }
   
-  private NetworkSystem getListenService()
+  private NetworkSystemBartender getListenService()
   {
-    return _httpContainer.getSystemManager().getSystem(NetworkSystem.class);
+    return _httpContainer.getSystemManager().getSystem(NetworkSystemBartender.class);
   }
 }

@@ -31,6 +31,7 @@ import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.webapp.FilterChainCaucho;
 import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.CacheListener;
 import com.caucho.v5.util.CharBuffer;
@@ -40,7 +41,6 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.RandomUtil;
-import com.caucho.v5.vfs.ClientDisconnectException;
 
 /**
  * Represents the proxy cache in a filter chain.
@@ -1443,9 +1443,9 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
 
         if (value != null)
           crc = Crc64.generate(crc,
-                               value.getBuffer(),
-                               value.getOffset(),
-                               value.getLength());
+                               value.buffer(),
+                               value.offset(),
+                               value.length());
       }
     }
     else {

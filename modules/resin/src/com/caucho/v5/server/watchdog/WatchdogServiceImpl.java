@@ -371,7 +371,7 @@ class WatchdogServiceImpl
     ChildWatchdogService child = _childMap.get(port);
     
     if (child == null) {
-      ServiceManagerAmp serviceManager = AmpSystem.getCurrentManager();
+      ServiceManagerAmp serviceManager = AmpSystem.currentManager();
       
       ChildWatchdogServiceImpl serviceImpl
         = new ChildWatchdogServiceImpl(_manager, port);

@@ -58,11 +58,11 @@ public class StatServiceCluster
   {
     _statService = statService;
     
-    ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp rampManager = AmpSystem.currentManager();
     
     rampManager.newService(this).address("public:///stat").ref();
     
-    ServiceManagerAmp champManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp champManager = AmpSystem.currentManager();
     
     /* XXX:
     _triadAll = champManager.createTriadAllRemoteProxy("/stat", ClusterStatServiceApi.class);

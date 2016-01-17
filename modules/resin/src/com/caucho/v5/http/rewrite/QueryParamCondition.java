@@ -39,8 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.HashMapImpl;
-import com.caucho.v5.vfs.Encoding;
 
 /**
 * A rewrite condition that passes if the value of a query parameter exists

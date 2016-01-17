@@ -156,18 +156,24 @@ public class HttpStress
     String path = uri.getPath();
 
     try {
+      /*
       if (_socketPath != null) {
         _keepaliveSystem.connectUnix(cxt, _socketPath);
       }
       else {
         _keepaliveSystem.connect(cxt, addr);
       }
+      */
+      _keepaliveSystem.connect(cxt, addr);
 
+      if (true) throw new UnsupportedOperationException();
+      /*
       writeRequest(cxt.getWriteStream(), host, port, path);
 
       ReadStream is = cxt.getReadStream();
 
       int status = parseResult(is);
+      */
     } finally {
       cxt.close();
     }

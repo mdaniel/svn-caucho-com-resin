@@ -107,7 +107,7 @@ public class PodsDeployServiceImpl
   @OnInit
   public void init()
   {
-    ServiceManagerAmp manager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp manager = AmpSystem.currentManager();
     
     manager.service(PodOnUpdate.ADDRESS)
            .subscribe((PodOnUpdate) pod->updatePod(pod));

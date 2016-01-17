@@ -60,6 +60,8 @@ import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseServlet;
 import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.io.ClientDisconnectException;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.javac.LineMapException;
 import com.caucho.v5.javac.ScriptStackTrace;
@@ -69,8 +71,6 @@ import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
 import com.caucho.v5.util.Version;
-import com.caucho.v5.vfs.ClientDisconnectException;
-import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.VfsOld;
 
 /**

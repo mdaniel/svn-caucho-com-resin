@@ -91,7 +91,7 @@ public class WebAppRouter
     _httpContainer = httpContainer;
     _host = host;
     
-    ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp ampManager = AmpSystem.currentManager();
     
     WebAppRouterServiceImpl routerServiceImpl = new WebAppRouterServiceImpl(this);
 

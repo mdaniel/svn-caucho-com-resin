@@ -25,10 +25,10 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.action.HealthActionBase;
 import com.caucho.v5.health.action.JmxSetQueryReply;
 import com.caucho.v5.health.event.HealthEvent;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 
 /**

@@ -55,12 +55,12 @@ import com.caucho.v5.http.protocol.ServletInputStreamImpl;
 import com.caucho.v5.http.session.SessionImpl;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.i18n.CharacterEncoding;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.vfs.BufferedReaderAdapter;
-import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.ReadStream;
 
 /**
@@ -385,7 +385,7 @@ class RequestDispatchBase extends RequestAdapter
 
     int p = cb.lastIndexOf('/');
     if (p >= 0)
-      cb.setLength(p);
+      cb.length(p);
     cb.append('/');
 
     return cb.close();

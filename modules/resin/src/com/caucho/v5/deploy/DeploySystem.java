@@ -36,8 +36,8 @@ import java.util.logging.Logger;
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.deploy2.DeployHandle2;
-import com.caucho.v5.env.system.SubSystemBase;
-import com.caucho.v5.env.system.SystemManager;
+import com.caucho.v5.subsystem.SubSystemBase;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 
 
@@ -87,7 +87,7 @@ public class DeploySystem extends SubSystemBase
     DeployHandle<I> handle = (DeployHandle) _handleMap.get(id);
     
     if (handle == null) {
-      ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
+      ServiceManagerAmp ampManager = AmpSystem.currentManager();
       Objects.requireNonNull(ampManager);
       
       DeployControllerServiceImpl<I> serviceImpl
@@ -112,7 +112,7 @@ public class DeploySystem extends SubSystemBase
     DeployHandle<I> handle = (DeployHandle) _handleMap.get(id);
     
     if (handle == null) {
-      ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
+      ServiceManagerAmp ampManager = AmpSystem.currentManager();
       Objects.requireNonNull(ampManager);
       
       DeployControllerServiceImpl<I> serviceImpl

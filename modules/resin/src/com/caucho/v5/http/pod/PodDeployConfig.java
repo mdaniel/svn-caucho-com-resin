@@ -29,13 +29,14 @@
 
 package com.caucho.v5.http.pod;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
 import com.caucho.v5.bartender.pod.PodConfig;
 import com.caucho.v5.config.ConfigArg;
-import com.caucho.v5.env.system.RootDirectorySystem;
+import com.caucho.v5.subsystem.RootDirectorySystem;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -62,11 +63,11 @@ public class PodDeployConfig
   {
     _podContainer = podContainer;
     
-    PathImpl dataRoot = RootDirectorySystem.getCurrentDataDirectory();
-    PathImpl expandPath = dataRoot.lookup("pods");
+    Path dataRoot = RootDirectorySystem.getCurrentDataDirectory();
+    Path expandPath = dataRoot.resolve("pods");
     
     if (_podContainer.getPodExpandPath() == null) {
-      _podContainer.setPodExpandPath(expandPath);
+      // XXX: _podContainer.setPodExpandPath(expandPath);
     }
     
     //_podDefaultList.addAll(podContainer.getPodDefaultList());

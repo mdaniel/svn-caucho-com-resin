@@ -80,7 +80,7 @@ public class XmlReader {
   {
     _parser = parser;
     _is = is;
-    _filename = is.getUserPath();
+    //_filename = is.getUserPath();
     _line = 1;
   }
 
@@ -208,7 +208,7 @@ public class XmlReader {
   public int parseName(CharBuffer name, int ch)
     throws IOException, SAXException
   {
-    char []buffer = name.getBuffer();
+    char []buffer = name.buffer();
     int capacity = buffer.length;
     int offset = 0;
 
@@ -218,17 +218,17 @@ public class XmlReader {
          ch > 0 && ch < 128 && isAsciiNameChar[ch] || XmlChar.isNameChar(ch);
          ch = read()) {
       if (offset >= capacity) {
-        name.setLength(offset);
+        name.length(offset);
         name.append((char) ch);
         offset++;
-        buffer = name.getBuffer();
+        buffer = name.buffer();
         capacity = buffer.length;
       }
       else
         buffer[offset++] = (char) ch;
     }
 
-    name.setLength(offset);
+    name.length(offset);
 
     return ch;
   }

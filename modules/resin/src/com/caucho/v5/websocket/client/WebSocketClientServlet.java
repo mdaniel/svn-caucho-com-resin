@@ -45,12 +45,12 @@ import javax.websocket.Extension;
 import javax.websocket.Session;
 
 import com.caucho.v5.amp.thread.ThreadPool;
+import com.caucho.v5.io.SocketBar;
+import com.caucho.v5.io.SocketSystem;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
-import com.caucho.v5.vfs.net.SocketSystem;
 import com.caucho.v5.websocket.common.ConnectionWebSocketBase;
 import com.caucho.v5.websocket.common.EndpointConnection;
 import com.caucho.v5.websocket.common.EndpointConnectionQSocket;

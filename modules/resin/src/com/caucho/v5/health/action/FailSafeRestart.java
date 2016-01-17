@@ -14,9 +14,9 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.env.health.HealthActionResult;
 import com.caucho.v5.env.health.HealthActionResult.ResultStatus;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.event.HealthEvent;
 import com.caucho.v5.health.shutdown.ShutdownSystem;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 
 /**

@@ -42,10 +42,10 @@ import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.http.protocol.RequestCauchoWrapper;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.ResponseServlet;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
 
 public class RequestAsync extends RequestCauchoWrapper {
   private static final IntMap _asyncAttributeMap = new IntMap();

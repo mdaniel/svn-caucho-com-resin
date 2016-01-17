@@ -29,9 +29,9 @@
 
 package com.caucho.v5.http.container;
 
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.env.health.HealthSubSystem;
 import com.caucho.v5.health.check.MemoryTenuredHealthCheck;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PollTcpManagerBase;
 
 public class HttpContainerAdmin extends HttpAdmin
@@ -65,7 +65,7 @@ public class HttpContainerAdmin extends HttpAdmin
   public boolean isSelectManagerEnabled()
   {
     PollTcpManagerBase selectManager 
-    = NetworkSystem.getCurrentSelectManager();
+    = NetworkSystemBartender.currentPollManager();
   
   return selectManager != null;
   }
@@ -78,7 +78,7 @@ public class HttpContainerAdmin extends HttpAdmin
   public int getSelectKeepaliveCount()
   {
     PollTcpManagerBase selectManager 
-      = NetworkSystem.getCurrentSelectManager();
+      = NetworkSystemBartender.currentPollManager();
 
     if (selectManager != null)
       return selectManager.getSelectCount();

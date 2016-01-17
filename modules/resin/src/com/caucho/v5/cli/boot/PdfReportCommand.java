@@ -38,11 +38,11 @@ import com.caucho.v5.cli.baratine.ArgsCli;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.io.IoUtil;
+import com.caucho.v5.io.StreamSource;
 import com.caucho.v5.server.admin.ManagerClientApi;
 import com.caucho.v5.server.admin.PdfReportQueryReply;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.StreamSource;
 
 public class PdfReportCommand extends ManagementCommandBase
 {

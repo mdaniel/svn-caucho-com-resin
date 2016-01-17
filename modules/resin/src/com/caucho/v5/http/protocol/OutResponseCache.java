@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.http.cache.EntryHttpCacheBase;
 import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 import com.caucho.v5.http.container.HttpContainerServlet;
+import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.ClientDisconnectException;
 
 abstract public class OutResponseCache extends OutResponseToByte
 {

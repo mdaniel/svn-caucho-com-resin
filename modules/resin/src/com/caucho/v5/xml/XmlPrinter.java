@@ -506,10 +506,13 @@ public class XmlPrinter implements XMLWriter {
 
   public PathImpl getPath()
   {
+    /*
     if (_os instanceof WriteStream)
       return ((WriteStream) _os).getPath();
     else
       return null;
+      */
+    return null;
   }
 
   /**

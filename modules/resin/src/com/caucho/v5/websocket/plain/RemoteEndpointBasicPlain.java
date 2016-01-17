@@ -41,11 +41,11 @@ import javax.websocket.CloseReason;
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 
+import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.io.IoUtil;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
-import com.caucho.v5.vfs.ClientDisconnectException;
 import com.caucho.v5.vfs.WriteStream;
 import com.caucho.v5.websocket.common.RemoteBasicWebSocketBase;
 import com.caucho.v5.websocket.io.WebSocketConstants;

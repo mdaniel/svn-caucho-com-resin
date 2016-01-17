@@ -31,6 +31,7 @@ package com.caucho.v5.http.webapp;
 
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -455,13 +456,13 @@ public class WebAppBuilderScan
     }
 
     @Override
-    public boolean isRootScannable(PathImpl root, String packageRoot)
+    public boolean isRootScannable(Path root, String packageRoot)
     {
       return true;
     }
 
     @Override
-    public ScanClass scanClass(PathImpl root, String packageRoot,
+    public ScanClass scanClass(Path root, String packageRoot,
                                String name, int modifiers)
     {
       if (Modifier.isPublic(modifiers))
@@ -488,14 +489,14 @@ public class WebAppBuilderScan
 
     @Override
     public void classMatchEvent(ClassLoader loader,
-                                PathImpl root,
+                                Path root,
                                 String className)
     {
       _pendingClasses.add(className);
     }
 
     @Override
-    public void completePath(PathImpl root)
+    public void completePath(Path root)
     {
     }
   }

@@ -52,9 +52,9 @@ import javax.servlet.jsp.tagext.ValidationMessage;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.types.Signature;
 import com.caucho.v5.el.Expr;
-import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.http.webapp.WebApp;
 import com.caucho.v5.http.webapp.WebAppResin;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.javac.CompileClassNotFound;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.javac.LineMapWriter;
@@ -72,12 +72,12 @@ import com.caucho.v5.jsp.cfg.TldFunction;
 import com.caucho.v5.jsp.el.JspELParser;
 import com.caucho.v5.loader.DynamicClassLoader;
 import com.caucho.v5.make.ClassDependency;
+import com.caucho.v5.subsystem.RootDirectorySystem;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.Version;
 import com.caucho.v5.vfs.Depend;
-import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.MergePath;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;
@@ -2162,7 +2162,7 @@ public class JavaJspGenerator extends JspGenerator {
                             String path, PathImpl appDir, MergePath classPath)
     throws IOException
   {
-    String resinHome = RootDirectorySystem.getCurrent().getRootDirectory().getPath();
+    String resinHome = RootDirectorySystem.getCurrent().getRootDirectory().toString();
 
     String prefix = getAppDir().getFullPath();
 

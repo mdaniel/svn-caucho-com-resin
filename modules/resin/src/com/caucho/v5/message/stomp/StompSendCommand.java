@@ -31,11 +31,11 @@ package com.caucho.v5.message.stomp;
 
 import java.io.IOException;
 
+import com.caucho.v5.io.ReadBuffer;
 import com.caucho.v5.io.TempBuffer;
+import com.caucho.v5.io.WriteBuffer;
 import com.caucho.v5.nautilus.broker.SenderBroker;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
-import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache
@@ -43,7 +43,7 @@ import com.caucho.v5.vfs.WriteStream;
 public class StompSendCommand extends StompCommand
 {
   @Override
-  boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
+  boolean doCommand(StompConnection conn, ReadBuffer is, WriteBuffer os)
     throws IOException
   {
     SenderBroker dest = conn.getDestination();

@@ -37,10 +37,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.RequestServlet;
+import com.caucho.v5.io.ClientDisconnectException;
+import com.caucho.v5.io.SocketBar;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CurrentTime;
-import com.caucho.v5.vfs.ClientDisconnectException;
-import com.caucho.v5.vfs.SocketBar;
 
 public class FilterChainStatistics implements FilterChain
 {

@@ -37,12 +37,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.caucho.v5.io.OutputStreamWithBuffer;
 import com.caucho.v5.io.TempBuffer;
-import com.caucho.v5.vfs.Encoding;
-import com.caucho.v5.vfs.OutputStreamWithBuffer;
+import com.caucho.v5.io.i18n.Encoding;
+import com.caucho.v5.io.i18n.EncodingWriter;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.TempCharBuffer;
-import com.caucho.v5.vfs.i18n.EncodingWriter;
 
 /**
  * API for handling the output stream.

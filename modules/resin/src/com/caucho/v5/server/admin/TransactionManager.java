@@ -31,8 +31,8 @@ package com.caucho.v5.server.admin;
 import java.util.logging.Logger;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.env.system.RootDirectorySystem;
 import com.caucho.v5.server.resin.Resin;
+import com.caucho.v5.subsystem.RootDirectorySystem;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.VfsOld;
@@ -54,14 +54,14 @@ public class TransactionManager
   public TransactionManager()
   {
     _resin = null;
-    _path = RootDirectorySystem.getCurrentDataDirectory();
+    _path = null;//RootDirectorySystem.getCurrentDataDirectory();
   }
 
   @Deprecated
   public TransactionManager(Resin resin)
   {
     _resin = resin;
-    _path = RootDirectorySystem.getCurrentDataDirectory();
+    _path = null;//RootDirectorySystem.getCurrentDataDirectory();
   }
 
   @Deprecated

@@ -38,6 +38,7 @@ import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.http.container.ProtocolPort;
 import com.caucho.v5.http.protocol.ProtocolHttp;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.network.port.PortTcpBuilder;
 import com.caucho.v5.server.config.ServerConfigBoot;
@@ -48,7 +49,7 @@ public class ServerNetworkConfig {
   private static final Logger log
     = Logger.getLogger(ServerNetworkConfig.class.getName());
   
-  private NetworkSystem _networkSystem;
+  private NetworkSystemBartender _networkSystem;
   
   private ContainerProgram _portDefaults = new ContainerProgram();
   private boolean _isKeepaliveSelectEnable = true;
@@ -60,7 +61,7 @@ public class ServerNetworkConfig {
   /**
    * Creates a new servlet server.
    */
-  ServerNetworkConfig(NetworkSystem listenService,
+  ServerNetworkConfig(NetworkSystemBartender listenService,
                       ServerConfigBoot serverConfig)
   {
     _networkSystem = listenService;
@@ -69,7 +70,7 @@ public class ServerNetworkConfig {
     _env = Configs.config().get();
   }
   
-  private NetworkSystem getNetworkSystem()
+  private NetworkSystemBartender getNetworkSystem()
   {
     return _networkSystem;
   }
@@ -117,7 +118,7 @@ public class ServerNetworkConfig {
   
   public void setAllowForeignIp(boolean isAllow)
   {
-    getNetworkSystem().setAllowForeignIp(isAllow);
+    // XXX: getNetworkSystem().setAllowForeignIp(isAllow);
   }
   
   @Configurable
@@ -156,7 +157,7 @@ public class ServerNetworkConfig {
   
   public void addHttp(PortTcp listener)
   {
-    if (listener.port() <= 0 && listener.getSocketPath() == null) {
+    if (listener.port() <= 0) { // && listener.getSocketPath() == null) {
       log.fine(listener + " skipping because port is 0.");
       return;
     }
@@ -166,7 +167,7 @@ public class ServerNetworkConfig {
   
   public void addListen(PortTcp listener)
   {
-    if (listener.port() <= 0 && listener.getSocketPath() == null) {
+    if (listener.port() <= 0) { // && listener.getSocketPath() == null) {
       log.fine(listener + " skipping because port is 0.");
       return;
     }

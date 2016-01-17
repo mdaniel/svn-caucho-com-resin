@@ -28,10 +28,10 @@
 
 package com.caucho.v5.vfs;
 
+import com.caucho.v5.io.StreamImpl;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.StringCharCursor;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.StreamImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;

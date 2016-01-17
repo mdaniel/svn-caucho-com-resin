@@ -205,14 +205,18 @@ public class XmlParser extends AbstractParser {
 
     if (_filename == null && _systemId != null)
       _filename = _systemId;
+    /*
     else if (_filename == null)
       _filename = _is.getUserPath();
+      */
 
+    /*
     if (_systemId == null) {
       _systemId = _is.getPath().getURL();
       if ("null:".equals(_systemId) || "string:".equals(_systemId))
         _systemId = "stream";
     }
+    */
 
     /* xsl/0401
     if (_isNamespaceAware)
@@ -232,7 +236,7 @@ public class XmlParser extends AbstractParser {
     if (_builder != null) {
       if (! "string:".equals(_systemId) && ! "stream".equals(_systemId))
         _builder.setSystemId(_systemId);
-      _builder.setFilename(_is.getPath().getURL());
+      //_builder.setFilename(_is.getPath().getURL());
     }
 
     if (_contentHandler == null)
@@ -273,10 +277,12 @@ public class XmlParser extends AbstractParser {
     QDocument owner = _owner;
     _owner = null;
 
+    /*
     // ioc/23l0
     PathImpl path = is.getPath();
     is.close();
     owner.addDepend(path);
+    */
       
     return owner;
   }
@@ -1231,6 +1237,7 @@ public class XmlParser extends AbstractParser {
     _systemId = systemId;
 
     PathImpl oldSearchPath = _searchPath;
+    /*
     PathImpl path = is.getPath();
     if (path != null) {
       _owner.addDepend(path);
@@ -1240,7 +1247,8 @@ public class XmlParser extends AbstractParser {
         _reader.setSearchPath(oldSearchPath);
       }
     }
-
+*/
+    
     _is = is;
     _line = 1;
     
@@ -1441,9 +1449,9 @@ public class XmlParser extends AbstractParser {
       addText((char) ch);
 
       if (_text.endsWith(tail)) {
-        _text.setLength(_text.length() - tail.length());
+        _text.length(_text.length() - tail.length());
         if (_text.length() > 1 && _text.charAt(_text.length() - 1) == '\n')
-          _text.setLength(_text.length() - 1);
+          _text.length(_text.length() - 1);
         appendText();
         return;
       }
@@ -1765,7 +1773,7 @@ public class XmlParser extends AbstractParser {
       _isIgnorableWhitespace = true;
     }
     else if (_lexicalHandler != null) {
-      _lexicalHandler.comment(_buf.getBuffer(), 0, _buf.getLength());
+      _lexicalHandler.comment(_buf.buffer(), 0, _buf.length());
       _isIgnorableWhitespace = true;
     }
   }
@@ -2858,6 +2866,7 @@ public class XmlParser extends AbstractParser {
       throw new FileNotFoundException(systemId);
     _is = VfsOld.openRead(stream);
     PathImpl oldSearchPath = _searchPath;
+    /*
     PathImpl path = _is.getPath();
     if (path != null) {
       _owner.addDepend(path);
@@ -2867,6 +2876,7 @@ public class XmlParser extends AbstractParser {
         _reader.setSearchPath(oldSearchPath);
       }
     }
+    */
 
     _filename = systemId;
     /*

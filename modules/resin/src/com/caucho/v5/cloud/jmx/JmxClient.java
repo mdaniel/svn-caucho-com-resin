@@ -45,7 +45,7 @@ public class JmxClient
                                              serverId));
     _address = "bartender://" + server.getId() + "/jmx";
 
-    ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp rampManager = AmpSystem.currentManager();
     //_conn = broker.getConnection("admin.resin", cookie, "jmx");
     _client = rampManager.service(_address).as(JmxActorApi.class);
   }

@@ -38,11 +38,9 @@ import java.util.regex.Pattern;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.bartender.ClusterBartender;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.deploy.DeployInstanceEnvironment;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.FilterChainException;
 import com.caucho.v5.http.dispatch.InvocationServlet;
@@ -62,7 +60,9 @@ import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.HostMXBean;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PortTcp;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -312,7 +312,7 @@ public class Host
         return "http://localhost";
       
       SystemManager resinSystem = server.getSystemManager();
-      NetworkSystem networkSystem = NetworkSystem.current();
+      NetworkSystemBartender networkSystem = NetworkSystemBartender.current();
 
       for (PortTcp port : networkSystem.getPorts()) {
         if ("http".equals(port.protocolName())) {

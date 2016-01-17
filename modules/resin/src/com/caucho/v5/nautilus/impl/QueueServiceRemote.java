@@ -42,11 +42,11 @@ import com.caucho.v5.amp.ServiceManagerAmp;
 import com.caucho.v5.bartender.BartenderSystem;
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.bartender.pod.PodBartender;
+import com.caucho.v5.io.StreamSource;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
 import com.caucho.v5.util.ConcurrentArrayList;
 import com.caucho.v5.util.CurrentTime;
-import com.caucho.v5.vfs.StreamSource;
 import com.caucho.v5.vfs.StreamSourceInputStream;
 
 /**
@@ -223,7 +223,7 @@ class QueueServiceRemote extends QueueServiceBase
         throw new ServiceExceptionUnavailable(getClass().getSimpleName());
       }
       
-      ServiceManagerAmp rampManager = AmpSystem.getCurrentManager();
+      ServiceManagerAmp rampManager = AmpSystem.currentManager();
       
       String url = "champ://" + server.getId() + NautilusService.PATH;
       

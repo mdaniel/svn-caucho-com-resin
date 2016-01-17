@@ -275,7 +275,7 @@ public class FilterMapping extends FilterConfigImpl {
         isExact = false;
 
         if (pattern.charAt(i - 1) == '/') {
-          cb.setLength(cb.length() - 1);
+          cb.length(cb.length() - 1);
 
           if (prefixLength < 0)
             prefixLength = i - 1;

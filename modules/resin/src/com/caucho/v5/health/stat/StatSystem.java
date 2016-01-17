@@ -36,11 +36,8 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.v5.amp.AmpSystem;
 import com.caucho.v5.amp.ServiceManagerAmp;
-import com.caucho.v5.bartender.network.NetworkSystem;
 import com.caucho.v5.config.InlineConfig;
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.env.system.SubSystemBase;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.analysis.AnomalyAnalyzer;
 import com.caucho.v5.health.meter.Meter;
 import com.caucho.v5.health.meter.MeterBase;
@@ -49,13 +46,16 @@ import com.caucho.v5.jmx.server.MeterGraphPageInfo;
 import com.caucho.v5.management.server.BaselineQueryResult;
 import com.caucho.v5.management.server.DownTime;
 import com.caucho.v5.management.server.StatServiceValue;
+import com.caucho.v5.network.NetworkSystemBartender;
+import com.caucho.v5.subsystem.SubSystemBase;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.Crc64;
 
 @InlineConfig
 public class StatSystem extends SubSystemBase
 {
   public static final int START_PRIORITY = 
-      NetworkSystem.START_PRIORITY_CLUSTER_SERVICE;
+      NetworkSystemBartender.START_PRIORITY_CLUSTER_SERVICE;
 
   private StatServiceLocal _statService;
   
@@ -63,7 +63,7 @@ public class StatSystem extends SubSystemBase
   {
     StatServiceLocalImpl statServiceImpl = new StatServiceLocalImpl();
     
-    ServiceManagerAmp ampManager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp ampManager = AmpSystem.currentManager();
     
     _statService = ampManager.newService(statServiceImpl).as(StatServiceLocal.class);
   }

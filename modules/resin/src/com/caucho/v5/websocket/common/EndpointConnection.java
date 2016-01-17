@@ -31,7 +31,7 @@ package com.caucho.v5.websocket.common;
 
 import java.io.IOException;
 
-import com.caucho.v5.vfs.SocketBar;
+import com.caucho.v5.io.SocketBar;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.WriteStream;
 

@@ -8,11 +8,11 @@ package com.caucho.v5.server.util;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.jni.JniCauchoSystem;
+import com.caucho.v5.jni.JniTroubleshoot;
+import com.caucho.v5.jni.JniUtil;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
-import com.caucho.v5.util.JniTroubleshoot;
-import com.caucho.v5.util.JniUtil;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

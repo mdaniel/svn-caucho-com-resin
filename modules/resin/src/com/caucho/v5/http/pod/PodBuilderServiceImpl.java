@@ -78,7 +78,7 @@ public class PodBuilderServiceImpl
     
     _serverSelf = BartenderSystem.getCurrentSelfServer();
     
-    ServiceManagerAmp manager = AmpSystem.getCurrentManager();
+    ServiceManagerAmp manager = AmpSystem.currentManager();
     
     _podsClusterService = manager.service("pod://cluster_root" + PodsManagerService.ADDRESS)
                                  .as(PodsManagerService.class); 

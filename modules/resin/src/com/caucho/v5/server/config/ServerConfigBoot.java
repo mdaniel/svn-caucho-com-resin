@@ -35,9 +35,9 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.Period;
+import com.caucho.v5.io.ServerSocketBar;
 import com.caucho.v5.network.port.PortTcp;
 import com.caucho.v5.vfs.PathImpl;
-import com.caucho.v5.vfs.ServerSocketBar;
 
 /**
  * Configuration for a server instance.

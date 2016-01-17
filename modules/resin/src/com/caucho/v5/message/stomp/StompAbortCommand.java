@@ -31,9 +31,9 @@ package com.caucho.v5.message.stomp;
 
 import java.io.IOException;
 
+import com.caucho.v5.io.ReadBuffer;
+import com.caucho.v5.io.WriteBuffer;
 import com.caucho.v5.nautilus.broker.SenderSettleHandler;
-import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.WriteStream;
 
 /**
  * begins a transaction.
@@ -41,7 +41,7 @@ import com.caucho.v5.vfs.WriteStream;
 public class StompAbortCommand extends StompCommand
 {
   @Override
-  boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
+  boolean doCommand(StompConnection conn, ReadBuffer is, WriteBuffer os)
     throws IOException
   {
     String transaction = conn.getTransaction();

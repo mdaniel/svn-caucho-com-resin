@@ -499,14 +499,16 @@ public class WebDavServlet extends GenericServlet {
       return;
     }
     
+    /*
     WriteStream ws = VfsOld.openWrite(os);
-    PathImpl path =ws.getPath();
+    PathImpl path = ws.getPath();
     try {
       InputStream is = req.getInputStream();
       ws.writeStream(is);
     } finally {
       ws.close();
     }
+    */
   }
 
   /**

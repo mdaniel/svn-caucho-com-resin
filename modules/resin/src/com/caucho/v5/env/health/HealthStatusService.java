@@ -34,6 +34,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.*;
 
 import com.caucho.v5.env.system.*;
+import com.caucho.v5.subsystem.SubSystemBase;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 
 /**

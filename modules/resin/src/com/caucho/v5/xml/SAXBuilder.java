@@ -296,7 +296,7 @@ public class SAXBuilder implements XMLWriter, Locator {
     if (_text.length() == 0)
       return;
 
-    _contentHandler.characters(_text.getBuffer(), 0, _text.getLength());
+    _contentHandler.characters(_text.buffer(), 0, _text.length());
     
     _text.clear();
   }

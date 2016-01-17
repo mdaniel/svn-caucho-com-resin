@@ -30,9 +30,9 @@
 package com.caucho.v5.server.resin;
 
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.server.container.ServerBuilderOld;
+import com.caucho.v5.subsystem.SystemManager;
 
 /**
  * The Resin class represents the top-level container for Resin.

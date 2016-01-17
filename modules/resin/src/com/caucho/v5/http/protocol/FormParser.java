@@ -41,12 +41,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.http.protocol.BadRequestException;
+import com.caucho.v5.io.i18n.ByteToChar;
 import com.caucho.v5.util.CharCursor;
 import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.StringCharCursor;
-import com.caucho.v5.vfs.ByteToChar;
 
 /**
  * Form handling.

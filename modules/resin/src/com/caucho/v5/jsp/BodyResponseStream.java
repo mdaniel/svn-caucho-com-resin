@@ -38,8 +38,8 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.http.protocol.OutResponseBase2;
 import com.caucho.v5.io.TempBuffer;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
 
 public class BodyResponseStream extends OutResponseBase2
 {

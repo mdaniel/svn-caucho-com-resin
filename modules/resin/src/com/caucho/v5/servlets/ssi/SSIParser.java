@@ -206,7 +206,7 @@ public class SSIParser {
     else if ((ch = is.read()) != '>') {
     }
 
-    Statement statement = _factory.createStatement(cmd, attr, is.getPath());
+    Statement statement = null;//_factory.createStatement(cmd, attr, is.getPath());
 
     if (statement == null)
       statement = new ErrorStatement("['" + cmd + "' is an unknown command.]");

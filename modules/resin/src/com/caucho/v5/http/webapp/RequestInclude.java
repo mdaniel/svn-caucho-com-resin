@@ -45,10 +45,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.http.protocol.RequestCauchoDispatch;
+import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.IntMap;
 import com.caucho.v5.util.ModulePrivate;
-import com.caucho.v5.vfs.Encoding;
 
 @ModulePrivate
 public class RequestInclude extends RequestCauchoDispatch {

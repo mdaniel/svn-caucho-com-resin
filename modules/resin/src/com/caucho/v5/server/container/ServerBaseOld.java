@@ -38,8 +38,6 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.bartender.ServerBartender;
-import com.caucho.v5.bartender.network.NetworkSystem;
-import com.caucho.v5.env.system.SystemManager;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpSystem;
@@ -47,15 +45,17 @@ import com.caucho.v5.http.pod.PodContainer;
 import com.caucho.v5.http.pod.PodSystem;
 import com.caucho.v5.jni.JniFilePathImpl;
 import com.caucho.v5.jni.JniServerSocketImpl;
+import com.caucho.v5.jni.OpenSSLFactory;
 import com.caucho.v5.jni.SelectManagerJni;
 import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.lifecycle.LifecycleState;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
+import com.caucho.v5.network.NetworkSystemBartender;
 import com.caucho.v5.network.port.PollTcpManagerBase;
+import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.OpenSSLFactory;
 import com.caucho.v5.vfs.PathImpl;
 
 /**
@@ -411,7 +411,7 @@ public class ServerBaseOld
       log.info("  JNI file: disabled for unknown reasons");
       */
     
-    PollTcpManagerBase selectManager = NetworkSystem.getCurrentSelectManager();
+    PollTcpManagerBase selectManager = NetworkSystemBartender.currentPollManager();
 
     if (selectManager != null) {
       if (sb.length() > 0)

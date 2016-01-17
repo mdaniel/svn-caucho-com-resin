@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.v5.io.ReadBuffer;
+import com.caucho.v5.io.WriteBuffer;
 import com.caucho.v5.nautilus.ReceiverMode;
 import com.caucho.v5.nautilus.broker.BrokerNautilus;
 import com.caucho.v5.nautilus.broker.ReceiverBroker;
@@ -48,7 +50,6 @@ import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.StateConnection;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.ReadStream;
-import com.caucho.v5.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache
@@ -141,7 +142,7 @@ public class StompConnection implements ConnectionProtocol
     throw new UnsupportedOperationException();
   }
   
-  WriteStream getWriteStream()
+  WriteBuffer getWriteStream()
   {
     return _link.writeStream();
   }
@@ -322,7 +323,7 @@ public class StompConnection implements ConnectionProtocol
   @Override
   public StateConnection service() throws IOException
   {
-    ReadStream is = null;//_link.getReadStream();
+    ReadBuffer is = null;//_link.getReadStream();
     
     if (! readMethod(is)) {
       return StateConnection.CLOSE;
@@ -337,7 +338,7 @@ public class StompConnection implements ConnectionProtocol
     while (readHeader(is)) {
     }
     
-    WriteStream os = _link.writeStream();
+    WriteBuffer os = _link.writeStream();
     System.out.println("CMD: " + cmd + " " + os);
     return cmd.doCommand(this, is, os) ? StateConnection.READ : StateConnection.CLOSE;
   }
@@ -353,7 +354,7 @@ public class StompConnection implements ConnectionProtocol
     _transaction = null;
   }
   
-  private boolean readMethod(ReadStream is)
+  private boolean readMethod(ReadBuffer is)
     throws IOException
   {
     CharBuffer method = _method;
@@ -368,7 +369,7 @@ public class StompConnection implements ConnectionProtocol
     return (ch == '\n');
   }
   
-  private boolean readHeader(ReadStream is)
+  private boolean readHeader(ReadBuffer is)
     throws IOException
   {
     int ch;
@@ -484,7 +485,7 @@ public class StompConnection implements ConnectionProtocol
   void receipt(String receipt)
   {
     try {
-      WriteStream out = _link.writeStream();
+      WriteBuffer out = _link.writeStream();
       
       out.print("RECEIPT\nreceipt-id:");
       out.print(receipt);
@@ -502,7 +503,7 @@ public class StompConnection implements ConnectionProtocol
                long contentLength)
     throws IOException
   {
-    WriteStream out = _link.writeStream();
+    WriteBuffer out = _link.writeStream();
     
     out.print("MESSAGE");
     out.print("\nsubscription:");

@@ -36,10 +36,10 @@ import java.util.logging.Logger;
 import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.NoAspect;
 import com.caucho.v5.config.program.ConfigProgram;
+import com.caucho.v5.io.SSLFactory;
+import com.caucho.v5.io.ServerSocketBar;
+import com.caucho.v5.jni.ServerSocketJni;
 import com.caucho.v5.util.CurrentTime;
-import com.caucho.v5.vfs.ServerSocketJni;
-import com.caucho.v5.vfs.ServerSocketBar;
-import com.caucho.v5.vfs.SSLFactory;
 
 /**
  * Represents a protocol connection.

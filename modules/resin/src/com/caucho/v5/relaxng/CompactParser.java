@@ -122,7 +122,7 @@ public class CompactParser {
 
   public String generateId()
   {
-    _cb.setLength(0);
+    _cb.length(0);
     _cb.append("__caucho_");
     _cb.append(_generatedId++);
     
@@ -141,8 +141,10 @@ public class CompactParser {
 
     if (is instanceof ReadStream) {
       _is = (ReadStream) is;
+      /*
       _filename = _is.getUserPath();
       _pwd = _is.getPath().getParent();
+      */
     }
     if (is != null)
       _is = VfsOld.openRead(is);
@@ -609,7 +611,7 @@ public class CompactParser {
       return name;
     }
 
-    char []cbuf = _cb.getBuffer();
+    char []cbuf = _cb.buffer();
     byte []buffer = _buffer;
     int i = 0;
     
@@ -640,7 +642,7 @@ public class CompactParser {
     _offset = offset;
     _length = length;
     
-    _cb.setLength(i);
+    _cb.length(i);
     
     if (ch == '*')
       _cb.append('*');
@@ -812,7 +814,7 @@ public class CompactParser {
 
       default:
         if (XmlChar.isNameStart(ch)) {
-          char []cbuf = cb.getBuffer();
+          char []cbuf = cb.buffer();
           int i = 0;
 
           while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
@@ -826,7 +828,7 @@ public class CompactParser {
             else
               ch = read();
           }
-          cb.setLength(i);
+          cb.length(i);
           unread();
 
           int token = _tokenMap.get(cb);

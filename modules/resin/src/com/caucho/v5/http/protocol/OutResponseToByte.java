@@ -36,11 +36,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.v5.io.TempBuffer;
+import com.caucho.v5.io.i18n.Encoding;
+import com.caucho.v5.io.i18n.EncodingWriter;
 import com.caucho.v5.util.L10N;
-import com.caucho.v5.vfs.Encoding;
 import com.caucho.v5.vfs.IOExceptionRuntime;
 import com.caucho.v5.vfs.TempCharBuffer;
-import com.caucho.v5.vfs.i18n.EncodingWriter;
 
 /**
  * Handles the dual char/byte buffering for the response stream.

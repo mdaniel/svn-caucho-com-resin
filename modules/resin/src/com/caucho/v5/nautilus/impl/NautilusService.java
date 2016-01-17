@@ -29,7 +29,7 @@
 
 package com.caucho.v5.nautilus.impl;
 
-import com.caucho.v5.vfs.StreamSource;
+import com.caucho.v5.io.StreamSource;
 
 /**
  * Service for an individual queue, managing its messages.

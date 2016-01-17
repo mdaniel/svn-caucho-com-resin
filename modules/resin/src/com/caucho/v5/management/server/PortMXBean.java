@@ -281,7 +281,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
 
   /**
    * The total number of connections that have terminated with
-   * {@link com.caucho.v5.vfs.ClientDisconnectException}.
+   * {@link com.caucho.v5.io.ClientDisconnectException}.
    */
   @Description("The total number of connections that have"
                + " terminated with a client disconnect")
