@@ -735,6 +735,7 @@ public class BlockStore {
 
     synchronized (_allocationLock) {
       setAllocation(blockIndex, code);
+      _allocCount.incrementAndGet();
     }
 
     /* XXX: requires more
@@ -784,8 +785,9 @@ public class BlockStore {
     long newBlockIndex;
 
     synchronized (_allocationLock) {
-      if (_freeAllocIndex < _blockCount)
+      if (_freeAllocIndex < _blockCount) {
         return;
+      }
 
       if (_blockCount < 256) {
         newBlockCount = _blockCount + 1;
@@ -928,10 +930,13 @@ public class BlockStore {
       }
 
       setAllocation(index, ALLOC_FREE);
+      _allocCount.decrementAndGet();
     }
 
     saveAllocation();
   }
+  
+  private AtomicInteger _allocCount = new AtomicInteger();
 
   /**
    * Sets the allocation for a block.

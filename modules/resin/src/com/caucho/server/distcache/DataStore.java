@@ -37,7 +37,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -79,7 +78,12 @@ public class DataStore {
   //private long _expireOrphanTimeout = 24 * 60L * 60L * 1000L;
   
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
-  private long _expireOrphanTimeout = 60 * 60L * 1000L;
+  //private long _expireOrphanTimeout = 60 * 60L * 1000L;
+  private long _expireOrphanTimeout = 15 * 60L * 1000L;
+
+  // data must live for at least 15min because of timing issues during
+  // creation. The reaper must not remove data while it's being added
+  private long _expireDataMinIdle = 15 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -691,8 +695,8 @@ public class DataStore {
       try {
         conn = getConnection();
 
-        HashSet<Long> mnodeDataIds = selectMnodeDataIds(conn);
         HashSet<Long> orphanList = selectDataIds(conn);
+        HashSet<Long> mnodeDataIds = selectMnodeDataIds(conn);
         
         for (Long mnodeDataId : mnodeDataIds) {
           orphanList.remove(mnodeDataId);
@@ -749,7 +753,7 @@ public class DataStore {
       HashSet<Long> dataIds = new HashSet<Long>();
       
       PreparedStatement pStmt = conn.prepareSelectDataIds();
-      long time = CurrentTime.getCurrentTime() - 2 * 60000;
+      long time = CurrentTime.getCurrentTime() - _expireDataMinIdle;
       
       pStmt.setLong(1, time);
       

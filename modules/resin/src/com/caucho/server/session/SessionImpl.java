@@ -857,6 +857,10 @@ public class SessionImpl implements HttpSession, CacheListener {
     else {
       log.warning("Invalid session load id=" + getId() + ", but loaded id=" + id);
       
+      synchronized (_values) {
+        _values.clear();
+      }
+      
       return false;
     }
   }

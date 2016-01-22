@@ -82,7 +82,8 @@ import com.caucho.vfs.TempCharBuffer;
  *  1536-2047) triple indirect block addresses (to 8T, 2^43)
  * </pre>
  */
-public class Inode {
+public class Inode
+{
   private static final L10N L = new L10N(Inode.class);
   private static final Logger log
     = Logger.getLogger(Inode.class.getName());
@@ -871,7 +872,7 @@ public class Inode {
         _store.deallocateBlock(blockAddr);
 
         int dblBlockCount
-        = (blockCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS);
+          = (blockCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS);
 
         // remove the double indirect blocks
         if (dblBlockCount >= 0
