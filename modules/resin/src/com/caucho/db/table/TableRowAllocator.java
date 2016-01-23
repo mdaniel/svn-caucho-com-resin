@@ -301,7 +301,7 @@ class TableRowAllocator extends AbstractTaskWorker {
       int head = _insertFreeRowBlockHead.get();
       
       if (head == tail) {
-        wake();
+        allocateNewRows();
         return 0;
       }
     
@@ -315,7 +315,7 @@ class TableRowAllocator extends AbstractTaskWorker {
         int size = (head - tail + FREE_ROW_BLOCK_SIZE) % FREE_ROW_BLOCK_SIZE;
         
         if (2 * size < FREE_ROW_BLOCK_SIZE) {
-          wake();
+          allocateNewRows();
         }
         
         return blockId;
@@ -341,10 +341,20 @@ class TableRowAllocator extends AbstractTaskWorker {
         return;
     }
   }
+  
+  private void allocateNewRows()
+  {
+    // wake();
+    
+    synchronized (this) {
+      fillFreeRows();
+    }
+  }
 
   @Override
   public long runTask()
   {
+    if (true) { Thread.dumpStack(); return -1; }
     fillFreeRows();
       
     return -1;

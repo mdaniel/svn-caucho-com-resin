@@ -298,6 +298,25 @@ class BlobColumn extends Column {
                Expr expr, QueryContext context)
     throws SQLException
   {
+    /*
+    if (expr.isNull(context)) {
+      setNull(block, rowOffset);
+    }
+    else if (expr.isBinaryStream(context)) {
+      setStream(xa, block, rowOffset, expr.evalStream(context));
+    }
+    else {
+      setString(xa, block, rowOffset, expr.evalString(context));
+    }
+    */
+  }
+  
+  @Override
+  void setExprBlob(DbTransaction xa,
+               byte []block, int rowOffset,
+               Expr expr, QueryContext context)
+    throws SQLException
+  {
     if (expr.isNull(context)) {
       setNull(block, rowOffset);
     }

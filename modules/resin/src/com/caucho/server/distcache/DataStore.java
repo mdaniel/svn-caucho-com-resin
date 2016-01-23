@@ -37,7 +37,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,11 +81,11 @@ public class DataStore {
   
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
-  private long _expireOrphanTimeout = 15 * 60L * 1000L;
+  private long _expireOrphanTimeout = 1 * 60L * 1000L;
 
   // data must live for at least 15min because of timing issues during
   // creation. The reaper must not remove data while it's being added
-  private long _expireDataMinIdle = 15 * 60L * 1000L;
+  private long _expireDataMinIdle = 1 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -94,6 +96,7 @@ public class DataStore {
   private final String _selectDataIdQuery;
   
   private final String _deleteQuery;
+  private final String _deleteOrphanQuery;
   private final String _validateQuery;
 
   private final String _countQuery;
@@ -141,12 +144,15 @@ public class DataStore {
     _selectMnodeDataIdQuery = ("SELECT value_data_id"
                         + " FROM " + _mnodeTableName);
 
-    _selectDataIdQuery = ("SELECT id"
+    _selectDataIdQuery = ("SELECT id,time"
                      + " FROM " + _dataTableName
                      + " WHERE time < ?");
 
     _deleteQuery = ("DELETE FROM " + _dataTableName
                     + " WHERE id = ?");
+
+    _deleteOrphanQuery = ("DELETE FROM " + _dataTableName
+                          + " WHERE id = ? and time=?");
 
     _validateQuery = ("VALIDATE " + _dataTableName);
 
@@ -695,25 +701,32 @@ public class DataStore {
       try {
         conn = getConnection();
 
-        HashSet<Long> orphanList = selectDataIds(conn);
+        HashMap<Long,Long> orphanList = selectDataIds(conn);
         HashSet<Long> mnodeDataIds = selectMnodeDataIds(conn);
-        
+
         for (Long mnodeDataId : mnodeDataIds) {
           orphanList.remove(mnodeDataId);
         }
-        
-        if (orphanList.size() > 0) {
-          log.info("DataStore removing " + orphanList.size() + " orphans");
-        }
 
-        PreparedStatement pStmt = conn.prepareDelete();
+        PreparedStatement pStmt = conn.prepareDeleteOrphan();
 
-        for (Long did : orphanList) {
+        for (Map.Entry<Long,Long> entry : orphanList.entrySet()) {
+          Long did = entry.getKey();
+          Long time = entry.getValue();
+          
           pStmt.setLong(1, did);
+          pStmt.setLong(2, time);
           
           if (pStmt.executeUpdate() > 0) {
             _entryCount.addAndGet(-1);
           }
+          else {
+            //System.out.println("Unable to remove orphan: " + Long.toHexString(did));
+          }
+        }
+        
+        if (orphanList.size() > 0) {
+          log.info("DataStore removing " + orphanList.size() + " orphans (entry-count=" + _entryCount.get() + ")");
         }
         
         isValid = true;
@@ -747,10 +760,10 @@ public class DataStore {
       return dataIds;
     }
     
-    private HashSet<Long> selectDataIds(DataConnection conn)
+    private HashMap<Long,Long> selectDataIds(DataConnection conn)
       throws SQLException
     {
-      HashSet<Long> dataIds = new HashSet<Long>();
+      HashMap<Long,Long> dataIds = new HashMap<Long,Long>();
       
       PreparedStatement pStmt = conn.prepareSelectDataIds();
       long time = CurrentTime.getCurrentTime() - _expireDataMinIdle;
@@ -760,7 +773,7 @@ public class DataStore {
       ResultSet rs = pStmt.executeQuery();
       
       while (rs.next()) {
-        dataIds.add(rs.getLong(1));
+        dataIds.put(rs.getLong(1), rs.getLong(2));
       }
       
       return dataIds;
@@ -830,6 +843,7 @@ public class DataStore {
     private PreparedStatement _selectMnodeDataIdStatement;
     private PreparedStatement _selectDataIdStatement;
     private PreparedStatement _deleteStatement;
+    private PreparedStatement _deleteOrphanStatement;
     private PreparedStatement _validateStatement;
 
     private PreparedStatement _countStatement;
@@ -884,6 +898,15 @@ public class DataStore {
         _deleteStatement = _conn.prepareStatement(_deleteQuery);
 
       return _deleteStatement;
+    }
+
+    PreparedStatement prepareDeleteOrphan()
+      throws SQLException
+    {
+      if (_deleteOrphanStatement == null)
+        _deleteOrphanStatement = _conn.prepareStatement(_deleteOrphanQuery);
+
+      return _deleteOrphanStatement;
     }
 
     PreparedStatement prepareValidate()

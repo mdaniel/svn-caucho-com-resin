@@ -43,6 +43,7 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectorySystem;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.distcache.MnodeStore.ExpiredMnode;
 import com.caucho.server.distcache.MnodeStore.ExpiredState;
 import com.caucho.server.distcache.MnodeStore.Mnode;
@@ -73,6 +74,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private Alarm _reaperAlarm;
 
   private DataSourceImpl _dataSource;
+  
+  private Lifecycle _lifecycle = new Lifecycle();
   
   //private long _reaperTimeout = 5 * 60 * 1000;
   //private long _reaperTimeout = 5 * 60 * 1000;
@@ -423,6 +426,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   public void start()
   {
     try {
+      if (! _lifecycle.toActive()) {
+        return;
+      }
+      
       Path dataDirectory = RootDirectorySystem.getCurrentDataDirectory();
 
       String serverId = ResinSystem.getCurrentId();

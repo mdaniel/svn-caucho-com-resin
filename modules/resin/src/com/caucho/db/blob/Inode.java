@@ -513,8 +513,7 @@ public class Inode
           int blockOffset = (int) (currentLength % BLOCK_SIZE);
           int sublen = length;
 
-          if (BLOCK_SIZE - blockOffset < sublen)
-            sublen = BLOCK_SIZE - blockOffset;
+          sublen = Math.min(sublen, BLOCK_SIZE - blockOffset);
 
           Block block = store.writeBlock(addr, blockOffset,
                                          buffer, offset, sublen);
@@ -722,8 +721,7 @@ public class Inode
           int blockOffset = (int) (currentLength % BLOCK_SIZE);
           int sublen = 2 * charLength;
 
-          if (BLOCK_SIZE - blockOffset < sublen)
-            sublen = BLOCK_SIZE - blockOffset;
+          sublen = Math.min(BLOCK_SIZE - blockOffset, sublen);
 
           int charSublen = sublen / 2;
 
@@ -739,8 +737,7 @@ public class Inode
         else {
           int sublen = 2 * charLength;
 
-          if (BLOCK_SIZE < sublen)
-            sublen = BLOCK_SIZE;
+          sublen = Math.min(sublen, BLOCK_SIZE);
 
           int charSublen = sublen / 2;
 

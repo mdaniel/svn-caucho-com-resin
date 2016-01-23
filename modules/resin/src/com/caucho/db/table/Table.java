@@ -1042,11 +1042,19 @@ public class Table extends BlockStore
       for (int i = rowOffset + _rowLength - 1; rowOffset < i; i--)
         buffer[i] = 0;
 
+      // set non-blob fields first
       for (int i = 0; i < columns.size(); i++) {
         Column column = columns.get(i);
         Expr value = values.get(i);
 
         column.setExpr(xa, buffer, rowOffset, value, queryContext);
+      }
+
+      for (int i = 0; i < columns.size(); i++) {
+        Column column = columns.get(i);
+        Expr value = values.get(i);
+
+        column.setExprBlob(xa, buffer, rowOffset, value, queryContext);
       }
 
       // lock for insert, i.e. entries, indices, and validation
