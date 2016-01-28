@@ -77,7 +77,7 @@ public class DataStore {
   // server/60i0
   // private long _expireTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 24 * 60L * 60L * 1000L;
-  
+
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
   private long _expireOrphanTimeout = 1 * 60L * 1000L;
@@ -90,10 +90,10 @@ public class DataStore {
 
   private final String _insertQuery;
   private final String _loadQuery;
-  
+
   private final String _selectMnodeDataIdQuery;
   private final String _selectDataIdQuery;
-  
+
   private final String _deleteQuery;
   private final String _deleteOrphanQuery;
   private final String _validateQuery;
@@ -177,7 +177,7 @@ public class DataStore {
     _alarm = new Alarm(new DeleteAlarm());
     //_alarm.queue(_expireOrphanTimeout);
     _alarm.queue(60000);
-    
+
     //_alarm.queue(0);
   }
 
@@ -396,8 +396,8 @@ public class DataStore {
 
         if (is == null) {
           System.err.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: 0x" + Long.toHexString(id));
-          
-          if (log.isLoggable(Level.FINE)) { 
+
+          if (log.isLoggable(Level.FINE)) {
             Thread.dumpStack();
           }
 
@@ -480,7 +480,7 @@ public class DataStore {
         ResultSet keys = stmt.getGeneratedKeys();
         if (keys.next()) {
           long id = keys.getLong("id");
-          
+
           return id;
         }
 
@@ -648,16 +648,14 @@ public class DataStore {
   private DataConnection getConnection()
     throws SQLException
   {
-    synchronized (_freeConn) {
-      DataConnection cConn = _freeConn.allocate();
+    DataConnection cConn = _freeConn.allocate();
 
-      if (cConn == null) {
-        Connection conn = _dataSource.getConnection();
-        cConn = new DataConnection(conn);
-      }
-
-      return cConn;
+    if (cConn == null) {
+      Connection conn = _dataSource.getConnection();
+      cConn = new DataConnection(conn);
     }
+
+    return cConn;
   }
 
   @Override
@@ -668,7 +666,7 @@ public class DataStore {
 
   private class DeleteAlarm implements AlarmListener {
     private long _lastOid;
-   
+
     @Override
     public void handleAlarm(Alarm alarm)
     {
@@ -677,8 +675,8 @@ public class DataStore {
           deleteOrphans();
         } finally {
           long timeout;
-          
-          if (_lastOid < 0) { 
+
+          if (_lastOid < 0) {
             timeout = _expireOrphanTimeout;
           }
           else {
@@ -696,7 +694,7 @@ public class DataStore {
     {
       DataConnection conn = null;
       ResultSet rs = null;
-      
+
       boolean isValid = false;
 
       try {
@@ -714,10 +712,10 @@ public class DataStore {
         for (Map.Entry<Long,Long> entry : orphanList.entrySet()) {
           Long did = entry.getKey();
           Long time = entry.getValue();
-          
+
           pStmt.setLong(1, did);
           pStmt.setLong(2, time);
-          
+
           if (pStmt.executeUpdate() > 0) {
             _entryCount.addAndGet(-1);
           }
@@ -725,11 +723,11 @@ public class DataStore {
             //System.out.println("Unable to remove orphan: " + Long.toHexString(did));
           }
         }
-        
+
         if (orphanList.size() > 0) {
           log.info("DataStore removing " + orphanList.size() + " orphans (entry-count=" + _entryCount.get() + ")");
         }
-        
+
         isValid = true;
       } catch (SQLException e) {
         e.printStackTrace();
@@ -744,39 +742,39 @@ public class DataStore {
           conn.destroy();
       }
     }
-    
+
     private HashSet<Long> selectMnodeDataIds(DataConnection conn)
       throws SQLException
     {
       HashSet<Long> dataIds = new HashSet<Long>();
-      
+
       PreparedStatement pStmt = conn.prepareSelectMnodeDataIds();
-      
+
       ResultSet rs = pStmt.executeQuery();
-      
+
       while (rs.next()) {
         dataIds.add(rs.getLong(1));
       }
-      
+
       return dataIds;
     }
-    
+
     private HashMap<Long,Long> selectDataIds(DataConnection conn)
       throws SQLException
     {
       HashMap<Long,Long> dataIds = new HashMap<Long,Long>();
-      
+
       PreparedStatement pStmt = conn.prepareSelectDataIds();
       long time = CurrentTime.getCurrentTime() - _expireDataMinIdle;
-      
+
       pStmt.setLong(1, time);
-      
+
       ResultSet rs = pStmt.executeQuery();
-      
+
       while (rs.next()) {
         dataIds.put(rs.getLong(1), rs.getLong(2));
       }
-      
+
       return dataIds;
     }
   }
@@ -828,7 +826,7 @@ public class DataStore {
       if (conn != null)
         conn.close();
     }
-    
+
     @Override
     public String toString()
     {
@@ -930,14 +928,8 @@ public class DataStore {
 
     void close()
     {
-      if (_freeConn == null || ! freeCareful(this)) {
+      if (_freeConn == null || ! _freeConn.freeCareful(this)) {
         destroy();
-      }
-    }
-
-    private boolean freeCareful(DataConnection connection) {
-      synchronized (_freeConn) {
-       return _freeConn.freeCareful(connection);
       }
     }
 
