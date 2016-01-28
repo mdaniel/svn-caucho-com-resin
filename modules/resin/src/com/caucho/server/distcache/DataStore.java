@@ -29,6 +29,7 @@
 
 package com.caucho.server.distcache;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -43,8 +44,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
 
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
@@ -649,14 +648,16 @@ public class DataStore {
   private DataConnection getConnection()
     throws SQLException
   {
-    DataConnection cConn = _freeConn.allocate();
+    synchronized (_freeConn) {
+      DataConnection cConn = _freeConn.allocate();
 
-    if (cConn == null) {
-      Connection conn = _dataSource.getConnection();
-      cConn = new DataConnection(conn);
+      if (cConn == null) {
+        Connection conn = _dataSource.getConnection();
+        cConn = new DataConnection(conn);
+      }
+
+      return cConn;
     }
-
-    return cConn;
   }
 
   @Override
@@ -929,8 +930,14 @@ public class DataStore {
 
     void close()
     {
-      if (_freeConn == null || ! _freeConn.freeCareful(this)) {
+      if (_freeConn == null || ! freeCareful(this)) {
         destroy();
+      }
+    }
+
+    private boolean freeCareful(DataConnection connection) {
+      synchronized (_freeConn) {
+       return _freeConn.freeCareful(connection);
       }
     }
 
