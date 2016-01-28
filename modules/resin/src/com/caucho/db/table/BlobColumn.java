@@ -275,12 +275,15 @@ class BlobColumn extends Column {
     byte []block = iter.getBuffer();
     int rowOffset = iter.getRowOffset();
 
-    if (expr.isNull(context))
+    if (expr.isNull(context)) {
       setNull(block, rowOffset);
-    else if (expr.isBinaryStream(context))
+    }
+    else if (expr.isBinaryStream(context)) {
       setStream(xa, block, rowOffset, expr.evalStream(context));
-    else
+    }
+    else {
       setString(xa, block, rowOffset, expr.evalString(context));
+    }
     
     iter.setDirty();
   }

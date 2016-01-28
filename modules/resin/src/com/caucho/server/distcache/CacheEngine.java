@@ -31,7 +31,7 @@ package com.caucho.server.distcache;
 
 import java.io.InputStream;
 
-import com.caucho.server.distcache.LocalDataManager.DataItem;
+import com.caucho.server.distcache.LocalDataManager.DataItemLocal;
 import com.caucho.util.HashKey;
 
 /**
@@ -64,7 +64,8 @@ public interface CacheEngine
   public void put(HashKey key, 
                   HashKey cacheKey,
                   MnodeUpdate mnodeUpdate,
-                  long valueDataId);
+                  long valueDataId,
+                  long valueDataTime);
 
   public void updateTime(HashKey key, HashKey cacheKey, MnodeEntry mnodeValue);
 
@@ -74,12 +75,14 @@ public interface CacheEngine
 
   public InputStream getAndPut(DistCacheEntry entry, 
                                MnodeUpdate mnodeValue,
-                               long valueDataId);
+                               long valueDataId,
+                               long valueDataTime);
 
   public boolean compareAndPut(DistCacheEntry entry, 
                                long testValue,
                                MnodeUpdate update,
-                               long valueDataId);
+                               long valueDataId,
+                               long valueDataTime);
 
   public void notifyLease(HashKey key, HashKey cacheKey, int leaseOwner);
 }

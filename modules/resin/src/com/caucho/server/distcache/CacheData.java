@@ -40,6 +40,7 @@ public final class CacheData extends MnodeValue {
   private final HashKey _cacheKey;
 
   private final long _valueDataId;
+  private final long _valueDataTime;
   
   private final long _accessTime;
   private final long _modifiedTime;
@@ -48,6 +49,7 @@ public final class CacheData extends MnodeValue {
                    HashKey cacheKey,
                    long valueHash,
                    long valueDataId,
+                   long valueDataTime,
                    long valueLength,
                    long version,
                    long flags,
@@ -65,6 +67,7 @@ public final class CacheData extends MnodeValue {
     _cacheKey = cacheKey;
     
     _valueDataId = valueDataId;
+    _valueDataTime = valueDataTime;
     _accessTime = accessTime;
     _modifiedTime = modifiedTime;
   }

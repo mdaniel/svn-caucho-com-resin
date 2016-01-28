@@ -500,10 +500,11 @@ public class CauchoSystem {
     boolean isJdk7 = false;
     
     try {
-      Class<?> pathClass = Class.forName("java.nio.file");
+      Class<?> pathClass = Class.forName("java.nio.file.Path");
       
       isJdk7 = true;
     } catch (Throwable e) {
+      e.printStackTrace();;
     }
     
     _isJdk7 = isJdk7;

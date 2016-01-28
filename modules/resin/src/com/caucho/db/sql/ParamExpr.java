@@ -481,6 +481,7 @@ class ParamExpr extends Expr {
   public int evalToBuffer(QueryContext context, byte []buffer, int offset)
     throws SQLException
   {
+    try {
     byte []bytes = evalBytes(context);
     
     if (bytes == null)
@@ -489,6 +490,9 @@ class ParamExpr extends Expr {
     System.arraycopy(bytes, 0, buffer, offset, bytes.length);
     
     return bytes.length;
+    } catch (UnsupportedOperationException e) {
+      throw new UnsupportedOperationException(this + " " + e.getMessage(), e);
+    }
   }
 
   public String toString()

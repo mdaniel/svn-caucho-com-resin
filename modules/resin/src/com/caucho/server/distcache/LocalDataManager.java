@@ -41,6 +41,7 @@ import com.caucho.db.blob.BlobInputStream;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.util.HashKey;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -81,7 +82,7 @@ public final class LocalDataManager
     return getStoreManager().getDataBacking();
   }
 
-  DataItem writeData(MnodeValue update, 
+  DataItemLocal writeData(MnodeValue update, 
                      long version,
                      StreamSource source)
   {
@@ -90,36 +91,38 @@ public final class LocalDataManager
     long valueDataId;
     
     if (valueHash == 0 && valueLength == 0 && source == null) {
-      return new DataItem(0, 0, 0);
+      return new DataItemLocal(0, 0, 0, 0);
     }
+    
+    DataItem valueData = null;
 
     if (source != null)
-      valueDataId = getDataBacking().saveData(source, (int) valueLength);
+      valueData = getDataBacking().saveData(source, (int) valueLength);
     else
       throw new IllegalStateException(L.l("writeData called without a stream or saved value {0}",
                                           update));
     
-    return new DataItem(valueHash,
-                        valueDataId,
+    return new DataItemLocal(valueHash,
+                        valueData,
                         valueLength);
   }
 
-  DataItem writeData(MnodeValue update, 
+  DataItemLocal writeData(MnodeValue update, 
                      long version,
                      InputStream is)
   {
     try {
       long valueHash = update.getValueHash();
       long valueLength = update.getValueLength();
-      long valueDataId = getDataBacking().saveData(is, (int) valueLength);
+      DataItem valueData = getDataBacking().saveData(is, (int) valueLength);
     
-      return new DataItem(valueHash, valueDataId, valueLength);
+      return new DataItemLocal(valueHash, valueData, valueLength);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  final public DataItem writeValue(MnodeEntry mnodeValue,
+  final public DataItemLocal writeValue(MnodeEntry mnodeValue,
                                    Object value,
                                    CacheConfig config)
   {
@@ -134,16 +137,16 @@ public final class LocalDataManager
       int length = os.getLength();
 
       StreamSource source = new StreamSource(os);
-      long valueDataId = getDataBacking().saveData(source, length);
+      DataItem valueData = getDataBacking().saveData(source, length);
       
-      if (valueDataId <= 0) {
+      if (valueData == null) {
         throw new IllegalStateException(L.l("Can't save the data '{0}'",
                                             valueHash));
       }
       
       // XXX: request owner?
 
-      return new DataItem(valueHash, valueDataId, length);
+      return new DataItemLocal(valueHash, valueData, length);
 
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -156,6 +159,7 @@ public final class LocalDataManager
   final protected Object readData(HashKey key,
                                   long valueHash,
                                   long valueDataId,
+                                  long valueDataTime,
                                   CacheSerializer serializer,
                                   CacheConfig config)
   {
@@ -169,8 +173,10 @@ public final class LocalDataManager
 
       WriteStream out = Vfs.openWrite(os);
 
-      if (! getDataBacking().loadData(valueDataId, out)) {
-        log.warning(this + " cannot load data for key=" + key + " from triad");
+      if (! getDataBacking().loadData(valueDataId, valueDataTime, out)) {
+        log.warning(this + " cannot load data for key=" + key + " from triad"
+                    + " (id=" + Long.toHexString(valueDataId) + " time=" + valueDataTime + ")");
+        Thread.dumpStack();
         
         out.close();
         
@@ -248,6 +254,7 @@ public final class LocalDataManager
     throws IOException
   {
     long valueDataId = mnodeValue.getValueDataId();
+    long valueDataTime = mnodeValue.getValueDataTime();
     
     if (valueDataId <= 0) {
       throw new IllegalStateException(L.l("readData may not be called with a null value"));
@@ -259,7 +266,7 @@ public final class LocalDataManager
       Blob blob = mnodeValue.getBlob();
       
       if (blob == null) {
-        blob = getDataBacking().loadBlob(valueDataId);
+        blob = getDataBacking().loadBlob(valueDataId, valueDataTime);
         
         if (blob != null)
           mnodeValue.setBlob(blob);
@@ -297,12 +304,13 @@ public final class LocalDataManager
     }
   }
   
-  public DataStreamSource createDataSource(long valueDataId)
+  public DataStreamSource createDataSource(long valueDataId,
+                                           long valueDataTime)
   {
     DataStore dataStore = getDataBacking().getDataStore();
     
     if (valueDataId > 0)
-      return new DataStreamSource(valueDataId, dataStore);
+      return new DataStreamSource(valueDataId, valueDataTime, dataStore);
     else
       return null;
   }
@@ -326,9 +334,9 @@ public final class LocalDataManager
     }
   }
   
-  void removeData(long valueHash)
+  void removeData(long valueHash, long valueDataTime)
   {
-    getDataBacking().removeData(valueHash);
+    getDataBacking().removeData(valueHash, valueDataTime);
   }
 
   /**
@@ -373,10 +381,10 @@ public final class LocalDataManager
     return hash;
   }
   
-  final public DataItem writeData(StreamSource source)
+  final public DataItemLocal writeData(StreamSource source)
   {
     if (source == null) {
-      return new DataItem(0, 0, 0);
+      return new DataItemLocal(0, 0, 0, 0);
     }
     
     InputStream is = null;
@@ -387,21 +395,21 @@ public final class LocalDataManager
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
       
-      return new DataItem(0, 0, 0);
+      return new DataItemLocal(0, 0, 0, 0);
     } finally {
       IoUtil.close(is);
     }
   }
 
-  final public DataItem writeData(InputStream is)
+  final public DataItemLocal writeData(InputStream is)
     throws IOException
   {
     TempOutputStream os = null;
 
     try {
       Crc64InputStream mIn = new Crc64InputStream(is);
-
-      long valueDataId = getDataBacking().saveData(mIn, -1);
+      
+      DataItem valueData = getDataBacking().saveData(mIn, -1); 
 
       long valueHash = mIn.getDigest();
       
@@ -411,7 +419,7 @@ public final class LocalDataManager
 
       long length = mIn.getLength();
       
-      return new DataItem(valueHash, valueDataId, length);
+      return new DataItemLocal(valueHash, valueData, length);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -428,24 +436,45 @@ public final class LocalDataManager
     return getClass().getSimpleName() + "[" + _serverId + "]";
   }
   
-  public static class DataItem {
+  public static class DataItemLocal {
     private long _valueHash;
     private long _dataId;
+    private long _dataTime;
     private long _length;
     
-    private DataItem(long valueHash, long dataId, long length)
+    private DataItemLocal(long valueHash, 
+                     long dataId,
+                     long dataTime,
+                     long length)
     {
       _valueHash = valueHash;
       _dataId = dataId;
+      _dataTime = dataTime;
       _length = length;
     }
     
-    /**
-     * @return
-     */
+    private DataItemLocal(long valueHash, 
+                          DataItem data,
+                          long length)
+    {
+      _valueHash = valueHash;
+      
+      if (data != null) {
+        _dataId = data.getId();
+        _dataTime = data.getTime();
+      }
+      
+      _length = length;
+    }
+    
     public long getValueDataId()
     {
       return _dataId;
+    }
+
+    public long getValueDataTime()
+    {
+      return _dataTime;
     }
 
     public long getValueHash()

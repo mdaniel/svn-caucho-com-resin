@@ -503,6 +503,8 @@ public class MemcachedClient implements Cache
     ClientSocket client = null;
     long idleStartTime = CurrentTime.getCurrentTime();
     
+    long valueDataTime = 0;
+    
     CacheImpl cache = getLocalCache();
     
     boolean isValid = false;
@@ -535,7 +537,7 @@ public class MemcachedClient implements Cache
       out.setDisableClose(true);
       
       //out.print(value);
-      boolean v = cache.loadData(valueDataId, out);
+      boolean v = cache.loadData(valueDataId, valueDataTime, out);
       
       out.setDisableClose(false);
       

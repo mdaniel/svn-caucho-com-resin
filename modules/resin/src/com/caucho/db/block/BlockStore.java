@@ -983,6 +983,8 @@ public class BlockStore {
     if (oldCode != ALLOC_FREE && code != ALLOC_FREE && oldCode != code) {
       System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + oldCode + " " + code);
       Thread.dumpStack();
+    }else if (blockIndex == 0 && code != ALLOC_DATA) {
+      Thread.dumpStack();
     }
 
     setAllocDirty(allocOffset, allocOffset + ALLOC_BYTES_PER_BLOCK);

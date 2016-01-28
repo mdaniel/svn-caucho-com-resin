@@ -1151,7 +1151,7 @@ public class Table extends BlockStore
     byte rowState = buffer[rowOffset];
 
     //if ((rowState & ROW_MASK) == 0) {
-    if (rowState == 0) {
+    if ((rowState & ROW_MASK) != ROW_VALID) {
       return false;
     }
 

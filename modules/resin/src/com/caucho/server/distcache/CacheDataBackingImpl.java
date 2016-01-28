@@ -44,6 +44,7 @@ import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.server.distcache.MnodeStore.ExpiredMnode;
 import com.caucho.server.distcache.MnodeStore.ExpiredState;
 import com.caucho.server.distcache.MnodeStore.Mnode;
@@ -176,6 +177,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         || oldEntryValue == MnodeEntry.NULL) {
       if (_mnodeStore.insert(key, cacheKey, mnodeUpdate,
                              mnodeUpdate.getValueDataId(),
+                             mnodeUpdate.getValueDataTime(),
                              mnodeUpdate.getLastAccessedTime(),
                              mnodeUpdate.getLastModifiedTime())) {
         entry = mnodeUpdate;
@@ -190,6 +192,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                  cacheKey.getHash(),
                                  mnodeUpdate,
                                  mnodeUpdate.getValueDataId(),
+                                 mnodeUpdate.getValueDataTime(),
                                  mnodeUpdate.getLastAccessedTime(),
                                  mnodeUpdate.getLastModifiedTime())) {
         isSave = true;
@@ -197,6 +200,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       }
       else if (_mnodeStore.insert(key, cacheKey, mnodeUpdate,
                                   mnodeUpdate.getValueDataId(),
+                                  mnodeUpdate.getValueDataTime(),
                                   mnodeUpdate.getLastAccessedTime(),
                                   mnodeUpdate.getLastModifiedTime())) {
         isSave = true;
@@ -212,10 +216,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     
     if (isSave && oldEntryValue != null) {
       long oldDataId = oldEntryValue.getValueDataId();
+      long oldDataTime = oldEntryValue.getValueDataTime();
 
       // XXX: create delete queue?
       if (oldDataId > 0 && mnodeUpdate.getValueDataId() != oldDataId) {
-        removeData(oldDataId);
+        removeData(oldDataId, oldDataTime);
       }
     }
     
@@ -245,7 +250,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       long lastModifiedTime = mnodeUpdate.getLastAccessTime();
 
       if (_mnodeStore.insert(key, cacheKey,
-                             mnodeUpdate, mnodeEntry.getValueDataId(),
+                             mnodeUpdate, 
+                             mnodeEntry.getValueDataId(),
+                             mnodeEntry.getValueDataTime(),
                              lastAccessTime, lastModifiedTime)) {
         isSave = true;
 
@@ -259,6 +266,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                  cacheKey.getHash(),
                                  mnodeUpdate,
                                  mnodeEntry.getValueDataId(),
+                                 mnodeEntry.getValueDataTime(),
                                  mnodeEntry.getLastAccessedTime(),
                                  mnodeEntry.getLastModifiedTime())) {
         isSave = true;
@@ -267,6 +275,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                   cacheKey,
                                   mnodeUpdate,
                                   mnodeEntry.getValueDataId(),
+                                  mnodeEntry.getValueDataTime(),
                                   mnodeEntry.getLastAccessedTime(),
                                   mnodeEntry.getLastModifiedTime())) {
         isSave = true;
@@ -281,10 +290,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
     if (isSave && oldEntryEntry != null) {
       long oldDataId = oldEntryEntry.getValueDataId();
+      long oldDataTime = oldEntryEntry.getValueDataTime();
 
       // XXX: create delete queue?
       if (oldDataId > 0 && mnodeEntry.getValueDataId() != oldDataId) {
-        removeData(oldDataId);
+        removeData(oldDataId, oldDataTime);
       }
     }
 
@@ -322,19 +332,20 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
   @Override
   public boolean loadData(long valueDataId,
+                          long valueDataTime,
                           WriteStream os)
     throws IOException
   {
-    return _dataStore.load(valueDataId, os);
+    return _dataStore.load(valueDataId, valueDataTime, os);
   }
 
   @Override
-  public java.sql.Blob loadBlob(long valueDataId)
+  public java.sql.Blob loadBlob(long valueDataId, long valueDataTime)
   {
-    return _dataStore.loadBlob(valueDataId);
+    return _dataStore.loadBlob(valueDataId, valueDataTime);
   }
 
-  public long saveData(StreamSource source, int length)
+  public DataItem saveData(StreamSource source, int length)
   {
     try {
       DataStore dataStore = _dataStore;
@@ -343,7 +354,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         return dataStore.save(source, length);
       }
       else {
-        return -1;
+        return null;
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -351,24 +362,25 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   @Override
-  public long saveData(InputStream is, int length)
+  public DataItem saveData(InputStream is, int length)
     throws IOException
   {
     return _dataStore.save(is, length);
   }
 
   @Override
-  public boolean removeData(long dataId)
+  public boolean removeData(long dataId, long dataTime)
   {
     // return _dataStore.remove(dataId);
 
-    _removeActor.offer(dataId);
+    _removeActor.offer(new DataItem(dataId, dataTime));
 
     return true;
   }
 
   @Override
-  public boolean isDataAvailable(long valueIndex)
+  public boolean isDataAvailable(long valueIndex,
+                                 long valueDataTime)
   {
     return valueIndex > 0;
     /*
@@ -506,7 +518,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
   private boolean removeData(byte []key,
                              byte []cacheHash,
-                             long dataId)
+                             long dataId,
+                             long dataTime)
   {
     DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key),
                                                       HashKey.create(cacheHash));
@@ -516,7 +529,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     boolean isRemove = _mnodeStore.remove(key);
 
     if (dataId > 0) {
-      removeData(dataId);
+      removeData(dataId, dataTime);
     }
 
     return isRemove;
@@ -616,10 +629,6 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
       ArrayList<Mnode> mnodeList = _expireState.selectExpiredData();
       
-      if (mnodeList.size() > 0) {
-        log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items");
-      }
-      
       // mnodeCount += mnodeList.size();
 
       for (Mnode mnode : mnodeList) {
@@ -632,7 +641,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         try {
           if (removeData(expiredMnode.getKey(),
                          expiredMnode.getCacheHash(),
-                         expiredMnode.getDataId())) {
+                         expiredMnode.getDataId(),
+                         expiredMnode.getDataTime())) {
             removeCount++;
           }
 
@@ -642,6 +652,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }
+      }
+      
+      if (mnodeList.size() > 0 || true) {
+        log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items (removed=" + removeCount + ")");
       }
 
         // throttle the select query
