@@ -801,7 +801,7 @@
   <mime-mapping extension=".skm" mime-type="application/vnd.koan"/>
   <mime-mapping extension=".skp" mime-type="application/vnd.koan"/>
   <mime-mapping extension=".skt" mime-type="application/vnd.koan"/>
-  <mime-mapping extension=".sldm" mime-type="application/vnd.ms-powerpoint.slide.macroenabled.12"/>
+  <mime-mapping extension=".sldm" mime-type="application/vnd.ms-powerpoint.slide.macroEnabled.12"/>
   <mime-mapping extension=".sldx" mime-type="application/vnd.openxmlformats-officedocument.presentationml.slide"/>
   <mime-mapping extension=".slt" mime-type="application/vnd.epson.salt"/>
   <mime-mapping extension=".sm" mime-type="application/vnd.stepmania.stepchart"/>
