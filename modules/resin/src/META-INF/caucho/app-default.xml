@@ -103,7 +103,14 @@
     
   <mime-mapping extension=".dmg" mime-type="application/octet-stream"/>
   <mime-mapping extension=".dms" mime-type="application/octet-stream"/>
+  
   <mime-mapping extension=".doc" mime-type="application/msword"/>
+  <mime-mapping extension=".dot" mime-type="application/msword"/>
+  <mime-mapping extension=".docx" mime-type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+  <mime-mapping extension=".dotx" mime-type="application/vnd.openxmlformats-officedocument.wordprocessingml.template"/>
+  <mime-mapping extension=".docm" mime-type="application/vnd.ms-word.document.macroEnabled.12"/>
+  <mime-mapping extension=".dotm" mime-type="application/vnd.ms-word.template.macroEnabled.12"/>
+  
   <mime-mapping extension=".dcr" mime-type="application/x-director"/>
   <mime-mapping extension=".dir" mime-type="application/x-director"/>
   <mime-mapping extension=".dll" mime-type="application/x-msdownload"/>
@@ -164,7 +171,19 @@
     
   <mime-mapping extension=".pdf" mime-type="application/pdf"/>
   <mime-mapping extension=".ps" mime-type="application/postscript"/>
+  
   <mime-mapping extension=".ppt" mime-type="application/vnd.ms-powerpoint"/>
+  <mime-mapping extension=".pot" mime-type="application/vnd.ms-powerpoint"/>
+  <mime-mapping extension=".pps" mime-type="application/vnd.ms-powerpoint"/>
+  <mime-mapping extension=".ppa" mime-type="application/vnd.ms-powerpoint"/>
+  <mime-mapping extension=".pptx" mime-type="application/vnd.openxmlformats-officedocument.presentationml.presentation"/>
+  <mime-mapping extension=".potx" mime-type="application/vnd.openxmlformats-officedocument.presentationml.template"/>
+  <mime-mapping extension=".ppsx" mime-type="application/vnd.openxmlformats-officedocument.presentationml.slideshow"/>
+  <mime-mapping extension=".ppam" mime-type="application/vnd.ms-powerpoint.addin.macroEnabled.12"/>
+  <mime-mapping extension=".pptm" mime-type="application/vnd.ms-powerpoint.presentation.macroEnabled.12"/>
+  <mime-mapping extension=".potm" mime-type="application/vnd.ms-powerpoint.presentation.macroEnabled.12"/>
+  <mime-mapping extension=".ppsm" mime-type="application/vnd.ms-powerpoint.slideshow.macroEnabled.12"/>
+  
   <mime-mapping extension=".png" mime-type="image/png"/>
   <mime-mapping extension=".pgn" mime-type="application/x-chess-pgn"/>
   <mime-mapping extension=".pnm" mime-type="image/x-portable-anymap"/>
@@ -242,6 +261,15 @@
   <mime-mapping extension=".wvx" mime-type="video/x-ms-wvx"/>
    
   <mime-mapping extension=".xls" mime-type="application/vnd.ms-excel"/>
+  <mime-mapping extension=".xlt" mime-type="application/vnd.ms-excel"/>
+  <mime-mapping extension=".xla" mime-type="application/vnd.ms-excel"/>
+  <mime-mapping extension=".xlsx" mime-type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+  <mime-mapping extension=".xltx" mime-type="application/vnd.openxmlformats-officedocument.spreadsheetml.template"/>
+  <mime-mapping extension=".xlsm" mime-type="application/vnd.ms-excel.sheet.macroEnabled.12"/>
+  <mime-mapping extension=".xltm" mime-type="application/vnd.ms-excel.template.macroEnabled.12"/>
+  <mime-mapping extension=".xlam" mime-type="application/vnd.ms-excel.addin.macroEnabled.12"/>
+  <mime-mapping extension=".xlsb" mime-type="application/vnd.ms-excel.sheet.binary.macroEnabled.12"/>  
+  
   <mime-mapping extension=".xbm" mime-type="image/x-xbitmap"/>
   <mime-mapping extension=".xml" mime-type="text/xml"/>
   <mime-mapping extension=".xpm" mime-type="image/x-xpixmax"/>
