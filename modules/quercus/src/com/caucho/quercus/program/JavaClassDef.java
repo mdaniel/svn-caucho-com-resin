@@ -219,7 +219,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     else if (Calendar.class.isAssignableFrom(type))
       return new CalendarClassDef(moduleContext);
     else if (Date.class.isAssignableFrom(type))
-      return new DateClassDef(moduleContext);
+      return new DateClassDef(moduleContext, type);
     else if (URL.class.isAssignableFrom(type))
       return new URLClassDef(moduleContext);
     else if (Map.class.isAssignableFrom(type))
@@ -592,7 +592,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
    */
   @Override
   public Value callNew(Env env, Value []args)
-  {
+  {    
     if (_cons != null) {
       if (__construct != null) {
         Value value = _cons.call(env, Value.NULL_ARGS);
@@ -1848,15 +1848,15 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   }
 
   private static class DateClassDef extends JavaClassDef {
-    DateClassDef(ModuleContext module)
+    DateClassDef(ModuleContext module, Class<?> type)
     {
-      super(module, "Date", Date.class);
+      super(module, "Date", type);
     }
 
     @Override
     public Value wrap(Env env, Object obj)
     {
-      return new JavaDateValue(env, (Date)obj, this);
+      return new JavaDateValue(env, (Date) obj, this);
     }
   }
 
