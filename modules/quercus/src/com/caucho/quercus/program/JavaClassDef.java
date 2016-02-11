@@ -1850,7 +1850,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private static class DateClassDef extends JavaClassDef {
     DateClassDef(ModuleContext module, Class<?> type)
     {
-      super(module, "Date", type);
+      super(module, type.getSimpleName(), type);
     }
 
     @Override
