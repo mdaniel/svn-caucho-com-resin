@@ -2194,7 +2194,7 @@ public class WebApp extends ServletContextImpl
   public boolean hasListener(ArrayList<?> listeners, Class<?> listenerClass)
   {
     for (int i = 0; i < listeners.size(); i++) {
-      Object listener = _listeners.get(i);
+      Object listener = listeners.get(i);
 
       if (listener.getClass().equals(listenerClass)) {
         return true;

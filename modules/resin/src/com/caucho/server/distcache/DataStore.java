@@ -84,7 +84,7 @@ public class DataStore {
 
   // data must live for at least 15min because of timing issues during
   // creation. The reaper must not remove data while it's being added
-  private long _expireDataMinIdle = 3 * 60L * 1000L;
+  private long _expireDataMinIdle = 15 * 60L * 1000L;
 
   private DataSource _dataSource;
 

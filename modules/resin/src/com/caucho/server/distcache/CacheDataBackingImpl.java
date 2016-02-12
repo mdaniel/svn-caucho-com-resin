@@ -654,7 +654,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         }
       }
       
-      if (mnodeList.size() > 0 || true) {
+      if (mnodeList.size() > 0) {
         log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items (removed=" + removeCount + ")");
       }
 

@@ -6,6 +6,13 @@
 
 <s1 title="Resin Change Log">
 
+<s2 title="4.0.48 - in progress">
+<ul>
+<li>mime-type: additional extensions for mime-type.</li>
+<li>session: fixes related delete timing.</li>
+</ul>
+</s2>
+
 <s2 title="4.0.47 - in progress">
 <ul>
 <li>session: fixes related to Java deserialization (#5947, rep by Shinomiya Nobuaki)</li>

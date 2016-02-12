@@ -33,12 +33,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.caucho.VersionFactory;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
 import com.caucho.util.CurrentTime;
@@ -52,6 +53,8 @@ import com.caucho.vfs.Vfs;
  * the default variables.
  */
 public class CauchoSystem {
+  private static final Logger log = Logger.getLogger(CauchoSystem.class.getName())
+      ;
   static EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
   
@@ -504,7 +507,9 @@ public class CauchoSystem {
       
       isJdk7 = true;
     } catch (Throwable e) {
-      e.printStackTrace();;
+      if (log.isLoggable(Level.FINEST)) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
     }
     
     _isJdk7 = isJdk7;
