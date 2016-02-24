@@ -47,7 +47,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.vfs.ReadStream;
 
 public class RequestCauchoDispatch extends RequestCauchoBase
@@ -682,14 +682,14 @@ public class RequestCauchoDispatch extends RequestCauchoBase
   }
   
   @Override
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     RequestCaucho cRequest = getCauchoRequest();
 
     if (cRequest != null)
       return cRequest.getWebApp();
     else
-      return (WebApp) _request.getServletContext();
+      return (WebAppResinBase) _request.getServletContext();
   }
   
   @Override

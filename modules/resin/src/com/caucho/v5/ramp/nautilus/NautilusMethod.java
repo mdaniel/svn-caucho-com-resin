@@ -49,7 +49,7 @@ class NautilusMethod extends MethodAmpBase
   }
 
   @Override
-  public String getName()
+  public String name()
   {
     return _methodName;
   }

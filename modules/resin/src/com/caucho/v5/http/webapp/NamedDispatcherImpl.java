@@ -51,7 +51,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
 
   private static final L10N L = new L10N(NamedDispatcherImpl.class);
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   
   private FilterChain _includeFilterChain;  
   private FilterChain _forwardFilterChain;  
@@ -63,7 +63,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
   NamedDispatcherImpl(FilterChain includeFilterChain,
                       FilterChain forwardFilterChain,
                       InvocationServlet invocation,
-                      String queryString, WebApp webApp)
+                      String queryString, WebAppResinBase webApp)
   {
     _includeFilterChain = includeFilterChain;
     _forwardFilterChain = forwardFilterChain;

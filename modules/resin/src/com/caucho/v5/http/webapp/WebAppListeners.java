@@ -62,7 +62,7 @@ class WebAppListeners
   private static final Logger log
     = Logger.getLogger(WebAppListeners.class.getName());
   
-  private final WebAppBuilder _builder;
+  private final WebAppResinBuilder _builder;
 
   // List of all the listeners.
   private ArrayList<ListenerConfig<?>> _listeners
@@ -90,14 +90,14 @@ class WebAppListeners
 
   private boolean _isStart;
 
-  WebAppListeners(WebAppBuilder builder)
+  WebAppListeners(WebAppResinBuilder builder)
   {
     Objects.requireNonNull(builder);
     
     _builder = builder;
   }
   
-  private WebApp getWebApp()
+  private WebAppResinBase getWebApp()
   {
     return _builder.getWebApp();
   }
@@ -134,7 +134,7 @@ class WebAppListeners
                           ServletContextEvent event,
                           boolean isContextConfigUnsuppored)
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     webApp.setContextConfigUnsuppored(isContextConfigUnsuppored);
 
     for (int i = 0; i < listeners.size(); i++) {

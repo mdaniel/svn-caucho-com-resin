@@ -225,9 +225,9 @@ public class ServerBaseConfigResin extends ServerBaseConfig implements Environme
   public TempFileManager getTempFileManager()
   {
     if (_tempFileManager == null) {
-      Path path = RootDirectorySystem.getCurrent().getDataDirectory();
+      Path path = RootDirectorySystem.getCurrent().dataDirectory();
 
-      _tempFileManager = new TempFileManager(path);
+      _tempFileManager = new TempFileManager(path, null);
     }
 
     return _tempFileManager;

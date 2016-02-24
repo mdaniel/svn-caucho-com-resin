@@ -30,7 +30,7 @@
 package com.caucho.v5.http.webapp;
 
 import com.caucho.v5.deploy.DeployHandle;
-import com.caucho.v5.http.webapp.WebAppBuilder;
+import com.caucho.v5.http.webapp.WebAppResinBuilder;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.util.ModulePrivate;
@@ -59,7 +59,7 @@ public class WebAppControllerResin extends WebAppController
    * Instantiate the webApp.
    */
   @Override
-  protected WebAppBuilder createInstanceBuilder()
+  protected WebAppResinBuilder createInstanceBuilder()
   {
     return new WebAppBuilderResin(this);
   }

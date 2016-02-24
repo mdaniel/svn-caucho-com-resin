@@ -33,7 +33,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpSession;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.network.port.StateConnection;
 
@@ -44,11 +44,11 @@ import com.caucho.v5.network.port.StateConnection;
 public class RequestServletStubSession extends RequestServletStub
   implements ConnectionProtocol
 {
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   private String _sessionId;
   private HttpSession _session;
   
-  public RequestServletStubSession(WebApp webApp, String sessionId)
+  public RequestServletStubSession(WebAppResinBase webApp, String sessionId)
   {
     _webApp = webApp;
     _sessionId = sessionId;

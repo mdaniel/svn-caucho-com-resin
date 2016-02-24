@@ -96,24 +96,24 @@ public class WebAppBuilderScan
   private List<String> _pendingClasses = new ArrayList<String>();
   private ScanListenerClassHierarchy _classHierarchyScanListener;
   
-  private final WebAppBuilder _builder;
+  private final WebAppResinBuilder _builder;
   
   /**
    * Builder Creates the webApp with its environment loader.
    */
-  public WebAppBuilderScan(WebAppBuilder builder)
+  public WebAppBuilderScan(WebAppResinBuilder builder)
   {
     Objects.requireNonNull(builder);
     
     _builder = builder;
   }
   
-  private WebAppBuilder getBuilder()
+  private WebAppResinBuilder getBuilder()
   {
     return _builder;
   }
   
-  private WebApp getWebApp()
+  private WebAppResinBase getWebApp()
   {
     return getBuilder().getWebApp();
   }

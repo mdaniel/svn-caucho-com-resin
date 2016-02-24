@@ -31,9 +31,9 @@ package com.caucho.v5.env.health;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.caucho.v5.env.system.*;
 import com.caucho.v5.subsystem.SubSystemBase;
 import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;

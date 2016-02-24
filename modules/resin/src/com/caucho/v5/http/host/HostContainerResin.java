@@ -42,7 +42,7 @@ import com.caucho.v5.http.host.HostController;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.webapp.AccessLogFilterChain;
 import com.caucho.v5.http.webapp.FilterChainWebApp;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.vfs.PathImpl;
 
 /**
@@ -126,7 +126,7 @@ public class HostContainerResin extends HostContainer
 
       if (rewriteChain != chain) {
         HttpContainerServlet server = getServer();
-        WebApp webApp = server.getDefaultWebApp();
+        WebAppResinBase webApp = server.getDefaultWebApp();
         invocation.setWebApp(webApp);
 
         if (webApp != null) {

@@ -35,12 +35,12 @@ import com.caucho.v5.server.config.ClusterConfigBoot;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.RootConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
-import com.caucho.v5.server.container.ServerBase;
-import com.caucho.v5.server.container.ServerBuilderBaratine;
 import com.caucho.v5.server.main.ArgsServerBaratine;
 import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.VfsOld;
+import com.caucho.v5.web.server.ServerBase;
+import com.caucho.v5.web.server.ServerBuilderBaratine;
 
 public class ServerBaratineEmbedBuilder implements ServiceServer.Builder
 {

@@ -41,7 +41,7 @@ import com.caucho.v5.http.dispatch.ServletBuilderResin;
 import com.caucho.v5.http.dispatch.ServletMapping;
 import com.caucho.v5.http.webapp.DeployGeneratorWebAppSingle;
 import com.caucho.v5.http.webapp.ListenerConfig;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 /**
  * Embeddable version of a Resin web-app.
@@ -83,7 +83,7 @@ public class WebAppEmbed
   private final ArrayList<ListenerEmbed> _listenerList
     = new ArrayList<ListenerEmbed>();
   
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   
   private DeployGeneratorWebAppSingle _deployGenerator;
   
@@ -261,7 +261,7 @@ public class WebAppEmbed
     _isStartDisabled = isDisable;
   }
   
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }
@@ -269,7 +269,7 @@ public class WebAppEmbed
   /**
    * Configures the web-app (for internal use)
    */
-  protected void configure(WebApp webApp)
+  protected void configure(WebAppResinBase webApp)
   {
     _webApp = webApp;
     

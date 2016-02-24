@@ -52,7 +52,7 @@ public class ThreadPoolConfig {
   @PostConstruct
   public void init()
   {
-    ThreadPool threadPool = ThreadPool.getThreadPool();
+    ThreadPool threadPool = ThreadPool.current();
 
     if (_threadMax > 0)
       threadPool.setThreadMax(_threadMax);

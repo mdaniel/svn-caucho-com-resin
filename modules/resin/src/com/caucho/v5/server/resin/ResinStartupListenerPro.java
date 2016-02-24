@@ -31,7 +31,7 @@ package com.caucho.v5.server.resin;
 
 import com.caucho.v5.env.log.LogSystem;
 import com.caucho.v5.health.shutdown.ExitCode;
-import com.caucho.v5.server.container.StartInfoListener;
+import com.caucho.v5.web.server.StartInfoListener;
 
 /**
  * Callback when the Resin instance gets its startup information from

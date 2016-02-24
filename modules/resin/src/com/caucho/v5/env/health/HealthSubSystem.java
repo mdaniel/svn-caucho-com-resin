@@ -34,7 +34,6 @@ import com.caucho.v5.lifecycle.Lifecycle;
 import com.caucho.v5.lifecycle.LifecycleListener;
 import com.caucho.v5.lifecycle.LifecycleState;
 import com.caucho.v5.server.container.ServerBaseOld;
-import com.caucho.v5.server.container.StartInfoListener;
 import com.caucho.v5.subsystem.SubSystemBase;
 import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.Alarm;
@@ -42,6 +41,7 @@ import com.caucho.v5.util.AlarmListener;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.QDate;
+import com.caucho.v5.web.server.StartInfoListener;
 
 @InlineConfig
 public class HealthSubSystem extends SubSystemBase
@@ -816,7 +816,7 @@ public class HealthSubSystem extends SubSystemBase
   
   public void fireEvent(HealthEvent event)
   {
-    ThreadPool.getThreadPool().schedule(new ExecuteActionsTask(event));
+    ThreadPool.current().schedule(new ExecuteActionsTask(event));
     
     // executeActions(event);
   }

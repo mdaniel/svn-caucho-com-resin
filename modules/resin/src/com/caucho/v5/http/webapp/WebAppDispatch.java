@@ -85,7 +85,7 @@ public class WebAppDispatch
     = Logger.getLogger(WebAppDispatch.class.getName());
   private static final L10N L = new L10N(WebAppDispatch.class);
   
-  private final WebAppBuilder _builder;
+  private final WebAppResinBuilder _builder;
 
   // The servlet manager
   private ServletManager _servletManager;
@@ -116,7 +116,7 @@ public class WebAppDispatch
 
   private FilterChainBuilder _securityBuilder;
 
-  private WebApp _oldWebApp;
+  private WebAppResinBase _oldWebApp;
   private long _oldWebAppExpireTime;
 
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
@@ -125,7 +125,7 @@ public class WebAppDispatch
     = new LruCache<>(256);
   private WelcomeFile _welcomeFile;
 
-  public WebAppDispatch(WebAppBuilder builder)
+  public WebAppDispatch(WebAppResinBuilder builder)
   {
     Objects.requireNonNull(builder);
     
@@ -152,12 +152,12 @@ public class WebAppDispatch
     return getWebApp().isEnabled();
   }
   
-  private WebApp getWebApp()
+  private WebAppResinBase getWebApp()
   {
     return _builder.getWebApp();
   }
   
-  private WebAppBuilder getBuilder()
+  private WebAppResinBuilder getBuilder()
   {
     return _builder;
   }
@@ -190,7 +190,7 @@ public class WebAppDispatch
   /**
    * Sets the old version web-app.
    */
-  public void setOldWebApp(WebApp oldWebApp, long expireTime)
+  public void setOldWebApp(WebAppResinBase oldWebApp, long expireTime)
   {
     _oldWebApp = oldWebApp;
     _oldWebAppExpireTime = expireTime;
@@ -536,7 +536,7 @@ public class WebAppDispatch
       // server/1h57
       boolean isSameWebApp = false;
       if (container != null) {
-        DeployHandle<WebApp> subController
+        DeployHandle<WebAppResinBase> subController
           = container.getWebAppHandle(includeInvocation);
 
         // server/1233

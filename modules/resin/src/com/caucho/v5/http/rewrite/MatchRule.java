@@ -37,7 +37,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.util.Alarm;
 import com.caucho.v5.util.AlarmListener;
@@ -173,7 +173,7 @@ public class MatchRule
    */
   public ProxyRule createProxy()
   {
-    WebApp webApp = getRewriteDispatch().getWebApp();
+    WebAppResinBase webApp = getRewriteDispatch().getWebApp();
 
     if (webApp == null)
       throw new ConfigException(L.l("<proxy> requires a web-app.  Host-based <rewrite-dispatch> can not use <proxy>."));

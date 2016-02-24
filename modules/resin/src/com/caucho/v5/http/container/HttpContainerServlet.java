@@ -72,8 +72,8 @@ import com.caucho.v5.http.protocol.ResponseServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.http.webapp.ErrorPage;
 import com.caucho.v5.http.webapp.ErrorPageManager;
-import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.http.webapp.WebAppBuilder;
+import com.caucho.v5.http.webapp.WebAppResinBase;
+import com.caucho.v5.http.webapp.WebAppResinBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.inject.InjectManagerAmp;
@@ -919,7 +919,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
    */
   public void addErrorPage(ErrorPage errorPage)
   {
-    WebApp webApp = getErrorWebApp();
+    WebAppResinBase webApp = getErrorWebApp();
     
     if (webApp != null)
       webApp.addErrorPage(errorPage);
@@ -1025,9 +1025,9 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   /**
    * Returns the default web-app or error web-app for top-level errors
    */
-  public WebApp getDefaultWebApp()
+  public WebAppResinBase getDefaultWebApp()
   {
-    WebApp webApp = getWebApp("", 80, "");
+    WebAppResinBase webApp = getWebApp("", 80, "");
 
     if (webApp != null)
       return webApp;
@@ -1038,7 +1038,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   /**
    * Returns the matching web-app for a URL.
    */
-  public WebApp getWebApp(String hostName, int port, String url)
+  public WebAppResinBase getWebApp(String hostName, int port, String url)
   {
     try {
       HostContainer hostContainer = _hostContainer;
@@ -1078,7 +1078,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     return null;
   }
 
-  public DeployHandle<WebApp> findWebAppHandle(String id)
+  public DeployHandle<WebAppResinBase> findWebAppHandle(String id)
   {
     for (DeployHandle<Host> hostHandle : getHostHandles()) {
       Host host = hostHandle.getDeployInstance();
@@ -1087,7 +1087,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
         continue;
       }
       
-      for (DeployHandle<WebApp> webAppCtrl : host.getWebAppContainer().getWebAppHandles()) {
+      for (DeployHandle<WebAppResinBase> webAppCtrl : host.getWebAppContainer().getWebAppHandles()) {
         if (webAppCtrl.getId().equals(id)) {
           return webAppCtrl;
         }
@@ -1100,7 +1100,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   /**
    * Returns the error webApp during startup.
    */
-  public WebApp getErrorWebApp()
+  public WebAppResinBase getErrorWebApp()
   {
     if (isActive())
       return _hostContainer.getErrorWebApp();
@@ -1110,7 +1110,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
   
   public ErrorPageManager getErrorPageManager()
   {
-    WebApp errorWebApp = getErrorWebApp();
+    WebAppResinBase errorWebApp = getErrorWebApp();
     
     if (errorWebApp != null)
       return errorWebApp.getErrorPageManager();
@@ -1371,9 +1371,9 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
     return _lifecycle.isActive();
   }
 
-  public WebAppBuilder createWebAppBuilder(WebAppController controller)
+  public WebAppResinBuilder createWebAppBuilder(WebAppController controller)
   {
-    return new WebAppBuilder(controller);
+    return new WebAppResinBuilder(controller);
   }
 
   /**
@@ -1445,7 +1445,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       log.log(Level.FINE, e1.toString(), e1);
     }
 
-    WebApp webApp = getDefaultWebApp();
+    WebAppResinBase webApp = getDefaultWebApp();
 
     if (webApp != null && req != null) {
       webApp.accessLog(req, res);
@@ -1520,7 +1520,7 @@ public class HttpContainerServlet extends HttpContainerBase<InvocationServlet>
       }
 
       try {
-        ThreadPool.getThreadPool().clearIdleThreads();
+        ThreadPool.current().clearIdleThreads();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }

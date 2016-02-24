@@ -348,8 +348,8 @@ class WatchdogServiceImpl
     ArrayList<ChildWatchdogService> servers
       = new ArrayList<>(_childMap.values());
     
-    ThreadPool.getCurrent().schedule(new FailSafeKill(servers));
-    ThreadPool.getCurrent().schedule(new FailSafeShutdown(SHUTDOWN_TIMEOUT));
+    ThreadPool.current().schedule(new FailSafeKill(servers));
+    ThreadPool.current().schedule(new FailSafeShutdown(SHUTDOWN_TIMEOUT));
     
     ShutdownCompletion cont
       = new ShutdownCompletion(servers.size(), result);

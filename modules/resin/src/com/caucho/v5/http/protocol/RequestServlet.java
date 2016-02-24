@@ -62,7 +62,7 @@ import com.caucho.v5.http.security.Login;
 import com.caucho.v5.http.security.LoginBase;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.WriteBuffer;
 import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.network.port.ConnectionTcp;
@@ -491,7 +491,7 @@ public final class RequestServlet extends RequestCauchoBase
       return false;
     }
     
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
       
     if (webApp != null) {
       Boolean isSecure = webApp.isRequestSecure();
@@ -585,7 +585,7 @@ public final class RequestServlet extends RequestCauchoBase
 
       Object oldValue = attributes.put(name, value);
 
-      WebApp webApp = getWebApp();
+      WebAppResinBase webApp = getWebApp();
 
       if (webApp != null) {
         for (ServletRequestAttributeListener listener
@@ -626,7 +626,7 @@ public final class RequestServlet extends RequestCauchoBase
 
     Object oldValue = attributes.remove(name);
 
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     if (webApp == null)
       return;
@@ -682,7 +682,7 @@ public final class RequestServlet extends RequestCauchoBase
     else {
       CharBuffer cb = new CharBuffer();
 
-      WebApp webApp = getWebApp();
+      WebAppResinBase webApp = getWebApp();
 
       String servletPath = getPageServletPath();
       if (servletPath != null)
@@ -961,7 +961,7 @@ public final class RequestServlet extends RequestCauchoBase
   @Override
   public Enumeration<String> getHeaderNames()
   {
-    return _request.getHeaderNames();
+    return null;//_request.getHeaderNames();
   }
 
   /**
@@ -1279,7 +1279,7 @@ public final class RequestServlet extends RequestCauchoBase
     if (login instanceof X509Certificate)
       return HttpServletRequest.CLIENT_CERT_AUTH;
 
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     if (webApp != null && webApp.getLogin() != null && getUserPrincipal() != null)
       return webApp.getLogin().getAuthType();
@@ -1292,7 +1292,7 @@ public final class RequestServlet extends RequestCauchoBase
    */
   protected Login getLogin()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     if (webApp != null)
       return webApp.getLogin();
@@ -1918,7 +1918,7 @@ public final class RequestServlet extends RequestCauchoBase
   /**
    * Returns the invocation's webApp.
    */
-  public final WebApp getWebApp()
+  public final WebAppResinBase getWebApp()
   {
     if (_invocation != null)
       return _invocation.getWebApp();

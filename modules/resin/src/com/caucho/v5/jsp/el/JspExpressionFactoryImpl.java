@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import com.caucho.v5.el.ExpressionFactoryImpl;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.ModulePrivate;
 
 import javax.el.*;
@@ -99,7 +99,7 @@ class JspExpressionFactoryImpl extends ExpressionFactory
 
   public String toString()
   {
-    WebApp webApp = null;
+    WebAppResinBase webApp = null;
     if (_jspApplicationContext != null)
       webApp = _jspApplicationContext.getWebApp();
 

@@ -45,7 +45,7 @@ import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.xml.ConfigXml;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.javac.JavacConfig;
@@ -314,7 +314,7 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public WebApp createWebApp(PathImpl rootDirectory)
+  public WebAppResinBase createWebApp(PathImpl rootDirectory)
   {
     if (_webApp == null) {
       if (rootDirectory == null)
@@ -341,7 +341,7 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public void setWebApp(WebApp app)
+  public void setWebApp(WebAppResinBase app)
   {
     _webApp = (WebAppResin) app;
 
@@ -663,7 +663,7 @@ public class JspCompiler implements EnvironmentBean {
         if (args[i].equals("-app-dir")) {
           PathImpl appDir = VfsOld.lookup(args[i + 1]);
 
-          WebApp webApp = createWebApp(appDir);
+          WebAppResinBase webApp = createWebApp(appDir);
 
           if (webApp != null)
             setWebApp(webApp);
@@ -693,7 +693,7 @@ public class JspCompiler implements EnvironmentBean {
           break;
       }
       
-      WebApp webApp = getWebApp();
+      WebAppResinBase webApp = getWebApp();
       if (webApp != null && ! hasConf) {
         PathImpl appDir = webApp.getRootDirectory();
 
@@ -865,7 +865,7 @@ public class JspCompiler implements EnvironmentBean {
     public void init()
       throws Exception
     {
-      WebApp webApp = createWebApp(_rootDir);
+      WebAppResinBase webApp = createWebApp(_rootDir);
       
       if (webApp == null)
         throw new NullPointerException();

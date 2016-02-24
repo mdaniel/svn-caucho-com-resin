@@ -52,7 +52,7 @@ public interface WebAppRouterService
   /**
    * Returns the deployed entries.
    */
-  DeployHandle<WebApp> []getHandles();
+  DeployHandle<WebAppResinBase> []getHandles();
   
   /**
    * Closes the service.

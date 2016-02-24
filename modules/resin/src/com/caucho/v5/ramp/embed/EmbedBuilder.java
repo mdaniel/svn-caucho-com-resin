@@ -300,7 +300,7 @@ public class EmbedBuilder
     Class<?> serviceClass;
     
     try {
-      serviceClass = Class.forName(className, false, manager.getClassLoader());
+      serviceClass = Class.forName(className, false, manager.classLoader());
     } catch (ClassNotFoundException e) {
       log.log(Level.FINE, e.toString(), e);
       

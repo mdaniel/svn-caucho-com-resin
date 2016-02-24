@@ -34,7 +34,7 @@ import java.net.URL;
 import com.caucho.v5.cli.resin.ProgramInfoResin;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.server.container.ServerBase;
+import com.caucho.v5.web.server.ServerBase;
 
 /**
  * The parsed resin command-line arguments

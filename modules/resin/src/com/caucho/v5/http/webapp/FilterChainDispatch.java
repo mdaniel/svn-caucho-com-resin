@@ -52,7 +52,7 @@ public class FilterChainDispatch implements FilterChain {
   private FilterChain _next;
 
   // app
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   // class loader
   private ClassLoader _classLoader;
 
@@ -65,7 +65,7 @@ public class FilterChainDispatch implements FilterChain {
    * @param webApp the webApp
    */
   public FilterChainDispatch(FilterChain next,
-                             WebApp webApp)
+                             WebAppResinBase webApp)
   {
     _next = next;
     _webApp = webApp;

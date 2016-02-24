@@ -69,8 +69,8 @@ class RequestIncludeDispatch extends RequestDispatchBase {
   }
 
   void init(InvocationServlet invocation,
-            WebApp webApp,
-            WebApp oldWebApp,
+            WebAppResinBase webApp,
+            WebAppResinBase oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
             String method, String uri,

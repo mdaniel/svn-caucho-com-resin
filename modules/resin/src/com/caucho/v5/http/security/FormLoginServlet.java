@@ -44,7 +44,7 @@ import javax.servlet.http.HttpSession;
 
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 public class FormLoginServlet extends GenericServlet {
@@ -59,7 +59,7 @@ public class FormLoginServlet extends GenericServlet {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    WebApp webApp = (WebApp) getServletContext();
+    WebAppResinBase webApp = (WebAppResinBase) getServletContext();
     
     FormLogin login = null;
     
@@ -167,7 +167,7 @@ public class FormLoginServlet extends GenericServlet {
     if (useInternalForward
         && uri.startsWith(uriPwd)
         && uri.indexOf('/', uriPwd.length() + 1) < 0) {
-      WebApp newApp = (WebApp) webApp.getContext(uri);
+      WebAppResinBase newApp = (WebAppResinBase) webApp.getContext(uri);
       String suffix = uri.substring(newApp.getContextPath().length());
       
       // force authorization of the page because the normal forward()

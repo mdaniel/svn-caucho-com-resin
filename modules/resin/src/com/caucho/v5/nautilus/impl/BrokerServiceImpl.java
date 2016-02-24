@@ -162,7 +162,7 @@ public final class BrokerServiceImpl
   
   private void initImpl()
   {
-    KrakenSystem kraken = KrakenSystem.getCurrent();
+    KrakenSystem kraken = KrakenSystem.current();
     
     Objects.requireNonNull(kraken);
     
@@ -330,15 +330,15 @@ public final class BrokerServiceImpl
     if (name.startsWith("///")) {
       String tail = name.substring(2);
       
-      name = "//" + _pod.getName() + tail;
+      name = "//" + _pod.name() + tail;
     }
     else if (name.startsWith("//")) {
     }
     else if (name.startsWith("/")) {
-      name = "//" + _pod.getName() + name;
+      name = "//" + _pod.name() + name;
     }
     else {
-      name = "//" + _pod.getName() + "/" + name;
+      name = "//" + _pod.name() + "/" + name;
     }
     
     QueueService queue = _queueNameMap.get(name);
@@ -372,7 +372,7 @@ public final class BrokerServiceImpl
     
     PodBartender pod = _bartender.findPod(podName);
     
-    ServerBartender server = pod.getNode(0).getServer(0);
+    ServerBartender server = pod.getNode(0).server(0);
     
     if (server == _bartender.serverSelf()) {
       QueueServiceLocal queueImpl = new QueueServiceLocal(this, name, qid);

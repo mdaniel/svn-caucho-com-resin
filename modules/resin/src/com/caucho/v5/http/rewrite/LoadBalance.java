@@ -47,7 +47,7 @@ import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.proxy.HashGeneratorStickyRequest;
 import com.caucho.v5.http.proxy.ProxyLoadBalanceServlet;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 /**
  * Dispatches a request to the load balancer.
@@ -63,7 +63,7 @@ import com.caucho.v5.http.webapp.WebApp;
 @Configurable
 public class LoadBalance extends DispatchRuleTargetBase
 {
-  private WebApp _webApp = WebApp.getCurrent();
+  private WebAppResinBase _webApp = WebAppResinBase.getCurrent();
 
   private ProxyLoadBalanceServlet _loadBalanceServlet;
   private ServletBuilder _servlet;
@@ -131,7 +131,7 @@ public class LoadBalance extends DispatchRuleTargetBase
     throws ConfigException
   {
     try {
-      _webApp = WebApp.getCurrent();
+      _webApp = WebAppResinBase.getCurrent();
 
       _servlet = new ServletBuilder();
 

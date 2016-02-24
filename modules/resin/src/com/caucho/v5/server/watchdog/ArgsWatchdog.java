@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import com.caucho.v5.cli.daemon.ArgsDaemon;
 import com.caucho.v5.cli.server.ProgramInfoDaemon;
 import com.caucho.v5.cli.server.ServerELContext;
-import com.caucho.v5.cli.shell.EnvCli;
+import com.caucho.v5.cli.shell_old.EnvCliOld;
 import com.caucho.v5.cli.spi.CommandManager;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.VfsOld;
@@ -52,10 +52,10 @@ public class ArgsWatchdog extends ArgsDaemon
   protected ArgsWatchdog(String[] argv, 
                          ProgramInfoDaemon programInfo)
   {
-    super(new EnvCli(), argv, programInfo);
+    super(new EnvCliOld(), argv, programInfo);
   }
 
-  protected ArgsWatchdog(EnvCli env, 
+  protected ArgsWatchdog(EnvCliOld env, 
                          String[] argv, 
                          ProgramInfoDaemon programInfo)
   {

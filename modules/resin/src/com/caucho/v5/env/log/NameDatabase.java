@@ -109,7 +109,7 @@ class NameDatabase
 
   private void createDatabases()
   {
-    KrakenSystem kraken = KrakenSystem.getCurrent();
+    KrakenSystem kraken = KrakenSystem.current();
     
     _tableManager = kraken.getTableManager();
 

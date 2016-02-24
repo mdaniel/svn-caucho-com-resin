@@ -45,7 +45,7 @@ import com.caucho.v5.vfs.PathImpl;
  * The generator for the web-app deploy
  */
 public class DeployGeneratorWebAppRegexp
-  extends DeployGenerator<WebApp,WebAppController>
+  extends DeployGenerator<WebAppResinBase,WebAppController>
 {
   private static final Logger log
     = Logger.getLogger(DeployGeneratorWebAppSingle.class.getName());
@@ -65,7 +65,7 @@ public class DeployGeneratorWebAppRegexp
   /**
    * Creates the new host deploy.
    */
-  public DeployGeneratorWebAppRegexp(DeployContainerService<WebApp,WebAppController> deployContainer)
+  public DeployGeneratorWebAppRegexp(DeployContainerService<WebAppResinBase,WebAppController> deployContainer)
   {
     super(deployContainer);
   }
@@ -73,7 +73,7 @@ public class DeployGeneratorWebAppRegexp
   /**
    * Creates the new host deploy.
    */
-  public DeployGeneratorWebAppRegexp(DeployContainerService<WebApp,WebAppController> deployContainer,
+  public DeployGeneratorWebAppRegexp(DeployContainerService<WebAppResinBase,WebAppController> deployContainer,
                             WebAppContainer container,
                             WebAppConfig config)
   {

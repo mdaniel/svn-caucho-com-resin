@@ -36,7 +36,7 @@ import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.servlet.jsp.JspApplicationContext;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.jsp.PageManager;
 import com.caucho.v5.jsp.TaglibManager;
 import com.caucho.v5.loader.EnvironmentLocal;
@@ -51,7 +51,7 @@ public class JspApplicationContextImpl implements JspApplicationContext
   private static final EnvironmentLocal<JspApplicationContextImpl> _contextLocal
     = new EnvironmentLocal<JspApplicationContextImpl>();
   
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   
   private final ExpressionFactory _expressionFactory;
 
@@ -66,7 +66,7 @@ public class JspApplicationContextImpl implements JspApplicationContext
 
   private final AtomicBoolean _hasRequest = new AtomicBoolean();
 
-  public JspApplicationContextImpl(WebApp webApp)
+  public JspApplicationContextImpl(WebAppResinBase webApp)
   {
     _webApp = webApp;
 
@@ -89,7 +89,7 @@ public class JspApplicationContextImpl implements JspApplicationContext
   // properties
   //
   
-  WebApp getWebApp()
+  WebAppResinBase getWebApp()
   {
     return _webApp;
   }

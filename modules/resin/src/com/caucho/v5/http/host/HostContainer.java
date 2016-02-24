@@ -48,7 +48,7 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.FilterChainError;
 import com.caucho.v5.http.dispatch.InvocationRouter;
 import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.io.AlwaysModified;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -443,7 +443,7 @@ public class HostContainer implements InvocationRouter<InvocationServlet>
   /**
    * Returns the error webApp during startup.
    */
-  public WebApp getErrorWebApp()
+  public WebAppResinBase getErrorWebApp()
   {
     Host errorHost = getErrorHost();
     

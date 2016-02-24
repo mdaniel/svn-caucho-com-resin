@@ -89,13 +89,15 @@ public class AdminPortTcp extends ManagedObjectBase
   @Override
   public int getAcceptThreadMin()
   {
-    return _port.getAcceptThreadMin();
+    //return _port.getAcceptThreadMin();
+    return 0;
   }
 
   @Override
   public int getAcceptThreadMax()
   {
-    return _port.getAcceptThreadMax();
+    //return _port.getAcceptThreadMax();
+    return 0;
   }
 
   @Override
@@ -113,7 +115,8 @@ public class AdminPortTcp extends ManagedObjectBase
   @Override
   public int getPortThreadMax()
   {
-    return _port.getPortThreadMax();
+    //return _port.getPortThreadMax();
+    return 0;
   }
 
   @Override
@@ -125,7 +128,7 @@ public class AdminPortTcp extends ManagedObjectBase
   @Override
   public int getKeepaliveSelectMax()
   {
-    return _port.getKeepaliveSelectMax();
+    return _port.pollMax();
   }
 
   @Override
@@ -179,25 +182,29 @@ public class AdminPortTcp extends ManagedObjectBase
   @Override
   public int getThreadCount()
   {
-    return _port.getThreadCount();
+    //return _port.getThreadCount();
+    return 0;
   }
 
   @Override
   public int getThreadActiveCount()
   {
-    return _port.getActiveThreadCount();
+    //return _port.getActiveThreadCount();
+    return 0;
   }
 
   @Override
   public int getThreadIdleCount()
   {
-    return _port.getIdleThreadCount();
+    //return _port.getIdleThreadCount();
+    return 0;
   }
 
   @Override
   public int getThreadStartCount()
   {
-    return _port.getStartThreadCount();
+    //return _port.getStartThreadCount();
+    return 0;
   }
   
   @Override

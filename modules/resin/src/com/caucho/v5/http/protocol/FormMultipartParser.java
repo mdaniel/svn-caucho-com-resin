@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.Part;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.TempBuffer;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CharBuffer;
@@ -145,7 +145,7 @@ class FormMultipartParser {
           throw formError(msg, fileLength, request);
         }
 
-        WebApp webApp = request.getWebApp();
+        WebAppResinBase webApp = request.getWebApp();
         if (webApp != null && webApp.isMultipartFormEnabled()) {
           // server/136u, server/136v, #2578
           if (table.get(name + ".filename") == null) {

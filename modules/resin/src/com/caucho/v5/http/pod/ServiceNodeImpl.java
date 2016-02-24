@@ -49,13 +49,13 @@ public class ServiceNodeImpl implements ServiceNode
   @Override
   public String podName()
   {
-    return _node.getPod().getName();
+    return _node.pod().name();
   }
 
   @Override
   public int nodeCount()
   {
-    return _node.getPod().getNodeCount();
+    return _node.pod().nodeCount();
   }
 
   @Override

@@ -34,8 +34,8 @@ import java.util.logging.Logger;
 import com.caucho.v5.bartender.pod.PodBartender;
 import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.deploy.DeployInstanceBuilder;
-import com.caucho.v5.http.baratine.HttpBaratine;
 import com.caucho.v5.vfs.PathImpl;
+import com.caucho.v5.web.webapp.HttpBaratine;
 
 /**
  * A configuration entry for an pod-application, the services deployed to

@@ -30,7 +30,7 @@
 package com.caucho.v5.http.cache;
 
 import com.caucho.v5.config.types.Bytes;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.vfs.PathImpl;
 
 import javax.servlet.FilterChain;
@@ -131,7 +131,7 @@ public class HttpCacheBase
    * Creates the filter.
    */
   public FilterChain createFilterChain(FilterChain next,
-                                       WebApp app)
+                                       WebAppResinBase app)
   {
     return next;
   }

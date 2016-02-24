@@ -164,7 +164,7 @@ public class RequestInclude extends RequestCauchoDispatch {
   }
   
   @Override
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _invocation.getWebApp();
   }

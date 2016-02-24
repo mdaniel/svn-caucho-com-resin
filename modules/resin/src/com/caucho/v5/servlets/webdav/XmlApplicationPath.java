@@ -28,7 +28,7 @@
 
 package com.caucho.v5.servlets.webdav;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -224,7 +224,7 @@ public class XmlApplicationPath extends ApplicationPath {
                          ServletContext app)
     throws IOException
   {
-    PathImpl appDir = ((WebApp) app).getRootDirectory();
+    PathImpl appDir = ((WebAppResinBase) app).getRootDirectory();
 
     if (_root != null)
       appDir = _root;

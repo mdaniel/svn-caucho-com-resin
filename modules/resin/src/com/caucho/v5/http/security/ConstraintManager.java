@@ -46,7 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.http.dispatch.FilterChainBuilder;
 import com.caucho.v5.http.dispatch.FilterChainError;
 import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 /**
  * Manages security constraint.
@@ -161,7 +161,7 @@ public class ConstraintManager extends FilterChainBuilder {
   {
     String uri = invocation.getContextURI();
 
-    WebApp webApp = invocation.getWebApp();
+    WebAppResinBase webApp = invocation.getWebApp();
     if (webApp == null) {
       return next;
     }

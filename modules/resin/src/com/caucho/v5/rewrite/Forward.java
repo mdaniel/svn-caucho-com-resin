@@ -39,7 +39,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainForward;
 import com.caucho.v5.http.dispatch.FilterChainForwardAbsolute;
 import com.caucho.v5.http.rewrite.DispatchRuleRegexpBase;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -127,7 +127,7 @@ public class Forward extends DispatchRuleRegexpBase
                                     FilterChain next)
   {
     if (_isAbsolute)
-      return new FilterChainForwardAbsolute(target, WebApp.getCurrent());
+      return new FilterChainForwardAbsolute(target, WebAppResinBase.getCurrent());
     else
       return new FilterChainForward(target);
   }

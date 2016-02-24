@@ -49,7 +49,7 @@ import com.caucho.v5.http.session.CookieImpl;
 import com.caucho.v5.http.session.SessionImpl;
 import com.caucho.v5.http.session.SessionManager;
 import com.caucho.v5.http.webapp.ErrorPageManager;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CurrentTime;
 import com.caucho.v5.util.HTTPUtil;
@@ -658,7 +658,7 @@ public final class ResponseServlet extends ResponseCauchoBase
       throw new IllegalStateException("response can't sendError() after commit");
     */
 
-    WebApp webApp = getRequest().getWebApp();
+    WebAppResinBase webApp = getRequest().getWebApp();
 
     ErrorPageManager errorManager = null;
     
@@ -806,7 +806,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   */
     // server/13dh
     else if (_cacheInvocation != null) {
-      WebApp webApp = _request.getWebApp();
+      WebAppResinBase webApp = _request.getWebApp();
 
       long maxAge = webApp.getMaxAge(_request.getRequestURI());
 
@@ -913,7 +913,7 @@ public final class ResponseServlet extends ResponseCauchoBase
           return null;
         }
 
-        WebApp webApp = _request.getWebApp();
+        WebAppResinBase webApp = _request.getWebApp();
 
         if (webApp != null) {
           /*
@@ -1128,7 +1128,7 @@ public final class ResponseServlet extends ResponseCauchoBase
         break;
     }
 
-    WebApp webApp = getRequest().getWebApp();
+    WebAppResinBase webApp = getRequest().getWebApp();
 
     String hostPrefix = null;
     String host = _request.getHeader("Host");
@@ -1598,7 +1598,7 @@ public final class ResponseServlet extends ResponseCauchoBase
       setPrivateOrResinCache(true);
   }
 
-  protected void addServletCookie(WebApp webApp)
+  protected void addServletCookie(WebAppResinBase webApp)
   {
       /* XXX:
       if (_sessionId != null && ! _hasSessionCookie) {
@@ -1616,7 +1616,7 @@ public final class ResponseServlet extends ResponseCauchoBase
     }
   }
 
-  protected Cookie createServletCookie(WebApp webApp)
+  protected Cookie createServletCookie(WebAppResinBase webApp)
   {
     SessionManager manager = webApp.getSessionManager();
 
@@ -1674,7 +1674,7 @@ public final class ResponseServlet extends ResponseCauchoBase
   {
     RequestServlet request = getRequest();
 
-    WebApp webApp = request.getWebApp();
+    WebAppResinBase webApp = request.getWebApp();
 
     if (webApp == null)
       return string;

@@ -37,7 +37,7 @@ import com.caucho.v5.deploy.DeployHandle;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.ThreadDump;
 
 
@@ -75,8 +75,8 @@ public class AdminRestServiceImpl
         continue;
       }
       
-      for (DeployHandle<WebApp> webAppCtrl : host.getWebAppContainer().getWebAppHandles()) {
-        WebApp webApp = webAppCtrl.getDeployInstance();
+      for (DeployHandle<WebAppResinBase> webAppCtrl : host.getWebAppContainer().getWebAppHandles()) {
+        WebAppResinBase webApp = webAppCtrl.getDeployInstance();
         
         if (webApp == null) {
           continue;
@@ -100,7 +100,7 @@ public class AdminRestServiceImpl
       return null;
     }
     
-    DeployHandle<WebApp> webApp = httpContainer.findWebAppHandle(id);
+    DeployHandle<WebAppResinBase> webApp = httpContainer.findWebAppHandle(id);
     
     if (webApp == null) {
       return null;

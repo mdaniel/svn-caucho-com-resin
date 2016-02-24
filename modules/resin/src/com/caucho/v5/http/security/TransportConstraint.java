@@ -29,7 +29,7 @@
 package com.caucho.v5.http.security;
 
 import com.caucho.v5.http.host.Host;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -77,7 +77,7 @@ public class TransportConstraint extends ConstraintBase {
     if (request.isSecure())
       return AuthorizationResult.DEFAULT_ALLOW;
 
-    WebApp webApp = (WebApp) application;
+    WebAppResinBase webApp = (WebAppResinBase) application;
     Host host = webApp.getHost();
     String secureHost = host.getSecureHostName();
 

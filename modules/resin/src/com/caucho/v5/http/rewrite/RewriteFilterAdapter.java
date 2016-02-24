@@ -35,7 +35,7 @@ import javax.servlet.ServletException;
 
 import com.caucho.v5.http.dispatch.FilterChainFilter;
 import com.caucho.v5.http.dispatch.FilterConfigImpl;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 /**
  * Wraps a Java filter in a RewriteFilter
@@ -47,7 +47,7 @@ public class RewriteFilterAdapter implements RewriteFilter
   public RewriteFilterAdapter(Filter filter)
     throws ServletException
   {
-    WebApp webApp = WebApp.getCurrent();
+    WebAppResinBase webApp = WebAppResinBase.getCurrent();
     FilterConfigImpl filterConfig = new FilterConfigImpl();
     filterConfig.setServletContext(webApp);
 

@@ -43,10 +43,10 @@ import com.caucho.v5.management.server.WebAppMXBean;
 /**
  * The admin implementation for a web-app.
  */
-public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
+public class WebAppAdmin extends DeployControllerAdmin<WebAppResinBase,WebAppController>
   implements WebAppMXBean
 {
-  public WebAppAdmin(DeployHandle<WebApp> handle)
+  public WebAppAdmin(DeployHandle<WebAppResinBase> handle)
   {
     super(handle);
   }
@@ -72,7 +72,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   @Override
   public SessionManagerMXBean getSessionManager()
   {
-    WebApp app = getWebApp();
+    WebAppResinBase app = getWebApp();
 
     if (app == null)
       return null;
@@ -83,7 +83,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   @Override
   public ConfigMXBean []getConfigs()
   {
-    WebApp app = getWebApp();
+    WebAppResinBase app = getWebApp();
 
     if (app == null) {
       return null;
@@ -138,7 +138,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   @Override
   public boolean isEnabled()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     return webApp != null && webApp.isEnabled();
   }
@@ -150,7 +150,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   @Override
   public long getStatus500CountTotal()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     if (webApp != null)
       return webApp.getStatus500CountTotal();
@@ -161,7 +161,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   @Override
   public Date getStatus500LastTime()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     if (webApp == null)
       return null;
@@ -181,7 +181,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   @Override
   public int getRequestCount()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     if (webApp != null)
       return webApp.getRequestCount();
@@ -222,7 +222,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebApp,WebAppController>
   /**
    * Returns the active webApp.
    */
-  protected WebApp getWebApp()
+  protected WebAppResinBase getWebApp()
   {
     return getHandle().getDeployInstance();
   }

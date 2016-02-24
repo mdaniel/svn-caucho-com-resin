@@ -54,7 +54,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.NullEnumeration;
 import com.caucho.v5.vfs.ReadStream;
@@ -342,7 +342,7 @@ public class RequestServletStub implements RequestCaucho {
   }
 
   @Override
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

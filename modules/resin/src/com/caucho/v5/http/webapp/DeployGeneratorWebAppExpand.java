@@ -50,7 +50,7 @@ import com.caucho.v5.vfs.PathImpl;
  * The generator for the web-app deploy
  */
 public class DeployGeneratorWebAppExpand
-  extends DeployGeneratorExpand<WebApp,WebAppController>
+  extends DeployGeneratorExpand<WebAppResinBase,WebAppController>
   implements EnvLoaderListener
 {
   private static final Logger log
@@ -83,7 +83,7 @@ public class DeployGeneratorWebAppExpand
    * Creates the new expand deploy.
    */
   public DeployGeneratorWebAppExpand(String id,
-                                     DeployContainerService<WebApp,WebAppController> container,
+                                     DeployContainerService<WebAppResinBase,WebAppController> container,
                                      WebAppContainer webAppContainer)
   {
     super(id, container, webAppContainer.getRootDirectory());

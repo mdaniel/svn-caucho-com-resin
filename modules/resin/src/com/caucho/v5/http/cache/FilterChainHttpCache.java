@@ -30,7 +30,7 @@ import com.caucho.v5.http.protocol.ResponseCache;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseFacade;
 import com.caucho.v5.http.webapp.FilterChainCaucho;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.util.Base64Util;
 import com.caucho.v5.util.CacheListener;
@@ -77,7 +77,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
   private final AtomicReference<EntryHttpCache> _cacheFillEntry
     = new AtomicReference<EntryHttpCache>();
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   // uri/query string for logging/equals
   private String _uri;
@@ -92,7 +92,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
    * Create the filter chain servlet.
    */
   public FilterChainHttpCache(FilterChain next,
-                               WebApp webApp)
+                               WebAppResinBase webApp)
   {
     this(HttpCache.getLocalCache(), next, webApp);
   }
@@ -102,7 +102,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
    */
   public FilterChainHttpCache(HttpCache cache,
                                FilterChain next,
-                               WebApp webApp)
+                               WebAppResinBase webApp)
   {
     _cache = cache;
 
@@ -115,7 +115,7 @@ public class FilterChainHttpCache extends FilterChainHttpCacheBase
     return _hitCount.get();
   }
 
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }

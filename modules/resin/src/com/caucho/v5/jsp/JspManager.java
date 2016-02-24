@@ -42,7 +42,7 @@ import javax.servlet.jsp.JspFactory;
 
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseCaucho;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
@@ -223,7 +223,7 @@ public class JspManager extends PageManager {
                boolean isGenerated)
     throws Exception
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     JspCompiler compiler = new JspCompiler();
 
     compiler.setWebApp(getWebApp());

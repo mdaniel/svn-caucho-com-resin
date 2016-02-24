@@ -65,7 +65,7 @@ import com.caucho.v5.cli.server.ProgramInfoDaemon;
 import com.caucho.v5.cli.server.ShutdownCommand;
 import com.caucho.v5.cli.server.StopCommand;
 import com.caucho.v5.cli.server.StoreSaveCommand;
-import com.caucho.v5.cli.shell.EnvCli;
+import com.caucho.v5.cli.shell_old.EnvCliOld;
 import com.caucho.v5.cli.spi.CommandManager;
 
 
@@ -81,15 +81,15 @@ public class ArgsResinCli extends ArgsCli
 
   public ArgsResinCli(String[] argv)
   {
-    this(new EnvCli(), argv, new ProgramInfoResin());
+    this(new EnvCliOld(), argv, new ProgramInfoResin());
   }
 
-  public ArgsResinCli(EnvCli env, String[] argv)
+  public ArgsResinCli(EnvCliOld env, String[] argv)
   {
     super(argv, new ProgramInfoResin());
   }
 
-  public ArgsResinCli(EnvCli env, String[] argv, ProgramInfoDaemon info)
+  public ArgsResinCli(EnvCliOld env, String[] argv, ProgramInfoDaemon info)
   {
     super(env, argv, new ProgramInfoResin());
   }

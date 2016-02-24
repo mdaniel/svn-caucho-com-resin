@@ -90,7 +90,7 @@ public class ErrorPageManager
   
   private final HttpContainerServlet _server;
   private final Host _host;
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
   private String _defaultLocation;
@@ -108,7 +108,7 @@ public class ErrorPageManager
   /**
    * Create error page manager.
    */
-  public ErrorPageManager(HttpContainerServlet server, WebApp webApp)
+  public ErrorPageManager(HttpContainerServlet server, WebAppResinBase webApp)
   {
     this(server, null, webApp);
   }
@@ -116,7 +116,7 @@ public class ErrorPageManager
   /**
    * Create error page manager.
    */
-  public ErrorPageManager(HttpContainerServlet server, Host host, WebApp app)
+  public ErrorPageManager(HttpContainerServlet server, Host host, WebAppResinBase app)
     {
     _webApp = app;
 
@@ -440,7 +440,7 @@ public class ErrorPageManager
         // can't use filters because of error pages due to filters
         // or security.
 
-        WebApp webApp = getWebApp();
+        WebAppResinBase webApp = getWebApp();
         
         if (webApp != null) {
           disp = webApp.getRequestDispatcher(location);
@@ -738,7 +738,7 @@ public class ErrorPageManager
     if (location == null && _parent != null)
       return _parent.handleErrorStatus(request, response, code, message);
 
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     if (webApp == null && _host == null)
       return false;
@@ -824,7 +824,7 @@ public class ErrorPageManager
     return null;
   }
   
-  private WebApp getWebApp()
+  private WebAppResinBase getWebApp()
   {
     if (_webApp != null) {
       return _webApp;

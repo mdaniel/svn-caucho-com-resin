@@ -43,7 +43,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.http.dispatch.FilterChainForward;
 import com.caucho.v5.http.dispatch.FilterChainRewriteDispatch;
 import com.caucho.v5.http.dispatch.FilterChainRewriteInclude;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -68,18 +68,18 @@ public class WelcomeFile extends DispatchRuleBase
   private static final HashSet<String> _welcomeFileResourceMap
     = new HashSet<String>();
   
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   
   private ArrayList<String> _welcomeFileList = new ArrayList<String>();
   
   public WelcomeFile()
   {
-    WebApp webApp = WebApp.getCurrent();
+    WebAppResinBase webApp = WebAppResinBase.getCurrent();
     
     if (webApp == null)
       throw new IllegalStateException(L.l("{0} must have an active {1}.",
                                           WelcomeFile.class.getSimpleName(),
-                                          WebApp.class.getSimpleName()));
+                                          WebAppResinBase.class.getSimpleName()));
     
     _webApp = webApp;
   }

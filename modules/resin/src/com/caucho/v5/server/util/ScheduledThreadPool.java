@@ -84,7 +84,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   private ScheduledThreadPool()
   {
     _loader = Thread.currentThread().getContextClassLoader();
-    _threadPool = ThreadPool.getThreadPool();
+    _threadPool = ThreadPool.current();
     
     _executor = _threadPool.getThrottleExecutor();
 

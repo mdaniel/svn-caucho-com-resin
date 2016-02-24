@@ -87,7 +87,7 @@ import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseAdapterToChar;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.webapp.RequestDispatcherImpl;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
@@ -168,7 +168,7 @@ public class PageContextImpl extends PageContext
     _bodyResponseStream.start();
   }
 
-  public PageContextImpl(WebApp webApp, Servlet servlet)
+  public PageContextImpl(WebAppResinBase webApp, Servlet servlet)
   {
     this();
 
@@ -188,7 +188,7 @@ public class PageContextImpl extends PageContext
 
   }
 
-  public PageContextImpl(WebApp webApp, HashMap<String,Method> functionMap)
+  public PageContextImpl(WebAppResinBase webApp, HashMap<String,Method> functionMap)
   {
     _webApp = (WebAppResin) webApp;
 
@@ -219,7 +219,7 @@ public class PageContextImpl extends PageContext
   }
 
   public void initialize(Servlet servlet,
-                         WebApp app,
+                         WebAppResinBase app,
                          ServletRequest request,
                          ServletResponse response,
                          String errorPage,

@@ -32,7 +32,7 @@ package com.caucho.v5.websocket.server;
 import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerContainerProvider;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.ModulePrivate;
 
 /**
@@ -44,7 +44,7 @@ public class ServerContainerProviderImpl extends ServerContainerProvider
   @Override
   protected ServerContainer getContainer()
   {
-    if (WebApp.getCurrent() != null) {
+    if (WebAppResinBase.getCurrent() != null) {
       return new ServerContainerImpl();
     }
     else {

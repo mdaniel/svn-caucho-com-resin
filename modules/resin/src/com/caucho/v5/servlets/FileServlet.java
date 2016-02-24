@@ -52,7 +52,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseServlet;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.subsystem.SystemManager;
 import com.caucho.v5.util.Base64Util;
@@ -86,7 +86,7 @@ public class FileServlet extends GenericServlet {
     = new LruCache<String,Cache>(16 * 1024);
 
   private PathImpl _context;
-  private WebApp _app;
+  private WebAppResinBase _app;
   private RequestDispatcher _dir;
 
   private boolean _isCaseInsensitive;
@@ -159,7 +159,7 @@ public class FileServlet extends GenericServlet {
   {
     super.init(conf);
 
-    _app = (WebApp) getServletContext();
+    _app = (WebAppResinBase) getServletContext();
     _context = _app.getRootDirectory();
 
     try {
@@ -474,7 +474,7 @@ public class FileServlet extends GenericServlet {
 
   private String getCacheUrl(HttpServletRequest req, String uri)
   {
-    WebApp webApp = (WebApp) req.getServletContext();
+    WebAppResinBase webApp = (WebAppResinBase) req.getServletContext();
     return webApp.getId() + "|" + uri;
   }
 

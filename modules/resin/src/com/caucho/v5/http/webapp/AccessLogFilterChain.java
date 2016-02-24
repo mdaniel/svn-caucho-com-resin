@@ -55,7 +55,7 @@ public class AccessLogFilterChain implements FilterChainCaucho {
   private final FilterChain _next;
 
   // app
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   private final AccessLogBase _accessLog;
 
   /**
@@ -64,7 +64,7 @@ public class AccessLogFilterChain implements FilterChainCaucho {
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public AccessLogFilterChain(FilterChain next, WebApp webApp)
+  public AccessLogFilterChain(FilterChain next, WebAppResinBase webApp)
   {
     _next = next;
     _webApp = webApp;

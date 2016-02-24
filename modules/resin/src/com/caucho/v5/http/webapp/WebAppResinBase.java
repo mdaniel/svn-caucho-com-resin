@@ -137,24 +137,24 @@ import com.caucho.v5.websocket.server.ServerContainerImpl;
 @Configurable
 @SuppressWarnings("serial")
 @CauchoBean
-public class WebApp extends ServletContextImpl
+public class WebAppResinBase extends ServletContextImpl
   implements Dependency, EnvironmentBean, 
              InvocationRouter<InvocationServlet>,
              DeployInstanceEnvironment,
              PodManagerApp,
              java.io.Serializable
 {
-  private static final L10N L = new L10N(WebApp.class);
+  private static final L10N L = new L10N(WebAppResinBase.class);
   private static final Logger log
-    = Logger.getLogger(WebApp.class.getName());
+    = Logger.getLogger(WebAppResinBase.class.getName());
   
   public static final String IMMEDIATE = "caucho.shutdown.immediate";
 
   private static EnvironmentLocal<AccessLogBase> _accessLogLocal
     = new EnvironmentLocal<AccessLogBase>("caucho.server.access-log");
 
-  private static EnvironmentLocal<WebApp> _webAppLocal
-    = new EnvironmentLocal<WebApp>("caucho.application");
+  private static EnvironmentLocal<WebAppResinBase> _webAppLocal
+    = new EnvironmentLocal<WebAppResinBase>("caucho.application");
 
   private static String []_classLoaderHackPackages;
 
@@ -264,7 +264,7 @@ public class WebApp extends ServletContextImpl
   //servlet 3.0
   // private ServiceManagerAmp _ampManager;
   private int _podSize;
-  private WebAppBuilder _builder;
+  private WebAppResinBuilder _builder;
   private WebAppDispatch _webAppDispatcher;
 
   private int _effectiveMajorVersion = 3;
@@ -275,7 +275,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Creates the webApp with its environment loader.
    */
-  WebApp(WebAppBuilder builder)
+  WebAppResinBase(WebAppResinBuilder builder)
   {
     Objects.requireNonNull(builder);
     
@@ -317,7 +317,7 @@ public class WebApp extends ServletContextImpl
     }
   }
 
-  private void initVersion(WebAppBuilder builder) {
+  private void initVersion(WebAppResinBuilder builder) {
     String version = builder.getVersion();
     if (version == null)
       return;
@@ -369,7 +369,7 @@ public class WebApp extends ServletContextImpl
     }
   }
 
-  protected WebAppDispatch createWebAppDispatch(WebAppBuilder builder)
+  protected WebAppDispatch createWebAppDispatch(WebAppResinBuilder builder)
   {
     return new WebAppDispatch(builder);
   }
@@ -433,7 +433,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns the local webApp.
    */
-  public static WebApp getLocal()
+  public static WebAppResinBase getLocal()
   {
     return getCurrent();
   }
@@ -441,7 +441,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns the local webApp.
    */
-  public static WebApp getCurrent()
+  public static WebAppResinBase getCurrent()
   {
     return _webAppLocal.get();
   }
@@ -1992,7 +1992,7 @@ public class WebApp extends ServletContextImpl
     if (realPath != null)
       return realPath;
 
-    WebApp webApp = this;
+    WebAppResinBase webApp = this;
     String tail = uri;
     
     if (isActive()) {
@@ -2004,7 +2004,7 @@ public class WebApp extends ServletContextImpl
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      webApp = (WebApp) getContext(fullURI);
+      webApp = (WebAppResinBase) getContext(fullURI);
 
       if (webApp == null)
         webApp = this;
@@ -2047,7 +2047,7 @@ public class WebApp extends ServletContextImpl
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    WebApp webApp = (WebApp) getContext(fullURI);
+    WebAppResinBase webApp = (WebAppResinBase) getContext(fullURI);
 
     if (webApp == null)
       return null;
@@ -2189,7 +2189,7 @@ public class WebApp extends ServletContextImpl
   }
   */
 
-  public WebAppBuilder getBuilder()
+  public WebAppResinBuilder getBuilder()
   {
     return _builder;
   }

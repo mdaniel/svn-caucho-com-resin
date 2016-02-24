@@ -39,7 +39,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.webapp.FilterChainResume;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.UserTransactionImpl;
 import com.caucho.v5.transaction.UserTransactionProxy;
@@ -64,7 +64,7 @@ public class FilterChainResumeResin extends FilterChainResume
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterChainResumeResin(FilterChain next, WebApp webApp)
+  public FilterChainResumeResin(FilterChain next, WebAppResinBase webApp)
   {
     super(next, webApp);
 

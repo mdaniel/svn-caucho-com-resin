@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.v5.http.cache.EntryHttpCacheBase;
 import com.caucho.v5.http.cache.FilterChainHttpCacheBase;
 import com.caucho.v5.http.webapp.ErrorPageManager;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 public class ResponseCauchoWrapper implements ResponseCaucho {
   private static final Logger log
@@ -214,7 +214,7 @@ public class ResponseCauchoWrapper implements ResponseCaucho {
     if (req == null)
       return false;
 
-    WebApp webApp = req.getWebApp();
+    WebAppResinBase webApp = req.getWebApp();
 
     if (webApp == null)
       return false;

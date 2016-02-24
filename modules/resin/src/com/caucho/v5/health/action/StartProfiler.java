@@ -148,7 +148,7 @@ public class StartProfiler extends HealthActionBase
     if (_isWait)
       _task.run();
     else
-      ThreadPool.getCurrent().schedule(_task);
+      ThreadPool.current().schedule(_task);
     
     return new HealthActionResult(ResultStatus.OK, L.l("Profiler started"));
   }

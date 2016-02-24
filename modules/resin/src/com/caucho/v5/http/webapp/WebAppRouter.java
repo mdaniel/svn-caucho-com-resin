@@ -56,7 +56,7 @@ import com.caucho.v5.util.LruCache;
  */
 public class WebAppRouter
 {
-  private static final L10N L = new L10N(WebApp.class);
+  private static final L10N L = new L10N(WebAppResinBase.class);
   private static final Logger log
     = Logger.getLogger(WebAppRouter.class.getName());
 
@@ -71,7 +71,7 @@ public class WebAppRouter
   private LruCache<String,WebAppUriMap> _uriToAppCache
     = new LruCache<>(URI_CACHE_SIZE);
   
-  private volatile HashMap<String,DeployHandle<WebApp>> _webAppMap
+  private volatile HashMap<String,DeployHandle<WebAppResinBase>> _webAppMap
     = new HashMap<>();
 
   private long _startWaitTime = 10000L;
@@ -149,7 +149,7 @@ public class WebAppRouter
     }
   }
 
-  void setWebAppMap(HashMap<String, DeployHandle<WebApp>> webAppMap)
+  void setWebAppMap(HashMap<String, DeployHandle<WebAppResinBase>> webAppMap)
   {
     _webAppMap = webAppMap;
     
@@ -199,7 +199,7 @@ public class WebAppRouter
    * Finds the web-app for the entry.
    */
   private WebAppUriMap findImpl(String uri, 
-                                Map<String,DeployHandle<WebApp>> webAppMap)
+                                Map<String,DeployHandle<WebAppResinBase>> webAppMap)
   {
     WebAppUriMap entry = _uriToAppCache.get(uri);
 
@@ -207,7 +207,7 @@ public class WebAppRouter
       return entry ;
     }
     
-    DeployHandle<WebApp> webAppHandle = webAppMap.get(uri);
+    DeployHandle<WebAppResinBase> webAppHandle = webAppMap.get(uri);
     
     if (webAppHandle != null) {
       entry = new WebAppUriMap(uri, webAppHandle);
@@ -237,7 +237,7 @@ public class WebAppRouter
   /**
    * Returns a list of the webApps.
    */
-  public DeployHandle<WebApp> []getWebAppHandles()
+  public DeployHandle<WebAppResinBase> []getWebAppHandles()
   {
     return _routerService.getHandles();
   }
@@ -261,10 +261,10 @@ public class WebAppRouter
   static class WebAppUriMap
   {
     private final String _contextPath;
-    private final DeployHandle<WebApp> _webAppHandle;
+    private final DeployHandle<WebAppResinBase> _webAppHandle;
     
     WebAppUriMap(String contextPath,
-                 DeployHandle<WebApp> webAppHandle)
+                 DeployHandle<WebAppResinBase> webAppHandle)
     {
       _contextPath = contextPath;
       _webAppHandle = webAppHandle;
@@ -275,7 +275,7 @@ public class WebAppRouter
       return _contextPath;
     }
     
-    DeployHandle<WebApp> getHandle()
+    DeployHandle<WebAppResinBase> getHandle()
     {
       return _webAppHandle;
     }

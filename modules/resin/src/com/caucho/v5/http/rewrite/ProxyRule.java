@@ -45,7 +45,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.http.dispatch.ServletBuilder;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 public class ProxyRule
@@ -54,14 +54,14 @@ public class ProxyRule
   private static final L10N L = new L10N(ProxyRule.class);
   private static final Logger log = Logger.getLogger(ProxyRule.class.getName());
 
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
 
   private ServletBuilder _servlet;
   private String _target;
 
   private ContainerProgram _program = new ContainerProgram();
 
-  ProxyRule(RewriteDispatch rewriteDispatch, WebApp webApp)
+  ProxyRule(RewriteDispatch rewriteDispatch, WebAppResinBase webApp)
   {
     super(rewriteDispatch);
 

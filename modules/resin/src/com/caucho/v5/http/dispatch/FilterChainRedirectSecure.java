@@ -60,7 +60,7 @@ public class FilterChainRedirectSecure implements FilterChain {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    WebApp webApp = (WebApp) req.getServletContext();
+    WebAppResinBase webApp = (WebAppResinBase) req.getServletContext();
     String path = req.getContextPath();
     String servletPath = req.getServletPath();
     String pathInfo = req.getPathInfo();

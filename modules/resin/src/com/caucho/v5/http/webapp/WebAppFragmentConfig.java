@@ -39,7 +39,7 @@ public class WebAppFragmentConfig extends WebAppConfig
 {
   //implements XmlSchemaBean {
 
-  private static final L10N L = new L10N(WebApp.class);
+  private static final L10N L = new L10N(WebAppResinBase.class);
   private static final Logger log
     = Logger.getLogger(WebAppFragmentConfig.class.getName());
 

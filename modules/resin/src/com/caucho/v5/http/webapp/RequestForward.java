@@ -206,7 +206,7 @@ public class RequestForward extends RequestCauchoDispatch
     return getQueryString();
   }
   
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _invocation.getWebApp();
   }

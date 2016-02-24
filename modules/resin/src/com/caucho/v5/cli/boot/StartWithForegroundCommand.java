@@ -54,7 +54,7 @@ public class StartWithForegroundCommand extends StartCommandBase
   private static final L10N L = new L10N(StartWithForegroundCommand.class);
 
   @Override
-  public String getName()
+  public String name()
   {
     return "start-with-foreground";
   }

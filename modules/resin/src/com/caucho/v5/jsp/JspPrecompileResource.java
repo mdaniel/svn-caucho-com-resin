@@ -33,7 +33,7 @@ import com.caucho.v5.amp.thread.ThreadPool;
 import com.caucho.v5.config.UserMessage;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.*;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.javac.LineMap;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -60,7 +60,7 @@ public class JspPrecompileResource {
 
   private FileSetType _fileSet;
   
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -73,7 +73,7 @@ public class JspPrecompileResource {
   /**
    * Sets the webApp.
    */
-  public void setWebApp(WebApp app)
+  public void setWebApp(WebAppResinBase app)
   {
     _webApp = app;
   }
@@ -132,7 +132,7 @@ public class JspPrecompileResource {
     }
 
     if (_webApp == null) {
-      _webApp = WebApp.getLocal();
+      _webApp = WebAppResinBase.getLocal();
     }
 
     if (_webApp == null)
@@ -160,7 +160,7 @@ public class JspPrecompileResource {
     for (int i = 0; i < _threadCount; i++) {
       CompileTask task = new CompileTask(paths, classes);
       
-      ThreadPool.getThreadPool().schedule(task);
+      ThreadPool.current().schedule(task);
     }
 
     long expire = CurrentTime.getCurrentTime() + _timeout;

@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.xml.ConfigXml;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.javac.JavaCompilerUtil;
 import com.caucho.v5.javac.LineMap;

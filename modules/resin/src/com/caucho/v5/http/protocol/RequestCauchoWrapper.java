@@ -54,7 +54,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.vfs.ReadStream;
@@ -298,7 +298,7 @@ public class RequestCauchoWrapper implements RequestCaucho
     else {
       CharBuffer cb = new CharBuffer();
 
-      WebApp webApp = getWebApp();
+      WebAppResinBase webApp = getWebApp();
 
       String servletPath = getPageServletPath();
       if (servletPath != null)
@@ -678,14 +678,14 @@ public class RequestCauchoWrapper implements RequestCaucho
   }
   
   @Override
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     RequestCaucho cRequest = getCauchoRequest();
 
     if (cRequest != null)
       return cRequest.getWebApp();
     else
-      return (WebApp) _request.getServletContext();
+      return (WebAppResinBase) _request.getServletContext();
   }
   
   @Override

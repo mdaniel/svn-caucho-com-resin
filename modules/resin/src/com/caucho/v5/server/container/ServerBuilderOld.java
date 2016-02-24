@@ -1003,7 +1003,7 @@ public class ServerBuilderOld
     
     if (rootService != null && _mbeanServer != null) {
       try {
-        String pathName = rootService.getDataDirectory().resolve("resin.hprof").toString();
+        String pathName = rootService.dataDirectory().resolve("resin.hprof").toString();
 
         _mbeanServer.invoke(_hotSpotName, "dumpHeap", 
                             new Object[] { pathName, true },

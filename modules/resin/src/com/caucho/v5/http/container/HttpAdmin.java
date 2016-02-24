@@ -306,6 +306,7 @@ public class HttpAdmin extends AbstractEmitterObject
   {
     int activeThreadCount = -1;
 
+    /*
     for (PortTcp port : getNetworkListeners()) {
       if (port.getActiveThreadCount() >= 0) {
         if (activeThreadCount == -1)
@@ -314,6 +315,7 @@ public class HttpAdmin extends AbstractEmitterObject
         activeThreadCount += port.getActiveThreadCount();
       }
     }
+    */
 
     return activeThreadCount;
   }

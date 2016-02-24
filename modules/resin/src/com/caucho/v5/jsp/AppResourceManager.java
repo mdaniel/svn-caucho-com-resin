@@ -29,16 +29,16 @@
 
 package com.caucho.v5.jsp;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.vfs.PathImpl;
 
 /**
  * Resolves resources and looks up *.tld
  */
 public class AppResourceManager extends JspResourceManager {
-  private WebApp _app;
+  private WebAppResinBase _app;
 
-  public AppResourceManager(WebApp app)
+  public AppResourceManager(WebAppResinBase app)
   {
     _app = app;
   }

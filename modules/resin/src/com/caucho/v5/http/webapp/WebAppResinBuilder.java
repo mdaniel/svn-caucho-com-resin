@@ -90,13 +90,13 @@ import com.caucho.v5.vfs.VfsOld;
 /**
  * Builder for the webapp to encapsulate the configuration process.
  */
-public class WebAppBuilder<T extends WebApp>
-  implements DeployInstanceBuilder<WebApp> // , XmlSchemaBean
+public class WebAppResinBuilder<T extends WebAppResinBase>
+  implements DeployInstanceBuilder<WebAppResinBase> // , XmlSchemaBean
 {
-  private static final L10N L = new L10N(WebAppBuilder.class);
+  private static final L10N L = new L10N(WebAppResinBuilder.class);
 
   private static final Logger log
-    = Logger.getLogger(WebAppBuilder.class.getName());
+    = Logger.getLogger(WebAppResinBuilder.class.getName());
 
   private final WebAppController _controller;
   private EnvironmentClassLoader _classLoader;
@@ -120,7 +120,7 @@ public class WebAppBuilder<T extends WebApp>
   private T _webApp;
 
   // Any war-generators.
-  private ArrayList<DeployGenerator<WebApp,WebAppController>> _appGenerators
+  private ArrayList<DeployGenerator<WebAppResinBase,WebAppController>> _appGenerators
     = new ArrayList<>();
 
   private String _moduleName;
@@ -194,7 +194,7 @@ public class WebAppBuilder<T extends WebApp>
   /**
    * Builder Creates the webApp with its environment loader.
    */
-  public WebAppBuilder(WebAppController controller)
+  public WebAppResinBuilder(WebAppController controller)
   {
     Objects.requireNonNull(controller);
 
@@ -251,7 +251,7 @@ public class WebAppBuilder<T extends WebApp>
     _scanner = new WebAppBuilderScan(this);
     _listenerManager = new WebAppListeners(this);
     
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     webApp.initConstructor();
 
     _servletMapper.setServletContext(webApp);
@@ -269,7 +269,7 @@ public class WebAppBuilder<T extends WebApp>
   }
   
   @Override
-  public WebApp getInstance()
+  public WebAppResinBase getInstance()
   {
     return getWebApp();
   }
@@ -1092,7 +1092,7 @@ public class WebAppBuilder<T extends WebApp>
 
   protected T createWebApp()
   {
-    return (T) new WebApp(this);
+    return (T) new WebAppResinBase(this);
   }
 
   public Collection<TaglibDescriptor> getTaglibs()
@@ -1232,9 +1232,9 @@ public class WebAppBuilder<T extends WebApp>
   }
 
   @Override
-  public WebApp build()
+  public WebAppResinBase build()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -1411,7 +1411,7 @@ public class WebAppBuilder<T extends WebApp>
     return _servletAllowEL;
   }
 
-  ArrayList<DeployGenerator<WebApp,WebAppController>> getWebAppGenerators()
+  ArrayList<DeployGenerator<WebAppResinBase,WebAppController>> getWebAppGenerators()
   {
     return _appGenerators;
   }
@@ -1420,7 +1420,7 @@ public class WebAppBuilder<T extends WebApp>
   {
     WebAppContainer container = getController().getContainer();
 
-    for (DeployGenerator<WebApp,WebAppController> gen : _appGenerators) {
+    for (DeployGenerator<WebAppResinBase,WebAppController> gen : _appGenerators) {
       container.addDeploy(gen);
     }
   }
@@ -1431,7 +1431,7 @@ public class WebAppBuilder<T extends WebApp>
 
     for (int i = _appGenerators.size() - 1; i >= 0; i--) {
       try {
-        DeployGenerator<WebApp,WebAppController> deploy = _appGenerators.get(i);
+        DeployGenerator<WebAppResinBase,WebAppController> deploy = _appGenerators.get(i);
 
         container.removeWebAppDeploy(deploy);
         deploy.destroy();

@@ -46,7 +46,7 @@ public class ResinThreadPoolExecutor implements Executor {
   private static ResinThreadPoolExecutor _service
     = new ResinThreadPoolExecutor();
     
-  private ThreadPool _threadPool = ThreadPool.getThreadPool();
+  private ThreadPool _threadPool = ThreadPool.current();
 
   private ResinThreadPoolExecutor()
   {

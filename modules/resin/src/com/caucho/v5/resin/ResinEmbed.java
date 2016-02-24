@@ -42,8 +42,8 @@ import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.host.HostConfig;
 import com.caucho.v5.http.webapp.DeployGeneratorWebAppSingle;
-import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.http.webapp.WebAppBuilder;
+import com.caucho.v5.http.webapp.WebAppResinBase;
+import com.caucho.v5.http.webapp.WebAppResinBuilder;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.inject.impl.InjectContext;
@@ -762,13 +762,13 @@ public class ResinEmbed implements Closeable
         
         builder.addContentProgram(this);
       }
-      else if (bean instanceof WebAppBuilder) {
-        WebAppBuilder builder = (WebAppBuilder) bean;
+      else if (bean instanceof WebAppResinBuilder) {
+        WebAppResinBuilder builder = (WebAppResinBuilder) bean;
         
         builder.addContentProgram(this);
       }
       else {
-        _config.configure((WebApp) bean);
+        _config.configure((WebAppResinBase) bean);
       }
     }
   }

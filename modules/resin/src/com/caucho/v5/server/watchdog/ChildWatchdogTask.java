@@ -176,7 +176,7 @@ class ChildWatchdogTask implements Runnable
     _isRestart = false;
     _restartMessage = "user start from watchdog";
 
-    ThreadPool.getCurrent().schedule(this);
+    ThreadPool.current().schedule(this);
   }
 
   /**

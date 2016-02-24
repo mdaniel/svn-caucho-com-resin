@@ -81,7 +81,7 @@ import com.caucho.v5.vfs.VfsOld;
 public class WebAppContainer
   implements InvocationRouter<InvocationServlet>, EnvLoaderListener
 {
-  private static final L10N L = new L10N(WebApp.class);
+  private static final L10N L = new L10N(WebAppResinBase.class);
   private static final Logger log
     = Logger.getLogger(WebAppContainer.class.getName());
 
@@ -102,13 +102,13 @@ public class WebAppContainer
   // dispatch mapping
   // private RewriteDispatch _rewriteDispatch;
   
-  private WebApp _errorWebApp;
+  private WebAppResinBase _errorWebApp;
 
   // List of default service webApp configurations
   private ArrayList<WebAppConfig> _serviceDefaultList
     = new ArrayList<>();
 
-  private DeployContainerService<WebApp,WebAppController> _appDeploy;
+  private DeployContainerService<WebAppResinBase,WebAppController> _appDeploy;
   
   private DeployGeneratorWebAppExpand _warGenerator;
 
@@ -157,7 +157,7 @@ public class WebAppContainer
     
     _webAppRouter = new WebAppRouter(http, host);
     
-    DeployContainerServiceImpl<WebApp, WebAppController> deployServiceImpl
+    DeployContainerServiceImpl<WebAppResinBase, WebAppController> deployServiceImpl
       = new DeployContainerServiceImpl<>(WebAppController.class);
     
     ServiceManagerAmp ampManager = AmpSystem.currentManager();
@@ -312,7 +312,7 @@ public class WebAppContainer
    */
   public ErrorPageManager getErrorPageManager()
   {
-    WebApp errorWebApp = getErrorWebApp();
+    WebAppResinBase errorWebApp = getErrorWebApp();
     
     if (errorWebApp != null) {
       return getErrorWebApp().getErrorPageManager();
@@ -370,7 +370,7 @@ public class WebAppContainer
   public void addWebApp(WebAppConfig config)
   {
     if (config.getURLRegexp() != null) {
-      DeployGenerator<WebApp,WebAppController> deploy
+      DeployGenerator<WebAppResinBase,WebAppController> deploy
         = new DeployGeneratorWebAppRegexp(_appDeploy, this, config);
       _appDeploy.add(deploy);
       
@@ -479,7 +479,7 @@ public class WebAppContainer
   /**
    * Sets the war-expansion
    */
-  public void addDeploy(DeployGenerator<WebApp,WebAppController> deploy)
+  public void addDeploy(DeployGenerator<WebAppResinBase,WebAppController> deploy)
     throws ConfigException
   {
     if (deploy instanceof DeployGeneratorWebAppExpand)
@@ -491,7 +491,7 @@ public class WebAppContainer
   /**
    * Removes a web-app-generator.
    */
-  public void removeWebAppDeploy(DeployGenerator<WebApp,WebAppController> deploy)
+  public void removeWebAppDeploy(DeployGenerator<WebAppResinBase,WebAppController> deploy)
   {
     _appDeploy.remove(deploy);
   }
@@ -685,9 +685,9 @@ public class WebAppContainer
     FilterChain chain;
     
     //WebAppController controller = getWebAppController(invocation);
-    DeployHandle<WebApp> webAppHandle = getWebAppHandle(invocation);
+    DeployHandle<WebAppResinBase> webAppHandle = getWebAppHandle(invocation);
     
-    WebApp webApp = getWebApp(invocation, webAppHandle, true);
+    WebAppResinBase webApp = getWebApp(invocation, webAppHandle, true);
 
     boolean isAlwaysModified;
 
@@ -764,8 +764,8 @@ public class WebAppContainer
       buildDispatchInvocation(dispatchInvocation);
 
       //WebAppController controller = getWebAppController(includeInvocation);
-      DeployHandle<WebApp> webAppHandle = getWebAppHandle(includeInvocation);
-      WebApp webApp = getWebApp(includeInvocation, webAppHandle, false);
+      DeployHandle<WebAppResinBase> webAppHandle = getWebAppHandle(includeInvocation);
+      WebAppResinBase webApp = getWebApp(includeInvocation, webAppHandle, false);
 
       RequestDispatcher disp
         = new RequestDispatcherImpl(includeInvocation,
@@ -789,7 +789,7 @@ public class WebAppContainer
   public void buildIncludeInvocation(InvocationServlet invocation)
     throws ServletException
   {
-    WebApp webApp = buildSubInvocation(invocation);
+    WebAppResinBase webApp = buildSubInvocation(invocation);
 
     if (webApp != null) {
       webApp.getDispatcher().buildIncludeInvocation(invocation);
@@ -802,7 +802,7 @@ public class WebAppContainer
   public void buildForwardInvocation(InvocationServlet invocation)
     throws ServletException
   {
-    WebApp webApp = buildSubInvocation(invocation);
+    WebAppResinBase webApp = buildSubInvocation(invocation);
 
     if (webApp != null) {
       webApp.getDispatcher().buildForwardInvocation(invocation);
@@ -815,7 +815,7 @@ public class WebAppContainer
   public void buildErrorInvocation(InvocationServlet invocation)
     throws ServletException
   {
-    WebApp webApp = buildSubInvocation(invocation);
+    WebAppResinBase webApp = buildSubInvocation(invocation);
 
     if (webApp != null) {
       webApp.getDispatcher().buildErrorInvocation(invocation);
@@ -828,7 +828,7 @@ public class WebAppContainer
   public void buildLoginInvocation(InvocationServlet invocation)
     throws ServletException
   {
-   WebApp webApp = buildSubInvocation(invocation);
+   WebAppResinBase webApp = buildSubInvocation(invocation);
 
     if (webApp != null)
       webApp.getDispatcher().buildErrorInvocation(invocation);
@@ -840,7 +840,7 @@ public class WebAppContainer
   public void buildDispatchInvocation(InvocationServlet invocation)
     throws ServletException
   {
-   WebApp webApp = buildSubInvocation(invocation);
+   WebAppResinBase webApp = buildSubInvocation(invocation);
 
     if (webApp != null) {
       webApp.getDispatcher().buildDispatchInvocation(invocation);
@@ -850,7 +850,7 @@ public class WebAppContainer
   /**
    * Creates a sub invocation, handing unmapped URLs and stopped webApps.
    */
-  private WebApp buildSubInvocation(InvocationServlet invocation)
+  private WebAppResinBase buildSubInvocation(InvocationServlet invocation)
   {
     if (! _lifecycle.waitForActive(_startWaitTime)) {
       UnavailableException e;
@@ -862,7 +862,7 @@ public class WebAppContainer
       return null;
     }
 
-    DeployHandle<WebApp> webAppHandle = getWebAppHandle(invocation);
+    DeployHandle<WebAppResinBase> webAppHandle = getWebAppHandle(invocation);
 
     if (webAppHandle == null) {
       String url = invocation.getURI();
@@ -875,7 +875,7 @@ public class WebAppContainer
       return null;
     }
 
-    WebApp webApp = webAppHandle.subrequest();
+    WebAppResinBase webApp = webAppHandle.subrequest();
 
     if (webApp == null) {
       UnavailableException e;
@@ -893,13 +893,13 @@ public class WebAppContainer
   /**
    * Returns the webApp for the current request.
    */
-  private WebApp getWebApp(InvocationServlet invocation,
-                           DeployHandle<WebApp> handle,
+  private WebAppResinBase getWebApp(InvocationServlet invocation,
+                           DeployHandle<WebAppResinBase> handle,
                            boolean isTopRequest)
   {
     try {
       if (handle != null) {
-        WebApp webApp;
+        WebAppResinBase webApp;
 
         if (isTopRequest) {
           webApp = handle.request();
@@ -1003,7 +1003,7 @@ public class WebAppContainer
    *
    * @return the controller or null if none match the url.
    */
-  protected DeployHandle<WebApp> getWebAppHandle(InvocationServlet invocation)
+  protected DeployHandle<WebAppResinBase> getWebAppHandle(InvocationServlet invocation)
   {
     //WebAppUriMap entry = findEntryByURI(invocation.getURI());
     
@@ -1045,7 +1045,7 @@ public class WebAppContainer
   /**
    * Creates the invocation.
    */
-  public WebApp findWebAppByURI(String uri)
+  public WebAppResinBase findWebAppByURI(String uri)
   {
     WebAppUriMap entry = findEntryByURI(uri);
 
@@ -1060,9 +1060,9 @@ public class WebAppContainer
   /**
    * Creates the invocation.
    */
-  public WebApp findSubWebAppByURI(String uri)
+  public WebAppResinBase findSubWebAppByURI(String uri)
   {
-    DeployHandle<WebApp> handle = findByURI(uri);
+    DeployHandle<WebAppResinBase> handle = findByURI(uri);
 
     if (handle != null) {
       return handle.subrequest();
@@ -1075,7 +1075,7 @@ public class WebAppContainer
   /**
    * Finds the web-app matching the current entry.
    */
-  public DeployHandle<WebApp> findByURI(String uri)
+  public DeployHandle<WebAppResinBase> findByURI(String uri)
   {
     WebAppUriMap entry = findEntryByURI(uri);
     
@@ -1137,7 +1137,7 @@ public class WebAppContainer
 
     if (p < 0 || p < length - 1) { // server/26cf
       //WebAppController controller = _appDeploy.findController(subURI);
-      DeployHandle<WebApp> webAppHandle = _appDeploy.findHandle(subURI);
+      DeployHandle<WebAppResinBase> webAppHandle = _appDeploy.findHandle(subURI);
       
       if (webAppHandle != null) {
         entry = new WebAppUriMap(subURI, webAppHandle);
@@ -1158,7 +1158,7 @@ public class WebAppContainer
     return entry;
   }
 
-  public DeployContainerService<WebApp,WebAppController> getWebAppDeployContainer()
+  public DeployContainerService<WebAppResinBase,WebAppController> getWebAppDeployContainer()
   {
     return _appDeploy;
   }
@@ -1185,7 +1185,7 @@ public class WebAppContainer
   /**
    * Returns a list of the webApps.
    */
-  public DeployHandle<WebApp> []getWebAppHandles()
+  public DeployHandle<WebAppResinBase> []getWebAppHandles()
   {
     return _appDeploy.getHandles();
   }
@@ -1228,7 +1228,7 @@ public class WebAppContainer
     _appDeploy.destroy(mode);
     // _serviceDeploy.destroy();
     
-    WebApp errorWebApp = _errorWebApp;
+    WebAppResinBase errorWebApp = _errorWebApp;
     
     if (errorWebApp != null) {
       try {
@@ -1255,10 +1255,10 @@ public class WebAppContainer
   /**
    * Returns the error webApp during startup.
    */
-  public WebApp getErrorWebApp()
+  public WebAppResinBase getErrorWebApp()
   {
     if (_errorWebApp == null) {
-      WebApp defaultWebApp = findWebAppByURI("/");
+      WebAppResinBase defaultWebApp = findWebAppByURI("/");
       
       if (defaultWebApp != null) {
         return defaultWebApp;
@@ -1274,7 +1274,7 @@ public class WebAppContainer
     }
   }
   
-  private WebApp createErrorWebApp()
+  private WebAppResinBase createErrorWebApp()
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
@@ -1289,7 +1289,7 @@ public class WebAppContainer
       WebAppController webAppController
         = createWebAppController(id, errorRoot, "/");
       
-      DeployHandle<WebApp> handle = _appDeploy.createHandle(id);
+      DeployHandle<WebAppResinBase> handle = _appDeploy.createHandle(id);
       
       handle.getService().setController(webAppController);
       

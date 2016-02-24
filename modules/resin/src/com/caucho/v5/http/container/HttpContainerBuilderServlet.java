@@ -345,7 +345,7 @@ public class HttpContainerBuilderServlet extends HttpContainerBuilder
       throw new ConfigException(L.l("<thread-executor-task-max> ({0}) must be less than <thread-max> ({1})",
                                     _threadExecutorTaskMax, _threadMax));
 
-    ThreadPool threadPool = ThreadPool.getThreadPool();
+    ThreadPool threadPool = ThreadPool.current();
 
     if (_threadMax > 0)
       threadPool.setThreadMax(_threadMax);

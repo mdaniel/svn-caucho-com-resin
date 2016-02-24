@@ -50,7 +50,7 @@ import com.caucho.v5.server.container.ServerBaseOld;
 public class StartCommandServer extends ServerCommandBase<ArgsServerBase>
 {
   @Override
-  public String getName()
+  public String name()
   {
     return "start";
   }

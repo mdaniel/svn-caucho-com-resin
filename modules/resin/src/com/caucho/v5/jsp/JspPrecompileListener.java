@@ -32,7 +32,7 @@ package com.caucho.v5.jsp;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.PathPatternType;
 import com.caucho.v5.config.types.Period;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 import javax.servlet.ServletContextEvent;
@@ -78,7 +78,7 @@ public class JspPrecompileListener extends JspPrecompileResource
   public void contextInitialized(ServletContextEvent event)
   {
     try {
-      setWebApp((WebApp) event.getServletContext());
+      setWebApp((WebAppResinBase) event.getServletContext());
       
       init();
     

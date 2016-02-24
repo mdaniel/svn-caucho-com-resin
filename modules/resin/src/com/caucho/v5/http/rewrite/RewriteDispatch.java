@@ -46,7 +46,7 @@ import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.rewrite.DispatchRule;
 import com.caucho.v5.http.rewrite.RewriteFilter;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -58,7 +58,7 @@ public class RewriteDispatch
   private static final Logger log
     = Logger.getLogger(RewriteDispatch.class.getName());
 
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   private final HttpContainerServlet _server;
 
   private HashSet<String> _dispatcherTypes = new HashSet<String>();
@@ -81,12 +81,12 @@ public class RewriteDispatch
     this(server, null);
   }
 
-  public RewriteDispatch(WebApp webApp)
+  public RewriteDispatch(WebAppResinBase webApp)
   {
     this(null, webApp);
   }
 
-  private RewriteDispatch(HttpContainerServlet server, WebApp webApp)
+  private RewriteDispatch(HttpContainerServlet server, WebAppResinBase webApp)
   {
     _server = server;
     _webApp = webApp;
@@ -95,7 +95,7 @@ public class RewriteDispatch
     _isFinest = log.isLoggable(Level.FINEST);
   }
 
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }

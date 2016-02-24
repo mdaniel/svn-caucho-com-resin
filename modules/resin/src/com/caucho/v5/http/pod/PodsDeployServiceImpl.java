@@ -222,7 +222,7 @@ public class PodsDeployServiceImpl
   
   private PodDeploy createPodDeploy(PodBartender pod)
   {
-    String id = "pods/" + pod.getName();
+    String id = "pods/" + pod.name();
     
     PodDeploy podDeploy = _podMap.get(id);
     
@@ -290,11 +290,11 @@ public class PodsDeployServiceImpl
     // -1 is used for expanding the classloader
     //nodeList.add(NODE_LOADER);
     
-    for (int i = 0; i < pod.getNodeCount(); i++) {
+    for (int i = 0; i < pod.nodeCount(); i++) {
       NodePodAmp node = pod.getNode(i);
       
       for (int j = 0; j < pod.getDepth(); j++) {
-        ServerBartender server = node.getServer(j);
+        ServerBartender server = node.server(j);
         
         if (server != null && server.isSameServer(_serverSelf)) {
           nodeList.add(i);

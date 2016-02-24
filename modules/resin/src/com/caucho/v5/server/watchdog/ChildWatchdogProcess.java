@@ -204,7 +204,7 @@ class ChildWatchdogProcess
         throw new IllegalStateException("Invalid server socket: " + ss);
       }
 
-      ThreadPool.getCurrent().start(new InfoThread(ss));
+      ThreadPool.current().start(new InfoThread(ss));
       
       String program = getArgs().getDisplayName();
       
@@ -228,7 +228,7 @@ class ChildWatchdogProcess
         WatchdogProcessLogThread logThread
           = new WatchdogProcessLogThread(stdIs, jvmOut);
 
-        ThreadPool.getCurrent().start(logThread);
+        ThreadPool.current().start(logThread);
 
         // ThreadPool.getCurrent().start(new InfoThread(ss));
 
@@ -514,7 +514,7 @@ class ChildWatchdogProcess
                         .as(LinkWatchdogService.class);
     
     try {
-      ThreadPool.getCurrent().schedule(link);
+      ThreadPool.current().schedule(link);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

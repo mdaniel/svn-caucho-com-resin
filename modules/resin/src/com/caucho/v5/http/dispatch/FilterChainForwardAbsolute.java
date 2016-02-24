@@ -43,14 +43,14 @@ import com.caucho.v5.http.webapp.*;
 public class FilterChainForwardAbsolute implements FilterChain {
   // servlet
   private String _url;
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   /**
    * Create the forward filter chain servlet.
    *
    * @param url the request dispatcher to forward to.
    */
-  public FilterChainForwardAbsolute(String url, WebApp webApp)
+  public FilterChainForwardAbsolute(String url, WebAppResinBase webApp)
   {
     _url = url;
     _webApp = webApp;

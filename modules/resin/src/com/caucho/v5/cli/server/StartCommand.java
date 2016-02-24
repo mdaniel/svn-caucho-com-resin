@@ -34,15 +34,15 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import com.caucho.v5.cli.daemon.ArgsDaemon;
-import com.caucho.v5.cli.shell.EnvCli;
+import com.caucho.v5.cli.shell_old.EnvCliOld;
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
 import com.caucho.v5.server.container.ArgsServerBase;
-import com.caucho.v5.server.container.ServerBase;
 import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.L10N;
+import com.caucho.v5.web.server.ServerBase;
 
 /**
  * Command to start Resin server
@@ -333,7 +333,7 @@ public class StartCommand extends StartCommandBase
     return ExitCode.OK;
   }
   
-  private void addServer(EnvCli env, ServerBaseOld server)
+  private void addServer(EnvCliOld env, ServerBaseOld server)
   {
     HashMap<Integer,ServerBaseOld> serverMap;
     

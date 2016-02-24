@@ -310,7 +310,7 @@ class PodBuilderImpl implements ServiceServer.PodBuilder
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      thread.setContextClassLoader(_manager.getClassLoader());
+      thread.setContextClassLoader(_manager.classLoader());
       
       PodContainer podContainer = PodContainer.getCurrent();
       

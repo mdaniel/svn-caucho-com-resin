@@ -46,9 +46,9 @@ abstract public class CommandWrapper<A extends ArgsWatchdog> implements BootComm
   abstract protected BootCommand<A> getDelegate();
 
   @Override
-  public String getName()
+  public String name()
   {
-    return getDelegate().getName();
+    return getDelegate().name();
   }
 
   @Override

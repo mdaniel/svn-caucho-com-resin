@@ -59,7 +59,7 @@ public class DisableCommand extends ManagementCommandBase
       serverId = args.getServerId();
 
     if (serverId == null)
-      throw new ConfigException(L.l("{0}: -server is not specified", getName()));
+      throw new ConfigException(L.l("{0}: -server is not specified", name()));
     
     String result = manager.disable(serverId);
     

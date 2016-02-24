@@ -38,7 +38,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 
 import com.caucho.v5.http.dispatch.InvocationServlet;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.util.IntMap;
@@ -187,7 +187,7 @@ public class RequestCauchoAsync extends RequestCauchoWrapper {
     return getQueryString();
   }
   
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _invocation.getWebApp();
   }

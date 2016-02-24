@@ -73,9 +73,9 @@ public class WebAppRouterServiceImpl implements WebAppRouterService
   private final WebAppRouter _router;
   private final String _idPrefix;
 
-  private final List<DeployHandle<WebApp>> _webAppList = new ArrayList<>();
+  private final List<DeployHandle<WebAppResinBase>> _webAppList = new ArrayList<>();
   
-  private HashMap<String,DeployHandle<WebApp>> _webAppMap = new HashMap<>();
+  private HashMap<String,DeployHandle<WebAppResinBase>> _webAppMap = new HashMap<>();
   
   private Cancel _onStartCancel;
 
@@ -122,7 +122,7 @@ public class WebAppRouterServiceImpl implements WebAppRouterService
       return;
     }
     
-    DeployHandle<WebApp> webAppHandle = _deploySystem.getHandle(id);
+    DeployHandle<WebAppResinBase> webAppHandle = _deploySystem.getHandle(id);
     
     if (webAppHandle == null) {
       return;
@@ -135,9 +135,9 @@ public class WebAppRouterServiceImpl implements WebAppRouterService
   
   private void buildWebAppMap()
   {
-    HashMap<String,DeployHandle<WebApp>> webAppMap = new HashMap<>();
+    HashMap<String,DeployHandle<WebAppResinBase>> webAppMap = new HashMap<>();
     
-    for (DeployHandle<WebApp> handle : _webAppList) {
+    for (DeployHandle<WebAppResinBase> handle : _webAppList) {
       String id = handle.getId();
       
       String contextPath = getContextPath(id);
@@ -227,7 +227,7 @@ public class WebAppRouterServiceImpl implements WebAppRouterService
    * Returns the deployed entries.
    */
   @Direct
-  public DeployHandle<WebApp> []getHandles()
+  public DeployHandle<WebAppResinBase> []getHandles()
   {
     //ArrayList<DeployHandle<I>> handleList = new ArrayList<>(_handleMap.values());
     

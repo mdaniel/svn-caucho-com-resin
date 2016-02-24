@@ -56,14 +56,13 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
-import com.caucho.v5.http.baratine.FormBaratine;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.http.security.Login;
 import com.caucho.v5.http.session.SessionImpl;
 import com.caucho.v5.http.session.SessionManager;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.i18n.CharacterEncoding;
 import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.network.port.ConnectionTcp;
@@ -76,6 +75,7 @@ import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.ReadStream;
 import com.caucho.v5.vfs.VfsOld;
 import com.caucho.v5.vfs.WriteStream;
+import com.caucho.v5.web.webapp.FormBaratine;
 
 abstract public class RequestCauchoBase implements RequestCaucho
 {
@@ -112,7 +112,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
     else {
       CharBuffer cb = new CharBuffer();
 
-      WebApp webApp = getWebApp();
+      WebAppResinBase webApp = getWebApp();
 
       String servletPath = getPageServletPath();
       if (servletPath != null)
@@ -528,7 +528,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   @Override
   public String getRealPath(String uri)
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     return webApp.getRealPath(uri);
   }
@@ -738,7 +738,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
    */
   protected final SessionManager getSessionManager()
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     if (webApp != null)
       return webApp.getSessionManager();
@@ -798,7 +798,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   public void login(String username, String password)
     throws ServletException
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     AuthenticatorRole auth = webApp.getConfiguredAuthenticator();
 
@@ -849,7 +849,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   public boolean login(boolean isFail)
   {
     try {
-      WebApp webApp = getWebApp();
+      WebAppResinBase webApp = getWebApp();
 
       if (webApp == null) {
         if (log.isLoggable(Level.FINE))
@@ -912,7 +912,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   public boolean authenticate(HttpServletResponse response)
     throws IOException, ServletException
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     if (webApp == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
@@ -946,7 +946,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   {
     requestLogin();
 
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     if (webApp == null)
       return null;
 
@@ -1007,7 +1007,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
     if (runAs != null)
       return runAs.equals(role);
 
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
 
     Principal user = getUserPrincipal();
 
@@ -1076,7 +1076,7 @@ abstract public class RequestCauchoBase implements RequestCaucho
   protected void finishRequest()
     throws IOException
   {
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     SessionImpl session = _session;
 
     if (webApp != null && webApp.isActive()) {

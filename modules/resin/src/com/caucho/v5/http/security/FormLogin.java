@@ -47,7 +47,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.session.SessionManager;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -77,7 +77,7 @@ public class FormLogin extends LoginBase
   protected boolean _internalForward;
   protected boolean _formURIPriority;
 
-  private WebApp _webApp = WebApp.getCurrent();
+  private WebAppResinBase _webApp = WebAppResinBase.getCurrent();
 
   /**
    * Sets the login page.
@@ -297,7 +297,7 @@ public class FormLogin extends LoginBase
       return;
     request.setAttribute(LOGIN_CHECK, "login");
 
-    WebApp webApp = _webApp;
+    WebAppResinBase webApp = _webApp;
 
     String jUseCookieAuth = (String) request.getParameter("j_use_cookie_auth");
 
@@ -364,7 +364,7 @@ public class FormLogin extends LoginBase
       return;
     }
 
-    WebApp webApp = _webApp;
+    WebAppResinBase webApp = _webApp;
 
     String uri = request.getRequestURI();
 
@@ -419,7 +419,7 @@ public class FormLogin extends LoginBase
 
   private void generateCookie(Principal user,
                               CookieAuthenticator auth,
-                              WebApp webApp,
+                              WebAppResinBase webApp,
                               HttpServletRequest request,
                               HttpServletResponse response)
   {

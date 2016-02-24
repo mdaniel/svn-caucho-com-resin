@@ -51,7 +51,7 @@ public class FilterChainWebAppListener implements FilterChainCaucho {
   private FilterChain _next;
 
   // app
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   private ServletRequestListener []_requestListeners;
 
@@ -62,7 +62,7 @@ public class FilterChainWebAppListener implements FilterChainCaucho {
    * @param filter the user's filter
    */
   public FilterChainWebAppListener(FilterChain next, 
-                                   WebApp webApp,
+                                   WebAppResinBase webApp,
                                    ServletRequestListener []requestListeners)
   {
     _next = next;

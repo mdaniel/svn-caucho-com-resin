@@ -69,7 +69,7 @@ import com.caucho.v5.vfs.WriteStream;
  */
 @ModulePrivate
 public class WebAppController
-  extends DeployControllerEnvironment<WebApp,WebAppConfig>
+  extends DeployControllerEnvironment<WebAppResinBase,WebAppConfig>
 {
   private static final Logger log
     = Logger.getLogger(WebAppController.class.getName());
@@ -596,7 +596,7 @@ public class WebAppController
   */
   
   @Override
-  public void merge(DeployController<WebApp> oldControllerDeploy)
+  public void merge(DeployController<WebAppResinBase> oldControllerDeploy)
   {
     super.merge(oldControllerDeploy);
     
@@ -739,7 +739,7 @@ public class WebAppController
    * Instantiate the webApp.
    */
   @Override
-  protected DeployInstanceBuilder<WebApp> createInstanceBuilder()
+  protected DeployInstanceBuilder<WebAppResinBase> createInstanceBuilder()
   {
     return getHttpContainer().createWebAppBuilder(this);
   }
@@ -748,7 +748,7 @@ public class WebAppController
    * Creates the webApp.
    */
   @Override
-  protected void configureInstanceVariables(DeployInstanceBuilder<WebApp> builder)
+  protected void configureInstanceVariables(DeployInstanceBuilder<WebAppResinBase> builder)
   {
     InjectManagerAmp inject = InjectManagerAmp.current();
     
@@ -758,9 +758,9 @@ public class WebAppController
     // factory.type(ServletContext.class);
     // factory.stereotype(CauchoDeploymentLiteral.create());
     
-    WebAppBuilder webAppBuilder = (WebAppBuilder) builder;
+    WebAppResinBuilder webAppBuilder = (WebAppResinBuilder) builder;
     
-    WebApp webApp = webAppBuilder.getWebApp();
+    WebAppResinBase webApp = webAppBuilder.getWebApp();
 
     // XXX:
     // beanManager.addBean(factory.singleton(webApp));

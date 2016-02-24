@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.cli.daemon.ArgsDaemon;
-import com.caucho.v5.cli.shell.EnvCli;
+import com.caucho.v5.cli.shell_old.EnvCliOld;
 import com.caucho.v5.health.shutdown.ExitCode;
 import com.caucho.v5.server.config.ConfigBoot;
 import com.caucho.v5.server.config.ServerConfigBoot;
@@ -122,7 +122,7 @@ public class StopCommand extends ServerCommandBase<ArgsDaemon>
   {
     HashMap<Integer,ServerBaseOld> serverMap;
     
-    EnvCli env = args.envCli();
+    EnvCliOld env = args.envCli();
     
     serverMap = (HashMap) env.get("baratine_servers");
     

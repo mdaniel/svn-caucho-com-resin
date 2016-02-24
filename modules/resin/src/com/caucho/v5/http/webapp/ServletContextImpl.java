@@ -293,7 +293,7 @@ public class ServletContextImpl extends ServletContextCompat
         
         if (p > 0) {
           String contextPath = file.substring(0, p);
-          WebApp webApp = (WebApp) getContext(contextPath);
+          WebAppResinBase webApp = (WebAppResinBase) getContext(contextPath);
           
           if (webApp != null)
             return webApp.getResource(url);

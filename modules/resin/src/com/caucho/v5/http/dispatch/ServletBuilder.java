@@ -75,7 +75,7 @@ import com.caucho.v5.http.protocol.RequestServletStub;
 import com.caucho.v5.http.protocol.ResponseServletStub;
 import com.caucho.v5.http.security.BasicPrincipal;
 import com.caucho.v5.http.security.ConstraintManager;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.jmx.JmxUtilResin;
 import com.caucho.v5.loader.EnvLoader;
@@ -135,7 +135,7 @@ public class ServletBuilder
   //private InjectionTarget _injectionTarget;
   //private OwnerCreationalContext _servletEnv;
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   private ServletContext _servletContext;
   private ServletManager _servletManager;
   private ServletMapper _servletMapper;
@@ -487,7 +487,7 @@ public class ServletBuilder
         _loadOnStartup = 1;
       }
 
-      if (_servletContext instanceof WebApp) {
+      if (_servletContext instanceof WebAppResinBase) {
         loadTld();
       }
     }
@@ -517,7 +517,7 @@ public class ServletBuilder
     // ((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
   }
   
-  protected WebApp getWebApp()
+  protected WebAppResinBase getWebApp()
   {
     return _webApp;
   }
@@ -726,7 +726,7 @@ public class ServletBuilder
     _servletContext = app;
   }
 
-  public void setWebApp(WebApp webApp)
+  public void setWebApp(WebAppResinBase webApp)
   {
     _webApp = webApp;
   }

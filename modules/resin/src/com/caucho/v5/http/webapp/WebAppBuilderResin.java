@@ -53,8 +53,8 @@ import com.caucho.v5.http.dispatch.ServletManagerResin;
 import com.caucho.v5.http.rewrite.DispatchRuleBase;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
 import com.caucho.v5.http.rewrite.RewriteFilter;
-import com.caucho.v5.http.webapp.WebApp;
-import com.caucho.v5.http.webapp.WebAppBuilder;
+import com.caucho.v5.http.webapp.WebAppResinBase;
+import com.caucho.v5.http.webapp.WebAppResinBuilder;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.jsp.JspServlet;
 import com.caucho.v5.jsp.cfg.JspConfig;
@@ -69,7 +69,7 @@ import com.caucho.v5.security.XmlRoleMap;
 /**
  * Builder for the webapp to encapsulate the configuration process.
  */
-public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
+public class WebAppBuilderResin extends WebAppResinBuilder<WebAppResin>
 {
   private static final Logger log
     = Logger.getLogger(WebAppBuilderResin.class.getName());
@@ -604,7 +604,7 @@ public class WebAppBuilderResin extends WebAppBuilder<WebAppResin>
   {
     super.initConstructor();
     
-    WebApp webApp = getWebApp();
+    WebAppResinBase webApp = getWebApp();
     
     // the JSP servlet needs to initialize the JspFactory
     JspServlet.initStatic();

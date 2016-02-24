@@ -45,9 +45,9 @@ import com.caucho.v5.util.CurrentTime;
 public class FilterChainStatistics implements FilterChain
 {
   private final FilterChain _next;
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
-  public FilterChainStatistics(FilterChain next, WebApp webApp)
+  public FilterChainStatistics(FilterChain next, WebAppResinBase webApp)
   {
     _next = next;
     _webApp = webApp;

@@ -83,12 +83,12 @@ public class WebAppBuilderDispatch
 
   private FilterChainBuilder _securityBuilder;
 
-  private WebAppBuilder _builder;
+  private WebAppResinBuilder _builder;
   
   /**
    * Builder Creates the webApp with its environment loader.
    */
-  public WebAppBuilderDispatch(WebAppBuilder builder)
+  public WebAppBuilderDispatch(WebAppResinBuilder builder)
   {
     Objects.requireNonNull(builder);
     
@@ -124,12 +124,12 @@ public class WebAppBuilderDispatch
     _errorFilterMapper.setFilterManager(_filterManager);
   }
   
-  private WebAppBuilder getBuilder()
+  private WebAppResinBuilder getBuilder()
   {
     return _builder;
   }
   
-  private WebApp getWebApp()
+  private WebAppResinBase getWebApp()
   {
     return getBuilder().getWebApp();
   }

@@ -46,7 +46,7 @@ public class ScheduledExecutorServiceImpl implements Executor {
   private static ScheduledExecutorServiceImpl _service
     = new ScheduledExecutorServiceImpl();
     
-  private ThreadPool _threadPool = ThreadPool.getThreadPool();
+  private ThreadPool _threadPool = ThreadPool.current();
 
   private ScheduledExecutorServiceImpl()
   {

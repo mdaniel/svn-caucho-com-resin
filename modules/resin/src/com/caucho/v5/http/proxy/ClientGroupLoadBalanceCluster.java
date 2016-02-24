@@ -123,12 +123,12 @@ class ClientGroupLoadBalanceCluster
   
   private void update()
   {
-    int length = _pod.getNodeCount();
+    int length = _pod.nodeCount();
     
     ClientSocketFactory []clientList = new ClientSocketFactory[length];
     
     for (int i = 0; i < length; i++) {
-      ServerBartender server = _pod.getNode(i).getServer(0);
+      ServerBartender server = _pod.getNode(i).server(0);
 
       if (server == null) {
         continue;

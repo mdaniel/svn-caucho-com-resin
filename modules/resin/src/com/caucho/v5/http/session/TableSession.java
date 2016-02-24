@@ -71,7 +71,7 @@ class TableSession
     
     _contextId = contextId;
     
-    KrakenSystem kraken = KrakenSystem.getCurrent();
+    KrakenSystem kraken = KrakenSystem.current();
     
     _tableManager = kraken.getTableManager();
     

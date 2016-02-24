@@ -36,12 +36,12 @@ import com.caucho.v5.deploy.DeployGenerator;
  * The generator for the web-app deploy
  */
 public class DeployGeneratorWebApp
-  extends DeployGenerator<WebApp,WebAppController>
+  extends DeployGenerator<WebAppResinBase,WebAppController>
 {
   /**
    * Creates the new host deploy.
    */
-  public DeployGeneratorWebApp(DeployContainerService<WebApp,WebAppController> deployContainer)
+  public DeployGeneratorWebApp(DeployContainerService<WebAppResinBase,WebAppController> deployContainer)
   {
     super(deployContainer);
   }

@@ -42,7 +42,7 @@ import com.caucho.v5.deploy2.DeployMode;
 import com.caucho.v5.http.container.HttpContainer;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.host.HostConfig;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppConfig;
 import com.caucho.v5.util.L10N;
 
@@ -60,7 +60,7 @@ public class RemoteAdminService
   private HttpContainerServlet _server;
   private boolean _isAuthenticationRequired = true;
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   public void setAuthenticationRequired(boolean isAuthenticationRequired)
   {
@@ -137,7 +137,7 @@ public class RemoteAdminService
     }
   }
 
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }

@@ -32,7 +32,7 @@ package com.caucho.v5.http.session;
 
 import com.caucho.v5.bartender.ServerBartender;
 import com.caucho.v5.http.container.HttpContainerServlet;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.jmx.server.ManagedObjectBase;
 import com.caucho.v5.management.server.PersistentStoreMXBean;
 import com.caucho.v5.management.server.SessionManagerMXBean;
@@ -323,7 +323,7 @@ public class SessionManagerAdmin extends ManagedObjectBase
   {
     int hash = SessionManager.getServerCode(sessionId, count);
     
-    WebApp webApp = _manager.getWebApp();
+    WebAppResinBase webApp = _manager.getWebApp();
     
     HttpContainerServlet servlet = webApp.getServer();
     

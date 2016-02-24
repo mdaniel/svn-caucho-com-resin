@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jsp.cfg;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 import java.util.ArrayList;
 
@@ -43,12 +43,12 @@ import java.util.ArrayList;
 public class JspConfig {
   private ArrayList<JspTaglib> _taglibList = new ArrayList<JspTaglib>();
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   
   private ArrayList<JspPropertyGroup> _propertyGroupList
     = new ArrayList<>();
 
-  public JspConfig(WebApp webApp)
+  public JspConfig(WebAppResinBase webApp)
   {
     _webApp = webApp;
   }

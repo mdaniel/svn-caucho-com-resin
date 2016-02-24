@@ -42,12 +42,12 @@ public class LocaleEncodingMappingList {
   static final Logger log
     = Logger.getLogger(LocaleEncodingMappingList.class.getName());
 
-  private WebApp _app;
+  private WebAppResinBase _app;
 
   /**
    * Creates the webApp with its environment loader.
    */
-  LocaleEncodingMappingList(WebApp app)
+  LocaleEncodingMappingList(WebAppResinBase app)
   {
     _app = app;
   }

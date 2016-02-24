@@ -48,7 +48,7 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.inject.impl.InjectManagerImpl;
 import com.caucho.v5.javac.JavaCompilerUtil;
@@ -99,7 +99,7 @@ abstract public class PageManager {
   {
   }
 
-  void initWebApp(WebApp webApp)
+  void initWebApp(WebAppResinBase webApp)
   {
     _webApp = (WebAppResin) webApp;
 
@@ -187,7 +187,7 @@ abstract public class PageManager {
    * The jsp page context initialization.
    */
   public PageContextImpl allocatePageContext(Servlet servlet,
-                                             WebApp app,
+                                             WebAppResinBase app,
                                              ServletRequest request,
                                              ServletResponse response,
                                              String errorPageURL,

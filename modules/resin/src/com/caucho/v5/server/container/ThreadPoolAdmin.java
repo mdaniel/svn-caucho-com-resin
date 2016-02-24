@@ -49,7 +49,7 @@ public class ThreadPoolAdmin extends ManagedObjectBase
    */
   public static ThreadPoolAdmin create()
   {
-    return new ThreadPoolAdmin(ThreadPool.getThreadPool());
+    return new ThreadPoolAdmin(ThreadPool.current());
   }
 
   /**

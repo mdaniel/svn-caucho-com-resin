@@ -106,7 +106,7 @@ public class ForwardRule
     uriArg = uri;
 
     if (_isAbsolute)
-      return new FilterChainForwardAbsolute(uriArg, WebApp.getCurrent());
+      return new FilterChainForwardAbsolute(uriArg, WebAppResinBase.getCurrent());
     else
       return new FilterChainForward(uriArg);
   }

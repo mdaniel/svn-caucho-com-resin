@@ -45,7 +45,7 @@ import javax.websocket.server.ServerEndpointConfig;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
 
 import com.caucho.v5.http.dispatch.ServletBuilder;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.ContainerWebSocketServer;
@@ -61,7 +61,7 @@ public class ServerContainerDelegate
   private static final L10N L = new L10N(ServerContainerDelegate.class);
   private static final Logger log = Logger.getLogger(ServerContainerDelegate.class.getName());
   
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   
   private final WebSocketEndpointManager _endpointManager;
   
@@ -71,7 +71,7 @@ public class ServerContainerDelegate
   
   public ServerContainerDelegate()
   {
-    _webApp = WebApp.getCurrent();
+    _webApp = WebAppResinBase.getCurrent();
     
     if (_webApp == null) {
       throw new IllegalStateException(L.l("{0} must be created in a web-app context.",

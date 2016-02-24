@@ -36,12 +36,12 @@ import com.caucho.v5.config.Configurable;
  */
 @Configurable
 @SuppressWarnings("serial")
-public class WebAppUnknown extends WebApp
+public class WebAppUnknown extends WebAppResinBase
 {
   /**
    * Creates the webApp with its environment loader.
    */
-  WebAppUnknown(WebAppBuilder builder)
+  WebAppUnknown(WebAppResinBuilder builder)
   {
     super(builder);
   }

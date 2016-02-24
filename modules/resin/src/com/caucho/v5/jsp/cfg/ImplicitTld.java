@@ -31,7 +31,7 @@ package com.caucho.v5.jsp.cfg;
 
 import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.DependencyBean;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 import com.caucho.v5.vfs.PathImpl;
 import com.caucho.v5.vfs.PersistentDependency;

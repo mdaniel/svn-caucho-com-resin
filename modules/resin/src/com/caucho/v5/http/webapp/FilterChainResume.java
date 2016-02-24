@@ -54,7 +54,7 @@ public class FilterChainResume implements FilterChainCaucho
   private FilterChain _next;
 
   // app
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   
   // error page manager
   private ErrorPageManager _errorPageManager;
@@ -67,7 +67,7 @@ public class FilterChainResume implements FilterChainCaucho
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterChainResume(FilterChain next, WebApp webApp)
+  public FilterChainResume(FilterChain next, WebAppResinBase webApp)
   {
     _next = next;
     _webApp = webApp;
@@ -106,7 +106,7 @@ public class FilterChainResume implements FilterChainCaucho
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    WebApp webApp = _webApp;
+    WebAppResinBase webApp = _webApp;
 
     try {
       thread.setContextClassLoader(webApp.getClassLoader());

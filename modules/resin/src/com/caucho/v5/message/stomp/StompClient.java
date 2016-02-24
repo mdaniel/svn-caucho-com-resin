@@ -97,7 +97,7 @@ public class StompClient
       throw new IOException("can't connect2");
     }
     
-    ThreadPool.getCurrent().schedule(_receiver);
+    ThreadPool.current().schedule(_receiver);
     // check
   }
   

@@ -59,7 +59,7 @@ public class WebAppBuilderFragment
   private static final Logger log
     = Logger.getLogger(WebAppBuilderFragment.class.getName());
   
-  private final WebAppBuilder _builder;
+  private final WebAppResinBuilder _builder;
   
   private Ordering _absoluteOrdering;
   private List<WebAppFragmentConfig> _webFragments;
@@ -68,21 +68,21 @@ public class WebAppBuilderFragment
   /**
    * Builder Creates the webApp with its environment loader.
    */
-  public WebAppBuilderFragment(WebAppBuilder builder)
+  public WebAppBuilderFragment(WebAppResinBuilder builder)
   {
     Objects.requireNonNull(builder);
     
     _builder = builder;
   }
   
-  private WebAppBuilder getBuilder()
+  private WebAppResinBuilder getBuilder()
   {
     return _builder;
   }
   
   public void addBuilderProgram(ConfigProgram program)
   {
-    WebAppBuilder builder = getBuilder();
+    WebAppResinBuilder builder = getBuilder();
 
     boolean isFragment = builder.isFragment();
     

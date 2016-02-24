@@ -66,7 +66,7 @@ import com.caucho.v5.hessian.io.SerializerFactory;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.protocol.RequestCauchoBase;
 import com.caucho.v5.http.security.AuthenticatorRole;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.TempOutputStream;
 import com.caucho.v5.json.io.JsonWriter;
 import com.caucho.v5.management.server.SessionManagerMXBean;
@@ -103,7 +103,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   
   private static final int []DECODE;
 
-  private final WebApp _webApp;
+  private final WebAppResinBase _webApp;
   private final SessionManagerAdmin _admin;
 
   private final HttpContainerServlet _servletContainer;
@@ -219,7 +219,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    *
    * @param webApp the web-webApp webApp
    */
-  public SessionManager(WebApp webApp)
+  public SessionManager(WebAppResinBase webApp)
     throws Exception
   {
     _webApp = webApp;
@@ -368,7 +368,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   /**
    * Returns the SessionManager's webApp
    */
-  WebApp getWebApp()
+  WebAppResinBase getWebApp()
   {
     return _webApp;
   }
@@ -1444,7 +1444,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     // back to the current server.
     int node = (int) (random & ((1 << 18) - 1));
     
-    int nodeLength = _clusterPod.getNodeCount();
+    int nodeLength = _clusterPod.nodeCount();
     nodeLength = 64; // XXX: forcing for old model
     node = (node - node % nodeLength) + index;
     sb.append(convert(node));

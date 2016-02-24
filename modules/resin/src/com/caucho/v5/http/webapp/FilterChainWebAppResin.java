@@ -40,7 +40,7 @@ import javax.servlet.ServletResponse;
 
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.webapp.FilterChainWebApp;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.transaction.TransactionManagerImpl;
 import com.caucho.v5.transaction.UserTransactionImpl;
 import com.caucho.v5.transaction.UserTransactionProxy;
@@ -67,7 +67,7 @@ public class FilterChainWebAppResin extends FilterChainWebApp
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterChainWebAppResin(FilterChain next, WebApp app)
+  public FilterChainWebAppResin(FilterChain next, WebAppResinBase app)
   {
     super(next, app, true);
   }
@@ -78,7 +78,7 @@ public class FilterChainWebAppResin extends FilterChainWebApp
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterChainWebAppResin(FilterChain next, WebApp webApp, boolean isTop)
+  public FilterChainWebAppResin(FilterChain next, WebAppResinBase webApp, boolean isTop)
   {
     super(next, webApp, isTop);
 

@@ -55,7 +55,7 @@ public class FilterChainWebApp implements FilterChainCaucho {
   private FilterChain _next;
 
   // app
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   
   // error page manager
   private ErrorPageManager _errorPageManager;
@@ -69,7 +69,7 @@ public class FilterChainWebApp implements FilterChainCaucho {
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterChainWebApp(FilterChain next, WebApp app)
+  public FilterChainWebApp(FilterChain next, WebAppResinBase app)
   {
     this(next, app, true);
   }
@@ -80,7 +80,7 @@ public class FilterChainWebApp implements FilterChainCaucho {
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterChainWebApp(FilterChain next, WebApp webApp, boolean isTop)
+  public FilterChainWebApp(FilterChain next, WebAppResinBase webApp, boolean isTop)
   {
     _next = next;
     _webApp = webApp;
@@ -111,7 +111,7 @@ public class FilterChainWebApp implements FilterChainCaucho {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    WebApp webApp = _webApp;
+    WebAppResinBase webApp = _webApp;
 
     try {
       thread.setContextClassLoader(webApp.getClassLoader());

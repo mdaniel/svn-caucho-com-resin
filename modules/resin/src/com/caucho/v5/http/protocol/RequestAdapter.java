@@ -44,7 +44,7 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import com.caucho.v5.http.session.SessionManager;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.L10N;
@@ -68,7 +68,7 @@ public class RequestAdapter extends RequestWrapper
     = new FreeList<RequestAdapter>(16);
   
   // for real adapters
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   private HttpServletResponse _response;
 
   private HashMap<String,String> _roleMap;
@@ -77,7 +77,7 @@ public class RequestAdapter extends RequestWrapper
   {
   }
   
-  protected RequestAdapter(HttpServletRequest request, WebApp app)
+  protected RequestAdapter(HttpServletRequest request, WebAppResinBase app)
   {
     super(request);
     
@@ -88,7 +88,7 @@ public class RequestAdapter extends RequestWrapper
    * Creates a new RequestAdapter.
    */
   public static RequestAdapter create(HttpServletRequest request,
-                                      WebApp app)
+                                      WebAppResinBase app)
   {
     RequestAdapter reqAdapt = _freeList.allocate();
 
@@ -117,7 +117,7 @@ public class RequestAdapter extends RequestWrapper
 
   public void init(HttpServletRequest request,
                    HttpServletResponse response,
-                   WebApp app)
+                   WebAppResinBase app)
     throws ServletException
   {
     setRequest(request);
@@ -138,7 +138,7 @@ public class RequestAdapter extends RequestWrapper
     return false;
   }
   
-  public void setWebApp(WebApp app)
+  public void setWebApp(WebAppResinBase app)
   {
     _webApp = app;
   }
@@ -341,7 +341,7 @@ public class RequestAdapter extends RequestWrapper
     return false;
   }
   
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }
@@ -486,7 +486,7 @@ public class RequestAdapter extends RequestWrapper
 
   protected final SessionManager getSessionManager()
   {
-    WebApp app = getWebApp();
+    WebAppResinBase app = getWebApp();
     if (app != null)
       return app.getSessionManager();
     else

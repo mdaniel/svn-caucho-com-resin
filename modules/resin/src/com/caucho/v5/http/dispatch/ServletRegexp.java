@@ -38,7 +38,7 @@ import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.program.ConfigProgram;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.RawString;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -129,7 +129,7 @@ public class ServletRegexp {
   /**
    * Initialize for a regexp.
    */
-  public String initRegexp(WebApp webApp,
+  public String initRegexp(WebAppResinBase webApp,
                            ServletMapper mapper,
                     ArrayList<String> vars)
     throws ServletException

@@ -146,8 +146,8 @@ public class WatchdogManager implements AlarmListener
       Logger.getLogger("javax.management").setLevel(Level.INFO);
     }
 
-    ThreadPool.getThreadPool().setIdleMin(4);
-    ThreadPool.getThreadPool().setPriorityIdleMin(4);
+    ThreadPool.current().setIdleMin(4);
+    ThreadPool.current().setPriorityIdleMin(4);
     
     boolean isLogDirectoryExists = getLogDirectory().exists();
 

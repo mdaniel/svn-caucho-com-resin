@@ -52,7 +52,7 @@ import javax.servlet.jsp.tagext.ValidationMessage;
 import com.caucho.v5.config.cf.NameCfg;
 import com.caucho.v5.config.types.Signature;
 import com.caucho.v5.el.Expr;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.io.i18n.Encoding;
 import com.caucho.v5.javac.CompileClassNotFound;
@@ -961,7 +961,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("javax.servlet.http.HttpSession session = request.getSession(true);");
     }
 
-    out.println(WebApp.class.getName() + " _jsp_application = _caucho_getApplication();");
+    out.println(WebAppResinBase.class.getName() + " _jsp_application = _caucho_getApplication();");
 
     out.print(PageContextImpl.class.getName() + " pageContext = _jsp_pageManager.allocatePageContext(");
 
@@ -2162,7 +2162,7 @@ public class JavaJspGenerator extends JspGenerator {
                             String path, PathImpl appDir, MergePath classPath)
     throws IOException
   {
-    String resinHome = RootDirectorySystem.getCurrent().getRootDirectory().toString();
+    String resinHome = RootDirectorySystem.getCurrent().rootDirectory().toString();
 
     String prefix = getAppDir().getFullPath();
 

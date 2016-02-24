@@ -51,7 +51,7 @@ import com.caucho.v5.config.Configurable;
 import com.caucho.v5.config.annotation.DisableConfig;
 import com.caucho.v5.config.program.ContainerProgram;
 import com.caucho.v5.config.types.InitParam;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.inject.InjectManagerAmp;
 import com.caucho.v5.util.CauchoUtil;
 
@@ -69,7 +69,7 @@ public class FilterConfigImpl
 
   private ContainerProgram _init;
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   private ServletContext _servletContext;
   private FilterManager _filterManager;
   private Filter _filter;
@@ -193,7 +193,7 @@ public class FilterConfigImpl
     return Collections.enumeration(_initParams.keySet());
   }
 
-  public void setWebApp(WebApp webApp)
+  public void setWebApp(WebAppResinBase webApp)
   {
     _webApp = webApp;
   }

@@ -28,7 +28,7 @@
 
 package com.caucho.v5.jstl.rt;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.jsp.PageContextImpl;
 import com.caucho.v5.jstl.NameValueTag;
 import com.caucho.v5.util.L10N;
@@ -283,7 +283,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
 
   private String getCanonicalURL(PageContextImpl pageContext, String url)
   {
-    WebApp app = pageContext.getApplication();
+    WebAppResinBase app = pageContext.getApplication();
     PathImpl appDir = pageContext.getApplication().getRootDirectory();
       
     if (url != null) {

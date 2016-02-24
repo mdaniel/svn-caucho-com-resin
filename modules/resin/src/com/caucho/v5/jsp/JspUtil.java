@@ -76,7 +76,7 @@ public class JspUtil
     
     //return cdiManager.getBeanManager().getReferenceFactory(bean);
     
-    return cdiManager.supplierCreate(cl);
+    return cdiManager.newProvider(cl);
   }
   
 

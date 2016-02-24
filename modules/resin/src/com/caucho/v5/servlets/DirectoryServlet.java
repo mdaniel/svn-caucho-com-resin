@@ -30,7 +30,7 @@
 package com.caucho.v5.servlets;
 
 import com.caucho.v5.http.protocol.RequestCaucho;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.i18n.CharacterEncoding;
 import com.caucho.v5.util.CauchoUtil;
 import com.caucho.v5.util.CharBuffer;
@@ -48,7 +48,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 
 public class DirectoryServlet extends HttpServlet {
-  WebApp _app;
+  WebAppResinBase _app;
   PathImpl _context;
   private boolean _enable = true;
 
@@ -69,7 +69,7 @@ public class DirectoryServlet extends HttpServlet {
 
   public void init()
   {
-    _app = (WebApp) getServletContext();
+    _app = (WebAppResinBase) getServletContext();
     _context = _app.getRootDirectory();
   }
 

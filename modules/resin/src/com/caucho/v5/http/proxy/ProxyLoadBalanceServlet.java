@@ -354,7 +354,7 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
   private ClientHttp2 openClient(String sessionId)
     throws IOException
   {
-    int len = _pod.getServerCount();
+    int len = _pod.serverCount();
     
     if (_isStickySessions && sessionId != null) {
       int hash = calculateStickySessionHash(sessionId);
@@ -381,11 +381,11 @@ public class ProxyLoadBalanceServlet extends GenericServlet {
   
   private ClientHttp2 getClient(long hash)
   {
-    int index = (int) (hash % _pod.getNodeCount());
+    int index = (int) (hash % _pod.nodeCount());
     
     NodePodAmp node = _pod.getNode(index);
   
-    ServerBartender server = node.getServer(0);
+    ServerBartender server = node.server(0);
   
     if (server != null && server.isUp()) {
       ClientHttp2 client = getClient(server);

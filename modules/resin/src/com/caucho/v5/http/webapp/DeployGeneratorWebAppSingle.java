@@ -46,7 +46,7 @@ import com.caucho.v5.vfs.PathImpl;
  * The generator for the web-app deploy
  */
 public class DeployGeneratorWebAppSingle
-  extends DeployGenerator<WebApp,WebAppController>
+  extends DeployGenerator<WebAppResinBase,WebAppController>
   implements EnvLoaderListener
 {
   private static final L10N L = new L10N(DeployGeneratorWebAppSingle.class);
@@ -72,7 +72,7 @@ public class DeployGeneratorWebAppSingle
   /**
    * Creates the new host deploy.
    */
-  public DeployGeneratorWebAppSingle(DeployContainerService<WebApp,WebAppController> deployContainer)
+  public DeployGeneratorWebAppSingle(DeployContainerService<WebAppResinBase,WebAppController> deployContainer)
   {
     super(deployContainer);
   }
@@ -80,7 +80,7 @@ public class DeployGeneratorWebAppSingle
   /**
    * Creates the new web-app deploy.
    */
-  public DeployGeneratorWebAppSingle(DeployContainerService<WebApp,WebAppController> deployContainer,
+  public DeployGeneratorWebAppSingle(DeployContainerService<WebAppResinBase,WebAppController> deployContainer,
                                      WebAppContainer container,
                                      WebAppConfig config)
   {

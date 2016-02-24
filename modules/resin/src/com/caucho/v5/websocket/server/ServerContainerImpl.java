@@ -37,7 +37,7 @@ import javax.websocket.Endpoint;
 import javax.websocket.Session;
 import javax.websocket.server.ServerContainer;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.util.ModulePrivate;
 import com.caucho.v5.websocket.common.ContainerServerWebSocketWrapper;

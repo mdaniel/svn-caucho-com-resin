@@ -44,7 +44,7 @@ import com.caucho.v5.config.ConfigException;
 import com.caucho.v5.config.types.FileSetType;
 import com.caucho.v5.config.types.PathPatternType;
 import com.caucho.v5.config.xml.ConfigXml;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.jsp.cfg.JspPropertyGroup;
 import com.caucho.v5.jsp.cfg.TldPreload;
@@ -94,7 +94,7 @@ public class TldManager {
   private ArrayList<TldPreload> _preloadTaglibs;
 
   private TldManager(JspResourceManager resourceManager,
-                     WebApp app)
+                     WebAppResinBase app)
     throws JspParseException, IOException
   {
     _resourceManager = resourceManager;
@@ -112,7 +112,7 @@ public class TldManager {
   }
 
   static TldManager create(JspResourceManager resourceManager,
-                           WebApp webApp)
+                           WebAppResinBase webApp)
     throws JspParseException, IOException
   {
 
@@ -141,7 +141,7 @@ public class TldManager {
   /**
    * Sets the webApp.
    */
-  void setWebApp(WebApp webApp)
+  void setWebApp(WebAppResinBase webApp)
   {
     _webApp = (WebAppResin) webApp;
   }

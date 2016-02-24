@@ -25,7 +25,7 @@ import com.caucho.v5.config.types.Bytes;
 import com.caucho.v5.http.container.HttpContainerServlet;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.webapp.FilterChainCaucho;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.CacheItem;
@@ -302,7 +302,7 @@ public class HttpCache extends HttpCacheBase
    * Creates the filter.
    */
   @Override
-  public FilterChain createFilterChain(FilterChain next, WebApp app)
+  public FilterChain createFilterChain(FilterChain next, WebAppResinBase app)
   {
     if (isEnable() && _store != null) // XXX: store init issue
       return new FilterChainHttpCache(this, next, app);
@@ -376,7 +376,7 @@ public class HttpCache extends HttpCacheBase
         boolean isMatch = true;
 
         if (hostRegexp != null) {
-          WebApp webApp = entry.getWebApp();
+          WebAppResinBase webApp = entry.getWebApp();
           if (! hostRegexp.matcher(webApp.getHostName()).find())
             isMatch = false;
         }

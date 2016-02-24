@@ -32,7 +32,7 @@ package com.caucho.v5.jsp;
 import com.caucho.v5.el.EL;
 import com.caucho.v5.http.protocol.ResponseCaucho;
 import com.caucho.v5.http.protocol.ResponseServlet;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.L10N;
 
@@ -62,12 +62,12 @@ import java.util.HashMap;
 public class InitPageContextImpl extends PageContextImpl {
   private ELContext _elContext;
 
-  public InitPageContextImpl(WebApp webApp, Servlet servlet)
+  public InitPageContextImpl(WebAppResinBase webApp, Servlet servlet)
   {
     super(webApp, servlet);
   }
 
-  public InitPageContextImpl(WebApp webApp, HashMap<String,Method> functionMap)
+  public InitPageContextImpl(WebAppResinBase webApp, HashMap<String,Method> functionMap)
   {
     super(webApp, functionMap);
   }

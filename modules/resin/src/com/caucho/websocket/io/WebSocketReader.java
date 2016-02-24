@@ -59,7 +59,7 @@ public final class WebSocketReader extends Reader
 
   public long getLength()
   {
-    return _is.getLength();
+    return _is.length();
   }
 
   @Override

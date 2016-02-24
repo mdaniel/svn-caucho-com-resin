@@ -188,7 +188,7 @@ public class RequestAsync extends RequestCauchoWrapper {
     return getQueryString();
   }
   
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _invocation.getWebApp();
   }

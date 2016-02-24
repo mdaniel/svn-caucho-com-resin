@@ -38,7 +38,7 @@ import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.host.Host;
 import com.caucho.v5.http.rewrite.DispatchRule;
 import com.caucho.v5.http.rewrite.RewriteDispatch;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppContainer;
 import com.caucho.v5.http.webapp.WebAppController;
 import com.caucho.v5.lifecycle.Lifecycle;
@@ -98,7 +98,7 @@ public class WebAppContainerResin extends WebAppContainer
       if (rewriteChain != chain) {
         // server/13sf, server/1kq1, server/1krd
         // WebApp rootWebApp = findWebAppByURI("/");
-        WebApp rootWebApp = findWebAppByURI(uri);
+        WebAppResinBase rootWebApp = findWebAppByURI(uri);
         
         if (rootWebApp == null) {
           // server/1u12

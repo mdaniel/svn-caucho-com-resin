@@ -96,7 +96,7 @@ public class WebSocketEndpointSkeleton<T>
   {
     _beanClass = beanClass;
 
-    _beanSupplier = InjectManagerAmp.create().supplierCreate(beanClass);
+    _beanSupplier = InjectManagerAmp.create().newProvider(beanClass);
 
     introspect();
   }
@@ -110,7 +110,7 @@ public class WebSocketEndpointSkeleton<T>
       _config = (ServerEndpointConfig) config;
     }
 
-    _beanSupplier = InjectManagerAmp.create().supplierCreate(beanClass);
+    _beanSupplier = InjectManagerAmp.create().newProvider(beanClass);
 
     introspect();
   }

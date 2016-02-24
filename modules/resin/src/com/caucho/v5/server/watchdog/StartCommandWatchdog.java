@@ -63,7 +63,7 @@ public class StartCommandWatchdog
     = Logger.getLogger(StartCommandWatchdog.class.getName());
   
   @Override
-  public String getName()
+  public String name()
   {
     return "start";
   }

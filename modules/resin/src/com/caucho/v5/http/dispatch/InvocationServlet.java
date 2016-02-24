@@ -44,7 +44,7 @@ import javax.servlet.ServletResponse;
 import com.caucho.v5.http.protocol.RequestFacade;
 import com.caucho.v5.http.protocol.ConnectionHttp;
 import com.caucho.v5.http.protocol.ResponseFacade;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.Dependency;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ConnectionProtocol;
@@ -67,7 +67,7 @@ public class InvocationServlet extends Invocation
   private String _servletPath;
   private String _pathInfo;
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   private String _servletName;
   private FilterChain _filterChain;
@@ -165,7 +165,7 @@ public class InvocationServlet extends Invocation
   /**
    * Returns the mapped webApp.
    */
-  public final WebApp getWebApp()
+  public final WebAppResinBase getWebApp()
   {
     return _webApp;
   }
@@ -173,7 +173,7 @@ public class InvocationServlet extends Invocation
   /**
    * Sets the mapped webApp.
    */
-  public void setWebApp(WebApp app)
+  public void setWebApp(WebAppResinBase app)
   {
     _webApp = app;
   }
@@ -191,7 +191,7 @@ public class InvocationServlet extends Invocation
       return true;
     }
 
-    WebApp webApp = _webApp;
+    WebAppResinBase webApp = _webApp;
 
     if (webApp != null) {
       depend = webApp.getInvocationDependency();
@@ -216,7 +216,7 @@ public class InvocationServlet extends Invocation
       return true;
     }
 
-    WebApp app = _webApp;
+    WebAppResinBase app = _webApp;
 
     if (app != null) {
       depend = app.getInvocationDependency();

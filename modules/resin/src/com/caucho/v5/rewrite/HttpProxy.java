@@ -46,7 +46,7 @@ import com.caucho.v5.config.types.Period;
 import com.caucho.v5.http.dispatch.ServletBuilder;
 import com.caucho.v5.http.proxy.LoadBalanceBackend;
 import com.caucho.v5.http.rewrite.DispatchRuleTargetBase;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.servlets.HttpProxyServlet;
 
 /**
@@ -171,7 +171,7 @@ public class HttpProxy extends DispatchRuleTargetBase
     try {
       _proxyServlet.init();
 
-      WebApp webApp = WebApp.getCurrent();
+      WebAppResinBase webApp = WebAppResinBase.getCurrent();
       if (webApp != null)
         webApp.getBuilder().addServlet(_servlet);
     }

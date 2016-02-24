@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import com.caucho.v5.config.types.FileSetType;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.jsp.cfg.TldFunction;
 import com.caucho.v5.jsp.cfg.TldTaglib;
@@ -75,7 +75,7 @@ public class TaglibManager {
   private volatile boolean _isInit;
 
   public TaglibManager(JspResourceManager resourceManager,
-                       WebApp webApp,
+                       WebAppResinBase webApp,
                        TagFileManager tagFileManager)
     throws JspParseException, IOException
   {
@@ -93,7 +93,7 @@ public class TaglibManager {
   /**
    * Sets the webApp.
    */
-  void setWebApp(WebApp webApp)
+  void setWebApp(WebAppResinBase webApp)
   {
     _webApp = (WebAppResin) webApp;
   }

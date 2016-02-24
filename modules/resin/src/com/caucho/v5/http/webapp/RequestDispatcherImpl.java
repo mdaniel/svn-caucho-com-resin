@@ -62,7 +62,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   static final int MAX_DEPTH = 64;
 
   // WebApp the request dispatcher was called from
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   private InvocationServlet _includeInvocation;
   private InvocationServlet _forwardInvocation;
   private InvocationServlet _errorInvocation;
@@ -76,7 +76,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
                         InvocationServlet errorInvocation,
                         InvocationServlet dispatchInvocation,
                         InvocationServlet requestInvocation,
-                        WebApp webApp)
+                        WebAppResinBase webApp)
   {
     _includeInvocation = includeInvocation;
     _forwardInvocation = forwardInvocation;

@@ -46,7 +46,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.v5.amp.thread.ThreadPool;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.StateConnection;
 import com.caucho.v5.util.L10N;
@@ -71,7 +71,7 @@ public class AsyncContextImpl // extends RequestProtocolBase
   private ArrayList<AsyncListenerNode> _listeners;
   private AtomicReference<StateAsync> _stateRef = new AtomicReference<>(StateAsync.IDLE);
 
-  private WebApp _dispatchWebApp;
+  private WebAppResinBase _dispatchWebApp;
   private String _dispatchPath;
   private RequestHttpBase _reqHttp;
   
@@ -115,7 +115,7 @@ public class AsyncContextImpl // extends RequestProtocolBase
       throw new IllegalStateException(String.valueOf(_stateRef.get()));
     }
     
-    _dispatchWebApp = (WebApp) request.getServletContext();
+    _dispatchWebApp = (WebAppResinBase) request.getServletContext();
 
     HttpServletRequest req;
     
@@ -325,7 +325,7 @@ public class AsyncContextImpl // extends RequestProtocolBase
   @Override
   public void dispatch(ServletContext context, String path)
   {
-    _dispatchWebApp = (WebApp) context;
+    _dispatchWebApp = (WebAppResinBase) context;
     _dispatchPath = path;
 
     dispatch();
@@ -335,7 +335,7 @@ public class AsyncContextImpl // extends RequestProtocolBase
   public void start(Runnable task)
   {
     if (isActive()) {
-      ThreadPool.getCurrent().schedule(task);
+      ThreadPool.current().schedule(task);
     }
     else
       throw new IllegalStateException(

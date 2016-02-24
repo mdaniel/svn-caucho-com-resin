@@ -57,7 +57,7 @@ import javax.servlet.http.HttpSessionIdListener;
 import javax.servlet.http.HttpSessionListener;
 
 import com.caucho.v5.http.security.Login;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.io.TempOutputStream;
 import com.caucho.v5.json.JsonName;
 import com.caucho.v5.json.JsonTransient;
@@ -1515,7 +1515,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     SessionManager manager = _manager;
     if (manager != null) {
-      WebApp webApp = manager.getWebApp();
+      WebAppResinBase webApp = manager.getWebApp();
 
       if (webApp != null)
         contextPath = "," + webApp.getContextPath();

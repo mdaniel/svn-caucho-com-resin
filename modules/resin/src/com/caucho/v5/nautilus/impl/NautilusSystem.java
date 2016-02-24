@@ -85,7 +85,7 @@ public class NautilusSystem extends SubSystemBase
   {
     ServiceManagerAmp rampManager = AmpSystem.currentManager();
     
-    KrakenSystem kraken = KrakenSystem.getCurrent();
+    KrakenSystem kraken = KrakenSystem.current();
     
     Objects.requireNonNull(kraken);
     

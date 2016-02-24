@@ -143,7 +143,7 @@ class StatDatabase
   
   private void initDatabase()
   {
-    KrakenSystem kraken = KrakenSystem.getCurrent();
+    KrakenSystem kraken = KrakenSystem.current();
     
     _tableManager = kraken.getTableManager();
 

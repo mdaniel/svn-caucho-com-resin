@@ -46,7 +46,7 @@ import com.caucho.v5.jsp.el.JspApplicationContextImpl;
 /**
  * Resin's webApp implementation.
  */
-public class WebAppResin extends WebApp
+public class WebAppResin extends WebAppResinBase
 {
   private static final Logger log
     = Logger.getLogger(WebAppResin.class.getName());
@@ -73,7 +73,7 @@ public class WebAppResin extends WebApp
   
   public static WebAppResin getCurrent()
   {
-    return (WebAppResin) WebApp.getCurrent();
+    return (WebAppResin) WebAppResinBase.getCurrent();
   }
   
   @Override
@@ -83,7 +83,7 @@ public class WebAppResin extends WebApp
   }
 
   @Override
-  protected WebAppDispatch createWebAppDispatch(WebAppBuilder builder)
+  protected WebAppDispatch createWebAppDispatch(WebAppResinBuilder builder)
   {
     return new WebAppDispatchResin((WebAppBuilderResin) builder);
   }

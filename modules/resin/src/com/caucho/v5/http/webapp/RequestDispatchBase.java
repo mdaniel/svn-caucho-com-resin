@@ -45,7 +45,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.caucho.v5.http.baratine.FormBaratine;
 import com.caucho.v5.http.dispatch.InvocationServlet;
 import com.caucho.v5.http.protocol.FormParser;
 import com.caucho.v5.http.protocol.RequestAdapter;
@@ -62,6 +61,7 @@ import com.caucho.v5.util.FreeList;
 import com.caucho.v5.util.HashMapImpl;
 import com.caucho.v5.vfs.BufferedReaderAdapter;
 import com.caucho.v5.vfs.ReadStream;
+import com.caucho.v5.web.webapp.FormBaratine;
 
 /**
  * sub-request for a include() page
@@ -74,8 +74,8 @@ class RequestDispatchBase extends RequestAdapter
   private static final FreeList<RequestDispatchBase> _freeList
     = new FreeList<RequestDispatchBase>(32);
 
-  private WebApp _webApp;
-  private WebApp _oldWebApp;
+  private WebAppResinBase _webApp;
+  private WebAppResinBase _oldWebApp;
   private InvocationServlet _invocation;
   private FormParser _formParser;
   private HashMapImpl<String,String[]> _form;
@@ -114,8 +114,8 @@ class RequestDispatchBase extends RequestAdapter
   }
 
   void init(InvocationServlet invocation,
-            WebApp webApp,
-            WebApp oldWebApp,
+            WebAppResinBase webApp,
+            WebAppResinBase oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
             String method, String uri,
@@ -157,7 +157,7 @@ class RequestDispatchBase extends RequestAdapter
     _readStream = readStream;
   }
 
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }

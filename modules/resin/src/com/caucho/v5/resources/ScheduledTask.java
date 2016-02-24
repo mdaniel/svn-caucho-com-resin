@@ -51,7 +51,7 @@ import com.caucho.v5.config.types.Period;
 import com.caucho.v5.config.types.Trigger;
 import com.caucho.v5.http.protocol.RequestServletStub;
 import com.caucho.v5.http.protocol.ResponseServletStub;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.loader.EnvLoader;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvLoaderListener;
@@ -91,8 +91,8 @@ public class ScheduledTask
   private String _url;
 
   @SuppressWarnings("unused")
-  private @Inject Instance<WebApp> _webAppInstance;
-  private WebApp _webApp;
+  private @Inject Instance<WebAppResinBase> _webAppInstance;
+  private WebAppResinBase _webApp;
   
   private Alarm _alarm;
 
@@ -160,7 +160,7 @@ public class ScheduledTask
     
     _url = url;
 
-    _webApp = WebApp.getCurrent();
+    _webApp = WebAppResinBase.getCurrent();
 
     /*
       throw new ConfigException(L.l("relative url '{0}' requires web-app context",
@@ -344,9 +344,9 @@ public class ScheduledTask
 
   public class ServletTask implements Runnable {
     private String _url;
-    private WebApp _webApp;
+    private WebAppResinBase _webApp;
 
-    ServletTask(String url, WebApp webApp)
+    ServletTask(String url, WebAppResinBase webApp)
     {
       _url = url;
       _webApp = webApp;

@@ -48,7 +48,7 @@ import com.caucho.v5.http.protocol.RequestAdapter;
 import com.caucho.v5.http.protocol.RequestCaucho;
 import com.caucho.v5.http.protocol.ResponseAdapter;
 import com.caucho.v5.http.protocol.ResponseCaucho;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.http.webapp.WebAppResin;
 import com.caucho.v5.io.ClientDisconnectException;
 import com.caucho.v5.util.L10N;

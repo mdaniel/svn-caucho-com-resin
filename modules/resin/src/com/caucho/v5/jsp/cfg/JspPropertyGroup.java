@@ -34,7 +34,7 @@ import com.caucho.v5.config.types.FileSetType;
 import com.caucho.v5.config.types.Period;
 import com.caucho.v5.http.dispatch.ServletMapping;
 import com.caucho.v5.http.dispatch.UrlMap;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.jsp.JspServlet;
 import com.caucho.v5.jsp.JspXmlServlet;
 import com.caucho.v5.util.L10N;
@@ -56,7 +56,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
 
   private static int _gId;
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
   
   private String _id;
   private ArrayList<String> _urlPatterns = new ArrayList<String>();
@@ -105,7 +105,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
   {
   }
 
-  public JspPropertyGroup(WebApp webApp)
+  public JspPropertyGroup(WebAppResinBase webApp)
   {
     _webApp = webApp;
   }

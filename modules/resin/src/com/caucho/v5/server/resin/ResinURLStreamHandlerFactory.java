@@ -28,7 +28,7 @@
  */
 package com.caucho.v5.server.resin;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 
 import java.io.IOException;
 import java.net.URL;
@@ -68,7 +68,7 @@ public class ResinURLStreamHandlerFactory implements URLStreamHandlerFactory
     protected URLConnection openConnection(URL url)
       throws IOException
     {
-      WebApp webApp = WebApp.getCurrent();
+      WebAppResinBase webApp = WebAppResinBase.getCurrent();
 
       if (webApp != null)
         return webApp.getResource(url);

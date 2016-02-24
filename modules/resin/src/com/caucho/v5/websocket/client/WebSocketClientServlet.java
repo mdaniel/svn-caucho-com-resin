@@ -474,7 +474,7 @@ public class WebSocketClientServlet
     if (_threadTask != null) {
       // _threadTask.start();
 
-      ThreadPool.getCurrent().execute(_threadTask);
+      ThreadPool.current().execute(_threadTask);
     }
 
   }

@@ -191,7 +191,7 @@ public class XALogManager extends AbstractXALogManager implements ThreadTask
       _flushCount++;
     }
 
-    ThreadPool.getThreadPool().schedule(this);
+    ThreadPool.current().schedule(this);
   }
 
   /**

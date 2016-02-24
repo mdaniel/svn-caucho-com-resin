@@ -28,7 +28,7 @@
 
 package com.caucho.v5.servlets.webdav;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.NullIterator;
 import com.caucho.v5.vfs.PathImpl;
 
@@ -287,7 +287,7 @@ public class ApplicationPath extends AbstractPath {
                          ServletContext app)
     throws IOException
   {
-    PathImpl appDir = ((WebApp) app).getRootDirectory();
+    PathImpl appDir = ((WebAppResinBase) app).getRootDirectory();
 
     return appDir.lookup("./" + path);
   }

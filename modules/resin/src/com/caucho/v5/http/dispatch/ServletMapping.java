@@ -39,7 +39,7 @@ import javax.servlet.ServletException;
 import com.caucho.v5.config.ConfigContext;
 import com.caucho.v5.config.ConfigArg;
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.L10N;
 
 /**
@@ -250,7 +250,7 @@ public class ServletMapping extends ServletBuilder {
       String className = ConfigContext.evalString(rawClassName);
 
       try {
-        WebApp app = (WebApp) getServletContext();
+        WebAppResinBase app = (WebAppResinBase) getServletContext();
 
         return Class.forName(className, false, app.getClassLoader());
       } catch (ClassNotFoundException e) {

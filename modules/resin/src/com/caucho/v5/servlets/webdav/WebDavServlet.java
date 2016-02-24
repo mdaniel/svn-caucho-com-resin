@@ -28,7 +28,7 @@
 
 package com.caucho.v5.servlets.webdav;
 
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.util.CharBuffer;
 import com.caucho.v5.util.HTTPUtil;
 import com.caucho.v5.util.QDate;
@@ -221,12 +221,12 @@ public class WebDavServlet extends GenericServlet {
     if (_path != null) {
     }
     else if (_root != null) {
-      PathImpl pwd = ((WebApp) getServletContext()).getRootDirectory();
+      PathImpl pwd = ((WebAppResinBase) getServletContext()).getRootDirectory();
 
       _path = new FilePath(pwd.lookup(_root));
     }
     else if (root != null) {
-      PathImpl pwd = ((WebApp) getServletContext()).getRootDirectory();
+      PathImpl pwd = ((WebAppResinBase) getServletContext()).getRootDirectory();
 
       _path = new FilePath(pwd.lookup(root));
     }
@@ -360,7 +360,7 @@ public class WebDavServlet extends GenericServlet {
       return;
     }
 
-    WebApp app = (WebApp) getServletContext();
+    WebAppResinBase app = (WebAppResinBase) getServletContext();
     PathImpl appDir = app.getRootDirectory();
 
     String pathInfo = req.getPathInfo();
@@ -413,7 +413,7 @@ public class WebDavServlet extends GenericServlet {
       return;
     }
     
-    WebApp app = (WebApp) getServletContext();
+    WebAppResinBase app = (WebAppResinBase) getServletContext();
     PathImpl appDir = app.getRootDirectory();
 
     String pathInfo = req.getPathInfo();
@@ -559,7 +559,7 @@ public class WebDavServlet extends GenericServlet {
   private void addAllProperties(ArrayList<AttributeName> properties,
                                 String pathInfo,
                                 HttpServletRequest req,
-                                WebApp app)
+                                WebAppResinBase app)
     throws IOException, ServletException
   {
     properties.add(new AttributeName("DAV:", "resourcetype", "D:resourcetype"));

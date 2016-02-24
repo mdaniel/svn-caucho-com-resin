@@ -42,7 +42,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
 import com.caucho.v5.config.ConfigException;
-import com.caucho.v5.http.webapp.WebApp;
+import com.caucho.v5.http.webapp.WebAppResinBase;
 import com.caucho.v5.loader.DependencyContainer;
 import com.caucho.v5.servlets.FileServlet;
 import com.caucho.v5.util.ConcurrentArrayList;
@@ -60,7 +60,7 @@ public class ServletMapper {
   private static final HashSet<String> _welcomeFileResourceMap
     = new HashSet<String>();
 
-  private WebApp _webApp;
+  private WebAppResinBase _webApp;
 
   private ServletManager _servletManager;
 
@@ -85,7 +85,7 @@ public class ServletMapper {
   private Map<String, ServletMapping> _servletNamesMap
     = new HashMap<String, ServletMapping>();
 
-  public ServletMapper(WebApp webApp)
+  public ServletMapper(WebAppResinBase webApp)
   {
     _webApp = webApp;
   }
@@ -93,12 +93,12 @@ public class ServletMapper {
   /**
    * Gets the servlet context.
    */
-  public WebApp getWebApp()
+  public WebAppResinBase getWebApp()
   {
     return _webApp;
   }
 
-  public void setServletContext(WebApp webApp)
+  public void setServletContext(WebAppResinBase webApp)
   {
     _webApp = webApp;
   }
@@ -399,7 +399,7 @@ public class ServletMapper {
 
     DependencyContainer dependencyList = new DependencyContainer();
 
-    WebApp webApp = (WebApp) _webApp;
+    WebAppResinBase webApp = (WebAppResinBase) _webApp;
 
     String uriRealPath = webApp.getRealPath(contextURI);
     PathImpl contextPath = webApp.getRootDirectory().lookup(uriRealPath);
