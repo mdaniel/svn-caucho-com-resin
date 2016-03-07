@@ -616,7 +616,6 @@ jni_open_file_win32(JNIEnv *env,
 {
   char buffer[8192];
   HANDLE fd;
-  OFSTRUCT openBuf;
   int flags;
   int offset = 0;
 

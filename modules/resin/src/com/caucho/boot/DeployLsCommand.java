@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.env.repository.CommitBuilder;
 
-public class DeployLsCommand extends AbstractDeployCatCommand 
+public class DeployLsCommand extends AbstractDeployLsCommand 
 {
   @Override
   protected void initBootOptions()

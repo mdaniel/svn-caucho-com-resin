@@ -6,7 +6,14 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.48 - in progress">
+<s2 title="4.0.49 - in progress">
+<ul>
+<li>win: sendfile issues with URL length</li>
+<li>CLI: deploy-ls and deploy-cat swapped (#5983)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.48 - Feb 12, 2016">
 <ul>
 <li>mime-type: additional extensions for mime-type.</li>
 <li>session: fixes related delete timing.</li>
