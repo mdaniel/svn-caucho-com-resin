@@ -628,7 +628,9 @@ jni_open_file_win32(JNIEnv *env,
 
   buffer[length] = 0;
 
-  fd = OpenFile(buffer, &openBuf, OF_READ);
+  fd = CreateFile(buffer, GENERIC_READ, FILE_SHARE_READ,
+	              0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,
+				  0);
 
   return fd;
 }

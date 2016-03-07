@@ -471,7 +471,7 @@ namespace Caucho.IIS
       /*
         String remoteUser = request.LogonUserIdentity.Name;
         */
-        String remoteUser = context.Current.User.Identity.Name;
+        String remoteUser = HttpContext.Current.User.Identity.Name;
         WriteRequestString(ws, HmuxConnection.CSE_REMOTE_USER, remoteUser, traceId);
       }
 
