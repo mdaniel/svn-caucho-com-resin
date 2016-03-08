@@ -1128,6 +1128,7 @@ public class Mysqli extends JdbcConnectionResource
   /**
    * returns a prepared statement or null on error.
    */
+  @Override
   public MysqliStatement prepare(Env env, String query)
   {
     MysqliStatement stmt = new MysqliStatement((Mysqli) validateConnection(env));
@@ -1139,6 +1140,14 @@ public class Mysqli extends JdbcConnectionResource
       return null;
     }
 
+    return stmt;
+  }
+  
+  @Override
+  protected JdbcStatementResource createStatementResource(Env env)
+  {
+    MysqliStatement stmt = new MysqliStatement(this);
+    
     return stmt;
   }
 

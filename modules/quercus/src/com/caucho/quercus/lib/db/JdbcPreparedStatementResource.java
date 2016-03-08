@@ -203,7 +203,7 @@ public class JdbcPreparedStatementResource
         // Currently treated as a string
         _preparedStmt.setString(i + 1, value.toString());
       }
-      else if (type == ColumnType.STRING) {
+      else if (type == ColumnType.STRING) {        
         _preparedStmt.setString(i + 1, value.toString());
       }
       else if (type == ColumnType.LOB) {
@@ -303,7 +303,7 @@ public class JdbcPreparedStatementResource
       }
 
       setQuery(query);
-
+      
       if (query.length() == 0) {
         return false;
       }
@@ -347,7 +347,7 @@ public class JdbcPreparedStatementResource
       return true;
 
     }
-    catch (SQLException e) {
+    catch (SQLException e) {      
       setError(env, e);
       return false;
     }
