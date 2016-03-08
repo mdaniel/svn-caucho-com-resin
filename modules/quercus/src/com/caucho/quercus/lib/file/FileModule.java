@@ -2188,7 +2188,7 @@ public class FileModule extends AbstractQuercusModule {
       // X:/ - slash is required when looking up root
       path = path.lookup(driveLetter + '/');
 
-      pattern = pattern.substring(3).replaceAll("\\", "/");
+      pattern = pattern.substring(3).replaceAll("\\\\", "/");
     }
 
     ArrayValue result = new ArrayValueImpl();
