@@ -54,8 +54,8 @@ public class EndpointConnectionQSocket implements EndpointConnection {
   public EndpointConnectionQSocket(SocketBar s) throws IOException
   {
     _s = s;
-    _is = new ReadStream(_s.getStream());
-    _os = new WriteStream(_s.getStream());
+    _is = new ReadStream(_s.stream());
+    _os = new WriteStream(_s.stream());
   }
   
   public SocketBar getQSocket()

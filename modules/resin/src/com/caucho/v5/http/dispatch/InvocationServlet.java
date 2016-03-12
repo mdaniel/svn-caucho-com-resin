@@ -316,7 +316,7 @@ public class InvocationServlet extends Invocation
    */
   public static ServletRequest getContextRequest()
   {
-    ConnectionProtocol req = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol req = null;//ConnectionTcp.current();
 
     if (req instanceof ConnectionHttp) {
       return (ServletRequest) ((ConnectionHttp) req).request();

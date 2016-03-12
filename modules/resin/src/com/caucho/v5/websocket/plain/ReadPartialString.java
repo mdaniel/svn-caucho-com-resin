@@ -57,7 +57,7 @@ class ReadPartialString extends ReadPlain
 
     try {
       TempCharBuffer tBuf = TempCharBuffer.allocate();
-      char []buf = tBuf.getBuffer();
+      char []buf = tBuf.buffer();
       
       do {
         int len = textIn.read(buf, 0, buf.length);

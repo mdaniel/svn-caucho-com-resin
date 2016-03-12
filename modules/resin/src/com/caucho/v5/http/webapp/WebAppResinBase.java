@@ -74,8 +74,6 @@ import javax.servlet.http.HttpSessionListener;
 import javax.websocket.server.ServerContainer;
 
 import com.caucho.v5.amp.ServiceManagerAmp;
-import com.caucho.v5.amp.queue.OutboxContext;
-import com.caucho.v5.amp.spi.MessageAmp;
 import com.caucho.v5.amp.spi.OutboxAmp;
 import com.caucho.v5.amp.spi.ShutdownModeAmp;
 import com.caucho.v5.config.CauchoBean;
@@ -98,7 +96,6 @@ import com.caucho.v5.http.log.AccessLogServlet;
 import com.caucho.v5.http.pod.PodManagerApp;
 import com.caucho.v5.http.protocol.RequestServlet;
 import com.caucho.v5.http.protocol.RequestServletStubSession;
-import com.caucho.v5.http.protocol.ResponseServlet;
 import com.caucho.v5.http.security.Authenticator;
 import com.caucho.v5.http.security.AuthenticatorRole;
 import com.caucho.v5.http.security.BasicLogin;
@@ -119,7 +116,6 @@ import com.caucho.v5.loader.EnvironmentBean;
 import com.caucho.v5.loader.EnvironmentClassLoader;
 import com.caucho.v5.loader.EnvironmentLocal;
 import com.caucho.v5.management.server.HostMXBean;
-import com.caucho.v5.network.port.ConnectionTcp;
 import com.caucho.v5.network.port.ConnectionProtocol;
 import com.caucho.v5.server.container.ServerBaseOld;
 import com.caucho.v5.util.BasicFuture;
@@ -1218,7 +1214,7 @@ public class WebAppResinBase extends ServletContextImpl
 
   public static ServletRequest getThreadRequest()
   {
-    ConnectionProtocol serverRequest = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol serverRequest = null;//ConnectionTcp.current();
 
     if (serverRequest instanceof ServletRequest)
       return (ServletRequest) serverRequest;
@@ -1394,7 +1390,7 @@ public class WebAppResinBase extends ServletContextImpl
     
     OutboxAmp outbox = OutboxAmp.current();
     //OutboxContext<MessageAmp> context = outbox.getAndSetContext(_ampManager.getSystemInbox());
-    OutboxContext<MessageAmp> context = outbox.getAndSetContext(null);
+    Object context = outbox.getAndSetContext(null);
 
     try {
       thread.setContextClassLoader(_classLoader);
@@ -2377,18 +2373,18 @@ public class WebAppResinBase extends ServletContextImpl
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldClassLoader = thread.getContextClassLoader();
-    ConnectionProtocol serverRequest = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol serverRequest = null;//ConnectionTcp.current();
     RequestServletStubSession stubRequest;
     
     try {
       stubRequest = new RequestServletStubSession(this, sessionId);
       
-      ConnectionTcp.setCurrentRequest(stubRequest);
+      //ConnectionTcp.setCurrentRequest(stubRequest);
       
       task.run();
     } finally {
       thread.setContextClassLoader(oldClassLoader);
-      ConnectionTcp.setCurrentRequest(serverRequest);
+      //ConnectionTcp.setCurrentRequest(serverRequest);
     }
   }
 

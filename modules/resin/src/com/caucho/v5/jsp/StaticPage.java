@@ -113,7 +113,7 @@ public class StaticPage extends Page {
     // res.setContentLength(_contentLength);
 
     TempCharBuffer buf = TempCharBuffer.allocate();
-    char []cBuf = buf.getBuffer();
+    char []cBuf = buf.buffer();
     int len;
 
     PrintWriter out = response.getWriter();

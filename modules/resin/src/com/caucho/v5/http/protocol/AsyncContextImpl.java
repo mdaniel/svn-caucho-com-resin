@@ -513,7 +513,7 @@ public class AsyncContextImpl // extends RequestProtocolBase
   {
     return (getClass().getSimpleName() + "[" + "uri" //_reqHttp.getRequestURI()
             + "," + _stateRef.get()
-            + "," + _connTcp.getId()
+            + "," + _connTcp.id()
             + "," + _connTcp.getStateName() + "]");
   }
   

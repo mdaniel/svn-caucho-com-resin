@@ -79,7 +79,7 @@ abstract public class OutResponseToChar extends OutResponseBase2 {
     _head.setNext(null);
     _tail = _head;
 
-    _charBuffer = _tail.getBuffer();
+    _charBuffer = _tail.buffer();
     _charLength = 0;
     
     _bufferCapacity = SIZE;
@@ -403,7 +403,7 @@ abstract public class OutResponseToChar extends OutResponseBase2 {
       _tail.setNext(tempBuf);
       _tail = tempBuf;
 
-      _charBuffer = _tail.getBuffer();
+      _charBuffer = _tail.buffer();
       _charLength = 0;
     }
   }
@@ -425,7 +425,7 @@ abstract public class OutResponseToChar extends OutResponseBase2 {
       TempCharBuffer next = ptr.getNext();
       ptr.setNext(null);
 
-      writeNext(ptr.getBuffer(), 0, ptr.getLength());
+      writeNext(ptr.buffer(), 0, ptr.getLength());
 
       if (next != null)
         TempCharBuffer.free(ptr);
@@ -435,7 +435,7 @@ abstract public class OutResponseToChar extends OutResponseBase2 {
 
     _tail = _head;
     _tail.setLength(0);
-    _charBuffer = _tail.getBuffer();
+    _charBuffer = _tail.buffer();
     _bufferSize = 0;
   }
 
@@ -462,7 +462,7 @@ abstract public class OutResponseToChar extends OutResponseBase2 {
 
     _tail = _head;
     _tail.setLength(0);
-    _charBuffer = _head.getBuffer();
+    _charBuffer = _head.buffer();
     _bufferSize = 0;
   }
 

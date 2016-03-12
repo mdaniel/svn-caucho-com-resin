@@ -113,7 +113,7 @@ public class QSocketChannelWrapper extends SocketBar {
    * Returns the server inet address that accepted the request.
    */
   @Override
-  public InetAddress getLocalAddress()
+  public InetAddress addressLocal()
   {
     return getSocket().getLocalAddress();
   }
@@ -122,7 +122,7 @@ public class QSocketChannelWrapper extends SocketBar {
    * Returns the server port that accepted the request.
    */
   @Override
-  public int getLocalPort()
+  public int portLocal()
   {
     return getSocket().getLocalPort();
   }
@@ -131,7 +131,7 @@ public class QSocketChannelWrapper extends SocketBar {
    * Returns the remote client's inet address.
    */
   @Override
-  public InetAddress getRemoteAddress()
+  public InetAddress addressRemote()
   {
     if (_channel != null)
       return getSocket().getInetAddress();
@@ -143,7 +143,7 @@ public class QSocketChannelWrapper extends SocketBar {
    * Returns the remote client's port.
    */
   @Override
-  public int getRemotePort()
+  public int portRemote()
   {
     if (_channel != null)
       return getSocket().getPort();
@@ -261,7 +261,7 @@ public class QSocketChannelWrapper extends SocketBar {
    * Returns the selectable channel.
    */
   @Override
-  public SelectableChannel getSelectableChannel()
+  public SelectableChannel selectableChannel()
   {
     return _channel;
   }
@@ -270,7 +270,7 @@ public class QSocketChannelWrapper extends SocketBar {
    * Returns the socket's input stream.
    */
   @Override
-  public StreamImpl getStream()
+  public StreamImpl stream()
     throws IOException
   {
     if (_streamImpl == null)

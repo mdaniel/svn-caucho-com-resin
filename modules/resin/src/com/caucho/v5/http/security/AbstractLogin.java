@@ -106,8 +106,8 @@ public abstract class AbstractLogin extends LoginBase {
   @Override
   public boolean isUserInRole(Principal user, String role)
   {
-    RequestCaucho request
-      = (RequestCaucho) ConnectionTcp.getCurrentRequest();
+    RequestCaucho request = null;
+      //= (RequestCaucho) ConnectionTcp.current();
 
     return isUserInRole(request,
                         null, // request.getResponse(),

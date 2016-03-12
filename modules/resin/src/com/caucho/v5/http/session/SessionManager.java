@@ -1925,7 +1925,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     JsonWriter jsonOutput = new JsonWriter(out);
 
     try {
-      jsonOutput.writeObject(session);
+      jsonOutput.write(session);
 
       jsonOutput.flush();
 
@@ -1988,7 +1988,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     JsonWriter jsonOutput = new JsonWriter(out);
 
     try {
-      jsonOutput.writeObject(sessions);
+      jsonOutput.write(sessions);
 
       jsonOutput.flush();
 

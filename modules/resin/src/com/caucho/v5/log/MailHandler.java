@@ -29,11 +29,7 @@
 
 package com.caucho.v5.log;
 
-import java.io.PrintWriter;
 import java.util.Properties;
-import java.util.logging.Filter;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;

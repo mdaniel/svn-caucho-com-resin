@@ -66,7 +66,7 @@ public class ResinThreadPoolExecutor implements Executor {
     if (task == null)
       throw new NullPointerException();
     
-    _threadPool.getThrottleExecutor().execute(task);
+    _threadPool.throttleExecutor().execute(task);
   }
 
   /**

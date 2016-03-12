@@ -174,7 +174,7 @@ public class SecurityContext {
    */
   public static SecurityContextProvider getProvider()
   {
-    ConnectionProtocol request = ConnectionTcp.getCurrentRequest();
+    ConnectionProtocol request = null;//ConnectionTcp.current();
 
     if (request instanceof SecurityContextProvider)
       return (SecurityContextProvider) request;

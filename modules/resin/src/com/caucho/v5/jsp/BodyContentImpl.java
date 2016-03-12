@@ -185,7 +185,7 @@ public class BodyContentImpl extends AbstractBodyContent {
     TempCharBuffer head = _tempStream.getHead();
 
     for (; head != null; head = head.getNext()) {
-      char []cbuf = head.getBuffer();
+      char []cbuf = head.buffer();
 
       cb.append(cbuf, 0, head.getLength());
     }
@@ -200,16 +200,16 @@ public class BodyContentImpl extends AbstractBodyContent {
   {
     TempCharBuffer head = _tempStream.getHead();
 
-    if (head == null || head.getBuffer().length == 0)
+    if (head == null || head.buffer().length == 0)
       return "";
 
     int bomLength = 0;
 
-    if (head.getBuffer()[0] == 0xfeff)
+    if (head.buffer()[0] == 0xfeff)
       bomLength = 1;
 
     if (head.getNext() == null)
-      return new String(head.getBuffer(), bomLength, head.getLength() - bomLength);
+      return new String(head.buffer(), bomLength, head.getLength() - bomLength);
 
     int length = 0;
     for (; head != null; head = head.getNext())
@@ -219,7 +219,7 @@ public class BodyContentImpl extends AbstractBodyContent {
 
     int offset = 0;
     for (head = _tempStream.getHead(); head != null; head = head.getNext()) {
-      char []cbuf = head.getBuffer();
+      char []cbuf = head.buffer();
       int sublen = head.getLength();
 
       System.arraycopy(cbuf, 0, buf, offset, sublen);
@@ -242,7 +242,7 @@ public class BodyContentImpl extends AbstractBodyContent {
     char []buf = null;
     int totalLength = 0;
     for (; head != null; head = head.getNext()) {
-      char []cbuf = head.getBuffer();
+      char []cbuf = head.buffer();
       int end = head.getLength();
       int offset = 0;
 
@@ -305,7 +305,7 @@ public class BodyContentImpl extends AbstractBodyContent {
       for (; head != null; head = head.getNext()) {
         int offset = 0;
         int length = head.getLength();
-        char []cbuf = head.getBuffer();
+        char []cbuf = head.buffer();
 
         if (isFirst && length > 0 && cbuf[0] == 0xfeff) {
           // skip byte-order-mark
