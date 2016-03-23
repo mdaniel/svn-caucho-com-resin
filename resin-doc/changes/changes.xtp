@@ -1729,17 +1729,12 @@ expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>
 </ul>
 </s2>
 
-<p>
-
+<s2>
 <ul>
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
+</s2>
 
-<a href="changes-3.xtp">Resin 3 changes</a>
-<a href="changes-31.xtp">Resin 3.1 changes</a>
-<a href="changes-2.xtp">Resin 1.2 changes</a>
-<a href="changes-1.xtp">older changes</a>
-</p>
 </s1>
 </body>
 </document>
