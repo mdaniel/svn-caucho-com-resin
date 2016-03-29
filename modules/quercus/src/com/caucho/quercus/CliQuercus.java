@@ -55,7 +55,7 @@ public class CliQuercus extends Quercus
     CliQuercus quercus = new CliQuercus();
 
     quercus.setUnicodeSemantics(true);
-    startMain(args, quercus);
+    System.exit(startMain(args, quercus));
   }
 
   /**

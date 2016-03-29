@@ -6363,9 +6363,12 @@ public class Env
    */
   public Value exit(Value msg)
   {
-    if (msg.isNull() || msg instanceof LongValue)
+    if (msg.isNull())
       return exit();
 
+    if (msg.isLong()) {
+      throw new QuercusExitException(getStackTraceAsString(), msg.toInt());
+    }
     try {
       getOut().print(msg.toString());
     } catch (IOException e) {

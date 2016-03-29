@@ -70,26 +70,26 @@ public class Quercus
     startMain(args, quercus);
   }
 
-  public static void startMain(String []args, Quercus quercus)
+  public static int startMain(String []args, Quercus quercus)
     throws IOException
   {
     if (! quercus.parseArgs(args)) {
       quercus.printUsage();
-      return;
+      return 1;
     }
 
     quercus.init();
     quercus.start();
 
     if (quercus.getFileName() != null) {
-      quercus.execute();
+      return quercus.execute();
     }
     else {
       InputStream is = System.in;
 
       ReadStream stream = new ReadStream(new InputStreamStream(is));
 
-      quercus.execute(stream);
+      return quercus.execute(stream);
     }
   }
 
@@ -188,23 +188,23 @@ public class Quercus
     return _argv;
   }
 
-  public void execute()
+  public int execute()
     throws IOException
   {
     Path path = getPwd().lookup(_fileName);
 
-    execute(path);
+    return execute(path);
   }
 
-  public void execute(String code)
+  public int execute(String code)
     throws IOException
   {
     Path path = new StringPath(code);
 
-    execute(path);
+    return execute(path);
   }
 
-  public void execute(Path path)
+  public int execute(Path path)
     throws IOException
   {
     QuercusPage page = parse(path);
@@ -219,12 +219,16 @@ public class Quercus
 
     try {
       env.execute();
+      return 0;
     } catch (QuercusDieException e) {
       log.log(Level.FINER, e.toString(), e);
+      return e.getExitValue();
     } catch (QuercusExitException e) {
       log.log(Level.FINER, e.toString(), e);
+      return e.getExitValue();
     } catch (QuercusErrorException e) {
       log.log(Level.FINER, e.toString(), e);
+      return 1;
     } finally {
       env.close();
 
@@ -232,7 +236,7 @@ public class Quercus
     }
   }
 
-  public void execute(ReadStream stream)
+  public int execute(ReadStream stream)
     throws IOException
   {
     QuercusPage page = parse(stream);
@@ -247,12 +251,16 @@ public class Quercus
 
     try {
       env.execute();
+      return 0;
     } catch (QuercusDieException e) {
       log.log(Level.FINER, e.toString(), e);
+      return e.getExitValue();
     } catch (QuercusExitException e) {
       log.log(Level.FINER, e.toString(), e);
+      return e.getExitValue();
     } catch (QuercusErrorException e) {
       log.log(Level.FINER, e.toString(), e);
+      return 1;
     } finally {
       env.close();
 

@@ -33,6 +33,8 @@ package com.caucho.quercus;
  * Exception thrown by die() or exit()
  */
 public class QuercusExitException extends QuercusRuntimeException {
+  private int _exitValue = 0;
+
   public QuercusExitException()
   {
   }
@@ -40,6 +42,12 @@ public class QuercusExitException extends QuercusRuntimeException {
   public QuercusExitException(String msg)
   {
     super(msg);
+  }
+
+  public QuercusExitException(String msg, int exitValue)
+  {
+    super(msg);
+    this._exitValue = exitValue;
   }
 
   public QuercusExitException(Throwable cause)
@@ -50,6 +58,10 @@ public class QuercusExitException extends QuercusRuntimeException {
   public QuercusExitException(String msg, Throwable cause)
   {
     super(msg, cause);
+  }
+  
+  public int getExitValue() {
+    return _exitValue;
   }
 }
 

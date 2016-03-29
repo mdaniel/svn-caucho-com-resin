@@ -70,7 +70,7 @@ public class CgiQuercus
   }
 
   @Override
-  public void execute()
+  public int execute()
     throws IOException
   {
     Path path = getPwd().lookup(getFileName());
@@ -87,12 +87,16 @@ public class CgiQuercus
 
     try {
       env.execute();
+      return 0;
     } catch (QuercusDieException e) {
+      return e.getExitValue();
     } catch (QuercusExitException e) {
+      return e.getExitValue();
+    } finally {
+      env.close();
+
+      os.flush();
     }
 
-    env.close();
-
-    os.flush();
   }
 }
