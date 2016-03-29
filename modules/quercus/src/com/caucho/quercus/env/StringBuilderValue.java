@@ -1984,6 +1984,10 @@ public class StringBuilderValue
 
       return true;
     }
+    else if (o instanceof UnicodeBuilderValue) {
+      // let UnicodeBuilderValue do comparison to avoid duplicate implementation
+      return o.equals(this);
+    }
     else if (o instanceof StringValue) {
       StringValue str = (StringValue) o;
 
@@ -2076,6 +2080,9 @@ public class StringBuilderValue
       }
 
       return true;
+    } else if (o instanceof UnicodeBuilderValue) {
+      // let UnicodeBuilderValue do comparison to avoid duplicate implementation
+      return o.eql(this);
     } else if (o instanceof StringValue) {
       StringValue value = (StringValue) o;
       

@@ -52,6 +52,8 @@ public class BinaryBuilderValue
 
   private final static BinaryBuilderValue []CHAR_STRINGS;
 
+  private int _hashCode;
+
   public BinaryBuilderValue()
   {
     super(128);
@@ -190,6 +192,42 @@ public class BinaryBuilderValue
     return new String(getBuffer(), 0, length());
   }
   
+  @Override
+  public int hashCode()
+  {
+    int hash = _hashCode;
+
+    if (hash != 0)
+      return hash;
+
+    hash = 37;
+
+    String string = toString();
+    int length = string.length();
+    char []buffer = string.toCharArray();
+
+    if (length > 256) {
+      for (int i = 127; i >= 0; i--) {
+        hash = 65521 * hash + buffer[i];
+      }
+
+      for (int i = length - 128; i < length; i++) {
+        hash = 65521 * hash + buffer[i];
+      }
+
+      _hashCode = hash;
+
+      return hash;
+    }
+
+    for (int i = length - 1; i >= 0; i--) {
+      hash = 65521 * hash + buffer[i];
+    }
+
+    _hashCode = hash;
+
+    return hash;
+  }
   /**
    * Returns a character array
    */
