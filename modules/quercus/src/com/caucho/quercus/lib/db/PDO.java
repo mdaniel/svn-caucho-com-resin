@@ -478,7 +478,7 @@ public class PDO implements EnvCleanup {
 
   public String lastInsertId(Env env, @Optional Value nameV)
   {
-    if (! nameV.isDefault()) {
+    if (! nameV.isDefault() && ! nameV.eq(env.createString("id"))) {
       throw new UnimplementedException("lastInsertId with name");
     }
 
