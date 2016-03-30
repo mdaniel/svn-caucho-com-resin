@@ -221,9 +221,6 @@ namespace Caucho.IIS
           _activeCount++;
         }
 
-        if (_log.IsLoggable(EventLogEntryType.Information))
-          _log.Info("Connect " + connection);
-
         Trace.TraceInformation("Connect '{0}'", connection);
 
         return connection;

@@ -39,15 +39,11 @@ namespace Caucho.IIS
 {
   class ResinHandlerFactory : IHttpHandlerFactory
   {
-    private static ResinHandler _resinHandler;
-
-    static ResinHandlerFactory()
-    {
-      _resinHandler = new ResinHandler();
-    }
+    private ResinHandler _resinHandler;
 
     public ResinHandlerFactory()
     {
+      _resinHandler = new ResinHandler();
     }
 
     public IHttpHandler GetHandler(HttpContext context, string requestType, string url, string pathTranslated)
