@@ -176,7 +176,7 @@ namespace Caucho.IIS
     {
       HmuxConnection connection = null;
 
-      if (sessionId != null)
+      if (sessionId != null && sessionId.Length > 1)
         connection = OpenSessionServer(sessionId);
 
       if (connection == null)
@@ -189,7 +189,12 @@ namespace Caucho.IIS
     {
       char c = sessionId[0];
 
-      Server server = _servers[(c - 'a')];
+      int i = c - 'a';
+
+      if (i >= _servers.Length)
+        return null;
+
+      Server server = _servers[i];
 
       HmuxConnection connection = null;
 
