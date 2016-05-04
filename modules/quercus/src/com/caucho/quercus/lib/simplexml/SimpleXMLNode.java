@@ -14,6 +14,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.annotation.JsonEncode;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -22,6 +23,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
+import com.caucho.quercus.env.JsonEncodeContext;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectExtJavaValue;
 import com.caucho.quercus.env.QuercusClass;
@@ -411,6 +413,12 @@ public abstract class SimpleXMLNode
     }
 
     return array;
+  }
+  
+  @JsonEncode
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
+  {    
+    _view.jsonEncode(env, context, sb, _cls);
   }
 
   protected QuercusClass getQuercusClass()
