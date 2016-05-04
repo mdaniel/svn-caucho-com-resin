@@ -29,21 +29,16 @@
 
 package com.caucho.quercus.lib.simplexml;
 
-import java.io.IOException;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.w3c.dom.Attr;
-import org.w3c.dom.Node;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.vfs.WriteStream;
 
 public class AttributeView extends SimpleView
 {

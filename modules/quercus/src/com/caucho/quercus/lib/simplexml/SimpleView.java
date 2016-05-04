@@ -196,6 +196,11 @@ public abstract class SimpleView
   {
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }
+  
+  public boolean issetField(Env env, String name)
+  {
+    return false;
+  }
 
   protected static SimpleView create(Node node)
   {

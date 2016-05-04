@@ -128,6 +128,12 @@ public class DocumentView extends SimpleView
   {
     return _element.getCount();
   }
+  
+  @Override
+  public boolean issetField(Env env, String name)
+  {
+    return _element.issetField(env, name);
+  }
 
   @Override
   public HashMap<String,String> getNamespaces(boolean isRecursive,

@@ -30,6 +30,8 @@
 package com.caucho.quercus.lib.simplexml;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.IdentityHashMap;
@@ -53,10 +55,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import com.caucho.quercus.annotation.EntrySet;
+import com.caucho.quercus.annotation.Isset;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -80,7 +84,7 @@ public class SimpleXMLElement extends SimpleXMLNode
 
   protected static Value create(Env env,
                                 QuercusClass cls,
-                                Value data,
+                                StringValue data,
                                 int options,
                                 boolean dataIsUrl,
                                 Value namespaceV,
@@ -130,7 +134,7 @@ public class SimpleXMLElement extends SimpleXMLNode
   }
 
   public static Value __construct(Env env,
-                                  Value data,
+                                  StringValue data,
                                   @Optional int options,
                                   @Optional boolean dataIsUrl,
                                   @Optional Value namespaceV,
@@ -198,16 +202,19 @@ public class SimpleXMLElement extends SimpleXMLNode
       }
     }
     else {
-      StringReader stringReader = new java.io.StringReader(data.toString());
-
-      document = builder.parse(new InputSource(stringReader));
+      if (data.isUnicode()) {
+        document = builder.parse(new InputSource(data.toStringValue().toSimpleReader()));
+      }
+      else {
+        document = builder.parse(data.toInputStream());
+      }
     }
 
     return document;
   }
 
   private static Document parse2(Env env,
-                                 Value data,
+                                 StringValue data,
                                  int options,
                                  boolean dataIsUrl,
                                  String namespace,
@@ -215,7 +222,7 @@ public class SimpleXMLElement extends SimpleXMLNode
     throws IOException,
            ParserConfigurationException,
            SAXException
-  {
+  {    
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     //factory.setNamespaceAware(true);
 
@@ -239,7 +246,7 @@ public class SimpleXMLElement extends SimpleXMLNode
     reader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
 
     if (dataIsUrl) {
-      Path path = env.lookup(data.toStringValue());
+      Path path = env.lookup(data);
 
       // PHP throws an Exception instead
       if (path == null) {
@@ -257,10 +264,11 @@ public class SimpleXMLElement extends SimpleXMLNode
         is.close();
       }
     }
-    else {
-      StringReader stringReader = new java.io.StringReader(data.toString());
-
-      parser.parse(new InputSource(stringReader), handler);
+    else if (data.isUnicode()) {      
+      parser.parse(new InputSource(data.toSimpleReader()), handler);
+    }
+    else {      
+      parser.parse(data.toInputStream(), handler);
     }
 
     Document doc = handler.getDocument();
@@ -277,6 +285,12 @@ public class SimpleXMLElement extends SimpleXMLNode
     DocumentView view = new DocumentView(doc);
 
     return view;
+  }
+  
+  @Isset
+  public boolean issetField(Env env, StringValue name)
+  {
+    return _view.issetField(env, name.toString());
   }
 
   /**

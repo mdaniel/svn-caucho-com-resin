@@ -13,6 +13,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -60,9 +61,30 @@ public abstract class SimpleXMLNode
   /**
    * public string __toString()
    */
-  public String __toString(Env env)
+  public StringValue __toString(Env env)
   {
-    return _view.toString(env);
+    String str = _view.toString(env);
+    
+    StringValue sb = env.createStringBuilder();
+        
+    if (sb.isUnicode()) {
+      sb.append(str);
+    }
+    else {
+      String encoding = _view.getEncoding();
+      byte[] bytes;
+      
+      try {
+        bytes = str.getBytes(encoding);
+      }
+      catch (UnsupportedEncodingException e) {
+        throw new QuercusException(e);
+      }
+      
+      sb.appendBytes(bytes, 0, bytes.length);
+    }
+    
+    return sb;
   }
 
   /**
@@ -126,10 +148,25 @@ public abstract class SimpleXMLNode
    * public SimpleXMLElement addChild( string $name [, string $value [, string $namespace ]] )
    */
   public SimpleXMLElement addChild(Env env,
-                                   String name,
-                                   @Optional String value,
+                                   StringValue nameV,
+                                   @Optional StringValue valueV,
                                    @Optional String namespace)
   {
+    String name;
+    String value;
+    
+    String encoding = _view.getEncoding();
+    
+    try {
+      name = nameV.toString(encoding);
+      value = valueV.toString(encoding);
+    }
+    catch (UnsupportedEncodingException e) {
+      env.warning(e);
+      
+      return null;
+    }
+    
     SimpleView view = _view.addChild(env, name, value, namespace);
 
     SimpleXMLElement e = new SimpleXMLElement(_cls, view);
@@ -141,10 +178,25 @@ public abstract class SimpleXMLNode
    * public void SimpleXMLElement::addAttribute ( string $name [, string $value [, string $namespace ]] )
    */
   public void addAttribute(Env env,
-                           String name,
-                           @Optional String value,
+                           StringValue nameV,
+                           @Optional StringValue valueV,
                            @Optional String namespace)
   {
+    String name;
+    String value;
+    
+    String encoding = _view.getEncoding();
+    
+    try {
+      name = nameV.toString(encoding);
+      value = valueV.toString(encoding);
+    }
+    catch (UnsupportedEncodingException e) {
+      env.warning(e);
+      
+      return;
+    }
+    
     if (namespace != null) {
       if (namespace.length() == 0) {
         namespace = null;
@@ -170,7 +222,7 @@ public abstract class SimpleXMLNode
     }
 
     String encoding = _view.getEncoding();
-
+    
     if (filename.isDefault()) {
       StringValue value = env.createStringBuilder();
 

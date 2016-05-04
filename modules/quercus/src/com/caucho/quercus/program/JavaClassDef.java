@@ -128,6 +128,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private Method _varDumpImpl;
   private Method _jsonEncode;
   private Method _entrySet;
+  
+  private Method _isset;
 
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
@@ -1379,6 +1381,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         _varDumpImpl = method;
       } else if (method.isAnnotationPresent(JsonEncode.class)) {
         _jsonEncode = method;
+      } else if (method.isAnnotationPresent(Isset.class)) {
+        _isset = method;
       } else if (method.isAnnotationPresent(EntrySet.class)) {
         _entrySet = method;
       } else if ("__call".equals(method.getName())) {
@@ -1439,6 +1443,24 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     Value str = __toString.callMethod(env, cls, value, Expr.NULL_ARGS);
 
     return str.toStringValue(env);
+  }
+  
+  public boolean issetField(Env env, Object obj, StringValue name)
+  {
+    if (_isset == null) {
+      return false;
+    }
+    
+    try {
+      Object result = _isset.invoke(obj, env, name);
+      
+      return ! Boolean.FALSE.equals(result);
+
+    } catch (InvocationTargetException e) {
+      throw new QuercusRuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new QuercusRuntimeException(e);
+    }
   }
 
   public boolean jsonEncode(Env env,

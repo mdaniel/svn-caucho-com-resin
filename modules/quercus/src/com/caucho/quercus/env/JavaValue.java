@@ -264,6 +264,15 @@ public class JavaValue extends ObjectValue
     else
       return NullValue.NULL;
   }
+  
+  /**
+   * Returns true if the field is set
+   */
+  @Override
+  public boolean issetField(Env env, StringValue name)
+  {
+    return _classDef.issetField(env, _object, name);
+  }
 
   public Set<? extends Map.Entry<Value, Value>> entrySet()
   {

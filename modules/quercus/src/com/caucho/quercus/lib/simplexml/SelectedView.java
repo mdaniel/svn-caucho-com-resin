@@ -188,6 +188,29 @@ public class SelectedView extends SimpleView
   {
     return _childList.size();
   }
+  
+  @Override
+  public boolean issetField(Env env, String name)
+  {    
+    if (_childList.size() > 0) {
+      SimpleView firstChild = _childList.get(0);
+
+      return firstChild.issetField(env, name);
+    }
+    else {
+      return false;
+    }
+    
+    /*
+    for (SimpleView child : _childList) {
+      if (child.getNodeName().equals(name)) {
+        return true;
+      }
+    }
+    
+    return false;
+    */
+  }
 
   @Override
   public List<SimpleView> xpath(Env env,
