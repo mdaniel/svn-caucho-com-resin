@@ -570,7 +570,11 @@ public class DoubleValue extends NumberValue
 
   @Override
   public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb) {
-    sb.append(toString(QuercusLocale.getDefault()));
+    if (Double.isInfinite(_value) || Double.isNaN(_value)) {
+      sb.append("false");
+    } else {
+      sb.append(toString(QuercusLocale.getDefault()));
+    }
   }
   //
   // Java Serialization
