@@ -747,6 +747,11 @@ public class BinaryBuilderValue
     out.print("\"");
   }
 
+  @Override
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb) {
+    // convert to String to avoid UTF-8 encoding problems
+    env.createString(toString()).jsonEncode(env, context, sb);
+  }
 
   static {
     CHAR_STRINGS = new BinaryBuilderValue[256];
