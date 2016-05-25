@@ -39,6 +39,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;

@@ -122,7 +122,7 @@ public class DateParser
           parseTime();
           _hasTime = true;
         }
-        else if (token == '-') {
+        else if (token == '-' || token == '.') {
           parseISODate(value);
           _hasDate = true;
         }
@@ -221,21 +221,27 @@ public class DateParser
 
     token = nextToken();
 
-    if (token == '-') {
+    if (token == '-' || token == '.') {
       token = nextToken();
 
       if (token == INT) {
-        if (value1 < 0)
-          _date.setYear(value1);
-        else if (value1 <= 68)
-          _date.setYear(2000 + value1);
-        else if (value1 < 100)
-          _date.setYear(1900 + value1);
-        else
-          _date.setYear(value1);
+        if (_value > 1900) {
+          _date.setYear(_value);
+          _date.setMonth(value2 - 1);
+          _date.setDayOfMonth(value1);;
+        } else { 
+          if (value1 < 0)
+            _date.setYear(value1);
+          else if (value1 <= 68)
+            _date.setYear(2000 + value1);
+          else if (value1 < 100)
+            _date.setYear(1900 + value1);
+          else
+            _date.setYear(value1);
 
-        _date.setMonth(value2 - 1);
-        _date.setDayOfMonth(_value);
+          _date.setMonth(value2 - 1);
+          _date.setDayOfMonth(_value);
+        }
       }
       else {
         _date.setMonth(value1 - 1);
