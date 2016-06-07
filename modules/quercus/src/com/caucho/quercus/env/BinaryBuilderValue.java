@@ -357,7 +357,7 @@ public class BinaryBuilderValue
     if (index < 0 || len <= index)
       return UnsetBinaryValue.UNSET;
     else
-      return BinaryBuilderValue.create(getBuffer()[(int) index] & 0xff);
+      return Env.getInstance().createString((char)(getBuffer()[(int) index] & 0xff));
   }
 
   /**
@@ -510,6 +510,11 @@ public class BinaryBuilderValue
     }
   }
 
+  @Override
+  public StringValue append(String s) {
+    return append(s.getBytes());
+  }
+  
   /**
    * Append a Java buffer to the value.
    */
@@ -589,7 +594,7 @@ public class BinaryBuilderValue
       return this;
     }
     else if (value.isString()) {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      BinaryBuilderValue sb = new BinaryBuilderValue();
 
       appendTo(sb);
       sb.append(value);

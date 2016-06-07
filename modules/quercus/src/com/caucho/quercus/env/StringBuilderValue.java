@@ -1123,7 +1123,7 @@ public class StringBuilderValue
    * Append a Java string to the value.
    */
   @Override
-  public final StringValue append(String s)
+  public StringValue append(String s)
   {
     int sublen = s.length();
 

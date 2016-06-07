@@ -356,9 +356,16 @@ public class UnicodeBuilderValue
    */
   public StringValue append(Value v)
   {
-    v.appendTo(this);
+    if (v.isBinary()) {
+      BinaryBuilderValue result = new BinaryBuilderValue();
+      result.append(getStringBytes());
+      v.appendTo(result);
+      return result;
+    } else {
+      v.appendTo(this);
 
-    return this;
+      return this;
+    }
   }
 
   /**
@@ -722,6 +729,14 @@ public class UnicodeBuilderValue
     }
   }
 
+  /**
+   * Returns the character at an index
+   */
+  public Value getArg(Value key, boolean isTop)
+  {
+    return get(key);
+  }
+  
   /**
    * Returns the character at an index
    */
