@@ -29,6 +29,7 @@
 
 package com.caucho.server.distcache;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -37,13 +38,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
 
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
@@ -77,19 +77,25 @@ public class DataStore {
   // server/60i0
   // private long _expireTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 24 * 60L * 60L * 1000L;
-  
+
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
-  private long _expireOrphanTimeout = 60 * 60L * 1000L;
+  //private long _expireOrphanTimeout = 60 * 60L * 1000L;
+  private long _expireOrphanTimeout = 1 * 60L * 1000L;
+
+  // data must live for at least 15min because of timing issues during
+  // creation. The reaper must not remove data while it's being added
+  private long _expireDataMinIdle = 15 * 60L * 1000L;
 
   private DataSource _dataSource;
 
   private final String _insertQuery;
   private final String _loadQuery;
-  
+
   private final String _selectMnodeDataIdQuery;
   private final String _selectDataIdQuery;
-  
+
   private final String _deleteQuery;
+  private final String _deleteOrphanQuery;
   private final String _validateQuery;
 
   private final String _countQuery;
@@ -120,11 +126,11 @@ public class DataStore {
                   */
     _loadQuery = ("SELECT data"
                   + " FROM " + _dataTableName
-                  + " WHERE id=?");
+                  + " WHERE id=? AND time=?");
 
     _insertQuery = ("INSERT into " + _dataTableName
                     + " (data,time) "
-                    + "VALUES(?,now())");
+                    + "VALUES(?,?)");
 
     /*
     _selectOrphanQuery = ("SELECT d.id, m.value_data_id"
@@ -137,12 +143,15 @@ public class DataStore {
     _selectMnodeDataIdQuery = ("SELECT value_data_id"
                         + " FROM " + _mnodeTableName);
 
-    _selectDataIdQuery = ("SELECT id"
+    _selectDataIdQuery = ("SELECT id,time"
                      + " FROM " + _dataTableName
                      + " WHERE time < ?");
 
     _deleteQuery = ("DELETE FROM " + _dataTableName
-                    + " WHERE id = ?");
+                    + " WHERE id = ? and time=?");
+
+    _deleteOrphanQuery = ("DELETE FROM " + _dataTableName
+                          + " WHERE id = ? and time=?");
 
     _validateQuery = ("VALIDATE " + _dataTableName);
 
@@ -168,7 +177,7 @@ public class DataStore {
     _alarm = new Alarm(new DeleteAlarm());
     //_alarm.queue(_expireOrphanTimeout);
     _alarm.queue(60000);
-    
+
     //_alarm.queue(0);
   }
 
@@ -252,10 +261,12 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public boolean load(long id, WriteStream os)
+  public boolean load(long id,
+                      long valueDataTime,
+                      WriteStream os)
   {
     try {
-      Blob blob = loadBlob(id);
+      Blob blob = loadBlob(id, valueDataTime);
 
       if (blob != null) {
         InputStream is = blob.getBinaryStream();
@@ -291,7 +302,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public Blob loadBlob(long id)
+  public Blob loadBlob(long id, long valueDataTime)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -302,6 +313,7 @@ public class DataStore {
       PreparedStatement pstmt = conn.prepareLoad();
       // pstmt.setBytes(1, id.getHash());
       pstmt.setLong(1, id);
+      pstmt.setLong(2, valueDataTime);
 
       rs = pstmt.executeQuery();
 
@@ -309,6 +321,9 @@ public class DataStore {
         Blob blob = rs.getBlob(1);
 
         return blob;
+      }
+      else {
+        System.out.println("NODATA: " + Long.toHexString(id) + " " + valueDataTime);
       }
 
       if (log.isLoggable(Level.FINER))
@@ -332,7 +347,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public boolean isDataAvailable(long id)
+  public boolean isDataAvailable(long id, long dataTime)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -343,6 +358,7 @@ public class DataStore {
       PreparedStatement pstmt = conn.prepareLoad();
       // pstmt.setBytes(1, id.getHash());
       pstmt.setLong(1, id);
+      pstmt.setLong(2, dataTime);
       rs = pstmt.executeQuery();
 
       if (rs.next()) {
@@ -368,7 +384,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public InputStream openInputStream(long id)
+  public InputStream openInputStream(long id, long dataTime)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -379,6 +395,7 @@ public class DataStore {
       PreparedStatement pstmt = conn.prepareLoad();
       // pstmt.setBytes(1, id.getHash());
       pstmt.setLong(1, id);
+      pstmt.setLong(2, dataTime);
 
       rs = pstmt.executeQuery();
 
@@ -387,8 +404,8 @@ public class DataStore {
 
         if (is == null) {
           System.err.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: 0x" + Long.toHexString(id));
-          
-          if (log.isLoggable(Level.FINE)) { 
+
+          if (log.isLoggable(Level.FINE)) {
             Thread.dumpStack();
           }
 
@@ -419,7 +436,7 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public long save(StreamSource source, int length)
+  public DataItem save(StreamSource source, int length)
     throws IOException
   {
     return insert(source.openInputStream(), length);
@@ -432,7 +449,7 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public long save(InputStream is, int length)
+  public DataItem save(InputStream is, int length)
     throws IOException
   {
     return insert(is, length);
@@ -445,13 +462,14 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  private long insert(InputStream is, int length)
+  private DataItem insert(InputStream is, int length)
   {
     if (is == null) {
       throw new NullPointerException();
     }
 
     DataConnection conn = null;
+    long now = CurrentTime.getCurrentTime();
 
     try {
       conn = getConnection();
@@ -459,7 +477,7 @@ public class DataStore {
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBinaryStream(1, is, length);
 
-      stmt.setLong(2, CurrentTime.getCurrentTime());
+      stmt.setLong(2, now);
 
       int count = stmt.executeUpdate();
 
@@ -471,21 +489,21 @@ public class DataStore {
         ResultSet keys = stmt.getGeneratedKeys();
         if (keys.next()) {
           long id = keys.getLong("id");
-          
-          return id;
+
+          return new DataItem(id, now);
         }
 
         throw new IllegalStateException();
       }
       else {
-        return 0;
+        return null;
       }
     } catch (SqlIndexAlreadyExistsException e) {
       // the data already exists in the cache, so this is okay
       log.finer(this + " " + e.toString());
       log.log(Level.FINEST, e.toString(), e);
 
-      return 1;
+      return null;
     } catch (SQLException e) {
       e.printStackTrace();
       log.finer(this + " " + e.toString());
@@ -495,7 +513,7 @@ public class DataStore {
         conn.close();
     }
 
-    return 0;
+    return null;
   }
 
   /**
@@ -503,7 +521,7 @@ public class DataStore {
    *
    * @param id the data's unique id.
    */
-  public boolean remove(long id)
+  public boolean remove(long id, long time)
   {
     if (id <= 0) {
       throw new IllegalStateException(L.l("remove of 0 value"));
@@ -516,6 +534,7 @@ public class DataStore {
 
       PreparedStatement stmt = conn.prepareDelete();
       stmt.setLong(1, id);
+      stmt.setLong(2, time);
 
       int count = stmt.executeUpdate();
 
@@ -657,7 +676,7 @@ public class DataStore {
 
   private class DeleteAlarm implements AlarmListener {
     private long _lastOid;
-   
+
     @Override
     public void handleAlarm(Alarm alarm)
     {
@@ -666,8 +685,8 @@ public class DataStore {
           deleteOrphans();
         } finally {
           long timeout;
-          
-          if (_lastOid < 0) { 
+
+          if (_lastOid < 0) {
             timeout = _expireOrphanTimeout;
           }
           else {
@@ -685,32 +704,43 @@ public class DataStore {
     {
       DataConnection conn = null;
       ResultSet rs = null;
-      
+
       boolean isValid = false;
 
       try {
         conn = getConnection();
 
+        HashMap<Long,Long> orphanList = selectDataIds(conn);
         HashSet<Long> mnodeDataIds = selectMnodeDataIds(conn);
-        HashSet<Long> orphanList = selectDataIds(conn);
-        
+
         for (Long mnodeDataId : mnodeDataIds) {
           orphanList.remove(mnodeDataId);
         }
+
+        PreparedStatement pStmt = conn.prepareDeleteOrphan();
         
-        if (orphanList.size() > 0) {
-          log.info("DataStore removing " + orphanList.size() + " orphans");
-        }
-        
-        for (Long did : orphanList) {
-          PreparedStatement pStmt = conn.prepareDelete();
+        int removeCount = 0;
+
+        for (Map.Entry<Long,Long> entry : orphanList.entrySet()) {
+          Long did = entry.getKey();
+          Long time = entry.getValue();
+
           pStmt.setLong(1, did);
-          
+          pStmt.setLong(2, time);
+
           if (pStmt.executeUpdate() > 0) {
             _entryCount.addAndGet(-1);
+            removeCount++;
+          }
+          else {
+            //System.out.println("Unable to remove orphan: " + Long.toHexString(did));
           }
         }
-        
+
+        if (orphanList.size() > 0) {
+          log.info("DataStore removing " + orphanList.size() + " orphans (remove=" + removeCount + ",entry-count=" + _entryCount.get() + ")");
+        }
+
         isValid = true;
       } catch (SQLException e) {
         e.printStackTrace();
@@ -725,39 +755,39 @@ public class DataStore {
           conn.destroy();
       }
     }
-    
+
     private HashSet<Long> selectMnodeDataIds(DataConnection conn)
       throws SQLException
     {
       HashSet<Long> dataIds = new HashSet<Long>();
-      
+
       PreparedStatement pStmt = conn.prepareSelectMnodeDataIds();
-      
+
       ResultSet rs = pStmt.executeQuery();
-      
+
       while (rs.next()) {
         dataIds.add(rs.getLong(1));
       }
-      
+
       return dataIds;
     }
-    
-    private HashSet<Long> selectDataIds(DataConnection conn)
+
+    private HashMap<Long,Long> selectDataIds(DataConnection conn)
       throws SQLException
     {
-      HashSet<Long> dataIds = new HashSet<Long>();
-      
+      HashMap<Long,Long> dataIds = new HashMap<Long,Long>();
+
       PreparedStatement pStmt = conn.prepareSelectDataIds();
-      long time = CurrentTime.getCurrentTime() - 2 * 60000;
-      
+      long time = CurrentTime.getCurrentTime() - _expireDataMinIdle;
+
       pStmt.setLong(1, time);
-      
+
       ResultSet rs = pStmt.executeQuery();
-      
+
       while (rs.next()) {
-        dataIds.add(rs.getLong(1));
+        dataIds.put(rs.getLong(1), rs.getLong(2));
       }
-      
+
       return dataIds;
     }
   }
@@ -809,7 +839,7 @@ public class DataStore {
       if (conn != null)
         conn.close();
     }
-    
+
     @Override
     public String toString()
     {
@@ -825,6 +855,7 @@ public class DataStore {
     private PreparedStatement _selectMnodeDataIdStatement;
     private PreparedStatement _selectDataIdStatement;
     private PreparedStatement _deleteStatement;
+    private PreparedStatement _deleteOrphanStatement;
     private PreparedStatement _validateStatement;
 
     private PreparedStatement _countStatement;
@@ -881,6 +912,15 @@ public class DataStore {
       return _deleteStatement;
     }
 
+    PreparedStatement prepareDeleteOrphan()
+      throws SQLException
+    {
+      if (_deleteOrphanStatement == null)
+        _deleteOrphanStatement = _conn.prepareStatement(_deleteOrphanQuery);
+
+      return _deleteOrphanStatement;
+    }
+
     PreparedStatement prepareValidate()
       throws SQLException
     {
@@ -912,6 +952,27 @@ public class DataStore {
         _conn.close();
       } catch (SQLException e) {
       }
+    }
+  }
+  
+  public static class DataItem {
+    private final long _id;
+    private final long _time;
+    
+    DataItem(long id, long time)
+    {
+      _id = id;
+      _time = time;
+    }
+    
+    public long getId()
+    {
+      return _id;
+    }
+    
+    public long getTime()
+    {
+      return _time;
     }
   }
 }

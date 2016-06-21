@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,33 +23,16 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- *
- * @author Scott Ferguson
  */
 
-package com.caucho.boot;
+package com.caucho.quercus.annotation;
 
-import com.caucho.env.repository.CommitBuilder;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class DeployLsCommand extends AbstractDeployLsCommand 
-{
-  @Override
-  protected void initBootOptions()
-  {
-    addValueOption("host", "host", "virtual host to make application available on");
-    
-    super.initBootOptions();
-  }
-  
-  @Override
-  public String getDescription()
-  {
-    return "lists deployed web-app files";
-  }
-  
-  @Override
-  protected CommitBuilder createCommitBuilder(WatchdogArgs args)
-  {
-    return DeployCommand.createWebAppCommit(args, null);
-  }
+/**
+ * Used to specify a function to be used for isset().
+ */
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Isset {
 }

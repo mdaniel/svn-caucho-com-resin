@@ -65,6 +65,7 @@ import com.caucho.server.distcache.CacheEngine;
 import com.caucho.server.distcache.CacheImpl;
 import com.caucho.server.distcache.CacheManagerImpl;
 import com.caucho.server.distcache.DataStore;
+import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.distcache.MnodeStore;
 import com.caucho.server.distcache.MnodeUpdate;
@@ -1073,21 +1074,23 @@ public class AbstractCache
     _config.setGuid(_guid);
   }
   
-  public boolean loadData(long valueIndex, WriteStream os)
+  public boolean loadData(long valueIndex,
+                          long valueDataTime,
+                          WriteStream os)
     throws IOException
   {
-    return _delegate.loadData(valueIndex, os);
+    return _delegate.loadData(valueIndex, valueDataTime, os);
   }
 
-  public long saveData(StreamSource source, int length)
+  public DataItem saveData(StreamSource source, int length)
     throws IOException
   {
     return _delegate.saveData(source, length);
   }
 
-  public boolean isDataAvailable(long valueDataId)
+  public boolean isDataAvailable(long valueDataId, long valueDataTime)
   {
-    return _delegate.isDataAvailable(valueDataId);
+    return _delegate.isDataAvailable(valueDataId, valueDataTime);
   }
 
   //

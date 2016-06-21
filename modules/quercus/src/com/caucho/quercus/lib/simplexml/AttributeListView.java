@@ -101,7 +101,15 @@ public class AttributeListView extends SimpleView
   @Override
   public SimpleView getField(Env env, Value indexV)
   {
-    throw new UnsupportedOperationException();
+    String name = indexV.toString();
+    
+    for (AttributeView attr : _attrList) {
+      if (attr.getNodeName().equals(name)) {
+        return attr;
+      }
+    }
+    
+    return null;
   }
 
   @Override
@@ -114,6 +122,18 @@ public class AttributeListView extends SimpleView
   public String toString(Env env)
   {
     return _attrList.get(0).toString(env);
+  }
+  
+  @Override
+  public boolean issetField(Env env, String name)
+  {
+    for (SimpleView view : _attrList) {
+      if (view.getNodeName().equals(name)) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   @Override

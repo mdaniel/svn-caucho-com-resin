@@ -340,11 +340,17 @@ public class SelectQuery extends Query {
     CharBuffer cb = CharBuffer.allocate();
     cb.append("SelectQuery[");
     cb.append("SELECT ");
-    for (int i = 0; i < _results.length; i++) {
-      if (i != 0)
-        cb.append(",");
-      cb.append(_results[i]);
+    if (_results != null) {
+      for (int i = 0; i < _results.length; i++) {
+        if (i != 0)
+          cb.append(",");
+        cb.append(_results[i]);
+      }
     }
+    else {
+      cb.append("... unknown ...");
+    }
+        
     cb.append(" FROM ");
 
     FromItem []fromItems = getFromItems();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -220,9 +220,6 @@ namespace Caucho.IIS
         lock (this) {
           _activeCount++;
         }
-
-        if (_log.IsLoggable(EventLogEntryType.Information))
-          _log.Info("Connect " + connection);
 
         Trace.TraceInformation("Connect '{0}'", connection);
 

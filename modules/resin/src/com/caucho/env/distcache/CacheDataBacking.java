@@ -35,10 +35,10 @@ import java.util.ArrayList;
 
 import com.caucho.server.distcache.CacheData;
 import com.caucho.server.distcache.DataStore;
+import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.server.distcache.MnodeStore;
 import com.caucho.server.distcache.MnodeUpdate;
-import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
@@ -76,19 +76,19 @@ public interface CacheDataBacking {
                                MnodeEntry oldEntryValue,
                                MnodeUpdate mnodeUpdate);
   
-  public boolean loadData(long valueDataId, WriteStream os)
+  public boolean loadData(long valueDataId, long valueDataTime, WriteStream os)
     throws IOException;
 
-  public java.sql.Blob loadBlob(long valueDataId);
+  public java.sql.Blob loadBlob(long valueDataId, long valueDataTime);
 
-  public long saveData(InputStream mIn, int length)
+  public DataItem saveData(InputStream mIn, int length)
     throws IOException;
 
-  public long saveData(StreamSource source, int length);
+  public DataItem saveData(StreamSource source, int length);
   
-  public boolean removeData(long valueDataId);
+  public boolean removeData(long valueDataId, long valueDataTime);
   
-  public boolean isDataAvailable(long valueDataId);
+  public boolean isDataAvailable(long valueDataId, long valueDataTime);
 
   /**
    * Returns the last update time on server startup.

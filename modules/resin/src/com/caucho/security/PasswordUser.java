@@ -85,6 +85,12 @@ public class PasswordUser implements Serializable
     this(new BasicPrincipal(user), password.toCharArray(),
          false, false, new String[] { "user" });
   }
+  
+  public PasswordUser(String user, String password, String []roles)
+  {
+    this(new BasicPrincipal(user), password.toCharArray(),
+         false, false, roles);
+  }
 
   /**
    * Returns the logged-in user principal

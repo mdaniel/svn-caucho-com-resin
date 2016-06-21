@@ -221,8 +221,9 @@ public class PDO implements EnvCleanup {
   {
     JdbcConnectionResource conn = getConnection();
 
-    if (! isConnected())
+    if (! isConnected()) {
       return false;
+    }
 
     if (_inTransaction) {
       return false;
@@ -313,13 +314,15 @@ public class PDO implements EnvCleanup {
     }
 
     try {
-      PDOStatement stmt = new PDOStatement(env, this, _error, query, false, null, true);
+      PDOStatement stmt = PDOStatement.execute(env, this, _error, query, true);
       _lastExecutedStatement = stmt;
 
       return LongValue.create(conn.getAffectedRows());
     }
     catch (SQLException e) {
       _error.error(env, e);
+      
+      e.printStackTrace();
 
       return BooleanValue.FALSE;
     }
@@ -487,7 +490,7 @@ public class PDO implements EnvCleanup {
     }
 
     try {
-      String lastInsertId = _lastExecutedStatement.lastInsertId(env);
+      String lastInsertId = _lastExecutedStatement.getStatement().lastInsertId(env);
 
       if (lastInsertId == null) {
         return "0";
@@ -516,7 +519,7 @@ public class PDO implements EnvCleanup {
       //closeStatements();
 
       PDOStatement pdoStatement
-        = new PDOStatement(env, this, _error, query, true, driverOptions, true);
+        = PDOStatement.prepare(env, this, _error, query, false);
 
       _lastPDOStatement = pdoStatement;
 
@@ -558,7 +561,7 @@ public class PDO implements EnvCleanup {
       //closeStatements();
 
       PDOStatement pdoStatement
-         = new PDOStatement(env, this, _error, query, false, null, true);
+         = PDOStatement.execute(env, this, _error, query, true);
 
       if (mode != 0) {
         pdoStatement.setFetchMode(env, mode, args);

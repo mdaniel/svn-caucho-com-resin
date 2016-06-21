@@ -47,6 +47,7 @@ import com.caucho.util.L10N;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,7 +58,6 @@ import java.util.Set;
  * PDO object oriented API facade.
  */
 public class PDOStatement
-  extends JdbcPreparedStatementResource
   implements Iterable<Value>, EnvCleanup
 {
   private static final L10N L = new L10N(PDOStatement.class);
@@ -68,7 +68,7 @@ public class PDOStatement
   private final PDOError _error;
 
   // XXX: need to make public @Name("queryString")
-  public final String queryString;
+  public String queryString;
 
   private int _fetchMode = PDO.FETCH_BOTH;
   private Value[] _fetchModeArgs = NULL_VALUES;
@@ -78,53 +78,88 @@ public class PDOStatement
 
   private HashMap<Integer,ColumnType> _paramTypes;
   private HashMap<Integer,Value> _paramValues;
+  
+  private JdbcStatementResource _stmt;
 
   // protected so it's not callable by PHP code
   protected PDOStatement(Env env,
                          PDO pdo,
-                         PDOError error,
-                         String query,
-                         boolean isPrepared,
-                         ArrayValue options,
-                         boolean isCatchException)
-    throws SQLException
+                         PDOError error)
   {
-    super(pdo.getConnection());
     env.addCleanup(this);
 
     _pdo = pdo;
     _error = error;
+  }
+  
+  protected static PDOStatement prepare(Env env,
+                                        PDO pdo,
+                                        PDOError error,
+                                        String query,
+                                        boolean isCatchException)
+    throws SQLException
+  {
+    PDOStatement stmt = new PDOStatement(env, pdo, error);
+    
+    query = stmt.parseQueryString(env, query);
 
-    if (options != null && options.getSize() > 0) {
-      env.notice(L.l("PDOStatement options unsupported"));
-    }
+    stmt._stmt = pdo.getConnection().prepare(env, query);
 
-    if (isPrepared) {
-      query = parseQueryString(env, query);
-
-      prepare(env, query);
-
-      // php/1s41 - oracle can't handle this
-      //_preparedStatement.setEscapeProcessing(false);
-    }
-    else {
-      setQuery(query);
-
-      try {
-        setStatement(pdo.getConnection().createStatement(env));
-        execute(env, false);
+    SQLException e = stmt._stmt.getException();
+        
+    if (e != null) {
+      if (! isCatchException) {
+        throw e;
       }
-      catch (SQLException e) {
-        if (isCatchException) {
-          _error.error(env, e);
-        }
-        else {
-          throw e;
-        }
-      }
+      
+      error.error(env, e);
     }
-
+    
+    // php/1s41 - oracle can't handle this
+    //_preparedStatement.setEscapeProcessing(false);
+    
+    stmt.queryString = query;
+    
+    return stmt;
+  }
+  
+  protected static PDOStatement execute(Env env,
+                                        PDO pdo,
+                                        PDOError error,
+                                        String query,
+                                        boolean isCatchException)
+    throws SQLException
+  {
+    PDOStatement stmt = new PDOStatement(env, pdo, error);
+    
+    stmt.init(pdo.getConnection().createStatement(env), query);
+    
+    try {
+      boolean result = stmt._stmt.execute(env, false);
+    }
+    catch (SQLException e) {      
+      if (! isCatchException) {
+        throw e;
+      }
+      
+      error.error(env, e);
+    }
+        
+    return stmt;
+  }
+  
+  private void init(JdbcStatementResource stmt, String query)
+  {
+    stmt.setQuery(query);
+    
+    _stmt = stmt;
+    
     this.queryString = query;
+  }
+  
+  protected JdbcStatementResource getStatement()
+  {
+    return _stmt;
   }
 
   //side-effect, updates _parameterNameMap
@@ -252,7 +287,7 @@ public class PDOStatement
         return false;
       }
 
-      ResultSetMetaData metaData = getMetaData();
+      ResultSetMetaData metaData = _stmt.getMetaData();
       BoundColumn boundColumn
         = new BoundColumn(metaData, column, var, columnType);
 
@@ -352,7 +387,7 @@ public class PDOStatement
    */
   public boolean closeCursor(Env env)
   {
-    return freeResult();
+    return _stmt.freeResult();
   }
 
   /**
@@ -360,13 +395,12 @@ public class PDOStatement
    */
   public int columnCount(Env env)
   {
-    return getColumnCount(env);
+    return _stmt.getColumnCount(env);
   }
 
-  @Override
   public boolean close()
   {
-    return super.close();
+    return _stmt.close();
   }
 
   /**
@@ -387,7 +421,6 @@ public class PDOStatement
     return _error.getErrorInfo();
   }
 
-  @Override
   protected void setError(Env env, SQLException e) {
     e.printStackTrace();
 
@@ -411,7 +444,7 @@ public class PDOStatement
     if (inputParameters.isArray()) {
       parameters = inputParameters.toArrayValue(env);
     }
-    else if (inputParameters.isDefault()) {
+    else if (inputParameters.isNull()) {
       parameters = null;
     }
     else {
@@ -452,7 +485,9 @@ public class PDOStatement
         values[index] = value;
       }
 
-      bindParams(env, types, values);
+      if (_stmt instanceof JdbcPreparedStatementResource) {
+        ((JdbcPreparedStatementResource) _stmt).bindParams(env, types, values);
+      }
     }
     else if (_paramTypes != null) {
       int size = _paramTypes.size();
@@ -470,32 +505,19 @@ public class PDOStatement
         values[i] = _paramValues.get(index);
       }
 
-      bindParams(env, types, values);
+      if (_stmt instanceof JdbcPreparedStatementResource) {
+        ((JdbcPreparedStatementResource) _stmt).bindParams(env, types, values);
+      }
     }
 
     try {
-      return execute(env, false);
+      return _stmt.execute(env, false);
     }
     catch (SQLException e) {
       _error.error(env, e);
 
       return false;
     }
-  }
-
-  @Override
-  protected boolean executeImpl(Env env)
-    throws SQLException
-  {
-    _pdo.setLastExecutedStatement(this);
-
-    return super.executeImpl(env);
-  }
-
-  @Override
-  protected JdbcResultResource createResultSet(ResultSet rs)
-  {
-    return new JdbcResultResource(rs, _pdo.getColumnCase());
   }
 
   /**
@@ -663,11 +685,11 @@ public class PDOStatement
     }
 
     try {
-      if (column < 0 || column >= getMetaData().getColumnCount()) {
+      if (column < 0 || column >= _stmt.getMetaData().getColumnCount()) {
         return BooleanValue.FALSE;
       }
 
-      JdbcResultResource rs = getResultSet();
+      JdbcResultResource rs = _stmt.getResultSet();
 
       if (rs == null || ! rs.next()) {
         return BooleanValue.FALSE;
@@ -696,7 +718,7 @@ public class PDOStatement
    */
   private Value fetchImpl(Env env, int fetchMode, int columnIndex)
   {
-    JdbcResultResource rs = getResultSet();
+    JdbcResultResource rs = _stmt.getResultSet();
 
     if (rs == null) {
       return BooleanValue.FALSE;
@@ -829,7 +851,7 @@ public class PDOStatement
 
       Value var = _fetchModeArgs[0];
 
-      int columnCount = getMetaData().getColumnCount();
+      int columnCount = _stmt.getMetaData().getColumnCount();
 
       for (int i = 1; i <= columnCount; i++) {
         String name = rs.getColumnLabel(i);
@@ -858,7 +880,7 @@ public class PDOStatement
     try {
       ArrayValue array = new ArrayValueImpl();
 
-      int columnCount = getMetaData().getColumnCount();
+      int columnCount = _stmt.getMetaData().getColumnCount();
 
       for (int i = 1; i <= columnCount; i++) {
         Value name = env.createString(rs.getColumnLabel(i));
@@ -893,7 +915,7 @@ public class PDOStatement
                            @Optional String className,
                            @Optional Value[] args)
   {
-    JdbcResultResource rs = getResultSet();
+    JdbcResultResource rs = _stmt.getResultSet();
 
     if (rs == null) {
       return BooleanValue.FALSE;
@@ -929,7 +951,7 @@ public class PDOStatement
   private Value getColumnValue(Env env, int column)
     throws SQLException
   {
-    JdbcResultResource rs = getResultSet();
+    JdbcResultResource rs = _stmt.getResultSet();
 
     return rs.getColumnValue(env, column);
   }
@@ -982,7 +1004,7 @@ public class PDOStatement
 
   public int rowCount(Env env)
   {
-    JdbcResultResource rs = getResultSet();
+    JdbcResultResource rs = _stmt.getResultSet();
 
     if (rs == null) {
       return 0;
@@ -1112,16 +1134,10 @@ public class PDOStatement
     return true;
   }
 
-  @Override
-  protected boolean isFetchFieldIndexBeforeFieldName()
-  {
-    return false;
-  }
-
   public String toString()
   {
-    String query = getQuery();
+    String query = _stmt.getQuery();
 
-    return "PDOStatement[" + query.substring(0, 16) + "]";
+    return "PDOStatement[" + query + "]";
   }
 }

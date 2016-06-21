@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -471,7 +471,7 @@ namespace Caucho.IIS
       /*
         String remoteUser = request.LogonUserIdentity.Name;
         */
-        String remoteUser = context.Current.User.Identity.Name;
+        String remoteUser = HttpContext.Current.User.Identity.Name;
         WriteRequestString(ws, HmuxConnection.CSE_REMOTE_USER, remoteUser, traceId);
       }
 

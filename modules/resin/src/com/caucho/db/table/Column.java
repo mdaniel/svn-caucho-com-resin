@@ -426,6 +426,20 @@ abstract public class Column {
   }
   
   /**
+   * Sets the column based on an expression.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   * @param expr the expression to store
+   */
+  void setExprBlob(DbTransaction xa,
+                   byte []block, int rowOffset,
+                   Expr expr, QueryContext context)
+    throws SQLException
+  {
+  }
+  
+  /**
    * Gets a double value in the column.
    *
    * @param block the block's buffer

@@ -114,7 +114,7 @@ public class Anchor extends FormattedText {
 
     if (isLinked) {
       out.writeStartElement("a");
-      out.writeAttribute("href", referenceDocument.getURI() 
+      out.writeAttribute("href", referenceDocument.getContextPath() 
                                  + '#' + _configTag);
 
       if (getDocument().isJavascriptEnabled()) {

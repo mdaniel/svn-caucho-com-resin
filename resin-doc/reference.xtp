@@ -49,7 +49,7 @@ public class MyAuthenticator extends AbstractAuthenticator {
                              new String[] { "user" });
   }
 
-  public PasswordUser getUser(String userName)
+  public PasswordUser getPasswordUser(String userName)
   {
     if (userName.equals(_user.getName()))
       return _user;
@@ -264,14 +264,14 @@ see <a href="admin/logging.xtp#path">"Log Paths"</a>.</td>
         kb (128kb), or megabytes (10mb).  
         See <a href="admin/logging.xtp#rollover">"Rollovers"</a>.
   </td>
-  <td>1mb</td>
+  <td>1gb</td>
 </tr>
 <tr>
   <td>rollover-count</td>
   <td>maximum number of rollover files before the oldest ones get overwritten. 
         See <a href="admin/logging.xtp#rollover">"Rollovers"</a>.
   </td>
-  <td>1mb</td>
+  <td>none</td>
 </tr>
 <tr>
   <td>resin:type</td>
@@ -11399,7 +11399,7 @@ element set {
 </example>
 </defun>
 
-
+<!--
 <defun title="&lt;resin:StatService>" name="resin:StatService">
 <javadoc class="com.caucho.rewrite.StatService"/>
 <pro/>
@@ -11417,44 +11417,19 @@ element set {
   <th>Default</th>
 </tr>
 <tr>
-  <td>unix-load-avg-exit-threshold</td>
-  <td>CPU load triggering a Resin exit (and restart)</td>
-  <td>100.0</td>
-</tr>
-<tr>
-  <td>cpu-load-log-info-threshold</td>
-  <td>CPU load triggering a log message at the info level</td>
-  <td>1.0</td>
-</tr>
-<tr>
-  <td>cpu-load-log-warning-threshold</td>
-  <td>CPU load triggering a log message at the warning level</td>
-  <td>5.0</td>
-</tr>
-<tr>
-  <td>cpu-load-log-thread-dump-threshold</td>
-  <td>CPU load triggering thread dump to the log</td>
-  <td>5.0</td>
+  <td>enabled</td>
+  <td>enable or disable stat collection</td>
+  <td>true</td>
 </tr>
 <tr>
   <td>sample-period</td>
   <td>how often to sample the statistics</td>
   <td>60s</td>
 </tr>
-<tr>
-  <td>thread-dump-interval</td>
-  <td>minimum time between thread dumps</td>
-  <td>15m</td>
-</tr>
-<tr>
-  <td>unix-load-avg-exit-threshold</td>
-  <td>Unix CPU load triggering a Resin exit (and restart)</td>
-  <td>5.0</td>
-</tr>
 </attributes>
 
 </defun>
-
+-->
 
 <defun title="&lt;resin:when>" name="resin:when" version="Resin 3.0.7">
 <parents>resin:choose</parents>

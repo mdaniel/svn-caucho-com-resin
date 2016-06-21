@@ -128,6 +128,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private Method _varDumpImpl;
   private Method _jsonEncode;
   private Method _entrySet;
+  
+  private Method _isset;
 
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
@@ -219,7 +221,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     else if (Calendar.class.isAssignableFrom(type))
       return new CalendarClassDef(moduleContext);
     else if (Date.class.isAssignableFrom(type))
-      return new DateClassDef(moduleContext);
+      return new DateClassDef(moduleContext, type);
     else if (URL.class.isAssignableFrom(type))
       return new URLClassDef(moduleContext);
     else if (Map.class.isAssignableFrom(type))
@@ -592,7 +594,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
    */
   @Override
   public Value callNew(Env env, Value []args)
-  {
+  {    
     if (_cons != null) {
       if (__construct != null) {
         Value value = _cons.call(env, Value.NULL_ARGS);
@@ -1379,6 +1381,8 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
         _varDumpImpl = method;
       } else if (method.isAnnotationPresent(JsonEncode.class)) {
         _jsonEncode = method;
+      } else if (method.isAnnotationPresent(Isset.class)) {
+        _isset = method;
       } else if (method.isAnnotationPresent(EntrySet.class)) {
         _entrySet = method;
       } else if ("__call".equals(method.getName())) {
@@ -1439,6 +1443,24 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
     Value str = __toString.callMethod(env, cls, value, Expr.NULL_ARGS);
 
     return str.toStringValue(env);
+  }
+  
+  public boolean issetField(Env env, Object obj, StringValue name)
+  {
+    if (_isset == null) {
+      return false;
+    }
+    
+    try {
+      Object result = _isset.invoke(obj, env, name);
+      
+      return ! Boolean.FALSE.equals(result);
+
+    } catch (InvocationTargetException e) {
+      throw new QuercusRuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new QuercusRuntimeException(e);
+    }
   }
 
   public boolean jsonEncode(Env env,
@@ -1848,15 +1870,15 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
   }
 
   private static class DateClassDef extends JavaClassDef {
-    DateClassDef(ModuleContext module)
+    DateClassDef(ModuleContext module, Class<?> type)
     {
-      super(module, "Date", Date.class);
+      super(module, type.getSimpleName(), type);
     }
 
     @Override
     public Value wrap(Env env, Object obj)
     {
-      return new JavaDateValue(env, (Date)obj, this);
+      return new JavaDateValue(env, (Date) obj, this);
     }
   }
 
