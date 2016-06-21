@@ -31,6 +31,9 @@ package com.caucho.quercus.lib.dom;
 
 import org.w3c.dom.NamedNodeMap;
 
+import com.caucho.quercus.annotation.Delegates;
+
+@Delegates(DOMNamedNodeMapDelegate.class)
 public class DOMNamedNodeMap
   extends DOMWrapper<NamedNodeMap>
 {
