@@ -1739,7 +1739,7 @@ driver = element driver {
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
 &lt;database jndi-name='jdbc/test_mysql'&gt;
-  &lt;driver class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"&gt;
+  &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"&gt;
     &lt;url&gt;jdbc:mysql://localhost:3306/test&lt;/url&gt;
     &lt;user&gt;&lt;/user&gt;
     &lt;password&gt;&lt;/password&gt;
