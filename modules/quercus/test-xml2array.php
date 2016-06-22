@@ -167,3 +167,60 @@ All is revealed in this thrilling horror spoof of a documentary.]]></plot>
 EOT;
 $array = XML2Array::createArray($xml);
 assert(isset($array['movies']['@attributes']['type']) && $array['movies']['@attributes']['type'] == 'documentary', 'Attributes were not extracted correctly');
+assert(isset($array['movies']['movie']['characters']['character'][1]['name']) && $array['movies']['movie']['characters']['character'][1]['name'] == 'Mr. Coder', 'XML was not parsed correctly');
+
+$xml = <<<EOT
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:i18n="http://www.w3.org/2005/09/ws-i18n" xmlns:typ="http://bees.com/determinations/server/interview/10.4/Honeybees/types">
+
+<SOAP-ENV:Header>
+
+<i18n:international>
+
+<i18n:locale>en_GB</i18n:locale>
+
+<i18n:tz>GMT-04:00</i18n:tz>
+
+</i18n:international>
+
+</SOAP-ENV:Header>
+
+<SOAP-ENV:Body>
+
+<typ:list-screens-response>
+
+<typ:interview-session-id>d9ded305-64df-45b1-8fa8-7b05ddca2004</typ:interview-session-id>
+
+<typ:entity id="global">
+
+<typ:instance id="global">
+
+<typ:screen id="qs" name="summary" title="Honeybee Registration Form" context-entity-id="global" context-instance-id="global" type="summary" is-automatic="false"/>
+
+<typ:screen id="qs@Interviews_Honeybeescreens_xint" name="s4@Interviews_Honeybeescreens_xint" title="Information on Beeyards" context-entity-id="global" context-instance-id="global" type="question" is-automatic="false"/>
+
+<typ:screen id="qs@Interviews_Honeybeescreens_xint" name="s10@Interviews_Honeybeescreens_xint" title="Personal Details Release" context-entity-id="global" context-instance-id="global" type="question" is-automatic="false"/>
+
+<typ:screen id="qs@Interviews_Honeybeescreens_xint" name="s11@Interviews_Honeybeescreens_xint" title="Beekeeper Business Information" context-entity-id="global" context-instance-id="global" type="question" is-automatic="false"/>
+
+<typ:screen id="qs@Interviews_Honeybeescreens_xint" name="s13@Interviews_Honeybeescreens_xint" title="Registration Complete" context-entity-id="global" context-instance-id="global" type="question" is-automatic="false"/>
+
+<typ:screen id="qs@Interviews_Portalcommonscreens_xint" name="s2@Interviews_Portalcommonscreens_xint" title="Business Information - Contact Details" context-entity-id="global" context-instance-id="global" type="question" is-automatic="false"/>
+
+<typ:screen id="qs@Interviews_Portalcommonscreens_xint" name="s4@Interviews_Portalcommonscreens_xint" title="Business Information - Address Details" context-entity-id="global" context-instance-id="global" type="question" is-automatic="false"/>
+
+<typ:screen id="dr" name="Default Data Review" title="Data Review" context-entity-id="global" context-instance-id="global" type="data-review" is-automatic="false"/>
+
+</typ:instance>
+
+</typ:entity>
+
+</typ:list-screens-response>
+
+</SOAP-ENV:Body>
+
+</SOAP-ENV:Envelope>
+
+
+EOT;
+$array = XML2Array::createArray($xml);
+assert(isset($array['SOAP-ENV:Envelope']['SOAP-ENV:Body']['typ:list-screens-response']['typ:entity']['typ:instance']['typ:screen'][0]['@attributes']['title']) && $array['SOAP-ENV:Envelope']['SOAP-ENV:Body']['typ:list-screens-response']['typ:entity']['typ:instance']['typ:screen'][0]['@attributes']['title'] == 'Honeybee Registration Form', 'Attributes were not extracted correctly');
