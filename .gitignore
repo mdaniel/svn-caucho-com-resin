@@ -14,3 +14,5 @@ conf/app-default.xml
 conf/resin.properties
 modules/resin/src/manifest
 modules/resin/src/manifest.dist
+modules/quercus/php-tests/vendor
+composer.lock
