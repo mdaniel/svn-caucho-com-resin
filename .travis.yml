@@ -1,7 +1,6 @@
 language: java
 before_script:
- - composer self-update
- - cd modules/quercus/php-tests; composer install --prefer-source
+ - cd modules/quercus/php-tests; wget http://getcomposer.org/composer.phar; php composer.phar install --prefer-source
 script:
  - ant quercus.war
  - cd modules/quercus/php-tests; java -Dfile.encoding=UTF-8 -Djava.util.Arrays.useLegacyMergeSort=true -cp ../../../dist/quercus-war-4.0.s*/WEB-INF/lib/quercus.jar com.caucho.quercus.CliQuercus -dmax_execution_time=0 vendor/phpunit/phpunit/phpunit
