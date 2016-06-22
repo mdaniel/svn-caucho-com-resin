@@ -5,6 +5,7 @@ addons:
     - php5-cli
 before_script:
  - cd modules/quercus/php-tests; wget http://getcomposer.org/composer.phar; php composer.phar install --prefer-source
+ - cd ../../..
 script:
  - ant quercus.war
  - cd modules/quercus/php-tests; java -Dfile.encoding=UTF-8 -Djava.util.Arrays.useLegacyMergeSort=true -cp ../../../dist/quercus-war-4.0.s*/WEB-INF/lib/quercus.jar com.caucho.quercus.CliQuercus -dmax_execution_time=0 vendor/phpunit/phpunit/phpunit
