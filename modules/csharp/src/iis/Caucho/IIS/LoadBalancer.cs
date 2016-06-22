@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -174,9 +174,10 @@ namespace Caucho.IIS
 
     public HmuxConnection OpenServer(String sessionId, Server xServer)
     {
-      HmuxConnection connection = null;
+      Trace.TraceInformation("OpenServer: {0}:{1}", _servers.Length, _servers[0]);
 
-      if (sessionId != null && sessionId.Length > 1)
+      HmuxConnection connection = null;
+      if (sessionId != null)
         connection = OpenSessionServer(sessionId);
 
       if (connection == null)
@@ -189,18 +190,11 @@ namespace Caucho.IIS
     {
       char c = sessionId[0];
 
-      int i = c - 'a';
-
-      if (i >= _servers.Length)
-        return null;
-
-      Server server = _servers[i];
+      Server server = _servers[(c - 'a')];
 
       HmuxConnection connection = null;
 
       connection = server.OpenConnection();
-
-      Trace.TraceInformation("open session server {0}->{1}", sessionId, connection);
 
       return connection;
     }
@@ -242,8 +236,6 @@ namespace Caucho.IIS
             break;
         }        
       }
-
-      Trace.TraceInformation("open any server {0}", connection);
 
       return connection;
     }

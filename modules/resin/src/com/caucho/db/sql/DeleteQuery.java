@@ -69,39 +69,35 @@ class DeleteQuery extends Query {
     int count = 0;
     TableIterator []rows = new TableIterator[1];
 
-    synchronized (_table) {
-      try {
-        rows[0] = _table.createTableIterator();
-        context.init(xa, rows, isReadOnly());
-
-        if (! start(rows, rows.length, context, xa)) {
-          return;
-        }
-
-        do {
-          if (! context.lock()) {
-            throw new IllegalStateException("unable to lock for delete");
-          }
-
-          try {
-            if (isSelect(context) && rows[0].delete()) {
-              context.setRowUpdateCount(++count);
-            }
-          } finally {
-            context.unlock();
-          }
-
-          xa.commit();
-        } while (nextTuple(rows, rows.length, context, xa));
-      } catch (IOException e) {
-        throw new SQLExceptionWrapper(e);
-      } finally {
-        // autoCommitWrite must be before freeRows in case freeRows
-        // throws an exception
-        context.close();
-
-        freeRows(rows, rows.length);
+    try {
+      rows[0] = _table.createTableIterator();
+      context.init(xa, rows, isReadOnly());
+      
+      if (! start(rows, rows.length, context, xa)) {
+        return;
       }
+
+      do {
+        context.lock();
+        
+        try {
+          if (isSelect(context) && rows[0].delete()) {
+            context.setRowUpdateCount(++count);
+          }
+        } finally {
+          context.unlock();
+        }
+        
+        xa.commit();
+      } while (nextTuple(rows, rows.length, context, xa));
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
+    } finally {
+      // autoCommitWrite must be before freeRows in case freeRows
+      // throws an exception
+      context.close();
+      
+      freeRows(rows, rows.length);
     }
   }
 

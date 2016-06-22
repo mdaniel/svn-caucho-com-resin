@@ -6,21 +6,6 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.49 - in progress">
-<ul>
-<li>iis: IndexOutOfRangeException in Caucho.IIS.LoadBalancer.OpenServer (#5990, rep by S. Szeto)</li>
-<li>win: sendfile issues with URL length</li>
-<li>CLI: deploy-ls and deploy-cat swapped (#5983)</li>
-</ul>
-</s2>
-
-<s2 title="4.0.48 - Feb 12, 2016">
-<ul>
-<li>mime-type: additional extensions for mime-type.</li>
-<li>session: fixes related delete timing.</li>
-</ul>
-</s2>
-
 <s2 title="4.0.47 - in progress">
 <ul>
 <li>session: fixes related to Java deserialization (#5947, rep by Shinomiya Nobuaki)</li>
@@ -1730,12 +1715,17 @@ expected in Mysql (#5637, rep by Srikanth Pulikonda)</li>
 </ul>
 </s2>
 
-<s2>
+<p>
+
 <ul>
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
-</s2>
 
+<a href="changes-3.xtp">Resin 3 changes</a>
+<a href="changes-31.xtp">Resin 3.1 changes</a>
+<a href="changes-2.xtp">Resin 1.2 changes</a>
+<a href="changes-1.xtp">older changes</a>
+</p>
 </s1>
 </body>
 </document>

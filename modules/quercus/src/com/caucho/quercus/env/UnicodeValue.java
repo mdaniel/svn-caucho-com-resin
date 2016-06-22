@@ -30,15 +30,10 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.marshal.Marshal;
 
 import java.util.IdentityHashMap;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Represents a 16-bit unicode string value.
@@ -152,32 +147,6 @@ abstract public class UnicodeValue extends StringValue {
   public int toUnicodeValueMarshalCost()
   {
     return Marshal.COST_IDENTICAL;
-  }
-  
-  @Override
-  public InputStream toInputStream()
-  {    
-    try {
-      //XXX: refactor so that env is passed in
-      String charset = Env.getInstance().getRuntimeEncoding();
-      
-      return new ByteArrayInputStream(toString().getBytes(charset));
-    }
-    catch (UnsupportedEncodingException e) {
-      throw new QuercusRuntimeException(e);
-    }
-  }
-  
-  @Override
-  public Reader toReader(String charset)
-  {
-    return toSimpleReader();
-  }
-  
-  @Override
-  public String toString(String charset)
-  {
-    return toString();
   }
 
   /**

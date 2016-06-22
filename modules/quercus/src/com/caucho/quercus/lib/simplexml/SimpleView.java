@@ -50,11 +50,8 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JsonEncodeContext;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.VariableModule;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -194,22 +191,10 @@ public abstract class SimpleView
 
     value.printR(env, out, depth, valueSet);
   }
-  
-  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb, QuercusClass cls)
-  {    
-    Value value = toDumpValue(env, cls, false);
-            
-    value.jsonEncode(env, context, sb);
-  }
 
   public int getCount()
   {
     throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-  
-  public boolean issetField(Env env, String name)
-  {
-    return false;
   }
 
   protected static SimpleView create(Node node)

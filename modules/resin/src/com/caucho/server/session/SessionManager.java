@@ -1933,8 +1933,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         try {
           _sessions.remove(session.getId());
           
-          // server/12i7
-          //session.timeout();
+          session.timeout();
         } catch (Throwable e) {
           log.log(Level.FINE, e.toString(), e);
         }

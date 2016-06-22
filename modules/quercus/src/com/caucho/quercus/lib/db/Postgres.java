@@ -155,7 +155,6 @@ public class Postgres extends JdbcConnectionResource
   /**
    * returns a prepared statement
    */
-  @Override
   public PostgresStatement prepare(Env env, String query)
   {
     PostgresStatement stmt
@@ -166,14 +165,6 @@ public class Postgres extends JdbcConnectionResource
     return stmt;
   }
 
-  @Override
-  protected PostgresStatement createStatementResource(Env env)
-  {
-    PostgresStatement stmt = new PostgresStatement(this);
-    
-    return stmt;
-  }
-  
   /**
    * Executes a query.
    *

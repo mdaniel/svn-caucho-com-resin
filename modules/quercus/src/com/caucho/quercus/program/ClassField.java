@@ -155,7 +155,7 @@ public class ClassField
   {
     int p = canonicalName.lastIndexOf('\u0000');
 
-    return p < 0;
+    return p >= 0;
   }
 
   public static boolean isPrivate(StringValue canonicalName)

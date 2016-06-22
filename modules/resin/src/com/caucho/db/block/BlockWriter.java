@@ -33,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.TimeUnit;
 
-import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.RingValueQueue;
@@ -51,7 +50,7 @@ public class BlockWriter extends AbstractTaskWorker {
     = new BlockWriteQueue(this);
 
   // private int _queueSize = 2 * 1024;
-  private int _queueSize = 16 * 1024;
+  private int _queueSize = 1024;
 
   private final RingValueQueue<Block> _blockWriteRing
     = new RingValueQueue<Block>(_queueSize);
@@ -117,13 +116,10 @@ public class BlockWriter extends AbstractTaskWorker {
 
     // if (findBlock(block.getBlockId()) != block) {
     //System.err.println(" OFFER: " + Long.toHexString(block.getBlockId()));
-    if (! _blockWriteRing.offer(block, 180, TimeUnit.SECONDS)) {
-      String message = "OFFER_FAILED: " + block
-                       + " head:" + _blockWriteRing.getHead()
-                       + " tail:" + _blockWriteRing.getTail();
-
-      ShutdownSystem.getCurrent().startFailSafeShutdown("shutting down due to: "
-                                                        + message);
+    if (! _blockWriteRing.offer(block, 60, TimeUnit.SECONDS)) {
+      System.err.println("OFFER_FAILED: " + block
+          + " head:" + _blockWriteRing.getHead()
+          + " tail:" + _blockWriteRing.getTail());
     }
 
     // }
@@ -229,6 +225,7 @@ public class BlockWriter extends AbstractTaskWorker {
     return super.isClosed() && _blockWriteRing.isEmpty();
   }
   */
+
 
   boolean XX_waitForComplete(long timeout)
   {

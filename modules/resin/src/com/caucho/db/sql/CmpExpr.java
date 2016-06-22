@@ -80,15 +80,12 @@ class CmpExpr extends AbstractBinaryExpr {
     
     boolean isLong = false;
     
-    if (left.isLong() && right.isLong()) {
+    if (left.isLong() && right.isLong())
       isLong = true;
-    }
-    else if (left.isLong() && right.isParam()) {
+    else if (left.isLong() && right.isParam())
       isLong = true;
-    }
-    else if (left.isParam() && right.isLong()) {
+    else if (left.isParam() && right.isLong())
       isLong = true;
-    }
     
     boolean isNullable = left.isNullable() || right.isNullable();
 
@@ -116,12 +113,14 @@ class CmpExpr extends AbstractBinaryExpr {
       
     case Parser.GE:
       return new DoubleGeExpr(left, right);
-      
-    case Parser.EQ:
-      if (isLong) {
+    }
+    
+    if (isLong) {
+      switch (_op) {
+      case Parser.EQ:
         return new LongEqExpr(left, right);
       }
-      break;
+      
     }
 
     if (_left.isDouble() || _right.isDouble()) {

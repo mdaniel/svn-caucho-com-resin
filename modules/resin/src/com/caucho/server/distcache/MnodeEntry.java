@@ -43,13 +43,12 @@ public final class MnodeEntry extends MnodeValue {
   private static final L10N L = new L10N(MnodeEntry.class);
   
   public static final MnodeEntry NULL
-  = new MnodeEntry(0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, false, true);
+  = new MnodeEntry(0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, false, true);
   
   public static final long NULL_KEY = 0;
   public static final long ANY_KEY = createAnyKey();
   
   private final long _valueDataId;
-  private final long _valueDataTime;
   
   private final boolean _isServerVersionValid;
 
@@ -77,7 +76,6 @@ public final class MnodeEntry extends MnodeValue {
                     long modifiedExpireTimeout,
                     long leaseExpireTimeout,
                     long valueDataId,
-                    long valueDataTime,
                     Object value,
                     long lastAccessTime,
                     long lastModifiedTime,
@@ -89,7 +87,6 @@ public final class MnodeEntry extends MnodeValue {
           accessedExpireTimeout, modifiedExpireTimeout, leaseExpireTimeout);
     
     _valueDataId = valueDataId;
-    _valueDataTime = valueDataTime;
     
     _lastRemoteAccessTime = lastAccessTime;
     _lastModifiedTime = lastModifiedTime;
@@ -113,7 +110,6 @@ public final class MnodeEntry extends MnodeValue {
 
   public MnodeEntry(MnodeValue mnodeValue,
                     long valueDataId,
-                    long valueDataTime,
                     Object value,
                     long lastAccessTime,
                     long lastModifiedTime,
@@ -129,7 +125,6 @@ public final class MnodeEntry extends MnodeValue {
          mnodeValue.getModifiedExpireTimeout(),
          mnodeValue.getLeaseExpireTimeout(),
          valueDataId,
-         valueDataTime,
          value,
          lastAccessTime,
          lastModifiedTime,
@@ -143,7 +138,6 @@ public final class MnodeEntry extends MnodeValue {
 
   public MnodeEntry(MnodeEntry oldMnodeValue,
                     long valueDataId,
-                    long valueDataTime,
                     long accessTimeout,
                     long lastAccessTime)
   {
@@ -156,7 +150,6 @@ public final class MnodeEntry extends MnodeValue {
           oldMnodeValue.getLeaseExpireTimeout());
     
     _valueDataId = valueDataId;
-    _valueDataTime = valueDataTime;
     
     _lastRemoteAccessTime = lastAccessTime;
     //_lastAccessTime = CurrentTime.getCurrentTime();
@@ -196,7 +189,7 @@ public final class MnodeEntry extends MnodeValue {
                           accessedExpireTimeout, 
                           modifiedExpireTimeout,
                           leaseExpireTimeout,
-                          0, 0, null,
+                          0, null,
                           now, now, false, true);
   }
   
@@ -210,7 +203,6 @@ public final class MnodeEntry extends MnodeValue {
                           getModifiedExpireTimeout(),
                           getLeaseExpireTimeout(),
                           getValueDataId(),
-                          getValueDataTime(),
                           getValue(),
                           now,
                           now,
@@ -222,15 +214,7 @@ public final class MnodeEntry extends MnodeValue {
   {
     return _valueDataId;
   }
-
-  /**
-   * @return
-   */
-  public long getValueDataTime()
-  {
-    return _valueDataTime;
-  }
-
+  
   /**
    * Returns the last access time.
    */

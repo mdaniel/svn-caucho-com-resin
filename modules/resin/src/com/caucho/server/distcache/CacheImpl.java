@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +73,6 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
@@ -898,23 +898,21 @@ public class CacheImpl<K,V>
     _manager.closeCache(_guid, getCacheKey());
   }
   
-  public boolean loadData(long valueDataId,
-                          long valueDataTime,
-                          WriteStream os)
+  public boolean loadData(long valueDataId, WriteStream os)
     throws IOException
   {
-    return getDataBacking().loadData(valueDataId, valueDataTime, os);
+    return getDataBacking().loadData(valueDataId, os);
   }
 
-  public DataItem saveData(StreamSource source, int length)
+  public long saveData(StreamSource source, int length)
     throws IOException
   {
     return getDataBacking().saveData(source, length);
   }
 
-  public boolean isDataAvailable(long valueDataId, long valueDataTime)
+  public boolean isDataAvailable(long valueDataId)
   {
-    return getDataBacking().isDataAvailable(valueDataId, valueDataTime);
+    return getDataBacking().isDataAvailable(valueDataId);
   }
   
   private CacheDataBacking getDataBacking()

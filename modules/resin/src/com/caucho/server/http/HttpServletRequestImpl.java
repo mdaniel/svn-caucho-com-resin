@@ -1230,7 +1230,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
    */
   @Override
   public void logout()
-  {    
+  {
     Login login = getLogin();
 
     if (login != null) {

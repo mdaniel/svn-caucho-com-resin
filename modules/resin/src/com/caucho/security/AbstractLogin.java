@@ -547,7 +547,7 @@ public abstract class AbstractLogin implements Login {
   public void logout(Principal user,
                      HttpServletRequest request,
                      HttpServletResponse response)
-  {    
+  {
     String sessionId = request.getRequestedSessionId();
 
     logoutImpl(user, request, response);
@@ -573,7 +573,7 @@ public abstract class AbstractLogin implements Login {
                                 boolean isTimeout)
   {
     //LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
-    
+
     if (session != null) {
       SingleSignon singleSignon = getSingleSignon();
 

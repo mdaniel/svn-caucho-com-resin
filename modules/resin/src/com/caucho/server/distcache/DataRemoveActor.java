@@ -33,7 +33,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.AbstractTaskWorker;
-import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.util.CurrentTime;
 
 /**
@@ -45,11 +44,8 @@ public class DataRemoveActor extends AbstractTaskWorker {
   
   private final int _queueMax = 8192;
   
-  //private final LinkedBlockingQueue<RemoveItem> _queue
-  //  = new LinkedBlockingQueue<RemoveItem>();
-  
-  private final LinkedBlockingQueue<DataItem> _queue
-    = new LinkedBlockingQueue<DataItem>();
+  private final LinkedBlockingQueue<RemoveItem> _queue
+    = new LinkedBlockingQueue<RemoveItem>();
   
   DataRemoveActor(DataStore dataStore)
   {
@@ -57,11 +53,11 @@ public class DataRemoveActor extends AbstractTaskWorker {
     _dataStore = dataStore;
   }
   
-  public void offer(DataItem dataItem)
+  public void offer(long dataId)
   {
-    //RemoveItem item = new RemoveItem(dataItem);
+    RemoveItem item = new RemoveItem(dataId);
     
-    _queue.offer(dataItem);
+    _queue.offer(item);
     
     wake();
   }
@@ -69,17 +65,15 @@ public class DataRemoveActor extends AbstractTaskWorker {
   @Override
   public long runTask()
   {
-    DataItem item;
+    RemoveItem item;
     DataStore dataStore = _dataStore;
     
     long now = CurrentTime.getCurrentTime();
     
     while ((item = _queue.peek()) != null) {
-      /*
       if (now < item.getExpireTime() && _queue.size() < _queueMax) {
         return item.getExpireTime() - now;
       }
-      */
       
       item = _queue.poll();
 
@@ -88,7 +82,7 @@ public class DataRemoveActor extends AbstractTaskWorker {
       }
 
       if (item != null) {
-        _dataStore.remove(item.getId(), item.getTime());
+        _dataStore.remove(item.getDataId());
       }
     }
     

@@ -143,21 +143,12 @@ public class Oracle extends JdbcConnectionResource {
   /**
    * returns a prepared statement
    */
-  @Override
   public OracleStatement prepare(Env env, String query)
   {
     OracleStatement stmt = new OracleStatement((Oracle) validateConnection(env));
 
     stmt.prepare(env, query);
 
-    return stmt;
-  }
-  
-  @Override
-  protected OracleStatement createStatementResource(Env env)
-  {
-    OracleStatement stmt = new OracleStatement(this);
-    
     return stmt;
   }
 

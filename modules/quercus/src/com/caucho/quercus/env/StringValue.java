@@ -2364,7 +2364,24 @@ abstract public class StringValue
    */
   public InputStream toInputStream()
   {
-    return new ByteArrayInputStream(toBytes());
+    try {
+      //XXX: refactor so that env is passed in
+      return toInputStream(Env.getInstance().getRuntimeEncoding());
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new QuercusRuntimeException(e);
+    }
+    //return new StringValueInputStream();
+  }
+
+  /**
+   * Returns a byte stream of chars.
+   * @param charset to encode chars to
+   */
+  public InputStream toInputStream(String charset)
+    throws UnsupportedEncodingException
+  {
+    return new ByteArrayInputStream(toString().getBytes(charset));
   }
 
   public Reader toSimpleReader()
@@ -2384,14 +2401,6 @@ abstract public class StringValue
     byte []bytes = toBytes();
 
     return new InputStreamReader(new ByteArrayInputStream(bytes), charset);
-  }
-  
-  public String toString(String charset)
-    throws UnsupportedEncodingException
-  {
-    byte []bytes = toBytes();
-    
-    return new String(bytes, charset);
   }
 
   public byte []toBytes()

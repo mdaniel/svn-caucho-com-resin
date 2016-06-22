@@ -58,7 +58,6 @@ public class JdbcStatementResource
 
   private Value[] _results;
 
-  private SQLException _e;
   private String _errorMessage = "";
   private int _errorCode;
 
@@ -79,11 +78,6 @@ public class JdbcStatementResource
     _stmtType = null;
 
     _query = query;
-  }
-  
-  protected void setStatement(Statement stmt)
-  {
-    _stmt = stmt;
   }
 
   /**
@@ -188,11 +182,6 @@ public class JdbcStatementResource
     return _rs.setRowNumber(offset);
   }
 
-  protected SQLException getException()
-  {
-    return _e;
-  }
-  
   /**
    * Returns the error number for the last error.
    *
@@ -231,7 +220,7 @@ public class JdbcStatementResource
 
     try {
       prepareForExecute(env);
-      
+
       if (executeImpl(env)) {
         _conn.setAffectedRows(0);
 
@@ -258,7 +247,6 @@ public class JdbcStatementResource
   protected void setError(Env env, SQLException e) {
     log.log(Level.FINE, e.getMessage(), e);
 
-    _e = e;
     _errorMessage = e.getMessage();
     _errorCode = e.getErrorCode();
   }
@@ -393,6 +381,11 @@ public class JdbcStatementResource
     }
 
     return lastInsertId;
+  }
+
+  protected void setStatement(Statement stmt)
+  {
+    _stmt = stmt;
   }
 
   public JdbcResultResource getResultSet()

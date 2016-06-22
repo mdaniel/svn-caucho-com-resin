@@ -40,24 +40,19 @@ import com.caucho.vfs.StreamSource;
 public class DataStreamSource extends StreamSource
 {
   private long _valueDataId;
-  private long _valueDataTime;
   private DataStore _dataBacking;
 
   /**
    * Create a new GitStreamSource for the named file
    */
   public DataStreamSource(long valueDataId,
-                          long valueDataTime,
                           DataStore dataBacking)
   {
     _valueDataId = valueDataId;
-    _valueDataTime = valueDataTime;
     _dataBacking = dataBacking;
-
-    /*
+    
     if (dataBacking == null)
       throw new NullPointerException();
-      */
   }
 
   /**
@@ -77,13 +72,7 @@ public class DataStreamSource extends StreamSource
   public InputStream openInputStream()
     throws IOException
   {
-    DataStore dataBacking = _dataBacking;
-    
-    if (dataBacking == null) {
-      return null;
-    }
-    
-    InputStream is = dataBacking.openInputStream(_valueDataId, _valueDataTime);
+    InputStream is = _dataBacking.openInputStream(_valueDataId);
     
     return is;
   }

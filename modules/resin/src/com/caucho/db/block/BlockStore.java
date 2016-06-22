@@ -361,14 +361,6 @@ public class BlockStore {
   }
 
   /**
-   * Returns the table's lock.
-   */
-  public Lock getTableLock()
-  {
-    return _rowWriteLock;
-  }
-
-  /**
    * Returns the block manager.
    */
   public BlockManager getBlockManager()
@@ -714,7 +706,7 @@ public class BlockStore {
   {
     long blockIndex;
 
-    while ((blockIndex = findFreeBlock(code)) == 0) {
+    while ((blockIndex = findFreeBlock()) == 0) {
       if (_freeAllocIndex == _blockCount && _freeAllocCount == 0) {
         extendFile();
       }
@@ -733,12 +725,9 @@ public class BlockStore {
     block.setDirty(0, BLOCK_SIZE);
     block.toValid();
 
-    _allocCount.incrementAndGet();
-    /*
     synchronized (_allocationLock) {
       setAllocation(blockIndex, code);
     }
-    */
 
     /* XXX: requires more
     if (isSave)
@@ -749,12 +738,8 @@ public class BlockStore {
     return block;
   }
 
-  private long findFreeBlock(int code)
+  private long findFreeBlock()
   {
-    if (code == ALLOC_FREE) {
-      throw new IllegalStateException();
-    }
-    
     synchronized (_allocationLock) {
       long end = _blockCount;
 
@@ -767,7 +752,7 @@ public class BlockStore {
           _freeAllocCount++;
 
           // mark USED before actual code so it's properly initialized
-          setAllocation(blockIndex, code);
+          setAllocation(blockIndex, ALLOC_DATA);
 
           return blockIndex;
         }
@@ -791,9 +776,8 @@ public class BlockStore {
     long newBlockIndex;
 
     synchronized (_allocationLock) {
-      if (_freeAllocIndex < _blockCount) {
+      if (_freeAllocIndex < _blockCount)
         return;
-      }
 
       if (_blockCount < 256) {
         newBlockCount = _blockCount + 1;
@@ -872,9 +856,9 @@ public class BlockStore {
 
     block.free();
 
-    //synchronized (_allocationLock) {
-    //  setAllocation(newBlockIndex, ALLOC_FREE);
-    //}
+    synchronized (_allocationLock) {
+      setAllocation(newBlockIndex, ALLOC_FREE);
+    }
   }
 
   /**
@@ -936,13 +920,10 @@ public class BlockStore {
       }
 
       setAllocation(index, ALLOC_FREE);
-      _allocCount.decrementAndGet();
     }
 
     saveAllocation();
   }
-  
-  private AtomicInteger _allocCount = new AtomicInteger();
 
   /**
    * Sets the allocation for a block.
@@ -973,19 +954,10 @@ public class BlockStore {
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
-    for (int i = 1; i < ALLOC_BYTES_PER_BLOCK; i++) {
+    for (int i = 1; i < ALLOC_BYTES_PER_BLOCK; i++)
       _allocationTable[allocOffset + i] = 0;
-    }
 
-    int oldCode = _allocationTable[allocOffset] & 0xff;
     _allocationTable[allocOffset] = (byte) code;
-    
-    if (oldCode != ALLOC_FREE && code != ALLOC_FREE && oldCode != code) {
-      System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + oldCode + " " + code);
-      Thread.dumpStack();
-    }else if (blockIndex == 0 && code != ALLOC_DATA) {
-      Thread.dumpStack();
-    }
 
     setAllocDirty(allocOffset, allocOffset + ALLOC_BYTES_PER_BLOCK);
   }
@@ -995,8 +967,11 @@ public class BlockStore {
    */
   private void setAllocDirty(int min, int max)
   {
-    _allocDirtyMin = Math.min(min, _allocDirtyMin);
-    _allocDirtyMax = Math.max(max, _allocDirtyMax);
+    if (min < _allocDirtyMin)
+      _allocDirtyMin = min;
+
+    if (_allocDirtyMax < max)
+      _allocDirtyMax = max;
   }
 
   /**

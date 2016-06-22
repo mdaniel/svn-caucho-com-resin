@@ -28,10 +28,11 @@
 
 package com.caucho.db.sql;
 
+import com.caucho.db.table.TableIterator;
+
 import java.io.IOException;
 import java.sql.SQLException;
-
-import com.caucho.db.table.TableIterator;
+import java.util.logging.Logger;
 
 class RowIterateExpr extends Expr {
   static final RowIterateExpr DEFAULT = new RowIterateExpr();

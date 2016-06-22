@@ -62,15 +62,14 @@ public class SimpleXMLModule
   }
 
   public Value simplexml_load_string(Env env,
-                                     StringValue data,
+                                     Value data,
                                      @Optional String className,
                                      @Optional int options,
                                      @Optional Value namespaceV,
                                      @Optional boolean isPrefix)
   {
-    if (data.length() == 0) {
+    if (data.isNull() || data == BooleanValue.FALSE)
       return BooleanValue.FALSE;
-    }
 
     if (className == null || className.length() == 0)
       className = "SimpleXMLElement";

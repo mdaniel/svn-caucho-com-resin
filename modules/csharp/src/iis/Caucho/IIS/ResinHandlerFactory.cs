@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,11 +39,15 @@ namespace Caucho.IIS
 {
   class ResinHandlerFactory : IHttpHandlerFactory
   {
-    private ResinHandler _resinHandler;
+    private static ResinHandler _resinHandler;
+
+    static ResinHandlerFactory()
+    {
+      _resinHandler = new ResinHandler();
+    }
 
     public ResinHandlerFactory()
     {
-      _resinHandler = new ResinHandler();
     }
 
     public IHttpHandler GetHandler(HttpContext context, string requestType, string url, string pathTranslated)

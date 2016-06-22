@@ -42,8 +42,6 @@ public class UrlEncodedBody extends PostBody
 {
   private StringValue _body;
   private int _length;
-  
-  private String _contentType = "application/x-www-form-urlencoded";
 
   public UrlEncodedBody (Env env, Value body)
   {
@@ -53,12 +51,7 @@ public class UrlEncodedBody extends PostBody
 
   public String getContentType()
   {
-    return _contentType;
-  }
-  
-  public void setContentType(String type)
-  {
-    _contentType = type;
+    return "application/x-www-form-urlencoded";
   }
 
   @Override

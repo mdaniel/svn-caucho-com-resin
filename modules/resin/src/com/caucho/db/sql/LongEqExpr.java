@@ -56,17 +56,15 @@ final class LongEqExpr extends AbstractBinaryBooleanExpr {
   @Override
   public Expr create(Expr left, Expr right)
   {
-    //return new DoubleEqExpr(left, right);
-    return new LongEqExpr(left, right);
+    return new DoubleEqExpr(left, right);
   }
 
   @Override
   public final boolean isSelect(final QueryContext context)
     throws SQLException
   {
-    if (_left.isNull(context) || _right.isNull(context)) {
+    if (_left.isNull(context) || _right.isNull(context))
       return false;
-    }
 
     return (_left.evalLong(context) == _right.evalLong(context));
   }
@@ -75,16 +73,13 @@ final class LongEqExpr extends AbstractBinaryBooleanExpr {
   public final int evalBoolean(final QueryContext context)
     throws SQLException
   {
-    if (_left.isNull(context) || _right.isNull(context)) {
+    if (_left.isNull(context) || _right.isNull(context))
       return UNKNOWN;
-    }
 
-    if (_left.evalLong(context) == _right.evalLong(context)) {
+    if (_left.evalLong(context) == _right.evalLong(context))
       return TRUE;
-    }
-    else {
+    else
       return FALSE;
-    }
   }
 
   @Override

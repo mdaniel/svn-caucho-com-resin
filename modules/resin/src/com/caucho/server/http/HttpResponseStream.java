@@ -342,7 +342,7 @@ public class HttpResponseStream
   {
     AbstractHttpRequest request = _response.getRequest();
     WebApp webApp = request.getWebApp();
-
+    
     if (! isSendfileEnabled()
         || ! webApp.isSendfileEnabled()
         || (request.getResponseFacade().isCaching()

@@ -214,11 +214,9 @@ class BlobColumn extends Column {
       
       Inode inode = new Inode();
       inode.init(getTable(), xa, block, rowOffset + _columnOffset);
-      //xa.addDeleteInode(inode);
+      xa.addDeleteInode(inode);
       
       setNull(block, rowOffset);
-      
-      inode.remove();
     }
   }
 
@@ -275,15 +273,12 @@ class BlobColumn extends Column {
     byte []block = iter.getBuffer();
     int rowOffset = iter.getRowOffset();
 
-    if (expr.isNull(context)) {
+    if (expr.isNull(context))
       setNull(block, rowOffset);
-    }
-    else if (expr.isBinaryStream(context)) {
+    else if (expr.isBinaryStream(context))
       setStream(xa, block, rowOffset, expr.evalStream(context));
-    }
-    else {
+    else
       setString(xa, block, rowOffset, expr.evalString(context));
-    }
     
     iter.setDirty();
   }
@@ -297,25 +292,6 @@ class BlobColumn extends Column {
    */
   @Override
   void setExpr(DbTransaction xa,
-               byte []block, int rowOffset,
-               Expr expr, QueryContext context)
-    throws SQLException
-  {
-    /*
-    if (expr.isNull(context)) {
-      setNull(block, rowOffset);
-    }
-    else if (expr.isBinaryStream(context)) {
-      setStream(xa, block, rowOffset, expr.evalStream(context));
-    }
-    else {
-      setString(xa, block, rowOffset, expr.evalString(context));
-    }
-    */
-  }
-  
-  @Override
-  void setExprBlob(DbTransaction xa,
                byte []block, int rowOffset,
                Expr expr, QueryContext context)
     throws SQLException

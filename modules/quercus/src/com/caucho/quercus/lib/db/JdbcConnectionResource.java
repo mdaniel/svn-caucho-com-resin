@@ -97,35 +97,6 @@ public abstract class JdbcConnectionResource
   {
     env.addCleanup(this);
   }
-  
-  protected JdbcPreparedStatementResource prepare(Env env, String query)
-  {
-    JdbcPreparedStatementResource stmt = new JdbcPreparedStatementResource(this);
-    
-    stmt.prepare(env, query);
-    
-    return stmt;
-  }
-  
-  protected JdbcStatementResource createStatementResource(Env env)
-    throws SQLException
-  {
-    JdbcStatementResource stmt = new JdbcStatementResource(this);
-
-    return stmt;
-  }
-  
-  protected final JdbcStatementResource createStatement(Env env)
-    throws SQLException
-  {
-    JdbcStatementResource stmt = createStatementResource(env);
-    
-    Statement javaStmt = getJavaConnection(env).createStatement();
-    
-    stmt.setStatement(javaStmt);
-    
-    return stmt;
-  }
 
   protected String getDriverName()
   {
@@ -769,7 +740,7 @@ public abstract class JdbcConnectionResource
     return env.wrapJava(_rs);
   }
 
-  protected Statement createJavaStatement(Env env)
+  protected Statement createStatement(Env env)
     throws SQLException
   {
     Connection conn = getConnection(env);

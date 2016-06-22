@@ -119,15 +119,16 @@ public class DependencyComponent extends ClassComponent {
         }
 
         String fullPath = path.getFullPath();
-        
+
         String relativePath;
         if (fullPath.startsWith(pwd)) {
+          char separatorChar = Path.getFileSeparatorChar();
           int len = pwd.length();
-          
-          if (fullPath.charAt(len) == '/') {            
+
+          if (fullPath.charAt(len) == separatorChar) {
             relativePath = "." + fullPath.substring(len);
           }
-          else {            
+          else {
             relativePath = fullPath.substring(len);
           }
         }
@@ -140,7 +141,7 @@ public class DependencyComponent extends ClassComponent {
         out.println(depend.getDigest() + "L, "
                     + depend.getRequireSource() + ");");
       }
-      else {        
+      else {
         out.print("_caucho_depend[" + i + "] = ");
         out.print(dependency.getJavaCreateString());
         out.println(";");

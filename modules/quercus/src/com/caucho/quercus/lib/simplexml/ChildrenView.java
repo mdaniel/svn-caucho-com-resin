@@ -187,18 +187,6 @@ public class ChildrenView extends SimpleView
   {
     return _childList.size();
   }
-  
-  @Override
-  public boolean issetField(Env env, String name)
-  {
-    for (SimpleView child : _childList) {
-      if (child.getNodeName().equals(name)) {
-        return true;
-      }
-    }
-    
-    return false;
-  }
 
   @Override
   public List<SimpleView> xpath(Env env,

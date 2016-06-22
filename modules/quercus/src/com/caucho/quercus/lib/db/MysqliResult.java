@@ -977,7 +977,7 @@ public class MysqliResult extends JdbcResultResource {
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
-    
+
     if (encoding == null) {
       String value = rs.getString(column);
 

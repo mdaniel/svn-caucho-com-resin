@@ -110,12 +110,7 @@ class TableRowAllocator extends AbstractTaskWorker {
   {
     Lock blockLock = block.getWriteLock();
 
-    if (! blockLock.tryLock(xa.getTimeout(), TimeUnit.MILLISECONDS)) {
-      log.warning("Unable to lock allocate table: " + xa.getTimeout() + "ms");
-      
-      return -1;
-    }
-    
+    blockLock.tryLock(xa.getTimeout(), TimeUnit.MILLISECONDS);
     try {
       block.read();
 
@@ -301,7 +296,7 @@ class TableRowAllocator extends AbstractTaskWorker {
       int head = _insertFreeRowBlockHead.get();
       
       if (head == tail) {
-        allocateNewRows();
+        wake();
         return 0;
       }
     
@@ -315,7 +310,7 @@ class TableRowAllocator extends AbstractTaskWorker {
         int size = (head - tail + FREE_ROW_BLOCK_SIZE) % FREE_ROW_BLOCK_SIZE;
         
         if (2 * size < FREE_ROW_BLOCK_SIZE) {
-          allocateNewRows();
+          wake();
         }
         
         return blockId;
@@ -341,20 +336,10 @@ class TableRowAllocator extends AbstractTaskWorker {
         return;
     }
   }
-  
-  private void allocateNewRows()
-  {
-    // wake();
-    
-    synchronized (this) {
-      fillFreeRows();
-    }
-  }
 
   @Override
   public long runTask()
   {
-    if (true) { Thread.dumpStack(); return -1; }
     fillFreeRows();
       
     return -1;

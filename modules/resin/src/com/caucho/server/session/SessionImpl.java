@@ -857,10 +857,6 @@ public class SessionImpl implements HttpSession, CacheListener {
     else {
       log.warning("Invalid session load id=" + getId() + ", but loaded id=" + id);
       
-      synchronized (_values) {
-        _values.clear();
-      }
-      
       return false;
     }
   }
@@ -1111,7 +1107,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * This should never be called by Resin code (for logging purposes)
    */
   public void invalidate()
-  {    
+  {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " invalidate");
 
@@ -1124,10 +1120,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Called by the session manager for a session timeout
    */
   public void timeout()
-  {    
-    // server/12i7
-    //if (! isValid())
-    //  return;
+  {
+    if (! isValid())
+      return;
 
     if (! _manager.isPersistenceEnabled()) {
       // if no persistent store then invalidate
@@ -1154,10 +1149,10 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   @Override
   public void removeEvent()
-  {    
+  {
     synchronized (this) {
       if (_state.isInvalidating() || _useCount.get() <= 0) {
-        _state = _state.toLru();        
+        _state = _state.toLru();
       }
     }
 
@@ -1175,13 +1170,11 @@ public class SessionImpl implements HttpSession, CacheListener {
     // server/015k, server/10g2
     if (_state.isInvalidating()
         || _manager.isDestroyOnLru()
-        || _accessTime + getMaxInactiveInterval() < now) {      
+        || _accessTime + getMaxInactiveInterval() < now) {
       notifyDestroy();
     }
-    
+
     invalidateLocal();
-    
-    timeout();
   }
 
   private void notifyDestroy()
@@ -1191,16 +1184,16 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (_clusterObject != null && ! _clusterObject.isPrimary())
       return;
     */
-    
+
     ArrayList<HttpSessionListener> listeners = _manager.getListeners();
 
-    if (listeners != null) {      
+    if (listeners != null) {
       HttpSessionEvent event = new HttpSessionEvent(this);
 
       for (int i = listeners.size() - 1; i >= 0; i--) {
         HttpSessionListener listener;
         listener = (HttpSessionListener) listeners.get(i);
-        
+
         listener.sessionDestroyed(event);
       }
     }
@@ -1262,7 +1255,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Invalidates the session.
    */
   private void invalidate(Logout logout)
-  {    
+  {
     if (isClosed()) {
       throw new IllegalStateException(L.l("{0}: Can't call invalidate() when session is no longer valid.",
                                           this));
@@ -1334,13 +1327,13 @@ public class SessionImpl implements HttpSession, CacheListener {
    * unbinds the session and saves if necessary.
    */
   private void invalidateLocal()
-  {    
-    if (! isClosed() && ! _state.isInvalidating()) {      
-      if (_manager.isSaveOnlyOnShutdown()) {        
+  {
+    if (! isClosed() && ! _state.isInvalidating()) {
+      if (_manager.isSaveOnlyOnShutdown()) {
         save();
       }
     }
-    
+
     unbind(); // we're invalidating, not passivating
   }
 
@@ -1348,7 +1341,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Cleans up the session.
    */
   public void unbind()
-  {    
+  {
     if (_values.size() == 0) {
       return;
     }

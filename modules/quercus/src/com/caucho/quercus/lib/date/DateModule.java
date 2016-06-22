@@ -926,84 +926,51 @@ public class DateModule extends AbstractQuercusModule {
                                 Value dayV,
                                 Value yearV)
   {
-    int yearsToAdd = 0;
-    int monthsToAdd = 0;
-    int daysToAdd = 0;
-    
-    int hoursToAdd = 0;
-    int minsToAdd = 0;
-    
-    if (! secondV.isDefault()) {
-      int second = secondV.toInt();
-      
-      if (second < 0) {
-        minsToAdd = second / 60 - (second % 60 != 0 ? 1 : 0);
-        second = second % 60 + 60;
-      }
+    if (! hourV.isDefault()) {
+      int hour = hourV.toInt();
 
-      date.setSecond(second);
+      date.setHour(hour);
     }
-    
+
     if (! minuteV.isDefault()) {
-      int minute = minuteV.toInt() + minsToAdd;
-      
-      if (minute < 0) {
-        hoursToAdd = minute / 60 - (minute % 60 != 0 ? 1 : 0);
-        minute = minute % 60 + 60;
-      }
+      int minute = minuteV.toInt();
 
       date.setMinute(minute);
     }
-    
-    if (! hourV.isDefault()) {
-      int hour = hourV.toInt() + hoursToAdd;
 
-      if (hour < 0) {
-        daysToAdd = hour / 24 - (hour % 24 != 0 ? 1 : 0);
-        hour = hour % 24 + 24;
-      }
-      
-      date.setHour(hour);
-    }    
-    
+    if (! secondV.isDefault()) {
+      int second = secondV.toInt();
+
+      date.setSecond(second);
+    }
+
+    if (! monthV.isDefault()) {
+      int month = monthV.toInt();
+
+      date.setMonth(month - 1);
+    }
+
     if (! dayV.isDefault()) {
-      int day = dayV.toInt() + daysToAdd;
-      
-      if (day <= 0) {
-        monthsToAdd = day / 30 - 1;
-        day = day % 30 + 30;
-      }
+      int day = dayV.toInt();
 
       date.setDayOfMonth(day);
     }
 
-    if (! monthV.isDefault()) {
-      int month = monthV.toInt() + monthsToAdd;
-
-      if (month <= 0) {
-        yearsToAdd = month / 12 - 1;
-        month = month % 12 + 12;
-      }
-
-      date.setMonth(month - 1);
-    }
-    
     if (! yearV.isDefault()) {
-      int year = yearV.toInt() + yearsToAdd;
+      int year = yearV.toInt();
 
       if (year >= 1000) {
+        date.setYear(year);
       }
       else if (year >= 70) {
-        year += 1900;
+        date.setYear(year + 1900);
       }
       else if (year >= 0) {
-        year += 2000;
+        date.setYear(year + 2000);
       }
       else if (year < 0) {
-        year = 1969;
+        date.setYear(1969);
       }
-            
-      date.setYear(year);
     }
   }
 

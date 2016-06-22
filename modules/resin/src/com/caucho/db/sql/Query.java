@@ -266,9 +266,8 @@ abstract public class Query {
       for (int i = 0; i < _whereExprs.length; i++) {
         Expr expr = _whereExprs[i];
 
-        if (expr != null) {
+        if (expr != null)
           _whereExprs[i] = expr.bind(this);
-        }
       }
     }
     else if (_fromItems != null) {
@@ -330,7 +329,7 @@ abstract public class Query {
 
       _initRowArray[i] = initRow;
     }
-    
+
     _initRow = initRow;
   }
 
@@ -416,7 +415,7 @@ abstract public class Query {
       whereExprs[i] = expr;
     }
 
-    setWhereExprs(whereExprs);
+    _whereExprs = whereExprs;
 
     if (log.isLoggable(Level.FINEST)) {
       log.finest("where-" + (whereExprs.length - 1) +  ": static " + whereExprs[whereExprs.length - 1]);
@@ -430,7 +429,7 @@ abstract public class Query {
       }
     }
   }
-  
+
   private void orderFromItems(ArrayList<FromItem> costItems,
                               ArrayList<Expr> topAndProduct)
   {

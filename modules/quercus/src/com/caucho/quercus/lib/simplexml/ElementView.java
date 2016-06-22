@@ -538,22 +538,6 @@ public class ElementView extends SimpleView
 
     return count;
   }
-  
-  @Override
-  public boolean issetField(Env env, String name)
-  {    
-    Node child = _node.getFirstChild();
-    
-    while (child != null) {
-      if (child.getNodeName().equals(name)) {
-        return true;
-      }
-      
-      child = child.getNextSibling();
-    }
-    
-    return false;
-  }
 
   @Override
   public String toString(Env env)

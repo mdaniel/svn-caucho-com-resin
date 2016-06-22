@@ -83,8 +83,7 @@ public class AbstractCacheEngine implements CacheEngine
   public void put(HashKey key, 
                   HashKey cacheKey,
                   MnodeUpdate mnodeUpdate,
-                  long valueDataId,
-                  long valueDataTime)
+                  long valueDataId)
   {
   }
 
@@ -104,8 +103,7 @@ public class AbstractCacheEngine implements CacheEngine
   public boolean compareAndPut(DistCacheEntry entry,
                                long testValue,
                                MnodeUpdate mnodeUpdate,
-                               long valueDataId,
-                               long valueDataTime)
+                               long valueDataId)
   {
     return false;
   }
@@ -113,8 +111,7 @@ public class AbstractCacheEngine implements CacheEngine
   @Override
   public InputStream getAndPut(DistCacheEntry entry, 
                                MnodeUpdate mnodeValue,
-                               long valueDataId,
-                               long valueDataTime)
+                               long valueDataId)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

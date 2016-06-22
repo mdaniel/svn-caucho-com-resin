@@ -84,17 +84,15 @@ public class HttpsConnection
     
     if (conn instanceof HttpsURLConnection) {
       httpsConn = (HttpsURLConnection) conn;
-      
-      if (! curl.getIsVerifySSLPeer()
-          || ! curl.getIsVerifySSLCommonName()
-          || ! curl.getIsVerifySSLHostname()) {
-        HostnameVerifier hostnameVerifier
-          = CurlHostnameVerifier.create(curl.getIsVerifySSLPeer(),
-                                        curl.getIsVerifySSLCommonName(),
-                                        curl.getIsVerifySSLHostname());
-        
-        httpsConn.setHostnameVerifier(hostnameVerifier);
-      }
+    }
+
+    HostnameVerifier hostnameVerifier
+      = CurlHostnameVerifier.create(curl.getIsVerifySSLPeer(),
+                                    curl.getIsVerifySSLCommonName(),
+                                    curl.getIsVerifySSLHostname());
+    
+    if (httpsConn != null) {
+      httpsConn.setHostnameVerifier(hostnameVerifier);
     }
 
     setConnection(conn);
