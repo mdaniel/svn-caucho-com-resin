@@ -77,11 +77,5 @@ class StringTest extends PHPUnit_Framework_TestCase
 		$uncompressed = gzuncompress($compressed);
 		$this->assertTrue($testString === $uncompressed, "$testString !== $uncompressed");
 	}
-	
-	public function testFailing()
-	{
-		$this->assertTrue(false);
-	}
-	
 }
 ?>

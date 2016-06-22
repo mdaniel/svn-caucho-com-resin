@@ -32,10 +32,5 @@ class EncodingTest extends PHPUnit_Framework_TestCase
     	unlink($tmpfname2);
     	$this->assertEquals($string, $read2, "$string should have been returned, but it was: $read2");
     }
-    
-    public function testFailing()
-    {
-    	$this->assertTrue(false);
-    }
 }
 ?>

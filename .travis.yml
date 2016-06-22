@@ -4,7 +4,7 @@ addons:
     packages:
     - php5-cli
 before_script:
- - cd modules/quercus/php-tests; wget http://getcomposer.org/composer.phar; php composer.phar install --prefer-source
+ - cd modules/quercus/php-tests; wget http://getcomposer.org/composer.phar; php composer.phar install
  - cd ../../..
 script:
  - ant quercus.war
