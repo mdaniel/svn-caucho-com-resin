@@ -1,4 +1,8 @@
 language: java
+addons:
+  apt:
+    packages:
+    - php5-cli
 before_script:
  - cd modules/quercus/php-tests; wget http://getcomposer.org/composer.phar; php composer.phar install --prefer-source
 script:
