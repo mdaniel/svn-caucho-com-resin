@@ -1308,7 +1308,7 @@ element connection-error-page {
 
 <defun title="&lt;connection-wait-time>" version="Resin 4.0" name="connection-wait-time">
 <parents>database</parents>
-<default>10m</default>
+<default>30s</default>
 
 <description>
 <p>&lt;connection-wait-time> configures the time a <code>getConnection</code>
@@ -1543,7 +1543,7 @@ setting the transaction-isolation.</td>
   <td>connection-wait-time</td>
   <td>When max-connections has been reached, how long Resin will wait for
 a connection to become idle before giving up.</td>
-  <td>10min</td>
+  <td>30s</td>
 </tr>
 <tr>
   <td>driver</td>
@@ -1572,7 +1572,7 @@ close when the Connection closes.</td>
 <tr>
   <td>max-connections</td>
   <td>The maximum number of Connections allowed.</td>
-  <td>128</td>
+  <td>1024</td>
 </tr>
 <tr>
   <td>max-create-connections</td>
@@ -1587,12 +1587,12 @@ close when the Connection closes.</td>
 <tr>
   <td>max-idle-time</td>
   <td>The maximum time a connection will spend in the idle pool before closing.</td>
-  <td>30s</td>
+  <td>60s</td>
 </tr>
 <tr>
   <td>max-overflow-connections</td>
   <td>The number of extra connection creation if the number of connections exceeds to pool size.</td>
-  <td>0</td>
+  <td>1024</td>
 </tr>
 <tr>
   <td>max-pool-time</td>
@@ -7733,7 +7733,7 @@ implementing the <code>java.sql.Driver</code> interface.</p>
 
 <defun title="&lt;max-connections>" name="max-connections" version="Resin 3.1">
 <parents>database</parents>
-<default>128</default>
+<default>1024</default>
 
 <description>
 <p>&lt;max-connections> configures the maximum number of
@@ -7761,7 +7761,7 @@ has succeeded, a new connection can proceed.</p>
 
 <defun title="&lt;max-idle-time>" name="max-idle-time" version="Resin 3.1">
 <parents>database</parents>
-<default>30s</default>
+<default>60s</default>
 
 <description>
 <p>&lt;max-idle-time> configures the maximum time a connection
@@ -7777,7 +7777,7 @@ more quickly.</p>
 
 <defun title="&lt;max-overflow-connections>" name="max-overflow-connections" version="Resin 3.1">
 <parents>database</parents>
-<default>0</default>
+<default>1024</default>
 
 <description>
 <p>&lt;max-overflow-connections> extends &lt;connection-max> temporarily
