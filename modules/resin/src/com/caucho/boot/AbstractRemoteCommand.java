@@ -91,6 +91,12 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
       password = client.getClusterSystemKey();
     }
     
+    String serverId = args.getServerId();
+    if (client.getId().equals(serverId)) {
+      address = client.getAddress();
+      port = client.getPort();
+    }
+    
     return createBamClient(client, address, port, user, password);
   }
   

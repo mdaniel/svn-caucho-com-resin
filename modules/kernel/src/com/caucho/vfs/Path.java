@@ -1245,6 +1245,11 @@ public abstract class Path implements Comparable<Path> {
   {
     return null;
   }
+  
+  public FileChannelFactory fileChannelFactory()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Opens a random-access stream.
@@ -1261,11 +1266,6 @@ public abstract class Path implements Comparable<Path> {
   {
     clearStatusCache();
 
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public FileChannel openFileChannel(OpenOption... options) throws IOException
-  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
@@ -1678,6 +1678,11 @@ public abstract class Path implements Comparable<Path> {
       this.list = list;
       index = 0;
     }
+  }
+  
+  public interface FileChannelFactory
+  {
+    FileChannel openFileChannel(OpenOption ...options) throws IOException;
   }
 
   static class PathKey {

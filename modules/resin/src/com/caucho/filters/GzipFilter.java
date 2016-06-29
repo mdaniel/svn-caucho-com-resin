@@ -112,7 +112,7 @@ public class GzipFilter implements Filter {
     throws ServletException
   {
     _app = config.getServletContext();
-    _embedError = "true".equals(config.getInitParameter("embed-error-in-output"));
+    _embedError = ! "false".equals(config.getInitParameter("embed-error-in-output"));
     String value = config.getInitParameter("use-vary");
 
     if (value == null) {

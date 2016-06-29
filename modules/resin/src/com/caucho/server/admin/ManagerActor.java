@@ -375,6 +375,9 @@ public class ManagerActor extends SimpleActor
     if (query.getSamplePeriod() > 0)
       action.setProfileTick(query.getSamplePeriod());
 
+    if (query.getServerId() != null)
+      action.setServerId(query.getServerId());
+
     if (query.getReport() != null)
       action.setReport(query.getReport());
     

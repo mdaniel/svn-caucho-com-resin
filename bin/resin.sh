@@ -39,8 +39,6 @@ if test -z "${RESIN_HOME}"; then
   RESIN_HOME="$bin/.."
 fi
 
-if test -n "${RESIN_HOME}"; then
-  cd "${RESIN_HOME}"
-fi  
+cd "${RESIN_HOME}"
 
-exec $JAVA_EXE -jar ${RESIN_HOME}/lib/resin.jar $*
+exec $JAVA_EXE -jar lib/resin.jar $@

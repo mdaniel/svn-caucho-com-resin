@@ -81,6 +81,7 @@ public class PdfReportCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
+    String serverId = args.getArg("-server");
     String path = args.getArg("-path");
     
     String report = args.getArg("-report");
@@ -120,6 +121,7 @@ public class PdfReportCommand extends AbstractManagementCommand
 
     PdfReportQueryReply result = managerClient.pdfReport(path,
                                                          report,
+                                                         serverId,
                                                          period,
                                                          logDirectory,
                                                          profileTime,

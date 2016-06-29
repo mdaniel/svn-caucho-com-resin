@@ -728,8 +728,10 @@
         <include name="lib/${eclipselink.jar}"/>
         <include name="lib/resin-eclipselink.jar"/>
 
+        <!--
         <include name="lib/hibernate-validator-4.3.0.Final.jar"/>
         <include name="lib/jboss-logging-3.1.0.CR2.jar"/>
+        -->
 
         <include name="lib/javamail-141.jar"/>
         <include name="lib/javamail-14.LICENSE"/>
@@ -777,16 +779,14 @@
       </fileset>
     </copy>
 
-      <!--
     <copy todir="${dist.build}/webapp-jars"
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${resindir}/lib">
-        <include name="slf4j-api-1.6.6.jar"/>
-        <include name="hibernate-validator-4.0.2.GA.jar"/>
+        <include name="hibernate-validator-4.3.0.Final.jar"/>
+        <include name="jboss-logging-3.1.0.CR2.jar"/>
       </fileset>
     </copy>
-      -->
 
     <copy todir="${dist.build}/ext-lib"
           preservelastmodified="true"

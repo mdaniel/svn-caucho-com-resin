@@ -28,16 +28,18 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.ByteBuffer;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 /*
  * A stream for reading multipart/mime files.
@@ -55,6 +57,8 @@ import java.util.Locale;
  */
 public class MultipartStream extends StreamImpl {
   private static final L10N L = new L10N(MultipartStream.class);
+  private static final Logger log = Logger.getLogger(MultipartStream.class.getName())
+      ;
   private ByteBuffer _boundary = new ByteBuffer();
   private byte []_boundaryBuffer;
   private int _boundaryLength;
@@ -73,7 +77,8 @@ public class MultipartStream extends StreamImpl {
   private boolean _isComplete;
   private HashMap<String, List<String>> _headers
     = new HashMap<String, List<String>>();
-  private CharBuffer _line = new CharBuffer();
+  //private CharBuffer _line = new CharBuffer();
+  private ByteToChar _line = new ByteToChar();
   private long _maxLength = 256 * 1024;
 
   private String _defaultEncoding;
@@ -106,6 +111,12 @@ public class MultipartStream extends StreamImpl {
   public void setEncoding(String encoding)
   {
     _defaultEncoding = encoding;
+    
+    try {
+      _line.setEncoding(encoding);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
   }
 
   /**
@@ -234,11 +245,11 @@ public class MultipartStream extends StreamImpl {
     while (ch > 0 && ch != '\n' && ch != '\r') {
       _line.clear();
 
-      _line.append((char) ch);
+      _line.addByte(ch);
       for (ch = read();
            ch >= 0 && ch != '\n' && ch != '\r';
            ch = read()) {
-        _line.append((char) ch);
+        _line.addByte(ch);
         
         if (_maxLength < length++)
           throw new IOException(L.l("header length {0} exceeded.", _maxLength));
@@ -247,18 +258,21 @@ public class MultipartStream extends StreamImpl {
       if (ch == '\r') {
         if ((ch = read()) == '\n')
           ch = read();
-      } else if (ch == '\n')
+      } else if (ch == '\n') {
         ch = read();
+      }
+      
+      String line = _line.getConvertedString();
 
       int i = 0;
-      for (; i < _line.length() && _line.charAt(i) != ':'; i++) {
+      for (; i < line.length() && line.charAt(i) != ':'; i++) {
       }
 
       String key = null;
       String value = null;
-      if (i < _line.length()) {
-        key = _line.substring(0, i).trim().toLowerCase(Locale.ENGLISH);
-        value = _line.substring(i + 1).trim();
+      if (i < line.length()) {
+        key = line.substring(0, i).trim().toLowerCase(Locale.ENGLISH);
+        value = line.substring(i + 1).trim();
 
         List<String> values = _headers.get(key);
 

@@ -307,6 +307,7 @@ public class ManagerClient
 
   public PdfReportQueryReply pdfReport(String path,
                                         String report,
+                                        String serverId,
                                         long period,
                                         String logDirectory,
                                         long profileTime,
@@ -317,6 +318,7 @@ public class ManagerClient
   {
     PdfReportQuery query = new PdfReportQuery(path,
                                               report,
+                                              serverId,
                                               period,
                                               logDirectory,
                                               profileTime,

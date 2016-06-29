@@ -408,7 +408,7 @@ public class TcpPort
 
       log.log(Level.FINER, e.toString(), e);
 
-      throw new ConfigException(L.l("<openssl> requires Resin Professional.  See http://www.caucho.com for more information."),
+      throw new ConfigException(L.l("<openssl> requires Resin Professional. See http://www.caucho.com for more information."),
                                 e);
     }
   }
@@ -1104,6 +1104,8 @@ public class TcpPort
     if (_throttle == null)
       _throttle = new Throttle();
 
+    boolean isEnableJni = _isEnableJni && ! CauchoSystem.isWindows();
+    
     if (_serverSocket != null) {
       if (_address != null)
         log.info("listening to " + _address + ":" + _serverSocket.getLocalPort());
@@ -1131,13 +1133,13 @@ public class TcpPort
     else if (_socketAddress != null) {
       _serverSocket = system.openServerSocket(_socketAddress, _port,
                                               _acceptListenBacklog,
-                                              _isEnableJni);
+                                              isEnableJni);
 
       log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _serverSocket.getLocalPort());
     }
     else {
       _serverSocket = system.openServerSocket(null, _port, _acceptListenBacklog,
-                                              _isEnableJni);
+                                              isEnableJni);
 
       log.info(_protocol.getProtocolName() + " listening to *:"
                + _serverSocket.getLocalPort());

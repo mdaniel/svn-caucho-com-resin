@@ -669,18 +669,9 @@ public class FilePath extends FilesystemPath {
   }
 
   @Override
-  public FileChannel openFileChannel(OpenOption... options) throws IOException
+  public FileChannelFactory fileChannelFactory()
   {
-    try {
-      java.nio.file.Path jdkPath;
-      
-      jdkPath = (java.nio.file.Path) _toPath.invoke(getFile());
-      return (FileChannel) _fileChannelOpen.invoke(null, jdkPath, options);
-    } catch (Exception e) {
-      log.finer(e.toString());
-      
-      return null;
-    }
+    return new FileChannelFactoryImpl();
   }
   
   @Override
@@ -754,6 +745,25 @@ public class FilePath extends FilesystemPath {
       return true;
 
     return false;
+  }
+  
+  private class FileChannelFactoryImpl implements FileChannelFactory
+  {
+    @Override
+    public FileChannel openFileChannel(OpenOption... options) throws IOException
+    {
+      try {
+        java.nio.file.Path jdkPath;
+      
+        jdkPath = (java.nio.file.Path) _toPath.invoke(getFile());
+        
+        return (FileChannel) _fileChannelOpen.invoke(null, jdkPath, options);
+      } catch (Exception e) {
+        log.finer(e.toString());
+      
+        return null;
+      }
+    }
   }
   
   static {

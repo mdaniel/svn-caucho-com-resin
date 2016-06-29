@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.JniUtil;

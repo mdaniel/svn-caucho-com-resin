@@ -120,8 +120,9 @@ abstract public class JarListLoader extends Loader implements Dependency {
   {
     super.init();
 
-    for (int i = 0; i < _jarList.size(); i++)
+    for (int i = 0; i < _jarList.size(); i++) {
       getClassLoader().addURL(_jarList.get(i).getJarPath());
+    }
   }
 
   protected boolean isJarCacheEnabled()
@@ -150,6 +151,13 @@ abstract public class JarListLoader extends Loader implements Dependency {
     }
 
     JarPath jarPath = JarPath.create(jar);
+    
+    try {
+      jarPath.getCertificates();
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+    
     JarEntry jarEntry = new JarEntry(jarPath);
 
     if (getClassLoader() != null) {

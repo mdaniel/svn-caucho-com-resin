@@ -90,7 +90,15 @@ function mbean_init()
 
   $g_mbean_server = new MBeanServer();
 
-  $server = server_find_by_index($g_mbean_server, $server_index);
+  if ($server_index) {
+    $server = server_find_by_index($g_mbean_server, $server_index);
+  }
+  else if ($g_server_id) {
+    $server = server_find_by_id($g_mbean_server, $g_server_id);
+  }
+  else {
+    $server = server_find_by_index($g_mbean_server, $server_index);
+  }
 
   if ($server) {
     $g_server_index = $server->ClusterIndex;

@@ -156,7 +156,8 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
                                 _path.getNativePath()));
     }
     
-    _channel = _path.openFileChannel(StandardOpenOption.CREATE, 
+    _channel = _path.fileChannelFactory()
+                    .openFileChannel(StandardOpenOption.CREATE, 
                                      StandardOpenOption.WRITE,
                                      StandardOpenOption.READ);
     
@@ -175,7 +176,8 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
     throws IOException
   {
     if (_channel == null) {
-      _channel = _path.openFileChannel(StandardOpenOption.CREATE,
+      _channel = _path.fileChannelFactory()
+                      .openFileChannel(StandardOpenOption.CREATE,
                                        StandardOpenOption.WRITE,
                                        StandardOpenOption.READ);
     }

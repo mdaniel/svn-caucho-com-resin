@@ -649,7 +649,7 @@ time before trying a new connection (15s).</li>
 <li><b>load-balance-socket-timeout</b>: the load balancer
 timeout for a valid request to complete (665s).</li>
 <li><b>keepalive-timeout</b>: the app-tier timeout for a keepalive
-connection (15s)</li>
+connection</li>
 <li><b>socket-timeout</b>: the app-tier timeout for a read or
 write (65s)</li>
 </ul>

@@ -96,6 +96,11 @@ public class PdfReportAction implements AdminAction
     _report = report;
   }
 
+  public void setServerId(String serverId)
+  {
+    _serverId = serverId;
+  }
+
   public String getTitle()
   {
     return _title;
@@ -260,13 +265,18 @@ public class PdfReportAction implements AdminAction
   public void init()
   {
     Resin resin = Resin.getCurrent();
+    
     if (resin != null) {
-      _serverId = resin.getServerId();
+      if (_serverId == null) {
+        _serverId = resin.getServerId();
+      }
 
       if (_logDirectory == null)
         _logPath = resin.getLogDirectory();
     } else {
-      _serverId = "unknown";
+      if (_serverId == null) {
+        _serverId = "unknown";
+      }
 
       if (_logDirectory == null)
         _logPath = Vfs.getPwd();
@@ -402,6 +412,11 @@ public class PdfReportAction implements AdminAction
 
       env = _quercus.createEnv(page, ws, qRequest, qResponse);
       //env.setGlobalValue("health_service", env.wrapJava(healthService));
+      
+      if (_serverId != null && ! _serverId.equals("unknown")) {
+        env.setGlobalValue("g_server_id", env.wrapJava(_serverId));
+      }
+
       env.setGlobalValue("g_report", env.wrapJava(calculateReport()));
       env.setGlobalValue("g_title", env.wrapJava(calculateTitle()));
       env.setGlobalValue("period", env.wrapJava(calculatePeriod() / 1000));

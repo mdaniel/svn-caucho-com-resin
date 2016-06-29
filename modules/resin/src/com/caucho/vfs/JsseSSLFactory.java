@@ -52,6 +52,7 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -342,7 +343,15 @@ public class JsseSSLFactory implements SSLFactory {
     }
 
     if (_protocols != null) {
-      sslServerSocket.setEnabledProtocols(_protocols);
+      try {
+        sslServerSocket.setEnabledProtocols(_protocols);
+      } catch (Exception e) {
+        throw ConfigException.create(L.l("Invalid protocols '{0}', expected from list '{1}'\n  {2}",
+                                  Arrays.asList(_protocols),
+                                  Arrays.asList(sslServerSocket.getSupportedProtocols()),
+                                  e.toString()),
+                              e);
+      }
     }
     
     if ("required".equals(_verifyClient))

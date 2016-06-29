@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import java.io.IOException;
 
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.JniUtil;
 
@@ -69,7 +70,7 @@ public class JniFileStream extends StreamImpl
 
   public static boolean isEnabled()
   {
-    return _jniTroubleshoot.isEnabled();
+    return _jniTroubleshoot.isEnabled() && CauchoSystem.isWindows();
   }
   
   public static Throwable getDisableCause()

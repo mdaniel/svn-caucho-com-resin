@@ -66,6 +66,9 @@ public class HttpProxyServlet extends GenericServlet
     }
     
     _loadBalanceBuilder = loadBalanceService.createBuilder();
+    
+    // lower default idle time
+    setIdleTime(new Period(2000));
   }
   
   public void addHost(String host)

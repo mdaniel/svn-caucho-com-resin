@@ -1853,7 +1853,7 @@ to launch the JVM</td>
 <tr>
   <td>keepalive-max</td>
   <td>The maximum keepalives enabled at one time.</td>
-  <td>128</td>
+  <td></td>
 </tr>
 <tr>
   <td>keepalive-select-enable</td>
@@ -1863,7 +1863,7 @@ to launch the JVM</td>
 <tr>
   <td>keepalive-timeout</td>
   <td>Timeout for a keepalive to wait for a new request</td>
-  <td>15s</td>
+  <td>120s</td>
 </tr>
 <tr>
   <td>load-balance-connect-timeout</td>

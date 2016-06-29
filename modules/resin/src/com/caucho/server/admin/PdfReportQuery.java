@@ -41,6 +41,7 @@ public class PdfReportQuery implements java.io.Serializable
   private boolean _isSnapshot;
   private boolean _isWatchdog;
   private boolean isReturnPdf;
+  private String _serverId;
   
   public PdfReportQuery()
   {
@@ -48,6 +49,7 @@ public class PdfReportQuery implements java.io.Serializable
 
   public PdfReportQuery(String path,
                         String report,
+                        String serverId,
                         long period,
                         String logDirectory,
                         long profileTime,
@@ -58,6 +60,7 @@ public class PdfReportQuery implements java.io.Serializable
   {
     _path = path;
     _report = report;
+    _serverId = serverId;
     _period = period;
     _logDirectory = logDirectory;
     _profileTime = profileTime;
@@ -85,6 +88,11 @@ public class PdfReportQuery implements java.io.Serializable
   public void setReport(String report)
   {
     _report = report;
+  }
+  
+  public String getServerId()
+  {
+    return _serverId;
   }
   
   public long getPeriod()
