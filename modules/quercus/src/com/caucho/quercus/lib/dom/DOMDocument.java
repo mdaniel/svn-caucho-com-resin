@@ -70,6 +70,7 @@ public class DOMDocument
     = Logger.getLogger(DOMDocument.class.getName());
 
   private String _encoding;
+  private boolean _isPrettyPrint;
 
   DOMDocument(DOMImplementation impl, Document document)
   {
@@ -284,7 +285,7 @@ public class DOMDocument
 
   public boolean getFormatOutput()
   {
-    throw new UnimplementedException();
+    return _isPrettyPrint;
   }
 
   public DOMImplementation getImplementation()
@@ -590,6 +591,10 @@ public class DOMDocument
 
       Document document = (Document) delegate._delegate;
       printer.setVersion(document.getXmlVersion());
+      
+      if (_isPrettyPrint) {
+        printer.setPretty(true);
+      }
 
       if (document.getXmlStandalone()) {
         printer.setStandalone("yes");
@@ -724,7 +729,7 @@ public class DOMDocument
 
   public void setFormatOutput(boolean formatOutput)
   {
-    throw new UnimplementedException();
+    _isPrettyPrint = formatOutput;
   }
 
   public void setPreserveWhiteSpace(boolean preserveWhiteSpace)
