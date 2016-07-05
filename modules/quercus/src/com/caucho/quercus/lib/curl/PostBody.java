@@ -62,7 +62,14 @@ abstract public class PostBody
       post = new MultipartBody(env, data);
     }
     else {
-      post = new UrlEncodedBody(env, data);
+      UrlEncodedBody body = new UrlEncodedBody(env, data);
+      post = body;
+      
+      String contentType = curl.getContentType();
+      
+      if (contentType != null) {
+        body.setContentType(contentType);
+      }
     }
 
     if (post.isValid()) {

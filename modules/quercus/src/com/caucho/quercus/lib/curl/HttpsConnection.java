@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,15 +29,17 @@
 
 package com.caucho.quercus.lib.curl;
 
-import com.caucho.quercus.QuercusModuleException;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.*;
-
+import java.net.ConnectException;
+import java.net.ProtocolException;
+import java.net.Proxy;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+ 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 /**
@@ -46,31 +48,18 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 public class HttpsConnection
   extends CurlHttpConnection
 {
-  protected HttpsConnection(URL url,
-                            String username,
-                            String password)
+  public HttpsConnection(URL url,
+                          String username,
+                          String password)
     throws IOException
   {
     super(url, username, password);
-  }
-
-  public HttpsConnection(URL url,
-                         String username,
-                         String password,
-                         URL proxyURL,
-                         String proxyUsername,
-                         String proxyPassword,
-                         String proxyType)
-    throws IOException
-  {
-    super(url, username, password,
-          proxyURL, proxyUsername, proxyPassword, proxyType);
   }
   
   @Override
   protected void init(CurlResource curl)
     throws IOException
-  {
+  { 
     Proxy proxy = getProxy();
 
     URLConnection conn;
@@ -81,13 +70,37 @@ public class HttpsConnection
       conn = getURL().openConnection(proxy);
     else
       conn = getURL().openConnection();
-    
+        
     if (conn instanceof HttpsURLConnection) {
       httpsConn = (HttpsURLConnection) conn;
+      
+      System.err.println("HttpsConnection.init0");
+      
+      if (curl.getSslKey() != null && curl.getSslCert() != null) {
+        System.err.println("HttpsConnection.init1");
+        httpsConn.setSSLSocketFactory(createSSLContext(curl).getSocketFactory());
+      }
+      else if (! curl.getIsVerifySSLPeer()) {
+        System.err.println("HttpsConnection.init2");
+
+        httpsConn.setSSLSocketFactory(createSSLContextUntrusted(curl).getSocketFactory());
+      }
+      else if (curl.getCaInfo() != null) {
+        System.err.println("HttpsConnection.init3");
+
+        httpsConn.setSSLSocketFactory(createSSLContextCaInfo(curl).getSocketFactory());
+      }
+      else {
+        httpsConn.setSSLSocketFactory(createSSLContextDefault(curl).getSocketFactory());
+      }
+      
+      System.err.println("HttpsConnection.init4");
       
       if (! curl.getIsVerifySSLPeer()
           || ! curl.getIsVerifySSLCommonName()
           || ! curl.getIsVerifySSLHostname()) {
+        System.err.println("HttpsConnection.init5");
+        
         HostnameVerifier hostnameVerifier
           = CurlHostnameVerifier.create(curl.getIsVerifySSLPeer(),
                                         curl.getIsVerifySSLCommonName(),
@@ -95,29 +108,124 @@ public class HttpsConnection
         
         httpsConn.setHostnameVerifier(hostnameVerifier);
       }
+      
+      System.err.println("HttpsConnection.init6");
     }
+    
+    System.err.println("HttpsConnection.init7");
 
     setConnection(conn);
+    
+    System.err.println("HttpsConnection.init8");
   }
   
   /**
    * Connects to the server.
    */
-  /*
   @Override
   public void connect(CurlResource curl)
-    throws ConnectException, ProtocolException, SocketTimeoutException,
-            IOException
+    throws ConnectException, ProtocolException, SocketTimeoutException, IOException
   {
     try {
-      super.connect(curl);
+      System.err.println("HttpsConnection.connect0");
       
-      ((HttpsURLConnection)getConnection()).getServerCertificates();
+      super.connect(curl);
+
+      System.err.println("HttpsConnection.connect1");
+
+      
+      ((HttpsURLConnection) getConnection()).getServerCertificates();
+      
+      System.err.println("HttpsConnection.connect2");
+
     }
     catch (SSLPeerUnverifiedException e) {
-      if (curl.getIsVerifySSLPeer())
+      if (curl.getIsVerifySSLPeer()) {
+        e.printStackTrace();
         throw e;
+      }
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+      
+      throw e;
     }
   }
-  */
+  
+  private static SSLContext createSSLContextCaInfo(CurlResource curl)
+    throws IOException
+  {
+    String algorithm = curl.getSslVersion();
+    String certFile = curl.getCaInfo();
+    
+    try {
+      return CurlSSLContextFactory.createCaInfo(algorithm, certFile);
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+      throw e;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+
+      throw new IOException(e);
+    }
+  }
+  
+  private static SSLContext createSSLContext(CurlResource curl)
+    throws IOException
+  {
+    String algorithm = curl.getSslVersion();
+
+    String keyPass = curl.getSslKeyPassword();
+    String certFile = curl.getSslCert();
+    String keyFile = curl.getSslKey();
+    
+    try {
+      SSLContext context = CurlSSLContextFactory.create(certFile, keyFile, keyPass, algorithm);
+      
+      return context;
+    }
+    catch (IOException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+  
+  private static SSLContext createSSLContextUntrusted(CurlResource curl)
+    throws IOException
+  {
+    try {
+      String algorithm = curl.getSslVersion();
+      
+      SSLContext context = CurlSSLContextFactory.createUntrusted(algorithm);
+      
+      return context;
+    }
+    catch (IOException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+  
+  private static SSLContext createSSLContextDefault(CurlResource curl)
+    throws IOException
+  {
+    try {
+      String algorithm = curl.getSslVersion();
+      
+      SSLContext context = SSLContext.getInstance(algorithm);
+      
+      context.init(null, null, null);
+      
+      return context;
+    }
+    catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
 }

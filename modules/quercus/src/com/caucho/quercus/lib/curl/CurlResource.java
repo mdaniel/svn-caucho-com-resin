@@ -85,8 +85,8 @@ public class CurlResource extends ResourceValue
   private boolean _failOnError = false;
   private boolean _isVerbose = false;
 
-  private int _readTimeoutMs = -1;
-  private int _connectTimeoutMs = -1;
+  private int _readTimeoutMs = getDefaultReadTimeout();
+  private int _connectTimeoutMs = getDefaultConnectTimeout();
 
   private HashMap<String,String> _requestProperties
     = new HashMap<String, String>();
@@ -113,8 +113,102 @@ public class CurlResource extends ResourceValue
   private Callable _readCallback;
   private Callable _writeCallback;
 
+  private String _sslVersion;
+  private String _sslCert;
+  private String _sslKey;
+  private String _sslKeyPassword;
+  private String _sslCertPassword;
+  
+  private String _caInfoFile;
+  
   public CurlResource()
   {
+  }
+  
+  private static int getDefaultConnectTimeout()
+  {
+    try {
+      return Integer.getInteger("sun.net.client.defaultConnectTimeout", -1);
+    }
+    catch (Exception e) {
+      return -1;
+    }
+  }
+  
+  private static int getDefaultReadTimeout()
+  {
+    try {
+      return Integer.getInteger("sun.net.client.defaultReadTimeout", -1);
+    }
+    catch (Exception e) {
+      return -1;
+    }
+  }
+  
+  public String getCaInfo()
+  {
+    return _caInfoFile;
+  }
+  
+  public void setCaInfo(String file)
+  {
+    _caInfoFile = file;
+  }
+  
+  public String getSslVersion()
+  {
+    String version = _sslVersion;
+    
+    if (version == null) {
+      version = "TLSv1";
+    }
+    
+    return version;
+  }
+ 
+  public void setSslVersion(String sslVersion)
+  {
+    _sslVersion = sslVersion;
+  }
+
+  public String getSslCert()
+  {
+    return _sslCert;
+  }
+
+  public void setSslCert(String sslCert)
+  {
+    _sslCert = sslCert;
+  }
+
+  public String getSslKey()
+  {
+    return _sslKey;
+  }
+
+  public void setSslKey(String sslKey)
+  {
+    _sslKey = sslKey;
+  }
+
+  public String getSslKeyPassword()
+  {
+    return _sslKeyPassword;
+  }
+
+  public void setSslKeyPassword(String sslKeyPassword)
+  {
+    _sslKeyPassword = sslKeyPassword;
+  }
+
+  public String getSslCertPassword()
+  {
+    return _sslCertPassword;
+  }
+
+  public void setSslCertPassword(String sslCertPassword)
+  {
+    _sslCertPassword = sslCertPassword;
   }
 
   /**
@@ -146,7 +240,7 @@ public class CurlResource extends ResourceValue
    */
   public void setConnectTimeout(int timeoutMs)
   {
-    _connectTimeoutMs = timeoutMs;
+    _connectTimeoutMs = (timeoutMs < 0) ? getDefaultConnectTimeout() : timeoutMs;
   }
 
   /**
@@ -577,7 +671,7 @@ public class CurlResource extends ResourceValue
    */
   public void setReadTimeout(int timeoutMs)
   {
-    _readTimeoutMs = timeoutMs;
+    _readTimeoutMs = (timeoutMs < 0) ? getDefaultReadTimeout() : timeoutMs;
   }
 
   /**
@@ -633,6 +727,10 @@ public class CurlResource extends ResourceValue
 
     if (value.length() > 0) {
       _requestProperties.put(key, value);
+      
+      if (key.equals("Content-Type")) {
+        setContentType(value);
+      }
     }
   }
 

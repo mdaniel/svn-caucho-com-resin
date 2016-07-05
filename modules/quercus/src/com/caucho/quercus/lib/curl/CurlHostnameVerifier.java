@@ -64,7 +64,7 @@ public final class CurlHostnameVerifier
   }
   
   public boolean verify(String hostname, SSLSession session)
-  {
+  {    
     if (_isVerifySSLPeer == false
         && _isVerifySSLCommonName == false
         && _isVerifySSLHostname == false) {
@@ -72,13 +72,14 @@ public final class CurlHostnameVerifier
     }
     
     Principal principal = null;
-    
+        
     try {
       principal = session.getPeerPrincipal();
     }
     catch (SSLPeerUnverifiedException e) { 
-      if (_isVerifySSLPeer)
+      if (_isVerifySSLPeer) {
         return false;
+      }
     }
       
     if (_isVerifySSLPeer) {
@@ -86,12 +87,11 @@ public final class CurlHostnameVerifier
         session.getPeerPrincipal();
       }
       catch (SSLPeerUnverifiedException e) {
-        //XXX: log
         return false;
       }
     }
     
-    if (_isVerifySSLCommonName) {
+    if (_isVerifySSLCommonName) {      
       if (principal == null || ! principal.getName().equals(hostname))
         return false;
     }

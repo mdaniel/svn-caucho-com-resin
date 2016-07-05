@@ -65,33 +65,15 @@ public class CurlHttpConnection
   private String _authorization;
   private String _proxyAuthorization;
 
-  protected CurlHttpConnection(URL url,
-                           String username,
-                           String password)
-    throws IOException
-  {
-    _url = url;
-    _username = username;
-    _password = password;
-  }
-
   public CurlHttpConnection(URL url,
-                              String username,
-                              String password,
-                              URL proxyURL,
-                              String proxyUsername,
-                              String proxyPassword,
-                              String proxyType)
+                            String username,
+                            String password)
     throws IOException
   {
     _url = url;
-    _proxyURL = proxyURL;
-    _proxyType = proxyType;
 
     _username = username;
     _password = password;
-    _proxyUsername = proxyUsername;
-    _proxyPassword = proxyPassword;
   }
 
   protected void init(CurlResource curl)
@@ -118,10 +100,7 @@ public class CurlHttpConnection
     CurlHttpConnection conn;
 
     if (url.getProtocol().equals("https")) {
-      HttpsConnection secureConn
-      = new HttpsConnection(url, username, password);
-
-      conn = secureConn;
+      conn = new HttpsConnection(url, username, password);
     }
     else {
       conn = new CurlHttpConnection(url, username, password);
@@ -146,10 +125,7 @@ public class CurlHttpConnection
     CurlHttpConnection conn;
 
     if (url.getProtocol().equals("https")) {
-      HttpsConnection secureConn
-        = new HttpsConnection(url, username, password);
-
-      conn = secureConn;
+      conn = new HttpsConnection(url, username, password);
     }
     else {
       conn = new CurlHttpConnection(url, username, password);

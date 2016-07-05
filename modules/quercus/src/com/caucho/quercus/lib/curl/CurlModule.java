@@ -284,6 +284,14 @@ public class CurlModule
   public static final int CURL_VERSION_LIBZ                   = 8;
   public static final int CURLVERSION_NOW                     = 3;
   public static final int CURL_VERSION_SSL                    = 4;
+  
+  public static final int CURL_SSLVERSION_DEFAULT             = 0;
+  public static final int CURL_SSLVERSION_TLSv1               = 1;
+  public static final int CURL_SSLVERSION_SSLv2               = 2;
+  public static final int CURL_SSLVERSION_SSLv3               = 3;
+  public static final int CURL_SSLVERSION_TLSv1_0             = 4;
+  public static final int CURL_SSLVERSION_TLSv1_1             = 5;
+  public static final int CURL_SSLVERSION_TLSv1_2             = 6;
 
   public String []getLoadedExtensions()
   {
@@ -390,8 +398,7 @@ public class CurlModule
       putInfo(env, curl, array, "header_size", CURLINFO_HEADER_SIZE);
       putInfo(env, curl, array, "request_size", CURLINFO_REQUEST_SIZE);
       putInfo(env, curl, array, "filetime", CURLINFO_FILETIME);
-      putInfo(env, curl, array,
-              "ssl_verify_result", CURLINFO_SSL_VERIFYRESULT);
+      putInfo(env, curl, array, "ssl_verify_result", CURLINFO_SSL_VERIFYRESULT);
       putInfo(env, curl, array, "redirect_count", CURLINFO_REDIRECT_COUNT);
       putInfo(env, curl, array, "total_time", CURLINFO_TOTAL_TIME);
       putInfo(env, curl, array, "namelookup_time", CURLINFO_NAMELOOKUP_TIME);
@@ -401,12 +408,9 @@ public class CurlModule
       putInfo(env, curl, array, "size_download", CURLINFO_SIZE_DOWNLOAD);
       putInfo(env, curl, array, "speed_download", CURLINFO_SPEED_DOWNLOAD);
       putInfo(env, curl, array, "speed_upload", CURLINFO_SPEED_UPLOAD);
-      putInfo(env, curl, array,
-              "download_content_length", CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-      putInfo(env, curl, array,
-              "upload_content_length", CURLINFO_CONTENT_LENGTH_UPLOAD);
-      putInfo(env, curl, array,
-              "starttransfer_time", CURLINFO_STARTTRANSFER_TIME);
+      putInfo(env, curl, array, "download_content_length", CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+      putInfo(env, curl, array, "upload_content_length", CURLINFO_CONTENT_LENGTH_UPLOAD);
+      putInfo(env, curl, array, "starttransfer_time", CURLINFO_STARTTRANSFER_TIME);
       putInfo(env, curl, array, "redirect_time", CURLINFO_REDIRECT_TIME);
 
       return array;
@@ -838,6 +842,49 @@ public class CurlModule
             env.warning(L.l("unknown ssl verify host option '{0}", i));
         }
         break;
+        
+      case CURLOPT_SSLVERSION:
+        int code = value.toInt();
+        
+        String version = null;
+        
+        switch (code) {
+          case CURL_SSLVERSION_DEFAULT:
+            break;
+          case CURL_SSLVERSION_TLSv1:
+            version = "TLSv1";
+            break;
+          case CURL_SSLVERSION_SSLv2:
+            version = "SSLv2";
+            break;
+          case CURL_SSLVERSION_SSLv3:
+            version = "SSLv3";
+            break;
+          case CURL_SSLVERSION_TLSv1_0:
+            version = "TLSv1.0";
+            break;
+          case CURL_SSLVERSION_TLSv1_1:
+            version = "TLSv1.1";
+            break;
+          case CURL_SSLVERSION_TLSv1_2:
+            version = "TLSv1.2";
+            break;
+          default:
+            env.warning(L.l("unknown ssl version: " + value));
+        }
+        
+        curl.setSslVersion(version);
+        break;
+      case CURLOPT_SSLCERT:
+        curl.setSslCert(value.toJavaString());
+        break;
+      case CURLOPT_SSLKEY:
+        curl.setSslKey(value.toJavaString());
+        break;
+      case CURLOPT_SSLKEYPASSWD:
+        curl.setSslKeyPassword(value.toJavaString());
+        break;  
+        
       case CURLOPT_TIMECONDITION:
         switch (value.toInt()) {
           case CURL_TIMECOND_IFMODSINCE:
@@ -866,7 +913,7 @@ public class CurlModule
       // strings
       //
       case CURLOPT_CAINFO:
-        env.notice(L.l("custom certificates not supported"));
+        curl.setCaInfo(value.toString());
         break;
 
       case CURLOPT_COOKIE:

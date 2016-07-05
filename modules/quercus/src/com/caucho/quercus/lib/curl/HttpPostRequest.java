@@ -29,9 +29,7 @@
 
 package com.caucho.quercus.lib.curl;
 
-import com.caucho.quercus.env.Callable;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -59,7 +57,7 @@ public class HttpPostRequest
     if (! super.init(env)) {
       return false;
     }
-
+    
     _body = PostBody.create(env, getCurlResource());
 
     if (_body == null) {
@@ -68,9 +66,8 @@ public class HttpPostRequest
 
     CurlHttpConnection conn = getHttpConnection();
 
-    if (conn.getRequestProperty("Content-Type") == null) {
-      conn.setRequestProperty("Content-Type",
-                              _body.getContentType());
+    if (conn.getRequestProperty("Content-Type") == null) {      
+      conn.setRequestProperty("Content-Type", _body.getContentType());
     }
 
     if (conn.getRequestProperty("Content-Length") == null) {
@@ -83,7 +80,6 @@ public class HttpPostRequest
       else if (false && _body.isChunked()) {
         conn.setRequestProperty("Transfer-Encoding", "chunked");
       }
-
     }
 
     conn.setDoOutput(true);
