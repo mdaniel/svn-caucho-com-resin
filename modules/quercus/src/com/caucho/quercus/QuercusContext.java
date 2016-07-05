@@ -30,6 +30,7 @@
 package com.caucho.quercus;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -2168,7 +2169,7 @@ public class QuercusContext
     try {
       _quercusTimer = new QuercusTimer();
 
-      _envTimeoutThread = new EnvTimeoutThread();
+      _envTimeoutThread = new EnvTimeoutThread(this);
       _envTimeoutThread.start();
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -2292,16 +2293,21 @@ public class QuercusContext
     }
   }
 
-  class EnvTimeoutThread extends Thread {
+  static class EnvTimeoutThread extends Thread {
     private volatile boolean _isRunnable = true;
-    private final long _timeout = _envTimeout;
+    private long _timeout;
 
     private long _quantumCount;
+    
+    private WeakReference<QuercusContext> _quercusRef;
 
-    EnvTimeoutThread()
+    EnvTimeoutThread(QuercusContext quercus)
     {
       super("quercus-env-timeout");
 
+      _quercusRef = new WeakReference<QuercusContext>(quercus);
+      _timeout = quercus._envTimeout;
+      
       setDaemon(true);
       //setPriority(Thread.MAX_PRIORITY);
     }
@@ -2326,8 +2332,14 @@ public class QuercusContext
           _quantumCount = 0;
 
           try {
+            QuercusContext quercus = _quercusRef.get();
+            
+            if (quercus == null) {
+              break;
+            }
+            
             ArrayList<Env> activeEnv
-              = new ArrayList<Env>(_activeEnvSet.keySet());
+              = new ArrayList<Env>(quercus._activeEnvSet.keySet());
 
             for (Env env : activeEnv) {
               env.updateTimeout();

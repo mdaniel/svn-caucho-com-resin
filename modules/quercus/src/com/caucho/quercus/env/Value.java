@@ -3004,7 +3004,7 @@ abstract public class Value implements java.io.Serializable
    */
   protected void varExportImpl(StringValue sb, int level)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

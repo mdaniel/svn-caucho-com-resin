@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2016 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -358,10 +358,28 @@ public class QuercusScriptEngine
    */
   public void close()
   {
-    if (_quercus != null) {
-      _quercus.close();
-
+    QuercusContext quercus = _quercus;
+    _quercus = null;
+    
+    if (quercus != null) {
+      quercus.close();
+    }
+  }
+  
+  @Override
+  protected void finalize()
+    throws Throwable
+  {
+    try {
+      QuercusContext quercus = _quercus;
       _quercus = null;
+      
+      if (quercus != null) {
+        quercus.close();
+      }
+    }
+    finally {
+      super.finalize();
     }
   }
 
