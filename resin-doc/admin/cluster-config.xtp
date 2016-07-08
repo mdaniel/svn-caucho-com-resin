@@ -1658,7 +1658,7 @@ when serializing the session.</p>
 <tr>
   <td>session-max</td>
   <td>Maximum active sessions</td>
-  <td>4096</td>
+  <td>8192</td>
 </tr>
 <tr>
   <td>use-persistent-store</td>
