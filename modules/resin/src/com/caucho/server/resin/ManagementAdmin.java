@@ -357,6 +357,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return managerClient.pdfReport(null,
                                    report,
+                                   serverId,
                                    period,
                                    logDirectory,
                                    profileTime,
