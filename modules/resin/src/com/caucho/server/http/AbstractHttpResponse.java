@@ -111,7 +111,7 @@ abstract public class AbstractHttpResponse {
   private static final long MINUTE = 60 * 1000L;
   private static final long HOUR = 60 * MINUTE;
 
-  private static LruCache<String,ContentType> _contentTypeCache
+  private static final LruCache<String,ContentType> _contentTypeCache
     = new LruCache<String,ContentType>(512);
 
   private final AbstractHttpRequest _request;
