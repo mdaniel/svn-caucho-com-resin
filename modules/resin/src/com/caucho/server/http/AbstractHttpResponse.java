@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +51,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CaseInsensitiveIntMap;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
 import com.caucho.vfs.ClientDisconnectException;
 
@@ -111,8 +111,8 @@ abstract public class AbstractHttpResponse {
   private static final long MINUTE = 60 * 1000L;
   private static final long HOUR = 60 * MINUTE;
 
-  private static final ConcurrentHashMap<String,ContentType> _contentTypeMap
-    = new ConcurrentHashMap<String,ContentType>();
+  private static LruCache<String,ContentType> _contentTypeCache
+    = new LruCache<String,ContentType>(512);
 
   private final AbstractHttpRequest _request;
 
@@ -456,12 +456,12 @@ abstract public class AbstractHttpResponse {
 
   protected static ContentType parseContentType(String contentType)
   {
-    ContentType item = _contentTypeMap.get(contentType);
+    ContentType item = _contentTypeCache.get(contentType);
 
     if (item == null) {
       item = new ContentType(contentType);
 
-      _contentTypeMap.put(contentType, item);
+      _contentTypeCache.put(contentType, item);
     }
 
     return item;
