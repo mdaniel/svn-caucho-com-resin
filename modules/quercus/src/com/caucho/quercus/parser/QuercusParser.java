@@ -181,6 +181,8 @@ public class QuercusParser {
   private final static int INSTEADOF = 579;
   private final static int EMPTY = 580;
 
+  private final static int FINALLY = 581;
+  
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
   private final static IntMap _insensitiveReserved = new IntMap();
@@ -1728,6 +1730,15 @@ public class QuercusParser {
         token = parseToken();
       }
 
+      if (token == FINALLY) {
+
+        block = parseStatement();
+
+        stmt.setFinally(block);
+
+        token = parseToken();
+      }
+      
       _peekToken = token;
 
       return stmt;
@@ -6543,6 +6554,7 @@ public class QuercusParser {
     _insensitiveReserved.put("throw", THROW);
     _insensitiveReserved.put("try", TRY);
     _insensitiveReserved.put("catch", CATCH);
+    _insensitiveReserved.put("finally", FINALLY);
     _insensitiveReserved.put("interface", INTERFACE);
     _insensitiveReserved.put("trait", TRAIT);
     _insensitiveReserved.put("insteadof", INSTEADOF);

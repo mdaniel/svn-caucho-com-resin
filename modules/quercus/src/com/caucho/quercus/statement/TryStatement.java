@@ -49,6 +49,7 @@ import java.util.ArrayList;
 public class TryStatement extends Statement {
   protected final Statement _block;
   protected final ArrayList<Catch> _catchList = new ArrayList<Catch>();
+  protected Statement _finallyBlock = null;
 
   public TryStatement(Location location, Statement block)
   {
@@ -66,6 +67,13 @@ public class TryStatement extends Statement {
     block.setParent(this);
   }
 
+  public void setFinally(Statement block)
+  {
+    _finallyBlock = block;
+
+    _finallyBlock.setParent(this);
+  } 
+  
   public Value execute(Env env)
   {
     try {
@@ -145,6 +153,10 @@ public class TryStatement extends Statement {
         throw (QuercusException) e;
       else
         throw new QuercusException(e);
+    } finally {
+      if(_finallyBlock != null) {
+        _finallyBlock.execute(env);
+      }
     }
   }
 
