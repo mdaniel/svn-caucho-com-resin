@@ -389,8 +389,9 @@ public class JsseSSLFactory implements SSLFactory {
                                     String []forbiddenList)
   {
     for (String forbidden : forbiddenList) {
-      if (cipher.equals(forbidden))
+      if (cipher.indexOf(forbidden) >= 0) {
         return true;
+      }
     }
     
     return false;

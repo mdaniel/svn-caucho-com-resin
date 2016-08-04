@@ -8,6 +8,7 @@
 
 <s2 title="4.0.49 - in progress">
 <ul>
+<li>jsse: allow substrings (RC4) for cipher-suites-forbidden (#4987)</li>
 <li>pdf: add -server support for CLI pdf-report (#5950, rep by Nobuaki)</li>
 <li>HttpProxy: lower default idle time to 2s (#6001)</li>
 <li>multipart: multipart headers need to be parsed with encoding (#5942, rep by bjornolsson)</li>
