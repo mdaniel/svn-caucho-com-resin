@@ -38,6 +38,8 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -333,18 +335,11 @@ public class DateModule extends AbstractQuercusModule {
                        @Optional() Value dayV,
                        @Optional() Value yearV)
   {
-    QDate date = env.getGmtDate();
-    long now = env.getCurrentTime();
+    GregorianCalendar gc = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
 
-    date.setLocalTime(now);
+    setMktime(gc, hourV, minuteV, secondV, monthV, dayV, yearV);
 
-    long gmtNow = date.getGMTTime();
-
-    date.setGMTTime(gmtNow);
-
-    setMktime(date, hourV, minuteV, secondV, monthV, dayV, yearV);
-
-    return date.getGMTTime() / 1000L;
+    return gc.getTimeInMillis() / 1000L;
   }
 
   /**
@@ -908,17 +903,14 @@ public class DateModule extends AbstractQuercusModule {
     if (isDST != -1)
       env.deprecatedArgument("isDST");
 
-    long now = env.getCurrentTime();
+    GregorianCalendar gc = new GregorianCalendar();
 
-    QDate date = env.getDate();
-    date.setGMTTime(now);
+    setMktime(gc, hourV, minuteV, secondV, monthV, dayV, yearV);
 
-    setMktime(date, hourV, minuteV, secondV, monthV, dayV, yearV);
-
-    return date.getGMTTime() / 1000L;
+    return gc.getTimeInMillis() / 1000L;
   }
 
-  private static void setMktime(QDate date,
+  private static void setMktime(Calendar date,
                                 Value hourV,
                                 Value minuteV,
                                 Value secondV,
@@ -926,51 +918,43 @@ public class DateModule extends AbstractQuercusModule {
                                 Value dayV,
                                 Value yearV)
   {
-    if (! hourV.isDefault()) {
-      int hour = hourV.toInt();
-
-      date.setHour(hour);
-    }
-
-    if (! minuteV.isDefault()) {
-      int minute = minuteV.toInt();
-
-      date.setMinute(minute);
-    }
-
-    if (! secondV.isDefault()) {
-      int second = secondV.toInt();
-
-      date.setSecond(second);
-    }
-
-    if (! monthV.isDefault()) {
-      int month = monthV.toInt();
-
-      date.setMonth(month - 1);
-    }
-
-    if (! dayV.isDefault()) {
-      int day = dayV.toInt();
-
-      date.setDayOfMonth(day);
-    }
 
     if (! yearV.isDefault()) {
       int year = yearV.toInt();
 
       if (year >= 1000) {
-        date.setYear(year);
       }
       else if (year >= 70) {
-        date.setYear(year + 1900);
+        year += 1900;
       }
       else if (year >= 0) {
-        date.setYear(year + 2000);
+        year += 2000;
       }
       else if (year < 0) {
-        date.setYear(1969);
+        year = 1969;
       }
+      
+      date.set(Calendar.YEAR, year);
+    }
+    
+    if (! monthV.isDefault()) {
+      date.set(Calendar.MONTH, monthV.toInt() - 1);
+    }
+
+    if (! dayV.isDefault()) {
+      date.set(Calendar.DAY_OF_MONTH, dayV.toInt());
+    }
+
+    if (! hourV.isDefault()) {
+      date.set(Calendar.HOUR_OF_DAY, hourV.toInt());
+    }
+
+    if (! minuteV.isDefault()) {
+      date.set(Calendar.MINUTE, minuteV.toInt());
+    }
+
+    if (! secondV.isDefault()) {
+      date.set(Calendar.SECOND, secondV.toInt());
     }
   }
 

@@ -1037,6 +1037,11 @@ public class QDate {
    */
   public CharBuffer format(CharBuffer cb, String format)
   {
+    // Expand compount formats in format string:
+    format = format
+            .replace("%r", "%I:%M:%S %P")
+            .replace("%R", "%H:%M");
+    
     int length = format.length();
     for (int i = 0; i < length; i++) {
       char ch = format.charAt(i);
