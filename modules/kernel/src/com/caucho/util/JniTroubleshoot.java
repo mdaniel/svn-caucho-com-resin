@@ -29,6 +29,7 @@
 
 package com.caucho.util;
 
+import java.net.URL;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +70,18 @@ public class JniTroubleshoot {
     _libraryName = libraryName;
     _cause = cause;
     _isValid = false;
+  }
+  
+  public static String getPath(String name)
+  {
+    Path lib = getLib(name);
+    
+    if (lib.exists()) {
+      return lib.getNativePath();
+    }
+    else {
+      return name;
+    }
   }
 
   public void log()
@@ -155,32 +168,14 @@ public class JniTroubleshoot {
     return _cause;
   }
 
-  private boolean isMacOSX()
+  private static boolean isMacOSX()
   {
     return System.getProperty("os.name").equals("Mac OS X");
   }
 
-  private boolean isWin()
+  private static boolean isWin()
   {
     return System.getProperty("os.name").startsWith("Windows");
-  }
-
-  private Path getLibexec()
-  {
-    Path resinHome = CauchoSystem.getResinHome();
-
-    if (isWin()) {
-      if (CauchoSystem.is64Bit())
-        return resinHome.lookup("win64");
-      else
-        return resinHome.lookup("win32");
-    }
-    else {
-      if (CauchoSystem.is64Bit())
-        return resinHome.lookup("libexec64");
-      else
-        return resinHome.lookup("libexec");
-    }
   }
 
   private Path getLib()
@@ -195,6 +190,39 @@ public class JniTroubleshoot {
     }
     else {
       return libexec.lookup("lib" + _libraryName + ".so");
+    }
+  }
+
+  private static Path getLib(String libraryName)
+  {
+    Path libexec = getLibexec();
+
+    if (isMacOSX()) {
+      return libexec.lookup("lib" + libraryName + ".jnilib");
+    }
+    else if (isWin()) {
+      return libexec.lookup(libraryName + ".dll");
+    }
+    else {
+      return libexec.lookup("lib" + libraryName + ".so");
+    }
+  }
+
+  private static Path getLibexec()
+  {
+    Path resinHome = CauchoSystem.getResinHome();
+
+    if (isWin()) {
+      if (CauchoSystem.is64Bit())
+        return resinHome.lookup("win64");
+      else
+        return resinHome.lookup("win32");
+    }
+    else {
+      if (CauchoSystem.is64Bit())
+        return resinHome.lookup("libexec64");
+      else
+        return resinHome.lookup("libexec");
     }
   }
   

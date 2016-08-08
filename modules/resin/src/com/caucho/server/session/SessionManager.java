@@ -1407,7 +1407,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     }
 
     SessionImpl session = _sessions.get(sessionId);
-    
+
     if (session != null) {
       if (! session.isValid()) {
         session = null;
@@ -1425,7 +1425,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         && sessionId != null
         && _sessionStore != null) {
       ExtCacheEntry entry = _sessionStore.getExtCacheEntry(sessionId);
-
+      
       if (entry != null && ! entry.isValueNull()) {
         session = create(sessionId, now, isCreate);
 
@@ -1931,10 +1931,10 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         SessionImpl session = _sessionList.get(i);
 
         try {
-          _sessions.remove(session.getId());
+          //_sessions.remove(session.getId());
           
           // server/12i7
-          //session.timeout();
+          session.timeout();
         } catch (Throwable e) {
           log.log(Level.FINE, e.toString(), e);
         }

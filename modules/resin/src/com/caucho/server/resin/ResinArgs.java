@@ -618,6 +618,12 @@ public class ResinArgs
     System.err.println(L.l("   -verbose              : print verbose starting information"));
     System.err.println(L.l("   -preview              : run as a preview server"));
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getServerId() + "]";
+  }
 
   static class DynamicServer {
     private final String _cluster;

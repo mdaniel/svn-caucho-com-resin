@@ -70,7 +70,7 @@ public class JniFileStream extends StreamImpl
 
   public static boolean isEnabled()
   {
-    return _jniTroubleshoot.isEnabled() && CauchoSystem.isWindows();
+    return _jniTroubleshoot.isEnabled() && ! CauchoSystem.isWindows();
   }
   
   public static Throwable getDisableCause()

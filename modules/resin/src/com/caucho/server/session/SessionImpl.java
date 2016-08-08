@@ -694,7 +694,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       ExtCacheEntry entry = cache.getExtCacheEntry(_id);
       ExtCacheEntry cacheEntry = _cacheEntry;
-
+      
       if (entry != null && ! entry.isValueNull()) {
         // server/01a1, #4419
 
@@ -1180,8 +1180,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
     
     invalidateLocal();
-    
-    timeout();
+
+    // timeout();
   }
 
   private void notifyDestroy()
@@ -1342,6 +1342,13 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
     
     unbind(); // we're invalidating, not passivating
+
+    // server/12i7
+    Login login = _manager.getWebApp().getLogin();
+
+    if (login != null) {
+      login.sessionInvalidate(this, true);
+    }
   }
 
   /**

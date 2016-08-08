@@ -708,7 +708,7 @@ public class MnodeStore {
       long now = CurrentTime.getCurrentTime();
       stmt.setLong(12, lastAccessTime);
       stmt.setLong(13, lastModifiedTime);
-
+      
       int count = stmt.executeUpdate();
 
       if (log.isLoggable(Level.FINER)) {
@@ -779,7 +779,7 @@ public class MnodeStore {
 
       stmt.setBytes(13, key);
       stmt.setLong(14, mnodeUpdate.getVersion());
-
+      
       int count = stmt.executeUpdate();
 
       if (log.isLoggable(Level.FINER)) {
