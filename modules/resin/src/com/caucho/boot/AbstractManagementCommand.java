@@ -48,7 +48,6 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
 
     try {
       managerClient = createManagerClient(args, client);
-      System.out.println("WDC: " + managerClient + " " + client);
 
       return doCommand(args, client, managerClient);
     } catch (Exception e) {
