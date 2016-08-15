@@ -248,7 +248,7 @@ public class FileServlet extends GenericServlet {
 
       String relPath = cb.toString();
 
-      if (_isCaseInsensitive) {
+      if (_isCaseInsensitive && ! _context.getScheme().equals("memory")) {
         relPath = relPath.toLowerCase(Locale.ENGLISH);
       }
       
