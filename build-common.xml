@@ -216,6 +216,9 @@
         <fileset dir="${ext}">
           <include name="**/*.jar"/>
         </fileset>
+        <fileset dir="${resin.lib}">
+          <include name="**/*.jar"/>
+        </fileset>
         <fileset dir="${maven.lib}">
           <include name="**/*.jar"/>
          <exclude name="ant-1.6.5.jar"/>

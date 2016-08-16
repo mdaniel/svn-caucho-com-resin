@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile"
-          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus-dev, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, resin-eclipselink, gae, jasper">
+          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus-dev, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, resin-eclipselink, gae">
   </target>
 
   <!--
