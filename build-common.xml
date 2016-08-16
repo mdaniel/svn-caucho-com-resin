@@ -791,6 +791,7 @@
       </fileset>
     </copy>
 
+    <!--
     <copy todir="${dist.build}/ext-lib"
           preservelastmodified="true"
           overwrite="true">
@@ -798,6 +799,7 @@
         <include name="resin-jasper.jar"/>
       </fileset>
     </copy>
+    -->
 
     <copy todir="${dist.build}/doc/resin-doc">
       <fileset dir="${resin.doc}">
