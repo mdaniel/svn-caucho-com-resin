@@ -136,8 +136,11 @@ public class JniTroubleshoot {
       }
     }
     else if (_cause == null) {
+      /*
       return L.l("Library '{0}' is not available on this system.",
                  _libraryName);
+                 */
+      return null;
     }
     else {
       return L.l("Found library '{0}' as '{1}', but the load failed. "
