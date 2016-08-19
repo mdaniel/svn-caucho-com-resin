@@ -120,10 +120,6 @@
       <web-app id="">
         <resin:LoadBalance regexp="" cluster="app"/>
       </web-app>
-      
-      <web-app id="/async">
-        <resin:LoadBalance regexp="" cluster="app"/>
-      </web-app>
     </host>
   </cluster>
 

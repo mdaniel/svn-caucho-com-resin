@@ -135,10 +135,14 @@ public class JniTroubleshoot {
                    _libraryName, _className, lib.getNativePath(), _cause);
       }
     }
+    else if (_cause == null) {
+      return L.l("Library '{0}' is not available on this system.",
+                 _libraryName);
+    }
     else {
       return L.l("Found library '{0}' as '{1}', but the load failed. "
-                 + "The JVM exception was: {2}\n",
-                 _libraryName, lib.getNativePath(), _cause);
+          + "The JVM exception was: {2}\n",
+          _libraryName, lib.getNativePath(), _cause);
     }
   }
 
