@@ -242,7 +242,8 @@ public class MiscModule extends AbstractQuercusModule {
           if (! hasCr) {
             line = sb.toString();
             sb.setLength(0);
-            if (! output.isDefault()) {
+            
+            if (output != null && ! output.isDefault()) {
               output.put(env.createString(line));
             }
           }
@@ -265,7 +266,7 @@ public class MiscModule extends AbstractQuercusModule {
         line = sb.toString();
         sb.setLength(0);
         
-        if (! output.isDefault()) {
+        if (output != null && ! output.isDefault()) {
           output.put(env.createString(line));
         }
       }
@@ -282,7 +283,14 @@ public class MiscModule extends AbstractQuercusModule {
       return line;
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e.getMessage(), e);
+
+      if (e.getMessage() != null) {
+        env.warning(e.getMessage(), e);
+      }
+      else {
+        env.warning(e.toString(), e);
+      }
+      e.printStackTrace();
 
       return null;
     }

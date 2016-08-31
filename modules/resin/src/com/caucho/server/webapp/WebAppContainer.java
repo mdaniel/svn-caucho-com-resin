@@ -1056,10 +1056,11 @@ public class WebAppContainer
     // server/1hb1
     WebAppController controller = entry.getController();
     String contextPath = controller.getContextPath(invocationURI);
-    // String contextPath = entry.getContextPath();
+    //String contextPath = entry.getContextPath();
 
-    invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
-    // invocation.setContextPath(contextPath);
+    // server/108i
+    //invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
+    invocation.setContextPath(contextPath);
 
     String contextUri = invocationURI.substring(contextPath.length());
     invocation.setContextURI(contextUri);

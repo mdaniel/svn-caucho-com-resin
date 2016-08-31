@@ -782,10 +782,20 @@ class WatchdogChildProcess
       jvmMode = "-server";
     }
     
+    /*
     if (! jvmArgs.contains("-server")
         && ! jvmArgs.contains("-client")
         && ! CauchoSystem.isWindows() && ! "none".equals(jvmMode)
-        && jvmMode != null && ! "".equals(jvmMode)) {
+        && jvmMode != null 
+        && ! "".equals(jvmMode)) {
+      // #3331, windows can't add -server automatically
+      jvmArgs.add(jvmMode);
+    }
+    */
+    
+    if (! CauchoSystem.isWindows() && ! "none".equals(jvmMode)
+        && jvmMode != null 
+        && ! "".equals(jvmMode)) {
       // #3331, windows can't add -server automatically
       jvmArgs.add(jvmMode);
     }
