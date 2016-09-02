@@ -203,7 +203,7 @@ public class FileServlet extends GenericServlet {
       isInclude = true;
     else
       uri = req.getRequestURI();
-
+    
     Cache cache = _localCache.get(uri);
 
     String filename = null;

@@ -1123,7 +1123,8 @@ class WatchdogArgs
 
         // license.doLogging(1);
       } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
+        log.finer(e.toString());
+        log.log(Level.FINEST, e.toString(), e);
       }
     }
   }
