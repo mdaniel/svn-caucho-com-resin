@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.server.distcache.DataStore.DataItem;
 import com.caucho.server.distcache.LocalDataManager.DataItemLocal;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
@@ -454,6 +455,7 @@ public class DistCacheEntry {
         && delta < modifiedExpireTime
         && delta < accessedExpireTime) {
       // server/01nx
+      
       return;
     }
     
@@ -475,7 +477,6 @@ public class DistCacheEntry {
     // idleTimeout = idleTimeout * 5L / 4;
     
     putLocalValue(mnodeUpdate, valueDataId, valueDataTime, null);
-    
     config.getEngine().put(getKeyHash(), getCacheKey(), 
                            mnodeUpdate, 
                            valueDataId, valueDataTime);
@@ -955,47 +956,6 @@ public class DistCacheEntry {
     return value instanceof String;
   }
   
-  private Object loadValue(CacheConfig config)
-  {
-    MnodeEntry mnodeEntry = getMnodeEntry();
-
-    if (mnodeEntry == null) {
-      return null;
-    }
-
-    Object value = mnodeEntry.getValue();
-
-    if (value != null) {
-      return value;
-    }
-
-    long valueHash = mnodeEntry.getValueHash();
-
-    if (valueHash == 0) {
-      return null;
-    }
-    
-    value = _cacheService.getLocalDataManager().readData(getKeyHash(),
-                                                         valueHash,
-                                                         mnodeEntry.getValueDataId(),
-                                                         mnodeEntry.getValueDataTime(),
-                                                         config.getValueSerializer(),
-                                                         config);
-    
-    if (value == null) {
-      // Recovery from dropped or corrupted data
-      log.warning("Missing or corrupted data in get for " 
-                  + mnodeEntry + " " + this);
-      remove();
-    }
-
-    if (! config.isStoreByValue() || isImmutable(value)) {
-      mnodeEntry.setObjectValue(value);
-    }
-
-    return value;
-  }
-  
   public long getValueHash()
   {
     MnodeEntry entry = getMnodeEntry();
@@ -1068,7 +1028,7 @@ public class DistCacheEntry {
     
     CacheConfig config = getConfig();
     int server = config.getServerIndex();
-    
+
     if (mnodeEntry == null 
         || mnodeEntry.isLocalExpired(server, now, config)
         || ! isReadThroughLocalValid(now)) {
@@ -1106,15 +1066,6 @@ public class DistCacheEntry {
       
       listener.onLoad(this);
     }
-  }
-
-  private boolean isLocalExpired(HashKey key,
-                                 MnodeEntry mnodeEntry,
-                                 long now)
-  {
-    CacheConfig config = getConfig();
-    
-    return config.getEngine().isLocalExpired(config, key, mnodeEntry, now);
   }
 
   void reloadValue(long now,
@@ -1155,7 +1106,7 @@ public class DistCacheEntry {
       mnodeEntry.setLastAccessTime(now);
     }
     else {
-      MnodeEntry nullMnodeValue = new MnodeEntry(0, 0, 0,
+      MnodeEntry nullMnodeValue = new MnodeEntry(0, 0, mnodeEntry.getVersion(),
                                                  0,
                                                  config.getAccessedExpireTimeout(),
                                                  config.getModifiedExpireTimeout(),
@@ -1308,7 +1259,7 @@ public class DistCacheEntry {
         IoUtil.close(is);
       }
     }
-
+    
     if (data != null) {
       putLocalValueImpl(update, data.getValueDataId(), data.getValueDataTime(), null);
     }
@@ -1369,7 +1320,6 @@ public class DistCacheEntry {
                                               valueDataId,
                                               valueDataTime,
                                               value);
-    
     if (mnodeValue.getValueHash() != prevMnodeValue.getValueHash()) {
       _cacheService.notifyPutListeners(getKeyHash(), getCacheKey(),
                                        mnodeUpdate, mnodeValue);

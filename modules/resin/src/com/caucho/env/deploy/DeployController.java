@@ -424,7 +424,7 @@ abstract public class DeployController<I extends DeployInstance>
     if (instance == null) {
       return true;
     }
-    
+
     if (isControllerModifiedNow()) {
       return true;
     }

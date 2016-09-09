@@ -58,6 +58,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.json.Json;
 import com.caucho.json.Transient;
 import com.caucho.security.Login;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CacheListener;
 import com.caucho.util.CurrentTime;
@@ -665,7 +666,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   public boolean load(boolean isNew)
   {
     long now = CurrentTime.getCurrentTime();
-    
+
     if (! _state.isValid()) {
       return false;
     }
@@ -1167,8 +1168,9 @@ public class SessionImpl implements HttpSession, CacheListener {
                       _useCount));
     }
 
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " remove");
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " remove " + _state);
+    }
 
     long now = CurrentTime.getCurrentTime();
 
@@ -1302,8 +1304,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (state.isInvalidating() && _manager.getSessionStore() != null) {
         boolean isRemove = false;
 
-        /*
-        if (logout == Logout.TIMEOUT) {
+        // server/018z vs server/01ny
+        isRemove = true;
+
+        if (! isRemove && logout == Logout.TIMEOUT) {
           // server/016r
           ExtCacheEntry entry
             = _manager.getSessionStore().peekExtCacheEntry(_id);
@@ -1312,13 +1316,10 @@ public class SessionImpl implements HttpSession, CacheListener {
             isRemove = true;
           }
         }
-        else
+        else {
           isRemove = true;
-          */
+        }
         
-        // server/018z
-        isRemove = true;
-
         if (isRemove) {
           _manager.getSessionStore().remove(_id);
         }

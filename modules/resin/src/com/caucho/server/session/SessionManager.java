@@ -76,8 +76,10 @@ import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.ByteBuffer;
 import com.caucho.util.Crc64;
 import com.caucho.util.CurrentTime;
+import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.RandomUtil;
@@ -1763,12 +1765,18 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (cache == null)
       return null;
 
+    if (! _isHessianSerialization) {
+      return "session is not hessian";
+    }
+    
     try {
       TempOutputStream os = new TempOutputStream();
 
       if (cache.get(id, os)) {
         InputStream is = os.getInputStream();
 
+        is = new HashChunkInputStream(is);
+        
         StringWriter writer = new StringWriter();
 
         HessianDebugInputStream dis
@@ -1779,7 +1787,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
         return writer.toString();
       }
-
+      
       os.close();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

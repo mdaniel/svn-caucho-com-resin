@@ -127,8 +127,9 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     DeployController<?> controller = getController();
     
     LifecycleState state = controller.getState();
-    
-    if (state.isActive() && controller.isModified())
+
+    // server/1h17
+    if (state.isActive() && controller.isModifiedNow())
       return state.toString() + "_MODIFIED";
     else
       return state.toString();

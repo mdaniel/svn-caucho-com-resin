@@ -97,8 +97,8 @@ public class JniTroubleshoot {
       }
       
       if (! isLogged) {
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, getMessage(), _cause);
+        if (log.isLoggable(Level.FINEST))
+          log.log(Level.FINEST, getMessage(), _cause);
         else
           log.warning(getMessage());
       }

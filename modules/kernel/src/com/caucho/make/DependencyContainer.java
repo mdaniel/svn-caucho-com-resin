@@ -196,14 +196,17 @@ public class DependencyContainer implements Dependency
   public void setModified(boolean isModified)
   {
     _isModified = isModified;
-
-    if (_isModified)
-      _checkExpiresTime = Long.MAX_VALUE / 2;
-    else
-      _checkExpiresTime = CurrentTime.getCurrentTime() + _checkInterval;
     
-    if (! isModified)
+    if (_isModified) {
+      _checkExpiresTime = Long.MAX_VALUE / 2;
+    }
+    else {
+      _checkExpiresTime = CurrentTime.getCurrentTime() + _checkInterval;
+    }
+    
+    if (! isModified) {
       _isModifiedLog = false;
+    }
   }
       
   /**
@@ -238,11 +241,13 @@ public class DependencyContainer implements Dependency
   {
     long now = CurrentTime.getCurrentTime();
 
-    if (now < _checkExpiresTime)
+    if (now < _checkExpiresTime) {
       return _isModified;
+    }
     
-    if (_isChecking.getAndSet(true))
+    if (_isChecking.getAndSet(true)) {
       return _isModified;
+    }
     
     _checkExpiresTime = now + _checkInterval;
 

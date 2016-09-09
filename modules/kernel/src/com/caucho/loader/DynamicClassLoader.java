@@ -1285,6 +1285,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns true if any of the classes have been modified.
    */
+  @Override
   public final boolean isModified()
   {
     return isModified(_isEnableDependencyCheck);

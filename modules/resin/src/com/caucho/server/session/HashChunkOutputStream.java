@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.CRC32;
 
+import com.caucho.util.Hex;
 import com.caucho.vfs.TempBuffer;
 
 public class HashChunkOutputStream extends OutputStream {

@@ -395,11 +395,10 @@ public class ServletConfigImpl
   @Override
   public void setAsyncSupported(boolean asyncSupported)
   {
-    /*
+    // server/12ub
     if (_webApp != null && ! _webApp.isInitializing()) {
       throw new IllegalStateException();
     }
-    */
 
     _isAsyncSupported = asyncSupported;
   }

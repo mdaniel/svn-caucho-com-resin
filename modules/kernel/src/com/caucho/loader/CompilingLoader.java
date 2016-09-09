@@ -381,22 +381,40 @@ public class CompilingLoader extends Loader implements Make {
     ArrayList<String> files = new ArrayList<String>();
     findAllModifiedClasses("", _sourceDir, _classDir, sourcePath, files);
 
-    if (files.size() == 0)
+    if (files.size() == 0) {
       return;
+    }
+    
+    ClassNotFoundException exn = null;
 
     if (_isBatch) {
       String []paths = files.toArray(new String[files.size()]);
 
-      compileBatch(paths, true);
-    }
-    else {
-      while (files.size() > 0) {
-        String path = files.remove(0);
-
-        String []paths = new String[] { path };
-
+      try {
         compileBatch(paths, true);
+        
+        return;
+      } catch (ClassNotFoundException e) {
+        exn = e;
       }
+    }
+
+    while (files.size() > 0) {
+      String path = files.remove(0);
+
+      String []paths = new String[] { path };
+
+      try {
+        compileBatch(paths, true);
+      } catch (ClassNotFoundException e) {
+        if (exn == null) {
+          exn = e;
+        }
+      }
+    }
+    
+    if (exn != null) {
+      throw exn;
     }
   }
 
@@ -674,6 +692,7 @@ public class CompilingLoader extends Loader implements Make {
           
       compiler.compileBatch(files);
     } catch (Exception e) {
+      // server/10kj
       getClassLoader().addDependency(AlwaysModified.create());
 
       // Compile errors are wrapped in a special ClassNotFound class

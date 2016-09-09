@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -544,7 +545,7 @@ abstract public class
   
   public Map<String,String> getRepositoryMetaData()
   {
-    HashMap<String,String> map = new HashMap<String,String>();
+    Map<String,String> map = new TreeMap<String,String>();
     
     Map<String,RepositoryTagEntry> tagMap = getRepository().getTagMap();
     

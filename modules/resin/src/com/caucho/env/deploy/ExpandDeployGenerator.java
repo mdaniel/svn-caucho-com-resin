@@ -234,10 +234,14 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   {
     _cronInterval = period.getPeriod();
 
-    if (_cronInterval < 0)
+    if (_cronInterval < 0) {
       _cronInterval = Period.INFINITE;
-    else if (_cronInterval < MIN_CRON_INTERVAL)
+    }
+    else if (_cronInterval < MIN_CRON_INTERVAL) {
       _cronInterval = MIN_CRON_INTERVAL;
+    }
+    
+    _checkInterval = Math.min(_cronInterval, Environment.getDependencyCheckInterval());
   }
 
   public long getDependencyCheckInterval()
@@ -928,8 +932,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   @Override
   public void handleAlarm(Alarm alarm)
   {
-    if (isDestroyed())
+    if (isDestroyed()) {
       return;
+    }
     
     try {
       alarm();

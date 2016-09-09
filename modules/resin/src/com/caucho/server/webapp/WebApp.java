@@ -3867,16 +3867,17 @@ public class WebApp extends ServletContextImpl
   public boolean isModified()
   {
     // server/13l8
-
     // _configException test is needed so compilation failures will force
     // restart
-    if (_lifecycle.isAfterStopping())
+    if (_lifecycle.isAfterStopping()) {
       return true;
+    }
     else if (DeployMode.MANUAL.equals(_controller.getRedeployMode())) {
       return false;
     }
-    else if (_classLoader.isModified())
+    else if (_classLoader.isModified()) {
       return true;
+    }
     else
       return false;
   }
@@ -3891,12 +3892,15 @@ public class WebApp extends ServletContextImpl
     _classLoader.isModifiedNow();
     _invocationDependency.isModifiedNow();
 
-    if (_lifecycle.isAfterStopping())
+    if (_lifecycle.isAfterStopping()) {
       return true;
-    else if (_classLoader.isModifiedNow())
+    }
+    else if (_classLoader.isModifiedNow()) {
       return true;
-    else
+    }
+    else {
       return false;
+    }
   }
 
   /**
