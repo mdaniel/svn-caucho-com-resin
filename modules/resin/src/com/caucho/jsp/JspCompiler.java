@@ -115,8 +115,9 @@ public class JspCompiler implements EnvironmentBean {
   {
     _system = ResinSystem.getCurrent();
 
-    if (_system == null)
+    if (_system == null || ! _system.getClassLoader().isActive()) {
       _system = new ResinSystem("jsp-compiler");
+    }
 
     _loader = _system.getClassLoader();
 
@@ -645,11 +646,11 @@ public class JspCompiler implements EnvironmentBean {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       JspCompiler compiler = new JspCompiler();
-
+      
       int i = compiler.configureFromArgs(args);
 
       ClassLoader loader = compiler.getClassLoader();
-
+      
       thread.setContextClassLoader(loader);
 
       ArrayList<String> pendingClasses = new ArrayList<String>();

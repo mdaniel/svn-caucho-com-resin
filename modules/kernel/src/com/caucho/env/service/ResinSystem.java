@@ -644,6 +644,8 @@ public class ResinSystem
         _globalSystemRef = null;
       }
       
+      _serverLocal.set(null, _classLoader.getParent());
+      
       /*
        * destroy
        */

@@ -565,8 +565,9 @@ public final class InjectManager
 
     InjectManager parent = null;
 
-    if (envLoader != null && envLoader != _systemClassLoader)
+    if (envLoader != null && envLoader != _systemClassLoader) {
       parent = create(envLoader.getParent());
+    }
 
     synchronized (_localContainer) {
       manager = _localContainer.getLevel(envLoader);
@@ -1774,7 +1775,7 @@ public final class InjectManager
       discoverScanClass(scanClass);
       processPendingAnnotatedTypes();
     }
-      
+
     ArrayList<TypedBean> localBeans = _selfBeanMap.get(rawClass);
     
     if (localBeans != null) {
