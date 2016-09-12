@@ -39,7 +39,7 @@ public class ResinThreadActivityReport extends AbstractThreadActivityReport
   private final Map<ThreadSnapshotFilter, ThreadActivityCode> _filters = new 
     LinkedHashMap<ThreadSnapshotFilter, ThreadActivityCode>();
   
-  private Map<Character, String> _key = new HashMap<Character, String>();
+  private Map<Character, String> _key = new TreeMap<Character, String>();
   
   public ResinThreadActivityReport()
   {
