@@ -41,6 +41,7 @@ import java.nio.file.OpenOption;
 import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -493,7 +494,7 @@ public class FilePath extends FilesystemPath {
   {
     try {
       String []list = getFile().list();
-
+      
       if (list != null)
         return list;
     } catch (AccessControlException e) {
