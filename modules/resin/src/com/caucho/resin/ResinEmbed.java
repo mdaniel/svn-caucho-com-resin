@@ -431,6 +431,11 @@ public class ResinEmbed
       throw ConfigException.create(e);
     }
   }
+  
+  public void close()
+  {
+    destroy();
+  }
 
   //
   // Testing API
