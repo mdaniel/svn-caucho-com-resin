@@ -52,15 +52,17 @@ public class WebAppLocalDeployEmbed extends WebAppEmbed
     super.setContextPath(LOCAL_DEPLOY_CONTEXT_PATH);
 
     _deploy = new ServletMappingEmbed();
+
     /*
     _deploy.setServletClass(LocalDeployServlet.class.getName());
     _deploy.setServletName(LocalDeployServlet.class.getName());
     */
+        
     _deploy.setUrlPattern("/");
     _deploy.addProperty("enable", true);
     _deploy.addProperty("role", "*");
 
-    addServletMapping(_deploy);
+    //addServletMapping(_deploy);
   }
 
   /**
