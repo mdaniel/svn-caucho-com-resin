@@ -918,9 +918,13 @@ public class TcpSocketLink extends AbstractSocketLink
     if (state.isAllowIdle() && _requestStateRef.get().isAllowIdle()) {
       _state = state.toIdle();
       
-      _requestStateRef.get().toIdle(_requestStateRef);
+      try {
+        _requestStateRef.get().toIdle(_requestStateRef);
         
-      _port.free(this);
+        _port.free(this);
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
     }
     else if (isDestroyed()) {
     }

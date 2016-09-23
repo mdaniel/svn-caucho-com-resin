@@ -41,7 +41,7 @@ public class CaseInsensitive {
   private final static EnvironmentLocal<Boolean> _caseInsensitive
     = new EnvironmentLocal<Boolean>("caucho.vfs.case-insensitive");
   
-  private static boolean isCaseInsensitive = true;
+  private static boolean _isCaseInsensitive = true;
 
   public CaseInsensitive()
   {
@@ -55,7 +55,7 @@ public class CaseInsensitive {
     Boolean value = _caseInsensitive.get();
 
     if (value == null) {
-      return isCaseInsensitive;
+      return _isCaseInsensitive;
     }
     else
       return value.booleanValue();
@@ -66,7 +66,7 @@ public class CaseInsensitive {
    */
   public void setValue(boolean isInsensitive)
   {
-    isCaseInsensitive = isInsensitive;
+    _isCaseInsensitive = isInsensitive;
   }
 
   /**
@@ -75,12 +75,12 @@ public class CaseInsensitive {
   @PostConstruct
   public void init()
   {
-    _caseInsensitive.set(new Boolean(isCaseInsensitive));
+    _caseInsensitive.set(new Boolean(_isCaseInsensitive));
   }
   
   static {
     String resinHome = System.getProperty("resin.home");
     File file = new File(resinHome + "/lib/resin.JAR");
-    isCaseInsensitive = file.exists();
+    _isCaseInsensitive = file.exists();
   }
 }

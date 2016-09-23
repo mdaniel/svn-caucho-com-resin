@@ -1234,6 +1234,10 @@ public class WebAppContainer
   {
     _earDeploy.stop();
     _appDeploy.stop();
+    
+    if (_errorWebApp != null) {
+      _errorWebApp.stop();
+    }
 
     return true;
   }
@@ -1245,6 +1249,10 @@ public class WebAppContainer
   {
     _earDeploy.destroy();
     _appDeploy.destroy();
+    
+    if (_errorWebApp != null) {
+      _errorWebApp.destroy();
+    }
 
     AbstractAccessLog accessLog = _accessLog;
     _accessLog = null;
