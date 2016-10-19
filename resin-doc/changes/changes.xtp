@@ -6,7 +6,7 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.49 - in progress">
+<s2 title="4.0.49 - Oct 15, 2016">
 <ul>
 <li>jsse: allow substrings (RC4) for cipher-suites-forbidden (#4987)</li>
 <li>pdf: add -server support for CLI pdf-report (#5950, rep by Nobuaki)</li>

@@ -3469,7 +3469,7 @@ public class WebApp extends ServletContextImpl
       = new ArrayList<ServletContainerInitializer>(_cdiManager.loadLocalServices(ServletContainerInitializer.class));
     
     Collections.sort(initList, new InitComparator());
-    
+
     for (ServletContainerInitializer init : initList) {
       callInitializer(init);
     }
@@ -3573,6 +3573,7 @@ public class WebApp extends ServletContextImpl
       if (log.isLoggable(Level.FINER)){
         log.finer("ServletContainerInitializer " + init + " {in " + this + "}");
       }
+      
       init.onStartup(null, this);
       return;
     }

@@ -3639,7 +3639,7 @@ public final class InjectManager
 
       while (e.hasMoreElements()) {
         URL url = e.nextElement();
-
+        
         if (serviceSet.contains(url))
           continue;
 
@@ -3647,8 +3647,7 @@ public final class InjectManager
 
         InputStream is = null;
         try {
-          is = url.openStream();
-          ReadStream in = Vfs.openRead(is);
+          ReadStream in = Vfs.openRead(url.toString());
 
           String line;
 
