@@ -272,7 +272,7 @@ public class FileServlet extends GenericServlet {
         return;
       }
 
-      if (relPath.endsWith(".DS_store")) {
+      if (relPath.indexOf(".DS_store") >= 0) {
         // MacOS-X security hole with trailing '.'
         res.sendError(HttpServletResponse.SC_NOT_FOUND);
         return;
