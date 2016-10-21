@@ -553,6 +553,10 @@ public class HostContainer implements InvocationBuilder {
 
     _hostDeploy.stop();
     
+    if (_errorHost != null) {
+      _errorHost.stop();
+    }
+    
     // _classLoader.stop();
   }
 
@@ -567,6 +571,11 @@ public class HostContainer implements InvocationBuilder {
       return;
 
     _hostDeploy.destroy();
+    
+    if (_errorHost != null) {
+      System.out.println("DEST: " + _errorHost);
+      _errorHost.destroy();
+    }
 
     _classLoader.destroy();
   }
