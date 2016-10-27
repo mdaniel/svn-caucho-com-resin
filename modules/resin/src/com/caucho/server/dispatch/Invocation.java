@@ -367,6 +367,8 @@ public class Invocation extends ServletInvocation implements Dependency
     sb.append(getClass().getSimpleName());
     sb.append("[");
     sb.append(getContextPath());
+    
+    sb.append(_uri);
 
     if (getQueryString() != null)
       sb.append("?").append(getQueryString());

@@ -1048,7 +1048,7 @@ public class WebAppContainer
     String invocationURI = invocation.getURI();
     
     WebAppUriMap entry = findEntryByURI(invocation.getURI());
-
+    
     if (entry == null) {
       return null;
     }

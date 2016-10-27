@@ -283,9 +283,10 @@ public class ServletInvocation {
   {
     _requestCount.incrementAndGet();
 
-    if (_isFiner)
+    if (_isFiner) {
       log.finer("Dispatch '" + _contextUri + "' to " + _filterChain);
-
+    }
+    
     _filterChain.doFilter(request, response);
   }
 

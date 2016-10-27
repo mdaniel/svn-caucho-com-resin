@@ -173,6 +173,16 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   protected void stopImpl()
   {
+    // server/1h20, server/27b0 (in order)
+    WebAppController controller = _primaryController;
+
+    if (controller != null) {
+      controller.stop();
+    }
+    
+    for (WebAppController ctrl : _controllerList) {
+      ctrl.stop();
+    }
   }
   
   @Override
