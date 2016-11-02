@@ -975,8 +975,9 @@ public class Resin
     String licenseErrorMessage = getDelegate().getLicenseErrorMessage();
 
     if (licenseErrorMessage != null) {
-      log().warning(licenseErrorMessage);
       System.err.println(licenseErrorMessage);
+      System.err.flush();
+      log().warning(licenseErrorMessage);
     }
 
     System.out.println("Starting " + getResinName()
