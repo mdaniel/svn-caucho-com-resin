@@ -732,7 +732,7 @@ abstract public class DeployController<I extends DeployInstance>
 
           onActive();
         }
-        else if (deployInstance == null) {
+        else {
           _lifecycle.toError();
         }
 
