@@ -121,9 +121,10 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
       address = liveClient.getConfig().getAddress();
     }
 
-    if (port <= 0)
+    if (port <= 0) {
       port = findPort(liveClient);
-
+    }
+    
     if (port <= 0) {
       throw new ConfigException(L.l("Cannot find live Resin server for deployment at {0}:{1} was not found",
                                     address, port));

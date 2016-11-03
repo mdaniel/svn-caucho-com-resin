@@ -682,6 +682,8 @@ abstract public class DeployController<I extends DeployInstance>
           log.log(Level.FINEST, e.toString(), e);
         }
         
+        isStarting = false;
+        
         return getDeployInstance();
       }
       
@@ -730,8 +732,9 @@ abstract public class DeployController<I extends DeployInstance>
 
           onActive();
         }
-        else
+        else if (deployInstance == null) {
           _lifecycle.toError();
+        }
 
         onStartComplete();
 
