@@ -308,6 +308,17 @@ public class GitSystem extends AbstractResinSubSystem
             return;
         }
         
+        if (path.getTail().endsWith(".war")) {
+          ZipInputStream zis = new ZipInputStream(is);
+          
+          try {
+            expandZipToPath(zis, path.getParent());
+          } finally {
+            zis.close();
+          }
+          return;
+        }
+        
         WriteStream os = path.openWrite();
 
         try {
@@ -324,6 +335,31 @@ public class GitSystem extends AbstractResinSubSystem
                                   is.getType()));
     } finally {
       is.close();
+    }
+  }
+  
+  private void expandZipToPath(ZipInputStream is, Path path)
+    throws IOException
+  {
+    ZipEntry entry;
+    
+    while ((entry = is.getNextEntry()) != null) {
+      String name = entry.getName();
+      
+      if (entry.isDirectory()) {
+        path.lookup(name).mkdirs();
+      }
+      else {
+        Path subPath = path.lookup(name);
+        subPath.getParent().mkdirs();
+        
+        WriteStream os = subPath.openWrite();
+        try {
+          os.writeStream(is);
+        } finally {
+          os.close();
+        }
+      }
     }
   }
 

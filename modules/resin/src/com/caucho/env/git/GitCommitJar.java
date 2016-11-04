@@ -208,6 +208,7 @@ public class GitCommitJar {
   {
     _jar = JarPath.create(path);
 
+    /*
     HashMap<String,Long> lengthMap = new HashMap<String,Long>();
 
     fillLengthMap(lengthMap, path);
@@ -215,6 +216,19 @@ public class GitCommitJar {
     ReadStream is = path.openRead();
 
     fillCommit(lengthMap, is);
+    */
+    
+    //long len = path.getLength();
+    
+    ReadStream is = null;
+    
+    try {
+      is = path.openRead();
+      
+      _commit.addFile(path.getTail(), 0664, is, path.getLength());
+    } finally {
+      IoUtil.close(is);
+    }
 
     _commit.commit();
   }
@@ -331,6 +345,18 @@ public class GitCommitJar {
       return tree.openFile();
     }
     else {
+      Path jar = _jar.getContainer();
+      
+      ReadStream is = null;
+      
+      try {
+        is = jar.openRead();
+        
+        return GitCommitTree.writeBlob(is, jar.getLength());
+      } finally {
+        IoUtil.close(is);;
+      }
+      /*
       long size = _jar.getJar().getLength(path);
       
       if (size < 0)
@@ -347,6 +373,7 @@ public class GitCommitJar {
         
         zipIs.close();
       }
+      */
     }
   }
 
