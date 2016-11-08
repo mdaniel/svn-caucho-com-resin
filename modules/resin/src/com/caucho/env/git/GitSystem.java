@@ -308,7 +308,9 @@ public class GitSystem extends AbstractResinSubSystem
             return;
         }
         
-        if (path.getTail().endsWith(".war")) {
+        if (path.getTail().endsWith(".war")
+            || path.getTail().endsWith(".jar")
+            || path.getTail().endsWith(".ear")) {
           ZipInputStream zis = new ZipInputStream(is);
           
           try {

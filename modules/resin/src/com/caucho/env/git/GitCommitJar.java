@@ -103,7 +103,7 @@ public class GitCommitJar {
     Path workDir = WorkDir.getLocalWorkDir();
     workDir.mkdirs();
     
-    Path tmpPath = workDir.createTempFile("git", "tmp");
+    Path tmpPath = workDir.createTempFile("git", ".jar");
     WriteStream os = null;
     
     try {
