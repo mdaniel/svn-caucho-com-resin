@@ -131,6 +131,17 @@ Resin supports single sign-on in the form of authenticators at the server or vir
 level shared across multiple web applications. This described in detail with authenticators
 if this is functionality you need for your application.  
 </p>
+
+  <example title="WEB-INF/resin-web.xml Deny POST Method Example">
+    &lt;web-app xmlns="http://caucho.com/ns/resin"
+    xmlns:resin="urn:java:com.caucho.resin">
+
+    &lt;resin:Deny url-pattern="/foo/*">
+    &lt;resin:Method method="POST"/>
+    &lt;/resin:Deny>
+
+    &lt;/web-app>
+  </example>
 </s1>
 <s1 title="Securing Resin Administration">
 <p>
