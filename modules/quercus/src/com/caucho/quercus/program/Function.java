@@ -363,24 +363,20 @@ public class Function extends AbstractFunction {
         arg = _args[i];
       }
 
-      if (arg == null) {
-      }
-      else if (arg.isReference()) {
-        map.put(arg.getName(), new EnvVarImpl(args[i].toLocalVarDeclAsRef()));
-      }
-      else {
-        // XXX: php/1708, toVar() may be doing another copy()
-        Var var = args[i].toLocalVar();
-
-        if (arg.getExpectedClass() != null
-            && arg.getDefault() instanceof ParamRequiredExpr) {
-          env.checkTypeHint(var,
-                            arg.getExpectedClass(),
-                            arg.getName().toString(),
-                            getName());
+      if (arg != null) {
+        Var var;
+        if (arg.isReference()) {
+          var = args[i].toLocalVarDeclAsRef();
+        } else {
+          var = args[i].toLocalVar();
         }
-
-        // quercus/0d04
+        
+        if (arg.getExpectedClass() != null) {
+            env.checkTypeHint(var,
+                    arg,
+                    getName());
+        }
+        
         map.put(arg.getName(), new EnvVarImpl(var));
       }
     }

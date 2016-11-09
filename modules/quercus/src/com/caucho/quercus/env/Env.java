@@ -61,6 +61,7 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.xdebug.XdebugConnection;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.VariableModule;
@@ -78,6 +79,7 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.program.Arg;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
@@ -6583,18 +6585,41 @@ public class Env
    * Check for type hinting
    */
   public void checkTypeHint(Value value,
-                            String type,
-                            String argName,
+                            Arg arg,
                             String functionName)
   {
-    if (value.isNull()) {
+    assert value != null;
+    boolean errorDetected = false;
+    if (arg.getDefault() instanceof ParamRequiredExpr && value.isNull()) {
+      errorDetected = true;
+    } else if ((! value.isNull()) && arg.getExpectedClass() != null) {
+      // This is ugly -- array and callable are namespace qualified by the
+      // parser. It might be better to fix this in the parser, but missing
+      // unittests for the parser, this is tested.
+      String exptectedLower = arg.getExpectedClass().toLowerCase();
+      String[] expectedLowerParts = exptectedLower.split("\\\\");
+      String simpleName = expectedLowerParts[expectedLowerParts.length - 1];
+      if (simpleName.equals("callable")) {
+        if(!value.isCallable(this, true, null)) {
+          errorDetected = true;
+        }
+      } else if (simpleName.equals("array")) {
+        if(! value.isArray()) {
+          errorDetected = true;
+        }
+      } else if (!value.isA(this, arg.getExpectedClass())) {
+        errorDetected = true;
+      }
+    }
+    
+    if (errorDetected) {
       error(L.l(
-        "'{0}' is an unexpected value for "
-        + "arg '{1}' in function '{2}', expected '{3}'",
-        value,
-        argName,
-        functionName,
-        type));
+              "'{0}' is an unexpected value for "
+              + "arg '{1}' in function '{2}', expected '{3}'",
+              value.isNull() ? "NULL" : value,
+              arg.getName(),
+              functionName,
+              arg.getExpectedClass()));
     }
   }
 
