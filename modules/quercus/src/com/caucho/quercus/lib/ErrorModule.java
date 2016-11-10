@@ -490,7 +490,7 @@ public class ErrorModule extends AbstractQuercusModule {
    * @param code errorMask error level
    */
   public static boolean set_error_handler(Env env,
-                                          Callable fun,
+                                          @Optional Callable fun,
                                           @Optional("E_ALL") int errorMask)
   {
     env.setErrorHandler(errorMask, fun);

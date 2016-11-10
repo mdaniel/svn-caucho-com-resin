@@ -2381,5 +2381,10 @@ public class Var extends Value
   {
     return _value;
   }
+
+  @Override
+  public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef) {
+    return _value.isCallable(env, isCheckSyntaxOnly, nameRef);
+  }
 }
 
