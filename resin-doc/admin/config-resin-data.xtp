@@ -1,0 +1,98 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin Data Directory</title>
+    <description>
+      <p>
+        Resin will keep its operational data in a directory named<i>
+        resin-data</i>.
+
+        By default directory
+        <i>resin-data</i>
+        is located under Resin Root.
+
+      </p>
+
+      <p>
+        For each server in cluster Resin creates a dedicated directory where
+        operational data for that server is stored:
+        e.g.<i>resin-data/app-0</i>,
+        <i>resin-data/app-1</i>
+      </p>
+
+      <p>
+        Operational data for an individual server include two important
+        directories:
+
+        <br/>
+        <br/>A directory for deployed applications named
+        <i>.git</i>
+        <br/>A directory for sessions and distributed cache named
+        <i>distcache</i>
+
+        <br/>
+        <br/>
+
+        Deleting .git directory will result in all deployed applications be
+        deleted from the server.
+        <br/>
+        <br/>
+
+        Deleting directory
+        <i>distcache</i>
+        will result in session data being
+        deleted.
+
+        <br/>
+        <br/>
+
+        <table>
+          <tr>
+            <th>Directory or File</th>
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td>.git</td>
+            <td>Deployed applications</td>
+          </tr>
+          <tr>
+            <td>distcache</td>
+            <td>Session store and distributed cache data store</td>
+          </tr>
+          <tr>
+            <td>log</td>
+            <td>Resin log message database for reporting recent messages to pdf
+              report and Resin-Admin
+            </td>
+          </tr>
+          <tr>
+            <td>stat_data.db, stat_name.db</td>
+            <td>Resin runtime statistics database. Used for reporting in pdf
+              report and Resin-Admin
+            </td>
+          </tr>
+          <tr>
+            <td>tmp</td>
+            <td>temporary directory for large file operations</td>
+          </tr>
+          <tr>
+            <td>xa.log*</td>
+            <td>Distributed transactions log</td>
+          </tr>
+        </table>
+
+
+      </p>
+    </description>
+  </header>
+
+  <body>
+
+
+    <s1>
+      <p></p>
+    </s1>
+
+  </body>
+</document>

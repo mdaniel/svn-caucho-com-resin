@@ -27,6 +27,10 @@
 
       <item link="config-el.xtp" title="EL expressions"
             description="EL expressions used in configuration"/>
+
+      <item link="config-resin-data.xtp" title="Resin Data Directory"
+            description=""/>
+
     </item>
 
     <item link="migration.xtp" title="Migrating"
