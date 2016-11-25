@@ -10,6 +10,9 @@
         By default directory
         <i>resin-data</i>
         is located under Resin Root.
+        <br/>
+        <br/>
+        All data in resin-data directory is managed internally by Resin.
 
       </p>
 
