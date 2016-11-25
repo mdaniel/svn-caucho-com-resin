@@ -54,7 +54,7 @@
 
           <tr>
             <td>.git</td>
-            <td>Deployed applications</td>
+            <td>Contains deployed applications</td>
           </tr>
           <tr>
             <td>distcache</td>
