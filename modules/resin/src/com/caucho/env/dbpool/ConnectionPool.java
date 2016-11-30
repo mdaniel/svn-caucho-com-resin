@@ -1076,8 +1076,9 @@ public class ConnectionPool extends AbstractManagedObject
     int size = _connectionPool.size();
     int createCount = _createCount.incrementAndGet();
 
-    if (createCount + size <= _maxConnections + _maxOverflowConnections)
+    if (createCount + size <= _maxConnections + _maxOverflowConnections) {
       return true;
+    }
       
     _createCount.decrementAndGet();
     String message = L.l("{0} cannot create overflow connection after {1}ms"
@@ -1188,14 +1189,18 @@ public class ConnectionPool extends AbstractManagedObject
   void toIdle(ManagedPoolItem item)
   {
     try {
-      if (_maxConnections < _connectionPool.size()
-          || item.isConnectionError()) {
-        return;
-      }
-
       ManagedConnection mConn = item.getManagedConnection();
 
       if (mConn == null) {
+        return;
+      }
+
+      if (item.isConnectionError()) {
+        removeItem(item, mConn);
+        
+        return;
+      }
+      else if (_maxConnections < _connectionPool.size()) {
         return;
       }
 
@@ -1206,13 +1211,15 @@ public class ConnectionPool extends AbstractManagedObject
       if (_idlePool.size() == 0)
         _idlePoolExpire = now + _idleTimeout;
 
-      if (_idlePoolExpire < now) {
-        // shrink the idle pool when non-empty for idleTimeout
-        _idlePoolExpire = now + _idleTimeout;
-      }
-      else if (_idlePool.add(mConn)) {
-        item = null;
-        return;
+      synchronized (_connectionPool) {
+        if (_idlePoolExpire < now) {
+          // shrink the idle pool when non-empty for idleTimeout
+          _idlePoolExpire = now + _idleTimeout;
+        }
+        else if (_idlePool.add(mConn)) {
+          item = null;
+          return;
+        }
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

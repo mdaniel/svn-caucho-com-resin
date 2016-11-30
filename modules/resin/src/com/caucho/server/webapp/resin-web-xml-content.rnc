@@ -1224,6 +1224,9 @@ r_web-app-Basis =
      
   & (attribute active-wait-time { r_period }
      | element active-wait-time { r_period })?
+     
+  & (attribute active-wait-error-page { string }
+     | element active-wait-error-page { string })?
 
   & r_allow-servlet-el*
 

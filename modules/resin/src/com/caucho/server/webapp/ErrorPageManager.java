@@ -184,6 +184,14 @@ public class ErrorPageManager {
   }
 
   /**
+   * Returns true if we should return a development-friendly error page.
+   */
+  protected boolean isErrorPageServerId()
+  {
+    return _server.isErrorPageServerId() || isDevelopmentModeErrorPage();
+  }
+
+  /**
    * Displays a parse error.
    */
   public void sendServletError(Throwable e,
@@ -582,8 +590,9 @@ public class ErrorPageManager {
 
       out.println(version);
 
-      if (server != null)
+      if (server != null && isErrorPageServerId()) {
         out.println("Server: '" + server.getServerId() + "'");
+      }
 
       out.println("</small>");
     }

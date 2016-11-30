@@ -8,7 +8,13 @@
 
 <s2 title="4.0.50 - in progress">
 <ul>
-<li>deploy: git now deploys .war as single blob</li>
+<li>startup: added active-wait-error-page for custom 503 on startup (#6002, rep by S. Busch)</li>
+<li>openssl: detect shutdown for SSL read (#5916, #5918, rep by stoty, alpor9)</li>
+<li>dbpool: remove connection error item (#6017)</li>
+<li>session: change session_store default to false (#6020)</li>
+<li>error-page: add error-page-server-id to disable server id from error page (#6015)</li>
+<li>cache: isssue with If-None-Match (#6014)</li>
+<li>deploy: git now deploys .war as single blob (#5989, #4957)</li>
 </ul>
 </s2>
 

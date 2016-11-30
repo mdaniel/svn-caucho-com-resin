@@ -106,7 +106,10 @@ public class ForwardRule
 
     if (_isAbsolute)
       return new ForwardAbsoluteFilterChain(uriArg, WebApp.getCurrent());
-    else
+    else if (getRewriteDispatch().getWebApp() == null) {
+      return new ForwardFilterChain(uriArg, true);
+    }
+    else 
       return new ForwardFilterChain(uriArg);
   }
 

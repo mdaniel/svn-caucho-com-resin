@@ -71,6 +71,9 @@ r_cluster-Content =
 
   & r_error-page*
 
+  & (attribute error-page-server-id { r_boolean-Type }
+     | element error-page-server-id { r_boolean-Type })?
+
   & (attribute header-size-max { r_int-Type }
      | element header-size-max { r_int-Type })?
 

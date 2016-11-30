@@ -817,7 +817,6 @@ public class WebAppContainer
                                                       uri,
                                                       queryString,
                                                       chain);
-
       if (rewriteChain != chain) {
         // server/13sf, server/1kq1, server/1krd
         // WebApp rootWebApp = findWebAppByURI("/");

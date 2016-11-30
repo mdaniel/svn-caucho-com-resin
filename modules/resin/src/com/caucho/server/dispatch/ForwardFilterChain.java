@@ -31,11 +31,14 @@ package com.caucho.server.dispatch;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.server.webapp.WebApp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,6 +55,8 @@ public class ForwardFilterChain implements FilterChain {
   // servlet
   private String _url;
   private RequestDispatcher _disp;
+  
+  private boolean _isRoot;
 
   /**
    * Create the forward filter chain servlet.
@@ -61,6 +66,12 @@ public class ForwardFilterChain implements FilterChain {
   public ForwardFilterChain(String url)
   {
     _url = url;
+  }
+  
+  public ForwardFilterChain(String url, boolean isRoot)
+  {
+    _url = url;
+    _isRoot = isRoot;
   }
 
   /**
@@ -90,7 +101,21 @@ public class ForwardFilterChain implements FilterChain {
       else {
         HttpServletRequest req = (HttpServletRequest) request;
 
-        RequestDispatcher disp = req.getRequestDispatcher(_url);
+        RequestDispatcher disp;
+        
+        if (_isRoot) {
+          WebApp webApp = (WebApp) req.getServletContext();
+          
+          if (webApp != null) {
+            disp = webApp.getHost().getWebAppContainer().getRequestDispatcher(_url);
+          }
+          else {
+            disp = req.getRequestDispatcher(_url);
+          }
+        }
+        else {
+          disp = req.getRequestDispatcher(_url);
+        }
 
         disp.forward(request, response);
       }

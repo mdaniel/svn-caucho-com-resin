@@ -29,14 +29,8 @@
 
 package com.caucho.env.dbpool;
 
-import com.caucho.sql.ManagedConnectionImpl;
-import com.caucho.transaction.ManagedResource;
-import com.caucho.transaction.ManagedXAResource;
-import com.caucho.transaction.UserTransactionImpl;
-import com.caucho.transaction.XAExceptionWrapper;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -50,8 +44,14 @@ import javax.security.auth.Subject;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.sql.ManagedConnectionImpl;
+import com.caucho.transaction.ManagedResource;
+import com.caucho.transaction.ManagedXAResource;
+import com.caucho.transaction.UserTransactionImpl;
+import com.caucho.transaction.XAExceptionWrapper;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.L10N;
 
 /**
  * Manages a ManagedConnection in the pool. Each ManagedPoolItem corresponds

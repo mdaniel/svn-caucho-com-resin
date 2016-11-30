@@ -149,6 +149,15 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Development mode error pages.
+   */
+  @Configurable
+  public void setErrorPageServerId(boolean isEnable)
+  {
+    _servletContainer.setErrorPageServerId(isEnable);
+  }
+
+  /**
    * Creates a persistent store instance.
    */
   @Configurable
