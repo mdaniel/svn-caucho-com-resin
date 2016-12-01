@@ -8,6 +8,7 @@
 
 <s2 title="4.0.50 - in progress">
 <ul>
+<li>jstl-el: ${param} is not case-insensitive (#6021)</li>
 <li>startup: added active-wait-error-page for custom 503 on startup (#6002, rep by S. Busch)</li>
 <li>openssl: detect shutdown for SSL read (#5916, #5918, rep by stoty, alpor9)</li>
 <li>dbpool: remove connection error item (#6017)</li>
