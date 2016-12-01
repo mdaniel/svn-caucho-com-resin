@@ -5245,6 +5245,24 @@ OnStart</a> will fire during this event also.</p>
     <td>String</td>
     <td>${resin.logDirectory}</td>
   </tr>
+  <tr>
+    <td>mail</td>
+    <td>A <a config-tag="mail">&lt;mail></a> resource to use, see example</td>
+    <td>javax.mail.Session</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>mail-to</td>
+    <td>A "TO:" address; a mail recipient</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>mail-from</td>
+    <td>The "FROM:" address</td>
+    <td>String</td>
+    <td>resin@localhost</td>
+  </tr>
 </attributes>
 
 <example title="Example: &lt;health:PdfReport> in health.xml">
