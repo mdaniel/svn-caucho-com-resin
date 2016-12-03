@@ -70,6 +70,21 @@ public class MailService
 
   private Session _session;
   private Transport _smtp;
+  
+  public MailService()
+  {
+    String host = System.getProperty("mail.smtp.host");
+    
+    if (host != null) {
+      _properties.put("mail.smtp.host", host);
+    }
+    
+    String port = System.getProperty("mail.smtp.port");
+    
+    if (port != null) {
+      _properties.put("mail.smtp.port", port);
+    }
+  }
 
   /**
    * Sets the mail session
