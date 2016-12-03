@@ -47,6 +47,8 @@
 #ifdef SHM
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <apr-1.0/apr.h>
+#include <apr-1.0/apr_pools.h>
 #endif
 #endif
 
@@ -990,10 +992,18 @@ static char *srun_to_a(srun_t *srun)
 }
 
 #ifdef SHM
-static void cse_cleanup_(char *s) {
+static apr_status_t cse_cleanup_shm(void *s)
+{
   LOG(("%s:%d:cse_cleanup_() %s\n", __FILE__, __LINE__, s));
 
   shm_unlink(s);
+
+  return 0;
+}
+
+static apr_status_t cse_cleanup_child(void  *v)
+{
+  return 0;
 }
 #endif
 
@@ -1084,7 +1094,9 @@ cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
     srun->status->last_unavail = 0;
   }
 
-  apr_pool_cleanup_register(config->web_pool, s, cse_cleanup_, NULL);
+  apr_pool_cleanup_register(config->web_pool, s, 
+                            cse_cleanup_shm, 
+                            cse_cleanup_child);
 
   cse_proc_unlock();
 #endif
