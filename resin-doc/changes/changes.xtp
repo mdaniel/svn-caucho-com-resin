@@ -8,6 +8,7 @@
 
 <s2 title="4.0.50 - in progress">
 <ul>
+<li>jmx-list: throws NPE with -operations or -attributes option (#6022, rep by MCGuard)</li>
 <li>apache: add 4th argument to apr_ppool_cleanup_register for SHM (#5948, rep by goodpro2)</li>
 <li>jstl-el: ${param} is not case-insensitive (#6021)</li>
 <li>startup: added active-wait-error-page for custom 503 on startup (#6002, rep by S. Busch)</li>

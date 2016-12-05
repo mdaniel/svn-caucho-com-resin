@@ -54,10 +54,10 @@ public class ListJmxQueryReply extends ManagementQueryReply
     private String _name;
 
     @Json(name = "attributes")
-    private List<Attribute> _attributes;
+    private List<Attribute> _attributes = new ArrayList<Attribute>();
 
     @Json(name = "operations")
-    private List<Operation> _operations;
+    private List<Operation> _operations = new ArrayList<Operation>();
 
     public String getName()
     {
@@ -71,17 +71,11 @@ public class ListJmxQueryReply extends ManagementQueryReply
 
     public void add(Attribute attr)
     {
-      if (_attributes == null)
-        _attributes = new ArrayList<Attribute>();
-
       _attributes.add(attr);
     }
 
     public void add(Operation op)
     {
-      if (_operations == null)
-        _operations = new ArrayList<Operation>();
-      
       _operations.add(op);
     }
 
