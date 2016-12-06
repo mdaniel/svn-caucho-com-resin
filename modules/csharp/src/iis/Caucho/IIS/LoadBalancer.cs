@@ -187,11 +187,15 @@ namespace Caucho.IIS
 
     public HmuxConnection OpenSessionServer(String sessionId)
     {
+      if (sessionId == null || sessionId.Length < 1) {
+        return null;
+      }
+
       char c = sessionId[0];
 
       int i = c - 'a';
 
-      if (i >= _servers.Length)
+      if (i < 0 || i >= _servers.Length)
         return null;
 
       Server server = _servers[i];
