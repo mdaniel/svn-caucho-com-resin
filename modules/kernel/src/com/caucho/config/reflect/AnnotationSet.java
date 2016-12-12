@@ -56,7 +56,9 @@ public class AnnotationSet extends AbstractSet<Annotation>
   public AnnotationSet(Collection<Annotation> set)
   {
     for (Annotation ann : set) {
-      add(ann);
+      if (ann != null) {
+        add(ann);
+      }
     }
   }
 
@@ -98,6 +100,10 @@ public class AnnotationSet extends AbstractSet<Annotation>
  
   public void replace(Annotation newAnn)
   {
+    if (newAnn == null) {
+      throw new NullPointerException();
+    }
+    
     Annotation []annSet = _annSet;
 
     for (int i = _size - 1; i >= 0; i--) {
@@ -112,25 +118,36 @@ public class AnnotationSet extends AbstractSet<Annotation>
     addImpl(newAnn);
   }
   
+  @Override
   public boolean add(Annotation newAnn)
   {
-    Annotation []annSet = _annSet;
-
-    for (int i = _size - 1; i >= 0; i--) {
-      Annotation oldAnn = annSet[i];
-
-      if (oldAnn.equals(newAnn)) {
-        return false;
-      }
+    if (newAnn == null) {
+      throw new NullPointerException();
     }
 
-    addImpl(newAnn);
+    synchronized (this) {
+      Annotation []annSet = _annSet;
+
+      for (int i = _size - 1; i >= 0; i--) {
+        Annotation oldAnn = annSet[i];
+
+        if (oldAnn.equals(newAnn)) {
+          return false;
+        }
+      }
+
+      addImpl(newAnn);
+    }
     
     return true;
   }
   
   public boolean remove(Annotation newAnn)
   {
+    if (newAnn == null) {
+      throw new NullPointerException();
+    }
+    
     Annotation []annSet = _annSet;
 
     for (int i = _size - 1; i >= 0; i--) {
@@ -149,19 +166,25 @@ public class AnnotationSet extends AbstractSet<Annotation>
   
   private void addImpl(Annotation newAnn)
   {
-    if (_annSet.length <= _size + 1) {
-      int newSize = 2 * (_size + 1);
-      
-      if (newSize < 16)
-        newSize = 16;
-      
-      Annotation []annSet = new Annotation[newSize];
-      System.arraycopy(_annSet, 0, annSet, 0, _annSet.length);
-      
-      _annSet = annSet;
+    if (newAnn == null) {
+      throw new NullPointerException();
     }
     
-    _annSet[_size++] = newAnn;
+    synchronized (this) {
+      if (_annSet.length <= _size + 1) {
+        int newSize = 2 * (_size + 1);
+      
+        if (newSize < 16)
+          newSize = 16;
+      
+        Annotation []annSet = new Annotation[newSize];
+        System.arraycopy(_annSet, 0, annSet, 0, _annSet.length);
+      
+        _annSet = annSet;
+      }
+    
+      _annSet[_size++] = newAnn;
+    }
   }
 
   @Override

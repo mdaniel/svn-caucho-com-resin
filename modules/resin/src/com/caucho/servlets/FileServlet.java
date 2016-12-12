@@ -552,6 +552,7 @@ public class FileServlet extends GenericServlet {
     String boundary = null;
     int off = range.indexOf("bytes=", head);
     ServletOutputStream os = null;
+    boolean hasData = false;
 
     if (off < 0)
       return false;
@@ -599,6 +600,12 @@ public class FileServlet extends GenericServlet {
       }
 
       head = off;
+
+      for (off--; off < length && range.charAt(off) != ','; off++) {
+      }
+
+      off++;
+      
       if (! hasLast) {
         if (first == 0)
           return false;
@@ -617,8 +624,11 @@ public class FileServlet extends GenericServlet {
 
       if (cacheLength <= last) {
         // XXX: actually, an error
-        break;
+        continue;
       }
+      
+      hasData = true;
+      
       res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
       StringBuilder cb = new StringBuilder();
       cb.append("bytes ");
@@ -700,11 +710,6 @@ public class FileServlet extends GenericServlet {
         if (is != null)
           is.close();
       }
-
-      for (off--; off < length && range.charAt(off) != ','; off++) {
-      }
-
-      off++;
     }
 
     if (hasMore) {
@@ -719,6 +724,9 @@ public class FileServlet extends GenericServlet {
       os.write('-');
       os.write('\r');
       os.write('\n');
+    }
+    else if (! hasData) {
+      res.setStatus(416);
     }
 
     return true;

@@ -159,7 +159,7 @@ public class RootDirectorySystem extends AbstractResinSubSystem
   public void start() throws Exception
   {
     super.start();
-    
+
     if (_isIgnoreLock) {
       return;
     }

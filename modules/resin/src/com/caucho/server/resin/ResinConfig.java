@@ -123,6 +123,12 @@ public class ResinConfig extends AbstractResinConfig implements EnvironmentBean
     _resin.setRootDirectory(root);
   }
 
+  @Configurable
+  public void setIgnoreLock(boolean isIgnore)
+  {
+    _resin.setIgnoreLock(isIgnore);
+  }
+
   /**
    * Set true if the server should enable environment-based
    * system properties.

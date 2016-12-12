@@ -285,6 +285,10 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
   @Override
   public void addAnalysisAnnotation(Annotation ann)
   {
+    if (ann == null) {
+      throw new NullPointerException();
+    }
+    
     if (_analysisAnnSet == null)
       _analysisAnnSet = new AnnotationSet();
     

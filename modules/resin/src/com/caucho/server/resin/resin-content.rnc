@@ -636,6 +636,9 @@ r_resin-Content =
   & (attribute home-server { string }
      | element home-server { string })?
 
+  & (attribute ignore-lock { r_boolean-Type }
+     | element ignore-lock { r_boolean-Type })?
+
   & r_management?
 
   & r_module-repository?
