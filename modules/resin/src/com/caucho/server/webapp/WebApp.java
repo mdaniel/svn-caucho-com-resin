@@ -4994,13 +4994,12 @@ public class WebApp extends ServletContextImpl
         return;
       }
       
-      long beginStop = CurrentTime.getCurrentTime();
+      long beginStop = CurrentTime.getCurrentTimeActual();
 
       clearCache();
-      
+
       while (_requestCount.get() > 0
-             && CurrentTime.getCurrentTime() < beginStop + _shutdownWaitTime
-             && ! CurrentTime.isTest()) {
+             && CurrentTime.getCurrentTimeActual() < beginStop + _shutdownWaitTime) {
         try {
           Thread.interrupted();
           Thread.sleep(100);

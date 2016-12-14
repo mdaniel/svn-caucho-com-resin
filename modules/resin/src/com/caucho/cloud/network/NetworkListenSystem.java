@@ -75,6 +75,11 @@ public class NetworkListenSystem extends AbstractResinSubSystem
     if (_clusterListener != null) {
       _listeners.add(_clusterListener);
     }
+    
+    NetworkListenStopSystem stopSystem = new NetworkListenStopSystem(this);
+    ResinSystem system = ResinSystem.getCurrent();
+    
+    system.addService(stopSystem);
 
     NetworkServerConfig config = new NetworkServerConfig(this);
    
@@ -199,6 +204,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
     else
       return START_PRIORITY_AT_BEGIN;
   }
+  
   /**
    * Bind the ports.
    */
@@ -269,13 +275,14 @@ public class NetworkListenSystem extends AbstractResinSubSystem
     Alarm alarm = _alarm;
     _alarm = null;
 
-    if (alarm != null)
+    if (alarm != null) {
       alarm.dequeue();
+    }
 
     for (TcpPort listener : _listeners) {
       try {
         if (listener != _clusterListener) {
-          listener.close();
+          listener.closeBind();
         }
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
