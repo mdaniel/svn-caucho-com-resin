@@ -1834,6 +1834,10 @@ public class TcpPort
       localPort = serverSocket.getLocalPort();
     }
 
+    if (localPort == 0) {
+      localPort = _port;
+    }
+
     // close the server socket
     if (serverSocket != null) {
       try {
@@ -1849,14 +1853,12 @@ public class TcpPort
       }
     }
 
-    /*
-    if (selectManager != null) {
+    if (_selectManager != null) {
       try {
-        selectManager.onPortClose(this);
+        _selectManager.onPortClose(this);
       } catch (Throwable e) {
       }
     }
-    */
 
     Set<TcpSocketLink> activeSet;
 
