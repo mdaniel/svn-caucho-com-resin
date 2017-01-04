@@ -128,37 +128,37 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
           }
         }
 
-          if (isPrintOperations) {
-            for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
-                                                      .getOperations()) {
-              ListJmxQueryReply.Operation op
-                = new ListJmxQueryReply.Operation();
+        if (isPrintOperations) {
+          for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
+              .getOperations()) {
+            ListJmxQueryReply.Operation op
+            = new ListJmxQueryReply.Operation();
 
-              op.setName(operation.getName());
+            op.setName(operation.getName());
 
-              MBeanParameterInfo []params = operation.getSignature();
-              if (params.length > 0) {
-                for (int i = 0; i < params.length; i++) {
-                  MBeanParameterInfo param = params[i];
+            MBeanParameterInfo []params = operation.getSignature();
+            if (params.length > 0) {
+              for (int i = 0; i < params.length; i++) {
+                MBeanParameterInfo param = params[i];
 
-                  ListJmxQueryReply.Param par
-                    = new ListJmxQueryReply.Param();
+                ListJmxQueryReply.Param par
+                = new ListJmxQueryReply.Param();
 
-                  par.setName(param.getName());
-                  par.setType(param.getType());
-                  par.setDescription(param.getDescription());
+                par.setName(param.getName());
+                par.setType(param.getType());
+                par.setDescription(param.getDescription());
 
-                  op.add(par);
-                }
+                op.add(par);
               }
-
-              op.setDescription(operation.getDescription());
-
-              op.setType(operation.getReturnType());
-
-              bean.add(op);
             }
+
+            op.setDescription(operation.getDescription());
+
+            op.setType(operation.getReturnType());
+
+            bean.add(op);
           }
+        }
         listJmxQueryResult.add(bean);
       }
     }
