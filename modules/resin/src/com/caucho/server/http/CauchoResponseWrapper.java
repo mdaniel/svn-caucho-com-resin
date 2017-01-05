@@ -290,6 +290,7 @@ public class CauchoResponseWrapper implements CauchoResponse {
     _response.addCookie(cookie);
   }
 
+  @Override
   public String encodeURL(String url)
   {
     return _response.encodeURL(url);

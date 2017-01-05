@@ -202,10 +202,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper
    * @param url the url to encode
    * @return a url with session information encoded
    */
+  @Override
   public String encodeURL(String url)
   {
-    return response.encodeURL(url);
+    return this.response.encodeURL(url);
   }
+  
   /**
    * Encodes session information in a URL suitable for
    * <code>sendRedirect()</code> 

@@ -1421,19 +1421,25 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     WebApp webApp = request.getWebApp();
 
-    if (webApp == null)
+    if (webApp == null) {
       return string;
+    }
 
-    if (request.isRequestedSessionIdFromCookie())
+    if (request.isRequestedSessionIdFromCookie()) {
       return string;
+    }
 
     HttpSession session = request.getSession(false);
-    if (session == null)
+
+    if (session == null) {
       return string;
+    }
 
     SessionManager sessionManager = webApp.getSessionManager();
-    if (! sessionManager.enableSessionUrls())
+    
+    if (! sessionManager.enableSessionUrls()) {
       return string;
+    }
 
     StringBuilder cb = new StringBuilder();
 
