@@ -977,13 +977,13 @@ public class BlockStore {
       _allocationTable[allocOffset + i] = 0;
     }
 
-    int oldCode = _allocationTable[allocOffset] & 0xff;
+    int oldCode = _allocationTable[allocOffset] & ALLOC_MASK;
     _allocationTable[allocOffset] = (byte) code;
     
     if (oldCode != ALLOC_FREE && code != ALLOC_FREE && oldCode != code) {
       System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + oldCode + " " + code);
       Thread.dumpStack();
-    }else if (blockIndex == 0 && code != ALLOC_DATA) {
+    } else if (blockIndex == 0 && code != ALLOC_DATA) {
       Thread.dumpStack();
     }
 
