@@ -6,13 +6,18 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.50 - in progress">
+<s2 title="4.0.51 in progress">
+<ul>
+</ul>
+</s2>
+
+<s2 title="4.0.50 - Jan 23, 2017">
 <ul>
 <li>lifecycle: shutdown order with request close (#6027, rep by Shinomiya Nobuaki)</li>
 <li>range: range issue with out-of-range range request (#6024, rep by snicolai2)</li>
 <li>tld: synchronization issue with AnnotationSet (#6023, rep by Shinomiya Nobuaki)</li>
 <li>jmx-list: throws NPE with -operations or -attributes option (#6022, rep by MCGuard)</li>
-<li>apache: add 4th argument to apr_ppool_cleanup_register for SHM (#5948, rep by goodpro2)</li>
+<li>apache: add 4th argument to apr_pool_cleanup_register for SHM (#5948, rep by goodpro2)</li>
 <li>jstl-el: ${param} is not case-insensitive (#6021)</li>
 <li>startup: added active-wait-error-page for custom 503 on startup (#6002, rep by S. Busch)</li>
 <li>openssl: detect shutdown for SSL read (#5916, #5918, rep by stoty, alpor9)</li>
