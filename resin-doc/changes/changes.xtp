@@ -8,6 +8,8 @@
 
 <s2 title="4.0.51 in progress">
 <ul>
+<li>hessian: add allow/deny/whitelist for the deserializer</li>
+<li>request: NPE in finishRequest for callbacks and getLocale() (#6028)</li>
 </ul>
 </s2>
 

@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -370,7 +371,12 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getContentType()
   {
-    return _request.getContentType();
+    AbstractHttpRequest request = _request;
+    
+    if (request != null)
+      return request.getContentType();
+    else
+      return null;
   }
 
   /**
@@ -380,7 +386,12 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public Locale getLocale()
   {
-    return _request.getLocale();
+    AbstractHttpRequest request = _request;
+    
+    if (request != null)
+      return request.getLocale();
+    else
+      return Locale.getDefault();
   }
 
   /**
@@ -389,7 +400,12 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public Enumeration<Locale> getLocales()
   {
-    return _request.getLocales();
+    AbstractHttpRequest request = _request;
+
+    if (request != null)
+      return request.getLocales();
+    else
+      return new Vector().elements();
   }
 
   /**
