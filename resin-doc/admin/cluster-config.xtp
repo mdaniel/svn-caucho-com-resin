@@ -2418,6 +2418,13 @@ SSL cryptographic ciphers.</p>
 
 </defun>
 
+<defun title="&lt;cipher-suite-forbidden> (JSSE)" version="Resin 4.0">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;cipher-suite-forbidden> restricts forbidden ciphers</p>
+
+</defun>
+
 <defun title="&lt;cluster-port>" version="Resin 3.0">
 <parents>server</parents>
 
@@ -2644,6 +2651,11 @@ The <a href="../admin/security.xtp">SSL</a> section of the Security documentatio
 </tr>
 <tr>
   <td>cipher-suite</td>
+  <td>Additions and restrictions to the allowed cryptography ciphers</td>
+  <td>see openssl-tags</td>
+</tr>
+<tr>
+  <td>cipher-suites-forbidden</td>
   <td>Additions and restrictions to the allowed cryptography ciphers</td>
   <td>see openssl-tags</td>
 </tr>

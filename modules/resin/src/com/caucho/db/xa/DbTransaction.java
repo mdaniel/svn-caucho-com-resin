@@ -451,7 +451,7 @@ public class DbTransaction extends StoreTransaction {
         }
         
         try {
-          block.commit();
+          block.commitNoWake();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }

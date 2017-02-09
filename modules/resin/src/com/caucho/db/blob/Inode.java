@@ -124,8 +124,6 @@ public class Inode
     = (SINGLE_INDIRECT_MAX
        + DOUBLE_INDIRECT_BLOCKS * (BLOCK_SIZE / 8L) * BLOCK_SIZE);
 
-  private static final FreeList<byte[]> _freeBytes = new FreeList<byte[]>(16);
-
   private BlockStore _store;
   private final byte []_bytes = new byte[INODE_SIZE];
 
@@ -810,11 +808,7 @@ public class Inode
    */
   public void remove()
   {
-    byte []bytes = _freeBytes.allocate();
-
-    if (bytes == null) {
-      bytes = new byte[INODE_SIZE];
-    }
+    byte []bytes = new byte[INODE_SIZE];
     
     System.arraycopy(_bytes, 0, bytes, 0, INODE_SIZE);
     Arrays.fill(_bytes, 0, INODE_SIZE, (byte) 0);
@@ -895,8 +889,6 @@ public class Inode
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _freeBytes.free(bytes);
-      
       if (update != null) {
         update.close();
       }

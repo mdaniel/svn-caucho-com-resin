@@ -60,12 +60,14 @@ public class StoreBuilder
     return _path;
   }
   
+  /*
   public StoreBuilder mmap(boolean isMmap)
   {
     _isMmap = isMmap;
     
     return this;
   }
+  */
   
   public boolean isMmap()
   {

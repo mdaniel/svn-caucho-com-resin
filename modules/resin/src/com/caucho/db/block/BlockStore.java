@@ -1981,6 +1981,11 @@ public class BlockStore {
     close();
   }
   */
+  
+  public void wakeWriter()
+  {
+    _writer.wakeIfPending();
+  }
 
   // debugging stuff.
   /**

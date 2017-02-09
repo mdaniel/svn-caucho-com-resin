@@ -73,6 +73,11 @@ The <a href="security-ssl.xtp">SSL</a> section of the Security documentation pro
   <td>see openssl-tags</td>
 </tr>
 <tr>
+  <td>cipher-suites-forbidden</td>
+  <td>Restrictions to the allowed cryptography ciphers</td>
+  <td>see openssl-tags</td>
+</tr>
+<tr>
   <td>password</td>
   <td>Password protecting the public key</td>
   <td>see openssl-tags</td>

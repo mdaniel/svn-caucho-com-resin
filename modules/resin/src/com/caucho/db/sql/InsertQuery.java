@@ -125,6 +125,8 @@ class InsertQuery extends Query {
         queryContext.close();
       }
     }
+    
+    _table.wakeWriter();
   }
 
   public String toString()

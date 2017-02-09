@@ -1155,7 +1155,7 @@ public class Table extends BlockStore
       return false;
     }
 
-    buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
+    // buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
 
     Column []columns = _row.getColumns();
 

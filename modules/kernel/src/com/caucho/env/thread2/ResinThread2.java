@@ -141,7 +141,7 @@ final class ResinThread2 extends Thread {
       else if (_launcher.isIdleExpire()) {
         return;
       }
-      else if (_pool.execute(this)) {
+      else if (_pool.execute(this) && _taskRef.get() != null) {
       }
       else {
         park();

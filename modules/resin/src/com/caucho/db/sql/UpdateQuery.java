@@ -135,6 +135,8 @@ class UpdateQuery extends Query {
         freeRows(rows, rows.length);
       }
     }
+    
+    _table.wakeWriter();
   }
 
   public String toString()

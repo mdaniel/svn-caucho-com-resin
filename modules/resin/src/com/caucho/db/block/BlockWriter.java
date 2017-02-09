@@ -67,7 +67,9 @@ public class BlockWriter extends AbstractTaskWorker {
   {
     addDirtyBlockNoWake(block);
 
-    wake();
+    if (! isQueueEmpty()) {
+      wake();
+    }
   }
   
   /**
@@ -293,6 +295,13 @@ public class BlockWriter extends AbstractTaskWorker {
   {
     // return _blockWriteQueue.isEmpty();
     return _blockWriteRing.isEmpty();
+  }
+  
+  public void wakeIfPending()
+  {
+    if (! isQueueEmpty()) {
+      wake();
+    }
   }
 
   private Block peekFirstBlock()
