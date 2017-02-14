@@ -62,7 +62,11 @@ class ValidateQuery extends Query {
   public void execute(QueryContext context, DbTransaction xa)
     throws SQLException
   {
-    _table.validate();
+    try {
+      _table.validate();
+    } finally {
+      _table.wakeWriter();
+    }
   }
 
   public String toString()

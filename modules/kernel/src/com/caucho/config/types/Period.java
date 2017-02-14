@@ -247,7 +247,7 @@ public class Period {
 
       cal.setLocalTime(localTime);
 
-      periodEnd =  cal.getGMTTime();
+      periodEnd = cal.getGMTTime();
     }
 
     else if (period % (30 * DAY) == 0) {
@@ -290,7 +290,7 @@ public class Period {
       periodEnd = cal.getGMTTime();
     }
     
-    if (periodEnd <= now || now + 2 * period <= periodEnd) {
+    if (periodEnd <= now || now + period <= periodEnd) {
       periodEnd = now + period;
     }
     

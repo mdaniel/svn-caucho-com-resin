@@ -418,6 +418,8 @@ public class Table extends BlockStore
     _database.addTable(this);
 
     writeStartupTimestamp();
+    
+    wakeWriter();
   }
 
   private void writeStartupTimestamp()

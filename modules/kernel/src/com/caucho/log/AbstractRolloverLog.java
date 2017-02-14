@@ -464,6 +464,8 @@ public class AbstractRolloverLog implements Closeable {
     throws IOException
   {
     synchronized (_logLock) {
+      flushTempStream();
+      
       if (_os != null)
         _os.flush();
 
@@ -471,11 +473,7 @@ public class AbstractRolloverLog implements Closeable {
         _zipOut.flush();
     }
     
-    long now = CurrentTime.getCurrentTime();
-    
-    if (_nextPeriodEnd < now) {
-      _rolloverWorker.wake();
-    }
+    rollover();
   }
 
   /**
@@ -530,8 +528,9 @@ public class AbstractRolloverLog implements Closeable {
     } finally {
       synchronized (_logLock) {
         _isRollingOver = false;
-        flushTempStream();
       }
+      
+      _flushWorker.wake();
       
       _rolloverListener.requeue(_rolloverAlarm);
     }
@@ -918,14 +917,19 @@ public class AbstractRolloverLog implements Closeable {
    */
   private void flushTempStream()
   {
+    if (_isRollingOver) {
+      return;
+    }
+    
     TempStreamApi ts = _tempStream;
     _tempStream = null;
     _tempStreamSize = 0;
 
     try {
       if (ts != null) {
-        if (_os == null)
+        if (_os == null) {
           openLog();
+        }
 
         try {
           ReadStream is = ts.openRead();
@@ -961,7 +965,11 @@ public class AbstractRolloverLog implements Closeable {
     @Override
     public long runTask()
     {
-      rolloverLogTask();
+      try {
+        rolloverLogTask();
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
       
       return -1;
     }
@@ -975,6 +983,8 @@ public class AbstractRolloverLog implements Closeable {
         flushStream();
       } catch (IOException e) {
         log.log(Level.FINER, e.toString(), e);
+      } catch (Throwable e) {
+        e.printStackTrace();
       }
       
       return -1;
@@ -1009,12 +1019,7 @@ public class AbstractRolloverLog implements Closeable {
       else
         nextCheckTime = now + _rolloverCheckPeriod;
 
-      if (_nextPeriodEnd <= nextCheckTime) {
-        alarm.queueAt(_nextPeriodEnd);
-      }
-      else {
-        alarm.queueAt(nextCheckTime);
-      }
+      alarm.queueAt(Math.min(_nextPeriodEnd, nextCheckTime));
     }
   }
 }

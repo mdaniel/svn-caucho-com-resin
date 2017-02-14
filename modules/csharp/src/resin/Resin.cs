@@ -54,7 +54,7 @@ namespace Caucho
     private Process _process;
     private ResinArgs ResinArgs;
 
-    private static Mutex mutex = new Mutex(false, @"Global\com.caucho.Resin");
+    private Mutex _mutex;
 
     private Resin(ResinArgs args)
     {
@@ -63,6 +63,8 @@ namespace Caucho
       _resinHome = ResinArgs.ResinHome;
       _rootDirectory = ResinArgs.ResinRoot;
       _javaHome = ResinArgs.JavaHome;
+
+      _mutex = new Mutex(false, @"Global\com.caucho.Resin" + _rootDirectory);
     }
 
     public bool StartResin()
@@ -158,14 +160,14 @@ namespace Caucho
 
     private void ExecuteJava(String command)
     {
-      mutex.WaitOne();
+      _mutex.WaitOne();
       try
       {
         ExecuteJavaImpl(command);
       }
       finally
       {
-        mutex.ReleaseMutex();
+        _mutex.ReleaseMutex();
       }
     }
 

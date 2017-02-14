@@ -109,24 +109,26 @@ class InsertQuery extends Query {
   {
     TableIterator []rows = new TableIterator[1];
 
-    synchronized (_table) {
-      try {
-        rows[0] = _table.createTableIterator();
-        queryContext.init(xa, rows, isReadOnly());
+    try {
+      synchronized (_table) {
+        try {
+          rows[0] = _table.createTableIterator();
+          queryContext.init(xa, rows, isReadOnly());
 
-        _table.insert(queryContext, xa, _columns, _values);
+          _table.insert(queryContext, xa, _columns, _values);
 
-        queryContext.setRowUpdateCount(1);
+          queryContext.setRowUpdateCount(1);
 
-        xa.writeData(); // XXX:
-      } catch (java.io.IOException e) {
-        throw new SQLExceptionWrapper(e);
-      } finally {
-        queryContext.close();
+          xa.writeData(); // XXX:
+        } catch (java.io.IOException e) {
+          throw new SQLExceptionWrapper(e);
+        } finally {
+          queryContext.close();
+        }
       }
+    } finally {
+      _table.wakeWriter();
     }
-    
-    _table.wakeWriter();
   }
 
   public String toString()
