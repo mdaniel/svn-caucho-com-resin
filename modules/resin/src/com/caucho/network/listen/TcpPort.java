@@ -1813,7 +1813,7 @@ public class TcpPort
     if (! _lifecycle.toDestroy()) {
       return;
     }
-
+    
     if (log.isLoggable(Level.FINE))
       log.fine(this + " closing");
 
@@ -1892,9 +1892,9 @@ public class TcpPort
       for (int i = 0; i < idleCount + 10; i++) {
         InetSocketAddress addr;
 
-        if (getIdleThreadCount() == 0)
+        if (getIdleThreadCount() + getStartThreadCount() == 0)
           break;
-
+        
         if (localAddress == null ||
             localAddress.getHostAddress().startsWith("0.")) {
           addr = new InetSocketAddress("127.0.0.1", localPort);
