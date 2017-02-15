@@ -1830,8 +1830,12 @@ public class TcpPort
 
     InetAddress localAddress = null;
     int localPort = getLocalPort();
-    
-    if (serverSocket != null) {
+
+    if (_port > 0) {
+	localPort = _port;
+	localAddress = _socketAddress;
+    }
+    else if (serverSocket != null) {
       localAddress = serverSocket.getLocalAddress();
       localPort = serverSocket.getLocalPort();
     }
@@ -1894,7 +1898,7 @@ public class TcpPort
 
         if (getIdleThreadCount() + getStartThreadCount() == 0)
           break;
-        
+
         if (localAddress == null ||
             localAddress.getHostAddress().startsWith("0.")) {
           addr = new InetSocketAddress("127.0.0.1", localPort);
