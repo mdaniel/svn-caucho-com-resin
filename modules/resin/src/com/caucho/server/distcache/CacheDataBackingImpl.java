@@ -660,6 +660,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
         } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
+          
+          log.warning(e.toString());
         }
       }
       
@@ -762,5 +764,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
       return actualSleepDurationMs;
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _dataStore + "]";
   }
 }
