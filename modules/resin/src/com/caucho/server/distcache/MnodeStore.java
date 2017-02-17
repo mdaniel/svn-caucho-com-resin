@@ -724,7 +724,7 @@ public class MnodeStore {
 
       return true;
     } catch (SQLException e) {
-      e.printStackTrace();
+      //e.printStackTrace();
       log.log(Level.FINER, e.toString(), e);
     } finally {
       if (conn != null)

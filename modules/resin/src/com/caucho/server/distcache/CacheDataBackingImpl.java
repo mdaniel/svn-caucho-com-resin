@@ -249,7 +249,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       long lastAccessTime = mnodeUpdate.getLastAccessTime();
       long lastModifiedTime = mnodeUpdate.getLastAccessTime();
 
-      if (_mnodeStore.insert(key, cacheKey,
+      if (mnodeStore.insert(key, cacheKey,
                              mnodeUpdate, 
                              mnodeEntry.getValueDataId(),
                              mnodeEntry.getValueDataTime(),
@@ -263,14 +263,14 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       }
     } else {
       if (mnodeStore.updateSave(key.getHash(),
-                                 cacheKey.getHash(),
-                                 mnodeUpdate,
-                                 mnodeEntry.getValueDataId(),
-                                 mnodeEntry.getValueDataTime(),
-                                 mnodeEntry.getLastAccessedTime(),
-                                 mnodeEntry.getLastModifiedTime())) {
-        isSave = true;
-      }
+                                cacheKey.getHash(),
+                                mnodeUpdate,
+                                mnodeEntry.getValueDataId(),
+                                mnodeEntry.getValueDataTime(),
+                                mnodeEntry.getLastAccessedTime(),
+                                mnodeEntry.getLastModifiedTime())) {
+       isSave = true;
+     }
       else if (mnodeStore.insert(key,
                                   cacheKey,
                                   mnodeUpdate,
@@ -282,8 +282,17 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
         addCreateCount();
       }
+      else if (mnodeStore.updateSave(key.getHash(),
+                                cacheKey.getHash(),
+                                mnodeUpdate,
+                                mnodeEntry.getValueDataId(),
+                                mnodeEntry.getValueDataTime(),
+                                mnodeEntry.getLastAccessedTime(),
+                                mnodeEntry.getLastModifiedTime())) {
+       isSave = true;
+     }
       else {
-        log.fine(this + " db update failed due to timing conflict"
+        log.info(this + " db update failed due to timing conflict"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     }
