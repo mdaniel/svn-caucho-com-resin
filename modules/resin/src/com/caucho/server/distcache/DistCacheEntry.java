@@ -1198,9 +1198,7 @@ public class DistCacheEntry {
 
     CacheConfig config = getConfig();
 
-    getLocalDataManager().readData(getKeyHash(), mnodeValue, os, config);
-    
-    return true;
+    return getLocalDataManager().readData(getKeyHash(), mnodeValue, os, config);
   }
 
   /**
@@ -1224,9 +1222,7 @@ public class DistCacheEntry {
     
     CacheConfig config = getConfig();
 
-    getLocalDataManager().readData(getKeyHash(), mnodeValue, os, config);
-    
-    return true;
+    return getLocalDataManager().readData(getKeyHash(), mnodeValue, os, config);
   }
 
   //

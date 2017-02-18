@@ -207,7 +207,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         entry = mnodeUpdate;
       }
       else {
-        log.fine(this + " db update failed due to timing conflict"
+        log.fine(this + " db update failed due to late version"
                  + "(key=" + key + ")");
 
         entry = oldEntryValue;
@@ -282,17 +282,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
         addCreateCount();
       }
-      else if (mnodeStore.updateSave(key.getHash(),
-                                cacheKey.getHash(),
-                                mnodeUpdate,
-                                mnodeEntry.getValueDataId(),
-                                mnodeEntry.getValueDataTime(),
-                                mnodeEntry.getLastAccessedTime(),
-                                mnodeEntry.getLastModifiedTime())) {
-       isSave = true;
-     }
       else {
-        log.info(this + " db update failed due to timing conflict"
+        log.info(this + " db update failed due to late version"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     }

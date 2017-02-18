@@ -36,7 +36,7 @@ class Row {
   private static final L10N L = new L10N(Row.class);
   
   // bit of the first null mask, i.e. skipping the allocation bits
-  private static final int NULL_OFFSET = 2;
+  private static final int NULL_OFFSET = 3;
 
   private Table _table;
   private Column []_columns = new Column[0];

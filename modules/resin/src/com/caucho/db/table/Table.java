@@ -989,7 +989,7 @@ public class Table extends BlockStore
         if (rowOffset >= 0) {
           insertRow(queryContext, xa, columns, values,
                     block, rowOffset);
-
+          
           block.saveAllocation();
 
           _rowAllocator.freeRowBlockId(blockId);
