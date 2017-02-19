@@ -924,11 +924,13 @@ public class BlockStore {
   public void deallocateBlock(long blockId)
     throws IOException
   {
-    if (blockId == 0)
+    if (blockId <= 1) {
+      Thread.dumpStack();
       return;
+    }
 
     long index = blockIdToIndex(blockId);
-
+    
     synchronized (_allocationLock) {
       if (getAllocation(index) == ALLOC_FREE) {
         throw new IllegalStateException(L.l("{0} double free of {1}",
@@ -971,6 +973,12 @@ public class BlockStore {
    */
   private void setAllocation(long blockIndex, int code)
   {
+    if (blockIndex <= 1 && code != ALLOC_DATA) {
+      System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + code);
+      Thread.dumpStack();
+      return;
+    }
+    
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
     for (int i = 1; i < ALLOC_BYTES_PER_BLOCK; i++) {
@@ -982,8 +990,6 @@ public class BlockStore {
     
     if (oldCode != ALLOC_FREE && code != ALLOC_FREE && oldCode != code) {
       System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + oldCode + " " + code);
-      Thread.dumpStack();
-    } else if (blockIndex == 0 && code != ALLOC_DATA) {
       Thread.dumpStack();
     }
 
