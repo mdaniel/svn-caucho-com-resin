@@ -283,7 +283,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         addCreateCount();
       }
       else {
-        log.info(this + " db update failed due to late version"
+        log.finer(this + " db update failed due to late version"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     }
