@@ -52,6 +52,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
@@ -60,6 +61,7 @@ import com.caucho.vfs.WriteStream;
  * Manages the distributed cache
  */
 public class CacheDataBackingImpl implements CacheDataBacking {
+  private static final L10N L = new L10N(CacheDataBackingImpl.class);
   private static final Logger log
     = Logger.getLogger(CacheDataBackingImpl.class.getName());
 
@@ -88,6 +90,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   public CacheDataBackingImpl(CacheStoreManager storeManager)
   {
     _manager = storeManager;
+    
+    if (_reaperTimeout < 5 * 60000) {
+      log.warning(L.l("Test {0} _reaperTimeout",
+                      getClass().getSimpleName()));
+    }
   }
 
   public void setDataStore(DataStore dataStore)
@@ -658,6 +665,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       
       if (mnodeList.size() > 0) {
         log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items (removed=" + removeCount + ")");
+        
+        _expireState.removeExpiredData();
       }
 
         // throttle the select query

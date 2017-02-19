@@ -77,6 +77,7 @@ public class MnodeStore {
   private String _updateAccessTimeQuery;
 
   private String _selectExpireQuery;
+  private String _deleteExpireQuery;
 
   private String _selectCacheKeysQuery;
 
@@ -231,6 +232,10 @@ public class MnodeStore {
                           + " FROM " + _tableName
                           + " WHERE (access_time + 1.25 * access_timeout < ?"
                           + "        OR modified_time + 1.25 * modified_timeout < ?)");
+    
+    _deleteExpireQuery = ("DELETE FROM " + _tableName
+                          + " WHERE (access_time + 5 * access_timeout < ?"
+                          + "        OR modified_time + 5 * modified_timeout < ?)");
 
     _selectCacheKeysQuery = ("SELECT resin_oid,id FROM " + _tableName
                              + " WHERE cache_id=? AND ? < resin_oid"
@@ -959,8 +964,40 @@ public class MnodeStore {
 
       return expireList;
     }
-  }
 
+    /**
+     * Clears the expired data
+     */
+    public void removeExpiredData()
+    {
+      CacheMapConnection conn = null;
+
+      try {
+        conn = getConnection();
+        PreparedStatement pstmt = conn.prepareDeleteExpire();
+
+        long now = CurrentTime.getCurrentTime();
+
+        //pstmt.setLong(1, _lastOid);
+        //pstmt.setLong(2, now);
+        //pstmt.setLong(3, now);
+
+        pstmt.setLong(1, now);
+        pstmt.setLong(2, now);
+
+        int count = pstmt.executeUpdate();
+
+        if (count > 0) {
+          log.warning("Removed " + count + " expired data");
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        log.log(Level.FINE, e.toString(), e);
+      } finally {
+        conn.close();
+      }
+    }
+  }      
   //
   // statistics
   //
@@ -1036,6 +1073,7 @@ public class MnodeStore {
     private PreparedStatement _updateAccessTimeStatement;
 
     private PreparedStatement _selectExpireStatement;
+    private PreparedStatement _deleteExpireStatement;
     private PreparedStatement _deleteStatement;
 
     private PreparedStatement _countStatement;
@@ -1090,6 +1128,15 @@ public class MnodeStore {
         _selectExpireStatement = _conn.prepareStatement(_selectExpireQuery);
 
       return _selectExpireStatement;
+    }
+
+    PreparedStatement prepareDeleteExpire()
+      throws SQLException
+    {
+      if (_deleteExpireStatement == null)
+        _deleteExpireStatement = _conn.prepareStatement(_deleteExpireQuery);
+
+      return _deleteExpireStatement;
     }
 
     PreparedStatement prepareDelete()

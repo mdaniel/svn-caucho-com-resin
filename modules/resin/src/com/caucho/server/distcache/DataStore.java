@@ -80,7 +80,7 @@ public class DataStore {
 
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
-  private long _expireOrphanTimeout = 1 * 60L * 1000L;
+  private long _expireOrphanTimeout = 60 * 60L * 1000L;
 
   // data must live for at least 15min because of timing issues during
   // creation. The reaper must not remove data while it's being added
@@ -156,6 +156,10 @@ public class DataStore {
     _validateQuery = ("VALIDATE " + _dataTableName);
 
     _countQuery = "SELECT count(*) FROM " + _dataTableName;
+    
+    if (_expireOrphanTimeout < 15 * 60000) {
+      log.warning("Short orphan timing for testing " + _expireOrphanTimeout);
+    }
   }
 
   DataSource getDataSource()

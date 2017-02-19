@@ -103,9 +103,9 @@ public class BlockWriter extends AbstractTaskWorker {
   void addDirtyBlockNoWake(Block block)
   {
     /*if (_queueSize <= 2 * _blockWriteRing.getSize()) {
-      wake();
-    }
-    */
+    wake();
+  }
+  */
 
     if (_blockWriteRing.offer(block, 0, TimeUnit.SECONDS)) {
       return;
@@ -156,9 +156,15 @@ public class BlockWriter extends AbstractTaskWorker {
   {
     Block writeBlock;
 
+    boolean isCopy = false;
+    
     do {
-      writeBlock = findBlock(blockId);
-    } while (writeBlock != null && ! writeBlock.copyToBlock(block));
+      synchronized (_blockWriteQueue) {
+        writeBlock = findBlock(blockId);
+
+        isCopy = writeBlock.copyToBlock(block);
+      }
+    } while (writeBlock != null && ! isCopy);
 
     return writeBlock != null;
   }
