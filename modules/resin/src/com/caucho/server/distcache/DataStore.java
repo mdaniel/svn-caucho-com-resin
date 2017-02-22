@@ -80,7 +80,7 @@ public class DataStore {
 
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
   //private long _expireOrphanTimeout = 60 * 60L * 1000L;
-  private long _expireOrphanTimeout = 60 * 60L * 1000L;
+  private long _expireOrphanTimeout = 1 * 60L * 1000L;
 
   // data must live for at least 15min because of timing issues during
   // creation. The reaper must not remove data while it's being added

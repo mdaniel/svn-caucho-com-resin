@@ -498,6 +498,10 @@ public class BlockStore {
     _readWrite.writeBlock(0, _allocationTable, 0, _allocationTable.length, isPriority);
 
     _blockCount = 2;
+
+    if (getAllocation(0) != ALLOC_DATA || getAllocation(1) != ALLOC_DATA) {
+      Thread.dumpStack();
+    }
   }
 
   public void init()
@@ -535,6 +539,10 @@ public class BlockStore {
 
       _readWrite.readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
                            _allocationTable, i, len);
+    }
+
+    if (getAllocation(0) != ALLOC_DATA || getAllocation(1) != ALLOC_DATA) {
+      Thread.dumpStack();
     }
   }
 
@@ -815,6 +823,11 @@ public class BlockStore {
                          newTable, 0,
                          _allocationTable.length);
         _allocationTable = newTable;
+
+	if (getAllocation(0) != ALLOC_DATA
+	    || getAllocation(1) != ALLOC_DATA) {
+	  Thread.dumpStack();
+	}
 
         long superBlockMax = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
         for (long index = 0;

@@ -162,7 +162,9 @@ public class BlockWriter extends AbstractTaskWorker {
       synchronized (_blockWriteQueue) {
         writeBlock = findBlock(blockId);
 
-        isCopy = writeBlock.copyToBlock(block);
+	if (writeBlock != null) {
+	  isCopy = writeBlock.copyToBlock(block);
+	}
       }
     } while (writeBlock != null && ! isCopy);
 
@@ -329,7 +331,9 @@ public class BlockWriter extends AbstractTaskWorker {
     }
     */
 
-    _blockWriteRing.poll();
+    synchronized (_blockWriteRing) {
+      _blockWriteRing.poll();
+    }
   }
 
   @Override

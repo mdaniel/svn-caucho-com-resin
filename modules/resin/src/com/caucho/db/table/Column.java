@@ -71,6 +71,10 @@ abstract public class Column {
     _columnOffset = _row.getLength();
     _nullOffset = _row.getNullOffset();
     _nullMask = _row.getNullMask();
+
+    if ((_nullMask & 0x3) != 0 && _nullOffset == 0) {
+	Thread.dumpStack();
+    }
     
     if (_nullOffset < 0) {
       throw new IllegalStateException();

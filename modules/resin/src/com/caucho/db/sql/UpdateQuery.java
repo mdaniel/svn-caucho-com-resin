@@ -123,7 +123,7 @@ class UpdateQuery extends Query {
             } finally {
               context.unlock();
             }
-
+	    
             context.setRowUpdateCount(++count);
           } while (nextTuple(rows, rows.length, context, xa));
         } catch (IOException e) {

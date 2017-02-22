@@ -343,6 +343,17 @@ public final class Block implements SyncCacheListener {
     } while (! _dirtyRange.compareAndSet(oldDirty, newDirty));
   }
 
+  public void debugFd()
+  {
+      byte []buffer = _buffer;
+      for (int i = 0; i < buffer.length; i++) {
+	  if ((buffer[i] & 0xff) == 0xfd) {
+	      System.err.println("ID: " + i + " " + this);
+	      Thread.dumpStack();
+	  }
+      }
+  }
+
   /**
    * Sets a specific dirty value. Not thread safe.
    */
@@ -550,6 +561,7 @@ public final class Block implements SyncCacheListener {
     // For timing reasons, the buffer cannot be freed if it's also
     // copied.
     _isFreeBuffer = false;
+    block._isFreeBuffer = false;
 
     byte []buffer = _buffer;
     byte []targetBuffer = block.getBuffer();

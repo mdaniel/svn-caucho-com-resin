@@ -444,9 +444,11 @@ public final class BTree {
           long oldValue = getPointer(buffer, offset);
 
           if (value != oldValue) {
-            throw new SqlIndexAlreadyExistsException(L.l("'{0}' insert of key '{1}' fails index uniqueness.",
+            throw new SqlIndexAlreadyExistsException(L.l("'{0}' insert of key '{1}' fails index uniqueness old={2} value={3}.",
                                                          _store,
-                                                         _keyCompare.toString(keyBuffer, keyOffset, keyLength)));
+                                                         _keyCompare.toString(keyBuffer, keyOffset, keyLength),
+							 Long.toHexString(oldValue),
+							 Long.toHexString(value)));
           }
         }
 

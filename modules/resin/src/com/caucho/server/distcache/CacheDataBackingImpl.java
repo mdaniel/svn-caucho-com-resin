@@ -178,7 +178,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     // MnodeUpdate mnodeUpdate = new MnodeUpdate(mnodeValue);
     MnodeEntry entry = null;
     boolean isSave = false;
-    
+
+    synchronized (_mnodeStore) {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeEntry.NULL) {
@@ -213,12 +214,23 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         isSave = true;
         entry = mnodeUpdate;
       }
+      else if (_mnodeStore.updateSave(key.getHash(),
+                                 cacheKey.getHash(),
+                                 mnodeUpdate,
+                                 mnodeUpdate.getValueDataId(),
+                                 mnodeUpdate.getValueDataTime(),
+                                 mnodeUpdate.getLastAccessedTime(),
+                                 mnodeUpdate.getLastModifiedTime())) {
+        isSave = true;
+        entry = mnodeUpdate;
+      }
       else {
         log.fine(this + " db update failed due to late version"
                  + "(key=" + key + ")");
 
         entry = oldEntryValue;
       }
+    }
     }
     
     if (isSave && oldEntryValue != null) {
@@ -249,6 +261,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       return true;
     }
 
+    synchronized (mnodeStore) {
     if (oldEntryEntry == null
         || oldEntryEntry.isImplicitNull()
         || oldEntryEntry == MnodeEntry.NULL) {
@@ -293,6 +306,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         log.finer(this + " db update failed due to late version"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
+    }
     }
 
     if (isSave && oldEntryEntry != null) {
