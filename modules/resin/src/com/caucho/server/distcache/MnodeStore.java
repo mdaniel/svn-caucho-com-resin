@@ -968,7 +968,7 @@ public class MnodeStore {
     /**
      * Clears the expired data
      */
-    public void removeExpiredData()
+    public int removeExpiredData()
     {
       CacheMapConnection conn = null;
 
@@ -987,12 +987,12 @@ public class MnodeStore {
 
         int count = pstmt.executeUpdate();
 
-        if (count > 0) {
-          log.warning("Removed " + count + " expired data");
-        }
+        return count;
       } catch (Exception e) {
         e.printStackTrace();
         log.log(Level.FINE, e.toString(), e);
+        
+        return 0;
       } finally {
         conn.close();
       }

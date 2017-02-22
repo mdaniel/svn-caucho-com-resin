@@ -82,7 +82,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   
   //private long _reaperTimeout = 5 * 60 * 1000;
   //private long _reaperTimeout = 5 * 60 * 1000;
-  private long _reaperTimeout = 1 * 60 * 1000;
+  private long _reaperTimeout = 5 * 60 * 1000;
 
   private long _reaperCycleMaxActiveDurationMs = 1 * 1000;
   private double _reaperCycleIdleToActiveUtilizationRatio = 2.0;
@@ -678,9 +678,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       }
       
       if (mnodeList.size() > 0) {
-        log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items (removed=" + removeCount + ")");
+        int count = _expireState.removeExpiredData();
         
-        _expireState.removeExpiredData();
+        log.info(getClass().getSimpleName() + " removed " + mnodeList.size() + " expired items (removed=" + removeCount + ",old=" + count + ")");
+        
       }
 
         // throttle the select query
