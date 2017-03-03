@@ -1,0 +1,46 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.51 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>We encourage people to report 4.0.51 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+<p>4.0.51 is primarily a bug fix release. Please see
+<a href="changes.xtp">changes.xtp</a> for a list of changes.</p>
+
+</s1>
+
+<s1 title="Database Timing">
+
+<p>Fixed timing issues with the underlying database block cache, which
+could lead to corrupted blocks.</p>
+
+</s1>
+
+<s1 title="Hessian Class Whitelist">
+
+<p>Added class loading whitelist to Hessian.</p>
+
+<example>
+HessianFactory factory = new HessianFactory();
+
+factory.allow("com.foo.mypkg.*");
+
+try (Hessian2Input hIn = factory.createHessian2Input(is)) {
+  Object obj = hIn.readObject();
+}  
+</example>
+
+
+</s1>
+
+</body>
+</document>

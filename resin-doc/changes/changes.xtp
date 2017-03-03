@@ -8,6 +8,7 @@
 
 <s2 title="4.0.51 in progress">
 <ul>
+<li>database: timing fixes for block load and write (#6034, rep by Nikola Sepentulevski)</li>
 <li>thread: task timing allows spurious LAUNCH error</li>
 <li>hessian: add allow/deny/whitelist for the deserializer</li>
 <li>request: NPE in finishRequest for callbacks and getLocale() (#6028)</li>
