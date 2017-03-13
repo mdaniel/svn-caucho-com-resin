@@ -1441,32 +1441,28 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
           session.invalidateTimeout();
           session = null;
         }
-        else if (session.load(isNew)) {
-          session.addUse();
-
-          if (isCreate) {
-            // TCK only set access on create
-            session.setAccess(now);
-          }
-
-          return session;
-        }
         else {
-          // if the load failed, then the session died out from underneath
-          if (! isNew) {
-            if (log.isLoggable(Level.FINER))
-              log.fine(session + " load failed for existing session");
+          session.addUse();
+          
+          if (session.load(isNew)) {
+            if (isCreate) {
+              // TCK only set access on create
+              session.setAccess(now);
+            }
 
-            // server/0174
-            session.reset(0);
-            /*
-          session.setModified();
+            return session;
+          }
+          else {
+            session.endUse();
+            
+            // if the load failed, then the session died out from underneath
+            if (! isNew) {
+              if (log.isLoggable(Level.FINER))
+                log.fine(session + " load failed for existing session");
 
-          // Return the existing session for timing reasons, e.g.
-          // if a second request hits before the first has finished saving
-
-          return session;
-             */
+              // server/0174
+              session.reset(0);
+            }
           }
         }
       }
@@ -1630,8 +1626,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
     SessionImpl session = create(id, now, true);
 
-    if (session == null)
+    if (session == null) {
       return null;
+    }
 
     session.addUse();
 

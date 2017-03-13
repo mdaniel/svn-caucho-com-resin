@@ -6,7 +6,14 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.51 in progress">
+<s2 title="4.0.52 - in progress">
+<ul>
+<li>rewrite: rewrite in host with resin:IfXXX adds extra log (#5943, rep by stbu)</li>
+<li>session: session.refCount issues with forward and loaded session (#6039, rep by Shinomiya Nobuaki)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.51 - Mar 3, 2017">
 <ul>
 <li>database: timing fixes for block load and write (#6034, rep by Nikola Sepentulevski)</li>
 <li>thread: task timing allows spurious LAUNCH error</li>

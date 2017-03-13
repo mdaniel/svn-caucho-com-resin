@@ -570,10 +570,10 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   boolean addUse()
   {
+    
     _lastUseTime = CurrentTime.getCurrentTime();
 
     _useCount.incrementAndGet();
-
     /*
     synchronized (this) {
       if (_isClosing)
@@ -646,7 +646,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     // TCK cares about exact time
     setAccessTime(CurrentTime.getExactTime());
     _isNew = false;
-
+    
     // update cache access?
     if (_useCount.decrementAndGet() > 0)
       return;
@@ -938,7 +938,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       }
 
       _isModified = false;
-
+      
       TempOutputStream os = new TempOutputStream();
       HashChunkOutputStream crcOs = new HashChunkOutputStream(os);
       

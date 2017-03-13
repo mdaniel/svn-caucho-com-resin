@@ -4019,6 +4019,14 @@ public class WebApp extends ServletContextImpl
   @Override
   public Invocation buildInvocation(Invocation invocation)
   {
+    return buildInvocation(invocation, true);
+  }
+
+    /**
+     * Fills the servlet instance.  (Generalize?)
+     */
+  public Invocation buildInvocation(Invocation invocation, boolean isTop)
+  {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -4127,7 +4135,7 @@ public class WebApp extends ServletContextImpl
         
         chain = buildSecurity(chain, invocation);
 
-        chain = createWebAppFilterChain(chain, invocation, true);
+        chain = createWebAppFilterChain(chain, invocation, isTop);
 
         invocation.setFilterChain(chain);
         invocation.setPathInfo(entry.getPathInfo());
@@ -4212,8 +4220,9 @@ public class WebApp extends ServletContextImpl
     if (_isStatisticsEnabled)
       chain = new StatisticsFilterChain(chain, this);
 
-    if (getAccessLog() != null && isTop)
+    if (getAccessLog() != null && isTop) {
       chain = new AccessLogFilterChain(chain, this);
+    }
     
     return chain;
   }
