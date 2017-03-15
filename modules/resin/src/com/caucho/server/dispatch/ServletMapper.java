@@ -433,7 +433,6 @@ public class ServletMapper {
       invocation.setPathInfo(null);
     }
     else if (next < tail.length()) {
-
       invocation.setServletPath(servletPath + tail.substring(0, next));
       invocation.setPathInfo(tail.substring(next));
     }

@@ -140,7 +140,7 @@ public class ServletInvocation {
    */
   public void setPathInfo(String pathInfo)
   {
-    _pathInfo = pathInfo;
+    _pathInfo = stripPathParameters(pathInfo);
   }
 
   /**
@@ -308,6 +308,42 @@ public class ServletInvocation {
     _filterChain = invocation._filterChain;
 
     _securityRoleMap = invocation._securityRoleMap;
+  }
+  
+  private static String stripPathParameters(String value)
+  {
+    if (value == null) {
+      return null;
+    }
+    
+    StringBuilder sb = null;
+    int i = 0;
+    int length = value.length();
+    
+    for (; i < length; i++) {
+      char ch = value.charAt(i);
+      
+      if (ch == ';') {
+        if (sb == null) {
+          sb = new StringBuilder();
+          sb.append(value, 0, i);
+        }
+        
+        int j = value.indexOf('/', i);
+        
+        if (j < 0) {
+          return sb.toString();
+        }
+        else {
+          i = j - 1;
+        }
+      }
+      else if (sb != null) {
+        sb.append(ch);
+      }
+    }
+    
+    return sb != null ? sb.toString() : value;
   }
 
   @Override
