@@ -124,7 +124,7 @@ public class ServletInvocation {
    */
   public void setServletPath(String servletPath)
   {
-    _servletPath = servletPath;
+    _servletPath = stripPathParameters(servletPath);
   }
 
   /**

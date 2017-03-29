@@ -77,10 +77,10 @@ class TableRowAllocator extends AbstractTaskWorker {
 
   private final AtomicLongArray _insertFreeRowBlockArray
     = new AtomicLongArray(FREE_ROW_BLOCK_SIZE);
-  private final AtomicInteger _insertFreeRowBlockHead
-    = new AtomicInteger();
-  private final AtomicInteger _insertFreeRowBlockTail
-    = new AtomicInteger();
+  private final AtomicLong _insertFreeRowBlockHead
+    = new AtomicLong();
+  private final AtomicLong _insertFreeRowBlockTail
+    = new AtomicLong();
 
   private long _rowTailTop = BlockStore.BLOCK_SIZE * FREE_ROW_BLOCK_SIZE;
   private final AtomicLong _rowTailOffset = new AtomicLong();
@@ -180,7 +180,7 @@ class TableRowAllocator extends AbstractTaskWorker {
     if (_rowTailOffset.get() < _rowTailTop || isClosed()) {
       return;
     }
-    
+
     while (scanClock()) {
       if (! resetClock()) {
         return;
@@ -226,7 +226,10 @@ class TableRowAllocator extends AbstractTaskWorker {
     long tableRowDeleteCount = _table.getRowDeleteCount();
     long deleteRowCount = (tableRowDeleteCount - _clockRowDeleteCount) / _rowsPerBlock;
 
-    if (_clockRowFree < ROW_CLOCK_MIN && _rowClockOffset > 0) {
+    if (newRowCount > 0) {
+      newRowCount = Math.max(newRowCount, ROW_CLOCK_MIN);
+    }
+    else if (_clockRowFree < ROW_CLOCK_MIN && _rowClockOffset > 0) {
       // minimum 256 blocks of free rows
       newRowCount = ROW_CLOCK_MIN;
     }
@@ -260,8 +263,9 @@ class TableRowAllocator extends AbstractTaskWorker {
   private boolean isRowBlockFree(long blockId)
     throws IOException
   {
-    if (isClosed())
+    if (isClosed()) {
       return false;
+    }
     
     Block block = _table.readBlock(blockId);
 
@@ -276,8 +280,9 @@ class TableRowAllocator extends AbstractTaskWorker {
           isFree = true;
           _clockRowFree++;
         }
-        else
+        else {
           _clockRowUsed++;
+        }
       }
 
       return isFree;
@@ -288,31 +293,32 @@ class TableRowAllocator extends AbstractTaskWorker {
 
   private boolean isFreeRowBlockIdAvailable()
   {
-    int head = _insertFreeRowBlockHead.get();
-    int tail = _insertFreeRowBlockTail.get();
+    long head = _insertFreeRowBlockHead.get();
+    long tail = _insertFreeRowBlockTail.get();
     
-    return (head + 1) % FREE_ROW_BLOCK_SIZE != tail;
+    return (head + 1) % FREE_ROW_BLOCK_SIZE != tail % FREE_ROW_BLOCK_SIZE;
   }
 
   private long allocateRowBlockId()
   {
     while (true) {
-      int tail = _insertFreeRowBlockTail.get();
-      int head = _insertFreeRowBlockHead.get();
+      long tail = _insertFreeRowBlockTail.get();
+      long head = _insertFreeRowBlockHead.get();
       
       if (head == tail) {
         allocateNewRows();
         return 0;
       }
     
-      long blockId = _insertFreeRowBlockArray.getAndSet(tail, 0);
+      int index = (int) (tail % FREE_ROW_BLOCK_SIZE);
+      long blockId = _insertFreeRowBlockArray.getAndSet(index, 0);
       
-      int nextTail = (tail + 1) % FREE_ROW_BLOCK_SIZE;
+      long nextTail = tail + 1;
       
       _insertFreeRowBlockTail.compareAndSet(tail, nextTail);
       
       if (blockId > 0) {
-        int size = (head - tail + FREE_ROW_BLOCK_SIZE) % FREE_ROW_BLOCK_SIZE;
+        int size = (int) (head - tail);
         
         if (2 * size < FREE_ROW_BLOCK_SIZE) {
           allocateNewRows();
@@ -327,18 +333,20 @@ class TableRowAllocator extends AbstractTaskWorker {
   void freeRowBlockId(long blockId)
   {
     while (true) {
-      int head = _insertFreeRowBlockHead.get();
-      int tail = _insertFreeRowBlockTail.get();
+      long head = _insertFreeRowBlockHead.get();
+      long tail = _insertFreeRowBlockTail.get();
       
-      int nextHead = (head + 1) % FREE_ROW_BLOCK_SIZE;
+      long nextHead = head + 1;
       
-      if (nextHead == tail)
+      if (nextHead % FREE_ROW_BLOCK_SIZE == tail % FREE_ROW_BLOCK_SIZE)
         return;
       
       _insertFreeRowBlockHead.compareAndSet(head, nextHead);
       
-      if (_insertFreeRowBlockArray.compareAndSet(head, 0, blockId))
+      int index = (int) (head % FREE_ROW_BLOCK_SIZE);
+      if (_insertFreeRowBlockArray.compareAndSet(index, 0, blockId)) {
         return;
+      }
     }
   }
   

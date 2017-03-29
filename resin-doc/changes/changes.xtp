@@ -8,6 +8,10 @@
 
 <s2 title="4.0.52 - in progress">
 <ul>
+<li>database: meta-allocation-table write issues</li>
+<li>database: free row allocation performance issues (#6044)</li>
+<li>access.log: possible corruption by multithreading (#6038)</li>
+<li>classloader: relative path validation for getResource (rep by Steffen Busch)</li>
 <li>servlet: strip path parameters from getPathInfo CVE-2016-9879 (#6036, rep by mtryhoen2</li>
 <li>rewrite: rewrite in host with resin:IfXXX adds extra log (#5943, rep by stbu)</li>
 <li>session: session.refCount issues with forward and loaded session (#6039, rep by Shinomiya Nobuaki)</li>

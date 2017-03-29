@@ -153,6 +153,12 @@ public class BlockReadWrite {
       closeRowFile(wrapper, isPriority);
     }
   }
+  
+  public void removeInit()
+    throws IOException
+  {
+    _path.remove();
+  }
 
   public void remove()
     throws SQLException
@@ -246,6 +252,18 @@ public class BlockReadWrite {
                          boolean isPriority)
     throws IOException
   {
+    if (buffer == null || offset < 0 || length < 0
+        || buffer.length < offset + length) {
+      System.err.println("BUFFER: " + buffer + " " + offset + " " + length);
+    }
+    
+    if (blockAddress == 0
+        && (buffer[offset] != BlockStore.ALLOC_DATA
+            || buffer[offset + 2] != BlockStore.ALLOC_DATA)) {
+      System.err.println("Bad meta-block write: " + blockAddress + " " + buffer[offset]);
+      Thread.dumpStack();
+    }
+    
     RandomAccessWrapper wrapper;
 
     wrapper = openRowFile(isPriority, blockAddress + length);
@@ -258,11 +276,7 @@ public class BlockReadWrite {
       Thread.dumpStack();
       }
       */
-      if (buffer == null || offset < 0 || length < 0
-          || buffer.length < offset + length) {
-        System.err.println("BUFFER: " + buffer + " " + offset + " " + length);
-      }
-
+      
       os.write(blockAddress, buffer, offset, length);
       freeRowFile(wrapper, isPriority);
       wrapper = null;

@@ -1950,8 +1950,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     else if (url != null)
       return url;
 
-    if (name.startsWith("/"))
+    if (name.startsWith("/")) {
       name = name.substring(1);
+    }
+    
+    int colon = name.indexOf(':');
+    int slash = name.indexOf('/');
+    
+    if (colon >= 0 && (colon < slash || slash < 0)) {
+      return null;
+    }
+    
 
     // String alias = getResourceAlias(name);
 

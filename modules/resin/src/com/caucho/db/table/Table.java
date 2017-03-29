@@ -350,6 +350,10 @@ public class Table extends BlockStore
                             table));
           }
         }
+        
+        if (table.getAllocation(0) != BlockStore.ALLOC_DATA) {
+          throw new IllegalStateException("Invalid table load");
+        }
 
         table.writeStartupTimestamp();
 

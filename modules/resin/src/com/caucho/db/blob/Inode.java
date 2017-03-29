@@ -856,7 +856,12 @@ public class Inode
         int blockCount = (int) ((length - 1) / BLOCK_SIZE);
         long blockAddr = readBlockAddr(bytes, 0, update, length - 1);
 
-        if (! validateBlockAddr(blockAddr, length, BlockStore.ALLOC_DATA)) {
+        try {
+          if (! validateBlockAddr(blockAddr, length, BlockStore.ALLOC_DATA)) {
+            continue;
+          }
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
           continue;
         }
 

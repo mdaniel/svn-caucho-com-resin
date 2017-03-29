@@ -492,10 +492,8 @@ public class BlockStore {
     boolean isPriority = true;
 
     byte []buffer = new byte[BLOCK_SIZE];
-    _readWrite.writeBlock(0, buffer, 0, BLOCK_SIZE, isPriority);
-    _readWrite.writeBlock(BLOCK_SIZE, buffer, 0, BLOCK_SIZE, isPriority);
-
     _readWrite.writeBlock(0, _allocationTable, 0, _allocationTable.length, isPriority);
+    _readWrite.writeBlock(BLOCK_SIZE, buffer, 0, BLOCK_SIZE, isPriority);
 
     _blockCount = 2;
 
@@ -522,6 +520,14 @@ public class BlockStore {
     allocCount -= allocCount % ALLOC_GROUP_COUNT;
 
     int allocSize = allocCount * ALLOC_BYTES_PER_BLOCK;
+    
+    if (allocSize < ALLOC_CHUNK_SIZE) {
+      log.warning(this + " chunk failure. Rebuilding.");
+      
+      removeAndCreate();
+      
+      return;
+    }
 
     _allocationTable = new byte[allocSize];
 
@@ -530,19 +536,40 @@ public class BlockStore {
 
       long allocGroup = i / BLOCK_SIZE;
 
-      if (BLOCK_SIZE < len)
-        len = BLOCK_SIZE;
+      len = Math.min(len, BLOCK_SIZE);
 
       /*
       System.out.println("READ: " + Long.toHexString(allocGroup * ALLOC_GROUP_SIZE) + " " + allocGroup * ALLOC_GROUP_SIZE);
       */
 
-      _readWrite.readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
+      _readWrite.readBlock(allocGroup * ALLOC_GROUP_SIZE,
                            _allocationTable, i, len);
     }
 
     if (getAllocation(0) != ALLOC_DATA || getAllocation(1) != ALLOC_DATA) {
+      log.warning(this + " corrupted database. Rebuilding.");
       Thread.dumpStack();
+     
+      removeAndCreate();
+    }
+  }
+  
+  private void removeAndCreate()
+  {
+    if (! _lifecycle.toIdle()) {
+      Thread.dumpStack();
+    }
+    
+    try {
+      _readWrite.removeInit();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  
+    try {
+      create();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -810,9 +837,7 @@ public class BlockStore {
         newBlockCount = _blockCount + 256;
       }
 
-      if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize()) {
-        newBlockCount = _readWrite.getFileSize() / BLOCK_SIZE;
-      }
+      newBlockCount = Math.max(newBlockCount, _readWrite.getFileSize() / BLOCK_SIZE);
       
       while (_allocationTable.length / ALLOC_BYTES_PER_BLOCK
              < newBlockCount) {
@@ -824,8 +849,7 @@ public class BlockStore {
                          _allocationTable.length);
         _allocationTable = newTable;
 
-	if (getAllocation(0) != ALLOC_DATA
-	    || getAllocation(1) != ALLOC_DATA) {
+	if (getAllocation(0) != ALLOC_DATA || getAllocation(1) != ALLOC_DATA) {
 	  Thread.dumpStack();
 	}
 
@@ -898,14 +922,22 @@ public class BlockStore {
   {
     RuntimeException e = null;
 
-    if (isClosed())
+    if (isClosed()) {
       e = new IllegalStateException(L.l("store {0} is closing.", this));
-    else if (getId() <= 0)
+    }
+    else if (getId() <= 0) {
       e = new IllegalStateException(L.l("invalid store {0}.", this));
+    }
     else if (getId() != (blockId & BLOCK_INDEX_MASK)) {
       e = new IllegalArgumentException(L.l("block {0} must match store {1}.",
-                                             blockId & BLOCK_INDEX_MASK,
-                                             this));
+                                           blockId & BLOCK_INDEX_MASK,
+                                           this));
+    }
+    else if (blockIdToAddress(blockId) <= 0) {
+      Thread.dumpStack();
+      e = new IllegalArgumentException(L.l("invalid meta-block {0} must match store {1}.",
+                                           Long.toHexString(blockId),
+                                           this));
     }
 
     if (e != null)
@@ -1060,22 +1092,25 @@ public class BlockStore {
   {
     // Write each dirty block to disk.  The physical blocks are
     // broken up each BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK.
-    for (;
-         dirtyMin < dirtyMax;
-         dirtyMin = (dirtyMin + BLOCK_SIZE) - dirtyMin % BLOCK_SIZE) {
+    while (dirtyMin < dirtyMax) {
       int allocGroup = dirtyMin / BLOCK_SIZE;
 
       int offset = dirtyMin % BLOCK_SIZE;
+      
       int length;
 
-      if (dirtyMin / BLOCK_SIZE != dirtyMax / BLOCK_SIZE)
+      if (dirtyMin / BLOCK_SIZE != dirtyMax / BLOCK_SIZE) {
         length = BLOCK_SIZE - offset;
-      else
+      }
+      else {
         length = dirtyMax - dirtyMin;
+      }
 
       boolean isPriority = true;
       _readWrite.writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
                             _allocationTable, dirtyMin, length, isPriority);
+      
+      dirtyMin += length;
     }
   }
 

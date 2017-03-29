@@ -207,6 +207,11 @@ abstract public class Loader {
     return null;
   }
   
+  protected Path lookupPath(Path path, String name)
+  {
+    return path.lookup("./" + name);
+  }
+  
   /**
    * Returns the code source for the path.
    */

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Logger;
 
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 
@@ -19,6 +20,7 @@ import com.caucho.vfs.RandomAccessStream;
  */
 public class RandomAccessStreamNio extends RandomAccessStream
 {
+  private static final L10N L = new L10N(RandomAccessStreamNio.class);
   private static final Logger log
     = Logger.getLogger(RandomAccessStreamNio.class.getName());
   
@@ -139,8 +141,16 @@ public class RandomAccessStreamNio extends RandomAccessStream
   {
     if (buf == null)
       throw new NullPointerException();
-    else if (offset < 0 || buf.length < offset + length)
+    else if (offset < 0 || buf.length < offset + length) {
+      throw new ArrayIndexOutOfBoundsException(L.l("pos: 0x{0} offset: 0x{1} length: 0x{2} buf.len: 0x{3}",
+                                                   Long.toHexString(pos),
+                                                   Long.toHexString(offset),
+                                                   Long.toHexString(length),
+                                                   Long.toHexString(buf.length)));
+    }
+    else if (pos < 0) {
       throw new ArrayIndexOutOfBoundsException();
+    }
     /*
     else if (_fileLength < pos + length) {
       throw new ArrayIndexOutOfBoundsException("FileLength: 0x" + Long.toHexString(_fileLength)

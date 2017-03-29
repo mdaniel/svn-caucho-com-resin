@@ -709,15 +709,17 @@ public class CompilingLoader extends Loader implements Make {
   @Override
   public Path getPath(String name)
   {
-    Path path = _classDir.lookup(name);
+    Path path = lookupPath(_classDir, name);
 
-    if (path != null && path.exists())
+    if (path != null && path.exists()) {
       return path;
+    }
 
-    path = _sourceDir.lookup(name);
+    path = lookupPath(_sourceDir, name);
 
-    if (path != null && path.exists())
+    if (path != null && path.exists()) {
       return path;
+    }
 
     return null;
   }

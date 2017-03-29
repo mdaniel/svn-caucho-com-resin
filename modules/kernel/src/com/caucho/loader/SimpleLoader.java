@@ -251,12 +251,7 @@ public class SimpleLoader extends Loader {
       return null;
     }
     
-    if (name.startsWith("/")) {
-      return _path.lookup("." + name);
-    }
-    else {
-      return _path.lookup(name);
-    }
+    return lookupPath(_path, name);
   }
 
   /**
