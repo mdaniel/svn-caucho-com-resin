@@ -1335,8 +1335,13 @@ public class ConnectionPool extends AbstractManagedObject
 
         userPoolItem = createConnection(_mcf, subject, info, null);
         
-        if (userPoolItem != null)
+        if (userPoolItem != null) {
+          /*
           userPoolItem.toIdle();
+          userPoolItem.clearTransaction();
+          */
+          userPoolItem.close();
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();

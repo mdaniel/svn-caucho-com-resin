@@ -466,8 +466,9 @@ public class UserTransactionImpl
         String msg = L.l("Resource {0} was not closed. Applications must close all resources in a finally block.",
                          resource.getUserConnection());
 
-        if (exn == null)
+        if (exn == null) {
           exn = new IllegalStateException(msg);
+        }
         
         _transactionManager.addUnclosedResource(msg);
 

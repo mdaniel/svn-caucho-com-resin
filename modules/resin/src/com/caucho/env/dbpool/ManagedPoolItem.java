@@ -285,8 +285,10 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     if (log.isLoggable(Level.FINE))
       log.fine("allocate " + this);
 
-    if (_cm.getSaveAllocationStackTrace())
+    if (_cm.getSaveAllocationStackTrace()) {
       _allocationStackTrace = new IllegalStateException(L.l("Connection {0} allocation stack trace", this));
+      _allocationStackTrace.fillInStackTrace();
+    }
 
     return userPoolItem;
   }

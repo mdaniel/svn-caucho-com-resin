@@ -8,6 +8,7 @@
 
 <s2 title="4.0.52 - in progress">
 <ul>
+<li>db-pool: min-idle-count registered with transaction</li>
 <li>database: meta-allocation-table write issues</li>
 <li>database: free row allocation performance issues (#6044)</li>
 <li>access.log: possible corruption by multithreading (#6038)</li>

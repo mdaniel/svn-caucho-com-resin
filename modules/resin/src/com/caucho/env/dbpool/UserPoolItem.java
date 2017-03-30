@@ -383,6 +383,12 @@ class UserPoolItem implements ManagedResource {
     if (poolItem != null)
       poolItem.toIdle();
   }
+  
+  void clearTransaction()
+  {
+    if (_transaction != null)
+      _transaction.delistResource(this);
+  }
 
   /**
    * Closes the item.
