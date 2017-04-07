@@ -140,6 +140,15 @@ abstract public class AbstractAccessLog {
     throws ServletException, IOException
   {
   }
+  
+  public void start()
+  {
+    try {
+      init();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
 
   /**
    * Logs a request using the current format.

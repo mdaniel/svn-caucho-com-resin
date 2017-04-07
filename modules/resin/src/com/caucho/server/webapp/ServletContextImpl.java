@@ -310,7 +310,8 @@ public class ServletContextImpl extends ServletContextCompat
       return url;
     }
     else if (path.isFile()) {
-      return url;
+      // #6049, server/1t15
+      return new URL(path.getURL());
     }
     else if (getClassLoader().getResource("META-INF/resources/" + realPath) != null) {
       return url;
@@ -394,6 +395,7 @@ public class ServletContextImpl extends ServletContextCompat
   /**
    * Returns the resource for a uripath as an input stream.
    */
+  @Override
   public InputStream getResourceAsStream(String uripath)
   {
     Path rootDirectory = getRootDirectory();

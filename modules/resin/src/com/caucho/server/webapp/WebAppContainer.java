@@ -733,6 +733,12 @@ public class WebAppContainer
   public void start()
   {
     try {
+      _accessLog.start();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+    
+    try {
       _appDeploy.start();
     } catch (Exception e) {
       throw ConfigException.create(e);

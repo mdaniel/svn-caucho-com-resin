@@ -8,6 +8,8 @@
 
 <s2 title="4.0.52 - in progress">
 <ul>
+<li>access.log: multiple &lt;access-log> not properly handled (#5920)</li>
+<li>getResource: return "file:" url for normal resource in getResource (#6049)</li>
 <li>db-pool: min-idle-count registered with transaction</li>
 <li>database: meta-allocation-table write issues</li>
 <li>database: free row allocation performance issues (#6044)</li>

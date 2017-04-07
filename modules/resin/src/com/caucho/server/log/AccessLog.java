@@ -258,6 +258,18 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   public void init()
     throws ServletException, IOException
   {
+    // do nothing because of multiple access-log declarations
+  }
+  
+  /**
+   * Initialize the log.
+   */
+  public void start()
+  {
+    if (_isActive) {
+      return;
+    }
+    
     _isActive = true;
 
     if (_alarm != null) {
@@ -280,12 +292,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       _timeFormat = "[%d/%b/%Y:%H:%M:%S %z]";
     }
     
-    _logWriter.init();
-    // _sharedBufferLock = _logWriter.getBufferLock();
+    try {
+      _logWriter.init();
+    //  _sharedBufferLock = _logWriter.getBufferLock();
 
-    super.init();
+      super.init();
     
-    _logWriter.rollover();
+      _logWriter.rollover();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

@@ -28,6 +28,7 @@
 
 package com.caucho.http.log;
 
+import com.caucho.config.ConfigException;
 import com.caucho.vfs.Path;
 
 import javax.servlet.ServletContext;
@@ -80,6 +81,15 @@ abstract public class AbstractAccessLog {
                            HttpServletResponse response,
                            ServletContext application)
     throws IOException;
+  
+  public void start()
+  {
+    try {
+      init();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
 
   /**
    * Cleanup the log.
