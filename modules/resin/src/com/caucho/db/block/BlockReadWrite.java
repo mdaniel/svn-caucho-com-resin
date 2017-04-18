@@ -105,6 +105,15 @@ public class BlockReadWrite {
   {
     return _fileSize;
   }
+  
+  private void setFileSize(long fileSize)
+  {
+    if (fileSize < 0) {
+      throw new IllegalStateException(L.l("Invalid file size {0} for {1}", fileSize, _path));
+    }
+    
+    _fileSize = fileSize;
+  }
 
   /**
    * Creates the store.
@@ -145,7 +154,7 @@ public class BlockReadWrite {
     try {
       RandomAccessStream file = wrapper.getFile();
 
-      _fileSize = file.getLength();
+      setFileSize(file.getLength());
 
       freeRowFile(wrapper, isPriority);
       wrapper = null;
@@ -358,8 +367,9 @@ public class BlockReadWrite {
   {
     long fileSize = _fileSize;
 
-    if (addressMax <= fileSize)
+    if (addressMax <= fileSize) {
       return fileSize;
+    }
 
     long newFileSize = fileSize;
 
@@ -374,8 +384,9 @@ public class BlockReadWrite {
         RandomAccessWrapper wrapper = openRowFileImpl(newFileSize);
 
         try {
-          if (wrapper != null)
+          if (wrapper != null) {
             stream = wrapper.getFile();
+          }
 
           if (stream == null)
             throw new IllegalStateException(this + " cannot open");
@@ -388,9 +399,7 @@ public class BlockReadWrite {
 
           fileLength = stream.getLength();
 
-          if (newFileSize < fileLength) {
-            newFileSize = fileLength;
-          }
+          newFileSize = Math.max(newFileSize, fileLength);
 
           freeRowFile(wrapper, false);
           wrapper = null;
@@ -403,7 +412,7 @@ public class BlockReadWrite {
           throw new IllegalStateException("bad file length: " + stream + " " + stream.getLength());
           */
 
-        _fileSize = newFileSize;
+        setFileSize(newFileSize);
       }
 
       return _fileSize;

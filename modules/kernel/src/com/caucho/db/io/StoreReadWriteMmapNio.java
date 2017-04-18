@@ -267,7 +267,8 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
     }
     
     if (address < 0) {
-      throw new IllegalArgumentException(L.l("Invalid address: {0}", address));
+      throw new IllegalArgumentException(L.l("Invalid address: {0}", 
+                                             Long.toHexString(address)));
     }
 
     try {

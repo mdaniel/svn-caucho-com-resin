@@ -147,6 +147,8 @@ session_store : true
 # Set the email address to receive weekly and restart PDF reports
 # email : admin@example.com
 
+pdf_summary : true
+
 # Set a global password to prevent foreign Resin instances from connecting.
 # Must be identical between web, app, and cache clusters.
 # cluster_system_key : changeme

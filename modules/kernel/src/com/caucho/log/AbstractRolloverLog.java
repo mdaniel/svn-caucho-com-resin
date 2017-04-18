@@ -29,6 +29,21 @@
 
 package com.caucho.log;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
@@ -48,20 +63,6 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.TempStreamApi;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Abstract class for a log that rolls over based on size or period.
@@ -339,11 +340,11 @@ public class AbstractRolloverLog implements Closeable {
   /**
    * Initialize the log.
    */
-  public void init()
+  public synchronized void init()
     throws IOException
   {
     long now = CurrentTime.getExactTime();
-
+    
     // server/0263
     // _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
@@ -380,8 +381,9 @@ public class AbstractRolloverLog implements Closeable {
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
     
     _isInit = true;
-
+    
     _rolloverListener.requeue(_rolloverAlarm);
+    
     rollover();
   }
 
@@ -492,8 +494,9 @@ public class AbstractRolloverLog implements Closeable {
     _isRollingOver = true;
     
     try {
-      if (! _isInit)
+      if (! _isInit) {
         return;
+      }
       
       Path savedPath = null;
 

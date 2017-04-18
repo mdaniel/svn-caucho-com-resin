@@ -716,6 +716,7 @@
   <!--
      - Automatic PDF reports
     -->
+  <resin:if test="${pdf_summary}">
   <health:PdfReport>
     <path>${resin.root}/doc/admin/pdf-gen.php</path>
     <report>Summary</report>
@@ -728,6 +729,7 @@
     
     <health:IfCron value="0 0 * * 0"/>
   </health:PdfReport>
+  </resin:if>
 
   <health:PdfReport>
     <path>${resin.root}/doc/admin/pdf-gen.php</path>

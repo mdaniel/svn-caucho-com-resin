@@ -106,11 +106,13 @@ public class JspManager extends PageManager {
       return -1;
 
     JspPropertyGroup jsp = webApp.getJsp();
-
-    if (jsp != null)
+    
+    if (jsp != null) {
       return jsp.getDependencyCheckInterval();
-    else
+    }
+    else {
       return -1;
+    }
   }
 
   /**

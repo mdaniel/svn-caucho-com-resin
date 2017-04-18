@@ -2298,6 +2298,7 @@ public class WebApp extends ServletContextImpl
   {
     if (_jsp == null) {
       _jsp = new JspPropertyGroup();
+      //_jsp.setDependencyCheckIntervalMillis(getEnvironmentClassLoader().getDependencyCheckInterval());
     }
 
     return _jsp;

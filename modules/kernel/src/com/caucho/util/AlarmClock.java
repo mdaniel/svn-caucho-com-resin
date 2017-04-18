@@ -50,7 +50,7 @@ public class AlarmClock {
   
   private Alarm []_clockArray = new Alarm[CLOCK_PERIOD];
   
-  private AtomicLong _now = new AtomicLong();
+  private AtomicLong _lastExtractTime = new AtomicLong();
   private AtomicLong _nextAlarmTime = new AtomicLong();
   
   private final ArrayList<Alarm> _currentAlarms = new ArrayList<Alarm>();
@@ -97,9 +97,9 @@ public class AlarmClock {
     if (wakeTime <= 0)
       return false;
     
-    long now = _now.get();
+    long lastExtractTime = _lastExtractTime.get();
     
-    if (wakeTime <= now) {
+    if (wakeTime <= lastExtractTime) {
       queueCurrent(alarm);
       return true;
     }
@@ -116,13 +116,14 @@ public class AlarmClock {
       _clockArray[bucket] = alarm;
     }
     
-    now = _now.get();
+    lastExtractTime = _lastExtractTime.get();
     
     long nextWakeTime = alarm.getWakeTime();
     
-    if (nextWakeTime != wakeTime || wakeTime < now) {
-      dequeueImpl(alarm);
-      queueCurrent(alarm);
+    if (nextWakeTime <= lastExtractTime && nextWakeTime > 0) {
+      if (dequeueImpl(alarm)) {
+        queueCurrent(alarm);
+      }
     }
     
     return isEarliest;
@@ -141,8 +142,9 @@ public class AlarmClock {
     // long oldWakeTime = alarm.getAndSetWakeTime(0);
     alarm.setWakeTime(0);
     
-    if (alarm.getBucket() >= 0)
+    if (alarm.getBucket() >= 0) {
       dequeueImpl(alarm);
+    }
   }
   
   private boolean dequeueImpl(Alarm alarm)
@@ -225,7 +227,7 @@ public class AlarmClock {
    */
   public long extractAlarm(long now, boolean isTest)
   {
-    long lastTime = _now.getAndSet(now);
+    long lastTime = _lastExtractTime.getAndSet(now);
     
     long nextTime = _nextAlarmTime.get();
     
@@ -239,8 +241,7 @@ public class AlarmClock {
     
     delta = (int) (now - lastTime) / CLOCK_INTERVAL;
     
-    if (CLOCK_PERIOD <= delta)
-      delta = CLOCK_PERIOD;
+    delta = Math.min(delta, CLOCK_PERIOD);
 
     Alarm alarm;
     
@@ -288,22 +289,25 @@ public class AlarmClock {
     
     long delta = Math.min(nextTime - now, CLOCK_PERIOD);
 
-    for (int i = 0; i < delta; i++) {
-      long time = now + i;
+    synchronized (_lock) {
+      for (int i = 0; i < delta; i++) {
+        long time = now + i;
       
-      if (nextTime < time)
-        return nextTime;
+        if (nextTime < time)
+          return nextTime;
       
-      int bucket = getBucket(time);
+        int bucket = getBucket(time);
       
-      if (_clockArray[bucket] != null) {
-        // Alarm alarm = _clockArray[bucket];
-        
-        while (time < nextTime) {
-          if (_nextAlarmTime.compareAndSet(nextTime, time))
-            return time;
+        for (Alarm ptr = _clockArray[bucket]; ptr != null; ptr = ptr.getNext()) {
+          // Alarm alarm = _clockArray[bucket];
           
-          nextTime = _nextAlarmTime.get();
+          long alarmTime = ptr.getWakeTime();
+        
+          while (alarmTime < nextTime && alarmTime > 0) {
+            _nextAlarmTime.compareAndSet(nextTime, alarmTime);
+          
+            nextTime = _nextAlarmTime.get();
+          }
         }
       }
     }
@@ -368,7 +372,7 @@ public class AlarmClock {
 
   void testClear()
   {
-    _now.set(0);
+    _lastExtractTime.set(0);
     _nextAlarmTime.set(0);
     
     synchronized (_lock) {

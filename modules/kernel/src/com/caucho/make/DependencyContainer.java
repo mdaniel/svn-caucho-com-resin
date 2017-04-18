@@ -245,7 +245,7 @@ public class DependencyContainer implements Dependency
       return _isModified;
     }
     
-    if (_isChecking.getAndSet(true)) {
+    if (! _isChecking.compareAndSet(false, true)) {
       return _isModified;
     }
     

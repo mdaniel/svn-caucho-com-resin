@@ -54,6 +54,8 @@ public class ByteCodeParser {
   static final int CP_NAME_AND_TYPE = 12;
   static final int CP_UTF8 = 1;
   
+  
+  
   static final int CP_METHOD_HANDLE = 15;
   static final int CP_METHOD_TYPE = 16;
   static final int CP_INVOKE_DYNAMIC = 18;
@@ -231,6 +233,15 @@ public class ByteCodeParser {
       
     case CP_UTF8:
       return parseUtf8Constant(index);
+      
+    case CP_METHOD_HANDLE:
+      return parseMethodHandleConstant(index);
+      
+    case CP_METHOD_TYPE:
+      return parseMethodTypeConstant(index);
+      
+    case CP_INVOKE_DYNAMIC:
+      return parseInvokeDynamicConstant(index);
 
     default:
       throw error(L.l("'{0}' is an unknown constant pool type.",
@@ -286,6 +297,44 @@ public class ByteCodeParser {
 
     return new InterfaceMethodRefConstant(_class.getConstantPool(), index,
                                           classIndex, nameAndTypeIndex);
+  }
+
+  /**
+   * Parses an invoke-dynamic constant pool entry.
+   */
+  private InvokeDynamicConstant parseInvokeDynamicConstant(int index)
+    throws IOException
+  {
+    int bootStrapMethod = readShort();
+    int nameAndTypeIndex = readShort();
+
+    return new InvokeDynamicConstant(_class.getConstantPool(), index,
+                                     bootStrapMethod, nameAndTypeIndex);
+  }
+
+  /**
+   * Parses an method-handle dynamic constant pool entry.
+   */
+  private MethodHandleConstant parseMethodHandleConstant(int index)
+    throws IOException
+  {
+    int referenceKind = read();
+    int referenceIndex = readShort();
+
+    return new MethodHandleConstant(_class.getConstantPool(), index,
+                                    referenceKind, referenceIndex);
+  }
+
+  /**
+   * Parses an method-type dynamic constant pool entry.
+   */
+  private MethodTypeConstant parseMethodTypeConstant(int index)
+    throws IOException
+  {
+    int descriptorIndex = readShort();
+
+    return new MethodTypeConstant(_class.getConstantPool(), index,
+                                    descriptorIndex);
   }
 
   /**

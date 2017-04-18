@@ -733,7 +733,9 @@ public class WebAppContainer
   public void start()
   {
     try {
-      _accessLog.start();
+      if (_accessLog != null) {
+        _accessLog.start();
+      }
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

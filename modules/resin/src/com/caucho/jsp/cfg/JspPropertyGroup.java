@@ -84,7 +84,7 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
 
   private int _jspMax = 0;
   private boolean _disableLog = true;
-  private long _dependencyCheckInterval = Long.MIN_VALUE;
+  private long _dependencyCheckInterval = -1;
   private boolean _staticPageGeneratesClass = true;
   private boolean _loadTldOnInit = false;
 
@@ -212,7 +212,15 @@ public class JspPropertyGroup implements JspPropertyGroupDescriptor {
    */
   public void setDependencyCheckInterval(Period period)
   {
-    _dependencyCheckInterval = period.getPeriod();
+    setDependencyCheckIntervalMillis(period.getPeriod());
+  }
+
+  /**
+   * Sets the dependency check interval.
+   */
+  public void setDependencyCheckIntervalMillis(long time)
+  {
+    _dependencyCheckInterval = time;
   }
 
   /**
