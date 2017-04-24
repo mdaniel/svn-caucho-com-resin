@@ -35,6 +35,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import javax.management.BadAttributeValueExpException;
 import javax.management.BadBinaryOpValueExpException;
@@ -285,10 +286,13 @@ public class MBeanView {
       Iterator<String> iter = map.keySet().iterator();
       while (iter.hasNext()) {
         String key = iter.next();
-        String value = map.get(key);
-
-        if (! value.equals(name.getKeyProperty(key)))
+        String pattern = patternToRegexp(map.get(key));
+        
+        String nameValue = name.getKeyProperty(key);
+        
+        if (nameValue == null || ! nameValue.matches(pattern)) {
           return false;
+        }
       }
     }
     else {
@@ -303,6 +307,51 @@ public class MBeanView {
       return false;
 
     return true;
+  }
+  
+  private String patternToRegexp(String value)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("^");
+
+    int len = value.length();
+    for (int i = 0; i < len; i++) {
+      char ch = value.charAt(i);
+      
+      switch (ch) {
+      case '?':
+        sb.append(".?");
+        break;
+
+      case '*':
+        sb.append(".*");
+        break;
+        
+      case '.':
+      case '\\':
+      case '(':
+      case ')':
+      case '{':
+      case '}':
+      case '[':
+      case ']':
+      case '+':
+      case '|':
+      case '^':
+      case '$':
+        sb.append("\\").append(ch);
+        break;
+        
+      default:
+        sb.append(ch);
+        break;
+      }
+    }
+    
+    sb.append("$");
+    
+    return sb.toString();
   }
 
   /**
