@@ -219,7 +219,9 @@ public class ServletMapper {
     ServletMapping servletRegexp = null;
     
     if (_servletMap != null) {
-      ServletMapping servletMap = _servletMap.map(contextURI, vars);
+      String cleanUri = Invocation.stripPathParameters(contextURI);
+      
+      ServletMapping servletMap = _servletMap.map(cleanUri, vars);
 
       if (servletMap != null && servletMap.isServletConfig())
         config = servletMap;

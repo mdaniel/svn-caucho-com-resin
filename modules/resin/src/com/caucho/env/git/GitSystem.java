@@ -348,6 +348,10 @@ public class GitSystem extends AbstractResinSubSystem
     while ((entry = is.getNextEntry()) != null) {
       String name = entry.getName();
       
+      while (name.startsWith("/")) {
+        name = name.substring(1);
+      }
+      
       if (entry.isDirectory()) {
         path.lookup(name).mkdirs();
       }

@@ -3749,6 +3749,10 @@ public class WebApp extends ServletContextImpl
       if (_accessLog == null) {
         _accessLog = _accessLogLocal.get();
       }
+      
+      if (_accessLog != null) {
+        _accessLog.start();
+      }
 
       long interval = _classLoader.getDependencyCheckInterval();
       _invocationDependency.setCheckInterval(interval);

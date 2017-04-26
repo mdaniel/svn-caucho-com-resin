@@ -310,7 +310,7 @@ public class ServletInvocation {
     _securityRoleMap = invocation._securityRoleMap;
   }
   
-  private static String stripPathParameters(String value)
+  public static String stripPathParameters(String value)
   {
     if (value == null) {
       return null;
