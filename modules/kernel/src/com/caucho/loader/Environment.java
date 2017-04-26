@@ -933,6 +933,11 @@ public class Environment {
           props.put("java.naming.factory.initial",
                     "com.caucho.naming.InitialContextFactoryImpl");
         }
+        
+        defaultProperty(props, "jdk.tls.ephemeralDHKeySize", "2048");
+        defaultProperty(props, "jdk.tls.rejectClientInitiatedRenegotiation", "true");
+        defaultProperty(props, "sun.security.ssl.allowUnsafeRenegotiation", "false");
+        defaultProperty(props, "sun.security.ssl.allowLegacyHelloMessages", "false");
 
         // props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
 
@@ -943,6 +948,7 @@ public class Environment {
           oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
           props.put("javax.management.builder.initial", oldBuilder);
         }
+        
 
         /*
           props.put("javax.management.builder.initial",
@@ -989,6 +995,13 @@ public class Environment {
       thread.setContextClassLoader(oldLoader);
       
       _isInitComplete = true;
+    }
+  }
+  
+  private static void defaultProperty(Properties props, String key, String value)
+  {
+    if (props.get(key) == null) {
+      props.setProperty(key, value);
     }
   }
 

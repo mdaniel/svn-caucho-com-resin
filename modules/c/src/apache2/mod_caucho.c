@@ -582,6 +582,19 @@ get_session_index(config_t *config, request_rec *r, int *backup)
   return cse_session_from_string(r->uri, config->session_url_prefix, backup);
 }
 
+static int
+hex_digit(int value)
+{
+  value = value & 0xf;
+
+  if (value < 10) {
+    return value + '0';
+  }
+  else {
+    return value + 'A' + (value - 10);
+  }
+}
+
 /**
  * Writes request parameters to srun.
  */
@@ -609,13 +622,20 @@ write_env(stream_t *s, request_rec *r)
 
   j = 0;
   for (i = 0; (ch = uri[i]) && ch != '?' && j + 2 < sizeof(buf); i++) {
-    if (ch == '%') { /* #1661 */
+    switch (ch) { /* #1661 */
+    case '%':
+    case 0x0d:
+    case 0x0a:
+    case 0x20:
       buf[j++] = '%';
-      buf[j++] = '2';
-      buf[j++] = '5';
-    }
-    else
+      buf[j++] = hex_digit(ch >> 4);
+      buf[j++] = hex_digit(ch);
+      break;
+
+    default:
       buf[j++] = ch;
+      break;
+    }
   }
   buf[j] = 0;
 

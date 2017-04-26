@@ -59,6 +59,7 @@ public class HmtpReader {
   public HmtpReader()
   {
     _hIn = new Hessian2Input();
+    _hIn.allow("com.caucho.*");
   }
 
   public HmtpReader(InputStream is)

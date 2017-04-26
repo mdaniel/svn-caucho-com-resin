@@ -8,6 +8,9 @@
 
 <s2 title="4.0.52 - in progress">
 <ul>
+<li>apache: reencode 0x0d for uri in mod_caucho</li>
+<li>jsse: set default JSSE settings to higher levels (#6051, rep by VasumathiN)</li>
+<li>jmx: issues with queries and wildcards (#6041, rep by kpokrovsky)</li>
 <li>health: need finally, and catching of exception</li>
 <li>jsp: analysis of InvokeDynamic (#6037, rep by alpor9)</li>
 <li>database: validation of database file extension size (#6045, rep by Shinomiya Nobuaki)</li>
