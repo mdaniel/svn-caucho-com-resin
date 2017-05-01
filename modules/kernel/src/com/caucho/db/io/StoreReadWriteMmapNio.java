@@ -327,24 +327,24 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
                                           Long.toHexString(size),
                                           chunkIndex));
     }
-
-    if (chunkIndex < _mmapFileChunks.length) {
-      MmapFile mmapFile = _mmapFileChunks[chunkIndex];
-      
-      /*
-      if (address < mmapFile.getAddress()
-          || mmapFile.getAddress() + mmapFile.getSize() < address + size) {
-        throw new IllegalStateException(L.l("Invalid mmap chunk. Requested <0x{0},0x{1}>. Received <0x{2},0x{3}>",
-                                            Long.toHexString(address), Long.toHexString(size),
-                                            Long.toHexString(mmapFile.getAddress()), 
-                                            Long.toHexString(mmapFile.getSize())));
-      }
-      */
-      
-      return mmapFile;
-    }
     
-    synchronized (this) {
+    synchronized (_mmapFiles) {
+      if (chunkIndex < _mmapFileChunks.length) {
+        MmapFile mmapFile = _mmapFileChunks[chunkIndex];
+        
+        /*
+        if (address < mmapFile.getAddress()
+            || mmapFile.getAddress() + mmapFile.getSize() < address + size) {
+          throw new IllegalStateException(L.l("Invalid mmap chunk. Requested <0x{0},0x{1}>. Received <0x{2},0x{3}>",
+                                              Long.toHexString(address), Long.toHexString(size),
+                                              Long.toHexString(mmapFile.getAddress()), 
+                                              Long.toHexString(mmapFile.getSize())));
+        }
+        */
+        
+        return mmapFile;
+      }
+      
       long reqSize = Math.max(address + size, _path.getLength());
       long fileSize = extendFileSize(_fileSize, reqSize);
       
@@ -847,39 +847,41 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
     OutStoreMmapNio()
     {
       _sequence = _storeSequence.get();
-      
-      _mmapFile = _mmapFileChunks;
-      
-      int indexEnd = (int) ((getFileSize() - 1) / _mmapChunkSize);
-      
-      _mmap = new ByteBuffer[indexEnd + 1];
-      
-      ByteBuffer lastBuffer = null;
-      
-      for (int i = 0; i < _mmap.length; i++) {
-        long address = i * _mmapChunkSize;
 
-        for (int j = 0; j < _mmapFile.length; j++) {
-          MmapFile mmapFile = _mmapFile[j];
-          
-          if (mmapFile.getAddress() <= address 
-              && address < mmapFile.getAddress() + mmapFile.getSize()) {
-            if (lastBuffer == mmapFile.getByteBuffer()) {
-              _mmap[i] = _mmap[i - 1];
+      synchronized (_mmapFiles) {
+        _mmapFile = _mmapFileChunks;
+      
+        int indexEnd = (int) ((getFileSize() - 1) / _mmapChunkSize);
+      
+        _mmap = new ByteBuffer[indexEnd + 1];
+      
+        ByteBuffer lastBuffer = null;
+      
+        for (int i = 0; i < _mmap.length; i++) {
+          long address = i * _mmapChunkSize;
+
+          for (int j = 0; j < _mmapFile.length; j++) {
+            MmapFile mmapFile = _mmapFile[j];
+
+            if (mmapFile.getAddress() <= address 
+                && address < mmapFile.getAddress() + mmapFile.getSize()) {
+              if (lastBuffer == mmapFile.getByteBuffer()) {
+                _mmap[i] = _mmap[i - 1];
+              }
+              else {
+                _mmapFileList.add(mmapFile);
+                _mmap[i] = mmapFile.getByteBuffer().duplicate();
+              }
+
+              lastBuffer = mmapFile.getByteBuffer();
+
+              break;
             }
-            else {
-              _mmapFileList.add(mmapFile);
-              _mmap[i] = mmapFile.getByteBuffer().duplicate();
-            }
-            
-            lastBuffer = mmapFile.getByteBuffer();
-            
-            break;
           }
-        }
-        
-        if (_mmap[i] == null) {
-          throw new IllegalStateException(L.l("Invalid initialization address=0x{0}", Long.toHexString(address)));
+
+          if (_mmap[i] == null) {
+            throw new IllegalStateException(L.l("Invalid initialization address=0x{0}", Long.toHexString(address)));
+          }
         }
       }
     }
