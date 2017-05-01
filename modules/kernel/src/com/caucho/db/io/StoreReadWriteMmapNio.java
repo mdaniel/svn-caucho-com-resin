@@ -856,19 +856,22 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
       
       ByteBuffer lastBuffer = null;
       
-      for (int i = 0; i < _mmap.length; i++) {
+      int k = 0;
+      
+      for (int i = 0; i < _mmapFile.length; i++) {
         MmapFile mmapFile = _mmapFile[i];
         
-        if (lastBuffer != mmapFile.getByteBuffer()) {
-          _mmap[i] = mmapFile.getByteBuffer().duplicate();
-          _mmapFileList.add(mmapFile);
+        _mmapFileList.add(mmapFile);
         
-          lastBuffer = mmapFile.getByteBuffer();
-        }
-        else {
-          _mmap[i] = _mmap[i - 1];
-        }
+        long size = mmapFile.getSize();
+        int chunks = (int) (size / _mmapChunkSize);
         
+        _mmap[k++] = mmapFile.getByteBuffer().duplicate();
+        
+        for (int j = 1; j < chunks; j++) {
+          _mmap[k + 1] = _mmap[k];
+          k++;
+        }
       }
     }
     
