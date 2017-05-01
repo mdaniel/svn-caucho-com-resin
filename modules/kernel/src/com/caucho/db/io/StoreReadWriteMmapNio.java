@@ -869,7 +869,7 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
         _mmap[k++] = mmapFile.getByteBuffer().duplicate();
         
         for (int j = 1; j < chunks; j++) {
-          _mmap[k + 1] = _mmap[k];
+          _mmap[k] = _mmap[k - 1];
           k++;
         }
       }
