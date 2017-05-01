@@ -856,21 +856,30 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
       
       ByteBuffer lastBuffer = null;
       
-      int k = 0;
-      
-      for (int i = 0; i < _mmapFile.length; i++) {
-        MmapFile mmapFile = _mmapFile[i];
+      for (int i = 0; i < _mmap.length; i++) {
+        long address = i * _mmapChunkSize;
+
+        for (int j = 0; j < _mmapFile.length; j++) {
+          MmapFile mmapFile = _mmapFile[j];
+          
+          if (mmapFile.getAddress() <= address 
+              && address < mmapFile.getAddress() + mmapFile.getSize()) {
+            if (lastBuffer == mmapFile.getByteBuffer()) {
+              _mmap[i] = _mmap[i - 1];
+            }
+            else {
+              _mmapFileList.add(mmapFile);
+              _mmap[i] = mmapFile.getByteBuffer().duplicate();
+            }
+            
+            lastBuffer = mmapFile.getByteBuffer();
+            
+            break;
+          }
+        }
         
-        _mmapFileList.add(mmapFile);
-        
-        long size = mmapFile.getSize();
-        int chunks = (int) (size / _mmapChunkSize);
-        
-        _mmap[k++] = mmapFile.getByteBuffer().duplicate();
-        
-        for (int j = 1; j < chunks; j++) {
-          _mmap[k] = _mmap[k - 1];
-          k++;
+        if (_mmap[i] == null) {
+          throw new IllegalStateException(L.l("Invalid initialization address=0x{0}", Long.toHexString(address)));
         }
       }
     }
