@@ -1019,7 +1019,13 @@ public class BlockStore {
   private void setAllocation(long blockIndex, int code)
   {
     if (blockIndex <= 1 && code != ALLOC_DATA) {
-      System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + code);
+      System.out.println("Suspicious change: 0x" + Long.toHexString(blockIndex) + " " + code);
+      Thread.dumpStack();
+      return;
+    }
+    
+    if (blockIndex % ALLOC_GROUP_COUNT == 0 && code != ALLOC_DATA) {
+      System.out.println("Suspicious meta-data: 0x" + Long.toHexString(blockIndex) + " " + code);
       Thread.dumpStack();
       return;
     }
@@ -1034,7 +1040,7 @@ public class BlockStore {
     _allocationTable[allocOffset] = (byte) code;
     
     if (oldCode != ALLOC_FREE && code != ALLOC_FREE && oldCode != code) {
-      System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " " + oldCode + " " + code);
+      System.out.println("Suspicious change: " + Long.toHexString(blockIndex) + " old:" + oldCode + " new:" + code);
       Thread.dumpStack();
     }
 
