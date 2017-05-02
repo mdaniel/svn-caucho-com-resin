@@ -934,10 +934,11 @@ public class BlockStore {
                                            this));
     }
     else if (blockIdToAddress(blockId) <= 0) {
-      Thread.dumpStack();
       e = new IllegalArgumentException(L.l("invalid meta-block {0} must match store {1}.",
                                            Long.toHexString(blockId),
                                            this));
+      e.fillInStackTrace();
+      e.printStackTrace();
     }
 
     if (e != null)
