@@ -800,7 +800,12 @@ public class Table extends BlockStore
 
       isValid = true;
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      if (log.isLoggable(Level.FINE)) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+      else {
+        log.warning(e.toString());
+      }
     } finally {
       if (iter != null)
         iter.free();

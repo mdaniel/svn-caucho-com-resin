@@ -341,7 +341,8 @@ public class RandomAccessStreamNio extends RandomAccessStream
     */
     
     StoreReadWrite store = _store;
-    _store = null;
+    // Can't close because of timing. Old store is still used.
+    // _store = null;
     
     if (store != null) {
       store.close();
