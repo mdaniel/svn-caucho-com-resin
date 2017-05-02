@@ -532,26 +532,48 @@ public class BlockStore {
     _allocationTable = new byte[allocSize];
 
     for (int i = 0; i < allocSize; i += BLOCK_SIZE) {
-      int len = allocSize - i;
+      //int len = allocSize - i;
 
       long allocGroup = i / BLOCK_SIZE;
 
-      len = Math.min(len, BLOCK_SIZE);
+      //len = Math.min(len, BLOCK_SIZE);
 
       /*
       System.out.println("READ: " + Long.toHexString(allocGroup * ALLOC_GROUP_SIZE) + " " + allocGroup * ALLOC_GROUP_SIZE);
       */
 
       _readWrite.readBlock(allocGroup * ALLOC_GROUP_SIZE,
-                           _allocationTable, i, len);
+                           _allocationTable, i, BLOCK_SIZE);
     }
 
-    if (getAllocation(0) != ALLOC_DATA || getAllocation(1) != ALLOC_DATA) {
-      log.warning(this + " corrupted database. Rebuilding.");
-      Thread.dumpStack();
-     
+    if (! validateLoad()) {
       removeAndCreate();
     }
+  }
+  
+  private boolean validateLoad()
+  {
+    if (getAllocation(0) != ALLOC_DATA || getAllocation(1) != ALLOC_DATA) {
+      log.warning(this + " corrupted block=zero database. Rebuilding.");
+      Thread.dumpStack();
+
+      return false;
+    }
+    
+    long superBlockMax = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
+    for (long index = 0;
+         index < superBlockMax;
+         index += ALLOC_GROUP_COUNT) {
+      if (getAllocation(index) !=  ALLOC_DATA) {
+        log.warning(L.l(this + " corrupted database meta-data at index=0x{0}. Rebuilding.",
+                        Long.toHexString(index)));
+        Thread.dumpStack();
+
+        return false;
+      }
+    }
+    
+    return true;
   }
   
   private void removeAndCreate()
@@ -886,32 +908,39 @@ public class BlockStore {
       }
 
       setAllocation(newBlockIndex, ALLOC_DATA);
+
+      long blockId = blockIndexToBlockId(newBlockIndex);
+
+      Block block = _blockManager.getBlock(this, blockId);
+
+      byte []buffer = block.getBuffer();
+
+      for (int i = BLOCK_SIZE - 1; i >= 0; i--)
+        buffer[i] = 0;
+
+      block.toValid();
+      block.setDirty(0, BLOCK_SIZE);
+
+      // if extending file, write the contents now
+      try {
+        block.writeFromBlockWriter();
+      } catch (IOException e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      block.free();
     }
-
-    long blockId = blockIndexToBlockId(newBlockIndex);
-
-    Block block = _blockManager.getBlock(this, blockId);
-
-    byte []buffer = block.getBuffer();
-
-    for (int i = BLOCK_SIZE - 1; i >= 0; i--)
-      buffer[i] = 0;
-
-    block.toValid();
-    block.setDirty(0, BLOCK_SIZE);
-
-    // if extending file, write the contents now
-    try {
-      block.writeFromBlockWriter();
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    block.free();
-
+    
+    
     //synchronized (_allocationLock) {
     //  setAllocation(newBlockIndex, ALLOC_FREE);
     //}
+    
+    try {
+      saveAllocation();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
