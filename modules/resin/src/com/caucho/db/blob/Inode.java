@@ -1030,6 +1030,17 @@ public class Inode
     
     return true;
   }
+  
+  private static void validateBlockAddr(BlockStore store,
+                                        long blockAddr,
+                                        int allocCode)
+  {
+    if (! isValidBlockAddr(store, blockAddr, 0, allocCode)) {
+      throw new IllegalStateException(L.l("Invalid block 0x{0} in {1}", 
+                                          Long.toHexString(blockAddr),
+                                          store));
+    }
+  }
 
   private static boolean isValidBlockAddr(BlockStore store,
                                           long blockAddr, 
@@ -1181,7 +1192,7 @@ public class Inode
   {
     BlockStore store = update.getStore();
     
-    store.validateBlockId(blockAddr);
+    validateBlockAddr(store, blockAddr, BlockStore.ALLOC_DATA);
     
     int blockCount = (int) (fileOffset / BLOCK_SIZE);
 
@@ -1205,7 +1216,7 @@ public class Inode
         writeLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8, indAddr);
       }
       
-      store.validateBlockId(indAddr);
+      validateBlockAddr(store, indAddr, BlockStore.ALLOC_INODE_PTR);
 
       int blockOffset = 8 * (blockCount - DIRECT_BLOCKS);
 
