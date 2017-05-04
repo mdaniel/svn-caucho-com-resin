@@ -958,7 +958,8 @@ public class BlockStore {
       e = new IllegalStateException(L.l("invalid store {0}.", this));
     }
     else if (getId() != (blockId & BLOCK_INDEX_MASK)) {
-      e = new IllegalArgumentException(L.l("block {0} must match store {1}.",
+      e = new IllegalArgumentException(L.l("block 0x{0} index {1} must match store {2}.",
+                                           Long.toHexString(blockId),
                                            blockId & BLOCK_INDEX_MASK,
                                            this));
     }
