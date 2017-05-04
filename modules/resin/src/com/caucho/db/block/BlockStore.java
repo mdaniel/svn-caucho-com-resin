@@ -946,7 +946,7 @@ public class BlockStore {
   /**
    * Check that an allocated block is valid.
    */
-  protected void validateBlockId(long blockId)
+  public void validateBlockId(long blockId)
     throws IllegalArgumentException, IllegalStateException
   {
     RuntimeException e = null;
@@ -963,7 +963,7 @@ public class BlockStore {
                                            this));
     }
     else if (blockIdToAddress(blockId) <= 0) {
-      e = new IllegalArgumentException(L.l("invalid meta-block {0} must match store {1}.",
+      e = new IllegalArgumentException(L.l("invalid block address {0} must match store {1}.",
                                            Long.toHexString(blockId),
                                            this));
       e.fillInStackTrace();

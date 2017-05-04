@@ -359,8 +359,7 @@ public class Inode
       long addr = readBlockAddr(inode, inodeOffset, update, fileOffset);
       int offset = (int) (fileOffset % BLOCK_SIZE);
 
-      if (BLOCK_SIZE - offset < sublen)
-        sublen = BLOCK_SIZE - offset;
+      sublen = Math.min(BLOCK_SIZE - offset, sublen);
 
       store.readBlock(addr, offset, buffer, bufferOffset, sublen);
 
@@ -1182,6 +1181,8 @@ public class Inode
   {
     BlockStore store = update.getStore();
     
+    store.validateBlockId(blockAddr);
+    
     int blockCount = (int) (fileOffset / BLOCK_SIZE);
 
     // XXX: not sure if correct, needs XA?
@@ -1200,9 +1201,11 @@ public class Inode
         Block block = store.allocateIndirectBlock();
         indAddr = BlockStore.blockIdToAddress(block.getBlockId());
         block.free();
-
+        
         writeLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8, indAddr);
       }
+      
+      store.validateBlockId(indAddr);
 
       int blockOffset = 8 * (blockCount - DIRECT_BLOCKS);
 
