@@ -565,8 +565,9 @@ public class BlockStore {
          index < superBlockMax;
          index += ALLOC_GROUP_COUNT) {
       if (getAllocation(index) !=  ALLOC_DATA) {
-        log.warning(L.l(this + " corrupted database meta-data at index=0x{0}. Rebuilding.",
-                        Long.toHexString(index)));
+        log.warning(L.l(this + " corrupted database meta-data {0} for address=0x{1}. Rebuilding.",
+                        getAllocation(index),
+                        Long.toHexString(index * BLOCK_SIZE)));
         Thread.dumpStack();
 
         return false;
