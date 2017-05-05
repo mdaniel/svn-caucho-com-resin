@@ -368,7 +368,8 @@ public class Inode
                                              e.getMessage(),
                                              inodeOffset,
                                              Long.toHexString(fileOffset),
-                                             Hex.toHex(inode, inodeOffset, inode.length - inodeOffset)));
+                                             Hex.toHex(inode, inodeOffset, inode.length - inodeOffset)),
+                                         e);
     } finally {
       update.close();
     }
