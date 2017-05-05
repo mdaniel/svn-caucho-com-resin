@@ -128,9 +128,6 @@ public class InodeUpdate
     
     Block block = _lastBlock;
 
-    System.out.println("WBL: addr=0x" + Long.toHexString(blockAddress)
-      + " off=0x" + Long.toHexString(offset)
-      + " val=0x" + Long.toHexString(value));
     if (block == null) {
       block = _store.readBlock(blockAddress);
       _lastBlock = block;
