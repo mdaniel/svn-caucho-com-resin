@@ -43,6 +43,7 @@ import com.caucho.db.block.BlockStore;
 import com.caucho.db.xa.RawTransaction;
 import com.caucho.db.xa.StoreTransaction;
 import com.caucho.util.FreeList;
+import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.vfs.OutputStreamWithBuffer;
 import com.caucho.vfs.TempCharBuffer;
@@ -327,12 +328,11 @@ public class Inode
   {
     long fileLength = readLong(inode, inodeOffset);
 
-    int sublen = bufferLength;
-    if (fileLength - fileOffset < sublen)
-      sublen = (int) (fileLength - fileOffset);
+    int sublen = Math.min(bufferLength, (int) (fileLength - fileOffset));
 
-    if (sublen <= 0)
+    if (sublen <= 0) {
       return -1;
+    }
 
     if (fileLength <= INLINE_MAX) {
       System.arraycopy(inode, inodeOffset + 8 + (int) fileOffset,
@@ -344,8 +344,7 @@ public class Inode
       long fragAddr = readMiniFragAddr(inode, inodeOffset, store, fileOffset);
       int fragOffset = (int) (fileOffset % MINI_FRAG_SIZE);
 
-      if (MINI_FRAG_SIZE - fragOffset < sublen)
-        sublen = MINI_FRAG_SIZE - fragOffset;
+      sublen = Math.min(MINI_FRAG_SIZE - fragOffset, sublen);
 
       store.readMiniFragment(fragAddr, fragOffset,
                              buffer, bufferOffset, sublen);
@@ -364,6 +363,12 @@ public class Inode
       store.readBlock(addr, offset, buffer, bufferOffset, sublen);
 
       return sublen;
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(L.l("{0}\n  inodeOffset={1} fileOffset=0x{2}\n  {2}",
+                                             e.getMessage(),
+                                             inodeOffset,
+                                             Long.toHexString(fileOffset),
+                                             Hex.toHex(inode, inodeOffset, inode.length - inodeOffset)));
     } finally {
       update.close();
     }

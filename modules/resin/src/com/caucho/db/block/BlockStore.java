@@ -964,7 +964,7 @@ public class BlockStore {
                                            this));
     }
     else if (blockIdToAddress(blockId) <= 0) {
-      e = new IllegalArgumentException(L.l("invalid block address {0} must match store {1}.",
+      e = new IllegalArgumentException(L.l("invalid block address 0x{0} for store {1}.",
                                            Long.toHexString(blockId),
                                            this));
       e.fillInStackTrace();
@@ -1099,9 +1099,9 @@ public class BlockStore {
 
     while (_allocDirtyMin < _allocDirtyMax) {
       try {
-        // only one thread should try saving at once.  The second thread
+        // only two threads should try saving at once.  The second thread
         // is necessary if the dirty range is set after the write
-        if (_allocationWriteCount.getAndIncrement() > 1) {
+        if (_allocationWriteCount.getAndIncrement() > 2) {
           return;
         }
         
