@@ -891,8 +891,7 @@ public class BlockStore {
           }
         }
 
-        _allocDirtyMin = 0;
-        _allocDirtyMax = newTable.length;
+        setAllocDirty(0, newTable.length);
       }
 
       if (log.isLoggable(Level.FINER))
@@ -1098,30 +1097,37 @@ public class BlockStore {
     if (! _isFlushDirtyBlocksOnCommit)
       return;
 
-    if (_allocDirtyMax <= _allocDirtyMin)
-      return;
-
-    try {
-      // only two threads should try saving at once.  The second thread
-      // is necessary if the dirty range is set after the write
-      if (_allocationWriteCount.incrementAndGet() < 2) {
-        synchronized (_allocationWriteLock) {
-          int dirtyMin;
-          int dirtyMax;
-
-          synchronized (_allocationLock) {
-            dirtyMin = _allocDirtyMin;
-            _allocDirtyMin = Integer.MAX_VALUE;
-
-            dirtyMax = _allocDirtyMax;
-            _allocDirtyMax = 0;
-          }
-
-          saveAllocation(dirtyMin, dirtyMax);
+    while (_allocDirtyMin < _allocDirtyMax) {
+      try {
+        // only one thread should try saving at once.  The second thread
+        // is necessary if the dirty range is set after the write
+        if (_allocationWriteCount.getAndIncrement() > 1) {
+          return;
         }
+        
+        writeAllocation();
+      } finally {
+        _allocationWriteCount.decrementAndGet();
       }
-    } finally {
-      _allocationWriteCount.decrementAndGet();
+    }
+  }
+  
+  private void writeAllocation()
+    throws IOException
+  {
+    synchronized (_allocationWriteLock) {
+      int dirtyMin;
+      int dirtyMax;
+
+      synchronized (_allocationLock) {
+        dirtyMin = _allocDirtyMin;
+        _allocDirtyMin = Integer.MAX_VALUE;
+
+        dirtyMax = _allocDirtyMax;
+        _allocDirtyMax = 0;
+      }
+
+      saveAllocation(dirtyMin, dirtyMax);
     }
   }
 
