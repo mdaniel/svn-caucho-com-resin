@@ -364,7 +364,7 @@ public class Inode
 
       return sublen;
     } catch (IllegalArgumentException e) {
-      e = new IllegalArgumentException(L.l("{0}\n  inodeOffset={1} fileOffset=0x{2}\n  {2}",
+      e = new IllegalArgumentException(L.l("{0}\n  inodeOffset={1} fileOffset=0x{2}\n  {3}",
                                              e.getMessage(),
                                              inodeOffset,
                                              Long.toHexString(fileOffset),
