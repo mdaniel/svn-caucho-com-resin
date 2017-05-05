@@ -364,12 +364,17 @@ public class Inode
 
       return sublen;
     } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException(L.l("{0}\n  inodeOffset={1} fileOffset=0x{2}\n  {2}",
+      e = new IllegalArgumentException(L.l("{0}\n  inodeOffset={1} fileOffset=0x{2}\n  {2}",
                                              e.getMessage(),
                                              inodeOffset,
                                              Long.toHexString(fileOffset),
                                              Hex.toHex(inode, inodeOffset, inode.length - inodeOffset)),
                                          e);
+      
+      e.fillInStackTrace();
+      e.printStackTrace();
+      
+      throw e;
     } finally {
       update.close();
     }

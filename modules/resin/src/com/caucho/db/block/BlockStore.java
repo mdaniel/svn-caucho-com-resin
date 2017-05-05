@@ -967,8 +967,6 @@ public class BlockStore {
       e = new IllegalArgumentException(L.l("invalid block address 0x{0} for store {1}.",
                                            Long.toHexString(blockId),
                                            this));
-      e.fillInStackTrace();
-      e.printStackTrace();
     }
 
     if (e != null)
