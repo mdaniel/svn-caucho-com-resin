@@ -110,6 +110,7 @@ public class InodeUpdate
 
     if (block != null) {
       block.free();
+      block.save();
     }
   }
 
@@ -126,13 +127,17 @@ public class InodeUpdate
     long blockId = _store.addressToBlockId(blockAddress);
     
     Block block = _lastBlock;
-    
+
+    System.out.println("WBL: addr=0x" + Long.toHexString(blockAddress)
+      + " off=0x" + Long.toHexString(offset)
+      + " val=0x" + Long.toHexString(value));
     if (block == null) {
       block = _store.readBlock(blockAddress);
       _lastBlock = block;
     }
     else if (block.getBlockId() != blockId) {
       block.free();
+      block.save();
       block = _store.readBlock(blockAddress);
       _lastBlock = block;
     }

@@ -193,7 +193,7 @@ public class Inode
   /**
    * Writes the inode value to a stream.
    */
-  public void writeToStreamOld(OutputStreamWithBuffer os,
+  private void writeToStreamOld(OutputStreamWithBuffer os,
                                long offset, long length)
     throws IOException
   {
@@ -535,8 +535,7 @@ public class Inode
         else {
           int sublen = length;
 
-          if (BLOCK_SIZE < sublen)
-            sublen = BLOCK_SIZE;
+          sublen = Math.min(sublen, BLOCK_SIZE);
 
           Block block = store.allocateBlock();
 
@@ -588,8 +587,7 @@ public class Inode
     long fileLength = readLong(inode, inodeOffset);
 
     int charSublen = (int) (fileLength - fileOffset) / 2;
-    if (bufferLength < charSublen)
-      charSublen = bufferLength;
+    charSublen = Math.min(bufferLength, charSublen);
 
     if (charSublen <= 0)
       return -1;
