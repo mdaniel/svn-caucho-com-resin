@@ -1006,7 +1006,7 @@ public class AbstractRolloverLog implements Closeable {
       try {
         _rolloverWorker.wake();
       } finally {
-        alarm.queue(Math.min(_rolloverCheckPeriod, HOUR));
+        requeue(alarm);
       }
     }
     
