@@ -392,7 +392,9 @@ public class AbstractRolloverLog implements Closeable {
     long now = CurrentTime.getCurrentTime();
 
     if (_nextPeriodEnd <= now || _nextRolloverCheckTime.get() <= now) {
-      _nextRolloverCheckTime.set(now + _rolloverCheckPeriod);
+      long checkPeriod = Math.min(_rolloverCheckPeriod, HOUR);
+      
+      _nextRolloverCheckTime.set(now + checkPeriod);
       _rolloverWorker.wake();
 
       return true;
@@ -1004,23 +1006,30 @@ public class AbstractRolloverLog implements Closeable {
       try {
         _rolloverWorker.wake();
       } finally {
-        alarm.queue(_rolloverCheckPeriod);
+        alarm.queue(Math.min(_rolloverCheckPeriod, HOUR));
       }
     }
     
     void requeue(Alarm alarm)
     {
-      if (isClosed() || alarm == null)
+      if (isClosed() || alarm == null) {
         return;
+      }
       
       long now = CurrentTime.getCurrentTime();
       
       long nextCheckTime;
       
-      if (getRolloverSize() <= 0 || _rolloverCheckPeriod <= 0)
-        nextCheckTime = now + DAY;
-      else
-        nextCheckTime = now + _rolloverCheckPeriod;
+      long checkPeriod;
+      
+      if (getRolloverSize() <= 0 || _rolloverCheckPeriod <= 0) {
+        checkPeriod = HOUR;
+      }
+      else {
+        checkPeriod = _rolloverCheckPeriod;
+      }
+      
+      nextCheckTime = now + Math.min(checkPeriod, HOUR);
 
       alarm.queueAt(Math.min(_nextPeriodEnd, nextCheckTime));
     }
