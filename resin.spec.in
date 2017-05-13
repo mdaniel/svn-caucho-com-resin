@@ -40,7 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 /usr/bin/getent group resin || /usr/sbin/groupadd -r resin
 /usr/bin/getent passwd resin || /usr/sbin/useradd -r -s /bin/false -g resin resin
-test -x /usr/bin/resinctl && /usr/bin/resinctl shutdown
+test -x /usr/bin/resinctl && /usr/bin/resinctl shutdown || /bin/true
 
 %post
 /sbin/chkconfig resin reset
