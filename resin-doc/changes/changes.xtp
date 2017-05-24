@@ -6,7 +6,13 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.52 - in progress">
+<s2 title="4.0.53 - in progress">
+<ul>
+<li>rewrite: NPE when web-app stopped and rewrite rules used (#6048, rep by stbu)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.52 - May 19, 2017">
 <ul>
 <li>apache: reencode 0x0d for uri in mod_caucho</li>
 <li>jsse: set default JSSE settings to higher levels (#6051, rep by VasumathiN)</li>

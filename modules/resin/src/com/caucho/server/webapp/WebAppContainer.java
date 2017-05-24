@@ -844,11 +844,14 @@ public class WebAppContainer
       // if (rootWebApp != webApp)
       // server/02ex vs server/02ey - false
       webApp = invocation.getWebApp();
-      rewriteChain = webApp.createWebAppFilterChain(rewriteChain, 
-                                                    invocation,
-                                                    true);
+      
+      if (webApp != null) { // #6058
+        rewriteChain = webApp.createWebAppFilterChain(rewriteChain, 
+                                                      invocation,
+                                                      true);
 
-      invocation.setFilterChain(rewriteChain);
+        invocation.setFilterChain(rewriteChain);
+      }
     }
 
     if (isAlwaysModified)
