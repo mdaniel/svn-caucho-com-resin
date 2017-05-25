@@ -468,7 +468,7 @@ fi
 #
 # deal with stronghold
 #
-if test -z "${apache_include}" -a -r "${apache_dir}/src/include/httpd.h"; then
+if test -z ${APACHE_INC} -a test -z "${apache_include}" -a -r "${apache_dir}/src/include/httpd.h"; then
   apache_include=${apache_dir}/src/include
 
   APACHE_INC="-I${apache_dir}/src/include"
@@ -476,7 +476,7 @@ if test -z "${apache_include}" -a -r "${apache_dir}/src/include/httpd.h"; then
   APACHE_INC="-I${apache_dir}/src/os/unix $APACHE_INC"
 fi
 
-if test -n "$apache" -a ! -r ${apache_include}/httpd.h; then
+if test -n "$apache" -a -z "${APACHE_INC}" -a ! -r ${apache_include}/httpd.h; then
   AC_MSG_ERROR([Can't find Apache include directory ${apache_include}])
 fi
 
