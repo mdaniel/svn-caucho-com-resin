@@ -468,7 +468,7 @@ fi
 #
 # deal with stronghold
 #
-if test -z ${APACHE_INC} -a test -z "${apache_include}" -a -r "${apache_dir}/src/include/httpd.h"; then
+if test -z ${APACHE_INC} -a -z "${apache_include}" -a -r "${apache_dir}/src/include/httpd.h"; then
   apache_include=${apache_dir}/src/include
 
   APACHE_INC="-I${apache_dir}/src/include"
@@ -1060,6 +1060,8 @@ if test -n "${poll}"; then
 fi   
 
 if test -z "$apache"; then
+  a=b
+elif test -n "${APACHE_INC}" -a -z "${apache_include}"; then
   a=b
 elif test -r "${apache_include}/apr_thread_mutex.h" -o -n "${apr_inc}"; then
   echo "Using Apache 2.0 configuration ${apache_conf}"
