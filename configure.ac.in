@@ -450,14 +450,18 @@ fi
 # heuristics for finding the Apache include directory
 #
 if test -z "${apache_include}" -a -n "${apxs}"; then
-  apache_include=`${apxs} -q INCLUDEDIR`
+  APACHE_INC=`${apxs} -q EXTRA_INCLUDES`
+
+  if test -x "${APACHE_INC}"; then
+    apache_include=`${apxs} -q INCLUDEDIR`
+  }
 fi
 
 if test -z "${apache_include}" -a -r "${apache_dir}/include/httpd.h"; then
   apache_include=${apache_dir}/include
 fi
 
-if test -n "${apache_include}"; then
+if test -z "${APACHE_INC} -a -n "${apache_include}"; then
   APACHE_INC="-I${apache_include}"
 fi
 
