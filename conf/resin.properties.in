@@ -172,7 +172,11 @@ web_admin_host   :
 # Require SSL for REST Admin
 # rest_admin_ssl : true
 
-# Access to /resin-admin and remote CLI is password restricted.
+# Health check disable
+# health_disable   : true
+# health_log_level : off
+
+# access to /resin-admin and remote CLI is password restricted.
 # Use "resinctl generate-password" and copy/paste here to set the admin
 # admin_user : admin
 # admin_password : {SSHA}xxxxxxxx

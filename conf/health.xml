@@ -9,13 +9,17 @@
      - Health monitoring system default configuration
     -->
   <health:HealthSystem>
-    <enabled>true</enabled>
+    <enabled>${! health_disable}</enabled>
     <startup-delay>15m</startup-delay>
     <period>5m</period>
     <recheck-period>30s</recheck-period>
     <recheck-max>5</recheck-max>
     <check-timeout>5m</check-timeout>
   </health:HealthSystem>
+
+  <resin:if test="${health_log_level}">
+    <health:LogService level="${health_log_level}"/>
+  </resin:if>
   
   <health:Restart>
     <health:IfHealthFatal/>

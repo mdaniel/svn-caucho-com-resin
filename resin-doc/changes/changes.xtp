@@ -8,6 +8,7 @@
 
 <s2 title="4.0.53 - in progress">
 <ul>
+<li>health: added resin.properties configure to disable health checks and logging (#6055)</li>
 <li>rewrite: NPE when web-app stopped and rewrite rules used (#6048, rep by stbu)</li>
 </ul>
 </s2>
