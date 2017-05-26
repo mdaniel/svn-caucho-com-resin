@@ -528,6 +528,19 @@ get_session_index(config_t *config, request_rec *r, int *backup)
   return cse_session_from_string(r->uri, config->session_url_prefix, backup);
 }
 
+static int
+hex_digit(int value)
+{
+  value = value & 0xf;
+
+  if (value < 10) {
+    return value + '0';
+  }
+  else {
+    return 'A' + (value - 10);
+  }
+}
+
 /**
  * Writes request parameters to srun.
  */
@@ -555,13 +568,20 @@ write_env(stream_t *s, request_rec *r)
 
   j = 0;
   for (i = 0; (ch = uri[i]) && ch != '?' && j + 2 < sizeof(buf); i++) {
-    if (ch == '%') { /* #1661 */
+    switch (ch) { /* #1661 */
+    case '%':
+    case 0x0d:
+    case 0x0a:
+    case 0x20:
       buf[j++] = '%';
-      buf[j++] = '2';
-      buf[j++] = '5';
-    }
-    else
+      buf[j++] = hex_digit(ch >> 4);
+      buf[j++] = hex_digit(ch);
+      break;
+
+    default:
       buf[j++] = ch;
+      break;
+    }
   }
   buf[j] = 0;
 
@@ -1193,6 +1213,26 @@ caucho_status(request_rec *r)
   return OK;
 }
 
+static int
+cse_is_valid_location(const char *uri)
+{
+  int i;
+
+  if (! uri) {
+    return 0;
+  }
+
+  for (i = 0; uri[i]; i++) {
+    int ch = uri[i];
+
+    if (ch == '\r' || ch == '\n') {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 /**
  * Strip the ;jsessionid
  */
@@ -1201,54 +1241,46 @@ cse_strip(request_rec *r)
 {
   config_t *config = cse_get_module_config(r);
   const char *uri = r->uri;
+  char *new_uri;
   
-  if (config == NULL || ! uri)
+  if (config == NULL || ! uri) {
     return DECLINED;
+  }
 
-  if (config->session_url_prefix) {
-    char buffer[8192];
-    char *new_uri;
-    
-    new_uri = strstr(uri, config->session_url_prefix);
-    
-    if (new_uri) {
-      *new_uri = 0;
+  if (! config->session_url_prefix || ! *config->session_url_prefix) {
+    return DECLINED;
+  }
   
-      /* Strip session encoding from static files. */
-      if (r->filename) {
-	char *url_rewrite = strstr(r->filename, config->session_url_prefix);
+  new_uri = strstr(uri, config->session_url_prefix);
     
-	if (url_rewrite) {
-	  char *query = strstr(url_rewrite, "?");
+  if (! new_uri) {
+    return DECLINED;
+  }
 
-	  if (query)
-	    strcpy(url_rewrite, query);
-	  else
-	    *url_rewrite = 0;
+  if (! cse_is_valid_location(uri)) {
+    return DECLINED;
+  }
+    
+  *new_uri = 0;
+  
+  /* Strip session encoding from static files. */
+  if (r->filename) {
+    char *url_rewrite = strstr(r->filename, config->session_url_prefix);
+    
+    if (url_rewrite) {
+      *url_rewrite = 0;
 
 	  /*
 	    if (stat(r->filename, &r->finfo) < 0)
 	    r->finfo.st_mode = 0;
 	  */
-	}
-      }
-
-      if (r->args) {
-	sprintf(buffer, "%s?%s", r->uri, r->args);
-	
-	apr_table_setn(r->headers_out, "Location",
-		       ap_construct_url(r->pool, buffer, r));
-      }
-      else {
-	apr_table_setn(r->headers_out, "Location",
-		       ap_construct_url(r->pool, r->uri, r));
-      }
-      
-      return HTTP_MOVED_PERMANENTLY;
     }
   }
-  
-  return DECLINED;
+      
+  apr_table_setn(r->headers_out, "Location",
+                 ap_construct_url(r->pool, r->uri, r));
+      
+  return HTTP_MOVED_PERMANENTLY;
 }
 
 /**

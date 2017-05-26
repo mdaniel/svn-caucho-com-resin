@@ -642,6 +642,10 @@ if test -z "${LD_SHLIB}"; then
         else
 	    LDFLAGS_SHLIB="-G -fPIC"
 	fi
+        
+	if test -n "$b64"; then
+  	  LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m64"
+	fi
 	;;
 
     darwin*)
