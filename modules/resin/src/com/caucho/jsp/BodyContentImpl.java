@@ -54,7 +54,7 @@ public class BodyContentImpl extends AbstractBodyContent {
   private static final FreeList<BodyContentImpl> _freeList
     = new FreeList<BodyContentImpl>(32);
 
-  private TempCharStream _tempStream = new TempCharStream();
+  private final TempCharStream _tempStream = new TempCharStream();
   private TempCharReader _charReader;
   private JspPrintWriter _printWriter;
   private JspWriter _prev;
@@ -76,8 +76,9 @@ public class BodyContentImpl extends AbstractBodyContent {
   {
     BodyContentImpl body = (BodyContentImpl) _freeList.allocate();
     
-    if (body == null)
+    if (body == null) {
       body = new BodyContentImpl(null);
+    }
 
     return body;
   }
@@ -348,6 +349,7 @@ public class BodyContentImpl extends AbstractBodyContent {
     releaseNoFree();
 
     _freeList.free(this);
+    //_freeList.freeCareful(this);
   }
   
   void releaseNoFree()
@@ -356,13 +358,15 @@ public class BodyContentImpl extends AbstractBodyContent {
       _charReader.setFree(true);
       _tempStream.discard();
     }
-    else
+    else {
       _tempStream.destroy();
+    }
 
     _charReader = null;
     _prev = null;
   }
 
+  @Override
   AbstractJspWriter popWriter()
   {
     AbstractJspWriter parent = super.popWriter();

@@ -54,8 +54,6 @@ public class ByteCodeParser {
   static final int CP_NAME_AND_TYPE = 12;
   static final int CP_UTF8 = 1;
   
-  
-  
   static final int CP_METHOD_HANDLE = 15;
   static final int CP_METHOD_TYPE = 16;
   static final int CP_INVOKE_DYNAMIC = 18;

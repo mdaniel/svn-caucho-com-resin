@@ -797,12 +797,18 @@ public class JavaCompilerUtil {
 
       javaClass.addAttribute(attr);
 
-      WriteStream os = classPath.openWrite();
+      TempStream os = new TempStream();
+      WriteStream out = new WriteStream(os);
       try {
-        javaClass.write(os);
+        javaClass.write(out);
       } finally {
+        out.close();
         os.close();
       }
+      
+      WriteStream cOut = classPath.openWrite();
+      cOut.writeStream(os.getInputStream());
+      cOut.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

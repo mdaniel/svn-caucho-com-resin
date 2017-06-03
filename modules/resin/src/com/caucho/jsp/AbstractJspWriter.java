@@ -119,6 +119,10 @@ abstract class AbstractJspWriter extends BodyContent implements FlushBuffer {
    */
   AbstractJspWriter popWriter()
   {
-    return (AbstractJspWriter) _parent;
+    AbstractJspWriter parent = (AbstractJspWriter) _parent;
+    
+    _parent = null;
+    
+    return (AbstractJspWriter) parent;
   }
 }

@@ -36,18 +36,18 @@ import java.util.logging.Logger;
  * Represents a method ref in the constant pool.
  */
 public class InvokeDynamicConstant extends ConstantPoolEntry {
-  private int _baseMethodIndex;
+  private int _bootstrapMethodIndex;
   private int _nameAndTypeIndex;
 
   /**
    * Creates a new field ref constant.
    */
   InvokeDynamicConstant(ConstantPool pool, int index,
-                        int baseMethodIndex, int nameAndTypeIndex)
+                        int bootstrapMethodIndex, int nameAndTypeIndex)
   {
     super(pool, index);
 
-    _baseMethodIndex = baseMethodIndex;
+    _bootstrapMethodIndex = bootstrapMethodIndex;
     _nameAndTypeIndex = nameAndTypeIndex;
   }
 
@@ -56,7 +56,7 @@ public class InvokeDynamicConstant extends ConstantPoolEntry {
    */
   public int getBaseMethodIndex()
   {
-    return _baseMethodIndex;
+    return _bootstrapMethodIndex;
   }
 
   /**
@@ -109,8 +109,8 @@ public class InvokeDynamicConstant extends ConstantPoolEntry {
   void write(ByteCodeWriter out)
     throws IOException
   {
-    out.write(ConstantPool.CP_METHOD_REF);
-    out.writeShort(_baseMethodIndex);
+    out.write(ConstantPool.CP_INVOKE_DYNAMIC);
+    out.writeShort(_bootstrapMethodIndex);
     out.writeShort(_nameAndTypeIndex);
   }
 

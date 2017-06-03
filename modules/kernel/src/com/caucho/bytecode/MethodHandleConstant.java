@@ -36,8 +36,8 @@ import java.util.logging.Logger;
  * Represents a method ref in the constant pool.
  */
 public class MethodHandleConstant extends ConstantPoolEntry {
-  private int _baseMethodIndex;
-  private int _nameAndTypeIndex;
+  private int _referenceKind;
+  private int _referenceIndex;
 
   /**
    * Creates a new field ref constant.
@@ -47,8 +47,8 @@ public class MethodHandleConstant extends ConstantPoolEntry {
   {
     super(pool, index);
 
-    _baseMethodIndex = referenceKind;
-    _nameAndTypeIndex = referenceIndex;
+    _referenceKind = referenceKind;
+    _referenceIndex = referenceIndex;
   }
 
   /**
@@ -56,7 +56,7 @@ public class MethodHandleConstant extends ConstantPoolEntry {
    */
   public int getBaseMethodIndex()
   {
-    return _baseMethodIndex;
+    return _referenceKind;
   }
 
   /**
@@ -84,7 +84,7 @@ public class MethodHandleConstant extends ConstantPoolEntry {
    */
   public String getName()
   {
-    return getConstantPool().getNameAndType(_nameAndTypeIndex).getName();
+    return getConstantPool().getNameAndType(_referenceIndex).getName();
   }
 
   /**
@@ -92,7 +92,7 @@ public class MethodHandleConstant extends ConstantPoolEntry {
    */
   public String getType()
   {
-    return getConstantPool().getNameAndType(_nameAndTypeIndex).getType();
+    return getConstantPool().getNameAndType(_referenceIndex).getType();
   }
 
   /**
@@ -100,7 +100,7 @@ public class MethodHandleConstant extends ConstantPoolEntry {
    */
   public void setNameAndType(String name, String type)
   {
-    _nameAndTypeIndex = getConstantPool().addNameAndType(name, type).getIndex();
+    _referenceIndex = getConstantPool().addNameAndType(name, type).getIndex();
   }
 
   /**
@@ -109,9 +109,9 @@ public class MethodHandleConstant extends ConstantPoolEntry {
   void write(ByteCodeWriter out)
     throws IOException
   {
-    out.write(ConstantPool.CP_METHOD_REF);
-    out.writeShort(_baseMethodIndex);
-    out.writeShort(_nameAndTypeIndex);
+    out.write(ConstantPool.CP_METHOD_HANDLE);
+    out.write(_referenceKind);
+    out.writeShort(_referenceIndex);
   }
 
   /**

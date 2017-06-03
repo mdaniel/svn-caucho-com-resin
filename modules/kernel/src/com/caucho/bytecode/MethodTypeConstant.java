@@ -83,7 +83,8 @@ public class MethodTypeConstant extends ConstantPoolEntry {
   void write(ByteCodeWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    out.write(ConstantPool.CP_METHOD_TYPE);
+    out.writeShort(_descriptorIndex);
   }
 
   /**

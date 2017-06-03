@@ -48,6 +48,10 @@ public class ConstantPool {
   public static final int CP_DOUBLE = 6;
   public static final int CP_NAME_AND_TYPE = 12;
   public static final int CP_UTF8 = 1;
+  
+  public static final int CP_METHOD_HANDLE = 15;
+  public static final int CP_METHOD_TYPE = 16;
+  public static final int CP_INVOKE_DYNAMIC = 18;
 
   private ArrayList<ConstantPoolEntry> _entries;
   private HashMap<String,Utf8Constant> _utf8Map
