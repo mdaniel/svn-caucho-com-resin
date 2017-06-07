@@ -8,6 +8,8 @@
 
 <s2 title="4.0.53 - in progress">
 <ul>
+<li>webapp: sync issues with starting (#5979, rep by Mathias Lagerwall)</li>
+<li>php: preload was switched to load (#6059, rep by kpokrovsky)</li>
 <li>jsp: multiple free of BodyContext (#6061)</li>
 <li>jsp: .smap issues with invokedynamic constant pool (#6060, rep by mnsh)</li>
 <li>mod_caucho: updates to ;jsessionid stripping (#6057, rep by Shinomiya Nobuaki)</li>

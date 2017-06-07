@@ -3719,15 +3719,17 @@ public class WebApp extends ServletContextImpl
       throw new IllegalStateException(L.l("webApp must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
     }
     
-    if (! _lifecycle.toStarting()) {
-      return;
-    }
-
-    StartupTask task = new StartupTask();
+    synchronized (this) {
+      if (_lifecycle.isActive() || _lifecycle.isAfterStopping()) {
+        return;
+      }
+      
+      StartupTask task = new StartupTask();
     
-    ThreadPool.getCurrent().execute(task);
+      ThreadPool.getCurrent().execute(task);
 
-    task.waitFor(getActiveWaitTime());
+      task.waitFor(getActiveWaitTime());
+    }
     // asdf: wait
   }
   
@@ -3735,6 +3737,10 @@ public class WebApp extends ServletContextImpl
   {
     if (! _lifecycle.isAfterInit()) {
       throw new IllegalStateException(L.l("webApp must be initialized before starting.  Currently in state {0}.", _lifecycle.getStateName()));
+    }
+    
+    if (! _lifecycle.toStarting()) {
+      return;
     }
 
     Thread thread = Thread.currentThread();
