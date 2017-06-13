@@ -136,7 +136,7 @@ install	:
 	  if test ! -w "$(usr_share)"; then \
 	    echo "WARNING: Resin home symlink install failed. Ensure $(usr_share) is writable by $$USER, or run 'make install' as root."; \
 	  else \
-	    ln -sf $(abs_resin_home) $(usr_share)/resin; \
+	    ln -sfn $(abs_resin_home) $(usr_share)/resin; \
 	    if test $$? != "0"; then \
 	      echo "WARNING: Resin home symlink creation failed. Ensure $(usr_share) is writable by $$USER, or run 'make install' as root."; \
 	    fi; \
