@@ -8,6 +8,7 @@
 
 <s2 title="4.0.53 - in progress">
 <ul>
+<li>install: issue with symlink and existing directory (#5951, rep by A. Hilliard)</li>
 <li>webapp: sync issues with starting (#5979, rep by Mathias Lagerwall)</li>
 <li>php: preload was switched to load (#6059, rep by kpokrovsky)</li>
 <li>jsp: multiple free of BodyContext (#6061)</li>

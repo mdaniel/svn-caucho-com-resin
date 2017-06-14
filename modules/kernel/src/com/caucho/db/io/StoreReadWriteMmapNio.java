@@ -905,12 +905,12 @@ public class StoreReadWriteMmapNio implements StoreReadWrite
         
         ByteBuffer mmap = _mmap[mmapIndex];
         
-        MmapFile mmapFile = _mmapFile[mmapIndex];
-        int mmapOffset = (int) (address - mmapFile.getAddress());
-        
-        int sublen = (int) Math.min(length, mmapFile.getSize() - mmapOffset);
-
         synchronized (mmap) {
+          MmapFile mmapFile = _mmapFile[mmapIndex];
+          int mmapOffset = (int) (address - mmapFile.getAddress());
+          
+          int sublen = (int) Math.min(length, mmapFile.getSize() - mmapOffset);
+
           mmap.limit(mmapOffset + sublen);
           mmap.position(mmapOffset);
 
