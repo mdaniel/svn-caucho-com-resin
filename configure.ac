@@ -365,6 +365,8 @@ if test -z "${apache_conf}" -a -n "${apxs}"; then
     apache_conf=${apache_confdir}/httpd.conf
   elif test -r "${apache_confdir}"/apache.conf; then
     apache_conf=${apache_confdir}/apache.conf
+  elif test -r "${apache_confdir}"/apache2.conf; then
+    apache_conf=${apache_confdir}/apache2.conf
   elif test -r "${apache_confdir}"/httpsd.conf; then
     apache_conf=${apache_confdir}/httpsd.conf
   fi
