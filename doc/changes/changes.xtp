@@ -10,6 +10,12 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
+<s2 title="3.1.15 Jun 21, 2017">
+<ul>
+<li>mod_caucho: handling of ;jsessionid= redirects.</li>
+</ul>
+</s2>
+
 <s2 title="3.1.15 Oct 9, 2014">
 <ul>
 <li>i18n: header iso8859 conversion to '?' for invalid chars.</li>
