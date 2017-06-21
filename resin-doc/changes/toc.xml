@@ -1,6 +1,7 @@
 <navigation threaded="true" section="Resin : Changes : " comment="true">
   <item title="Changes" link="index.xtp">
     <item link="release-notes.xtp" title="Release Notes">
+      <item link="resin-4.0.52.xtp" title="Resin 4.0.52"/>
       <item link="resin-4.0.51.xtp" title="Resin 4.0.51"/>
       <item link="resin-4.0.50.xtp" title="Resin 4.0.50"/>
       <item link="resin-4.0.49.xtp" title="Resin 4.0.49"/>

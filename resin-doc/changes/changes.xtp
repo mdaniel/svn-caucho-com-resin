@@ -6,7 +6,7 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.53 - in progress">
+<s2 title="4.0.53 - Jun 21, 2017">
 <ul>
 <li>install: issue with symlink and existing directory (#5951, rep by A. Hilliard)</li>
 <li>webapp: sync issues with starting (#5979, rep by Mathias Lagerwall)</li>
