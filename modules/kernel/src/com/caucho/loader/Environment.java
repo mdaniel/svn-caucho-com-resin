@@ -934,10 +934,12 @@ public class Environment {
                     "com.caucho.naming.InitialContextFactoryImpl");
         }
         
+        /*
         defaultProperty(props, "jdk.tls.ephemeralDHKeySize", "2048");
         defaultProperty(props, "jdk.tls.rejectClientInitiatedRenegotiation", "true");
         defaultProperty(props, "sun.security.ssl.allowUnsafeRenegotiation", "false");
         defaultProperty(props, "sun.security.ssl.allowLegacyHelloMessages", "false");
+        */
 
         // props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
 

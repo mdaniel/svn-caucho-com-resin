@@ -6,6 +6,13 @@
 
 <s1 title="Resin Change Log">
 
+<s2 title="4.0.54 - in progress">
+<ul>
+<li>jsse: default system properties moved to resin.xml (#6063, rep by Marc Wiest)</li>
+<li>jsse: honor-cipher-order (#6067, rep by stbu)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.53 - Jun 21, 2017">
 <ul>
 <li>install: issue with symlink and existing directory (#5951, rep by A. Hilliard)</li>

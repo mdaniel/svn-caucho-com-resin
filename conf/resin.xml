@@ -74,6 +74,16 @@
   <elastic-dns>${elastic_dns}</elastic-dns>
 
   <!--
+     - JSSE default properties
+    -->
+  <system-property
+    jdk.tls.ephemeralDHKeySize="2048"
+    jdk.tls.rejectClientInitiatedRenegotiation="true"
+    sun.security.ssl.allowUnsafeRenegotiation="false"
+    sun.security.ssl.allowLegacyHelloMessages="false"/>
+     
+
+  <!--
      - Configures the main application cluster.  Load-balancing configurations
      - will also have a web cluster.
     -->
