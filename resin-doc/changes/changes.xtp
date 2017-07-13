@@ -8,6 +8,9 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>cluster: cleanup of heartbeat period and timeout (#5904, rep by Tom Pohl)</li>
+<li>servlet: i18n issues with encodeRedirectURL over 0x8000 (#6069, rep by marc82ch)</li>
+<li>servlet: handling of stale web-app while processing error page</li>
 <li>jsse: default system properties moved to resin.xml (#6063, rep by Marc Wiest)</li>
 <li>jsse: honor-cipher-order (#6067, rep by stbu)</li>
 </ul>

@@ -654,7 +654,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     WebApp webApp = getRequest().getWebApp();
 
     ErrorPageManager errorManager = null;
-    if (webApp != null)
+    
+    if (webApp != null && webApp.isActive())
       errorManager = webApp.getErrorPageManager();
     else
       errorManager = getRequest().getServer().getErrorPageManager();
@@ -728,6 +729,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
       s.println("</body></html>");
     } catch (Exception e) {
+      log.fine(L.l("Error in processing sendError code={0}, status='{1}'", 
+                   code, value));
       log.log(Level.FINE, e.toString(), e);
     }
 
@@ -1091,7 +1094,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
         addHex(cb, d1);
         addHex(cb, d2);
       }
-      else if (ch < 0x8000) {
+      else {
         int d1 = 0xe0 + ((ch >> 12) & 0xf);
         int d2 = 0x80 + ((ch >> 6) & 0x3f);
         int d3 = 0x80 + (ch & 0x3f);

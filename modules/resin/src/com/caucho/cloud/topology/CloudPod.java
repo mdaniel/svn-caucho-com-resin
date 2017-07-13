@@ -446,14 +446,17 @@ public class CloudPod
         server = new CloudServer(id, displayId, this, index, address, port, isSSL, 
                                  isStatic, isAllowExternal);
       
-      if (index < _serverList.size() && _serverList.get(index) != null)
+      _maxIndex = Math.max(_maxIndex, index);
+      
+      while (index < _serverList.size()) {
+        _serverList.add(null);
+      }
+      
+      if (_serverList.get(index) != null)
         return null;
   
       _serverList.set(index, server);
       _servers = _serverList.toArray();
-      
-      if (_maxIndex < index)
-        _maxIndex = index;
     }
 
     updateDispatcher();
@@ -502,8 +505,7 @@ public class CloudPod
         _serverList.remove(_serverList.size() - 1);
       }
       
-      if (_serverList.size() <= _maxIndex)
-        _maxIndex = _serverList.size() - 1; 
+      _maxIndex = _serverList.size() - 1; 
       
       _servers = _serverList.toArray();
     }

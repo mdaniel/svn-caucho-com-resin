@@ -349,7 +349,7 @@ public final class Lifecycle {
       }
     }
     
-    return _state.get().isActive();
+    return getState().isActive();
   }
 
   /**
