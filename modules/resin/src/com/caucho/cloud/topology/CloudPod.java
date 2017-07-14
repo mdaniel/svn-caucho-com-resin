@@ -448,7 +448,7 @@ public class CloudPod
       
       _maxIndex = Math.max(_maxIndex, index);
       
-      while (index < _serverList.size()) {
+      while (_serverList.size() <= index) {
         _serverList.add(null);
       }
       

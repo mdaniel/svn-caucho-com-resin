@@ -1003,17 +1003,21 @@ class WatchdogChildProcess
     RotateLog log = new RotateLog();
     log.setPath(jvmPath);
     log.setRolloverSizeBytes(64L * 1024 * 1024);
-    
-    if (_watchdog.getStdoutLog() != null)
+
+    if (_watchdog.getStdoutLog() != null) {
       _watchdog.getStdoutLog().configure(log);
+    }
 
     log.init();
     
     RotateStream rotateStream = log.getRotateStream();
 
-    // _watchdog.getConfig().logInit(rotateStream);
+    // server/6e82
+    if (_watchdog.getStdoutLog() == null) {
+      _watchdog.getConfig().logInit(rotateStream);
+      rotateStream.init();
+    }
     
-    // rotateStream.init();
     return rotateStream.getStream();
   }
 
