@@ -108,7 +108,7 @@ abstract public class AbstractScopeContext implements Context {
 
     result = create(bean, creationalContext);
 
-    context.put(bean, key, result, creationalContext);
+    result = context.put(bean, key, result, creationalContext);
 
     return result;
   }

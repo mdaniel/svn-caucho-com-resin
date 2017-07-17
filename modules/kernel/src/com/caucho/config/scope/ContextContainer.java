@@ -71,12 +71,14 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
     return null;
   }
 
-  public <T> void put(Contextual<T> bean, 
-                      Object id, 
-                      T value, 
-                      CreationalContext<T> env)
+  public <T> T put(Contextual<T> bean, 
+                   Object id, 
+                   T value, 
+                   CreationalContext<T> env)
   {
     _values = new ContextItem<T>(_values, bean, id, value, env);
+    
+    return value;
   }
 
   public void removeEvent(Object scope, String name)

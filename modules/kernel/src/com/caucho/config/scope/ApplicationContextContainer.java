@@ -29,55 +29,36 @@
 
 package com.caucho.config.scope;
 
-import java.lang.annotation.Annotation;
-
-import javax.enterprise.context.ApplicationScoped;
-
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
-import com.caucho.loader.Environment;
+
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.BeanManager;
+import java.io.Serializable;
 
 /**
- * The application scope value
+ * Serializable container for a bean scope.
  */
 @Module
-public class ApplicationContext extends AbstractScopeContext {
-  private ContextContainer _context = new ApplicationContextContainer();
-
-  /**
-   * Returns the current application scope
-   */
-  public ApplicationContext()
-  {
-    Environment.addCloseListener(_context);
-  }
-
-  /**
-   * Returns true if the scope is currently active.
-   */
+@SuppressWarnings("serial")
+public class ApplicationContextContainer extends ContextContainer
+{
   @Override
-  public boolean isActive()
+  public <T> T put(Contextual<T> bean, 
+                   Object id, 
+                   T value, 
+                   CreationalContext<T> env)
   {
-    return true;
-   }
-
-  /**
-   * Returns the scope annotation type.
-   */
-  @Override
-  public Class<? extends Annotation> getScope()
-  {
-    return ApplicationScoped.class;
-  }
-
-  @Override
-  protected ContextContainer getContextContainer()
-  {
-    return _context;
-  }
-
-  @Override
-  protected ContextContainer createContextContainer()
-  {
-    return _context;
+    synchronized (this) {
+      T result = (T) get(id);
+      
+      if (result != null) {
+        return result;
+      }
+      else {
+        return super.put(bean, id, value, env);
+      }
+    }
   }
 }
