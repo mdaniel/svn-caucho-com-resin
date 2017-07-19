@@ -8,6 +8,7 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>cache: kill keepalive when cache is invalid (#5982, rep by jfblachon)</li>
 <li>cdi: timing issue with ApplicationScoped beans (#6639, rep by Jose Fernandez)</li>
 <li>cluster: cleanup of heartbeat period and timeout (#5904, rep by Tom Pohl)</li>
 <li>servlet: i18n issues with encodeRedirectURL over 0x8000 (#6069, rep by marc82ch)</li>
