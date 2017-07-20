@@ -85,7 +85,7 @@ public class HeapDumpAction implements AdminAction
     MBeanServer mBeanServer = Jmx.getGlobalMBeanServer();
     mBeanServer.invoke(name,
                        "dumpHeap",
-                       new Object[]{hprofPath.getPath(), Boolean.TRUE},
+                       new Object[]{hprofPath.getNativePath(), Boolean.TRUE},
                        new String[]{String.class.getName(), boolean.class.getName()});
 
     final String result = L.l("Heap dump is written to `{0}'.\n"
