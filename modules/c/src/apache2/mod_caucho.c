@@ -1303,6 +1303,8 @@ cse_strip(request_rec *r)
   config_t *config = cse_get_module_config(r);
   const char *uri = r->uri;
   char *new_uri;
+  char full_uri[8192];
+  int len = 0;
   
   if (config == NULL || ! uri) {
     return DECLINED;
@@ -1321,6 +1323,10 @@ cse_strip(request_rec *r)
   if (! cse_is_valid_location(uri)) {
     return DECLINED;
   }
+
+  if (r->args && ! cse_is_valid_location(r->args)) {
+    return DECLINED;
+  }
     
   *new_uri = 0;
   
@@ -1337,9 +1343,23 @@ cse_strip(request_rec *r)
 	  */
     }
   }
+
+  strncpy(full_uri, r->uri, sizeof(full_uri));
+
+  full_uri[sizeof(full_uri) - 1] = 0;
+
+  if (r->args && len < sizeof(full_uri) - 3) {
+    len = strlen(full_uri);
+
+    full_uri[len] = '?';
+
+    strncpy(full_uri + len + 1, r->args, sizeof(full_uri) - len - 1);
+    
+    full_uri[sizeof(full_uri) - 1] = 0;
+  }
       
   apr_table_setn(r->headers_out, "Location",
-                 ap_construct_url(r->pool, r->uri, r));
+                 ap_construct_url(r->pool, full_uri, r));
       
   return HTTP_MOVED_PERMANENTLY;
 }
@@ -1389,7 +1409,7 @@ cse_dispatch(request_rec *r)
     return caucho_status(r);
   }
   
-  if (config->session_url_prefix) {
+  if (config->session_url_prefix && *config->session_url_prefix) {
     return cse_strip(r);
   }
 
