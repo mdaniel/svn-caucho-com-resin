@@ -8,6 +8,7 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>actor: backport actors actor from Baratine for HP-UX issues</li>
 <li>dump_heap: hprof-path must use getNativePath() for windows (#6072)</li>
 <li>mod_caucho: redirect issue with query parameters (#6054)</li>
 <li>cache: kill keepalive when cache is invalid (#5982, rep by jfblachon)</li>
