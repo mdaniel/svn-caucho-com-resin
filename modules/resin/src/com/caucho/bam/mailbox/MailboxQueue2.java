@@ -31,12 +31,13 @@ package com.caucho.bam.mailbox;
 
 import com.caucho.bam.packet.Packet;
 import com.caucho.env.actor.ActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+import com.caucho.env.actor2.ActorQueue2;
 
 /**
  * Queue/worker for a mailbox. 
  */
-public class MailboxQueue2 extends ValueActorQueue<Packet>
+//public class MailboxQueue2 extends ValueActorQueue<Packet>
+public class MailboxQueue2 extends ActorQueue2<Packet>
 {
   /**
    * @param capacity

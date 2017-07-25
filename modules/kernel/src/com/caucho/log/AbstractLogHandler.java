@@ -35,7 +35,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 import com.caucho.env.actor.AbstractActorProcessor;
-import com.caucho.env.actor.ValueActorQueue;
+import com.caucho.env.actor2.ActorQueue2;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
@@ -43,8 +43,12 @@ import com.caucho.vfs.WriteStream;
  * Configures a log handler
  */
 abstract public class AbstractLogHandler extends Handler {
+  /*
   private final ValueActorQueue<LogRecord> _logQueue
     = new ValueActorQueue<LogRecord>(256, new LogQueue());
+    */
+  private final ActorQueue2<LogRecord> _logQueue
+    = new ActorQueue2<LogRecord>(256, new LogQueue());
 
   private Filter _filter;
 

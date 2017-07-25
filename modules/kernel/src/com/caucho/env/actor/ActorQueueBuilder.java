@@ -29,6 +29,9 @@
 
 package com.caucho.env.actor;
 
+import com.caucho.env.actor2.ActorQueue2;
+import com.caucho.env.actor2.ActorQueue2MultiWorker;
+
 /**
  * Interface for an actor queue
  */
@@ -46,12 +49,18 @@ public class ActorQueueBuilder<T> extends AbstractActorQueueBuilder<T>
     validateBuilder();
     
     if (processors.length == 1) {
-      return new ValueActorQueue<T>(getCapacity(), processors);
+      //return new ValueActorQueue<T>(getCapacity(), processors);
+      return new ActorQueue2<T>(getCapacity(), processors[0]);
     }
     else {
+      /*
       return new MultiworkerActorQueue<T>(getCapacity(), 
                                           getMultiworkerOffset(),
                                           processors);
+                                          */
+      return new ActorQueue2MultiWorker<T>(getCapacity(), 
+          getMultiworkerOffset(),
+          processors);
     }
   }
 }

@@ -29,17 +29,19 @@
 
 package com.caucho.env.actor;
 
+import com.caucho.env.actor2.ActorQueue2;
 
 /**
  * Ring-based memory queue processed by a single worker.
  */
 abstract public class AbstractWorkerQueue<T> extends AbstractActorProcessor<T> 
 {
-  private final ValueActorQueue<T> _queueConsumer;
+  //private final ValueActorQueue<T> _queueConsumer;
+  private final ActorQueue2<T> _queueConsumer;
   
   public AbstractWorkerQueue(int size)
   {
-    _queueConsumer = new ValueActorQueue<T>(size, this);
+    _queueConsumer = new ActorQueue2<T>(size, this);
   }
   
   public final boolean isEmpty()
