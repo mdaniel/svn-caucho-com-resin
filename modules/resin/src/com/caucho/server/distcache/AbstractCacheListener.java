@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import javax.cache.event.CacheEntryListener;
+import com.caucho.cache.event.CacheEntryListener;
 
 /**
  * Provides a base class that can extended to override the method or methods of

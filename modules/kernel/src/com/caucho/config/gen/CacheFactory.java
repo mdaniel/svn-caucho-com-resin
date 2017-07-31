@@ -29,10 +29,6 @@
 
 package com.caucho.config.gen;
 
-import javax.cache.annotation.CachePut;
-import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheRemoveEntry;
-import javax.cache.annotation.CacheResult;
 import javax.ejb.Remove;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -41,6 +37,10 @@ import javax.ejb.TransactionManagementType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.cache.annotation.CachePut;
+import com.caucho.cache.annotation.CacheRemoveAll;
+import com.caucho.cache.annotation.CacheRemoveEntry;
+import com.caucho.cache.annotation.CacheResult;
 import com.caucho.inject.Module;
 
 /**

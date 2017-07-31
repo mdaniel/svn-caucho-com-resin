@@ -41,17 +41,17 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
-import javax.cache.Cache;
-import javax.cache.CacheException;
-import javax.cache.CacheLoader;
-import javax.cache.CacheMXBean;
-import javax.cache.CacheStatistics;
-import javax.cache.CacheWriter;
-import javax.cache.Configuration;
-import javax.cache.Status;
-import javax.cache.event.CacheEntryEventFilter;
-import javax.cache.event.CacheEntryListener;
 
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheException;
+import com.caucho.cache.CacheLoader;
+import com.caucho.cache.CacheMXBean;
+import com.caucho.cache.CacheStatistics;
+import com.caucho.cache.CacheWriter;
+import com.caucho.cache.Configuration;
+import com.caucho.cache.Status;
+import com.caucho.cache.event.CacheEntryEventFilter;
+import com.caucho.cache.event.CacheEntryListener;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Bytes;

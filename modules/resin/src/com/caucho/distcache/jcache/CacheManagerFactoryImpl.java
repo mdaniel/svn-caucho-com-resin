@@ -32,10 +32,9 @@ package com.caucho.distcache.jcache;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.cache.CacheManager;
-import javax.cache.CacheManagerFactory;
-import javax.cache.CachingShutdownException;
-
+import com.caucho.cache.CacheManager;
+import com.caucho.cache.CacheManagerFactory;
+import com.caucho.cache.CachingShutdownException;
 import com.caucho.config.ConfigException;
 import com.caucho.server.distcache.CacheManagerImpl;
 import com.caucho.server.distcache.DistCacheSystem;

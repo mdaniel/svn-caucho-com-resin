@@ -31,6 +31,13 @@ package com.caucho.server.distcache;
 
 import java.util.concurrent.TimeUnit;
 
+import com.caucho.cache.CacheBuilder;
+import com.caucho.cache.CacheLoader;
+import com.caucho.cache.CacheWriter;
+import com.caucho.cache.Configuration;
+import com.caucho.cache.ExpiryPolicy;
+import com.caucho.cache.transaction.IsolationLevel;
+import com.caucho.cache.transaction.Mode;
 import com.caucho.config.Configurable;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.CacheSerializer;
@@ -39,14 +46,6 @@ import com.caucho.distcache.ResinCacheBuilder.Scope;
 import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
-
-import javax.cache.CacheBuilder;
-import javax.cache.Configuration;
-import javax.cache.CacheLoader;
-import javax.cache.CacheWriter;
-import javax.cache.ExpiryPolicy;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
 
 /**
  * Manages the distributed cache

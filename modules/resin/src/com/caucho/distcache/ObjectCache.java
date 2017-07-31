@@ -29,7 +29,7 @@
 
 package com.caucho.distcache;
 
-import javax.cache.Cache;
+import com.caucho.cache.Cache;
 
 /**
  * Interface for a distributed cache.

@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import javax.cache.CacheLoader;
+import com.caucho.cache.CacheLoader;
 
 /**
  * Extended cache loader

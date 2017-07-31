@@ -34,8 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
@@ -46,6 +44,8 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 
+import com.caucho.cache.CacheManager;
+import com.caucho.cache.Caching;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
 import com.caucho.jmx.Jmx;

@@ -32,13 +32,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.MutableConfiguration;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheKeyInvocationContext;
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheBuilder;
+import com.caucho.cache.CacheManager;
+import com.caucho.cache.Caching;
+import com.caucho.cache.MutableConfiguration;
+import com.caucho.cache.annotation.CacheInvocationParameter;
+import com.caucho.cache.annotation.CacheKeyInvocationContext;
 
 /**
  * Utilities to manage caching.

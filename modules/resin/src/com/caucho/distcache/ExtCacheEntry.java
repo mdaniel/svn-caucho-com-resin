@@ -32,15 +32,14 @@ package com.caucho.distcache;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.cache.Cache;
-
+import com.caucho.cache.Cache;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
 
 /**
- * Provides additional information about an entry in a {@link javax.cache.Cache}.
+ * Provides additional information about an entry in a {@link com.caucho.cache.Cache}.
  */
 public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
 {

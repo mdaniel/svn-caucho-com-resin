@@ -37,10 +37,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
-import javax.cache.Cache;
-import javax.cache.CacheLoader;
-import javax.cache.CacheWriter;
-
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheLoader;
+import com.caucho.cache.CacheWriter;
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.CurrentTime;

@@ -31,16 +31,15 @@ package com.caucho.distcache.jcache;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheLoader;
-import javax.cache.CacheWriter;
-import javax.cache.Configuration.Duration;
-import javax.cache.Configuration.ExpiryType;
-import javax.cache.event.CacheEntryListener;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
-
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheBuilder;
+import com.caucho.cache.CacheLoader;
+import com.caucho.cache.CacheWriter;
+import com.caucho.cache.Configuration.Duration;
+import com.caucho.cache.Configuration.ExpiryType;
+import com.caucho.cache.event.CacheEntryListener;
+import com.caucho.cache.transaction.IsolationLevel;
+import com.caucho.cache.transaction.Mode;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheManagerImpl;

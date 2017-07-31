@@ -32,7 +32,7 @@ package com.caucho.server.distcache;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.cache.Cache.Entry;
+import com.caucho.cache.Cache.Entry;
 
 /**
  * Extended cache loader

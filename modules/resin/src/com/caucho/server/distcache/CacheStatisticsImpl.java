@@ -31,8 +31,7 @@ package com.caucho.server.distcache;
 
 import java.util.Date;
 
-import javax.cache.CacheStatistics;
-
+import com.caucho.cache.CacheStatistics;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 

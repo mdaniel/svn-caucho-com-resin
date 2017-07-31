@@ -34,21 +34,21 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.cache.Cache;
-import javax.cache.annotation.CacheInvocationContext;
-import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.CacheKey;
-import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheKeyInvocationContext;
-import javax.cache.annotation.CacheKeyParam;
-import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CachePut;
-import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheRemoveEntry;
-import javax.cache.annotation.CacheResolver;
-import javax.cache.annotation.CacheResolverFactory;
-import javax.cache.annotation.CacheResult;
-import javax.cache.annotation.CacheValue;
+import com.caucho.cache.Cache;
+import com.caucho.cache.annotation.CacheInvocationContext;
+import com.caucho.cache.annotation.CacheInvocationParameter;
+import com.caucho.cache.annotation.CacheKey;
+import com.caucho.cache.annotation.CacheKeyGenerator;
+import com.caucho.cache.annotation.CacheKeyInvocationContext;
+import com.caucho.cache.annotation.CacheKeyParam;
+import com.caucho.cache.annotation.CacheMethodDetails;
+import com.caucho.cache.annotation.CachePut;
+import com.caucho.cache.annotation.CacheRemoveAll;
+import com.caucho.cache.annotation.CacheRemoveEntry;
+import com.caucho.cache.annotation.CacheResolver;
+import com.caucho.cache.annotation.CacheResolverFactory;
+import com.caucho.cache.annotation.CacheResult;
+import com.caucho.cache.annotation.CacheValue;
 
 /**
  * Key for a cacheable method.

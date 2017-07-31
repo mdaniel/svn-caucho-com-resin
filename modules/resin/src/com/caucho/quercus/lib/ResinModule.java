@@ -40,11 +40,6 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.MutableConfiguration;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -56,6 +51,11 @@ import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import com.caucho.VersionFactory;
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheBuilder;
+import com.caucho.cache.CacheManager;
+import com.caucho.cache.Caching;
+import com.caucho.cache.MutableConfiguration;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;

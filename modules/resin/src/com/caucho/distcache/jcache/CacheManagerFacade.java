@@ -33,13 +33,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Configuration;
-import javax.cache.OptionalFeature;
-import javax.cache.Status;
 import javax.transaction.UserTransaction;
 
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheManager;
+import com.caucho.cache.Configuration;
+import com.caucho.cache.OptionalFeature;
+import com.caucho.cache.Status;
 import com.caucho.config.ConfigException;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheImpl;

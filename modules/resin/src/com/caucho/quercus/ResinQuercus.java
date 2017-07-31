@@ -30,6 +30,7 @@
 package com.caucho.quercus;
 
 import com.caucho.VersionFactory;
+import com.caucho.cache.Cache;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.*;
 import com.caucho.distcache.*;
@@ -48,7 +49,6 @@ import com.caucho.sql.UserStatement;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import javax.cache.Cache;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;

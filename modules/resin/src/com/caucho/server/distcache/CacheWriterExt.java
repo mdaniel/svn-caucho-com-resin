@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import javax.cache.CacheWriter;
+import com.caucho.cache.CacheWriter;
 
 /**
  * Extended cache writer

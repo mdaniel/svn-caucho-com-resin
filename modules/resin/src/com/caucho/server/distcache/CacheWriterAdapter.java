@@ -31,8 +31,8 @@ package com.caucho.server.distcache;
 
 import java.util.Collection;
 
-import javax.cache.Cache.Entry;
-import javax.cache.CacheWriter;
+import com.caucho.cache.CacheWriter;
+import com.caucho.cache.Cache.Entry;
 
 /**
  * Extended cache loader

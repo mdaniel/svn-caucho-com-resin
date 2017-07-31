@@ -30,7 +30,7 @@ package com.caucho.config.util;
 
 import java.io.Serializable;
 
-import javax.cache.annotation.CacheKey;
+import com.caucho.cache.annotation.CacheKey;
 
 /**
  * Key for a cacheable method.

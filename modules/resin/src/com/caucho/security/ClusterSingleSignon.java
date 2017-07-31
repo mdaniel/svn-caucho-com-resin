@@ -32,8 +32,8 @@ package com.caucho.security;
 import java.security.Principal;
 
 import javax.annotation.PostConstruct;
-import javax.cache.Cache;
 
+import com.caucho.cache.Cache;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.server.distcache.CacheImpl;

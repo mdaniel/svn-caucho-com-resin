@@ -29,9 +29,9 @@
 
 package com.caucho.distcache.jcache;
 
-import javax.cache.CacheManagerFactory;
-import javax.cache.OptionalFeature;
-import javax.cache.spi.CachingProvider;
+import com.caucho.cache.CacheManagerFactory;
+import com.caucho.cache.OptionalFeature;
+import com.caucho.cache.spi.CachingProvider;
 
 /**
  * Caching Provider for jcache

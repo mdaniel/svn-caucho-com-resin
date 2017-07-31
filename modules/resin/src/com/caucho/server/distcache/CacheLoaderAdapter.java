@@ -31,9 +31,9 @@ package com.caucho.server.distcache;
 
 import java.util.Map;
 
-import javax.cache.Cache;
-import javax.cache.CacheLoader;
-import javax.cache.Cache.Entry;
+import com.caucho.cache.Cache;
+import com.caucho.cache.CacheLoader;
+import com.caucho.cache.Cache.Entry;
 
 /**
  * Extended cache loader

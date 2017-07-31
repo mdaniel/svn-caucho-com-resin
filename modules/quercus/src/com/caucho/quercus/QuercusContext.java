@@ -45,9 +45,9 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.cache.Cache;
 import javax.sql.DataSource;
 
+import com.caucho.cache.Cache;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompilerUtil;
 import com.caucho.quercus.annotation.ClassImplementation;
