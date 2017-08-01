@@ -8,6 +8,7 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>cache: rename javax.cache to com.caucho.cache to avoid conflict with final spec (#6071)</li>
 <li>admin: NPE in JavaClassDef.getField (#6074)</li>
 <li>actor: backport actors actor from Baratine for HP-UX issues</li>
 <li>dump_heap: hprof-path must use getNativePath() for windows (#6072)</li>

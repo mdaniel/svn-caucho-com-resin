@@ -117,7 +117,7 @@ public class AbstractRolloverLog implements Closeable {
   private volatile boolean _isInit;
 
   // The time of the next period-based rollover
-  private long _nextPeriodEnd = -1;
+  private final AtomicLong _nextPeriodEnd = new AtomicLong(-1);
   private final AtomicLong _nextRolloverCheckTime = new AtomicLong();
 
   // private long _lastTime;
@@ -363,10 +363,10 @@ public class AbstractRolloverLog implements Closeable {
 
       // _calendar.setGMTTime(lastModified);
 
-      _nextPeriodEnd = nextRolloverTime(lastModified);
+      _nextPeriodEnd.set(nextRolloverTime(lastModified));
     }
     else {
-      _nextPeriodEnd = nextRolloverTime(now);
+      _nextPeriodEnd.set(nextRolloverTime(now));
     }
     
     if (_archiveFormat != null || getRolloverPeriod() <= 0) {
@@ -391,10 +391,16 @@ public class AbstractRolloverLog implements Closeable {
   {
     long now = CurrentTime.getCurrentTime();
 
-    if (_nextPeriodEnd <= now || _nextRolloverCheckTime.get() <= now) {
+    if (_nextPeriodEnd.get() <= now) {
+      _rolloverWorker.wake();
+
+      return true;
+    }
+    else if (_nextRolloverCheckTime.get() <= now) {
       long checkPeriod = Math.min(_rolloverCheckPeriod, HOUR);
       
       _nextRolloverCheckTime.set(now + checkPeriod);
+      
       _rolloverWorker.wake();
 
       return true;
@@ -496,17 +502,15 @@ public class AbstractRolloverLog implements Closeable {
     _isRollingOver = true;
     
     try {
-      if (! _isInit) {
-        return;
-      }
-      
       Path savedPath = null;
 
       long now = CurrentTime.getCurrentTime();
 
-      long lastPeriodEnd = _nextPeriodEnd;
-
-      _nextPeriodEnd = nextRolloverTime(now);
+      long lastPeriodEnd = _nextPeriodEnd.getAndSet(nextRolloverTime(now));
+      
+      if (! _isInit) {
+        return;
+      }
 
       Path path = getPath();
 
@@ -861,10 +865,16 @@ public class AbstractRolloverLog implements Closeable {
   
   private long nextRolloverTime(long time)
   {
-    if (_rolloverCron != null)
-      return _rolloverCron.nextTime(time);
-    else
-      return Period.periodEnd(time, getRolloverPeriod());
+    long nextTime;
+    
+    if (_rolloverCron != null) {
+      nextTime = _rolloverCron.nextTime(time);
+    }
+    else {
+      nextTime = Period.periodEnd(time, getRolloverPeriod());
+    }
+    
+    return Math.max(nextTime, time + 60000);
   }
 
   /**
@@ -951,7 +961,9 @@ public class AbstractRolloverLog implements Closeable {
         }
       }
     } finally {
-      _logLock.notifyAll();
+      if (ts != null) {
+        _logLock.notifyAll();
+      }
     }
   }
   
@@ -1030,8 +1042,11 @@ public class AbstractRolloverLog implements Closeable {
       }
       
       nextCheckTime = now + Math.min(checkPeriod, HOUR);
+      
+      nextCheckTime = Math.min(_nextPeriodEnd.get(), nextCheckTime);
+      nextCheckTime = Math.max(nextCheckTime, now + 60000);
 
-      alarm.queueAt(Math.min(_nextPeriodEnd, nextCheckTime));
+      alarm.queueAt(nextCheckTime);
     }
   }
 }
