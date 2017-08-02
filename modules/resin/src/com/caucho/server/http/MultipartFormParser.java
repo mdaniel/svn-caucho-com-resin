@@ -120,26 +120,26 @@ class MultipartFormParser {
           tempBuffer = null;
         }
 
-        if (uploadMax > 0 && uploadMax < tempFile.getLength()) {
+        long fileLength = tempFile.getLength();
+        
+        if (uploadMax > 0 && uploadMax < fileLength) {
           String msg = L.l("multipart form data '{0}' too large",
                            "" + tempFile.getLength());
           
-          long fileLength = tempFile.getLength();
           tempFile.remove();
 
           throw formError(msg, fileLength, request);
         } else if (fileUploadMax > 0 && fileUploadMax < tempFile.getLength()){
-          String msg = L.l("multipart form data part '{0}':'{1}' is greater then the accepted value of '{2}'",
+          String msg = L.l("multipart form data part '{0}':'{1}' is greater than the accepted value of '{2}'",
                            name, "" + tempFile.getLength(), fileUploadMax);
 
           tempFile.remove();
 
-          throw new IllegalStateException(msg);
+          throw formErrorState(msg, fileLength, request);
         }
-        else if (tempFile.getLength() != totalLength) {
+        else if (fileLength != totalLength) {
           String msg = L.l("multipart form upload failed (possibly due to full disk).");
           
-          long fileLength = tempFile.getLength();
           tempFile.remove();
           
           throw formError(msg, fileLength, request);
@@ -215,7 +215,19 @@ class MultipartFormParser {
     request.setAttribute("caucho.multipart.form.error.size",
                          new Long(length));
     
-    throw new IOException(msg);
+    return new IOException(msg);
+  }
+  
+  private static IllegalStateException formErrorState(String msg, long length,
+                                                      AbstractCauchoRequest request)
+  {
+    log.fine(request.getRequestURI() + ": " + msg);
+    
+    request.setAttribute("caucho.multipart.form.error", msg);
+    request.setAttribute("caucho.multipart.form.error.size",
+                         new Long(length));
+    
+    return new IllegalStateException(msg);
   }
 
   private static void addTable(HashMapImpl<String,String[]> table, String name, String value)

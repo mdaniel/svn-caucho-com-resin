@@ -431,10 +431,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         if (multipartConfig != null
             && formUploadMax > 0
             && formUploadMax < contentLength)
-          throw new IllegalStateException(L.l(
+          throw formErrorState(L.l(
             "multipart form data request's Content-Length '{0}' is greater then configured in @MultipartConfig.maxRequestSize value: '{1}'",
             contentLength,
-            formUploadMax));
+            formUploadMax),
+            contentLength);
 
         i += "boundary=".length();
         char ch = contentType.charAt(i);
@@ -476,6 +477,17 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+  
+  private IllegalStateException formErrorState(String msg, long length)
+  {
+    log.fine(getRequestURI() + ": " + msg);
+    
+    setAttribute("caucho.multipart.form.error", msg);
+    setAttribute("caucho.multipart.form.error.size",
+                         new Long(length));
+    
+    throw new IllegalStateException(msg);
   }
 
   Part createPart(String name,
