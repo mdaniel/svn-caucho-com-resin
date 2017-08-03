@@ -56,6 +56,7 @@ import javax.servlet.http.Part;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
+import com.caucho.server.session.SessionImpl;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.NullEnumeration;
 import com.caucho.vfs.ReadStream;
@@ -69,6 +70,8 @@ public class StubServletRequest implements CauchoRequest {
     = Logger.getLogger(StubServletRequest.class.getName());
   
   private HashMap _attributes;
+
+  private String _sessionId;
 
   public StubServletRequest()
   {
@@ -418,7 +421,7 @@ public class StubServletRequest implements CauchoRequest {
   {
     return null;
   }
-  
+
   public Cookie []getCookies()
   {
     return null;
@@ -508,11 +511,12 @@ public class StubServletRequest implements CauchoRequest {
 
   public String getSessionId()
   {
-    return null;
+    return _sessionId;
   }
 
   public void setSessionId(String sessionId)
   {
+    _sessionId = sessionId;
   }
 
   @Override
