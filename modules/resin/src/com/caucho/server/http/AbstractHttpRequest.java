@@ -54,6 +54,7 @@ import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.ServletService;
+import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationServer;
@@ -1725,10 +1726,15 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     try {
       ErrorPageManager errorManager = getErrorManager();
       
-      if (errorManager != null)
+      if (errorManager != null) {
         getErrorManager().sendServletError(e, _requestFacade, _responseFacade);
-      else
+      }
+      else if (e instanceof BadRequestException) {
+        _responseFacade.sendError(400);
+      }
+      else {
         _responseFacade.sendError(503);
+      }
     } catch (ClientDisconnectException e1) {
       throw e1;
     } catch (Throwable e1) {
@@ -1749,8 +1755,9 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
    */
   protected ErrorPageManager getErrorManager()
   {
-    if (_errorManager == null)
+    if (_errorManager == null) {
       _errorManager = _server.getErrorPageManager();
+    }
 
     return _errorManager;
   }

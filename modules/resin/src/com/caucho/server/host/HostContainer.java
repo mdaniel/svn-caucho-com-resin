@@ -519,11 +519,13 @@ public class HostContainer implements InvocationBuilder {
     
     Host defaultHost = getHost("", 0);
     
-    if (defaultHost != null)
+    if (defaultHost != null) {
       return defaultHost;
+    }
     else {
-      if (_errorHost == null)
+      if (_errorHost == null) {
         _errorHost = createErrorHost();
+      }
 
       return _errorHost;
     }

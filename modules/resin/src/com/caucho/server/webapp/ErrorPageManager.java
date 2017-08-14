@@ -344,8 +344,12 @@ public class ErrorPageManager {
       location = getErrorPage(rootExn);
     }
 
-    if (location == null)
+    if (location == null && rootExn instanceof BadRequestException) {
+      location = getErrorPage(400);
+    }
+    else if (location == null) {
       location = getErrorPage(500);
+    }
 
     if (location == null && _defaultLocation == null && _parent != null) {
       _parent.sendServletError(e, req, res);

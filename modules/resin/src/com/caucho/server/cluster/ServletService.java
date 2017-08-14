@@ -1142,10 +1142,12 @@ public class ServletService
   {
     WebApp errorWebApp = getErrorWebApp();
     
-    if (errorWebApp != null)
+    if (errorWebApp != null) {
       return errorWebApp.getErrorPageManager();
-    else
+    }
+    else {
       return _errorPageManager;
+    }
   }
 
   /**
