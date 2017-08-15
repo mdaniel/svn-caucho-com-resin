@@ -216,9 +216,6 @@
     
     <item link="hessian.xtp" title="Hessian"
           description="Hessian protocol"/>
-    
-    <item link="websocket.xtp" title="WebSocket"
-          description="WebSocket support"/>
        
     <item link="advanced-jmx.xtp" title="JMX (MXBeans)"
           description="JMX management"/>
