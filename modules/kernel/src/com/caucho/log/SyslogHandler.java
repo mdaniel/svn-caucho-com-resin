@@ -28,12 +28,13 @@
 
 package com.caucho.log;
 
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Syslog;
-
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * Logs to the syslog stream
@@ -130,7 +131,15 @@ public class SyslogHandler extends Handler {
     if (! isLoggable(record))
       return;
 
-    Syslog.syslog(_facility, _severity, record.getMessage());
+    String value = record.getMessage();
+    
+    Formatter formatter = getFormatter();
+    
+    if (formatter != null) {
+      value = formatter.format(record);
+    }
+
+    Syslog.syslog(_facility, _severity, value);
   }
 
   /**

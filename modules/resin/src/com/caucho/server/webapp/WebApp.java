@@ -4518,11 +4518,14 @@ public class WebApp extends ServletContextImpl
       try {
         accessLog.log(req, res, this);
       } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+        /*
         log.warning("AccessLog: " + e);
         
         if (log.isLoggable(Level.FINER)) {
           log.log(Level.FINER, "AccessLog: " + e.toString(), e);
         }
+        */
       }
     }
   }

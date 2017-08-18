@@ -692,13 +692,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    */
   private int print(byte []buffer, int offset, CharSegment cb)
   {
+    if (cb == null) {
+      return offset;
+    }
+    
     char []charBuffer = cb.getBuffer();
     int cbOffset = cb.getOffset();
     int length = cb.getLength();
 
     // truncate for hacker attacks
-    if (buffer.length - offset - 256 < length)
-      length =  buffer.length - offset - 256;
+    length = Math.min(length, buffer.length - offset - 256);
 
     for (int i = length - 1; i >= 0; i--)
       buffer[offset + i] = (byte) charBuffer[cbOffset + i];
@@ -716,6 +719,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    */
   private int print(byte []buffer, int offset, String s)
   {
+    if (s == null) {
+      return offset;
+      
+    }
     int length = s.length();
 
     for (int i = length - 1; i >= 0; i--) {

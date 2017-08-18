@@ -8,6 +8,9 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>log: add getFormatter() support for SyslogHandler (#6087)</li>
+<li>servlet: change access log NPE logging to see stack trace (rep by Steffen Busch)</li>
+<li>servlet: error-page for 400 (#6076, rep by stbu)</li>
 <li>servlet: session issues when using ScheduledTask (#6080, rep by kenjrwalker)</li>
 <li>servlet: multipart form error attributes (#6077, rep by Steffen Busch)</li>
 <li>log: log rotation timing issues on HP-UX (#6079)</li>
