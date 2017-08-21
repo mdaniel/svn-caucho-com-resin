@@ -190,11 +190,19 @@ public class DeployClient implements Repository
   public String commitArchive(CommitBuilder commit,
                               Path jar)
   {
-    return commitArchive(commit, jar, DEPLOY_TIMEOUT);
+    return commitArchive(commit, jar, jar.getTail(), DEPLOY_TIMEOUT);
   }
   
   public String commitArchive(CommitBuilder commit,
                               Path jar,
+                              String pathName)
+  {
+    return commitArchive(commit, jar, pathName, DEPLOY_TIMEOUT);
+  }
+  
+  public String commitArchive(CommitBuilder commit,
+                              Path jar,
+                              String pathName,
                               long timeout)
   {
     commit.validate();
@@ -202,7 +210,7 @@ public class DeployClient implements Repository
     GitCommitJar gitCommit = null;
 
     try {
-      gitCommit = new GitCommitJar(jar);
+      gitCommit = new GitCommitJar(pathName, jar);
       
       String tag = commit.getId();
       

@@ -66,6 +66,12 @@ public class GitCommitJar {
   public GitCommitJar(Path jar)
     throws IOException
   {
+    this(jar.getTail(), jar);
+  }
+
+  public GitCommitJar(String pathName, Path jar)
+    throws IOException
+  {
     if (jar.getScheme().equals("memory")) {
       InputStream is = jar.openRead();
       
@@ -76,14 +82,14 @@ public class GitCommitJar {
       }
     }
     else {
-      init(jar);
+      init(pathName, jar);
     }
   }
 
-  private GitCommitJar(Path jar, boolean isTemp)
+  private GitCommitJar(String pathName, Path jar, boolean isTemp)
     throws IOException
   {
-    init(jar);
+    init(pathName, jar);
     
     _tempJar = jar;
   }
@@ -125,7 +131,7 @@ public class GitCommitJar {
   
       os.close();
       
-      GitCommitJar gitCommitJar = new GitCommitJar(tmpPath, true);
+      GitCommitJar gitCommitJar = new GitCommitJar(tmpPath.getTail(), tmpPath, true);
       
       tmpPath = null;
       
@@ -195,7 +201,7 @@ public class GitCommitJar {
       os.writeStream(is);
       os.close();
 
-      init(path);
+      init(path.getTail(), path);
 
       _tempJar = path;
     } catch (IOException e) {
@@ -203,7 +209,7 @@ public class GitCommitJar {
     }
   }
 
-  private void init(Path path)
+  private void init(String pathName, Path path)
     throws IOException
   {
     _jar = JarPath.create(path);
@@ -225,7 +231,7 @@ public class GitCommitJar {
     try {
       is = path.openRead();
       
-      _commit.addFile(path.getTail(), 0664, is, path.getLength());
+      _commit.addFile(pathName, 0664, is, path.getLength());
     } finally {
       IoUtil.close(is);
     }

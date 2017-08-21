@@ -239,7 +239,7 @@ function deploy()
   <?
   }
   else {
-    $client->commitArchive($commit, $path);
+    $client->commitArchive($commit, $path, substr($name, 1) . ".war");
 
     $date = $commit->getAttributes()['date'];
     $message = $commit->getAttributes()['message'];
