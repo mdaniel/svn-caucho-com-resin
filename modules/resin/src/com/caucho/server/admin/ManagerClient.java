@@ -377,6 +377,13 @@ public class ManagerClient
     return (StringQueryReply) query(status);
   }
 
+  public StringQueryReply statusWebApp()
+  {
+    ServerStatusWebAppQuery status = new ServerStatusWebAppQuery();
+
+    return (StringQueryReply) query(status);
+  }
+
   public StringQueryReply scoreboard(String type, boolean greedy)
   {
     ScoreboardQuery query = new ScoreboardQuery(type, greedy);

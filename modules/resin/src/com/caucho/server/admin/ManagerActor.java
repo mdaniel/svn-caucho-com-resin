@@ -29,7 +29,35 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.admin.action.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.management.JMException;
+
+import com.caucho.admin.action.AddLicenseAction;
+import com.caucho.admin.action.AddUserAction;
+import com.caucho.admin.action.CallJmxAction;
+import com.caucho.admin.action.GetStatsAction;
+import com.caucho.admin.action.HeapDumpAction;
+import com.caucho.admin.action.JmxDumpAction;
+import com.caucho.admin.action.ListJmxAction;
+import com.caucho.admin.action.ListUsersAction;
+import com.caucho.admin.action.PdfReportAction;
+import com.caucho.admin.action.ProfileAction;
+import com.caucho.admin.action.RemoveUserAction;
+import com.caucho.admin.action.ScoreboardAction;
+import com.caucho.admin.action.SetJmxAction;
+import com.caucho.admin.action.SetLogLevelAction;
+import com.caucho.admin.action.ThreadDumpAction;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -41,25 +69,16 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.ServletService;
+import com.caucho.server.cluster.ServletSystem;
+import com.caucho.server.host.Host;
+import com.caucho.server.host.HostController;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.Vfs;
-
-import javax.annotation.PostConstruct;
-import javax.management.JMException;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ManagerActor extends SimpleActor
 {
@@ -508,6 +527,59 @@ public class ManagerActor extends SimpleActor
     return reply;
   }
   
+  @Query
+  public StringQueryReply statusWebApp(long id,
+                                       String to,
+                                       String from,
+                                       ServerStatusWebAppQuery query)
+  {
+    Resin resin = Resin.getCurrent();
+
+    CloudServer cloudServer = resin.getSelfServer();
+    
+    ServletSystem system = ServletSystem.getCurrent();
+    
+    if (system == null) {
+      return null;
+    }
+
+    ServletService server = system.getServer();
+    
+    if (server == null) {
+      return null;
+    }
+    
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("\n");
+    //hosts = server.getHostControllers();
+    for (HostController hostCtrl : server.getHostControllers()) {
+      Host host = hostCtrl.getDeployInstance();
+      
+      if (host == null) {
+        continue;
+      }
+      
+      for (WebAppController webAppCtrl : host.getWebAppContainer().getWebAppList()) {
+        sb.append("web-app '").append(webAppCtrl.getIdKey()).append("': ");
+        sb.append(webAppCtrl.getState().toString());
+        sb.append("\n");
+      }
+    }
+    /*
+    String status = L.l("Server {0} : {1}",
+                        cloudServer,
+                        cloudServer.getState());
+                        */
+    String status = sb.toString();
+
+    final StringQueryReply reply = new StringQueryReply(status);
+
+    getBroker().queryResult(id, from, to, reply);
+
+    return reply;
+  }
+
   @Query
   public StringQueryReply scoreboard(long id,
                                            String to,
