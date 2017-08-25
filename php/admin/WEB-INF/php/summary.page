@@ -642,7 +642,6 @@ function print_connections()
 
   $connInfoList = array();
 
-  var_dump($g_server->Ports);
   foreach ($g_server->Ports as $port) {
     if ($port) {
       $portConnInfo = $port->connectionInfo();
