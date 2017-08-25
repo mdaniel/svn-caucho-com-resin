@@ -93,7 +93,10 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   public Value eval(Env env)
   {
     Value obj = _objExpr.eval(env);
-    return obj.getField(env, _name);
+    
+    Value result = obj.getField(env, _name);
+    
+    return result;
   }
 
   /**

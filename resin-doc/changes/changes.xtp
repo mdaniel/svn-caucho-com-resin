@@ -8,6 +8,8 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>admin: hessian whitelist issue with ObjectName (#6043, rep by Shinomiya NObuaki)</li>
+<li>admin: add web-app information to CLI status (#6056)</li>
 <li>deploy: deploy issues from /resin-admin (#6050, rep by Shinomiya Nobuaki)</li>
 <li>log: add getFormatter() support for SyslogHandler (#6087)</li>
 <li>servlet: change access log NPE logging to see stack trace (rep by Steffen Busch)</li>

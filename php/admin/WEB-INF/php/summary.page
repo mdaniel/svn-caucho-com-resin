@@ -642,10 +642,14 @@ function print_connections()
 
   $connInfoList = array();
 
+  var_dump($g_server->Ports);
   foreach ($g_server->Ports as $port) {
-    $portConnInfo = $port->connectionInfo();
-    if ($portConnInfo)
-      $connInfoList = array_merge($connInfoList, $portConnInfo);
+    if ($port) {
+      $portConnInfo = $port->connectionInfo();
+      if ($portConnInfo) {
+        $connInfoList = array_merge($connInfoList, $portConnInfo);
+      }
+    }
   }
 
   $row = 0;

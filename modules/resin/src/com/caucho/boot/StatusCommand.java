@@ -83,7 +83,6 @@ public class StatusCommand extends AbstractManagementCommand
           System.out.println(statusWebApp);
         }
       } catch (Exception e) {
-        e.printStackTrace();;
         log().log(Level.FINER, e.toString(), e);
       }
     } catch (Exception e) {

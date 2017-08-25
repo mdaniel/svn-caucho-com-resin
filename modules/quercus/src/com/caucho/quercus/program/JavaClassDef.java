@@ -479,7 +479,7 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       } catch (Exception e) {
         log.log(Level.FINE, e.getMessage(), e);
 
-        return null;
+        return UnsetValue.UNSET;
       }
     }
 
@@ -491,11 +491,21 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       } catch (Exception e) {
         log.log(Level.FINE,  e.getMessage(), e);
 
-        return null;
+        return UnsetValue.UNSET;
       }
     }
+    
+    QuercusClass qClass = null;
+    
+    if (qThis != null) {
+      qClass = qThis.getQuercusClass();
+    }
+    
+    if (qClass == null) {
+      qClass = getQuercusClass();
+    }
 
-    AbstractFunction phpGet = qThis.getQuercusClass().getFieldGet();
+    AbstractFunction phpGet = qClass.getFieldGet();
 
     if (phpGet != null) {
       return phpGet.callMethod(env, getQuercusClass(), qThis, nameV);
@@ -507,11 +517,11 @@ public class JavaClassDef extends ClassDef implements InstanceInitializer {
       } catch (Exception e) {
         log.log(Level.FINE,  e.getMessage(), e);
 
-        return null;
+        return UnsetValue.UNSET;
       }
     }
 
-    return null;
+    return UnsetValue.UNSET;
   }
 
   public Value putField(Env env,

@@ -138,10 +138,12 @@ public class JavaMapAdapter
   {
     Object obj = _map.get(key.toJavaObject());
     
-    if (obj != null)
+    if (obj != null) {
       return wrapJava(_map.get(key.toJavaObject()));
-    else
+    }
+    else {
       return UnsetValue.UNSET;
+    }
   }
   
   /**
