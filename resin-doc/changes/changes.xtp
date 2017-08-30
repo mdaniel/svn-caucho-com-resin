@@ -8,6 +8,8 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>network: timing issue with thread launcher (#6089)</li>
+<li>network: add 120s failsafe to thread launcher (#6089)</li>
 <li>admin: hessian whitelist issue with ObjectName (#6043, rep by Shinomiya NObuaki)</li>
 <li>admin: add web-app information to CLI status (#6056)</li>
 <li>deploy: deploy issues from /resin-admin (#6050, rep by Shinomiya Nobuaki)</li>

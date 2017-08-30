@@ -230,7 +230,7 @@ public class Period {
   private static long periodEnd(long now, long period, QDate cal)
   {
     if (period < 0) {
-      return Long.MAX_VALUE;
+      return Long.MAX_VALUE / 2;
     }
     else if (period == 0) {
       return now;

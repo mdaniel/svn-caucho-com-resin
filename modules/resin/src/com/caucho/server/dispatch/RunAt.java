@@ -39,7 +39,8 @@ import com.caucho.util.QDate;
  */
 public class RunAt {
   static L10N L = new L10N(RunAt.class);
-  private QDate _cal = QDate.createLocal();
+  
+  private static long MINUTE = 60000L;
 
   private long _period = -1;
   
@@ -70,23 +71,36 @@ public class RunAt {
   {
     _period = period.getPeriod();
   }
+  
+  private long getZoneOffset(long now)
+  {
+    QDate cal = QDate.allocateLocalDate();
+    
+    cal.setGMTTime(now);
+    
+    long zoneOffset = cal.getZoneOffset();
+    
+    QDate.freeLocalDate(cal);
+    
+    return zoneOffset;
+  }
 
   /**
    * Returns the next time.
    */
   public long getNextTimeout(long now)
   {
-    _cal.setGMTTime(now);
-    long zone = _cal.getZoneOffset();
+    long zone = getZoneOffset(now);
     
-    if (_period > 0)
+    if (_period > 0) {
       return Period.periodEnd(now + zone, _period) - zone;
+    }
 
-    now = now - now % 60000;
+    now -= now % MINUTE;
 
     long local = now + zone;
     
-    long dayMinutes = (local / 60000) % (24 * 60);
+    long dayMinutes = (local / MINUTE) % (24 * 60);
     long hourMinutes = dayMinutes % 60;
     
     long nextDelta = Long.MAX_VALUE;
@@ -95,26 +109,30 @@ public class RunAt {
       long time = _hourTimes.get(i);
       long delta = (time - dayMinutes + 24 * 60) % (24 * 60);
 
-      if (delta == 0)
+      if (delta == 0) {
         delta = 24 * 60;
+      }
       
-      if (delta < nextDelta && delta > 0)
+      if (delta < nextDelta && delta > 0) {
         nextDelta = delta;
+      }
     }
 
     for (int i = 0; _minuteTimes != null && i < _minuteTimes.size(); i++) {
       long time = _minuteTimes.get(i);
       long delta = (time - hourMinutes + 60) % 60;
       
-      if (delta == 0)
+      if (delta == 0) {
         delta = 60;
+      }
 
-      if (delta < nextDelta && delta > 0)
+      if (delta < nextDelta && delta > 0) {
         nextDelta = delta;
+      }
     }
 
     if (nextDelta < Integer.MAX_VALUE)
-      return now + nextDelta * 60000L;
+      return now + nextDelta * MINUTE;
     else
       return Long.MAX_VALUE / 2;
   }

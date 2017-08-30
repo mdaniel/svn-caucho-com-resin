@@ -468,11 +468,13 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   protected boolean doStart()
   {
-    if (! _lifecycle.isActive())
+    if (! _lifecycle.isActive()) {
       return false;
+    }
     
-    if (! isEnable())
+    if (! isEnable()) {
       return false;
+    }
     
     int startingCount = _startingCount.getAndIncrement();
 
@@ -642,8 +644,14 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
   @Override
   public long runTask()
   {
-    startConnection();
+    try {
+      startConnection();
     
-    return -1;
+      return 2 * 60000;
+    } catch (Throwable e) {
+      e.printStackTrace();
+      
+      return 1000;
+    }
   }
 }
