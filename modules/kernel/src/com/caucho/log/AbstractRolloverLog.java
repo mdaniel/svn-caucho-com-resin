@@ -247,8 +247,9 @@ public class AbstractRolloverLog implements Closeable {
       _rolloverPeriod += 3600000L - 1;
       _rolloverPeriod -= _rolloverPeriod % 3600000L;
     }
-    else
+    else {
       _rolloverPeriod = Period.INFINITE;
+    }
   }
 
   /**
@@ -381,7 +382,7 @@ public class AbstractRolloverLog implements Closeable {
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
     
     _isInit = true;
-    
+
     _rolloverListener.requeue(_rolloverAlarm);
     
     rollover();
@@ -1045,7 +1046,7 @@ public class AbstractRolloverLog implements Closeable {
       
       nextCheckTime = Math.min(_nextPeriodEnd.get(), nextCheckTime);
       nextCheckTime = Math.max(nextCheckTime, now + 60000);
-
+      
       alarm.queueAt(nextCheckTime);
     }
   }

@@ -8,6 +8,8 @@
 
 <s2 title="4.0.54 - in progress">
 <ul>
+<li>elastic: dynamic server timeouts not properly handled (#6088)</li>
+<li>log: add archive-format to watchdog-log (#6081)</li>
 <li>network: timing issue with thread launcher (#6089)</li>
 <li>network: add 120s failsafe to thread launcher (#6089)</li>
 <li>admin: hessian whitelist issue with ObjectName (#6043, rep by Shinomiya NObuaki)</li>

@@ -74,7 +74,7 @@ class BamProxyHandler implements InvocationHandler
     _sender = sender;
     _to = to;
     _timeout = timeout;
-      
+    
     for (Method m : api.getMethods()) {
       if (m.getDeclaringClass() == Object.class) {
         continue;

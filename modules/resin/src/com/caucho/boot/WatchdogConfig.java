@@ -367,10 +367,10 @@ class WatchdogConfig
       return getRootDirectory().lookup("log");
   }
   
-  void logInit(RotateStream log)
+  void logInit(String name, AbstractRolloverLog log)
   {
     if (_watchdogLog != null)
-      _watchdogLog.logInit(log);
+      _watchdogLog.logInit(name, log);
   }
   
   public long getShutdownWaitTime()
@@ -621,6 +621,9 @@ class WatchdogConfig
   public class WatchdogLog {
     private Path _logDirectory;
     
+    private String _pathFormat;
+    private String _archiveFormat;
+    
     private Integer _rolloverCount;
     private Period _rolloverPeriod;
     private Bytes _rolloverSize;
@@ -650,14 +653,34 @@ class WatchdogConfig
       _rolloverSize = size;
     }
     
+    public void setPathFormat(String format)
+    {
+      _pathFormat = format;
+    }
+    
+    public void setArchiveFormat(String format)
+    {
+      _archiveFormat = format;
+    }
+    
     /**
      * Initialize a log with the watchdog-log parameters
      * 
      * @param stream the log to initialize
      */
-    void logInit(RotateStream stream)
+    void logInit(String name, AbstractRolloverLog log)
     {
-      AbstractRolloverLog log = stream.getRolloverLog();
+      if (_pathFormat != null) {
+        String pathFormat = _pathFormat.replace("%{name}", name);
+        
+        log.setPathFormat(pathFormat);
+      }
+      
+      if (_archiveFormat != null) {
+        String archiveFormat = _archiveFormat.replace("%{name}", name);
+        
+        log.setArchiveFormat(archiveFormat);
+      }
       
       if (_rolloverCount != null)
         log.setRolloverCount(_rolloverCount);
@@ -665,8 +688,11 @@ class WatchdogConfig
       if (_rolloverPeriod != null)
         log.setRolloverPeriod(_rolloverPeriod);
       
-      if (_rolloverSize != null)
+      if (_rolloverSize != null) {
         log.setRolloverSize(_rolloverSize);
+      }
+      
+      System.out.println("LI0: " + log);
     }
   }
 }

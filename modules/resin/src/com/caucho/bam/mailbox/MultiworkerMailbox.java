@@ -305,9 +305,10 @@ public class MultiworkerMailbox implements Mailbox, Closeable
 
   protected final void enqueue(Packet packet)
   {
-    if (! _lifecycle.isActive())
+    if (! _lifecycle.isActive()) {
       throw new IllegalStateException(L.l("{0} cannot accept packets because it's no longer active",
                                           this));
+    }
     
     MailboxQueue2 workerQueue = findWorker();
     
@@ -397,7 +398,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   @Override
   public boolean isClosed()
   {
-    return _lifecycle.isDestroying() || _broker.isClosed();
+    return _lifecycle.isDestroying() || _broker.isClosed() || _actorStream.isClosed();
   }
 
   @Override

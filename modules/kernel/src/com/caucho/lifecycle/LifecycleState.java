@@ -225,7 +225,7 @@ public enum LifecycleState {
 
   public boolean isDestroying()
   {
-    return false;
+    return DESTROYING.ordinal() <= ordinal();
   }
 
   public boolean isAfterDestroying()

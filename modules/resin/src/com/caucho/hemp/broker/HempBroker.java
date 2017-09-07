@@ -368,7 +368,14 @@ public class HempBroker extends AbstractManagedBroker
     Mailbox mailbox = getMailbox(to);
     
     if (mailbox != null) {
-      mailbox.query(id, to, from, payload);
+      try {
+        mailbox.query(id, to, from, payload);
+      } catch (RuntimeException e) {
+        super.query(id, to, from, payload);
+        
+        throw e;
+      }
+      
       return;
     }
     
@@ -390,7 +397,7 @@ public class HempBroker extends AbstractManagedBroker
   public void queryResult(long id, String to, String from, Serializable payload)
   {
     Mailbox mailbox = getMailbox(to);
-    
+
     if (mailbox != null) {
       mailbox.queryResult(id, to, from, payload);
       return;
@@ -501,8 +508,9 @@ public class HempBroker extends AbstractManagedBroker
     if (ref != null) {
       Mailbox mailbox = ref.get();
 
-      if (mailbox != null)
+      if (mailbox != null && ! mailbox.isClosed()) {
         return mailbox;
+      }
     }
 
     if (address.endsWith("@")) {
@@ -521,8 +529,13 @@ public class HempBroker extends AbstractManagedBroker
     synchronized (_actorStreamMap) {
       WeakReference<Mailbox> ref = _actorStreamMap.get(address);
 
-      if (ref != null)
-        return ref.get();
+      if (ref != null) {
+        Mailbox mailbox = ref.get();
+        
+        if (! mailbox.isClosed()) {
+          return mailbox;
+        }
+      }
 
       _actorStreamMap.put(address, new WeakReference<Mailbox>(actorStream));
 

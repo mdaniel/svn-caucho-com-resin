@@ -1014,8 +1014,15 @@ class WatchdogChildProcess
 
     // server/6e82
     if (_watchdog.getStdoutLog() == null) {
-      _watchdog.getConfig().logInit(rotateStream);
+      String logTail = jvmPath.getTail();
+      int p = logTail.lastIndexOf('.');
+      String logName = logTail.substring(0, p);
+      
+      System.out.println("LN: " + logName);
+      _watchdog.getConfig().logInit(logName, rotateStream.getRolloverLog());
+      rotateStream.getRolloverLog().init();
       rotateStream.init();
+      System.out.println("LN0: " + logName);
     }
     
     return rotateStream.getStream();

@@ -131,7 +131,8 @@ class WatchdogManager implements AlarmListener {
 
     Vfs.setPwd(_args.getRootDirectory());
     
-    Path logPath = getLogDirectory().lookup("watchdog-manager.log");
+    String logName = "watchdog-manager";
+    Path logPath = getLogDirectory().lookup(logName + ".log");
     
     try {
       getLogDirectory().mkdirs();
@@ -153,6 +154,8 @@ class WatchdogManager implements AlarmListener {
     logStream.init();
     WriteStream out = logStream.getStream();
     out.setDisableClose(true);
+    
+    boolean isLogDirectoryExists = getLogDirectory().exists();
 
     EnvironmentStream.setStdout(out);
     EnvironmentStream.setStderr(out);
@@ -218,7 +221,6 @@ class WatchdogManager implements AlarmListener {
                                               serverId));
       }
     }
-    boolean isLogDirectoryExists = getLogDirectory().exists();
 
     JniBoot boot = new JniBoot();
     Path logDirectory = getLogDirectory();
@@ -231,7 +233,7 @@ class WatchdogManager implements AlarmListener {
       }
     }
 
-    server.getConfig().logInit(logStream);
+    server.getConfig().logInit(logName, logStream.getRolloverLog());
     
     startWatchdogSystem(resin, server);
   }

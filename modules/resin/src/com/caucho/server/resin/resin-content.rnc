@@ -974,6 +974,9 @@ r_watchdog-log = element watchdog-log {
   & r_rollover-period?
 
   & r_rollover-size?
+  
+  & (attribute archive-format { string }
+     | element archive-format { string })?
 }
 
 r_watchdog-manager = element watchdog-manager {

@@ -164,10 +164,12 @@ public class DualSizeMailbox implements Mailbox
                           String from,
                           Serializable payload)
   {
-    if (payload instanceof BamLargePayload)
+    if (payload instanceof BamLargePayload) {
       _largeMailbox.queryResult(id, to, from, payload);
-    else
+    }
+    else {
       _smallMailbox.queryResult(id, to, from, payload);
+    }
   }
 
   /**

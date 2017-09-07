@@ -462,6 +462,12 @@ public class CloudServer {
   }
   
   @SuppressWarnings("unchecked")
+  public <T> T putDataIfAbsent(Class<T> cl, T value)
+  {
+    return (T) _dataMap.putIfAbsent(cl, value);
+  }
+  
+  @SuppressWarnings("unchecked")
   public <T> T getData(Class<T> cl)
   {
     return (T) _dataMap.get(cl);

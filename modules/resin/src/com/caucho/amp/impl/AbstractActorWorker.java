@@ -208,7 +208,6 @@ abstract class AbstractActorWorker implements Runnable {
   
   protected void onException(Throwable e)
   {
-    System.out.println("EXN: " + e);
     log.log(Level.WARNING, e.toString(), e);
   }
   

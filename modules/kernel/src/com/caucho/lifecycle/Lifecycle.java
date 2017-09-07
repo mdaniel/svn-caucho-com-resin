@@ -426,7 +426,8 @@ public final class Lifecycle {
    */
   public boolean isDestroying()
   {
-    return getState().isDestroying();
+    //return getState().isDestroying();
+    return getState().isAfterDestroying();
   }
 
   /**
