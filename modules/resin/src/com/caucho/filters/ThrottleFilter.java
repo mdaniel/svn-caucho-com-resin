@@ -140,8 +140,7 @@ public class ThrottleFilter implements Filter {
     synchronized (this) {
       int count = _throttleCache.get(ip);
 
-      if (count <= 0)
-        count = 0;
+      count = Math.max(0,  count);
 
       if (count < _maxConcurrentRequests) {
         isOverflow = false;
