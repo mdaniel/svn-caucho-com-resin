@@ -483,10 +483,12 @@ public class CauchoResponseWrapper implements CauchoResponse {
       return null;
   }
 
+  @Override
   public AbstractHttpResponse getAbstractHttpResponse()
   {
-    if (_response instanceof CauchoResponse)
+    if (_response instanceof CauchoResponse) {
       return ((CauchoResponse) _response).getAbstractHttpResponse();
+    } 
 
     return null;
   }

@@ -60,6 +60,12 @@ public class StatusCommand extends AbstractManagementCommand
   {
     return "watchdog and server status";
   }
+
+  @Override
+  public boolean isProOnly()
+  {
+    return false;
+  }
   
   @Override
   public int doCommand(WatchdogArgs args, 
