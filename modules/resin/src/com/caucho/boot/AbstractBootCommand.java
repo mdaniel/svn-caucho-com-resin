@@ -356,6 +356,12 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     return false;
   }
+  
+  @Override
+  public int retryCount()
+  {
+    return isRetry() ? 5 : 0;
+  }
 
   @Override
   public final void usage(boolean verbose)

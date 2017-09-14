@@ -30,7 +30,12 @@
 package com.caucho.boot;
 
 
-public interface BootCommand {
+public interface BootCommand
+{
+  public static final int BOOT_OK = 0;
+  public static final int BOOT_FAIL_PERM = 1;
+  public static final int BOOT_FAIL_RETRY = 2;
+  
   public boolean isProOnly();
 
   public String getName();
@@ -41,6 +46,7 @@ public interface BootCommand {
     throws BootArgumentException;
 
   public boolean isRetry();
+  public int retryCount();
 
   public boolean isValueOption(String key);
 

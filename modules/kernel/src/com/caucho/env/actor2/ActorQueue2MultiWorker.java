@@ -171,6 +171,8 @@ public class ActorQueue2MultiWorker<T> implements ActorQueueApi<T>
         } finally {
           _processor.onProcessComplete();
         }
+      } catch (RuntimeException e) {
+        throw e;
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

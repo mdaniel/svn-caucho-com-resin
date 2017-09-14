@@ -44,6 +44,14 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
                        WatchdogClient client)
     throws BootArgumentException
   {
+    return doCommand(args, client, true);
+  }
+
+  protected int doCommand(WatchdogArgs args,
+                          WatchdogClient client,
+                          boolean isMessage)
+      throws BootArgumentException
+  {
     ManagerClient managerClient = null;
 
     try {
@@ -55,18 +63,25 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
 
       if (cause instanceof ConfigException || 
           cause instanceof ErrorPacketException) {
-        System.out.println(cause.getMessage());
+        if (isMessage || args.isVerbose()) {
+          System.out.println(cause.getMessage());
+        }
       } else if (cause instanceof BamException) {
         BamException bamException = (BamException) cause;
-        if (bamException.getActorError() != null) 
-          System.out.println(bamException.getActorError().getText());
-        else
-          System.out.println(bamException.getMessage());
+        
+        if (isMessage || args.isVerbose()) {
+          if (bamException.getActorError() != null) 
+            System.out.println(bamException.getActorError().getText());
+          else
+            System.out.println(bamException.getMessage());
+        }
       } else {
         while (cause.getCause() != null)
           cause = cause.getCause();
         
-        System.out.println(cause.toString());
+        if (isMessage || args.isVerbose()) {
+          System.out.println(cause.toString());
+        }
       }
 
       if (args.isVerbose()) {
@@ -74,9 +89,11 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
       }
 
       if (e instanceof NotAuthorizedException)
-        return 1;
+        return BOOT_FAIL_PERM;
+      else if (e instanceof RemoteListenerUnavailableException)
+        return BOOT_FAIL_PERM;
       else
-        return 2;
+        return BOOT_FAIL_RETRY;
     } finally {
       if (managerClient != null)
         managerClient.close();

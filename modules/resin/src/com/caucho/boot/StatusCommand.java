@@ -60,11 +60,10 @@ public class StatusCommand extends AbstractManagementCommand
   {
     return "watchdog and server status";
   }
-
+  
   @Override
   public int doCommand(WatchdogArgs args, 
-                       WatchdogClient clientWatchdog,
-                       ManagerClient clientServer)
+                       WatchdogClient clientWatchdog)
     throws BootArgumentException
   {
     try {
@@ -77,11 +76,7 @@ public class StatusCommand extends AbstractManagementCommand
       System.out.println(status);
       
       try {
-        String statusWebApp = clientServer.statusWebApp().getValue();
-      
-        if (statusWebApp != null) {
-          System.out.println(statusWebApp);
-        }
+        super.doCommand(args,  clientWatchdog, false);
       } catch (Exception e) {
         log().log(Level.FINER, e.toString(), e);
       }
@@ -101,11 +96,50 @@ public class StatusCommand extends AbstractManagementCommand
 
     return 0;
   }
+  
+  @Override
+  public int doCommand(WatchdogArgs args, 
+                       WatchdogClient clientWatchdog,
+                       ManagerClient clientServer)
+    throws BootArgumentException
+  {
+    try {
+      try {
+        String statusWebApp = clientServer.statusWebApp().getValue();
+      
+        if (statusWebApp != null) {
+          System.out.println(statusWebApp);
+        }
+      } catch (Exception e) {
+        log().log(Level.FINER, e.toString(), e);
+      }
+    } catch (Exception e) {
+      /*
+      System.out.println(L().l(
+        "Resin/{0} can't retrieve status of -server '{1}' for watchdog at {2}:{3}.\n{4}",
+        VersionFactory.getVersion(),
+        clientWatchdog.getId(),
+        clientWatchdog.getWatchdogAddress(),
+        clientWatchdog.getWatchdogPort(),
+        e.toString()));
+        */
+
+      log().log(Level.FINE, e.toString(), e);
+    }
+
+    return 0;
+  }
 
   @Override
   public boolean isRetry()
   {
     return true;
+  }
+  
+  @Override
+  public int retryCount()
+  {
+    return 2;
   }
 
   private static Logger log()

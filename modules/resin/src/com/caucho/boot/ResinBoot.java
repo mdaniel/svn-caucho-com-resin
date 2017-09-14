@@ -285,7 +285,7 @@ public class ResinBoot
     else if (command != null && command.isRetry()) {
       int code = command.doCommand(this, _args);
 
-      return code != 0;
+      return code == BootCommand.BOOT_FAIL_RETRY;
     }
     else if (command != null) {
       if (! command.isProOnly() || (command.isProOnly() && isPro())) {
@@ -345,8 +345,10 @@ public class ResinBoot
       }
 
       command = boot.getCommand();
+      
+      int retry = 0;
 
-      while (boot.start()) {
+      while (boot.start() && retry++ < command.retryCount()) {
         try {
           synchronized (command) {
             command.wait(5000);
