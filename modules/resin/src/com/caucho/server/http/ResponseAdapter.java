@@ -446,7 +446,7 @@ public class ResponseAdapter extends ResponseWrapper
   {
     _request = null;
     _responseStream = null;
-
+    
     setResponse(null);
   }
 

@@ -77,7 +77,7 @@ public class UserAddCommand extends AbstractManagementCommand
       char []passwordEntry = System.console().readPassword("%s",
                                                            "enter password:");
       if (passwordEntry.length <= 8) {
-        System.out.println("password must be greater then 8 characters");
+        System.out.println("password must be greater than 8 characters");
 
         continue;
       }

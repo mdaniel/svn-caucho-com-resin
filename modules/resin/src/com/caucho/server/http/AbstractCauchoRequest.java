@@ -432,7 +432,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
             && formUploadMax > 0
             && formUploadMax < contentLength)
           throw formErrorState(L.l(
-            "multipart form data request's Content-Length '{0}' is greater then configured in @MultipartConfig.maxRequestSize value: '{1}'",
+            "multipart form data request's Content-Length '{0}' is greater than configured in @MultipartConfig.maxRequestSize value: '{1}'",
             contentLength,
             formUploadMax),
             contentLength);
