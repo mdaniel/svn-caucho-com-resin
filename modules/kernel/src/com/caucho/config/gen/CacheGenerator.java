@@ -156,7 +156,7 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
     _cacheInstance = "__caucho_cache_" + out.generateId();
     
     out.println();
-    out.println("private static final javax.cache.Cache " + _cacheInstance);
+    out.println("private static final com.caucho.cache.Cache " + _cacheInstance);
     out.print("  = com.caucho.config.util.CacheUtil.getCache(\"");
     out.printJavaString(_cacheName);
     out.print("\");");
