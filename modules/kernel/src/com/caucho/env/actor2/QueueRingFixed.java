@@ -29,7 +29,6 @@
 
 package com.caucho.env.actor2;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -173,7 +172,9 @@ public final class QueueRingFixed<M >
                              final long timeout,
                              final TimeUnit unit)
   {
-    Objects.requireNonNull(value);
+    if (value == null) {
+      throw new NullPointerException();
+    }
 
     final AtomicLong headRef = _head;
     final AtomicLong tailRef = _tail;
