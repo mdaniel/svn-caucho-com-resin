@@ -383,8 +383,7 @@ public class JsseSSLFactory implements SSLFactory {
       if (_setSSLParameters != null) {
         _setSSLParameters.invoke(serverSocket, params);
       }
-      serverSocket.setSSLParameters(params);
-
+      
       log.log(Level.FINER, L.l("setting honor-cipher-order {0}",
                                _isHonorCipherOrder));
     } catch (Throwable t) {
