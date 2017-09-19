@@ -29,19 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.config.ConfigException;
-import com.caucho.env.service.RootDirectorySystem;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -56,6 +43,20 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+
+import com.caucho.config.ConfigException;
+import com.caucho.env.service.RootDirectorySystem;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
@@ -67,7 +68,8 @@ public class JsseSSLFactory implements SSLFactory {
 
   private static Method _honorCipherOrderMethod;
   private static Method _getSSLParametersMethod;
-
+  private static final Method _setSSLParameters;
+  
   private Path _keyStoreFile;
   private String _alias;
   private String _password;
@@ -377,6 +379,10 @@ public class JsseSSLFactory implements SSLFactory {
         = (SSLParameters) _getSSLParametersMethod.invoke(serverSocket);
 
       _honorCipherOrderMethod.invoke(params, _isHonorCipherOrder);
+      
+      if (_setSSLParameters != null) {
+        _setSSLParameters.invoke(serverSocket, params);
+      }
       serverSocket.setSSLParameters(params);
 
       log.log(Level.FINER, L.l("setting honor-cipher-order {0}",
@@ -506,6 +512,8 @@ public class JsseSSLFactory implements SSLFactory {
   }
 
   static {
+    Method setSSLParameters = null;
+    
     try {
       Method method = SSLServerSocket.class.getMethod("getSSLParameters");
 
@@ -517,9 +525,13 @@ public class JsseSSLFactory implements SSLFactory {
       method.setAccessible(true);
 
       _honorCipherOrderMethod = method;
+      
+      setSSLParameters = SSLServerSocket.class.getMethod("setSSLParameters", SSLParameters.class);
     } catch (Exception e) {
       log.log(Level.FINER, e.getMessage(), e);
     }
+    
+    _setSSLParameters = setSSLParameters;
   }
 }
 
