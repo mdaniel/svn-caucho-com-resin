@@ -116,7 +116,7 @@ public class ActorQueue2MultiWorker<T> implements ActorQueueApi<T>
   @Override
   public void wake()
   {
-    int len = _actorQueue.size();
+    int len = Math.min(_workers.length, _actorQueue.size());
     
     for (int i = 0; i < len; i++) {
       _workers[i].wake();
