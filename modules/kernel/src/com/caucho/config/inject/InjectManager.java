@@ -1356,7 +1356,7 @@ public final class InjectManager
   /**
    * Adds a new bean definition to the manager
    */
-  public <T> void addBeanImpl(Bean<T> bean, Annotated ann)
+  public synchronized <T> void addBeanImpl(Bean<T> bean, Annotated ann)
   {
     if (bean == null)
       return;
