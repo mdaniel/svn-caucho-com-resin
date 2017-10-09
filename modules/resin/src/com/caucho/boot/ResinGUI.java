@@ -213,8 +213,9 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
           e.printStackTrace();
         }
       }
-      else
+      else {
         _client.stopConsole();
+      }
 
       SwingUtilities.invokeLater(new Runnable() {
         @Override

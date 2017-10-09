@@ -65,13 +65,19 @@ public class ConsoleCommand extends AbstractStartCommand
   {
     return true;
   }
+  
+  @Override
+  public int retryCount()
+  {
+    return Integer.MAX_VALUE;
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
     try {
-      return client.startConsole();
+      return client.startConsole().ordinal();
     } catch (IOException e) {
       log.log(Level.FINE, e.getMessage(), e);
 

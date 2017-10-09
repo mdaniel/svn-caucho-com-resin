@@ -6,7 +6,14 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.54 - in progress">
+<s2 title="4.0.55 - in progress">
+<ul>
+<li>ssl: allow empty password for openssl (rep by Steffen Busch, #6103)</li>
+<li>cli: "console" and "gui" were exiting immediately (rep by Naoki, #6101)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.54 - Oct 5, 2017">
 <ul>
 <li>elastic: dynamic server timeouts not properly handled (#6088)</li>
 <li>log: add archive-format to watchdog-log (#6081)</li>

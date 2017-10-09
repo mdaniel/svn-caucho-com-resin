@@ -46,6 +46,7 @@ import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.BamActorRef;
 import com.caucho.bam.manager.BamManager;
 import com.caucho.bam.manager.SimpleBamManager;
+import com.caucho.boot.BootCommand.ResultCommand;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hmtp.HmtpClient;
@@ -200,11 +201,12 @@ class WatchdogClient
     return _config.getShutdownWaitTime();
   }
 
-  public int startConsole()
+  public ResultCommand startConsole()
     throws IOException
   {
-    if (_watchdog == null)
+    if (_watchdog == null) {
       _watchdog = new WatchdogChild(_system, _config);
+    }
 
     return _watchdog.startConsole();
   }
@@ -214,17 +216,19 @@ class WatchdogClient
     _watchdog.stop();
   }
 
-  public int startGui(GuiCommand command) throws IOException
+  public ResultCommand startGui(GuiCommand command) throws IOException
   {
-    if (_ui != null && _ui.isVisible())
-      return 1;
-    else if (_ui != null)
-      return 0;
+    if (_ui != null && _ui.isVisible()) {
+      return ResultCommand.FAIL_RETRY;
+    }
+    else if (_ui != null) {
+      return ResultCommand.OK;
+    }
 
     _ui = new ResinGUI(command, this);
     _ui.setVisible(true);
 
-    return 1;
+    return ResultCommand.FAIL_RETRY;
   }
 
   //

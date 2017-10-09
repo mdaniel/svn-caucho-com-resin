@@ -450,12 +450,14 @@ public class Body extends ContainerNode {
     out.writeEndElement(); // a
     out.writeEntityRef("nbsp");
 
+    /*
     out.writeStartElement("a");
     out.writeAttribute("href", "http://blog.caucho.com/");
     out.writeAttribute("title", "Blog to discuss Resin Server, a Java EE certified Java Application Server, Web Server and Querus PHP engine");
     out.writeCharacters("blog");
     out.writeEndElement(); // a
     out.writeEntityRef("nbsp");
+    */
 
     out.writeStartElement("a");
     out.writeAttribute("href", "http://www.caucho.com/resin-4.0/");

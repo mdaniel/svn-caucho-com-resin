@@ -34,12 +34,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.caucho.boot.BootCommand.ResultCommand;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
-import com.caucho.network.listen.TcpPort;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -402,18 +402,19 @@ class WatchdogChild
     return _config.isVerbose();
   }
 
-  public int startConsole()
+  public ResultCommand startConsole()
   {
     _isConsole = true;
     
     WatchdogChildTask task = new WatchdogChildTask(_system, this);
 
-    if (! _taskRef.compareAndSet(null, task))
-      return -1;
+    if (! _taskRef.compareAndSet(null, task)) {
+      return ResultCommand.FAIL_RETRY;
+    }
     
     task.start();
 
-    return 1;
+    return ResultCommand.FAIL_RETRY;
   }
 
   /**

@@ -66,4 +66,10 @@ public interface BootCommand
   public boolean isRemote(WatchdogArgs args);
 
   public void doWatchdogStart(WatchdogManager manager);
+  
+  enum ResultCommand {
+    OK,
+    FAIL_PERM,
+    FAIL_RETRY;
+  }
 }

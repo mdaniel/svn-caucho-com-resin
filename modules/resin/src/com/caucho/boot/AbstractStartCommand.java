@@ -72,6 +72,9 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
                       "port", "listen to an unauthenticated JMX port");
     addIntValueOption("watchdog-port", 
                       "port", "set watchdog port to listen to");
+    addValueOption("name", 
+                   "name", 
+                   "name for win32 service");
     
     super.initBootOptions();
   }

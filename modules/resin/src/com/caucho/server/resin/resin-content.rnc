@@ -429,7 +429,7 @@ r_openssl = element openssl {
      | element honor-cipher-order { r_boolean-Type })?
 
   & (attribute password { string }
-     | element password { r_string-Group })
+     | element password { r_string-Group })?
 
   & (attribute protocol { string }
      | element protocol { r_string-Group })?

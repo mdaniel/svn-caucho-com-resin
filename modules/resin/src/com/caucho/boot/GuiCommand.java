@@ -55,7 +55,7 @@ public class GuiCommand extends AbstractStartCommand
     throws BootArgumentException
   {
     try {
-      return client.startGui(this);
+      return client.startGui(this).ordinal();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -65,6 +65,12 @@ public class GuiCommand extends AbstractStartCommand
   public boolean isRetry()
   {
     return true;
+  }
+  
+  @Override
+  public int retryCount()
+  {
+    return Integer.MAX_VALUE;
   }
 
   private static Logger log()
