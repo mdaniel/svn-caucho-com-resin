@@ -203,17 +203,21 @@ abstract public class
 
   private void addConfigController(C config)
   {
-    if (config.getStartupMode() != null)
+    if (config.getStartupMode() != null) {
       setStartupMode(config.getStartupMode());
+    }
 
-    if (config.getRedeployCheckInterval() != null)
+    if (config.getRedeployCheckInterval() != null) {
       setRedeployCheckInterval(config.getRedeployCheckInterval());
+    }
 
-    if (config.getRedeployMode() != null)
+    if (config.getRedeployMode() != null) {
       setRedeployMode(config.getRedeployMode());
+    }
 
-    if (config.getExpandCleanupFileset() != null)
+    if (config.getExpandCleanupFileset() != null) {
       addParentExpandCleanupFileSet(config.getExpandCleanupFileset());
+    }
   }
 
   /**

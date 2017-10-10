@@ -161,14 +161,16 @@ public class DirectoryServlet extends HttpServlet {
       tail = rawpath.substring(p + 1) + "/";
       rawpath = rawpath + "/";
     }
+    
+    String dirpath = URLUtil.encodeURL(rawpath);
 
     pw.println("<html>");
     pw.println("<head>");
-    pw.println("<title>Directory of " + rawpath + "</title>");
+    pw.println("<title>Directory of " + dirpath+ "</title>");
     pw.println("</head>");
     pw.println("<body>");
 
-    pw.println("<h1>Directory of " + rawpath + "</h1>");
+    pw.println("<h1>Directory of " + dirpath + "</h1>");
 
     pw.println("<ul>");
 
@@ -184,7 +186,7 @@ public class DirectoryServlet extends HttpServlet {
 
       String enc = URLUtil.encodeURL(tail + name);
 
-      pw.println("<li><a href='" + enc + "'>" + name + "</a>");
+      pw.println("<li><a href='" + enc + "'>" + URLUtil.encodeURL(name) + "</a>");
     }
     pw.println("</ul>");
     pw.println("</body>");

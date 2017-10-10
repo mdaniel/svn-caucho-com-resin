@@ -32,6 +32,7 @@ package com.caucho.env.deploy;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
@@ -143,9 +144,31 @@ public class DeployConfig {
   /**
    * Sets the archive auto-remove file set.
    */
+  /*
   public void setExpandCleanupFileset(FileSetType fileset)
   {
     _expandCleanupFileset = fileset;
+  }
+  */
+
+  @Configurable
+  public void addExpandCleanupFileset(FileSetType include)
+  {
+    if (_expandCleanupFileset == null) {
+      _expandCleanupFileset = new FileSetType();
+    }
+
+    _expandCleanupFileset.add(include);
+  }
+
+  @Configurable
+  public void addExpandPreserveFileset(FileSetType exclude)
+  {
+    if (_expandCleanupFileset == null) {
+      _expandCleanupFileset = new FileSetType();
+    }
+
+    _expandCleanupFileset.addInverse(exclude);
   }
 
   /**
