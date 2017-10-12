@@ -1113,10 +1113,8 @@ public class HttpRequest extends AbstractHttpRequest
     }
     
     int readTail = uriBuffer.length - uriLength - 1;
-    
-    if (readLength < readTail) {
-      readTail = readLength;
-    }
+
+    readTail = Math.min(readLength, readTail);
 
     // read URI
     while (! isHttpWhitespace[ch]) {
@@ -1133,6 +1131,8 @@ public class HttpRequest extends AbstractHttpRequest
         }
 
         readOffset = s.getOffset();
+        readLength = s.getLength();
+        
         uriBuffer = _uri;
         uriLength = _uriLength;
       }
@@ -1147,8 +1147,9 @@ public class HttpRequest extends AbstractHttpRequest
     while (ch == ' ' || ch == '\t') {
       if (readLength <= readOffset) {
         readOffset = 0;
-        if ((readLength = s.fillBuffer()) < 0)
+        if ((readLength = s.fillBuffer()) < 0) {
           return true;
+        }
       }
       ch = readBuffer[readOffset++] & 0xff;
     }

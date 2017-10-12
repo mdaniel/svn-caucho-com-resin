@@ -937,9 +937,18 @@ public class ConnectionPool extends AbstractManagedObject
         if (mConn != null) {
           poolItem = findPoolItem(mConn);
             
-          if (poolItem == null)
-            throw new IllegalStateException(L.l("Unexpected non-matching PoolItem found for {0}",
-                                                mConn));
+          if (poolItem != null) {
+            break;
+          }
+          
+          log.warning(L.l("Unexpected non-matching PoolItem found for {0}",
+                          mConn));
+
+          try {
+            mConn.destroy();
+          } catch (Exception e) {
+            log.log(Level.FINE, e.toString(), e);
+          }
 
           break;
         }
