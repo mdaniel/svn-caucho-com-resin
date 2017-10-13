@@ -71,6 +71,7 @@ public class BasicLogin extends AbstractLogin {
     return "Basic";
   }
 
+  @Override
   public boolean isPasswordBased()
   {
     return true;

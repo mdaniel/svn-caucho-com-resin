@@ -8,6 +8,7 @@
 
 <s2 title="4.0.55 - in progress">
 <ul>
+<li>servlet: programmatic login with form-login (#6104, rep by nono)</li>
 <li>http: HTTP read issue when TCP packet in URL (#6093, rep by zhaown)</li>
 <li>db-pool: recover from non-matching PoolItem (#6099)</li>
 <li>webapp: allow expand-preserve-fileset in web-app (#6102, rep by mnsh)</li>

@@ -205,6 +205,12 @@ public class FormLogin extends AbstractLogin
     return request.getServletPath().indexOf("j_security_check") >= 0;
   }
 
+  @Override
+  public boolean isPasswordBased()
+  {
+    return true;
+  }
+
   /**
    * Logs a user in with a user name and a password.
    *
@@ -232,11 +238,21 @@ public class FormLogin extends AbstractLogin
       }
     }
 
-    String userName = request.getParameter("j_username");
-    String passwordString = request.getParameter("j_password");
+    String userName = (String) request.getAttribute(LOGIN_USER_NAME);
+    
+    if (userName == null) {
+      userName = request.getParameter("j_username");
+    }
+    
+    String passwordString = (String) request.getAttribute(LOGIN_PASSWORD);
+    
+    if (passwordString == null) {
+      passwordString = request.getParameter("j_password");
+    }
 
-    if (userName == null || passwordString == null)
+    if (userName == null || passwordString == null) {
       return null;
+    }
 
     char []password = passwordString.toCharArray();
 
