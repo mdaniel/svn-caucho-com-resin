@@ -137,7 +137,7 @@ public class Resin
 
   private Socket _pingSocket;
   
-  private long _shutdownWaitMax = 60000L;
+  // private long _shutdownWaitMax = 60000L;
   
   private ResinDelegate _resinDelegate;
 
@@ -590,6 +590,7 @@ public class Resin
     return _serverDataDirectory;
   }
 
+  /*
   public long getShutdownWaitMax()
   {
     return _shutdownWaitMax;
@@ -599,6 +600,7 @@ public class Resin
   {
     _shutdownWaitMax = shutdownTime;
   }
+  */
   
   //
   // deprecated configuration
