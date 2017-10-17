@@ -280,7 +280,7 @@ public class PageManager
 
         program = preloadProgram(path, fileName);
 
-        if (program == null) {
+        if (program == null || program.isModified()) {
           if (log.isLoggable(Level.FINE))
             log.fine(L.l("Quercus[{0}] parsing page", path));
 
@@ -294,8 +294,9 @@ public class PageManager
         _programCache.put(path, new SoftReference<QuercusProgram>(program));
       }
 
-      if (program.getCompiledPage() != null)
+      if (program.getCompiledPage() != null) {
         return program.getCompiledPage();
+      }
 
       return compilePage(program, path);
     } catch (IOException e) {
