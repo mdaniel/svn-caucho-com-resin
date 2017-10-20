@@ -664,16 +664,10 @@ class WatchdogChildProcess
 
     jvmArgs.add(_watchdog.getJavaExe());
     
-    boolean isEndorsed = false;
-
     // user args are first so they're displayed by ps
     for (String arg : _watchdog.getJvmArgs()) {
       if (! isResinProperty(arg)) {
         jvmArgs.add(arg);
-      }
-      
-      if (arg.startsWith("-Djava.endorsed.dirs")) {
-        isEndorsed = true;
       }
     }
 
@@ -689,22 +683,6 @@ class WatchdogChildProcess
     
     Path resinHome = _watchdog.getResinHome();
     Path resinRoot = _watchdog.getResinRoot();
-    
-    if (! isEndorsed) {
-      String endorsed = System.getProperty("java.endorsed.dirs");
-      
-      String resinEndorsed = resinHome.getNativePath() + File.separator + "endorsed";
-      
-      resinEndorsed += (File.pathSeparator
-                        + resinRoot .getNativePath() + File.separator + "endorsed");
-      
-      if (endorsed != null)
-        endorsed = endorsed + File.pathSeparator + resinEndorsed;
-      else
-        endorsed = resinEndorsed;
-      
-      jvmArgs.add("-Djava.endorsed.dirs=" + endorsed);
-    }
     
     // #2567
     jvmArgs.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");

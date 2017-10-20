@@ -8,6 +8,7 @@
 
 <s2 title="4.0.55 - in progress">
 <ul>
+<li>start: removed automatic setting of endorsed directory for Java 9 (#6107)</li>
 <li>quercus: issues with not-reloading compiled .php pages (#6091)</li>
 <li>webapp: web-app shutdown-wait-max needs to default to server-default value (#6096)</li>
 <li>servlet: programmatic login with form-login (#6104, rep by nono)</li>
