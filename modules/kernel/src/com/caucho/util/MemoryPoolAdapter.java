@@ -135,89 +135,105 @@ public class MemoryPoolAdapter
   public long getCodeCacheCommitted()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getCodeCacheName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getCommitted();
+    if (usage != null) {
+      return usage.getCommitted();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getCodeCacheMax()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getCodeCacheName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax();
+    if (usage != null) {
+      return usage.getMax();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getCodeCacheUsed()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getCodeCacheName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getUsed();
+    if (usage != null) {
+      return usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getCodeCacheFree()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getCodeCacheName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getCodeCacheName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax() - usage.getUsed();
+    if (usage != null) {
+      return usage.getMax() - usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getEdenCommitted()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getEdenName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getCommitted();
+    if (usage != null) {
+      return usage.getCommitted();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getEdenMax()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getEdenName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax();
+    if (usage != null) {
+      return usage.getMax();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getEdenUsed()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getEdenName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getUsed();
+    if (usage != null) {
+      return usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getEdenFree()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getEdenName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getEdenName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax() - usage.getUsed();
+    if (usage != null) {
+      return usage.getMax() - usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   /*
@@ -303,102 +319,136 @@ public class MemoryPoolAdapter
   public long getSurvivorCommitted()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getSurvivorName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getCommitted();
+    if (usage != null) {
+      return usage.getCommitted();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getSurvivorMax()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getSurvivorName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax();
+    if (usage != null) {
+      return usage.getMax();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getSurvivorUsed()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getSurvivorName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getUsed();
+    if (usage != null) {
+      return usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getSurvivorFree()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getSurvivorName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getSurvivorName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax() - usage.getUsed();
+    if (usage != null) {
+      return usage.getMax() - usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getTenuredCommitted()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getTenuredName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getCommitted();
+    if (usage != null) {
+      return usage.getCommitted();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getTenuredMax()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getTenuredName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax();
+    if (usage != null) {
+      return usage.getMax();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getTenuredUsed()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getTenuredName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getUsed();
+    if (usage != null) {
+      return usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
 
   public long getTenuredFree()
     throws JMException
   {
-      CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
-
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return usage.getMax() - usage.getUsed();
+    MemoryUsage usage = getMemoryUsage(getTenuredName(), "Usage");
+    
+    if (usage != null) {
+      return usage.getMax() - usage.getUsed();
+    }
+    else {
+      return 0;
+    }
   }
   
   public MemUsage getTenuredMemUsage()
     throws JMException
   {
-    CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getTenuredName(), "Usage");
+    MemoryUsage usage = getMemoryUsage(getTenuredName(), "Usage");
 
-    MemoryUsage usage = MemoryUsage.from(data);
-
-    return new MemUsage(usage.getMax(), 
-                        usage.getCommitted(),
-                        usage.getUsed());
+    if (usage != null) {
+      return new MemUsage(usage.getMax(), 
+                          usage.getCommitted(),
+                          usage.getUsed());
+    }
+    else {
+      return new MemUsage(0, 0, 0);
+    }
+  }
+  
+  private MemoryUsage getMemoryUsage(ObjectName name, String attribute)
+    throws JMException
+  {
+    Object data = _mbeanServer.getAttribute(name, attribute);
+    
+    if (data instanceof MemoryUsage) {
+      return (MemoryUsage) data;
+    }
+    else if (data instanceof CompositeData) {
+      return MemoryUsage.from((CompositeData) data);
+    }
+    else {
+      return null;
+    }
   }
 
   public long getGarbageCollectionTime()

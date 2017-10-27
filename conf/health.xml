@@ -17,7 +17,7 @@
     <check-timeout>5m</check-timeout>
   </health:HealthSystem>
 
-  <resin:if test="${health_log_level}">
+  <resin:if test="${health_log_level!=null}">
     <health:LogService level="${health_log_level}"/>
   </resin:if>
   
