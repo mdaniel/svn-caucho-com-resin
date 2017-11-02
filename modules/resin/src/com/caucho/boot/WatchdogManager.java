@@ -78,6 +78,8 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import sun.rmi.runtime.Log;
+
 /**
  * Process responsible for watching a backend watchdog.
  */
@@ -140,13 +142,22 @@ class WatchdogManager implements AlarmListener {
       log().log(Level.ALL, e.toString(), e);
     }
     
-    // #4333 - check watchdog-manager.log can be written
-    WriteStream testOut = logPath.openAppend();
-    testOut.close();
+    if (! getLogDirectory().isDirectory()) {
+      log().warning("Watchdog can't open log directory: " + getLogDirectory().getNativePath()
+                    + " as user " + System.getProperty("user.name"));
+    }
+    
+    try {
+      // #4333 - check watchdog-manager.log can be written
+      WriteStream testOut = logPath.openAppend();
+      testOut.close();
+    } catch (Exception e) {
+      log().log(Level.WARNING, "Log-file: " + logPath + " " + e, e);
+    }
     
     if (! logPath.canWrite()) {
-      throw new ConfigException("Cannot open " + logPath.getNativePath()
-                                + " required for Resin start. Please check permissions");
+      throw new ConfigException("Cannot open " + logPath.getNativePath() + " as '" + System.getProperty("user.name") 
+                                + "' required for Resin start. Please check permissions");
     }
 
     RotateStream logStream = RotateStream.create(logPath);
@@ -299,7 +310,7 @@ class WatchdogManager implements AlarmListener {
         factory.type(AdminAuthenticator.class);
         factory.qualifier(DefaultLiteral.DEFAULT);
 
-        cdiManager.addBeanDiscover(factory.singleton(auth));
+        cdiManager.add)BeanDiscover(factory.singleton(auth));
       }
 
       DependencyCheckInterval depend = new DependencyCheckInterval();
