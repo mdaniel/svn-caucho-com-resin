@@ -90,8 +90,15 @@ namespace Caucho
         StringBuilder message = new StringBuilder("Unable to start application. Make sure java is in your path. Use option -verbose for more detail.\n");
         message.Append(e.ToString());
 
-        Info(message.ToString());
-
+        if (ResinArgs.IsService)
+        {
+            Error(message.ToString(), e);
+        }
+        else
+        {
+            Info(message.ToString());
+        }
+    
         return false;
       }
     }
