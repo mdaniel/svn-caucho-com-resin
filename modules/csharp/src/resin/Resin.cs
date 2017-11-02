@@ -64,7 +64,12 @@ namespace Caucho
       _rootDirectory = ResinArgs.ResinRoot;
       _javaHome = ResinArgs.JavaHome;
 
-      _mutex = new Mutex(false, @"Global\com.caucho.Resin" + _rootDirectory);
+      //_mutex = new Mutex(false, @"Global\com.caucho.Resin." + _rootDirectory);
+      //_mutex = new Mutex(false, @"Global\com.caucho.Resin");
+
+      if (_mutex == null) {
+          _mutex = new Mutex(false, @"Global\com.caucho.Resin." + _rootDirectory);
+      }
     }
 
     public bool StartResin()
@@ -256,7 +261,7 @@ namespace Caucho
 
           return;
         }
-
+ 
         StringBuilder error = new StringBuilder();
         StringBuilder output = new StringBuilder();
         process.ErrorDataReceived += delegate(Object sendingProcess, DataReceivedEventArgs err)
@@ -271,7 +276,9 @@ namespace Caucho
         process.BeginOutputReadLine();
 
         while (!process.HasExited)
-          process.WaitForExit(500);
+        {
+            process.WaitForExit(500);
+        }
 
         process.CancelErrorRead();
         process.CancelOutputRead();
@@ -355,6 +362,11 @@ namespace Caucho
 
     private void Info(String message, TextWriter writer, bool newLine)
     {
+      if (message.Length > 32000)
+      {
+        message = message.Substring(message.Length - 32000);
+      }
+
       if (writer != null && newLine)
         writer.WriteLine(message);
       else if (writer != null && !newLine)
