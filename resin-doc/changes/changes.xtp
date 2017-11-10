@@ -8,6 +8,7 @@
 
 <s2 title="4.0.55 - in progress">
 <ul>
+<li>win32: error messages related to permissions for win32 services (#6092)</li>
 <li>LogService: configuration in health.xml with health_log_level (#6110)</li>
 <li>jmx: MemoryUsage from MBeanServer returning unexpected type (#6106)</li>
 <li>start: removed automatic setting of endorsed directory for Java 9 (#6107)</li>
