@@ -373,7 +373,7 @@ public class MBeanView {
       return true;
     }
     else 
-      return _mbeans.putIfAbsent(name, mbean) == null;
+      return ((ConcurrentHashMap) _mbeans).putIfAbsent(name, mbean) == null;
   }
 
   /**
