@@ -29,22 +29,23 @@
 
 package com.caucho.servlets;
 
-import com.caucho.i18n.CharacterEncoding;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.URLUtil;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Iterator;
+
+import com.caucho.i18n.CharacterEncoding;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Html;
+import com.caucho.util.URLUtil;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 public class DirectoryServlet extends HttpServlet {
   WebApp _app;
@@ -162,7 +163,7 @@ public class DirectoryServlet extends HttpServlet {
       rawpath = rawpath + "/";
     }
     
-    String dirpath = URLUtil.encodeURL(rawpath);
+    String dirpath = Html.escapeHtml(rawpath);
 
     pw.println("<html>");
     pw.println("<head>");
@@ -186,7 +187,7 @@ public class DirectoryServlet extends HttpServlet {
 
       String enc = URLUtil.encodeURL(tail + name);
 
-      pw.println("<li><a href='" + enc + "'>" + URLUtil.encodeURL(name) + "</a>");
+      pw.println("<li><a href='" + enc + "'>" + Html.escapeHtml(name) + "</a>");
     }
     pw.println("</ul>");
     pw.println("</body>");

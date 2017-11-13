@@ -78,8 +78,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-import sun.rmi.runtime.Log;
-
 /**
  * Process responsible for watching a backend watchdog.
  */

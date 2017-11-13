@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 import javax.management.BadAttributeValueExpException;
 import javax.management.BadBinaryOpValueExpException;
@@ -55,7 +55,7 @@ public class MBeanView {
 
   private AbstractMBeanServer _mbeanServer;
 
-  private ConcurrentHashMap<ObjectName,MBeanWrapper> _mbeans
+  private Map<ObjectName,MBeanWrapper> _mbeans
     = new ConcurrentHashMap<ObjectName,MBeanWrapper>();
 
   MBeanView(AbstractMBeanServer mbeanServer,

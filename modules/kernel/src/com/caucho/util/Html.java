@@ -53,6 +53,8 @@ public class Html {
       
       if (ch == '<')
         cb.append("&lt;");
+      else if (ch == '>')
+        cb.append("&gt;");
       else if (ch == '&')
         cb.append("&amp;");
       else if (ch == '\n' || ch == '\r') {
