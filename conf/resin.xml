@@ -133,29 +133,4 @@
     </host>
   </cluster>
 
-  <cluster id="memcached" xmlns:memcache="urn:java:com.caucho.memcached">
-    <!-- define the servers in the cluster -->
-    <server-multi id-prefix="memcached-" address-list="${memcached_servers}" port="6820">
-      <!-- listen for the memcache protocol -->
-      <listen port="${memcached_port?:11211}"
-              keepalive-timeout="600s" socket-timeout="600s">
-        <memcache:MemcachedProtocol/>
-      </listen>
-    </server-multi>
-  </cluster>
-  
-  <cluster id="proxycache">
-    <!-- define the servers in the cluster -->
-    <server-multi id-prefix="proxycache-" address-list="${proxycache_servers}" port="6830"/>
-
-    <host id="" root-directory="proxycache">
-      <web-app id="">
-        <resin:HttpProxy regexp=".*">
-          <!-- backend HTTP servers to proxy to -->
-          <addresses>${backend_servers}</addresses>
-        </resin:HttpProxy>
-      </web-app>
-    </host>
-  </cluster>
-
 </resin>

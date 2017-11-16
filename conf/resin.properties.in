@@ -36,15 +36,6 @@ resin_doc_host :
 # app-tier Triad servers: app-0 app-1 app-2
 app_servers      : 127.0.0.1:6800
 
-# Configures Resin for a memcached server tier
-# memcached-tier Triad servers: memcached-0 memcached-1 memcached-2
-# memcached_servers    : 127.0.0.1:6820
-# memcached_port : 11211
-
-# proxycache tier: proxycache-0 proxycache-1 proxycache-2
-# proxycache_servers   : 127.0.0.1:6830
-# backend_servers       : 127.0.0.1:80
-
 # Allow elastic nodes to join the cluster (enable for cloud mode)
 # elastic_cloud_enable : true
 
@@ -75,12 +66,6 @@ app.http          : @HTTP_PORT@
 
 web.http          : @HTTP_PORT@
 # web.https         : @HTTPS_PORT@
-
-# memcached.http      : @HTTP_PORT@
-# memcached.https     : @HTTPS_PORT@
-
-# proxycache.http    : @HTTP_PORT@
-# proxycache.https  : @HTTPS_PORT@
 
 # For security, Resin can switch to a non-root user after binding to port 80
 setuid_user   : @SETUID_USER@
