@@ -779,26 +779,6 @@ if test -z "${apache_ldflags_shlib}"; then
 fi
 
 #
-# Java 1.6 check
-#
-
-echo $ECHO_N "checking if ${JAVA_EXE} is Java 1.6... "
-
-tmpname="/tmp/java$$.out"
-$JAVA_EXE -version 2> $tmpname
-
-grep "1\.@<:@678]" $tmpname 1> /dev/null
-if test "$?" != "0"; then
-  echo "no"
-  java_version=`cat $tmpname`
-  AC_MSG_ERROR([Java 1.6 required. ${JAVA_EXE} returned: ${java_version}])
-fi
-
-echo "yes"
-
-rm -f $tmpname
-
-#
 # 64bit heuristics
 #
 echo $ECHO_N "checking if ${JAVA_EXE} is 64-bit... "
