@@ -2889,7 +2889,11 @@ public class WebApp extends ServletContextImpl
   private void addWebServiceContextProxy()
   {
     try {
-      _cdiManager.addBeanDiscover(_cdiManager.createManagedBean(WebServiceContextProxy.class));
+      Class<?> cl = Class.forName("javax.xml.ws.WebServiceContext");
+      
+      if (cl != null) {
+        _cdiManager.addBeanDiscover(_cdiManager.createManagedBean(WebServiceContextProxy.class));
+      }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
