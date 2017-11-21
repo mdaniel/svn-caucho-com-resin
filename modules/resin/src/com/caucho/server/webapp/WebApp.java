@@ -2824,7 +2824,7 @@ public class WebApp extends ServletContextImpl
       */
 
       // server/5030
-      _cdiManager.addBeanDiscover(_cdiManager.createManagedBean(WebServiceContextProxy.class));
+      addWebServiceContextProxy();
 
       /*
       _beanManager.addObserver(new WebBeansObserver(),
@@ -2883,6 +2883,15 @@ public class WebApp extends ServletContextImpl
       }
     } finally {
       _lifecycle.toInit();
+    }
+  }
+  
+  private void addWebServiceContextProxy()
+  {
+    try {
+      _cdiManager.addBeanDiscover(_cdiManager.createManagedBean(WebServiceContextProxy.class));
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
   
