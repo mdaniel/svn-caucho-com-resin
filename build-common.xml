@@ -952,7 +952,9 @@
       </zipfileset>
     </zip>
 
-    <checksum file="${dist}/${shortproduct}-${version}.zip" algorithm="SHA-256">
+    <checksum file="${dist}/${shortproduct}-${version}.zip"
+              fileext=".sha256"
+              algorithm="SHA-256">
     </checksum>
 
     <zip destfile="${dist}/${shortproduct}-${version}-src.zip"
@@ -970,7 +972,9 @@
       </tarfileset>
     </tar>
 
-    <checksum file="${dist}/${shortproduct}-${version}.tar.gz" algorithm="SHA-256">
+    <checksum file="${dist}/${shortproduct}-${version}.tar.gz"
+              fileext=".sha256"
+              algorithm="SHA-256">
     </checksum>
 
     <tar destfile="${dist}/${shortproduct}-${version}-src.tar.gz"
