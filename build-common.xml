@@ -952,6 +952,9 @@
       </zipfileset>
     </zip>
 
+    <checksum file="${dist}/${shortproduct}-${version}.zip" algorithm="SHA-256">
+    </checksum>
+
     <zip destfile="${dist}/${shortproduct}-${version}-src.zip"
          basedir="${dist}">
       <patternset refid="dist.src"/>
@@ -966,6 +969,9 @@
         <patternset refid="dist.bin"/>
       </tarfileset>
     </tar>
+
+    <checksum file="${dist}/${shortproduct}-${version}.tar.gz" algorithm="SHA-256">
+    </checksum>
 
     <tar destfile="${dist}/${shortproduct}-${version}-src.tar.gz"
          basedir="${dist}" longfile="gnu" compression="gzip">
