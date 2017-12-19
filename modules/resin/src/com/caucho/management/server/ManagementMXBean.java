@@ -62,6 +62,7 @@ import javax.management.ReflectionException;
 @Description("Management Facade for Resin")
 public interface ManagementMXBean extends ManagedObjectMXBean
 {
+  /*
   @Description("deploys configuration")
   @MXAction(value = "config-deploy", method = "POST")
   @MXContentType
@@ -98,6 +99,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                                @MXParam(name = "version") String version,
                                @MXParam(name = "message") String message)
     throws ReflectionException;
+    */
 
   @Description("Produces a complete dump of JMX objects and values")
   @MXAction("jmx-dump")

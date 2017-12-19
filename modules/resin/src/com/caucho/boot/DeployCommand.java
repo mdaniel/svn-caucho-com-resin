@@ -36,7 +36,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 public class DeployCommand extends AbstractDeployCommand {
-  private static final L10N L = new L10N(ConfigDeployCommand.class);
+  private static final L10N L = new L10N(DeployCommand.class);
 
   @Override
   protected void initBootOptions()

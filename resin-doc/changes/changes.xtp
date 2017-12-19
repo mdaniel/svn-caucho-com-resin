@@ -6,7 +6,13 @@
 
 <s1 title="Resin Change Log">
 
-<s2 title="4.0.55 - in progress">
+<s2 title="4.0.56 - in progress">
+<ul>
+<li>cli: Removed config-deploy because it is too brittle to deploy reliably</li>
+</ul>
+</s2>
+
+<s2 title="4.0.55 - Dec 4, 2017">
 <ul>
 <li>config: simplified resin.xml and resin.properties to remove unused capabilities</li>
 <li>win32: error messages related to permissions for win32 services (#6092)</li>

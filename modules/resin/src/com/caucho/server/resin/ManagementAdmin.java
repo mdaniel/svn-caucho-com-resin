@@ -106,67 +106,27 @@ public class ManagementAdmin extends AbstractManagedObject
     return null;
   }
 
-  @Override
+  //@Override
   public String configDeploy(String serverId,
                              String stage,
                              String version,
                              String message,
                              InputStream is) throws ReflectionException
   {
-    CommitBuilder commit = new CommitBuilder();
-
-    if (stage != null)
-      commit.stage(stage);
-
-    commit.type("config");
-    commit.tagKey("resin");
-
-
-    if (message == null)
-      message = "deploy config via REST";
-
-    commit.message(message);
-
-    if (version != null)
-      DeployClient.fillInVersion(commit, version);
-
-    DeployClient client = getWebappDeployClient(serverId);
-
-    client.commitArchive(commit, is);
-
-    return "Deployed config " + commit.getId() + " to " + client.getUrl();
+    throw new UnsupportedOperationException("configDeploy is not supported");
   }
 
-  @Override
+  //@Override
   public InputStream configCat(String serverId,
                                 String name,
                                 String stage,
                                 String version)
     throws ReflectionException
   {
-    CommitBuilder commit = new CommitBuilder();
-    if (stage != null)
-      commit.stage(stage);
-
-    commit.type("config");
-    commit.tagKey("resin");
-
-    try {
-      TempOutputStream out = new TempOutputStream();
-
-      DeployClient client = getWebappDeployClient(serverId);
-
-      client.getFile(commit.getId(), name, out);
-
-      out.flush();
-
-      return out.getInputStream();
-    } catch (IOException e) {
-      throw ConfigException.create(e);
-    }
+    throw new UnsupportedOperationException("configDeploy is not supported");
   }
 
-  @Override
+  //@Override
   public String []configLs(String serverId,
                          String name,
                          String stage,
@@ -192,7 +152,7 @@ public class ManagementAdmin extends AbstractManagedObject
     }
   }
 
-  @Override
+  //@Override
   public String configUndeploy(String serverId,
                                String stage,
                                String version,

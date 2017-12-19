@@ -1135,9 +1135,6 @@ class WatchdogArgs
   }
 
   static {
-    addCommand(new ConfigCatCommand());
-    addCommand(new ConfigDeployCommand());
-    addCommand(new ConfigLsCommand());
     addCommand(new ConfigUndeployCommand());
 
     addCommand(new ConsoleCommand());
