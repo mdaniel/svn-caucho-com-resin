@@ -934,9 +934,14 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
         return null;
       }
       
+      SessionManager sessionManager = getSessionManager();
+      
+      if (sessionManager == null) {
+        return null;
+      }
+      
       cookiesIn = request.getCookies();
 
-      SessionManager sessionManager = getSessionManager();
       String sessionCookieName = getSessionCookie(sessionManager);
 
       for (int i = 0; i < cookiesIn.length; i++) {

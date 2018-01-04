@@ -360,10 +360,10 @@ public class PdfReportAction implements AdminAction
     }
   }
 
-  public String getReportFileName()
+  public String getReportFileName(long now)
   {
     if (_fileName == null) {
-      String date = QDate.formatLocal(CurrentTime.getCurrentTime(), "%Y%m%dT%H%M");
+      String date = QDate.formatLocal(now, "%Y%m%dT%H%M");
 
       String serverId = "default";
 
@@ -371,10 +371,10 @@ public class PdfReportAction implements AdminAction
       if (resin != null)
         serverId = resin.getServerIdFilePart();
 
-      _fileName = String.format("%s-%s-%s.pdf",
-                                serverId,
-                                calculateTitle(),
-                                date);
+      return String.format("%s-%s-%s.pdf",
+                           serverId,
+                           calculateTitle(),
+                           date);
     }
 
     return _fileName;
@@ -403,6 +403,8 @@ public class PdfReportAction implements AdminAction
       TempStream ts = new TempStream();
       ts.openWrite();
       ws = new WriteStream(ts);
+      
+      long now = CurrentTime.getCurrentTime();
 
       HttpServletRequest request = new StubServletRequest();
       HttpServletResponse response = new StubServletResponse();
@@ -417,6 +419,8 @@ public class PdfReportAction implements AdminAction
         env.setGlobalValue("g_server_id", env.wrapJava(_serverId));
       }
 
+      env.setGlobalValue("time", env.wrapJava(now / 1000));
+      
       env.setGlobalValue("g_report", env.wrapJava(calculateReport()));
       env.setGlobalValue("g_title", env.wrapJava(calculateTitle()));
       env.setGlobalValue("period", env.wrapJava(calculatePeriod() / 1000));
@@ -448,7 +452,7 @@ public class PdfReportAction implements AdminAction
       ws.flush();
 
       if (_mailTo != null && ! "".equals(_mailTo)) {
-        mailPdf(ts);
+        mailPdf(ts, now);
 
         String message = L.l("{0} report mailed to {1}",
                              calculateReport(),
@@ -460,7 +464,7 @@ public class PdfReportAction implements AdminAction
         return actionResult;
       }
 
-      Path path = writePdfToFile(ts);
+      Path path = writePdfToFile(ts, now);
 
       if (_isReturnPdf) {
         pdfOut = new TempOutputStream();
@@ -499,12 +503,12 @@ public class PdfReportAction implements AdminAction
     return _quercus;
   }
 
-  private void mailPdf(TempStream ts)
+  private void mailPdf(TempStream ts, long now)
     throws IOException
   {
-    String fileName = getReportFileName();
+    String fileName = getReportFileName(now);
 
-    String userDate = QDate.formatLocal(CurrentTime.getCurrentTime(),
+    String userDate = QDate.formatLocal(now,
                                         "%Y-%m-%d %H:%M");
 
     String subject = "[Resin] PDF Report: " + calculateTitle() + "@" + _serverId
@@ -525,10 +529,10 @@ public class PdfReportAction implements AdminAction
                                     ts.openInputStream());
   }
 
-  private Path writePdfToFile(TempStream ts)
+  private Path writePdfToFile(TempStream ts, long now)
     throws IOException
   {
-    String fileName = getReportFileName();
+    String fileName = getReportFileName(now);
 
     Path path = _logPath.lookup(fileName);
 

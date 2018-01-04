@@ -8,6 +8,8 @@
 
 <s2 title="4.0.56 - in progress">
 <ul>
+<li>access.log: NPE with logging bad-request (#6123, rep by Steffen Busch)</li>
+<li>pdf: report date and snapshot time need to match (#6114)</li>
 <li>cli: Removed config-deploy because it is too brittle to deploy reliably</li>
 </ul>
 </s2>

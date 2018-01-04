@@ -30,6 +30,7 @@ package com.caucho.sql;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
@@ -902,6 +903,178 @@ public class UserStatement implements Statement {
       throw e;
     } catch (SQLException e) {
       onSqlException(e);
+      
+      throw e;
+    }
+  }
+  
+  //
+  // jdbc for jdk8
+  //
+  
+  @Override
+  public long getLargeUpdateCount()
+    throws SQLException
+  {
+    try {
+      return _stmt.getLargeUpdateCount();
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void setLargeMaxRows(long max)
+    throws SQLException
+  {
+    try {
+      _stmt.setLargeMaxRows(max);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long getLargeMaxRows()
+    throws SQLException
+  {
+    try {
+      return _stmt.getLargeMaxRows();
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long []executeLargeBatch()
+    throws SQLException
+  {
+    try {
+      return _stmt.executeLargeBatch();
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long executeLargeUpdate(String sql)
+    throws SQLException
+  {
+    try {
+      return _stmt.executeLargeUpdate(sql);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long executeLargeUpdate(String sql, int keys)
+    throws SQLException
+  {
+    try {
+      return _stmt.executeLargeUpdate(sql, keys);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long executeLargeUpdate(String sql, int []index)
+    throws SQLException
+  {
+    try {
+      return _stmt.executeLargeUpdate(sql, index);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long executeLargeUpdate(String sql, String []columns)
+    throws SQLException
+  {
+    try {
+      return _stmt.executeLargeUpdate(sql, columns);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
       
       throw e;
     }

@@ -2229,6 +2229,178 @@ public class UserCallableStatement extends UserPreparedStatement
       throw e;
     }
   }
+  
+  //
+  // jdk8
+  //
+  
+  @Override
+  public void setObject(String name, Object x, SQLType targetType, int scale)
+    throws SQLException
+  {
+    try {
+      _cstmt.setObject(name, x, targetType, scale);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void setObject(String name, Object x, SQLType targetType)
+    throws SQLException
+  {
+    try {
+      _cstmt.setObject(name, x, targetType);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void registerOutParameter(int index, SQLType type)
+    throws SQLException
+  {
+    try {
+      _cstmt.registerOutParameter(index, type);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void registerOutParameter(int index, SQLType type, int scale)
+    throws SQLException
+  {
+    try {
+      _cstmt.registerOutParameter(index, type, scale);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void registerOutParameter(int index, SQLType type, String typeName)
+    throws SQLException
+  {
+    try {
+      _cstmt.registerOutParameter(index, type, typeName);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void registerOutParameter(String name, SQLType type, String typeName)
+    throws SQLException
+  {
+    try {
+      _cstmt.registerOutParameter(name, type, typeName);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void registerOutParameter(String name, SQLType type, int scale)
+    throws SQLException
+  {
+    try {
+      _cstmt.registerOutParameter(name, type, scale);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void registerOutParameter(String name, SQLType type)
+    throws SQLException
+  {
+    try {
+      _cstmt.registerOutParameter(name, type);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
 
   @Override
   @SuppressWarnings("unchecked")

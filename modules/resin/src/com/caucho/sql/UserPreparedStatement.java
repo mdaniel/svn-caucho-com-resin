@@ -44,7 +44,9 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLType;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -1184,6 +1186,72 @@ public class UserPreparedStatement extends UserStatement
       throw e;
     } catch (SQLException e) {
       onSqlException(e);
+      
+      throw e;
+    }
+  }
+  
+  //
+  // jdk8
+  
+  @Override
+  public void setObject(int param, Object x, SQLType targetType, int scale)
+    throws SQLException
+  {
+    try {
+      _pstmt.setObject(param, x, targetType, scale);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public void setObject(int param, Object x, SQLType targetType)
+    throws SQLException
+  {
+    try {
+      _pstmt.setObject(param, x, targetType);
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
+      
+      throw e;
+    }
+  }
+  
+  @Override
+  public long executeLargeUpdate()
+    throws SQLException
+  {
+    try {
+      return _pstmt.executeLargeUpdate();
+    } catch (SQLClientInfoException e) {
+      onSqlException(e);
+      
+      throw e;
+    } catch (SQLException e) {
+      onSqlException(e);
+      
+      throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      onRuntimeException(e);
       
       throw e;
     }
