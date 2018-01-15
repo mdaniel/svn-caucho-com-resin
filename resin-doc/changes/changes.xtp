@@ -8,6 +8,8 @@
 
 <s2 title="4.0.56 - in progress">
 <ul>
+<li>gzip: add min-gzip-size based on content-length header (#6112, rep by stbu)</li>
+<li>jdbc: add wrapper methods for JDBC 4.2 (#6082)</li>
 <li>access.log: NPE with logging bad-request (#6123, rep by Steffen Busch)</li>
 <li>pdf: report date and snapshot time need to match (#6114)</li>
 <li>cli: Removed config-deploy because it is too brittle to deploy reliably</li>

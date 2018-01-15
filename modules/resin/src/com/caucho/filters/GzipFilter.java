@@ -22,6 +22,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.config.types.Bytes;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.util.FreeList;
 import com.caucho.util.RuntimeExceptionWrapper;
@@ -57,6 +58,7 @@ public class GzipFilter implements Filter {
   private boolean _embedError;
   private boolean _useVary = true;
   private boolean _noCache = false;
+  private long _minGzipSize = -1;
 
   private HashMap<String,AllowEntry> _contentTypeMap;
   private boolean _hasDeny;
@@ -108,6 +110,21 @@ public class GzipFilter implements Filter {
     _contentTypeMap.put(type, DENY);
   }
   
+  public void setMinGzipSize(Bytes size)
+  {
+    setMinGzipSizeBytes(size.getBytes());
+  }
+  
+  private void setMinGzipSizeBytes(long size)
+  {
+    _minGzipSize = size;
+  }
+  
+  long getMinGzipSize()
+  {
+    return _minGzipSize;
+  }
+  
   public void init(FilterConfig config)
     throws ServletException
   {
@@ -130,6 +147,14 @@ public class GzipFilter implements Filter {
       _noCache = true;
     else if ("false".equals(value))
       _noCache = true;
+    
+    value = config.getInitParameter("min-gzip-size");
+
+    if (value == null) {
+    }
+    else  {
+      setMinGzipSizeBytes(Bytes.toBytes(value));
+    }
   }
   
   /**
@@ -153,8 +178,9 @@ public class GzipFilter implements Filter {
         gzipResponse = _freeList.allocate();
       }
       
-      if (gzipResponse == null)
+      if (gzipResponse == null) {
         gzipResponse = new GzipResponse();
+      }
       
       gzipResponse.setUseDeflate(encoding == DEFLATE);
       
@@ -362,6 +388,7 @@ public class GzipFilter implements Filter {
     public void setIntHeader(String header, int value)
     {
       if (header.equalsIgnoreCase("Content-Length")) {
+        setContentLength((long) value);
       }
       else {
         super.setIntHeader(header, value);
@@ -375,6 +402,7 @@ public class GzipFilter implements Filter {
     public void addIntHeader(String header, int value)
     {
       if (header.equalsIgnoreCase("Content-Length")) {
+        setContentLength((long) value);
       }
       else {
         super.addIntHeader(header, value);
@@ -388,6 +416,7 @@ public class GzipFilter implements Filter {
     @Override
     public void setContentLength(int length)
     {
+      setContentLength((long) length);
     }
 
     /**
@@ -397,6 +426,14 @@ public class GzipFilter implements Filter {
     @Override
     public void setContentLength(long length)
     {
+      if (length < GzipFilter.this.getMinGzipSize()) {
+        _allowGzip = false;
+        
+        if (_gzipStream != null && ! _gzipStream.isData()) {
+          _response.setHeader("Content-Encoding", "plain");
+          _gzipStream.setEnable(false);
+        }
+      }
     }
 
     /**
