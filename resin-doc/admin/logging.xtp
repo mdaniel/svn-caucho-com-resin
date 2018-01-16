@@ -1116,43 +1116,5 @@ of your filesystem path:</p>
 </example>
 </s1>
 
-<s1 title="Custom Access Logs">
-
-<p>If you need to create a custom access log, you can create your
-own implementation extending <a javadoc="com.caucho.http.log.AccessLog"/> and
-configuring it.</p>
-
-<example title="Custom Configuration">
-...
-&lt;host-default>
-
-  &lt;access-log>
-    &lt;mypkg:MyCustomLog xmlns:mypkg="urn:java:com.mypkg"/>
-  &lt;/access-log>
-
-&lt;/host-default>
-</example>
-
-<example title="Custom Log">
-package com.mypkg;
-
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import com.caucho.http.log.*;
-
-public class MyLog extends AccessLog {
-  public void log(HttpServletRequest req,
-                  HttpServletResponse res,
-                  ServletContext application)
-  {
-    System.out.println.add(req.getRequestURI());
-  }
-}
-</example>
-
-</s1>
-
-
 </body>
 </document>
