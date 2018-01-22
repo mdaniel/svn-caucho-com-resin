@@ -124,18 +124,20 @@ public class ServletMapper {
   /**
    * Adds a servlet mapping
    */
-  void addUrlMapping(final String urlPattern,
-                     String servletName,
-                     ServletMapping mapping,
-                     boolean ifAbsent)
+  boolean addUrlMapping(final String urlPattern,
+                        String servletName,
+                        ServletMapping mapping,
+                        boolean ifAbsent)
     throws ServletException
   {
     try {
       boolean isIgnore = false;
 
       if (mapping.isInFragmentMode()
-         && _servletMap.contains(new FragmentFilter(servletName)))
-        return;
+         && _servletMap.contains(new FragmentFilter(servletName))
+         && ifAbsent) {
+        return false;
+      }
 
       if (servletName == null) {
         throw new ConfigException(L.l("servlets need a servlet-name."));
@@ -153,7 +155,7 @@ public class ServletMapper {
         if (urlPattern != null)
           _ignorePatterns.add(urlPattern);
 
-        return;
+        return false;
       }
       else if (mapping.getBean() != null) {
       }
@@ -182,6 +184,8 @@ public class ServletMapper {
       patterns.add(urlPattern);
 
       log.config("servlet-mapping " + urlPattern + " -> " + servletName);
+      
+      return true;
     } catch (ServletException e) {
       throw e;
     } catch (RuntimeException e) {
