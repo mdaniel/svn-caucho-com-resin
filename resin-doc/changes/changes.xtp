@@ -8,6 +8,7 @@
 
 <s2 title="4.0.56 - in progress">
 <ul>
+<li>log: add %{ssl_protocol}V and %{ssl_cipher_suite}V to access log config (#6113, rep by Steffen Busch)</li>
 <li>servlet: multiple url-pattern in web fragment (#6127)</li>
 <li>gzip: add min-gzip-size based on content-length header (#6112, rep by stbu)</li>
 <li>jdbc: add wrapper methods for JDBC 4.2 (#6082)</li>

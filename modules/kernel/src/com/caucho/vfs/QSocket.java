@@ -160,6 +160,14 @@ abstract public class QSocket {
   }
 
   /**
+   * Return the ssl protocol
+   */
+  public String getSslProtocol()
+  {
+    return null;
+  }
+
+  /**
    * Returns the bits in the socket.
    */
   public int getCipherBits()

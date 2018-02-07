@@ -359,6 +359,17 @@ public final class JniSocketImpl extends QSocket {
   }
 
   /**
+   * Returns the protocol for an ssl connection.
+   */
+  @Override
+  public String getSslProtocol()
+  {
+    synchronized (this) {
+      return getSslProtocol(_socketFd);
+    }
+  }
+
+  /**
    * Returns the number of bits in the cipher for an ssl connection.
    */
   @Override
@@ -742,6 +753,8 @@ public final class JniSocketImpl extends QSocket {
                                        int port);
 
   native String getCipher(long fd);
+
+  native String getSslProtocol(long fd);
 
   native int getCipherBits(long fd);
 

@@ -184,6 +184,15 @@ public abstract class AbstractSocketLink
     return null;
   }
   
+  /**
+   * Returns the ssl protocol
+   */
+  @Override
+  public String getSslProtocol()
+  {
+    return null;
+  }
+  
   /***
    * Returns the key size.
    */

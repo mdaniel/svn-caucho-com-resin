@@ -488,6 +488,15 @@ public class TcpSocketLink extends AbstractSocketLink
     return _socket.getCipherSuite();
   }
   
+  /**
+   * Returns the cipher suite
+   */
+  @Override
+  public String getSslProtocol()
+  {
+    return _socket.getSslProtocol();
+  }
+  
   /***
    * Returns the key size.
    */

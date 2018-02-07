@@ -92,6 +92,7 @@ struct connection_t {
   struct sockaddr *client_sin;
 
   char *ssl_cipher;
+  char *ssl_protocol;
   int ssl_bits;
 
   int pipe[2];

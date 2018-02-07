@@ -1028,6 +1028,19 @@ Java_com_caucho_vfs_JniSocketImpl_getCipher(JNIEnv *env,
   return (*env)->NewStringUTF(env, conn->ssl_cipher);
 }
 
+JNIEXPORT jstring JNICALL
+Java_com_caucho_vfs_JniSocketImpl_SslProtocol(JNIEnv *env,
+                                            jobject obj,
+                                            jlong conn_fd)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+
+  if (! conn || ! conn->ssl_sock || ! conn->ssl_protocol)
+    return 0;
+  
+  return (*env)->NewStringUTF(env, conn->ssl_protocol);
+}
+
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_getCipherBits(JNIEnv *env,
 					     jobject obj,

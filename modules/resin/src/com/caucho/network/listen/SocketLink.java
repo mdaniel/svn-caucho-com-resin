@@ -115,6 +115,11 @@ public interface SocketLink {
    */
   public String getCipherSuite();
   
+  /**
+   * Returns the cipher suite
+   */
+  public String getSslProtocol();
+  
   /***
    * Returns the key size.
    */

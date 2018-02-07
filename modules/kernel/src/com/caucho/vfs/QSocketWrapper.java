@@ -189,6 +189,7 @@ public class QSocketWrapper extends QSocket {
     else
       return sslSocketClass.isAssignableFrom(_s.getClass());
   }
+  
   /**
    * Returns the secure cipher algorithm.
    */
@@ -204,6 +205,25 @@ public class QSocketWrapper extends QSocket {
     
     if (sslSession != null)
       return sslSession.getCipherSuite();
+    else
+      return null;
+  }
+  
+  /**
+   * Returns the secure cipher algorithm.
+   */
+  @Override
+  public String getSslProtocol()
+  {
+    if (! (_s instanceof SSLSocket))
+      return super.getCipherSuite();
+
+    SSLSocket sslSocket = (SSLSocket) _s;
+    
+    SSLSession sslSession = sslSocket.getSession();
+    
+    if (sslSession != null)
+      return sslSession.getProtocol();
     else
       return null;
   }
