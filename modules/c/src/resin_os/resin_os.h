@@ -62,6 +62,14 @@ typedef struct connection_ops_t {
   void (*free) (connection_t *conn);
 } connection_ops_t;
 
+typedef struct ssl_sock_host_t {
+  struct ssl_sock_host_t *next;
+
+  const char *id;
+  
+  void *ssl_context;
+} ssl_sock_host_t;
+
 struct connection_t {
   struct server_socket_t *ss;
   
@@ -69,7 +77,11 @@ struct connection_t {
 
   JNIEnv *jni_env;
   
+  struct ssl_sock_host_t *ssl_hosts;
+  
   void *ssl_context;
+  void *ssl_sni_context;
+  
   connection_ops_t *ops;
 
   int fd;
@@ -109,6 +121,14 @@ typedef struct resin_t {
   int (*get_server_socket)(struct resin_t *);
 } resin_t;
 
+typedef struct ssl_host_t {
+  struct ssl_host_t *next;
+
+  char *id;
+  char *certificate_file;
+  char *key_file;
+  char *password;
+} ssl_host_t;
 
 typedef struct ssl_config_t {
   JNIEnv *jni_env;
@@ -143,6 +163,8 @@ typedef struct ssl_config_t {
   void *crl;
   
   pthread_mutex_t ssl_lock;
+
+  ssl_host_t *hosts;
 } ssl_config_t;
 
 struct server_socket_t {

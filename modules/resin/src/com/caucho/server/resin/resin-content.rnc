@@ -425,6 +425,8 @@ r_openssl = element openssl {
   & (attribute crypto-device { string }
      | element crypto-device { r_string-Group })?
 
+  & r_openssl-host*
+
   & (attribute honor-cipher-order { r_boolean-Type }
      | element honor-cipher-order { r_boolean-Type })?
 
@@ -447,6 +449,24 @@ r_openssl = element openssl {
   & (attribute verify-depth { r_int }
      | element verify-depth { r_int })?
 }
+
+r_openssl-host = element host {
+    (attribute id { string }
+     | element id { string })
+
+    & (attribute certificate-file { string }
+       | element certificate-file { r_string-Group })?
+
+    & (attribute certificate-chain-file { string }
+     | element certificate-chain-file { r_string-Group })?
+
+    & (attribute certificate-key-file { string }
+       | element certificate-key-file { r_string-Group }
+       | attribute key-file { string }
+       | element key-file { r_string-Group })?
+
+    & r_password?
+  }
 
 r_password =
   attribute password { string}

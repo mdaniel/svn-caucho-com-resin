@@ -685,9 +685,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         
       case 'V':
         offset = printVariable(buffer, offset, segment.getArg(), request);
+        break;
 
       default:
-        throw new IOException();
+        throw new IOException(L.l("Unknown code {0}", String.valueOf((char) segment._code)));
       }
     }
 
